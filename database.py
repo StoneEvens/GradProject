@@ -1,8 +1,19 @@
 import firebase_admin
 from firebase_admin import credentials, db
+import os
 
-# 讀取 Firebase 服務帳戶金鑰
-cred = credentials.Certificate("serviceAccountKey.json")
+# 從環境變數中讀取憑證檔案路徑
+cred_path = os.getenv("FIREBASE_CREDENTIALS")
+
+# 確保環境變數存在
+if not cred_path:
+    raise ValueError("FIREBASE_CREDENTIALS environment variable is not set")
+
+# 使用憑證檔案初始化 Firebase Admin SDK
+cred = credentials.Certificate(cred_path)
+
+# 現在可以使用 Firebase Admin SDK 操作資料庫等
+print("Firebase initialized successfully!")
 
 # 初始化 Firebase（請填入你的 Firebase Realtime Database URL）
 firebase_admin.initialize_app(cred, {
