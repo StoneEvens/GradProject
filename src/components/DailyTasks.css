@@ -1,0 +1,38 @@
+
+/* 每日任務欄位 */
+.task-card {
+    background-color: #fbd4aa;
+    border-radius: 20px;
+    padding: 12px;
+    width: 100%;
+    max-width: 50%;
+    flex: 1;
+  }
+
+/* 行程列表的圓點 */
+.task-list {
+    list-style: none;
+    padding-left: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: left;
+  }
+  
+
+/* 任務內容 */
+.task {
+    background-color: #fff5e6;
+    border-radius: 16px;
+    padding: 10px 10px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+/* 已完成任務 */
+  .task.completed {
+    text-decoration: line-through;
+    color: #aaa;
+  }

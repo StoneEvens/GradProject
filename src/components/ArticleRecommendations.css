@@ -1,0 +1,39 @@
+.article-container {
+    background-color: #fbd4aa;
+    border-radius: 20px;
+    padding: 16px;
+    margin-top: 24px;
+  }
+  
+  .article-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 16px;
+  }
+  
+  .article-card {
+    background-color: #fff6e9;
+    border-radius: 16px;
+    padding: 16px;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    justify-content: center; 
+    align-items: flex-start; 
+    font-size: 14px;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .article-title {
+    font-weight: bold;
+    margin-bottom: 4px;
+  }
+  
+  .article-tags {
+    color: #555;
+    font-size: 13px;
+  }
+  
