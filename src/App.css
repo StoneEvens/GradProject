@@ -5,7 +5,7 @@
 html, body {
   margin: 0;
   padding: 0;
-  background-color: #fdfdfd;
+  background-color: #FFEED6;
   display: flex;
   justify-content: center;
 }
@@ -29,7 +29,7 @@ html, body {
   padding-top: 80px;
   padding-bottom: 80px;
   min-height: 100vh;
-  background-color: white;
+  background-color: #FFEED6;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
   position: relative;
   overflow-y: auto;
