@@ -1,0 +1,38 @@
+.bottom-nav {
+    width: 100%;
+    background-color: #FFB370;
+    padding: 12px 0;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    z-index: 999;
+    border-top-left-radius: 24px;
+    border-top-right-radius: 24px;
+  }
+  
+  .nav-buttons-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 40px;
+    max-width: 400px;   /* ✅ 根據你的畫面大小調整，建議和主容器一致 */
+    margin: 0 auto;     /* ✅ 水平置中 */
+  }
+  
+  .nav-icon {
+    background-color: #fff6e9;
+    border: none;
+    border-radius: 50%;
+    padding: 10px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .nav-icon img {
+    width: 32px;  /* ✅ 放大 icon 圖片 */
+    height: 32px;
+  }

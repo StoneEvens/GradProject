@@ -1,16 +1,19 @@
 import React from 'react'
 import './Header.css'
 
+import notificationIcon from '../assets/icon/HeaderButton_Notification.png'
+import userProfileIcon from '../assets/icon/HeaderButton_UserProfile.png'
+
 function Header() {
   return (
     <div className="header">
-      <div className="inner-container">
-        <img
-          src="https://w7.pngwing.com/pngs/178/595/png-transparent-user-profile-computer-icons-login-user-avatars-thumbnail.png"
-          alt="頭像"
-          className="avatar"
-        />
-        <div className="notification">🔔</div>
+      <div className="header-buttons">
+        <button className="header-icon">
+          <img src={userProfileIcon} alt="用戶頭像" />
+        </button>
+        <button className="header-icon">
+          <img src={notificationIcon} alt="通知" />
+        </button>
       </div>
     </div>
   )

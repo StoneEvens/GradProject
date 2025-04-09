@@ -24,7 +24,7 @@ function Calendar() {
 
   return (
     <div className="calendar-container">
-      <div className="calendar-header">{formattedTitle}</div>
+      <div className="section-title">{formattedTitle}</div>
 
       <div className="calendar-grid">
         {weekNames.map((day, index) => (

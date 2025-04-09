@@ -6,17 +6,7 @@
     box-sizing: border-box;
     margin-top: 20px;
   }
-  
-  .calendar-header {
-    font-weight: bold;
-    font-size: 18px;
-    text-align: center;
-    background-color: #d5e7ff;
-    border-radius: 12px;
-    padding: 8px;
-    margin-bottom: 16px;
-  }
-  
+
   .calendar-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
