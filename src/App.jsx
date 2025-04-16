@@ -1,28 +1,20 @@
+// src/App.jsx
 import React from 'react'
 import './App.css'
-import Header from './components/Header'
-import DailyTasks from './components/DailyTasks'
-import DailySchedule from './components/DailySchedule'
-import Calendar from './components/Calendar'
-import ArticleRecommendations from './components/ArticleRecommendations'
-import BottomNavigationBar from './components/BottomNavigationBar'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import Home from './pages/Home'
+import LoginPage from './pages/LoginPage'
+import RegisterPage from './pages/RegisterPage'
 
 function App() {
   return (
-    <>
-      <Header />
-      <div className="app-container">
-        <div className="main-content">
-        <div className="task-schedule-wrapper">
-          <DailyTasks />
-          <DailySchedule />
-        </div>
-          <Calendar />
-          <ArticleRecommendations />
-        </div>
-      </div>
-      <BottomNavigationBar />
-    </>
+    <Router>
+      <Routes>
+        <Route path="/home" element={<Home />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+      </Routes>
+    </Router>
   )
 }
 

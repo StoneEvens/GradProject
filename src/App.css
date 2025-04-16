@@ -41,7 +41,6 @@ html, body {
   top: 0;
   left: 0;
   right: 0;
-  background-color: #fff1e5;
   z-index: 999;
   height: 60px;
 }
@@ -52,7 +51,6 @@ html, body {
   bottom: 0;
   left: 0;
   right: 0;
-  background-color: #f8f8f8;
   z-index: 999;
   height: 60px;
   display: flex;

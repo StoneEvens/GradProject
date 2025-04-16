@@ -1,11 +1,11 @@
 import React from 'react'
 import './BottomNavigationBar.css'
 
-import calculatorIcon from '../assets/icon/BottomButton_Calculator.png'
-import petIcon from '../assets/icon/BottomButton_PetPage.png'
-import postIcon from '../assets/icon/BottomButton_CreatePost.png'
-import forumIcon from '../assets/icon/BottomButton_Forum.png'
-import settingIcon from '../assets/icon/BottomButton_Setting.png'
+import calculatorIcon from '../../assets/icon/BottomButton_Calculator.png'
+import petIcon from '../../assets/icon/BottomButton_PetPage.png'
+import postIcon from '../../assets/icon/BottomButton_CreatePost.png'
+import forumIcon from '../../assets/icon/BottomButton_Forum.png'
+import settingIcon from '../../assets/icon/BottomButton_Setting.png'
 
 function BottomNavigationBar() {
   return (

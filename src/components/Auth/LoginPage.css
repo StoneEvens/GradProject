@@ -1,0 +1,97 @@
+/* LoginPage.css */
+.login-container {
+    min-height: 100vh;
+    background-color: #FFCA9C;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .login-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 400px;
+    padding: 0 2rem;
+  }
+  
+  .login-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 80px;
+  }
+  
+  .input-group {
+    width: 100%;
+    margin-bottom: 20px;
+  }
+  
+  .input-label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 0.25rem;
+    text-align: left;
+  }
+  
+  .input-field {
+    width: 100%;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    background-color: #FFF5E1;
+    color: black;
+    border: none;
+    font-size: 1rem;
+  }
+  
+  .password-group {
+    position: relative;
+  }
+  
+  .password-field {
+    padding-right: 2.5rem;
+  }
+  
+  .toggle-password-btn {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-10%);
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+  }
+  
+  .login-button {
+    width: 33.33%;
+    background-color: #F08651;
+    color: #FFEED6;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    margin-bottom: 20px;
+    border: none;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+  
+  .divider {
+    width: 100%;
+    border-top: 1px solid #F08651;
+    margin-bottom: 20px;
+  }
+  
+  .register-prompt {
+    margin-bottom: 0.5rem;
+  }
+  
+  .register-button {
+    width: 33.33%;
+    background-color: #D4EAFF;
+    color: black;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    border: none;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+  

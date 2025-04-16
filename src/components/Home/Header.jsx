@@ -1,8 +1,8 @@
 import React from 'react'
 import './Header.css'
 
-import notificationIcon from '../assets/icon/HeaderButton_Notification.png'
-import userProfileIcon from '../assets/icon/HeaderButton_UserProfile.png'
+import notificationIcon from '../../assets/icon/HeaderButton_Notification.png'
+import userProfileIcon from '../../assets/icon/HeaderButton_UserProfile.png'
 
 function Header() {
   return (

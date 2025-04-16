@@ -1,13 +1,21 @@
+.task-schedule-wrapper {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between; /* 可改為 center / start / gap 視情況 */
+  align-items: flex-start;
+  gap: 12px;
+}
 
 /* 每日任務欄位 */
 .task-card {
-    background-color: #fbd4aa;
-    border-radius: 20px;
-    padding: 12px;
-    width: 100%;
-    max-width: 50%;
-    flex: 1;
-  }
+  background-color: #fbd4aa;
+  border-radius: 20px;
+  padding: 12px;
+  flex: 1;              /* 平均分配寬度 */
+  min-width: 0;         /* 避免撐爆 flex */
+  box-sizing: border-box;
+}
+
 
 /* 行程列表的圓點 */
 .task-list {

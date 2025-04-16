@@ -24,13 +24,13 @@ function Calendar() {
 
   return (
     <div className="calendar-container">
-      <div className="section-title">{formattedTitle}</div>
+      <h3 className="section-title">{formattedTitle}</h3>
 
       <div className="calendar-grid">
         {weekNames.map((day, index) => (
           <div key={index} className="calendar-day-name">{day}</div>
         ))}
-
+        
         {calendarDays.map((d, index) => (
           <div
             key={index}
