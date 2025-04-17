@@ -1,4 +1,3 @@
-// src/pages/LoginPage.jsx
 import React, { useState } from 'react'
 import '../components/Auth/LoginPage.css'
 
@@ -8,6 +7,8 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [maskedPassword, setMaskedPassword] = useState('')
   const [timeoutId, setTimeoutId] = useState(null)
+  const [emailError, setEmailError] = useState(false)
+  const [passwordError, setPasswordError] = useState(false)
 
   const handlePasswordChange = (e) => {
     const input = e.target.value
@@ -23,6 +24,22 @@ export default function LoginPage() {
     setTimeoutId(id)
   }
 
+  const handleLogin = () => {
+    const isEmailEmpty = email.trim() === ''
+    const isPasswordEmpty = password.trim() === ''
+
+    setEmailError(isEmailEmpty)
+    setPasswordError(isPasswordEmpty)
+
+    if (!isEmailEmpty && !isPasswordEmpty) {
+      // ✅ 登入邏輯處理區
+      console.log('Login success')
+    }
+  }
+
+  const handleEmailFocus = () => setEmailError(false)
+  const handlePasswordFocus = () => setPasswordError(false)
+
   const displayedPassword = showPassword ? password : maskedPassword
 
   return (
@@ -36,31 +53,38 @@ export default function LoginPage() {
             type="text"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            onFocus={handleEmailFocus}
             className="input-field"
           />
+          {emailError && <p className="error-msg">請填入Email</p>}
         </div>
 
         <div className="input-group password-group">
           <label className="input-label">密碼</label>
           <input
             type="text"
+            inputMode="latin"
             value={displayedPassword}
             onChange={handlePasswordChange}
+            onFocus={handlePasswordFocus}
             className="input-field password-field"
           />
           <img
             src={
               showPassword
-                ? '/assets/LoginButton_HidePassword.png'
-                : '/assets/LoginButton_ShowPassword.png'
+                ? 'src/assets/icon/LoginButton_HidePassword.png'
+                : 'src/assets/icon/LoginButton_ShowPassword.png'
             }
             alt="Toggle Password"
             className="toggle-password-btn"
             onClick={() => setShowPassword(!showPassword)}
           />
+          {passwordError && <p className="error-msg">請填入密碼</p>}
         </div>
 
-        <button className="login-button">登入</button>
+        <button className="login-button" onClick={handleLogin}>
+          登入
+        </button>
 
         <hr className="divider" />
 

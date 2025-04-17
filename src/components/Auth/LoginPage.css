@@ -1,12 +1,17 @@
 /* LoginPage.css */
 .login-container {
-    min-height: 100vh;
-    background-color: #FFCA9C;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  max-width: 420px;
+  width: 100%;
+  margin: 0 auto;
+  padding-top: 80px;
+  padding-bottom: 80px;
+  min-height: 100vh;
+  background-color: #FFCA9C;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+  position: relative;
+  overflow-y: auto;
   }
-  
+
   .login-box {
     display: flex;
     flex-direction: column;
@@ -38,7 +43,7 @@
     width: 100%;
     padding: 0.75rem;
     border-radius: 0.5rem;
-    background-color: #FFF5E1;
+    background-color: #FFEDE6;
     color: black;
     border: none;
     font-size: 1rem;
@@ -56,7 +61,7 @@
     position: absolute;
     right: 10px;
     top: 50%;
-    transform: translateY(-10%);
+    transform: translateY(10%);
     width: 24px;
     height: 24px;
     cursor: pointer;
@@ -95,3 +100,10 @@
     cursor: pointer;
   }
   
+  /* 輸入欄位錯誤提示 */
+  .error-msg {
+  color: red;
+  opacity: 0.5;
+  font-size: 0.85rem;
+  margin: 4px 0 12px;
+  }
