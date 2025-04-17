@@ -1,0 +1,96 @@
+.register-container {
+    background-color: #FFCA9C;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 16px;
+  }
+  
+  .register-box {
+    max-width: 420px;
+    width: 80%;
+  }
+  
+  .register-title {
+    font-size: 28px;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 40px;
+  }
+  
+  .input-group {
+    margin-bottom: 20px;
+  }
+  
+  .input-label {
+    font-weight: bold;
+    font-size: 18px;
+    margin-bottom: 4px;
+    display: block;
+  }
+  
+  .input-field {
+    width: 100%;
+    padding: 12px;
+    background-color: #FFEED6;
+    border: none;
+    border-radius: 16px;
+    font-size: 16px;
+    box-sizing: border-box;
+  }
+  
+  .input-hint {
+    color: #646464;
+    font-size: 14px;
+    margin-top: 4px;
+  }
+  
+  .input-wrapper {
+    position: relative;
+  }
+  
+  .toggle-password-btn {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+  }
+  
+  .password-check {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  
+  .check-item {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    color: #333;
+  }
+  
+  .check-item img {
+    width: 16px;
+    height: 16px;
+    margin-right: 8px;
+  }
+  
+  .register-button {
+    width: 33.33%;
+    margin: 32px auto 0;
+    display: block;
+    background-color: #D4EAFF;
+    color: black;
+    font-weight: bold;
+    font-size: 16px;
+    border: none;
+    border-radius: 12px;
+    padding: 10px;
+    cursor: pointer;
+  }
+  

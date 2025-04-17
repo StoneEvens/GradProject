@@ -1,9 +1,8 @@
 import React, { useState } from 'react'
 import '../components/Auth/LoginPage.css'
-import Header from '../components/Home/Header'
-import BottomNavigationBar from '../components/Home/BottomNavigationBar'
 import '../components/Home/Header.css'
 import '../components/Home/BottomNavigationBar.css'
+import { useNavigate } from 'react-router-dom'
 
 
 export default function LoginPage() {
@@ -14,6 +13,7 @@ export default function LoginPage() {
   const [timeoutId, setTimeoutId] = useState(null)
   const [emailError, setEmailError] = useState(false)
   const [passwordError, setPasswordError] = useState(false)
+  const navigate = useNavigate()
 
   const handlePasswordChange = (e) => {
     const input = e.target.value
@@ -92,7 +92,9 @@ export default function LoginPage() {
 
         <hr className="divider" />
         <p className="register-prompt">還沒有帳號？</p>
-        <button className="register-button">註冊</button>
+        <button className="register-button" onClick={() => navigate('/register')}>
+          註冊
+        </button>
       </div>
     </div>
   )
