@@ -28,8 +28,7 @@
   }
   
   .input-group {
-    width: 100%;
-    margin-bottom: 20px;
+    margin-bottom: 20px; /* ✅ 預留錯誤訊息空間，避免擠到按鈕 */
   }
   
   .input-label {
@@ -39,15 +38,24 @@
     text-align: left;
   }
   
+  /* 外框包裹 input + icon（讓 icon 不受下方錯誤訊息影響） */
+  .input-wrapper {
+    position: relative;
+    width: 100%;
+  }
+
+  /* 密碼欄本體 */
   .input-field {
     width: 100%;
     padding: 0.75rem;
     border-radius: 0.5rem;
-    background-color: #FFEDE6;
+    background-color: #FFEED6;
     color: black;
     border: none;
     font-size: 1rem;
+    padding-right: 40px;
   }
+  
   
   .password-group {
     position: relative;
@@ -57,15 +65,16 @@
     padding-right: 2.5rem;
   }
   
+  /* 顯示／隱藏密碼按鈕固定在右側垂直置中 ✅ */
   .toggle-password-btn {
     position: absolute;
     right: 10px;
     top: 50%;
-    transform: translateY(10%);
+    transform: translateY(-50%);
     width: 24px;
     height: 24px;
     cursor: pointer;
-  }
+  } 
   
   .login-button {
     width: 33.33%;
@@ -77,6 +86,7 @@
     border: none;
     font-size: 1rem;
     cursor: pointer;
+    margin: 16px auto 12px;
   }
   
   .divider {
@@ -102,8 +112,8 @@
   
   /* 輸入欄位錯誤提示 */
   .error-msg {
-  color: red;
-  opacity: 0.5;
-  font-size: 0.85rem;
-  margin: 4px 0 12px;
+    color: red;
+    opacity: 0.5;
+    font-size: 0.85rem;
+    margin-top: 4px;
   }

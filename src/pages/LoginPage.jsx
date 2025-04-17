@@ -1,5 +1,10 @@
 import React, { useState } from 'react'
 import '../components/Auth/LoginPage.css'
+import Header from '../components/Home/Header'
+import BottomNavigationBar from '../components/Home/BottomNavigationBar'
+import '../components/Home/Header.css'
+import '../components/Home/BottomNavigationBar.css'
+
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -15,7 +20,6 @@ export default function LoginPage() {
     setPassword(input)
 
     if (timeoutId) clearTimeout(timeoutId)
-
     const id = setTimeout(() => {
       setMaskedPassword('*'.repeat(input.length))
     }, 1000)
@@ -32,14 +36,12 @@ export default function LoginPage() {
     setPasswordError(isPasswordEmpty)
 
     if (!isEmailEmpty && !isPasswordEmpty) {
-      // ✅ 登入邏輯處理區
       console.log('Login success')
     }
   }
 
   const handleEmailFocus = () => setEmailError(false)
   const handlePasswordFocus = () => setPasswordError(false)
-
   const displayedPassword = showPassword ? password : maskedPassword
 
   return (
@@ -54,31 +56,33 @@ export default function LoginPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             onFocus={handleEmailFocus}
-            className="input-field"
+            className={`input-field ${emailError ? 'error' : ''}`}
           />
           {emailError && <p className="error-msg">請填入Email</p>}
         </div>
 
-        <div className="input-group password-group">
+        <div className="input-group">
           <label className="input-label">密碼</label>
-          <input
-            type="text"
-            inputMode="latin"
-            value={displayedPassword}
-            onChange={handlePasswordChange}
-            onFocus={handlePasswordFocus}
-            className="input-field password-field"
-          />
-          <img
-            src={
-              showPassword
-                ? 'src/assets/icon/LoginButton_HidePassword.png'
-                : 'src/assets/icon/LoginButton_ShowPassword.png'
-            }
-            alt="Toggle Password"
-            className="toggle-password-btn"
-            onClick={() => setShowPassword(!showPassword)}
-          />
+          <div className="input-wrapper">
+            <input
+              type="text"
+              inputMode="latin"
+              value={displayedPassword}
+              onChange={handlePasswordChange}
+              onFocus={handlePasswordFocus}
+              className={`input-field password-field ${passwordError ? 'error' : ''}`}
+            />
+            <img
+              src={
+                showPassword
+                  ? 'src/assets/icon/LoginButton_HidePassword.png'
+                  : 'src/assets/icon/LoginButton_ShowPassword.png'
+              }
+              alt="Toggle Password"
+              className="toggle-password-btn"
+              onClick={() => setShowPassword(!showPassword)}
+            />
+          </div>
           {passwordError && <p className="error-msg">請填入密碼</p>}
         </div>
 
@@ -87,7 +91,6 @@ export default function LoginPage() {
         </button>
 
         <hr className="divider" />
-
         <p className="register-prompt">還沒有帳號？</p>
         <button className="register-button">註冊</button>
       </div>
