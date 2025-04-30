@@ -5,8 +5,30 @@ import BottomNavigationBar from '../components/BottomNavigationBar';
 import userProfileIcon from '../assets/icon/HeaderButton_UserProfile.png'
 import { useNavigate } from 'react-router-dom';
 
+// 寵物照片九宮格元件，未來可直接傳入圖片陣列
+function PetPhotoGrid({ photos = [] }) {
+  return (
+    <div className="pet-photo-grid">
+      {[...Array(9)].map((_, idx) => (
+        photos[idx] ? (
+          <img
+            className="pet-photo-img"
+            src={photos[idx]}
+            alt={`貼文照片${idx + 1}`}
+            key={idx}
+          />
+        ) : (
+          <div className="pet-photo-placeholder" key={idx}></div>
+        )
+      ))}
+    </div>
+  );
+}
+
 function ProfilePage() {
   const navigate = useNavigate();
+  // 未來可由props或API取得照片陣列
+  const recentPhotos = [];
 
   return (
     <div className="profile-page-container">
@@ -39,11 +61,7 @@ function ProfilePage() {
           </button>
         </div>
         {/* 貓咪照片九宮格 */}
-        <div className="pet-photo-grid">
-          {[...Array(9)].map((_, idx) => (
-            <div className="pet-photo-placeholder" key={idx}></div>
-          ))}
-        </div>
+        <PetPhotoGrid photos={recentPhotos} />
       </div>
       <BottomNavigationBar />
     </div>
