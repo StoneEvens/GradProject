@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import "../components/Auth/RegisterPage.css"
+import "../RegisterPage/RegisterPage.css"
 
 import checkIcon from '../assets/icon/RegisterPage_CheckIcon.png'
 import notCheckIcon from '../assets/icon/RegisterPage_NotCheckIcon.png'

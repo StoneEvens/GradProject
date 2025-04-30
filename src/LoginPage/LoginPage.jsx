@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
-import '../components/Auth/LoginPage.css'
-import '../components/Home/Header.css'
-import '../components/Home/BottomNavigationBar.css'
+import '../LoginPage/LoginPage.css'
+import '../components/Header.css'
+import '../components/BottomNavigationBar.css'
 import { useNavigate } from 'react-router-dom'
 
 

@@ -2,9 +2,9 @@
 import React from 'react'
 import './App.css'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import Home from './pages/Home'
-import LoginPage from './pages/LoginPage'
-import RegisterPage from './pages/RegisterPage'
+import Home from './Home/Home'
+import LoginPage from './LoginPage/LoginPage'
+import RegisterPage from './RegisterPage/RegisterPage'
 
 function App() {
   return (

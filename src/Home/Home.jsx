@@ -1,11 +1,11 @@
 // src/pages/Home.jsx
 import React from 'react'
-import Header from '../components/Home/Header'
-import DailyTasks from '../components/Home/DailyTasks'
-import DailySchedule from '../components/Home/DailySchedule'
-import Calendar from '../components/Home/Calendar'
-import ArticleRecommendations from '../components/Home/ArticleRecommendations'
-import BottomNavigationBar from '../components/Home/BottomNavigationBar'
+import Header from '../components/Header'
+import DailyTasks from '../Home/components/DailyTasks'
+import DailySchedule from '../Home/components/DailySchedule'
+import Calendar from '../Home/components/Calendar'
+import ArticleRecommendations from '../Home/components/ArticleRecommendations'
+import BottomNavigationBar from '../components/BottomNavigationBar'
 
 function Home() {
   return (
