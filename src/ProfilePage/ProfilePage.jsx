@@ -19,8 +19,7 @@ function ProfilePage() {
             <div className="profile-username">__ilovecattts__</div>
             <div className="profile-realname">李筱貞</div>
             <div className="profile-desc">
-              三隻布偶貓！老大是五歲的胖胖，老二是三歲的肥肥，<br />
-              老么是6個月大的咪寶！
+              三隻布偶貓！老大是五歲的胖胖，老二是三歲的肥肥，老么是6個月大的咪寶！
             </div>
           </div>
         </div>
