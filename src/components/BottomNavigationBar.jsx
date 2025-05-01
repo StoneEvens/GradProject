@@ -25,18 +25,18 @@ function BottomNavigationBar() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showDialog]);
 
-  // 按鈕點擊後延遲0.2秒關閉
+  // 按鈕點擊後延遲0.1秒關閉
   const handleDialogButtonClick = () => {
     setTimeout(() => setShowDialog(false), 100);
   };
 
   return (
-    <div className="bottom-nav">
+    <form className="bottom-nav">
       {showDialog && (
         <div className="create-post-dialog" ref={dialogRef}>
           <div className="dialog-arrow"></div>
           <button className="dialog-tab" onClick={handleDialogButtonClick}>日常紀錄</button>
-          <button className="dialog-tab" onClick={handleDialogButtonClick}>異常紀錄</button>
+          <button className="dialog-tab" onClick={handleDialogButtonClick}>症狀紀錄</button>
         </div>
       )}
       <div className="nav-buttons-container">
@@ -56,7 +56,7 @@ function BottomNavigationBar() {
           <img src={settingIcon} alt="Settings" />
         </button>
       </div>
-    </div>
+    </form>
   )
 }
 

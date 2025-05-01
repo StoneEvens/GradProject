@@ -31,7 +31,7 @@ function ProfilePage() {
   const recentPhotos = [];
 
   return (
-    <div className="profile-page-container">
+    <form className="profile-page-container">
       <Header />
       <div className="profile-content">
         {/* 頭像與簡介區塊 */}
@@ -64,7 +64,7 @@ function ProfilePage() {
         <PetPhotoGrid photos={recentPhotos} />
       </div>
       <BottomNavigationBar />
-    </div>
+    </form>
   );
 }
 

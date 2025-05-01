@@ -9,7 +9,7 @@ import BottomNavigationBar from '../components/BottomNavigationBar'
 
 function Home() {
   return (
-    <>
+    <form>
       <Header />
       <div className="app-container">
         <div className="main-content">
@@ -22,7 +22,7 @@ function Home() {
         </div>
       </div>
       <BottomNavigationBar />
-    </>
+    </form>
   )
 }
 
