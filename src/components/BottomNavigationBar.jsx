@@ -26,33 +26,47 @@ function BottomNavigationBar() {
   }, [showDialog]);
 
   // 按鈕點擊後延遲0.1秒關閉
-  const handleDialogButtonClick = () => {
+  const handleDialogButtonClick = (e) => {
+    e.preventDefault();
     setTimeout(() => setShowDialog(false), 100);
   };
 
+  // 防止表單提交
+  const handleSubmit = (e) => {
+    e.preventDefault();
+  };
+
+  // 處理導航按鈕點擊
+  const handleNavButtonClick = (e, action) => {
+    e.preventDefault();
+    if (typeof action === 'function') {
+      action();
+    }
+  };
+
   return (
-    <form className="bottom-nav">
+    <form className="bottom-nav" onSubmit={handleSubmit}>
       {showDialog && (
         <div className="create-post-dialog" ref={dialogRef}>
           <div className="dialog-arrow"></div>
-          <button className="dialog-tab" onClick={handleDialogButtonClick}>日常紀錄</button>
-          <button className="dialog-tab" onClick={handleDialogButtonClick}>症狀紀錄</button>
+          <button type="button" className="dialog-tab" onClick={handleDialogButtonClick}>日常紀錄</button>
+          <button type="button" className="dialog-tab" onClick={handleDialogButtonClick}>症狀紀錄</button>
         </div>
       )}
       <div className="nav-buttons-container">
-        <button className="nav-icon">
+        <button type="button" className="nav-icon" onClick={e => handleNavButtonClick(e)}>
           <img src={calculatorIcon} alt="Calculator" />
         </button>
-        <button className="nav-icon">
+        <button type="button" className="nav-icon" onClick={e => handleNavButtonClick(e)}>
           <img src={petIcon} alt="Pet" />
         </button>
-        <button className="nav-icon" onClick={() => setShowDialog(v => !v)}>
+        <button type="button" className="nav-icon" onClick={e => handleNavButtonClick(e, () => setShowDialog(v => !v))}>
           <img src={postIcon} alt="Add" />
         </button>
-        <button className="nav-icon" onClick={() => navigate('/ProfilePage')}>
+        <button type="button" className="nav-icon" onClick={e => handleNavButtonClick(e, () => navigate('/ProfilePage'))}>
           <img src={forumIcon} alt="Forum" />
         </button>
-        <button className="nav-icon">
+        <button type="button" className="nav-icon" onClick={e => handleNavButtonClick(e)}>
           <img src={settingIcon} alt="Settings" />
         </button>
       </div>
