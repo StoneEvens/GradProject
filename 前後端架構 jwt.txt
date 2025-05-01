@@ -1,0 +1,113 @@
+畢專寵物App 系統運作說明（前後端分離架構 - JWT 認證）
+
+一、系統概覽
+
+1. 前端 (React)
+   - 單頁應用程式 (SPA)，處理使用者介面與互動
+   - 使用 axios 或 fetch 發送 HTTP 請求至後端 API
+   - baseURL：`http://localhost:3000`（開發環境）
+
+2. 後端 (Django REST Framework)
+   - 管理資料庫與業務邏輯，提供 JSON API
+   - baseURL：`http://localhost:8000/api/v1/`
+   - 採用無狀態的 JWT 認證，不依賴 Session Cookie
+   - 已啟用 CORS:
+     ```python
+     CORS_ALLOWED_ORIGINS = ["http://localhost:3000"]
+     CORS_ALLOW_HEADERS = [
+         'authorization', 'content-type',
+         # 如需其他 Header，可一併設定
+     ]
+     ```
+   - 設定 `REST_FRAMEWORK`:
+     ```python
+     REST_FRAMEWORK = {
+         'DEFAULT_AUTHENTICATION_CLASSES': [
+             'rest_framework_simplejwt.authentication.JWTAuthentication',
+         ],
+         'DEFAULT_PERMISSION_CLASSES': [
+             'rest_framework.permissions.IsAuthenticated',
+         ],
+     }
+     ```
+
+二、前後端互動流程（JWT 認證）
+
+1. **登入取得 Token**
+   ```http
+   POST /api/v1/accounts/token/
+   Content-Type: application/json
+
+   {
+     "email": "user@example.com",
+     "password": "your_password"
+   }
+   ```
+   回傳：
+   ```json
+   {
+     "access":  "<access_token>",
+     "refresh": "<refresh_token>",
+     "user": { /* 基本使用者資料 */ },
+     "message": "登入成功"
+   }
+   ```
+   - 前端：將 `access` 存於記憶體或安全的 localStorage
+   - 將 `refresh` 存於 HttpOnly cookie 或 localStorage（視安全需求）
+
+2. **呼叫受保護 API**
+   - 在每次請求中，帶上 `Authorization` header：
+     ```
+     Authorization: Bearer <access_token>
+     ```
+   - 例如：
+     ```js
+     axios.get('/api/v1/pets/', {
+       headers: { Authorization: `Bearer ${accessToken}` }
+     })
+     ```
+
+3. **Access Token 過期後自動更新**
+   - 若 API 回傳 401（TokenExpired），使用 `refresh` 呼叫：
+     ```http
+     POST /api/v1/accounts/token/refresh/
+     Content-Type: application/json
+
+     { "refresh": "<refresh_token>" }
+     ```
+   - 回傳新的 `access`（與可選的新版 `refresh`）
+   - 前端建議使用 axios interceptor 自動攔截 401，並刷新 Token
+
+4. **登出與 Token 撤銷**
+   ```http
+   POST /api/v1/accounts/logout/
+   Content-Type: application/json
+   Authorization: Bearer <access_token>
+
+   { "refresh": "<refresh_token>" }
+   ```
+   - 後端將該 `refresh_token` 加入黑名單
+   - 前端清除本地所有 Token 與使用者狀態
+
+三、權限管理
+
+1. **後端**
+   - 於 `settings.py` 全域套用 JWT 認證與 `IsAuthenticated`
+   - 單獨開放 `/accounts/token/`, `/accounts/token/refresh/`, `/accounts/register/`、`/swagger/` 等 `AllowAny`
+   - 各 View 或 ViewSet 中，依需求覆寫 `permission_classes`
+
+2. **前端**
+   - App 啟動時，檢查是否有本地 `access`，並呼叫 `/api/v1/accounts/me/` 取得當前用戶資料
+   - 成功：將使用者資料存入 Context/Redux
+   - 失敗（如 401）：清除本地 Token，導向登入頁
+   - 所有 API 呼叫透過 axios interceptor 統一注入 Token、處理刷新與錯誤
+
+四、後續建議
+
+- **完整保護**：將所有需授權的 endpoint 都以 JWT 認證與 `IsAuthenticated` 保護
+- **錯誤處理**：前端攔截 401 與刷新失敗後，自動導向登入並顯示提示
+- **Token 存放**：依安全需求選擇記憶體或 HttpOnly cookie，以降低 XSS 風險
+- **文件維護**：持續更新 `drf_yasg` Swagger/OpenAPI，確保 JWT endpoints 與授權方式清晰可見
+
+——
+以上即為基於 JWT 認證後的前後端分離架構說明，可作為團隊共識文件，方便開發與後續維護。

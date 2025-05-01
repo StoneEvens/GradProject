@@ -3,39 +3,25 @@ from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate
 from django.contrib.auth import get_user_model
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from accounts.models import *
 from accounts.serializers import *
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.views import TokenObtainPairView as BaseTokenObtainPairView
 
 User = get_user_model()
 
-#登入
-class LoginAPIView(APIView):
-    def post(self, request):
-        email = request.data.get('email')
-        password = request.data.get('password')
+# 自定義 TokenObtainPairView 使用自定義的序列化器
+class TokenObtainPairView(BaseTokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer
+    permission_classes = [AllowAny]  # 確保這個視圖可以被未認證的用戶訪問
 
-        try:
-            user_obj = User.objects.get(email=email)
-        except User.DoesNotExist:
-            return Response({'message': '查無此 email'}, status=status.HTTP_400_BAD_REQUEST)
-
-        user = authenticate(request, username=user_obj.username, password=password)
-
-        if user is not None and user.is_active:
-            login(request, user)
-            user_data = UserLoginSerializer(user).data
-            return Response({
-                'message': '登入成功',
-                'user': user_data
-            }, status=status.HTTP_200_OK)
-        else:
-            return Response({'message': '密碼錯誤'}, status=status.HTTP_401_UNAUTHORIZED)
-
-#註冊
+# 註冊
 class RegisterAPIView(APIView):
+    permission_classes = [AllowAny]  # 註冊不需要認證
+    
     def post(self, request):
         user_account = request.data.get('user_account')
         password = request.data.get('password')
@@ -60,18 +46,36 @@ class RegisterAPIView(APIView):
         user.set_password(password)
         user.save()
 
+        # 創建令牌
+        refresh = RefreshToken.for_user(user)
         serializer = UserLoginSerializer(user)
-        return Response({'message': '註冊成功！', 'user': serializer.data}, status=status.HTTP_201_CREATED)
+        
+        return Response({
+            'message': '註冊成功！', 
+            'user': serializer.data,
+            'tokens': {
+                'refresh': str(refresh),
+                'access': str(refresh.access_token),
+            }
+        }, status=status.HTTP_201_CREATED)
 
-#登出
+# 登出
 class LogoutAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        logout(request)
-        return Response({'message': '登出成功！'}, status=status.HTTP_200_OK)
+        try:
+            refresh_token = request.data.get('refresh')
+            if not refresh_token:
+                return Response({'message': '刷新令牌不能為空'}, status=status.HTTP_400_BAD_REQUEST)
+                
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+            return Response({'message': '登出成功！'}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'message': f'登出失敗: {str(e)}'}, status=status.HTTP_400_BAD_REQUEST)
 
-#查詢個人資料
+# 查詢個人資料
 class MeAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -80,7 +84,7 @@ class MeAPIView(APIView):
         serializer = UserProfileSerializer(user)
         return Response({'user': serializer.data}, status=status.HTTP_200_OK)
 
-#取今日行程
+# 取今日行程
 class TodayPlanAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -93,7 +97,7 @@ class TodayPlanAPIView(APIView):
         serializer = PlanSerializer(plans, many=True)
         return Response(serializer.data)
 
-#取今日任務
+# 取今日任務
 class TodayMissionAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -103,7 +107,7 @@ class TodayMissionAPIView(APIView):
         serializer = UserMissionSerializer(missions, many=True)
         return Response(serializer.data)
 
-#建立每日行程
+# 建立每日行程
 class CreatePlanAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -114,7 +118,7 @@ class CreatePlanAPIView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-#取用戶頭像
+# 取用戶頭像
 class UserImageAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -125,7 +129,7 @@ class UserImageAPIView(APIView):
             user_image_url = None
         return Response({'user_image_url': user_image_url})
 
-#回傳使用者基本資料＋追蹤數、被追蹤數、發文（Post+Archive）數）
+# 回傳使用者基本資料＋追蹤數、被追蹤數、發文（Post+Archive）數）
 class UserSummaryView(APIView):
     permission_classes = [IsAuthenticated]
     def get(self, request, pk):

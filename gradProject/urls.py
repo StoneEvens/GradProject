@@ -15,15 +15,42 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import include, path
+from django.urls import include, path, re_path
+from rest_framework import permissions
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
+
+# 創建 Swagger 文檔視圖
+schema_view = get_schema_view(
+   openapi.Info(
+      title="寵物 APP API",
+      default_version='v1',
+      description="寵物 APP API 文檔",
+      terms_of_service="https://www.example.com/terms/",
+      contact=openapi.Contact(email="contact@example.com"),
+      license=openapi.License(name="BSD License"),
+   ),
+   public=True,
+   permission_classes=[permissions.AllowAny],
+)
+
+# API 路由版本前綴
+api_v1_prefix = 'api/v1/'
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('accounts/', include('accounts.urls')),
-    path('pets/', include('pets.urls')),
-    path('social/', include('social.urls')),
-    path('feeds/', include('feeds.urls')),
-    path('interactions/', include('interactions.urls')),
-    path('comments/', include('comments.urls')),
-    path('media/', include('media.urls')),
+    
+    # API 版本化路由
+    path(f'{api_v1_prefix}accounts/', include('accounts.urls')),
+    path(f'{api_v1_prefix}pets/', include('pets.urls')),
+    path(f'{api_v1_prefix}social/', include('social.urls')),
+    path(f'{api_v1_prefix}feeds/', include('feeds.urls')),
+    path(f'{api_v1_prefix}interactions/', include('interactions.urls')),
+    path(f'{api_v1_prefix}comments/', include('comments.urls')),
+    path(f'{api_v1_prefix}media/', include('media.urls')),
+    
+    # Swagger 文檔
+    re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
+    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 ]
