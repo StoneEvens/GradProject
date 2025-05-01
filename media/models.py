@@ -9,7 +9,7 @@ class Image(models.Model):
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey('content_type', 'object_id')
 
-    img_url = models.TextField()  # 圖片網址（你可以改成FileField上傳，如果需要）
+    img_url = models.TextField()  # 圖片網址
     sort_order = models.IntegerField(default=0)
     alt_text = models.CharField(max_length=255, blank=True)
 
@@ -18,7 +18,7 @@ class Image(models.Model):
 
 class PetHeadshot(models.Model):
     pet = models.OneToOneField(Pet, on_delete=models.CASCADE, related_name='headshot')
-    img_url = models.TextField()  # 或使用 ImageField，如 img_file = models.ImageField(upload_to='pet_heads/')
+    img_url = models.TextField()  
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -26,7 +26,7 @@ class PetHeadshot(models.Model):
 
 class UserHeadshot(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='headshot')
-    img_url = models.TextField()  # 或改為 ImageField 看你是否啟用檔案管理
+    img_url = models.TextField()  
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

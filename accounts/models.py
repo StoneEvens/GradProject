@@ -9,7 +9,7 @@ class CustomUser(AbstractUser):
     user_intro = models.TextField(blank=True, null=True)  # 使用者自我介紹
     user_fullname = models.CharField(max_length=150, blank=True)  # 使用者真實姓名
     user_account = models.CharField(max_length=150, unique=True)  # 唯一帳號
-
+    
     def __str__(self):
         return self.username
 
