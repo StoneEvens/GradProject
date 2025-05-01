@@ -20,6 +20,8 @@ class PostPreviewSerializer(serializers.Serializer):
     first_image_url = serializers.SerializerMethodField()
 
     def get_first_image_url(self, obj: Post):
+        # 這個方法現在會在視圖的 list 方法中被覆蓋
+        # 但我們保留它以防視圖以外的地方使用序列化器
         qs = Image.objects.filter(
             content_type__model='post',
             object_id=obj.id

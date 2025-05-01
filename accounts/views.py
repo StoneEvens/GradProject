@@ -11,6 +11,7 @@ from accounts.serializers import *
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView as BaseTokenObtainPairView
 from utils.api_response import APIResponse
+from django.db.models import Count
 
 User = get_user_model()
 
@@ -115,7 +116,12 @@ class TodayPlanAPIView(APIView):
         start_of_day = datetime.combine(today, time.min)  
         end_of_day = datetime.combine(today, time.max)    
         
-        plans = Plan.objects.filter(user=request.user, date__range=(start_of_day, end_of_day))
+        # 使用 select_related 預加載相關模型
+        plans = Plan.objects.filter(
+            user=request.user, 
+            date__range=(start_of_day, end_of_day)
+        ).select_related('user')
+        
         serializer = PlanSerializer(plans, many=True)
         return APIResponse(data=serializer.data)
 
@@ -125,7 +131,13 @@ class TodayMissionAPIView(APIView):
 
     def get(self, request):
         today = date.today()
-        missions = UserMission.objects.filter(user=request.user, due=today)
+        
+        # 使用 select_related 預加載相關模型
+        missions = UserMission.objects.filter(
+            user=request.user, 
+            due=today
+        ).select_related('mission', 'user')
+        
         serializer = UserMissionSerializer(missions, many=True)
         return APIResponse(data=serializer.data)
 
@@ -163,22 +175,25 @@ class UserImageAPIView(APIView):
 # 回傳使用者基本資料＋追蹤數、被追蹤數、發文（Post+Archive）數）
 class UserSummaryView(APIView):
     permission_classes = [IsAuthenticated]
+    
     def get(self, request, pk):
-        user = get_object_or_404(CustomUser, pk=pk)
-        followers = user.followers.count()      
-        following = user.following.count()    
-        post_count = user.posts.count()         
-        archive_count = user.illness_archives.count()  
-        total = post_count + archive_count
-
+        # 使用單一查詢並包含聚合函數，減少數據庫請求次數
+        user = CustomUser.objects.annotate(
+            followers_count=Count('followers', distinct=True),
+            following_count=Count('following', distinct=True),
+            posts_count=Count('posts', distinct=True),
+            archives_count=Count('illness_archives', distinct=True)
+        ).get(pk=pk)
+        
         data = {
             'id': user.id,
             'username': user.username,
             'user_fullname': user.user_fullname,
             'user_intro': user.user_intro,
-            'followers_count': followers,
-            'following_count': following,
-            'posts_count': total,
+            'followers_count': user.followers_count,
+            'following_count': user.following_count,
+            'posts_count': user.posts_count + user.archives_count,
         }
+        
         serializer = UserSummarySerializer(data)
         return APIResponse(data=serializer.data)

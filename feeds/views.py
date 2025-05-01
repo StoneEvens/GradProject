@@ -14,11 +14,13 @@ import easyocr
 from PIL import Image as PilImage
 from io import BytesIO
 from utils.api_response import APIResponse
+from utils.query_optimization import log_queries
 
 #建立選擇的寵物資料
 class GeneratePetInfoAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
+    @log_queries
     def post(self, request):
         data = request.data
         pet_id = data.get('pet_id')
@@ -32,7 +34,10 @@ class GeneratePetInfoAPIView(APIView):
             )
 
         try:
-            pet = Pet.objects.get(id=pet_id)
+            # 使用 prefetch_related 來預加載相關數據
+            pet = Pet.objects.prefetch_related(
+                'illness_archives__illnesses__illness'
+            ).get(id=pet_id)
         except Pet.DoesNotExist:
             return APIResponse(
                 message="Pet not found.",
@@ -53,14 +58,15 @@ class GeneratePetInfoAPIView(APIView):
         }
 
         # Step 2: 透過 IllnessArchive 和 ArchiveIllnessRelation 找出疾病
-        illness_names = list(set(
-            relation.illness.illness_name
-            for archive in pet.illness_archives.all()
-            for relation in archive.illnesses.all()
-        ))
-        pet_info["illnesses"] = illness_names
+        # 已經預加載數據，所以這裡不會產生額外的查詢
+        illness_names = set()
+        for archive in pet.illness_archives.all():
+            for relation in archive.illnesses.all():
+                illness_names.add(relation.illness.illness_name)
+        
+        pet_info["illnesses"] = list(illness_names)
 
-        # Step 3: 合併 edited_info （使用者修改的資料會覆蓋原本的）
+        # Step 3: 合併 edited_info（使用者修改的資料會覆蓋原本的）
         for key, value in edited_info.items():
             if key in pet_info:
                 pet_info[key] = value
@@ -70,6 +76,8 @@ class GeneratePetInfoAPIView(APIView):
 #得到寵物資料和飼料id之後開始計算
 class FeedNutritionCalculatorAPIView(APIView):
     permission_classes = [IsAuthenticated]
+    
+    @log_queries
     def post(self, request):
         data = request.data
         feed_id = data.get('feed_id')
@@ -191,6 +199,8 @@ def extract_nutrition_info_for_chinese(text):
 #新增飼料
 class UploadFeedAPIView(APIView):
     permission_classes = [IsAuthenticated]
+    
+    @log_queries
     def post(self, request):
         feed_name = request.data.get('feed_name')
         front_image_file = request.FILES.get('front_image')
@@ -257,29 +267,42 @@ class UploadFeedAPIView(APIView):
 class RecentUsedFeedsAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
+    @log_queries
     def get(self, request):
         user = request.user
 
-        # 查出該使用者的 UserFeed（最近使用的飼料）
-        recent_user_feeds = UserFeed.objects.filter(user=user).order_by('-last_used_date')[:8]
+        # 使用 select_related 預加載 Feed 數據
+        recent_user_feeds = UserFeed.objects.filter(user=user).select_related('feed').order_by('-last_used_date')[:8]
 
         if recent_user_feeds.exists():
             # 使用歷史紀錄
             feeds = [uf.feed for uf in recent_user_feeds]
+            feed_ids = [uf.feed.id for uf in recent_user_feeds]
         else:
             # 第一次使用，隨機選取 8 筆 Feed
             all_feeds = list(Feed.objects.all())
             feeds = random.sample(all_feeds, min(8, len(all_feeds)))
+            feed_ids = [feed.id for feed in feeds]
+
+        # 一次性查詢所有相關圖片，而不是在循環中一個一個查詢
+        feed_images = {}
+        images = Image.objects.filter(
+            content_type__model='feed', 
+            object_id__in=feed_ids
+        ).order_by('object_id', 'sort_order')
+        
+        # 將圖片按 feed_id 分組
+        for image in images:
+            if image.object_id not in feed_images:
+                feed_images[image.object_id] = image.img_url
 
         # 查出每個 Feed 對應的 Image（正面照片）
         result = []
         for feed in feeds:
-            # 假設每個 feed 都至少有一張 image（可加排序）
-            image = Image.objects.filter(content_type__model='feed', object_id=feed.id).order_by('sort_order').first()
             result.append({
                 "feed_id": feed.id,
                 "feed_name": feed.feed_name,
-                "feed_image_url": image.img_url if image else None  # 若沒圖則傳 None
+                "feed_image_url": feed_images.get(feed.id)  # 使用預先查詢的圖片
             })
 
         return APIResponse(
