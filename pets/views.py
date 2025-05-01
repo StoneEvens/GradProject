@@ -6,6 +6,7 @@ from .models import *
 from .serializers import *
 from media.models import * 
 from rest_framework import generics
+from utils.api_response import APIResponse
 
 #取今日熱門病程紀錄
 class TodayPopularIllnessArchiveAPIView(APIView):
@@ -15,7 +16,7 @@ class TodayPopularIllnessArchiveAPIView(APIView):
         today = date.today()
         archives = IllnessArchive.objects.filter(post_date=today).order_by('-popularity')[:4]
         serializer = IllnessArchiveSerializer(archives, many=True)
-        return Response(serializer.data)
+        return APIResponse(data=serializer.data)
 
 #取得寵物資料加頭像
 class UserPetsAPIView(APIView):
@@ -53,7 +54,7 @@ class UserPetsAPIView(APIView):
                 "headshot_url": headshot_url
             })
 
-        return Response(result)
+        return APIResponse(data=result)
 
 #列出某 user 的所有病程紀錄 (IllnessArchive)
 class UserIllnessArchiveListAPIView(generics.ListAPIView):

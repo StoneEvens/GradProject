@@ -78,6 +78,9 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
+    'EXCEPTION_HANDLER': 'utils.exception_handler.custom_exception_handler',
+    'DEFAULT_PAGINATION_CLASS': 'utils.pagination.StandardResultsSetPagination',
+    'PAGE_SIZE': 20,
 }
 
 # JWT 設置

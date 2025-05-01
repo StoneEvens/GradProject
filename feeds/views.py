@@ -13,6 +13,7 @@ import re
 import easyocr
 from PIL import Image as PilImage
 from io import BytesIO
+from utils.api_response import APIResponse
 
 #建立選擇的寵物資料
 class GeneratePetInfoAPIView(APIView):
@@ -24,12 +25,20 @@ class GeneratePetInfoAPIView(APIView):
         edited_info = data.get('edited_info', {})
 
         if not pet_id:
-            return Response({"error": "pet_id is required."}, status=status.HTTP_400_BAD_REQUEST)
+            return APIResponse(
+                message="pet_id is required.",
+                code=status.HTTP_400_BAD_REQUEST,
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         try:
             pet = Pet.objects.get(id=pet_id)
         except Pet.DoesNotExist:
-            return Response({"error": "Pet not found."}, status=status.HTTP_404_NOT_FOUND)
+            return APIResponse(
+                message="Pet not found.",
+                code=status.HTTP_404_NOT_FOUND,
+                status=status.HTTP_404_NOT_FOUND
+            )
 
         # Step 1: 從 Pet model 取出基本資料
         pet_info = {
@@ -56,7 +65,7 @@ class GeneratePetInfoAPIView(APIView):
             if key in pet_info:
                 pet_info[key] = value
 
-        return Response(pet_info, status=status.HTTP_200_OK)
+        return APIResponse(data=pet_info)
 
 #得到寵物資料和飼料id之後開始計算
 class FeedNutritionCalculatorAPIView(APIView):
@@ -67,12 +76,20 @@ class FeedNutritionCalculatorAPIView(APIView):
         pet_info = data.get('pet_info')
 
         if not feed_id or not pet_info:
-            return Response({"error": "feed_id and pet_info are required."}, status=status.HTTP_400_BAD_REQUEST)
+            return APIResponse(
+                message="feed_id and pet_info are required.",
+                code=status.HTTP_400_BAD_REQUEST,
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         try:
             feed = Feed.objects.get(id=feed_id)
         except Feed.DoesNotExist:
-            return Response({"error": "Feed not found."}, status=status.HTTP_404_NOT_FOUND)
+            return APIResponse(
+                message="Feed not found.",
+                code=status.HTTP_404_NOT_FOUND,
+                status=status.HTTP_404_NOT_FOUND
+            )
 
         # 取出pet基本資訊
         pet_type = pet_info['pet_type']
@@ -94,7 +111,11 @@ class FeedNutritionCalculatorAPIView(APIView):
                 required_ME = 145 * math.pow(weight, 0.75)
             elif pet_stage == 'puppy':
                 if not predicted_adult_weight:
-                    return Response({"error": "predicted_adult_weight is required for puppies."}, status=status.HTTP_400_BAD_REQUEST)
+                    return APIResponse(
+                        message="predicted_adult_weight is required for puppies.",
+                        code=status.HTTP_400_BAD_REQUEST,
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
                 p = weight / predicted_adult_weight
                 required_ME = 130 * math.pow(weight, 0.75) * 3.2 * (math.exp(-0.87 * p) - 0.1)
         elif pet_type == 'cat':
@@ -106,7 +127,11 @@ class FeedNutritionCalculatorAPIView(APIView):
                 required_ME = 100 * math.pow(weight, 0.67)
             elif pet_stage == 'kitten':
                 if not predicted_adult_weight:
-                    return Response({"error": "predicted_adult_weight is required for kittens."}, status=status.HTTP_400_BAD_REQUEST)
+                    return APIResponse(
+                        message="predicted_adult_weight is required for kittens.",
+                        code=status.HTTP_400_BAD_REQUEST,
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
                 p = weight / predicted_adult_weight
                 required_ME = 100 * math.pow(weight, 0.67) * 6.7 * (math.exp(-0.189 * p) - 0.66)
 
@@ -129,14 +154,19 @@ class FeedNutritionCalculatorAPIView(APIView):
             defaults={"last_used_date": timezone.now().date()}
         )
 
-        return Response({
+        result_data = {
             "feed_name": feed.feed_name,
             "calculated_ME_per_100g": round(me_per_100g, 2),
             "required_ME_per_day": round(required_ME, 2),
             "required_grams_per_day": round(required_grams_per_day, 2),
             "estimated_nutrition_intake": {k: round(v, 2) for k, v in estimated_nutrition.items()},
             "illnesses": illnesses
-        }, status=status.HTTP_200_OK)
+        }
+        
+        return APIResponse(
+            data=result_data,
+            message="營養計算完成"
+        )
 
 #中文辨識
 def extract_nutrition_info_for_chinese(text):
@@ -167,8 +197,11 @@ class UploadFeedAPIView(APIView):
         nutrition_image_file = request.FILES.get('nutrition_image')
 
         if not all([feed_name, front_image_file, nutrition_image_file]):
-            return Response({"error": "feed_name, front_image and nutrition_image are required."},
-                            status=status.HTTP_400_BAD_REQUEST)
+            return APIResponse(
+                message="feed_name, front_image and nutrition_image are required.",
+                code=status.HTTP_400_BAD_REQUEST,
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         # 1. 儲存正面產品照片
         front_image = Image.objects.create(img_url=front_image_file)
@@ -181,14 +214,21 @@ class UploadFeedAPIView(APIView):
             result_lines = reader.readtext(image_bytes, detail=0)
             ocr_text = "\n".join(result_lines)
         except Exception as e:
-            return Response({"error": f"OCR failed: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
+            return APIResponse(
+                message=f"OCR failed: {str(e)}",
+                code=status.HTTP_400_BAD_REQUEST,
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         # 3. 擷取營養成分
         nutrition_data = extract_nutrition_info_for_chinese(ocr_text)
 
         if not nutrition_data:
-            return Response({"error": "Failed to extract nutrition information from OCR."},
-                            status=status.HTTP_400_BAD_REQUEST)
+            return APIResponse(
+                message="Failed to extract nutrition information from OCR.",
+                code=status.HTTP_400_BAD_REQUEST,
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         # 4. 建立 Feed 物件
         feed = Feed.objects.create(
@@ -202,13 +242,16 @@ class UploadFeedAPIView(APIView):
             carbohydrate=nutrition_data.get('carbohydrate', 0),
         )
 
-        return Response({
-            "message": "Feed uploaded and processed successfully.",
-            "feed_id": feed.id,
-            "front_image_id": front_image.id,
-            "extracted_text": ocr_text,
-            "nutrition_data": nutrition_data
-        }, status=status.HTTP_201_CREATED)
+        return APIResponse(
+            data={
+                "feed_id": feed.id,
+                "front_image_id": front_image.id,
+                "extracted_text": ocr_text,
+                "nutrition_data": nutrition_data
+            },
+            message="飼料上傳和處理成功",
+            status=status.HTTP_201_CREATED
+        )
 
 #顯示最近使用飼料
 class RecentUsedFeedsAPIView(APIView):
@@ -239,4 +282,7 @@ class RecentUsedFeedsAPIView(APIView):
                 "feed_image_url": image.img_url if image else None  # 若沒圖則傳 None
             })
 
-        return Response(result)
+        return APIResponse(
+            data=result,
+            message="獲取最近使用的飼料成功"
+        )

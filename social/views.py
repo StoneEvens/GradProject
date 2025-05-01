@@ -2,6 +2,7 @@ from rest_framework import generics
 from .models import Post
 from .serializers import *
 from rest_framework.permissions import IsAuthenticated
+from utils.api_response import APIResponse
 
 #使用者社群首頁post預覽圖
 class UserPostsPreviewListAPIView(generics.ListAPIView):

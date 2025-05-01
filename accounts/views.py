@@ -10,6 +10,7 @@ from accounts.models import *
 from accounts.serializers import *
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView as BaseTokenObtainPairView
+from utils.api_response import APIResponse
 
 User = get_user_model()
 
@@ -29,13 +30,25 @@ class RegisterAPIView(APIView):
         user_fullname = request.data.get('user_fullname')
 
         if not user_account or not password or not email or not user_fullname:
-            return Response({'message': '所有欄位皆為必填。'}, status=status.HTTP_400_BAD_REQUEST)
+            return APIResponse(
+                message='所有欄位皆為必填。',
+                code=status.HTTP_400_BAD_REQUEST,
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         if User.objects.filter(user_account=user_account).exists():
-            return Response({'message': '帳號已存在。'}, status=status.HTTP_400_BAD_REQUEST)
+            return APIResponse(
+                message='帳號已存在。',
+                code=status.HTTP_400_BAD_REQUEST,
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         if User.objects.filter(email=email).exists():
-            return Response({'message': 'Email 已被使用。'}, status=status.HTTP_400_BAD_REQUEST)
+            return APIResponse(
+                message='Email 已被使用。',
+                code=status.HTTP_400_BAD_REQUEST,
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         user = User(
             username=user_account,
@@ -50,14 +63,15 @@ class RegisterAPIView(APIView):
         refresh = RefreshToken.for_user(user)
         serializer = UserLoginSerializer(user)
         
-        return Response({
-            'message': '註冊成功！', 
-            'user': serializer.data,
-            'tokens': {
+        return APIResponse(
+            data=serializer.data,
+            message='註冊成功！',
+            tokens={
                 'refresh': str(refresh),
                 'access': str(refresh.access_token),
-            }
-        }, status=status.HTTP_201_CREATED)
+            },
+            status=status.HTTP_201_CREATED
+        )
 
 # 登出
 class LogoutAPIView(APIView):
@@ -67,13 +81,21 @@ class LogoutAPIView(APIView):
         try:
             refresh_token = request.data.get('refresh')
             if not refresh_token:
-                return Response({'message': '刷新令牌不能為空'}, status=status.HTTP_400_BAD_REQUEST)
+                return APIResponse(
+                    message='刷新令牌不能為空',
+                    code=status.HTTP_400_BAD_REQUEST,
+                    status=status.HTTP_400_BAD_REQUEST
+                )
                 
             token = RefreshToken(refresh_token)
             token.blacklist()
-            return Response({'message': '登出成功！'}, status=status.HTTP_200_OK)
+            return APIResponse(message='登出成功！')
         except Exception as e:
-            return Response({'message': f'登出失敗: {str(e)}'}, status=status.HTTP_400_BAD_REQUEST)
+            return APIResponse(
+                message=f'登出失敗: {str(e)}',
+                code=status.HTTP_400_BAD_REQUEST,
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
 # 查詢個人資料
 class MeAPIView(APIView):
@@ -82,7 +104,7 @@ class MeAPIView(APIView):
     def get(self, request):
         user = request.user
         serializer = UserProfileSerializer(user)
-        return Response({'user': serializer.data}, status=status.HTTP_200_OK)
+        return APIResponse(data=serializer.data)
 
 # 取今日行程
 class TodayPlanAPIView(APIView):
@@ -95,7 +117,7 @@ class TodayPlanAPIView(APIView):
         
         plans = Plan.objects.filter(user=request.user, date__range=(start_of_day, end_of_day))
         serializer = PlanSerializer(plans, many=True)
-        return Response(serializer.data)
+        return APIResponse(data=serializer.data)
 
 # 取今日任務
 class TodayMissionAPIView(APIView):
@@ -105,7 +127,7 @@ class TodayMissionAPIView(APIView):
         today = date.today()
         missions = UserMission.objects.filter(user=request.user, due=today)
         serializer = UserMissionSerializer(missions, many=True)
-        return Response(serializer.data)
+        return APIResponse(data=serializer.data)
 
 # 建立每日行程
 class CreatePlanAPIView(APIView):
@@ -115,8 +137,17 @@ class CreatePlanAPIView(APIView):
         serializer = PlanSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(user=request.user)  
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return APIResponse(
+                data=serializer.data,
+                message='行程創建成功',
+                status=status.HTTP_201_CREATED
+            )
+        return APIResponse(
+            message='驗證失敗',
+            errors=serializer.errors,
+            code=status.HTTP_400_BAD_REQUEST,
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
 # 取用戶頭像
 class UserImageAPIView(APIView):
@@ -125,9 +156,9 @@ class UserImageAPIView(APIView):
     def get(self, request):
         try:
             user_image_url = request.user.headshot.img_url
-        except:
+        except AttributeError:
             user_image_url = None
-        return Response({'user_image_url': user_image_url})
+        return APIResponse(data={'user_image_url': user_image_url})
 
 # 回傳使用者基本資料＋追蹤數、被追蹤數、發文（Post+Archive）數）
 class UserSummaryView(APIView):
@@ -150,4 +181,4 @@ class UserSummaryView(APIView):
             'posts_count': total,
         }
         serializer = UserSummarySerializer(data)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return APIResponse(data=serializer.data)
