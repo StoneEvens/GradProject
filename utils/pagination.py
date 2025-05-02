@@ -1,3 +1,9 @@
+"""
+標準分頁處理
+
+提供統一的分頁機制，確保 API 響應格式一致
+"""
+
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from django.core.paginator import InvalidPage
@@ -5,67 +11,51 @@ from .api_response import APIResponse
 
 class StandardResultsSetPagination(PageNumberPagination):
     """
-    標準分頁類，使用統一的 API 響應格式
+    標準分頁類
     
-    提供：
-    - 當前頁數據
-    - 總記錄數
-    - 總頁數
-    - 當前頁號
-    - 頁面大小
-    - 首頁、上一頁、下一頁和最後一頁的鏈接
+    提供默認分頁大小、最大分頁大小和最小分頁大小限制
+    分頁參數：
+    - page: 頁碼，從1開始
+    - page_size: 每頁數量，5-100之間
     """
-    
     page_size = 20
     page_size_query_param = 'page_size'
     max_page_size = 100
-    min_page_size = 5  # 最小頁面大小，防止過小的分頁請求
+    min_page_size = 5
     
     def get_page_size(self, request):
         """
-        從請求中獲取頁面大小，並確保它不小於最小值
+        獲取並驗證頁面大小
+        
+        確保頁面大小不低於最小限制
         """
         page_size = super().get_page_size(request)
+        
+        # 確保不低於最小頁面大小
         if page_size < self.min_page_size:
             return self.min_page_size
+            
         return page_size
-    
-    def get_last_page_link(self):
-        """
-        獲取最後一頁的鏈接
-        """
-        if not self.page.has_next():
-            return None
-            
-        url = self.request.build_absolute_uri()
-        page_number = self.page.paginator.num_pages
-        return self.replace_query_param(url, self.page_query_param, page_number)
-    
-    def get_first_page_link(self):
-        """
-        獲取第一頁的鏈接
-        """
-        if self.page.number == 1:
-            return None
-            
-        url = self.request.build_absolute_uri()
-        return self.replace_query_param(url, self.page_query_param, 1)
     
     def get_paginated_response(self, data):
         """
         返回統一格式的分頁響應
+        
+        使用 APIResponse 包裝分頁數據和元信息
         """
         return APIResponse(
-            data=data,
-            pagination={
+            message="查詢成功",
+            data={
                 'count': self.page.paginator.count,
                 'next': self.get_next_link(),
                 'previous': self.get_previous_link(),
-                'first': self.get_first_page_link(),
-                'last': self.get_last_page_link(),
-                'current_page': self.page.number,
+                'first': self.request.build_absolute_uri().split('?')[0] + '?page=1',
+                'last': self.request.build_absolute_uri().split('?')[0] + f'?page={self.page.paginator.num_pages}',
+                'current': self.request.build_absolute_uri(),
+                'page': self.page.number,
+                'pages': self.page.paginator.num_pages,
                 'page_size': self.get_page_size(self.request),
-                'total_pages': self.page.paginator.num_pages,
+                'results': data
             }
         )
     
