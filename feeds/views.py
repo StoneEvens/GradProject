@@ -27,6 +27,8 @@ from django.http import Http404
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from rest_framework.pagination import StandardResultsSetPagination
+from django.db.models import Prefetch
+from utils.image_service import ImageService
 
 # 配置日誌記錄器
 logger = logging.getLogger(__name__)
@@ -282,6 +284,15 @@ def extract_nutrition_info_for_chinese(text):
 class UploadFeedAPIView(APIView):
     permission_classes = [IsAuthenticated]
     
+    @swagger_auto_schema(
+        operation_summary="上傳飼料信息",
+        operation_description="上傳飼料的基本信息、正面圖和營養成分圖",
+        responses={
+            201: openapi.Response(description="飼料信息上傳成功"),
+            400: openapi.Response(description="參數無效"),
+            500: openapi.Response(description="服務器錯誤")
+        }
+    )
     @log_queries
     def post(self, request):
         """
@@ -306,7 +317,6 @@ class UploadFeedAPIView(APIView):
 
                 # 儲存飼料正面圖片
                 front_image = request.FILES['front_image']
-                # 圖片安全性已在序列化器中驗證過
                 front_img = Image.objects.create(
                     content_type=ContentType.objects.get_for_model(Feed),
                     object_id=feed.id,
@@ -317,7 +327,6 @@ class UploadFeedAPIView(APIView):
 
                 # 儲存營養成分圖片
                 nutrition_image = request.FILES['nutrition_image']
-                # 圖片安全性已在序列化器中驗證過
                 nutrition_img = Image.objects.create(
                     content_type=ContentType.objects.get_for_model(Feed),
                     object_id=feed.id,
@@ -339,6 +348,9 @@ class UploadFeedAPIView(APIView):
                     defaults={'last_used': timezone.now()}
                 )
                 
+                # 清除任何可能存在的舊緩存
+                ImageService.invalidate_image_cache(feed.id, Feed)
+                
                 # 啟動非同步任務進行OCR處理
                 from feeds.tasks import process_feed_ocr
                 process_feed_ocr.delay(
@@ -348,28 +360,29 @@ class UploadFeedAPIView(APIView):
                     nutrition_image_id=nutrition_img.id
                 )
 
+                # 獲取圖片 URL
+                front_image_url = front_img.img_url.url if hasattr(front_img.img_url, 'url') else None
+                nutrition_image_url = nutrition_img.img_url.url if hasattr(nutrition_img.img_url, 'url') else None
+
                 return APIResponse(
                     code=201,
                     message="飼料信息上傳成功，正在處理中",
                     data={
                         "feed_id": feed.id,
                         "name": feed.name,
-                        "front_image_url": front_img.img_url.url,
-                        "nutrition_image_url": nutrition_img.img_url.url,
+                        "front_image_url": front_image_url,
+                        "nutrition_image_url": nutrition_image_url,
                         "processing_status": feed.processing_status
                     }
                 )
 
         except Exception as e:
-            # 確保在發生錯誤時刪除任何臨時文件
-            try:
-                if 'temp_path' in locals() and os.path.exists(temp_path):
-                    os.remove(temp_path)
-            except Exception:
-                pass  # 如果刪除臨時文件失敗，忽略錯誤
-                
-            logger.error(f"上傳飼料時發生錯誤: {str(e)}", exc_info=True)
-            return APIResponse(code=500, message=f"處理上傳時發生錯誤: {str(e)}")
+            logger.error(f"上傳飼料信息時發生錯誤: {str(e)}", exc_info=True)
+            # 如果發生錯誤，將自動回滾事務
+            return APIResponse(
+                code=500, 
+                message=f"上傳飼料信息失敗: {str(e)}"
+            )
 
 #顯示最近使用飼料
 class RecentUsedFeedsAPIView(APIView):
@@ -392,12 +405,34 @@ class RecentUsedFeedsAPIView(APIView):
         返回用戶最近使用過的所有處理完成的飼料，按最近使用時間降序排列
         """
         try:
-            # 使用 select_related 優化查詢性能
+            # 優化查詢 - 使用 select_related 和 prefetch_related 減少數據庫查詢
             user_feeds = UserFeed.objects.filter(
                 user=request.user
-            ).select_related('feed').order_by('-last_used')
+            ).select_related(
+                'feed'  # 預加載 feed 數據
+            ).prefetch_related(
+                Prefetch(
+                    'feed__users',
+                    queryset=UserFeed.objects.filter(user=request.user),
+                    to_attr='user_feed_cache'
+                )
+            ).order_by('-last_used')
             
-            # 提取飼料資訊並過濾掉未完成處理的飼料
+            # 提取所有飼料對象，用於後續批量加載圖片
+            feeds = [user_feed.feed for user_feed in user_feeds 
+                    if user_feed.feed.processing_status in ['completed', 'completed_with_warnings']]
+            
+            if not feeds:
+                # 如果沒有符合條件的飼料，直接返回空列表
+                paginator = self.pagination_class()
+                return paginator.get_paginated_response([])
+            
+            # 批量預加載所有飼料的圖片
+            from feeds.models import Feed
+            feed_ids = [feed.id for feed in feeds]
+            image_map = ImageService.preload_images_for_objects(feeds, model_class=Feed)
+            
+            # 構建結果數據
             feeds_data = []
             for user_feed in user_feeds:
                 feed = user_feed.feed
@@ -409,17 +444,11 @@ class RecentUsedFeedsAPIView(APIView):
                     feed_data = feed_serializer.data
                     feed_data['last_used'] = user_feed.last_used.strftime('%Y-%m-%d %H:%M:%S')
                     
-                    # 獲取飼料的圖片
-                    from django.contrib.contenttypes.models import ContentType
-                    feed_content_type = ContentType.objects.get_for_model(Feed)
-                    images = Image.objects.filter(
-                        content_type=feed_content_type,
-                        object_id=feed.id
-                    ).order_by('sort_order')
-                    
-                    if images.exists():
-                        feed_data['front_image_url'] = images.first().img_url.url if images.count() >= 1 else None
-                        feed_data['nutrition_image_url'] = images.last().img_url.url if images.count() >= 2 else None
+                    # 從預加載的圖片中獲取 URL
+                    feed_images = image_map.get(feed.id, [])
+                    if feed_images:
+                        feed_data['front_image_url'] = feed_images[0].img_url.url if len(feed_images) >= 1 and hasattr(feed_images[0].img_url, 'url') else None
+                        feed_data['nutrition_image_url'] = feed_images[1].img_url.url if len(feed_images) >= 2 and hasattr(feed_images[1].img_url, 'url') else None
                     
                     feeds_data.append(feed_data)
             
@@ -438,6 +467,16 @@ class RecentUsedFeedsAPIView(APIView):
 class FeedProcessingStatusAPIView(APIView):
     permission_classes = [IsAuthenticated]
     
+    @swagger_auto_schema(
+        operation_summary="獲取飼料處理狀態",
+        operation_description="獲取指定飼料的處理狀態和結果",
+        responses={
+            200: openapi.Response(description="成功獲取飼料處理狀態"),
+            403: openapi.Response(description="無權訪問"),
+            404: openapi.Response(description="飼料不存在")
+        }
+    )
+    @log_queries
     def get(self, request, feed_id):
         """
         獲取指定飼料的處理狀態
@@ -463,27 +502,18 @@ class FeedProcessingStatusAPIView(APIView):
                 feed_serializer = FeedSerializer(feed)
                 response_data.update({"nutrition_info": feed_serializer.data})
                 
-                # 獲取飼料的圖片
-                from django.contrib.contenttypes.models import ContentType
-                feed_content_type = ContentType.objects.get_for_model(Feed)
-                images = Image.objects.filter(
-                    content_type=feed_content_type,
-                    object_id=feed.id
-                ).order_by('sort_order')
-                
-                if images.exists():
-                    response_data['front_image_url'] = images.first().img_url.url if images.count() >= 1 else None
-                    response_data['nutrition_image_url'] = images.last().img_url.url if images.count() >= 2 else None
+                # 獲取飼料的圖片 URL
+                front_image_url, nutrition_image_url = ImageService.get_feed_image_urls(feed.id)
+                response_data['front_image_url'] = front_image_url
+                response_data['nutrition_image_url'] = nutrition_image_url
             
-            # 返回處理狀態
             return APIResponse(
-                message="成功獲取飼料處理狀態",
+                message="獲取飼料處理狀態成功",
                 data=response_data
             )
             
         except Feed.DoesNotExist:
-            raise Http404(f"找不到 ID 為 {feed_id} 的飼料")
-            
+            return APIResponse(code=404, message="飼料不存在")
         except Exception as e:
             logger.error(f"獲取飼料處理狀態時發生錯誤: {str(e)}", exc_info=True)
             return APIResponse(code=500, message=f"獲取飼料處理狀態時發生錯誤: {str(e)}")

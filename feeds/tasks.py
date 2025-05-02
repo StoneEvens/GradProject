@@ -11,6 +11,7 @@ from feeds.models import Feed
 from media.models import Image
 from feeds.views import extract_nutrition_info_for_chinese
 from utils.file_safety import validate_image_file, sanitize_image
+from utils.image_service import ImageService
 
 logger = logging.getLogger(__name__)
 
@@ -49,6 +50,9 @@ def process_feed_ocr(self, feed_id, nutrition_image_temp_path, front_image_id, n
                 feed.processing_error = error_msg
                 feed.save()
                 
+                # 使緩存失效
+                ImageService.invalidate_image_cache(feed.id, Feed)
+                
             return {
                 "status": "error", 
                 "message": error_msg, 
@@ -66,17 +70,12 @@ def process_feed_ocr(self, feed_id, nutrition_image_temp_path, front_image_id, n
         with open(nutrition_image_temp_path, 'rb') as f:
             nutrition_image_data = f.read()
         
-        # 使用 EasyOCR 提取文本
+        # 執行 OCR 識別
         try:
             results = reader.readtext(nutrition_image_data)
-            
-            # 提取文本內容
-            extracted_text = " ".join([text[1] for text in results])
-            logger.debug(f"OCR 提取文本內容: {extracted_text[:100]}...")
-            
-        except Exception as e:
-            error_msg = f"OCR 處理失敗: {str(e)}"
-            logger.error(error_msg)
+        except Exception as ocr_error:
+            error_msg = f"OCR 處理失敗: {str(ocr_error)}"
+            logger.error(error_msg, exc_info=True)
             
             # 更新飼料處理狀態
             with transaction.atomic():
@@ -84,74 +83,87 @@ def process_feed_ocr(self, feed_id, nutrition_image_temp_path, front_image_id, n
                 feed.processing_error = error_msg
                 feed.save()
                 
+                # 使緩存失效
+                ImageService.invalidate_image_cache(feed.id, Feed)
+                
             return {
                 "status": "error", 
                 "message": error_msg, 
                 "feed_id": feed_id
             }
         
-        # 根據提取的文本更新飼料信息
-        logger.debug(f"從提取的文本中解析營養成分信息")
+        # 提取識別出的文本
+        logger.debug(f"從 OCR 結果中提取文本")
+        extracted_text = ' '.join([result[1] for result in results])
+        
+        # 提取營養信息
+        logger.debug(f"從文本中提取營養信息")
+        nutrition_info, warnings = extract_nutrition_info_for_chinese(extracted_text)
+        
+        # 更新飼料記錄
         with transaction.atomic():
-            # 提取營養信息
-            nutrition_data = extract_nutrition_info_for_chinese(extracted_text)
-            
-            if nutrition_data:
-                # 更新飼料信息
-                feed.protein = nutrition_data.get('protein', 0)
-                feed.fat = nutrition_data.get('fat', 0)
-                feed.calcium = nutrition_data.get('calcium', 0)
-                feed.phosphorus = nutrition_data.get('phosphorus', 0)
-                feed.magnesium = nutrition_data.get('magnesium', 0)
-                feed.sodium = nutrition_data.get('sodium', 0)
-                feed.carbohydrate = nutrition_data.get('carbohydrate', 0)
-                feed.processing_status = "completed"
-            else:
-                # 未能提取到足夠的營養信息
-                warning_msg = "未能從圖片中提取足夠的營養信息"
-                logger.warning(warning_msg)
-                feed.processing_status = "completed_with_warnings"
-                feed.processing_error = warning_msg
-            
-            # 保存提取的文本
+            feed.protein = nutrition_info.get('protein', 0)
+            feed.fat = nutrition_info.get('fat', 0)
+            feed.calcium = nutrition_info.get('calcium', 0)
+            feed.phosphorus = nutrition_info.get('phosphorus', 0)
+            feed.magnesium = nutrition_info.get('magnesium', 0)
+            feed.sodium = nutrition_info.get('sodium', 0)
+            feed.carbohydrate = nutrition_info.get('carbohydrate', 0)
             feed.extracted_text = extracted_text
+            
+            # 更新處理狀態
+            if warnings:
+                feed.processing_status = "completed_with_warnings"
+                feed.processing_error = ', '.join(warnings)
+            else:
+                feed.processing_status = "completed"
+                feed.processing_error = ""
+                
             feed.save()
             
-        # 處理完成後刪除臨時文件
-        if os.path.exists(nutrition_image_temp_path):
-            logger.debug(f"刪除臨時文件 {nutrition_image_temp_path}")
-            os.remove(nutrition_image_temp_path)
+            # 使緩存失效
+            ImageService.invalidate_image_cache(feed.id, Feed)
             
-        logger.info(f"飼料 ID {feed_id} 的營養信息處理完成")
-        return {"status": "success", "feed_id": feed_id}
-    
-    except Exception as e:
-        error_msg = f"處理飼料 ID {feed_id} 時發生錯誤: {str(e)}"
-        logger.error(error_msg)
-        
-        # 如果重試次數未達上限，則重試
+        # 清理臨時文件
         try:
-            # 處理完成後確保刪除臨時文件
             if os.path.exists(nutrition_image_temp_path):
-                logger.debug(f"刪除臨時文件 {nutrition_image_temp_path}")
                 os.remove(nutrition_image_temp_path)
-            
-            # 如果可以重試，則重試任務
-            if self.request.retries < self.max_retries:
-                logger.info(f"準備重試任務，當前重試次數: {self.request.retries}")
-                self.retry(exc=e)
         except Exception as cleanup_error:
-            logger.error(f"清理過程中發生錯誤: {str(cleanup_error)}")
+            logger.warning(f"清理臨時文件失敗: {str(cleanup_error)}")
         
-        # 更新處理狀態
+        # 返回處理結果
+        return {
+            "status": "success", 
+            "message": "營養信息提取完成", 
+            "feed_id": feed_id,
+            "nutrition_info": nutrition_info,
+            "warnings": warnings
+        }
+        
+    except Exception as e:
+        logger.error(f"處理飼料 ID {feed_id} 的營養信息時發生錯誤: {str(e)}", exc_info=True)
+        
+        # 嘗試更新處理狀態
         try:
             with transaction.atomic():
                 feed = Feed.objects.get(id=feed_id)
                 feed.processing_status = "failed"
-                feed.processing_error = str(e)
+                feed.processing_error = f"處理時發生錯誤: {str(e)}"
                 feed.save()
+                
+                # 使緩存失效
+                ImageService.invalidate_image_cache(feed.id, Feed)
+                
         except Exception as update_error:
-            logger.error(f"更新處理狀態時發生錯誤: {str(update_error)}")
+            logger.error(f"更新飼料處理狀態時發生錯誤: {str(update_error)}", exc_info=True)
         
-        # 記錄錯誤並返回
-        return {"status": "error", "message": str(e), "feed_id": feed_id} 
+        # 如果還有重試次數，重試任務
+        if self.request.retries < self.max_retries:
+            logger.info(f"將重試任務，當前重試次數: {self.request.retries}")
+            raise self.retry(exc=e)
+            
+        return {
+            "status": "error", 
+            "message": f"處理飼料營養信息失敗: {str(e)}", 
+            "feed_id": feed_id
+        } 

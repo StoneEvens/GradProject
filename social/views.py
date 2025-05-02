@@ -4,6 +4,7 @@ from .serializers import *
 from rest_framework.permissions import IsAuthenticated
 from utils.api_response import APIResponse
 from utils.query_optimization import log_queries
+from utils.image_service import ImageService
 from django.contrib.contenttypes.models import ContentType
 from media.models import Image
 
@@ -24,24 +25,19 @@ class UserPostsPreviewListAPIView(generics.ListAPIView):
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
         
-        # 獲取 post 的內容類型 ID 用於查詢圖片
-        post_content_type = ContentType.objects.get_for_model(Post)
-        
         # 獲取所有貼文 ID
         post_ids = list(queryset.values_list('id', flat=True))
         
-        # 一次性查詢所有相關圖片
+        # 使用 ImageService 一次性查詢所有相關圖片
         post_images = {}
         if post_ids:
-            images = Image.objects.filter(
-                content_type=post_content_type,
-                object_id__in=post_ids
-            ).order_by('object_id', 'sort_order')
+            # 預加載每個貼文的第一張圖片
+            image_map = ImageService.preload_first_image_for_objects(queryset, model_class=Post)
             
-            # 將圖片按 post_id 分組，每個 post 只取第一張圖片
-            for image in images:
-                if image.object_id not in post_images:
-                    post_images[image.object_id] = image.img_url
+            # 將圖片映射轉換為 URL 映射
+            for post_id, image in image_map.items():
+                if image and hasattr(image.img_url, 'url'):
+                    post_images[post_id] = image.img_url.url
         
         # 如果使用分頁，處理分頁
         page = self.paginate_queryset(queryset)

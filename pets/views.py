@@ -9,6 +9,7 @@ from rest_framework import generics
 from utils.api_response import APIResponse
 from django.db.models import Prefetch
 from utils.query_optimization import log_queries
+from utils.image_service import ImageService
 
 #取今日熱門病程紀錄
 class TodayPopularIllnessArchiveAPIView(APIView):
@@ -36,6 +37,23 @@ class UserPetsAPIView(APIView):
             )
         )
 
+        # 預加載所有寵物的頭像
+        image_map = {}
+        try:
+            # 對於每個寵物，獲取頭像
+            pet_ids = list(pets.values_list('id', flat=True))
+            pet_headshots = {}
+            
+            if pet_ids:
+                from pets.models import PetHeadshot
+                # 批量獲取所有頭像
+                headshots = PetHeadshot.objects.filter(pet_id__in=pet_ids)
+                for headshot in headshots:
+                    pet_headshots[headshot.pet_id] = headshot.img_url.url if hasattr(headshot.img_url, 'url') else None
+        except Exception as e:
+            logger.error(f"預加載寵物頭像時發生錯誤: {str(e)}", exc_info=True)
+            # 如果發生錯誤，繼續處理其他數據，僅記錄錯誤
+
         result = []
         for pet in pets:
             # 由於已經預加載了相關數據，這裡的查詢不會觸發額外的數據庫請求
@@ -44,10 +62,8 @@ class UserPetsAPIView(APIView):
                 for relation in archive.illnesses.all():
                     illness_names.add(relation.illness.illness_name)
 
-            # 嘗試取得頭像圖片
-            headshot_url = None
-            if hasattr(pet, 'headshot') and pet.headshot:
-                headshot_url = pet.headshot.img_url
+            # 從預加載的頭像中獲取 URL
+            headshot_url = pet_headshots.get(pet.id)
 
             result.append({
                 "pet_id": pet.id,
@@ -63,7 +79,10 @@ class UserPetsAPIView(APIView):
                 "headshot_url": headshot_url
             })
 
-        return APIResponse(data=result)
+        return APIResponse(
+            message="成功獲取寵物列表",
+            data=result
+        )
 
 #列出某 user 的所有病程紀錄 (IllnessArchive)
 class UserIllnessArchiveListAPIView(generics.ListAPIView):
