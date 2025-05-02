@@ -15,8 +15,12 @@ REST_FRAMEWORK = {
         'rest_framework.throttling.UserRateThrottle',
     ],
     'DEFAULT_THROTTLE_RATES': {
-        'anon': '100/day',
-        'user': '1000/day',
+        'anon': '60/hour',                # 匿名用戶每小時最多 60 次請求
+        'user': '1000/hour',              # 認證用戶每小時最多 1000 次請求
+        'feed_upload': '20/hour',         # 飼料上傳每小時最多 20 次
+        'feed_calculate': '60/hour',      # 飼料計算每小時最多 60 次
+        'user_profile': '100/hour',       # 用戶資料請求每小時最多 100 次
+        'burst': '10/minute',             # 短時間內的突發請求限制
     },
 }
 

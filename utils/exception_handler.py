@@ -1,85 +1,182 @@
 """
-全局異常處理器
+全局異常處理模塊
 
-提供統一的 API 異常處理邏輯，確保一致的錯誤響應格式
+提供統一的異常處理機制，將各種異常轉換為標準格式的 API 響應
 """
 
 import logging
-from rest_framework.views import exception_handler
+import traceback
+from django.core.exceptions import ValidationError as DjangoValidationError
+from django.db import DatabaseError, IntegrityError
+from django.http import Http404
 from rest_framework import exceptions
-from rest_framework.exceptions import ValidationError
-from django.db import IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
-from utils.api_response import APIResponse
+from rest_framework.views import set_rollback
+from .api_response import APIResponse
+from .error_codes import ErrorCodes
 
 logger = logging.getLogger(__name__)
 
 def custom_exception_handler(exc, context):
     """
-    自定義異常處理器
+    自定義異常處理函數
     
-    處理所有 DRF 和 Django 異常，返回統一格式的錯誤響應
+    將各種類型的異常轉換為標準的 API 響應格式
+    
+    Parameters:
+    - exc: 發生的異常
+    - context: 異常發生的上下文
+    
+    Returns:
+    - APIResponse: 標準化的 API 響應
     """
-    # 首先使用 DRF 的默認處理
-    response = exception_handler(exc, context)
+    # 獲取視圖和請求信息，用於日誌記錄
+    view_name = context.get('view').__class__.__name__ if context and 'view' in context else 'UnknownView'
+    request_path = context.get('request').path if context and 'request' in context else 'unknown_path'
+    user_id = context.get('request').user.id if context and 'request' in context and hasattr(context['request'], 'user') and hasattr(context['request'].user, 'id') else None
     
-    # 獲取請求路徑和視圖信息，用於日誌記錄
-    request = context.get('request')
-    view = context.get('view')
-    
-    path = request.path if request else "未知路徑"
-    view_name = view.__class__.__name__ if view else "未知視圖"
-    
-    # 如果已經有了響應，我們需要調整其格式
-    if response is not None:
-        error_data = {}
-        status_code = response.status_code
-        
-        # 處理驗證錯誤，為每個字段保留詳細信息
-        if isinstance(exc, ValidationError):
-            message = "參數驗證失敗"
-            if isinstance(exc.detail, dict):
-                for field, error_items in exc.detail.items():
-                    error_data[field] = error_items
-            else:
-                error_data["detail"] = exc.detail
-        # 處理其他 DRF 異常
-        elif isinstance(exc, exceptions.APIException):
-            message = str(exc)
-        # 處理其他任何異常
-        else:
-            message = "服務器錯誤"
-        
-        # 使用統一的 APIResponse 格式
-        return APIResponse(
-            message=message,
-            code=status_code,
-            data=error_data if error_data else None
-        )
-    
-    # 處理 DRF 未捕獲的常見 Django 異常
-    if isinstance(exc, IntegrityError):
-        logger.error(f"數據庫完整性錯誤: {str(exc)} - 路徑: {path}, 視圖: {view_name}")
-        return APIResponse(
-            message="數據已存在或違反資料庫完整性約束",
-            code=400
-        )
-    
-    if isinstance(exc, ObjectDoesNotExist):
-        logger.error(f"對象不存在: {str(exc)} - 路徑: {path}, 視圖: {view_name}")
-        return APIResponse(
-            message="請求的資源不存在",
-            code=404
-        )
-    
-    # 處理所有其他未捕獲的異常
-    logger.exception(
-        f"未處理的異常: {exc.__class__.__name__}: {str(exc)} - 路徑: {path}, 視圖: {view_name}",
-        exc_info=exc
+    # 記錄異常詳細信息到日誌
+    logger.error(
+        f"處理請求 '{request_path}' 時在視圖 '{view_name}' 中發生異常: {exc}",
+        exc_info=True,
+        extra={
+            'view': view_name,
+            'path': request_path,
+            'user_id': user_id,
+            'exception_class': exc.__class__.__name__,
+            'exception_message': str(exc)
+        }
     )
     
-    # 為任何未處理的異常返回統一的服務器錯誤響應
-    return APIResponse(
-        message="服務器內部錯誤，請稍後再試",
-        code=500
-    ) 
+    # 回滾數據庫事務
+    set_rollback()
+    
+    # 處理 REST framework 自帶的異常
+    if isinstance(exc, exceptions.AuthenticationFailed):
+        return APIResponse(
+            message="身份驗證失敗",
+            code=ErrorCodes.INVALID_CREDENTIALS,
+            status=401
+        )
+        
+    elif isinstance(exc, exceptions.NotAuthenticated):
+        return APIResponse(
+            message="未提供身份驗證憑證",
+            code=ErrorCodes.UNAUTHORIZED,
+            status=401
+        )
+        
+    elif isinstance(exc, exceptions.PermissionDenied):
+        return APIResponse(
+            message="您沒有執行此操作的權限",
+            code=ErrorCodes.PERMISSION_DENIED,
+            status=403
+        )
+        
+    elif isinstance(exc, exceptions.MethodNotAllowed):
+        return APIResponse(
+            message=f"請求方法 '{context['request'].method}' 不被允許",
+            code=ErrorCodes.METHOD_NOT_ALLOWED,
+            status=405
+        )
+        
+    elif isinstance(exc, exceptions.NotFound):
+        return APIResponse(
+            message="請求的資源不存在",
+            code=ErrorCodes.RESOURCE_NOT_FOUND,
+            status=404
+        )
+        
+    elif isinstance(exc, exceptions.ValidationError):
+        # 處理 REST framework 的驗證錯誤
+        error_details = exc.detail if hasattr(exc, 'detail') else {'error': str(exc)}
+        return APIResponse(
+            message="請求參數驗證失敗",
+            code=ErrorCodes.VALIDATION_ERROR,
+            data={'errors': error_details},
+            status=400
+        )
+        
+    elif isinstance(exc, exceptions.Throttled):
+        # 處理請求頻率限制
+        wait_time = exc.wait
+        return APIResponse(
+            message=f"請求過於頻繁，請等待 {wait_time} 秒後再試",
+            code=ErrorCodes.RATE_LIMITED,
+            data={'wait': wait_time},
+            status=429
+        )
+    
+    # 處理 Django 異常
+    elif isinstance(exc, Http404):
+        return APIResponse(
+            message="請求的資源不存在",
+            code=ErrorCodes.RESOURCE_NOT_FOUND,
+            status=404
+        )
+        
+    elif isinstance(exc, DjangoValidationError):
+        # 處理 Django 的驗證錯誤
+        error_message = exc.messages[0] if hasattr(exc, 'messages') and exc.messages else str(exc)
+        return APIResponse(
+            message=error_message,
+            code=ErrorCodes.VALIDATION_ERROR,
+            data={'errors': exc.message_dict if hasattr(exc, 'message_dict') else {'error': error_message}},
+            status=400
+        )
+        
+    elif isinstance(exc, DatabaseError):
+        # 處理數據庫異常
+        logger.error(f"數據庫錯誤: {str(exc)}", exc_info=True)
+        return APIResponse(
+            message="數據庫操作失敗",
+            code=ErrorCodes.DATABASE_ERROR,
+            status=500
+        )
+        
+    elif isinstance(exc, IntegrityError):
+        # 處理數據完整性異常
+        return APIResponse(
+            message="數據完整性錯誤",
+            code=ErrorCodes.DUPLICATE_RESOURCE,
+            status=409
+        )
+    
+    # 處理自定義業務異常 (如果有)
+    # 示例: 如果項目中實現了自定義異常類
+    # elif isinstance(exc, CustomBusinessError):
+    #     return APIResponse(
+    #         message=str(exc),
+    #         code=exc.code,
+    #         status=200  # 業務錯誤通常使用 200 狀態碼
+    #     )
+    
+    # 處理所有其他未處理的異常
+    else:
+        # 記錄完整的異常棧跟踪
+        logger.critical(
+            f"發生未處理的異常: {str(exc)}",
+            exc_info=True,
+            extra={
+                'traceback': traceback.format_exc(),
+                'view': view_name,
+                'path': request_path
+            }
+        )
+        
+        # 生產環境中隱藏詳細錯誤信息
+        from django.conf import settings
+        if settings.DEBUG:
+            error_detail = {
+                'exception': exc.__class__.__name__,
+                'detail': str(exc),
+                'traceback': traceback.format_exc().split('\n')
+            }
+        else:
+            error_detail = None
+            
+        return APIResponse(
+            message="伺服器內部錯誤，請稍後再試",
+            code=ErrorCodes.SERVER_ERROR,
+            data=error_detail,
+            status=500
+        ) 

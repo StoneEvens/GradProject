@@ -29,6 +29,8 @@ from drf_yasg import openapi
 from rest_framework.pagination import StandardResultsSetPagination
 from django.db.models import Prefetch
 from utils.image_service import ImageService
+from utils.throttling import FeedUploadRateThrottle, FeedCalculateRateThrottle, BurstRateThrottle
+from utils.error_codes import ErrorCodes
 
 # 配置日誌記錄器
 logger = logging.getLogger(__name__)
@@ -93,6 +95,7 @@ class GeneratePetInfoAPIView(APIView):
 #得到寵物資料和飼料id之後開始計算
 class FeedNutritionCalculatorAPIView(APIView):
     permission_classes = [IsAuthenticated]
+    throttle_classes = [FeedCalculateRateThrottle]
     
     @swagger_auto_schema(
         operation_summary="計算飼料的營養需求",
@@ -133,7 +136,12 @@ class FeedNutritionCalculatorAPIView(APIView):
         # 使用序列化器驗證請求參數
         serializer = NutritionCalculatorRequestSerializer(data=request.data)
         if not serializer.is_valid():
-            raise ValidationError(serializer.errors)
+            return APIResponse(
+                code=400,
+                message="請求參數無效",
+                data={"errors": serializer.errors},
+                status=status.HTTP_400_BAD_REQUEST
+            )
             
         # 獲取驗證後的數據
         validated_data = serializer.validated_data
@@ -167,6 +175,22 @@ class FeedNutritionCalculatorAPIView(APIView):
                         "error": feed.processing_error
                     }
                 )
+            
+            # 檢查飼料營養數據完整性
+            required_nutrients = ['protein', 'fat', 'carbohydrate']
+            missing_nutrients = [nutrient for nutrient in required_nutrients 
+                              if getattr(feed, nutrient, 0) == 0]
+            
+            if missing_nutrients:
+                return APIResponse(
+                    code=400,
+                    message="飼料營養數據不完整，無法進行準確計算",
+                    data={
+                        "feed_id": feed.id,
+                        "name": feed.name,
+                        "missing_nutrients": missing_nutrients
+                    }
+                )
                 
             # 添加用户最近使用的飼料記錄
             UserFeed.objects.update_or_create(
@@ -176,11 +200,48 @@ class FeedNutritionCalculatorAPIView(APIView):
             )
             
         except Feed.DoesNotExist:
-            raise Http404(f"找不到 ID 為 {feed_id} 的飼料")
+            return APIResponse(
+                code=404, 
+                message=f"找不到ID為 {feed_id} 的飼料",
+                status=status.HTTP_404_NOT_FOUND
+            )
         
         # 從已驗證的數據中提取寵物信息
         pet_type = pet_info['pet_type']
-        pet_weight = float(pet_info['weight'])
+        
+        try:
+            pet_weight = float(pet_info['weight'])
+            
+            # 添加體重合理性檢查
+            if pet_weight <= 0:
+                return APIResponse(
+                    code=400,
+                    message="寵物體重必須大於0",
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+                
+            if pet_type == 'dog' and pet_weight > 100:
+                return APIResponse(
+                    code=400,
+                    message="狗狗體重超出合理範圍",
+                    data={"valid_range": {"min": 0.1, "max": 100}},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+                
+            if pet_type == 'cat' and pet_weight > 20:
+                return APIResponse(
+                    code=400,
+                    message="貓咪體重超出合理範圍",
+                    data={"valid_range": {"min": 0.1, "max": 20}},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        except (ValueError, TypeError):
+            return APIResponse(
+                code=400,
+                message="寵物體重必須為有效數字",
+                status=status.HTTP_400_BAD_REQUEST
+            )
+            
         pet_stage = pet_info['pet_stage']
         
         # 計算寵物的每日代謝能量需求 (kcal/day)
@@ -219,8 +280,45 @@ class FeedNutritionCalculatorAPIView(APIView):
         # 修菲公式: ME (kcal/100g) = 4 * 蛋白質% + 9 * 脂肪% + 4 * 碳水化合物%
         feed_energy_per_100g = (4 * feed.protein) + (9 * feed.fat) + (4 * feed.carbohydrate)
         
+        # 合理性檢查: 確保飼料能量不為零
+        if feed_energy_per_100g <= 0:
+            return APIResponse(
+                code=400,
+                message="飼料營養數據異常，無法計算能量",
+                data={
+                    "feed_id": feed.id,
+                    "name": feed.name,
+                    "nutrient_values": {
+                        "protein": feed.protein,
+                        "fat": feed.fat,
+                        "carbohydrate": feed.carbohydrate
+                    }
+                }
+            )
+        
         # 計算每日所需的飼料克數
         daily_feed_grams = (daily_energy_need / feed_energy_per_100g) * 100
+        
+        # 計算結果合理性檢查
+        warnings = []
+        
+        # 檢查計算出的飼料量是否在合理範圍內
+        if daily_feed_grams < 10:
+            warnings.append("計算出的飼料量過少，請確認寵物信息是否正確")
+        elif daily_feed_grams > 1000:
+            warnings.append("計算出的飼料量過大，可能超出寵物實際需要")
+            
+        # 檢查能量是否足夠寵物需求
+        energy_per_gram = feed_energy_per_100g / 100
+        max_reasonable_amount = 0
+        
+        if pet_type == 'dog':
+            max_reasonable_amount = pet_weight * 30  # 假設狗狗最多吃自身體重30%的飼料
+        else:  # cat
+            max_reasonable_amount = pet_weight * 20  # 假設貓咪最多吃自身體重20%的飼料
+            
+        if daily_feed_grams > max_reasonable_amount:
+            warnings.append(f"計算出的飼料量可能超出寵物可接受範圍，建議諮詢獸醫")
         
         # 計算每日營養攝入
         daily_nutrition = {
@@ -252,9 +350,27 @@ class FeedNutritionCalculatorAPIView(APIView):
             }
         }
         
+        # 添加計算結果的警告信息
+        if warnings:
+            result['calculation_warnings'] = warnings
+        
         # 如果處理狀態有警告，添加警告信息
         if feed.processing_status == 'completed_with_warnings':
-            result['warning'] = feed.processing_error
+            result['feed_warnings'] = feed.processing_error
+        
+        # 記錄計算結果
+        logger.info(
+            f"用戶 {request.user.id} 計算了飼料 ID {feed.id} 的營養需求", 
+            extra={
+                'user_id': request.user.id,
+                'feed_id': feed.id,
+                'pet_type': pet_type,
+                'pet_weight': pet_weight,
+                'pet_stage': pet_stage,
+                'daily_feed_grams': daily_feed_grams,
+                'has_warnings': bool(warnings)
+            }
+        )
         
         return APIResponse(
             message="營養計算完成",
@@ -283,111 +399,121 @@ def extract_nutrition_info_for_chinese(text):
 #新增飼料
 class UploadFeedAPIView(APIView):
     permission_classes = [IsAuthenticated]
+    throttle_classes = [FeedUploadRateThrottle]
     
     @swagger_auto_schema(
-        operation_summary="上傳飼料信息",
-        operation_description="上傳飼料的基本信息、正面圖和營養成分圖",
+        operation_summary="上傳飼料資訊",
+        operation_description="上傳飼料圖片和名稱",
+        request_body=UploadFeedSerializer,
         responses={
-            201: openapi.Response(description="飼料信息上傳成功"),
-            400: openapi.Response(description="參數無效"),
-            500: openapi.Response(description="服務器錯誤")
+            200: openapi.Response(
+                description="成功上傳並開始處理",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'code': openapi.Schema(type=openapi.TYPE_INTEGER, example=200),
+                        'message': openapi.Schema(type=openapi.TYPE_STRING, example="飼料上傳成功"),
+                        'data': openapi.Schema(
+                            type=openapi.TYPE_OBJECT,
+                            properties={
+                                'feed_id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                                'name': openapi.Schema(type=openapi.TYPE_STRING)
+                            }
+                        )
+                    }
+                )
+            ),
+            400: openapi.Response(description="無效的請求數據"),
+            429: openapi.Response(description="上傳頻率超過限制")
         }
     )
     @log_queries
     def post(self, request):
         """
-        上傳飼料信息，包括飼料正面圖和營養成分圖，提取營養信息
+        上傳飼料信息
+        
+        接收飼料前面和營養成分表的圖片以及飼料名稱，進行處理和保存。
         """
         serializer = UploadFeedSerializer(data=request.data)
+        
         if not serializer.is_valid():
-            raise ValidationError(serializer.errors)
+            return APIResponse(
+                code=ErrorCodes.VALIDATION_ERROR,
+                message="上傳數據驗證失敗",
+                data={"errors": serializer.errors},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         try:
             with transaction.atomic():
                 # 創建飼料記錄
                 feed = Feed.objects.create(
-                    name=serializer.validated_data['name'],
-                    # 初始化營養信息為0，以後由OCR更新
-                    protein=0, fat=0, calcium=0, 
-                    phosphorus=0, magnesium=0, sodium=0, carbohydrate=0,
-                    # 添加處理狀態字段
-                    processing_status='pending',
-                    processing_error=''
-                )
-
-                # 儲存飼料正面圖片
-                front_image = request.FILES['front_image']
-                front_img = Image.objects.create(
-                    content_type=ContentType.objects.get_for_model(Feed),
-                    object_id=feed.id,
-                    img_url=front_image,
-                    sort_order=1,
-                    alt_text=f"{feed.name} - 正面圖"
-                )
-
-                # 儲存營養成分圖片
-                nutrition_image = request.FILES['nutrition_image']
-                nutrition_img = Image.objects.create(
-                    content_type=ContentType.objects.get_for_model(Feed),
-                    object_id=feed.id,
-                    img_url=nutrition_image,
-                    sort_order=2,
-                    alt_text=f"{feed.name} - 營養成分圖"
-                )
-
-                # 將營養圖片保存到臨時文件以進行異步處理
-                with tempfile.NamedTemporaryFile(delete=False, suffix='.jpg') as temp_file:
-                    nutrition_image.seek(0)
-                    temp_file.write(nutrition_image.read())
-                    temp_path = temp_file.name
-
-                # 添加用户最近使用的飼料記錄
-                UserFeed.objects.update_or_create(
                     user=request.user,
-                    feed=feed,
-                    defaults={'last_used': timezone.now()}
+                    name=serializer.validated_data['name'],
+                    processing_status='pending'
                 )
                 
-                # 清除任何可能存在的舊緩存
-                ImageService.invalidate_image_cache(feed.id, Feed)
-                
-                # 啟動非同步任務進行OCR處理
-                from feeds.tasks import process_feed_ocr
-                process_feed_ocr.delay(
-                    feed_id=feed.id,
-                    nutrition_image_temp_path=temp_path,
-                    front_image_id=front_img.id,
-                    nutrition_image_id=nutrition_img.id
+                # 保存前面圖片
+                front_image = serializer.validated_data['front_image']
+                front_image_obj = ImageService.save_image(
+                    image_file=front_image,
+                    owner=request.user,
+                    content_type=ContentType.objects.get_for_model(Feed),
+                    object_id=feed.id,
+                    image_type='feed_front'
                 )
-
-                # 獲取圖片 URL
-                front_image_url = front_img.img_url.url if hasattr(front_img.img_url, 'url') else None
-                nutrition_image_url = nutrition_img.img_url.url if hasattr(nutrition_img.img_url, 'url') else None
-
-                return APIResponse(
-                    code=201,
-                    message="飼料信息上傳成功，正在處理中",
-                    data={
-                        "feed_id": feed.id,
-                        "name": feed.name,
-                        "front_image_url": front_image_url,
-                        "nutrition_image_url": nutrition_image_url,
-                        "processing_status": feed.processing_status
+                
+                # 保存營養成分圖片
+                nutrition_image = serializer.validated_data['nutrition_image']
+                nutrition_image_obj = ImageService.save_image(
+                    image_file=nutrition_image, 
+                    owner=request.user,
+                    content_type=ContentType.objects.get_for_model(Feed),
+                    object_id=feed.id,
+                    image_type='feed_nutrition'
+                )
+                
+                # 設置關聯圖片
+                feed.front_image = front_image_obj
+                feed.nutrition_image = nutrition_image_obj
+                feed.save()
+                
+                # 啟動異步OCR處理任務
+                process_feed_ocr.delay(feed.id)
+                
+                logger.info(
+                    f"用戶 {request.user.id} 成功上傳飼料 '{feed.name}'", 
+                    extra={
+                        'user_id': request.user.id, 
+                        'feed_id': feed.id
                     }
                 )
-
+                
+                return APIResponse(
+                    message="飼料上傳成功，開始進行營養信息處理",
+                    data={
+                        "feed_id": feed.id,
+                        "name": feed.name
+                    }
+                )
+                
         except Exception as e:
-            logger.error(f"上傳飼料信息時發生錯誤: {str(e)}", exc_info=True)
-            # 如果發生錯誤，將自動回滾事務
+            logger.error(
+                f"處理飼料上傳時出錯: {str(e)}", 
+                exc_info=True,
+                extra={'user_id': request.user.id if request.user.is_authenticated else None}
+            )
             return APIResponse(
-                code=500, 
-                message=f"上傳飼料信息失敗: {str(e)}"
+                code=ErrorCodes.SERVER_ERROR,
+                message="處理飼料上傳時發生錯誤",
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
 #顯示最近使用飼料
 class RecentUsedFeedsAPIView(APIView):
     permission_classes = [IsAuthenticated]
     pagination_class = StandardResultsSetPagination
+    throttle_classes = [BurstRateThrottle]
     
     @swagger_auto_schema(
         operation_summary="獲取最近使用的飼料",
@@ -464,56 +590,296 @@ class RecentUsedFeedsAPIView(APIView):
             return APIResponse(code=500, message=f"獲取飼料列表時發生錯誤: {str(e)}")
 
 #檢查飼料處理狀態
-class FeedProcessingStatusAPIView(APIView):
+class FeedStatusAPIView(APIView):
     permission_classes = [IsAuthenticated]
     
     @swagger_auto_schema(
         operation_summary="獲取飼料處理狀態",
-        operation_description="獲取指定飼料的處理狀態和結果",
+        operation_description="查詢指定飼料ID的處理狀態和進度",
         responses={
-            200: openapi.Response(description="成功獲取飼料處理狀態"),
-            403: openapi.Response(description="無權訪問"),
-            404: openapi.Response(description="飼料不存在")
+            200: openapi.Response(
+                description="成功獲取處理狀態",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'code': openapi.Schema(type=openapi.TYPE_INTEGER, example=200),
+                        'message': openapi.Schema(type=openapi.TYPE_STRING, example="獲取處理狀態成功"),
+                        'data': openapi.Schema(
+                            type=openapi.TYPE_OBJECT,
+                            properties={
+                                'feed_id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                                'name': openapi.Schema(type=openapi.TYPE_STRING),
+                                'processing_status': openapi.Schema(type=openapi.TYPE_STRING, 
+                                    description="pending, processing, completed, completed_with_warnings, failed"),
+                                'processing_error': openapi.Schema(type=openapi.TYPE_STRING),
+                                'last_updated': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATETIME)
+                            }
+                        )
+                    }
+                )
+            ),
+            404: openapi.Response(description="飼料未找到"),
+            403: openapi.Response(description="無權訪問該飼料信息")
         }
     )
     @log_queries
     def get(self, request, feed_id):
         """
-        獲取指定飼料的處理狀態
+        獲取飼料處理狀態
         
-        檢查飼料營養信息提取的處理狀態，包括處理進度、結果或錯誤信息
+        查詢指定飼料的營養數據處理狀態和進度信息
         """
         try:
-            # 獲取飼料對象
+            # 獲取飼料記錄
             feed = Feed.objects.get(id=feed_id)
             
-            # 檢查當前用戶是否有權訪問此飼料
-            is_owner = UserFeed.objects.filter(user=request.user, feed=feed).exists()
-            if not is_owner:
-                return APIResponse(code=403, message="您無權訪問此飼料的處理狀態")
+            # 權限檢查：只能查看自己的飼料
+            if feed.user != request.user:
+                return APIResponse(
+                    code=ErrorCodes.PERMISSION_DENIED,
+                    message="你沒有權限查看此飼料信息",
+                    status=status.HTTP_403_FORBIDDEN
+                )
             
-            # 使用序列化器獲取基本處理狀態
-            status_serializer = FeedStatusSerializer(feed)
-            response_data = status_serializer.data
-            
-            # 如果處理完成，添加營養信息
-            if feed.processing_status in ['completed', 'completed_with_warnings']:
-                # 使用完整序列化器獲取詳細信息
-                feed_serializer = FeedSerializer(feed)
-                response_data.update({"nutrition_info": feed_serializer.data})
-                
-                # 獲取飼料的圖片 URL
-                front_image_url, nutrition_image_url = ImageService.get_feed_image_urls(feed.id)
-                response_data['front_image_url'] = front_image_url
-                response_data['nutrition_image_url'] = nutrition_image_url
+            # 序列化狀態數據
+            serializer = FeedStatusSerializer(feed)
             
             return APIResponse(
-                message="獲取飼料處理狀態成功",
-                data=response_data
+                message="獲取處理狀態成功",
+                data=serializer.data
             )
             
         except Feed.DoesNotExist:
-            return APIResponse(code=404, message="飼料不存在")
+            return APIResponse(
+                code=ErrorCodes.RESOURCE_NOT_FOUND,
+                message=f"找不到ID為 {feed_id} 的飼料",
+                status=status.HTTP_404_NOT_FOUND
+            )
         except Exception as e:
-            logger.error(f"獲取飼料處理狀態時發生錯誤: {str(e)}", exc_info=True)
-            return APIResponse(code=500, message=f"獲取飼料處理狀態時發生錯誤: {str(e)}")
+            logger.error(
+                f"獲取飼料處理狀態時出錯: {str(e)}", 
+                exc_info=True,
+                extra={'user_id': request.user.id, 'feed_id': feed_id}
+            )
+            return APIResponse(
+                code=ErrorCodes.SERVER_ERROR,
+                message="獲取飼料處理狀態時發生錯誤",
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+class UserFeedsAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    pagination_class = StandardResultsSetPagination
+    
+    @swagger_auto_schema(
+        operation_summary="獲取用戶的飼料列表",
+        operation_description="返回用戶上傳的飼料列表，以及處理狀態",
+        manual_parameters=[
+            openapi.Parameter(
+                name='page', in_=openapi.IN_QUERY,
+                description='頁碼',
+                type=openapi.TYPE_INTEGER
+            ),
+            openapi.Parameter(
+                name='page_size', in_=openapi.IN_QUERY,
+                description='每頁數量',
+                type=openapi.TYPE_INTEGER
+            ),
+            openapi.Parameter(
+                name='status', in_=openapi.IN_QUERY,
+                description='過濾狀態: pending, processing, completed, completed_with_warnings, failed',
+                type=openapi.TYPE_STRING
+            ),
+            openapi.Parameter(
+                name='search', in_=openapi.IN_QUERY, 
+                description='搜索飼料名稱',
+                type=openapi.TYPE_STRING
+            )
+        ],
+        responses={
+            200: openapi.Response(
+                description="飼料列表獲取成功",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'code': openapi.Schema(type=openapi.TYPE_INTEGER, example=200),
+                        'message': openapi.Schema(type=openapi.TYPE_STRING, example="獲取飼料列表成功"),
+                        'data': openapi.Schema(
+                            type=openapi.TYPE_OBJECT,
+                            properties={
+                                'count': openapi.Schema(type=openapi.TYPE_INTEGER),
+                                'next': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_URI),
+                                'previous': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_URI),
+                                'results': openapi.Schema(
+                                    type=openapi.TYPE_ARRAY,
+                                    items=openapi.Schema(type=openapi.TYPE_OBJECT)
+                                )
+                            }
+                        )
+                    }
+                )
+            ),
+            400: openapi.Response(description="參數無效")
+        }
+    )
+    @log_queries
+    def get(self, request):
+        """
+        獲取用戶的飼料列表
+        
+        返回用戶上傳的飼料列表，支持分頁、狀態過濾和名稱搜索
+        """
+        # 獲取分頁器
+        paginator = self.pagination_class()
+        
+        # 獲取查詢參數
+        status_filter = request.query_params.get('status', None)
+        search_query = request.query_params.get('search', None)
+        
+        # 基礎查詢集
+        queryset = Feed.objects.filter(user=request.user)
+        
+        # 優化查詢性能：預先獲取關聯圖片，減少數據庫請求
+        queryset = queryset.prefetch_related(
+            Prefetch('images', 
+                     queryset=Image.objects.filter(
+                         content_type=ContentType.objects.get_for_model(Feed)
+                     ),
+                     to_attr='prefetched_images'
+                    )
+        ).order_by('-created_at')
+        
+        # 應用狀態過濾
+        if status_filter:
+            if status_filter not in ['pending', 'processing', 'completed', 'completed_with_warnings', 'failed']:
+                return APIResponse(
+                    code=ErrorCodes.INVALID_PARAMETERS,
+                    message="無效的狀態過濾參數",
+                    data={"valid_status": ['pending', 'processing', 'completed', 'completed_with_warnings', 'failed']},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            queryset = queryset.filter(processing_status=status_filter)
+        
+        # 應用搜索過濾
+        if search_query:
+            queryset = queryset.filter(name__icontains=search_query)
+        
+        # 執行分頁
+        page = paginator.paginate_queryset(queryset, request, view=self)
+        if page is None:
+            return APIResponse(
+                code=ErrorCodes.RESOURCE_NOT_FOUND,
+                message="指定的頁碼超出範圍",
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # 序列化
+        serializer = FeedSerializer(page, many=True, context={'request': request})
+        
+        logger.info(
+            f"用戶 {request.user.id} 獲取了飼料列表", 
+            extra={
+                'user_id': request.user.id,
+                'status_filter': status_filter,
+                'search_query': search_query,
+                'count': len(page)
+            }
+        )
+        
+        # 返回結果
+        return APIResponse(
+            message="獲取飼料列表成功",
+            data=paginator.get_paginated_response(serializer.data).data
+        )
+
+class FeedDetailAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    @swagger_auto_schema(
+        operation_summary="獲取飼料詳情",
+        operation_description="根據ID獲取飼料的詳細信息，包括營養成分和處理狀態",
+        responses={
+            200: openapi.Response(
+                description="成功獲取飼料詳情",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'code': openapi.Schema(type=openapi.TYPE_INTEGER, example=200),
+                        'message': openapi.Schema(type=openapi.TYPE_STRING, example="獲取飼料詳情成功"),
+                        'data': openapi.Schema(
+                            type=openapi.TYPE_OBJECT,
+                            properties={
+                                'id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                                'name': openapi.Schema(type=openapi.TYPE_STRING),
+                                'processing_status': openapi.Schema(type=openapi.TYPE_STRING),
+                                'protein': openapi.Schema(type=openapi.TYPE_NUMBER),
+                                'fat': openapi.Schema(type=openapi.TYPE_NUMBER),
+                                'images': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(type=openapi.TYPE_OBJECT))
+                            }
+                        )
+                    }
+                )
+            ),
+            404: openapi.Response(description="飼料未找到"),
+            403: openapi.Response(description="無權訪問該飼料信息")
+        }
+    )
+    @log_queries
+    def get(self, request, feed_id):
+        """
+        根據ID獲取飼料詳細信息
+        
+        返回指定ID的飼料完整信息，包括營養成分數據和關聯圖片
+        """
+        try:
+            # 獲取飼料信息
+            feed = Feed.objects.get(id=feed_id)
+            
+            # 權限檢查：只能查看自己的飼料信息
+            if feed.user != request.user:
+                return APIResponse(
+                    code=ErrorCodes.PERMISSION_DENIED,
+                    message="你沒有權限查看此飼料信息",
+                    status=status.HTTP_403_FORBIDDEN
+                )
+            
+            # 序列化飼料數據
+            serializer = FeedSerializer(feed, context={'request': request})
+            
+            # 添加用户最近查看記錄
+            UserFeed.objects.update_or_create(
+                user=request.user,
+                feed=feed,
+                defaults={'last_used': timezone.now()}
+            )
+            
+            logger.info(
+                f"用戶 {request.user.id} 查看了飼料 ID {feed_id} 的詳情", 
+                extra={
+                    'user_id': request.user.id,
+                    'feed_id': feed_id
+                }
+            )
+            
+            return APIResponse(
+                message="獲取飼料詳情成功",
+                data=serializer.data
+            )
+            
+        except Feed.DoesNotExist:
+            return APIResponse(
+                code=ErrorCodes.RESOURCE_NOT_FOUND,
+                message=f"找不到ID為 {feed_id} 的飼料",
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            logger.error(
+                f"獲取飼料詳情時出錯: {str(e)}", 
+                exc_info=True,
+                extra={'user_id': request.user.id, 'feed_id': feed_id}
+            )
+            return APIResponse(
+                code=ErrorCodes.SERVER_ERROR,
+                message="獲取飼料詳情時發生錯誤",
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
