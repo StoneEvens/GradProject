@@ -14,7 +14,13 @@ import easyocr
 from PIL import Image as PilImage
 from io import BytesIO
 from utils.api_response import APIResponse
-from utils.query_optimization import log_queries
+from utils.decorators import log_queries
+import os
+import tempfile
+from django.db import transaction
+from django.contrib.contenttypes.models import ContentType
+from .serializers import UploadFeedSerializer
+from .tasks import process_feed_ocr
 
 #建立選擇的寵物資料
 class GeneratePetInfoAPIView(APIView):
@@ -195,73 +201,112 @@ def extract_nutrition_info_for_chinese(text):
             extracted[key] = float(match.group(1))
     return extracted
 
-# !圖片儲存位置待處理
 #新增飼料
 class UploadFeedAPIView(APIView):
     permission_classes = [IsAuthenticated]
     
     @log_queries
     def post(self, request):
-        feed_name = request.data.get('feed_name')
-        front_image_file = request.FILES.get('front_image')
-        nutrition_image_file = request.FILES.get('nutrition_image')
-
-        if not all([feed_name, front_image_file, nutrition_image_file]):
+        # 使用序列化器驗證輸入數據
+        serializer = UploadFeedSerializer(data=request.data)
+        if not serializer.is_valid():
+            # 組合所有錯誤信息
+            error_messages = []
+            for field, errors in serializer.errors.items():
+                error_messages.append(f"{field}: {', '.join(str(error) for error in errors)}")
+            
             return APIResponse(
-                message="feed_name, front_image and nutrition_image are required.",
+                message="; ".join(error_messages),
                 code=status.HTTP_400_BAD_REQUEST,
                 status=status.HTTP_400_BAD_REQUEST
             )
-
-        # 1. 儲存正面產品照片
-        front_image = Image.objects.create(img_url=front_image_file)
-
-        # 2. 使用 EasyOCR 辨識成分表
+        
+        # 獲取驗證後的數據
+        feed_name = serializer.validated_data['feed_name']
+        front_image_file = serializer.validated_data['front_image']
+        nutrition_image_file = serializer.validated_data['nutrition_image']
+        
         try:
-            reader = easyocr.Reader(['ch_tra', 'en'])
-            image_bytes = nutrition_image_file.read()
-            img = PilImage.open(BytesIO(image_bytes)).convert("RGB")
-            result_lines = reader.readtext(image_bytes, detail=0)
-            ocr_text = "\n".join(result_lines)
+            with transaction.atomic():
+                # 1. 建立基本的 Feed 物件 (稍後會透過異步任務更新詳細資訊)
+                feed = Feed.objects.create(
+                    feed_name=feed_name,
+                    # 初始化其他字段為 0，稍後會通過異步任務更新
+                    protein=0,
+                    fat=0,
+                    calcium=0,
+                    phosphorus=0,
+                    magnesium=0,
+                    sodium=0,
+                    carbohydrate=0,
+                )
+                
+                # TODO: [雲端存儲] 這裡需要修改為使用雲端儲存服務
+                # 目前直接保存到本地，未來需要:
+                # 1. 將圖片上傳到雲端存儲服務 (如 AWS S3, Azure Blob, Google Cloud Storage)
+                # 2. 獲取並保存返回的 URL 而非文件本身
+                # 3. 考慮添加文件命名策略，例如：{user_id}/{feed_id}/{timestamp}_{type}.jpg
+                
+                # 2. 儲存正面產品照片和營養成分圖片
+                feed_content_type = ContentType.objects.get_for_model(Feed)
+                front_image = Image.objects.create(
+                    content_type=feed_content_type,
+                    object_id=feed.id,
+                    img_url=front_image_file,  # TODO: [雲端存儲] 這裡應改為雲端URL
+                    sort_order=1
+                )
+                
+                nutrition_image = Image.objects.create(
+                    content_type=feed_content_type,
+                    object_id=feed.id,
+                    img_url=nutrition_image_file,  # TODO: [雲端存儲] 這裡應改為雲端URL
+                    sort_order=2
+                )
+                
+                # 3. 保存營養成分圖片到臨時文件
+                # TODO: [雲端存儲] 雲端實現後，可能需要先從雲端下載圖片再進行處理
+                # 或直接從雲端服務獲取圖片內容進行處理
+                fd, temp_path = tempfile.mkstemp(suffix='.jpg')
+                try:
+                    # 重置文件指針
+                    nutrition_image_file.seek(0)
+                    # 寫入文件
+                    with os.fdopen(fd, 'wb') as tmp:
+                        for chunk in nutrition_image_file.chunks():
+                            tmp.write(chunk)
+                    
+                    # 4. 啟動異步任務進行 OCR 處理
+                    process_feed_ocr.delay(
+                        feed_id=feed.id,
+                        nutrition_image_temp_path=temp_path,
+                        front_image_id=front_image.id,
+                        nutrition_image_id=nutrition_image.id
+                    )
+                    
+                    return APIResponse(
+                        data={
+                            "feed_id": feed.id,
+                            "front_image_id": front_image.id,
+                            "nutrition_image_id": nutrition_image.id,
+                            "status": "processing"
+                        },
+                        message="飼料已上傳，正在後台處理營養信息",
+                        status=status.HTTP_202_ACCEPTED
+                    )
+                    
+                except Exception as e:
+                    # 確保臨時文件被刪除
+                    if os.path.exists(temp_path):
+                        os.remove(temp_path)
+                    # 重新拋出異常以觸發事務回滾
+                    raise e
+                
         except Exception as e:
             return APIResponse(
-                message=f"OCR failed: {str(e)}",
-                code=status.HTTP_400_BAD_REQUEST,
-                status=status.HTTP_400_BAD_REQUEST
+                message=f"處理上傳飼料時發生錯誤: {str(e)}",
+                code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-
-        # 3. 擷取營養成分
-        nutrition_data = extract_nutrition_info_for_chinese(ocr_text)
-
-        if not nutrition_data:
-            return APIResponse(
-                message="Failed to extract nutrition information from OCR.",
-                code=status.HTTP_400_BAD_REQUEST,
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        # 4. 建立 Feed 物件
-        feed = Feed.objects.create(
-            feed_name=feed_name,
-            protein=nutrition_data.get('protein', 0),
-            fat=nutrition_data.get('fat', 0),
-            calcium=nutrition_data.get('calcium', 0),
-            phosphorus=nutrition_data.get('phosphorus', 0),
-            magnesium=nutrition_data.get('magnesium', 0),
-            sodium=nutrition_data.get('sodium', 0),
-            carbohydrate=nutrition_data.get('carbohydrate', 0),
-        )
-
-        return APIResponse(
-            data={
-                "feed_id": feed.id,
-                "front_image_id": front_image.id,
-                "extracted_text": ocr_text,
-                "nutrition_data": nutrition_data
-            },
-            message="飼料上傳和處理成功",
-            status=status.HTTP_201_CREATED
-        )
 
 #顯示最近使用飼料
 class RecentUsedFeedsAPIView(APIView):
@@ -292,6 +337,8 @@ class RecentUsedFeedsAPIView(APIView):
         ).order_by('object_id', 'sort_order')
         
         # 將圖片按 feed_id 分組
+        # TODO: [雲端存儲] 圖片URL格式將改變，這裡需要相應調整
+        # 當前可能使用 image.img_url.url，但雲端實現後可能直接使用 image.img_url
         for image in images:
             if image.object_id not in feed_images:
                 feed_images[image.object_id] = image.img_url
@@ -302,10 +349,74 @@ class RecentUsedFeedsAPIView(APIView):
             result.append({
                 "feed_id": feed.id,
                 "feed_name": feed.feed_name,
-                "feed_image_url": feed_images.get(feed.id)  # 使用預先查詢的圖片
+                "feed_image_url": feed_images.get(feed.id)  # TODO: [雲端存儲] 這裡URL格式可能需要調整
             })
 
         return APIResponse(
             data=result,
             message="獲取最近使用的飼料成功"
         )
+
+#檢查飼料處理狀態
+class FeedProcessingStatusAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request, feed_id):
+        """
+        檢查飼料 OCR 處理的狀態
+        """
+        try:
+            feed = Feed.objects.get(id=feed_id)
+            
+            # 檢查飼料是否已完成處理
+            if feed.protein > 0 or feed.fat > 0:  # 簡單判斷是否已處理
+                status_code = "completed"
+            else:
+                status_code = "processing"
+                
+            # 獲取飼料的圖片
+            feed_content_type = ContentType.objects.get_for_model(Feed)
+            images = Image.objects.filter(
+                content_type=feed_content_type,
+                object_id=feed.id
+            ).order_by('sort_order')
+            
+            # 構建響應數據
+            # TODO: [雲端存儲] 圖片URL格式將改變，這裡需要相應調整
+            # 當前使用 img.img_url.url，但雲端實現後可能直接使用 img.img_url
+            data = {
+                "feed_id": feed.id,
+                "feed_name": feed.feed_name,
+                "status": status_code,
+                "images": [{"id": img.id, "url": img.img_url.url if img.img_url else None} for img in images],
+            }
+            
+            # 如果處理已完成，添加營養信息
+            if status_code == "completed":
+                data.update({
+                    "protein": feed.protein,
+                    "fat": feed.fat,
+                    "calcium": feed.calcium,
+                    "phosphorus": feed.phosphorus,
+                    "magnesium": feed.magnesium,
+                    "sodium": feed.sodium,
+                    "carbohydrate": feed.carbohydrate,
+                })
+                
+            return APIResponse(
+                data=data,
+                message="獲取飼料處理狀態成功"
+            )
+            
+        except Feed.DoesNotExist:
+            return APIResponse(
+                message="指定的飼料不存在",
+                code=status.HTTP_404_NOT_FOUND,
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return APIResponse(
+                message=f"檢查飼料處理狀態時發生錯誤: {str(e)}",
+                code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

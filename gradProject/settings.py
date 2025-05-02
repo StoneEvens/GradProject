@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_celery_results',  # Celery results backend
     "accounts",
     "pets",
     "social",
@@ -50,7 +51,6 @@ INSTALLED_APPS = [
     "interactions",
     "comments",
     "media",
-
 ]
 
 MIDDLEWARE = [
@@ -185,3 +185,61 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Celery Settings
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'django-db'
+CELERY_CACHE_BACKEND = 'django-cache'
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = TIME_ZONE
+
+# 設置 Celery 任務的默認隊列
+CELERY_TASK_DEFAULT_QUEUE = 'default'
+
+# 設置 Celery 任務的默認交換
+CELERY_TASK_DEFAULT_EXCHANGE = 'default'
+
+# 設置 Celery 任務的默認路由鍵
+CELERY_TASK_DEFAULT_ROUTING_KEY = 'default'
+
+# 設置 Celery 結果過期時間（秒）
+CELERY_RESULT_EXPIRES = 60 * 60 * 24  # 24 小時
+
+# TODO: [雲端存儲] 雲端存儲服務配置
+# 這些設置將在雲端存儲服務準備好後使用
+# 根據實際使用的服務提供商進行配置
+CLOUD_STORAGE = {
+    'PROVIDER': 'S3',  # 可選值: 'S3', 'AZURE', 'GCP'
+    
+    # AWS S3 配置
+    'S3': {
+        'BUCKET_NAME': 'pet-feed-images',
+        'REGION': 'ap-northeast-1',
+        'ACCESS_KEY_ID': '',  # 填入您的 AWS Access Key ID
+        'SECRET_ACCESS_KEY': '',  # 填入您的 AWS Secret Access Key
+        'ENDPOINT_URL': None,  # 如果使用自定義 S3 兼容服務，填入端點 URL
+    },
+    
+    # Azure Blob Storage 配置
+    'AZURE': {
+        'ACCOUNT_NAME': '',
+        'ACCOUNT_KEY': '',
+        'CONTAINER_NAME': 'pet-feed-images',
+    },
+    
+    # Google Cloud Storage 配置
+    'GCP': {
+        'BUCKET_NAME': 'pet-feed-images',
+        'PROJECT_ID': '',
+        'CREDENTIALS_FILE': '',  # 服務帳戶密鑰文件的路徑
+    },
+    
+    # 通用配置
+    'BASE_URL': '',  # 如果有 CDN 或自定義域名可以配置
+    'MAX_UPLOAD_SIZE': 5 * 1024 * 1024,  # 5MB
+    'ALLOWED_EXTENSIONS': ['jpg', 'jpeg', 'png', 'webp'],
+    'USE_SECURE_URL': True,  # 是否使用 HTTPS
+    'TIMEOUT': 60,  # 上傳/下載超時（秒）
+}

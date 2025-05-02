@@ -12,6 +12,7 @@ class Feed(models.Model):
     magnesium = models.FloatField(help_text="鎂 (mg/100g)")
     sodium = models.FloatField(help_text="鈉 (mg/100g)")
     carbohydrate = models.FloatField(help_text="碳水化合物 (g/100g)")  # 計算ME會用到
+    extracted_text = models.TextField(blank=True, null=True, help_text="OCR 提取的原始文本")
 
     def __str__(self):
         return self.feed_name
