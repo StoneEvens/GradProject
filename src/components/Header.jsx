@@ -10,7 +10,7 @@ function Header({ showSearchBar }) {
   return (
     <form className="header">
       <div className="header-buttons">
-        <button className="header-icon" onClick={() => navigate('/Home')}>
+        <button className="header-icon" onClick={() => navigate('/home')}>
           <img src={homePageIcon} alt="首頁" />
         </button>
         {showSearchBar && (
