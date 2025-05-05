@@ -20,7 +20,7 @@ import tempfile
 import logging
 from django.db import transaction
 from django.contrib.contenttypes.models import ContentType
-from .serializers import UploadFeedSerializer, NutritionCalculatorRequestSerializer, FeedStatusSerializer, FeedSerializer
+from .serializers import UploadFeedSerializer, NutritionCalculatorRequestSerializer, FeedStatusSerializer, FeedSerializer, PetFeedSerializer, PetFeedCreateSerializer
 from .tasks import process_feed_ocr
 from django.core.exceptions import ValidationError
 from django.http import Http404
@@ -198,6 +198,24 @@ class FeedNutritionCalculatorAPIView(APIView):
                 feed=feed,
                 defaults={'last_used': timezone.now()}
             )
+            
+            # 如果提供了寵物ID，則記錄寵物的飼料使用
+            pet_id = pet_info.get('pet_id')
+            if pet_id:
+                try:
+                    pet = Pet.objects.get(id=pet_id, owner=request.user)
+                    # 更新寵物的飼料使用記錄
+                    PetFeed.objects.update_or_create(
+                        pet=pet,
+                        feed=feed,
+                        defaults={
+                            'last_used': timezone.now(),
+                            'is_current': True  # 設為當前使用的飼料
+                        }
+                    )
+                except Pet.DoesNotExist:
+                    # 寵物不存在或不屬於當前用戶，忽略這部分處理但繼續計算
+                    pass
             
         except Feed.DoesNotExist:
             return APIResponse(
@@ -882,4 +900,155 @@ class FeedDetailAPIView(APIView):
                 code=ErrorCodes.SERVER_ERROR,
                 message="獲取飼料詳情時發生錯誤",
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+# === 寵物飼料 API ===
+class PetFeedAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    @swagger_auto_schema(
+        operation_summary="獲取寵物的飼料記錄",
+        operation_description="返回特定寵物的飼料使用記錄",
+        responses={
+            200: openapi.Response(description="成功獲取寵物飼料記錄"),
+            404: openapi.Response(description="寵物不存在或不屬於當前用戶")
+        }
+    )
+    @log_queries
+    def get(self, request, pet_id):
+        """
+        獲取特定寵物的飼料使用記錄
+        """
+        try:
+            # 確認寵物存在且屬於當前用戶
+            pet = Pet.objects.get(id=pet_id, owner=request.user)
+            
+            # 獲取寵物的飼料記錄，按最近使用時間排序
+            pet_feeds = PetFeed.objects.filter(pet=pet).select_related('feed').order_by('-last_used')
+            
+            # 序列化數據
+            serializer = PetFeedSerializer(pet_feeds, many=True)
+            
+            return APIResponse(
+                data=serializer.data,
+                message="獲取寵物飼料記錄成功"
+            )
+            
+        except Pet.DoesNotExist:
+            return APIResponse(
+                status=status.HTTP_404_NOT_FOUND,
+                message="寵物不存在或不屬於當前用戶",
+                errors={"pet_id": "寵物不存在或不屬於您"}
+            )
+    
+    @swagger_auto_schema(
+        operation_summary="為寵物添加飼料記錄",
+        operation_description="為特定寵物添加或更新飼料使用記錄",
+        request_body=PetFeedCreateSerializer,
+        responses={
+            201: openapi.Response(description="成功添加飼料記錄"),
+            400: openapi.Response(description="請求數據無效"),
+            404: openapi.Response(description="寵物或飼料不存在")
+        }
+    )
+    @log_queries
+    @transaction.atomic
+    def post(self, request, pet_id):
+        """
+        為特定寵物添加飼料使用記錄
+        """
+        try:
+            # 確認寵物存在且屬於當前用戶
+            pet = Pet.objects.get(id=pet_id, owner=request.user)
+            
+            # 添加寵物ID到請求數據
+            data = request.data.copy()
+            data['pet'] = pet_id
+            
+            # 使用序列化器驗證請求數據
+            serializer = PetFeedCreateSerializer(data=data, context={'request': request})
+            if not serializer.is_valid():
+                return APIResponse(
+                    status=status.HTTP_400_BAD_REQUEST,
+                    message="請求數據無效",
+                    errors=serializer.errors
+                )
+            
+            # 保存寵物飼料記錄
+            pet_feed = serializer.save()
+            
+            # 返回新創建的記錄
+            response_serializer = PetFeedSerializer(pet_feed)
+            
+            return APIResponse(
+                status=status.HTTP_201_CREATED,
+                data=response_serializer.data,
+                message="寵物飼料記錄添加成功"
+            )
+            
+        except Pet.DoesNotExist:
+            return APIResponse(
+                status=status.HTTP_404_NOT_FOUND,
+                message="寵物不存在或不屬於當前用戶",
+                errors={"pet_id": "寵物不存在或不屬於您"}
+            )
+        except Feed.DoesNotExist:
+            return APIResponse(
+                status=status.HTTP_404_NOT_FOUND,
+                message="飼料不存在",
+                errors={"feed": "飼料不存在"}
+            )
+
+# === 寵物當前飼料 API ===
+class PetCurrentFeedAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    @swagger_auto_schema(
+        operation_summary="獲取寵物當前使用的飼料",
+        operation_description="返回特定寵物當前使用的飼料記錄",
+        responses={
+            200: openapi.Response(description="成功獲取寵物當前飼料"),
+            404: openapi.Response(description="寵物不存在或無當前飼料記錄")
+        }
+    )
+    @log_queries
+    def get(self, request, pet_id):
+        """
+        獲取特定寵物當前使用的飼料
+        """
+        try:
+            # 確認寵物存在且屬於當前用戶
+            pet = Pet.objects.get(id=pet_id, owner=request.user)
+            
+            # 獲取寵物當前使用的飼料
+            try:
+                current_feed = PetFeed.objects.filter(pet=pet, is_current=True).select_related('feed').first()
+                
+                if not current_feed:
+                    return APIResponse(
+                        status=status.HTTP_404_NOT_FOUND,
+                        message="寵物沒有設置當前使用的飼料",
+                        errors={"pet_id": "未找到當前飼料記錄"}
+                    )
+                
+                # 序列化數據
+                serializer = PetFeedSerializer(current_feed)
+                
+                return APIResponse(
+                    data=serializer.data,
+                    message="獲取寵物當前飼料成功"
+                )
+                
+            except PetFeed.DoesNotExist:
+                return APIResponse(
+                    status=status.HTTP_404_NOT_FOUND,
+                    message="寵物沒有設置當前使用的飼料",
+                    errors={"pet_id": "未找到當前飼料記錄"}
+                )
+            
+        except Pet.DoesNotExist:
+            return APIResponse(
+                status=status.HTTP_404_NOT_FOUND,
+                message="寵物不存在或不屬於當前用戶",
+                errors={"pet_id": "寵物不存在或不屬於您"}
             )

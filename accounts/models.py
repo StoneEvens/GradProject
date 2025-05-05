@@ -51,17 +51,55 @@ class UserBlock(models.Model):
     def __str__(self):
         return f"{self.blocker.username} blocked {self.blocked.username}"
 
+# 任務條件類型
+class MissionCondition(models.Model):
+    CONDITION_TYPE_CHOICES = [
+        ('post', '發布貼文'),
+        ('comment', '評論'),
+        ('login', '登入'),
+        ('follow', '追蹤用戶'),
+        ('profile', '完善個人資料'),
+        ('archive', '建立病歷檔案'),
+        ('like', '點讚'),
+        ('visit', '訪問頁面'),
+        ('read', '閱讀文章'),
+        ('custom', '自定義條件')
+    ]
+    
+    type = models.CharField(max_length=20, choices=CONDITION_TYPE_CHOICES)
+    name = models.CharField(max_length=100)
+    description = models.TextField()
+    target_count = models.IntegerField(default=1)  # 目標次數，例如發布3篇文章
+    target_entity = models.CharField(max_length=100, blank=True, null=True)  # 目標實體，例如特定頁面ID
+    custom_validation_code = models.TextField(blank=True, null=True)  # 自定義驗證代碼或邏輯描述
+    
+    def __str__(self):
+        return f"{self.name} ({self.type})"
+
 # 每日任務
 class Mission(models.Model):
+    MISSION_LEVEL_CHOICES = [
+        ('low', '初級任務 (0-300分)'),
+        ('high', '高級任務 (301-500分)')
+    ]
+    
     mission_name = models.CharField(max_length=100)
     description = models.TextField()
     point = models.IntegerField()
-
+    level = models.CharField(max_length=10, choices=MISSION_LEVEL_CHOICES, default='low')
+    conditions = models.ManyToManyField(MissionCondition, related_name='missions', blank=True)
+    
     def __str__(self):
         return self.mission_name
 
 # 使用者與每日任務關聯
 class UserMission(models.Model):
+    STATUS_CHOICES = [
+        ('pending', '進行中'),
+        ('completed', '已完成'),
+        ('expired', '已過期')
+    ]
+    
     mission = models.ForeignKey(
         Mission,
         on_delete=models.CASCADE,
@@ -73,13 +111,42 @@ class UserMission(models.Model):
         related_name='missions'
     )
     due = models.DateField()
+    date_assigned = models.DateField(auto_now_add=True)
     date_achieved = models.DateField(null=True, blank=True)
-
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+    condition_progress = models.JSONField(default=dict, blank=True)  # 儲存每個條件的完成進度
+    
     class Meta:
         unique_together = ('mission', 'user', 'due')  
 
     def __str__(self):
         return f"{self.user.username} - {self.mission.mission_name} (Due: {self.due})" 
+
+# 使用者完成條件記錄
+class UserConditionRecord(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='condition_records'
+    )
+    condition = models.ForeignKey(
+        MissionCondition,
+        on_delete=models.CASCADE,
+        related_name='user_records'
+    )
+    user_mission = models.ForeignKey(
+        UserMission,
+        on_delete=models.CASCADE,
+        related_name='condition_records',
+        null=True,
+        blank=True
+    )
+    count = models.IntegerField(default=1)  # 完成次數
+    timestamp = models.DateTimeField(auto_now_add=True)
+    details = models.JSONField(default=dict, blank=True)  # 額外詳細資訊
+    
+    def __str__(self):
+        return f"{self.user.username} - {self.condition.name} ({self.timestamp})"
 
 # 成就
 class Achievement(models.Model):

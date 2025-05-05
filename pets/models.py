@@ -103,6 +103,63 @@ class IllnessArchive(models.Model):
 
     def __str__(self):
         return f"Archive: {self.archive_title} for {self.pet.pet_name}"
+        
+    def get_interaction_stats(self):
+        """
+        獲取疾病檔案的互動統計
+        """
+        from interactions.models import UserInteraction
+        
+        archive_type = ContentType.objects.get_for_model(IllnessArchive)
+        
+        upvotes = UserInteraction.objects.filter(
+            content_type=archive_type,
+            object_id=self.id,
+            relation='upvoted'
+        ).count()
+        
+        downvotes = UserInteraction.objects.filter(
+            content_type=archive_type,
+            object_id=self.id,
+            relation='downvoted'
+        ).count()
+        
+        saves = UserInteraction.objects.filter(
+            content_type=archive_type,
+            object_id=self.id,
+            relation='saved'
+        ).count()
+        
+        shares = UserInteraction.objects.filter(
+            content_type=archive_type,
+            object_id=self.id,
+            relation='shared'
+        ).count()
+        
+        return {
+            'upvotes': upvotes,
+            'downvotes': downvotes,
+            'saves': saves,
+            'shares': shares,
+            'total_score': upvotes - downvotes
+        }
+    
+    def check_user_interaction(self, user, relation):
+        """
+        檢查用戶是否對疾病檔案有特定互動
+        """
+        if not user or not user.is_authenticated:
+            return False
+            
+        from interactions.models import UserInteraction
+        
+        archive_type = ContentType.objects.get_for_model(IllnessArchive)
+        return UserInteraction.objects.filter(
+            user=user,
+            content_type=archive_type,
+            object_id=self.id,
+            relation=relation
+        ).exists()
 
 # 病程紀錄和異常貼文的關聯
 class ArchiveAbnormalPostRelation(models.Model):

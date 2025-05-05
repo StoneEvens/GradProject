@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Feed, UserFeed
+from .models import Feed, UserFeed, PetFeed
 from utils.file_safety import validate_image_content, MAX_FILE_SIZE, SAFE_IMAGE_MIMETYPES
 from django.core.validators import MinValueValidator, MaxValueValidator
 import re
@@ -69,6 +69,50 @@ class UserFeedSerializer(serializers.ModelSerializer):
         model = UserFeed
         fields = '__all__'
 
+# === 寵物飼料使用紀錄序列化器 ===
+class PetFeedSerializer(serializers.ModelSerializer):
+    """
+    寵物飼料使用記錄序列化器
+    """
+    feed_details = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = PetFeed
+        fields = ['id', 'pet', 'feed', 'feed_details', 'last_used', 'is_current', 'notes']
+        read_only_fields = ['last_used']
+    
+    def get_feed_details(self, obj):
+        """獲取飼料的詳細資訊"""
+        return {
+            'id': obj.feed.id,
+            'feed_name': obj.feed.feed_name,
+            'protein': obj.feed.protein,
+            'fat': obj.feed.fat,
+            'calcium': obj.feed.calcium,
+            'phosphorus': obj.feed.phosphorus
+        }
+
+# === 寵物飼料建立序列化器 ===
+class PetFeedCreateSerializer(serializers.ModelSerializer):
+    """
+    用於建立寵物飼料關聯的序列化器
+    """
+    class Meta:
+        model = PetFeed
+        fields = ['pet', 'feed', 'is_current', 'notes']
+    
+    def validate(self, data):
+        """驗證寵物和飼料關聯"""
+        pet = data.get('pet')
+        feed = data.get('feed')
+        
+        # 確認寵物屬於當前用戶
+        request = self.context.get('request')
+        if request and request.user and pet.owner != request.user:
+            raise serializers.ValidationError({"pet": "您不是此寵物的主人"})
+        
+        return data
+        
 # === 飼料上傳序列化器 ===
 class UploadFeedSerializer(serializers.Serializer):
     """

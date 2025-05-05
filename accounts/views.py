@@ -1,4 +1,4 @@
-from datetime import date, datetime, time
+from datetime import date, datetime, time, timedelta
 from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -197,3 +197,158 @@ class UserSummaryView(APIView):
         
         serializer = UserSummarySerializer(data)
         return APIResponse(data=serializer.data)
+
+# 用戶完成任務
+class CompleteMissionAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @staticmethod
+    def award_points(user_mission):
+        """
+        給用戶添加任務積分
+        
+        Args:
+            user_mission: UserMission實例
+        """
+        points_earned = user_mission.mission.point
+        user = user_mission.user
+        user.points += points_earned
+        user.save(update_fields=['points'])
+        
+        return points_earned, user.points
+
+    def post(self, request, mission_id):
+        try:
+            # 獲取用戶任務
+            user_mission = UserMission.objects.get(
+                id=mission_id,
+                user=request.user,
+                status='pending'
+            ).select_related('mission')
+            
+            # 檢查是否有條件需要滿足
+            mission_conditions = user_mission.mission.conditions.all()
+            
+            if mission_conditions.exists():
+                # 如果任務需要滿足特定條件
+                from accounts.services import MissionConditionService
+                is_completed = MissionConditionService.check_mission_completion(user_mission)
+                
+                if not is_completed:
+                    return APIResponse(
+                        message="任務條件尚未滿足，無法完成任務",
+                        code=status.HTTP_400_BAD_REQUEST,
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+                
+                # 任務已在check_mission_completion中被標記為完成並獲得積分
+                points_earned = user_mission.mission.point
+                return APIResponse(
+                    message="任務完成成功！",
+                    data={
+                        'mission_id': user_mission.id,
+                        'points_earned': points_earned,
+                        'total_points': request.user.points
+                    }
+                )
+            else:
+                # 沒有特定條件的任務，直接標記為完成
+                # 標記為已完成
+                today = date.today()
+                user_mission.status = 'completed'
+                user_mission.date_achieved = today
+                user_mission.save(update_fields=['status', 'date_achieved'])
+                
+                # 給用戶添加積分
+                points_earned, total_points = self.award_points(user_mission)
+                
+                return APIResponse(
+                    message="任務完成成功！",
+                    data={
+                        'mission_id': user_mission.id,
+                        'points_earned': points_earned,
+                        'total_points': total_points
+                    }
+                )
+            
+        except UserMission.DoesNotExist:
+            return APIResponse(
+                message="找不到指定的任務或任務已完成",
+                code=status.HTTP_404_NOT_FOUND,
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+# 獲取用戶當前所有任務
+class UserActiveMissionsAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        today = date.today()
+        
+        # 獲取用戶所有未過期的任務
+        active_missions = UserMission.objects.filter(
+            user=request.user,
+            status='pending',
+            due__gte=today
+        ).select_related('mission')
+        
+        # 序列化數據，添加額外信息
+        missions_data = []
+        for user_mission in active_missions:
+            mission = user_mission.mission
+            days_left = (user_mission.due - today).days
+            
+            missions_data.append({
+                'user_mission_id': user_mission.id,
+                'mission_id': mission.id,
+                'mission_name': mission.mission_name,
+                'description': mission.description,
+                'point': mission.point,
+                'level': mission.level,
+                'due_date': user_mission.due,
+                'days_left': days_left,
+                'status': user_mission.status
+            })
+        
+        # 按等級和獎勵點數排序
+        missions_data.sort(key=lambda x: (-1 if x['level'] == 'high' else 0, -x['point']))
+        
+        return APIResponse(
+            data=missions_data,
+            message="獲取活躍任務成功"
+        )
+
+# 獲取用戶已完成任務
+class UserCompletedMissionsAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        today = date.today()
+        
+        # 獲取用戶所有已完成的任務（最近一周內完成的）
+        one_week_ago = today - timedelta(days=7)
+        completed_missions = UserMission.objects.filter(
+            user=request.user,
+            status='completed',
+            date_achieved__gte=one_week_ago  # 只獲取一周內完成的任務
+        ).select_related('mission').order_by('-date_achieved')
+        
+        # 序列化數據
+        missions_data = []
+        for user_mission in completed_missions:
+            mission = user_mission.mission
+            missions_data.append({
+                'user_mission_id': user_mission.id,
+                'mission_id': mission.id,
+                'mission_name': mission.mission_name,
+                'description': mission.description,
+                'point': mission.point,
+                'level': mission.level,
+                'completed_date': user_mission.date_achieved,
+                'days_left': 7 - (today - user_mission.date_achieved).days  # 還有幾天會被刪除
+            })
+        
+        return APIResponse(
+            data=missions_data,
+            message="獲取已完成任務成功"
+        )

@@ -3,7 +3,9 @@ from .views import (
     FeedNutritionCalculatorAPIView, 
     UploadFeedAPIView, 
     RecentUsedFeedsAPIView,
-    FeedProcessingStatusAPIView
+    FeedStatusAPIView,
+    PetFeedAPIView,
+    PetCurrentFeedAPIView
 )
 
 # 標準化 API 路由
@@ -19,5 +21,11 @@ urlpatterns = [
     path('recent/', RecentUsedFeedsAPIView.as_view(), name='feed-recent'),
     
     # 獲取飼料處理狀態
-    path('status/<int:feed_id>/', FeedProcessingStatusAPIView.as_view(), name='feed-status'),
+    path('status/<int:feed_id>/', FeedStatusAPIView.as_view(), name='feed-status'),
+    
+    # 寵物飼料記錄
+    path('pets/<int:pet_id>/feeds/', PetFeedAPIView.as_view(), name='pet-feeds'),
+    
+    # 寵物當前使用的飼料
+    path('pets/<int:pet_id>/current-feed/', PetCurrentFeedAPIView.as_view(), name='pet-current-feed'),
 ]
