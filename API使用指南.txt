@@ -1,0 +1,1638 @@
+# 寵物APP API使用指南
+
+## 目錄
+1. [通用說明](#通用說明)
+2. [帳戶管理 (Accounts)](#帳戶管理-accounts)
+3. [寵物管理 (Pets)](#寵物管理-pets)
+4. [社交功能 (Social)](#社交功能-social)
+5. [互動功能 (Interactions)](#互動功能-interactions)
+6. [評論功能 (Comments)](#評論功能-comments)
+7. [飼料管理 (Feeds)](#飼料管理-feeds)
+8. [媒體管理 (Media)](#媒體管理-media)
+
+## 通用說明
+
+### API基礎路徑
+所有API均使用以下基礎路徑：
+```
+/api/v1/
+```
+
+### 認證機制
+本系統使用JWT (JSON Web Token) 進行認證，大部分API需要在請求頭中包含有效的Bearer令牌。
+
+#### 認證標頭格式
+```
+Authorization: Bearer {access_token}
+```
+
+### 標準回應格式
+所有API均使用以下統一的回應格式：
+```json
+{
+  "code": 200,       // 狀態碼
+  "message": "操作成功", // 回應訊息
+  "success": true,   // 操作是否成功
+  "data": {}         // 回應資料 (僅在有資料時出現)
+}
+```
+
+## 帳戶管理 (Accounts)
+
+### 登入
+- **端點**: `/api/v1/accounts/token/`
+- **方法**: POST
+- **認證**: 不需要
+- **功能**: 使用電子郵件和密碼登入，取得JWT令牌
+
+#### 請求資料
+```json
+{
+  "email": "user@example.com",
+  "password": "your_password"
+}
+```
+
+#### 回應資料
+```json
+{
+  "code": 200,
+  "message": "登入成功",
+  "success": true,
+  "data": {
+    "access": "eyJ0eXAiOiJKV...",  // 存取令牌
+    "refresh": "eyJ0eXAiOiJKV...", // 刷新令牌
+    "user": {
+      "id": 1,
+      "username": "user_account",
+      "email": "user@example.com"
+    }
+  }
+}
+```
+
+#### 前端使用範例
+```javascript
+// 使用 fetch API 登入
+async function login(email, password) {
+  const response = await fetch('/api/v1/accounts/token/', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ email, password }),
+  });
+  
+  const data = await response.json();
+  
+  if (data.success) {
+    // 將token儲存到localStorage或其他安全的地方
+    localStorage.setItem('access_token', data.access);
+    localStorage.setItem('refresh_token', data.refresh);
+    return data.user;
+  } else {
+    throw new Error(data.message);
+  }
+}
+```
+
+### 註冊
+- **端點**: `/api/v1/accounts/register/`
+- **方法**: POST
+- **認證**: 不需要
+- **功能**: 註冊新用戶
+
+#### 請求資料
+```json
+{
+  "user_account": "user_account",
+  "password": "your_password",
+  "email": "user@example.com",
+  "user_fullname": "真實姓名"
+}
+```
+
+#### 回應資料
+```json
+{
+  "code": 201,
+  "message": "註冊成功！",
+  "success": true,
+  "data": {
+    "id": 1,
+    "username": "user_account",
+    "email": "user@example.com"
+  },
+  "tokens": {
+    "refresh": "eyJ0eXAiOiJKV...",
+    "access": "eyJ0eXAiOiJKV..."
+  }
+}
+```
+
+### 刷新令牌
+- **端點**: `/api/v1/accounts/token/refresh/`
+- **方法**: POST
+- **認證**: 不需要
+- **功能**: 使用刷新令牌獲取新的存取令牌
+
+#### 請求資料
+```json
+{
+  "refresh": "your_refresh_token"
+}
+```
+
+#### 回應資料
+```json
+{
+  "code": 200,
+  "message": "操作成功",
+  "success": true,
+  "data": {
+    "access": "new_access_token"
+  }
+}
+```
+
+### 驗證令牌
+- **端點**: `/api/v1/accounts/token/verify/`
+- **方法**: POST
+- **認證**: 不需要
+- **功能**: 驗證令牌是否有效
+
+#### 請求資料
+```json
+{
+  "token": "your_token"
+}
+```
+
+#### 回應資料（成功時）
+```json
+{
+  "code": 200,
+  "message": "操作成功",
+  "success": true
+}
+```
+
+### 登出
+- **端點**: `/api/v1/accounts/logout/`
+- **方法**: POST
+- **認證**: 需要
+- **功能**: 登出用戶，使當前令牌無效
+
+#### 請求資料
+```json
+{
+  "refresh": "your_refresh_token"
+}
+```
+
+#### 回應資料
+```json
+{
+  "code": 200,
+  "message": "登出成功！",
+  "success": true
+}
+```
+
+### 獲取當前用戶資料
+- **端點**: `/api/v1/accounts/me/`
+- **方法**: GET
+- **認證**: 需要
+- **功能**: 獲取當前登入用戶的詳細資料
+
+#### 回應資料
+```json
+{
+  "code": 200,
+  "message": "操作成功",
+  "success": true,
+  "data": {
+    "id": 1,
+    "username": "user_account",
+    "email": "user@example.com",
+    "headshot_url": "https://example.com/media/headshots/user.jpg",
+    "user_fullname": "真實姓名",
+    "user_account": "user_account",
+    "points": 100,
+    "user_intro": "用戶自我介紹"
+  }
+}
+```
+
+### 獲取用戶頭像
+- **端點**: `/api/v1/accounts/profile/image/`
+- **方法**: GET
+- **認證**: 需要
+- **功能**: 獲取當前用戶的頭像URL
+
+#### 回應資料
+```json
+{
+  "code": 200,
+  "message": "操作成功",
+  "success": true,
+  "data": {
+    "user_image_url": "https://example.com/media/headshots/user.jpg"
+  }
+}
+```
+
+### 獲取用戶摘要資訊
+- **端點**: `/api/v1/accounts/user/{user_id}/summary/`
+- **方法**: GET
+- **認證**: 需要
+- **功能**: 獲取指定用戶的摘要資訊，包含追蹤數、被追蹤數和發文數
+
+#### 回應資料
+```json
+{
+  "code": 200,
+  "message": "操作成功",
+  "success": true,
+  "data": {
+    "id": 1,
+    "username": "user_account",
+    "user_fullname": "真實姓名",
+    "user_intro": "用戶自我介紹",
+    "followers_count": 50,
+    "following_count": 30,
+    "posts_count": 20
+  }
+}
+```
+
+### 獲取今日行程
+- **端點**: `/api/v1/accounts/plans/today/`
+- **方法**: GET
+- **認證**: 需要
+- **功能**: 獲取當前用戶的今日行程
+
+#### 回應資料
+```json
+{
+  "code": 200,
+  "message": "操作成功",
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "title": "行程標題",
+      "description": "行程描述",
+      "date": "2023-06-01T10:00:00Z",
+      "is_completed": false
+    }
+  ]
+}
+```
+
+### 建立每日行程
+- **端點**: `/api/v1/accounts/plans/create/`
+- **方法**: POST
+- **認證**: 需要
+- **功能**: 為當前用戶創建新行程
+
+#### 請求資料
+```json
+{
+  "title": "行程標題",
+  "description": "行程描述",
+  "date": "2023-06-01T10:00:00Z",
+  "is_completed": false
+}
+```
+
+#### 回應資料
+```json
+{
+  "code": 201,
+  "message": "行程創建成功",
+  "success": true,
+  "data": {
+    "id": 1,
+    "title": "行程標題",
+    "description": "行程描述",
+    "date": "2023-06-01T10:00:00Z",
+    "is_completed": false
+  }
+}
+```
+
+### 獲取今日任務
+- **端點**: `/api/v1/accounts/missions/today/`
+- **方法**: GET
+- **認證**: 需要
+- **功能**: 獲取當前用戶的今日任務
+
+#### 回應資料
+```json
+{
+  "code": 200,
+  "message": "操作成功",
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "user": 1,
+      "mission": {
+        "id": 1,
+        "title": "任務標題",
+        "description": "任務描述",
+        "point": 10
+      },
+      "status": "pending",
+      "due": "2023-06-01"
+    }
+  ]
+}
+```
+
+### 獲取進行中的任務
+- **端點**: `/api/v1/accounts/missions/active/`
+- **方法**: GET
+- **認證**: 需要
+- **功能**: 獲取當前用戶的進行中任務
+
+#### 回應資料
+```json
+{
+  "code": 200,
+  "message": "操作成功",
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "user": 1,
+      "mission": {
+        "id": 1,
+        "title": "任務標題",
+        "description": "任務描述",
+        "point": 10
+      },
+      "status": "pending",
+      "due": "2023-06-01"
+    }
+  ]
+}
+```
+
+### 獲取已完成的任務
+- **端點**: `/api/v1/accounts/missions/completed/`
+- **方法**: GET
+- **認證**: 需要
+- **功能**: 獲取當前用戶的已完成任務
+
+#### 回應資料
+```json
+{
+  "code": 200,
+  "message": "操作成功",
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "user": 1,
+      "mission": {
+        "id": 1,
+        "title": "任務標題",
+        "description": "任務描述",
+        "point": 10
+      },
+      "status": "completed",
+      "due": "2023-06-01",
+      "completed_at": "2023-06-01T15:00:00Z"
+    }
+  ]
+}
+```
+
+### 完成任務
+- **端點**: `/api/v1/accounts/missions/{mission_id}/complete/`
+- **方法**: POST
+- **認證**: 需要
+- **功能**: 標記指定任務為已完成並獲得相應積分
+
+#### 回應資料
+```json
+{
+  "code": 200,
+  "message": "任務完成成功！",
+  "success": true,
+  "data": {
+    "mission_id": 1,
+    "points_earned": 10,
+    "total_points": 110
+  }
+}
+```
+
+### 檢查任務條件
+- **端點**: `/api/v1/accounts/missions/{mission_id}/conditions/`
+- **方法**: GET
+- **認證**: 需要
+- **功能**: 檢查指定任務的完成條件
+
+#### 回應資料
+```json
+{
+  "code": 200,
+  "message": "操作成功",
+  "success": true,
+  "data": {
+    "mission_id": 1,
+    "conditions": [
+      {
+        "id": 1,
+        "type": "post_count",
+        "value": "5",
+        "current_progress": 3,
+        "is_satisfied": false
+      },
+      {
+        "id": 2,
+        "type": "comment_count",
+        "value": "3",
+        "current_progress": 3,
+        "is_satisfied": true
+      }
+    ],
+    "all_conditions_met": false
+  }
+}
+```
+
+### 記錄用戶行為
+- **端點**: `/api/v1/accounts/user-action/record/`
+- **方法**: POST
+- **認證**: 需要
+- **功能**: 記錄用戶行為，用於任務完成條件檢查
+
+#### 請求資料
+```json
+{
+  "action_type": "post_created",
+  "target_id": 1,
+  "target_type": "post",
+  "metadata": {
+    "additional_info": "可選的額外資訊"
+  }
+}
+```
+
+#### 回應資料
+```json
+{
+  "code": 201,
+  "message": "用戶行為記錄成功",
+  "success": true,
+  "data": {
+    "id": 1,
+    "user": 1,
+    "action_type": "post_created",
+    "target_id": 1,
+    "target_type": "post",
+    "created_at": "2023-06-01T15:30:00Z",
+    "metadata": {
+      "additional_info": "可選的額外資訊"
+    }
+  }
+}
+```
+
+## 寵物管理 (Pets)
+
+### 獲取熱門疾病檔案
+- **端點**: `/api/v1/pets/illness-archives/popular-today/`
+- **方法**: GET
+- **認證**: 需要
+- **功能**: 獲取今日熱門的寵物疾病檔案
+
+#### 回應資料
+```json
+{
+  "code": 200,
+  "message": "操作成功",
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "title": "貓咪感冒",
+      "description": "貓咪感冒的症狀與治療方法",
+      "user": {
+        "id": 1,
+        "username": "user_account",
+        "user_fullname": "真實姓名"
+      },
+      "popularity": 150,
+      "created_at": "2023-06-01T10:00:00Z",
+      "updated_at": "2023-06-02T15:30:00Z",
+      "upvotes_count": 120,
+      "comments_count": 35
+    }
+  ]
+}
+```
+
+### 獲取用戶寵物
+- **端點**: `/api/v1/pets/my-pets/`
+- **方法**: GET
+- **認證**: 需要
+- **功能**: 獲取當前登入用戶的所有寵物
+
+#### 回應資料
+```json
+{
+  "code": 200,
+  "message": "操作成功",
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "name": "小白",
+      "species": "貓",
+      "breed": "短毛貓",
+      "birth_date": "2020-05-15",
+      "gender": "male",
+      "weight": 4.5,
+      "avatar_url": "https://example.com/media/pets/pet1.jpg",
+      "description": "一隻活潑好動的小貓"
+    }
+  ]
+}
+```
+
+### 獲取用戶疾病檔案列表
+- **端點**: `/api/v1/pets/users/{user_id}/archives/`
+- **方法**: GET
+- **認證**: 需要
+- **功能**: 獲取指定用戶創建的疾病檔案列表
+
+#### 回應資料
+```json
+{
+  "code": 200,
+  "message": "操作成功",
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "title": "貓咪感冒",
+      "description": "貓咪感冒的症狀與治療方法",
+      "created_at": "2023-06-01T10:00:00Z",
+      "updated_at": "2023-06-02T15:30:00Z",
+      "pet": {
+        "id": 1,
+        "name": "小白",
+        "species": "貓"
+      },
+      "upvotes_count": 120,
+      "comments_count": 35
+    }
+  ],
+  "pagination": {
+    "count": 5,
+    "next": "/api/v1/pets/users/1/archives/?page=2",
+    "previous": null
+  }
+}
+```
+
+### 創建異常狀況紀錄
+- **端點**: `/api/v1/pets/abnormal-posts/create/`
+- **方法**: POST
+- **認證**: 需要
+- **功能**: 為寵物創建異常狀況記錄
+
+#### 請求資料
+```json
+{
+  "pet_id": 1,
+  "title": "食慾不振",
+  "description": "最近兩天幾乎不吃東西",
+  "symptoms": [1, 3, 5],
+  "started_at": "2023-06-01T10:00:00Z",
+  "images": ["base64編碼的圖片內容"]
+}
+```
+
+#### 回應資料
+```json
+{
+  "code": 201,
+  "message": "異常狀況記錄創建成功",
+  "success": true,
+  "data": {
+    "id": 1,
+    "pet": {
+      "id": 1,
+      "name": "小白",
+      "species": "貓"
+    },
+    "title": "食慾不振",
+    "description": "最近兩天幾乎不吃東西",
+    "symptoms": [
+      {"id": 1, "name": "食慾不振"},
+      {"id": 3, "name": "精神不佳"},
+      {"id": 5, "name": "嘔吐"}
+    ],
+    "started_at": "2023-06-01T10:00:00Z",
+    "created_at": "2023-06-02T15:30:00Z",
+    "images": [
+      {"id": 1, "url": "https://example.com/media/abnormal/img1.jpg"}
+    ]
+  }
+}
+```
+
+### 獲取症狀列表
+- **端點**: `/api/v1/pets/symptoms/`
+- **方法**: GET
+- **認證**: 需要
+- **功能**: 獲取系統中所有可用的寵物症狀
+
+#### 回應資料
+```json
+{
+  "code": 200,
+  "message": "操作成功",
+  "success": true,
+  "data": [
+    {"id": 1, "name": "食慾不振", "category": "general"},
+    {"id": 2, "name": "發熱", "category": "general"},
+    {"id": 3, "name": "精神不佳", "category": "general"},
+    {"id": 4, "name": "腹瀉", "category": "digestive"},
+    {"id": 5, "name": "嘔吐", "category": "digestive"}
+  ]
+}
+```
+
+### 獲取用戶的異常狀況記錄
+- **端點**: `/api/v1/pets/my-abnormal-posts/`
+- **方法**: GET
+- **認證**: 需要
+- **功能**: 獲取當前用戶的所有異常狀況記錄
+
+#### 回應資料
+```json
+{
+  "code": 200,
+  "message": "操作成功",
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "pet": {
+        "id": 1,
+        "name": "小白",
+        "species": "貓"
+      },
+      "title": "食慾不振",
+      "description": "最近兩天幾乎不吃東西",
+      "symptoms": [
+        {"id": 1, "name": "食慾不振"},
+        {"id": 3, "name": "精神不佳"},
+        {"id": 5, "name": "嘔吐"}
+      ],
+      "started_at": "2023-06-01T10:00:00Z",
+      "created_at": "2023-06-02T15:30:00Z",
+      "images_count": 1
+    }
+  ],
+  "pagination": {
+    "count": 3,
+    "next": null,
+    "previous": null
+  }
+}
+```
+
+### 獲取特定寵物的異常狀況記錄
+- **端點**: `/api/v1/pets/{pet_id}/abnormal-posts/`
+- **方法**: GET
+- **認證**: 需要
+- **功能**: 獲取指定寵物的所有異常狀況記錄
+
+#### 回應資料
+```json
+{
+  "code": 200,
+  "message": "操作成功",
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "title": "食慾不振",
+      "description": "最近兩天幾乎不吃東西",
+      "symptoms": [
+        {"id": 1, "name": "食慾不振"},
+        {"id": 3, "name": "精神不佳"},
+        {"id": 5, "name": "嘔吐"}
+      ],
+      "started_at": "2023-06-01T10:00:00Z",
+      "created_at": "2023-06-02T15:30:00Z",
+      "images_count": 1
+    }
+  ],
+  "pagination": {
+    "count": 2,
+    "next": null,
+    "previous": null
+  }
+}
+```
+
+## 社交功能 (Social)
+
+### 獲取用戶貼文預覽
+- **端點**: `/api/v1/social/users/{user_id}/posts/preview/`
+- **方法**: GET
+- **認證**: 需要
+- **功能**: 獲取指定用戶的貼文預覽，通常顯示較少內容但包含更多貼文
+
+#### 回應資料
+```json
+{
+  "code": 200,
+  "message": "操作成功",
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "content_preview": "今天帶小白去公園玩...",
+      "created_at": "2023-06-01T10:00:00Z",
+      "images": [
+        {"id": 1, "url": "https://example.com/media/posts/img1.jpg"}
+      ],
+      "upvotes_count": 25,
+      "comments_count": 8
+    }
+  ],
+  "pagination": {
+    "count": 12,
+    "next": "/api/v1/social/users/1/posts/preview/?page=2",
+    "previous": null
+  }
+}
+```
+
+### 獲取用戶貼文列表
+- **端點**: `/api/v1/social/users/{user_id}/posts/`
+- **方法**: GET
+- **認證**: 需要
+- **功能**: 獲取指定用戶的完整貼文列表
+
+#### 回應資料
+```json
+{
+  "code": 200,
+  "message": "操作成功",
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "content": "今天帶小白去公園玩，牠非常開心地到處跑，還交到了新朋友！",
+      "created_at": "2023-06-01T10:00:00Z",
+      "updated_at": "2023-06-01T12:30:00Z",
+      "user": {
+        "id": 1,
+        "username": "user_account",
+        "user_fullname": "真實姓名",
+        "headshot_url": "https://example.com/media/headshots/user.jpg"
+      },
+      "images": [
+        {"id": 1, "url": "https://example.com/media/posts/img1.jpg"},
+        {"id": 2, "url": "https://example.com/media/posts/img2.jpg"}
+      ],
+      "upvotes_count": 25,
+      "comments_count": 8,
+      "tagged_pets": [
+        {"id": 1, "name": "小白", "species": "貓"}
+      ]
+    }
+  ],
+  "pagination": {
+    "count": 12,
+    "next": "/api/v1/social/users/1/posts/?page=2",
+    "previous": null
+  }
+}
+```
+
+### 搜尋
+- **端點**: `/api/v1/social/search/`
+- **方法**: GET
+- **認證**: 需要
+- **功能**: 根據關鍵字搜尋用戶、寵物、貼文或疾病檔案
+
+#### 請求參數
+- `q`: 搜尋關鍵字
+- `type`: 搜尋類型（可選值：users, pets, posts, archives, all）
+
+#### 回應資料
+```json
+{
+  "code": 200,
+  "message": "操作成功",
+  "success": true,
+  "data": {
+    "users": [
+      {
+        "id": 1,
+        "username": "user_account",
+        "user_fullname": "真實姓名",
+        "headshot_url": "https://example.com/media/headshots/user.jpg"
+      }
+    ],
+    "pets": [
+      {
+        "id": 1,
+        "name": "小白",
+        "species": "貓",
+        "avatar_url": "https://example.com/media/pets/pet1.jpg",
+        "owner": {
+          "id": 1,
+          "username": "user_account"
+        }
+      }
+    ],
+    "posts": [
+      {
+        "id": 1,
+        "content_preview": "今天帶小白去公園玩...",
+        "created_at": "2023-06-01T10:00:00Z",
+        "user": {
+          "id": 1,
+          "username": "user_account"
+        }
+      }
+    ],
+    "archives": [
+      {
+        "id": 1,
+        "title": "貓咪感冒",
+        "created_at": "2023-06-01T10:00:00Z",
+        "user": {
+          "id": 1,
+          "username": "user_account"
+        }
+      }
+    ]
+  },
+  "pagination": {
+    "users": {"count": 5, "next": null, "previous": null},
+    "pets": {"count": 3, "next": null, "previous": null},
+    "posts": {"count": 8, "next": "/api/v1/social/search/?q=keyword&type=posts&page=2", "previous": null},
+    "archives": {"count": 2, "next": null, "previous": null}
+  }
+}
+```
+
+### 搜尋建議
+- **端點**: `/api/v1/social/search/suggestions/`
+- **方法**: GET
+- **認證**: 需要
+- **功能**: 根據輸入的字符提供搜尋建議
+
+#### 請求參數
+- `q`: 輸入字符
+
+#### 回應資料
+```json
+{
+  "code": 200,
+  "message": "操作成功",
+  "success": true,
+  "data": [
+    {"type": "user", "text": "王小明", "id": 5},
+    {"type": "pet", "text": "小白", "id": 1},
+    {"type": "tag", "text": "#貓咪日常", "value": "貓咪日常"}
+  ]
+}
+```
+
+### 創建貼文
+- **端點**: `/api/v1/social/posts/create/`
+- **方法**: POST
+- **認證**: 需要
+- **功能**: 創建新貼文
+
+#### 請求資料
+```json
+{
+  "content": "今天帶小白去公園玩，牠非常開心地到處跑，還交到了新朋友！",
+  "images": ["base64編碼的圖片內容"],
+  "tagged_pets": [1, 2],
+  "hashtags": ["貓咪日常", "戶外活動"]
+}
+```
+
+#### 回應資料
+```json
+{
+  "code": 201,
+  "message": "貼文創建成功",
+  "success": true,
+  "data": {
+    "id": 1,
+    "content": "今天帶小白去公園玩，牠非常開心地到處跑，還交到了新朋友！",
+    "created_at": "2023-06-01T10:00:00Z",
+    "user": {
+      "id": 1,
+      "username": "user_account",
+      "user_fullname": "真實姓名",
+      "headshot_url": "https://example.com/media/headshots/user.jpg"
+    },
+    "images": [
+      {"id": 1, "url": "https://example.com/media/posts/img1.jpg"}
+    ],
+    "tagged_pets": [
+      {"id": 1, "name": "小白", "species": "貓"},
+      {"id": 2, "name": "小黑", "species": "狗"}
+    ],
+    "hashtags": ["貓咪日常", "戶外活動"]
+  }
+}
+```
+
+### 獲取貼文詳情
+- **端點**: `/api/v1/social/posts/{post_id}/`
+- **方法**: GET
+- **認證**: 需要
+- **功能**: 獲取指定貼文的詳細信息
+
+#### 回應資料
+```json
+{
+  "code": 200,
+  "message": "操作成功",
+  "success": true,
+  "data": {
+    "id": 1,
+    "content": "今天帶小白去公園玩，牠非常開心地到處跑，還交到了新朋友！",
+    "created_at": "2023-06-01T10:00:00Z",
+    "updated_at": "2023-06-01T12:30:00Z",
+    "user": {
+      "id": 1,
+      "username": "user_account",
+      "user_fullname": "真實姓名",
+      "headshot_url": "https://example.com/media/headshots/user.jpg"
+    },
+    "images": [
+      {"id": 1, "url": "https://example.com/media/posts/img1.jpg"},
+      {"id": 2, "url": "https://example.com/media/posts/img2.jpg"}
+    ],
+    "upvotes_count": 25,
+    "downvotes_count": 2,
+    "comments_count": 8,
+    "is_upvoted": true,
+    "is_downvoted": false,
+    "is_saved": false,
+    "tagged_pets": [
+      {"id": 1, "name": "小白", "species": "貓"},
+      {"id": 2, "name": "小黑", "species": "狗"}
+    ],
+    "hashtags": ["貓咪日常", "戶外活動"]
+  }
+}
+```
+
+### 標記寵物在貼文中
+- **端點**: `/api/v1/social/posts/tag-pets/`
+- **方法**: POST
+- **認證**: 需要
+- **功能**: 在貼文中標記寵物
+
+#### 請求資料
+```json
+{
+  "post_id": 1,
+  "pet_ids": [1, 2]
+}
+```
+
+#### 回應資料
+```json
+{
+  "code": 200,
+  "message": "寵物標記成功",
+  "success": true,
+  "data": {
+    "post_id": 1,
+    "tagged_pets": [
+      {"id": 1, "name": "小白", "species": "貓"},
+      {"id": 2, "name": "小黑", "species": "狗"}
+    ]
+  }
+}
+```
+
+## 互動功能 (Interactions)
+
+### 貼文互動操作
+- **端點**: `/api/v1/interactions/posts/{object_id}/interaction/`
+- **方法**: POST
+- **認證**: 需要
+- **功能**: 對貼文進行點讚、踩、收藏或分享等互動操作
+
+#### 請求資料
+```json
+{
+  "relation": "upvoted"  // 可選值: upvoted, downvoted, saved, shared
+}
+```
+
+#### 回應資料 (添加互動)
+```json
+{
+  "code": 201,
+  "message": "已成功點讚",
+  "success": true,
+  "detail": "已成功點讚"
+}
+```
+
+#### 回應資料 (取消互動)
+```json
+{
+  "code": 200,
+  "message": "操作成功",
+  "success": true,
+  "detail": "已取消點讚"
+}
+```
+
+### 評論互動操作
+- **端點**: `/api/v1/interactions/comments/{object_id}/interaction/`
+- **方法**: POST
+- **認證**: 需要
+- **功能**: 對評論進行點讚或踩等互動操作
+
+#### 請求資料
+```json
+{
+  "relation": "upvoted"  // 可選值: upvoted, downvoted
+}
+```
+
+#### 回應資料
+```json
+{
+  "code": 201,
+  "message": "操作成功",
+  "success": true,
+  "detail": "已成功點讚"
+}
+```
+
+### 疾病檔案互動操作
+- **端點**: `/api/v1/interactions/illness-archives/{object_id}/interaction/`
+- **方法**: POST
+- **認證**: 需要
+- **功能**: 對疾病檔案進行點讚、踩、收藏或分享等互動操作
+
+#### 請求資料
+```json
+{
+  "relation": "upvoted"  // 可選值: upvoted, downvoted, saved, shared
+}
+```
+
+#### 回應資料
+```json
+{
+  "code": 201,
+  "message": "操作成功",
+  "success": true,
+  "detail": "已成功點讚"
+}
+```
+
+## 評論功能 (Comments)
+
+### 獲取貼文評論
+- **端點**: `/api/v1/comments/post/{post_id}/comments/`
+- **方法**: GET
+- **認證**: 需要
+- **功能**: 獲取指定貼文的評論列表
+
+#### 回應資料
+```json
+{
+  "code": 200,
+  "message": "操作成功",
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "content": "太可愛了！",
+      "created_at": "2023-06-01T12:00:00Z",
+      "user": {
+        "id": 2,
+        "username": "other_user",
+        "user_fullname": "其他用戶",
+        "headshot_url": "https://example.com/media/headshots/other_user.jpg"
+      },
+      "upvotes_count": 5,
+      "is_upvoted": false,
+      "reply_count": 2
+    }
+  ],
+  "pagination": {
+    "count": 10,
+    "next": "/api/v1/comments/post/1/comments/?page=2",
+    "previous": null
+  }
+}
+```
+
+### 查看評論詳情
+- **端點**: `/api/v1/comments/comments/{comment_id}/`
+- **方法**: GET
+- **認證**: 需要
+- **功能**: 獲取指定評論的詳細資訊
+
+#### 回應資料
+```json
+{
+  "code": 200,
+  "message": "操作成功",
+  "success": true,
+  "data": {
+    "id": 1,
+    "content": "太可愛了！",
+    "created_at": "2023-06-01T12:00:00Z",
+    "updated_at": "2023-06-01T12:10:00Z",
+    "user": {
+      "id": 2,
+      "username": "other_user",
+      "user_fullname": "其他用戶",
+      "headshot_url": "https://example.com/media/headshots/other_user.jpg"
+    },
+    "post": 1,
+    "parent": null,
+    "upvotes_count": 5,
+    "downvotes_count": 0,
+    "is_upvoted": false,
+    "is_downvoted": false
+  }
+}
+```
+
+### 獲取評論回覆
+- **端點**: `/api/v1/comments/comments/{comment_id}/replies/`
+- **方法**: GET
+- **認證**: 需要
+- **功能**: 獲取指定評論的回覆列表
+
+#### 回應資料
+```json
+{
+  "code": 200,
+  "message": "操作成功",
+  "success": true,
+  "data": [
+    {
+      "id": 2,
+      "content": "我也覺得！",
+      "created_at": "2023-06-01T13:00:00Z",
+      "user": {
+        "id": 1,
+        "username": "user_account",
+        "user_fullname": "真實姓名",
+        "headshot_url": "https://example.com/media/headshots/user.jpg"
+      },
+      "parent": 1,
+      "upvotes_count": 2,
+      "is_upvoted": true
+    }
+  ],
+  "pagination": {
+    "count": 2,
+    "next": null,
+    "previous": null
+  }
+}
+```
+
+### 添加評論
+- **端點**: `/api/v1/comments/post/{post_id}/comments/`
+- **方法**: POST
+- **認證**: 需要
+- **功能**: 對貼文添加評論
+
+#### 請求資料
+```json
+{
+  "content": "這是一條評論內容"
+}
+```
+
+#### 回應資料
+```json
+{
+  "code": 201,
+  "message": "評論發布成功",
+  "success": true,
+  "data": {
+    "id": 3,
+    "content": "這是一條評論內容",
+    "created_at": "2023-06-02T10:00:00Z",
+    "user": {
+      "id": 1,
+      "username": "user_account",
+      "user_fullname": "真實姓名",
+      "headshot_url": "https://example.com/media/headshots/user.jpg"
+    },
+    "post": 1,
+    "parent": null,
+    "upvotes_count": 0
+  }
+}
+```
+
+### 回覆評論
+- **端點**: `/api/v1/comments/comments/{comment_id}/replies/`
+- **方法**: POST
+- **認證**: 需要
+- **功能**: 回覆特定評論
+
+#### 請求資料
+```json
+{
+  "content": "這是一條回覆內容"
+}
+```
+
+#### 回應資料
+```json
+{
+  "code": 201,
+  "message": "回覆發布成功",
+  "success": true,
+  "data": {
+    "id": 4,
+    "content": "這是一條回覆內容",
+    "created_at": "2023-06-02T11:00:00Z",
+    "user": {
+      "id": 1,
+      "username": "user_account",
+      "user_fullname": "真實姓名",
+      "headshot_url": "https://example.com/media/headshots/user.jpg"
+    },
+    "post": 1,
+    "parent": 3,
+    "upvotes_count": 0
+  }
+}
+```
+
+## 飼料管理 (Feeds)
+
+### 飼料營養計算
+- **端點**: `/api/v1/feeds/calculator/`
+- **方法**: POST
+- **認證**: 需要
+- **功能**: 根據飼料成分計算營養價值
+
+#### 請求資料
+```json
+{
+  "protein": 25.5,
+  "fat": 12.8,
+  "fiber": 3.2,
+  "moisture": 8.0,
+  "ash": 6.5,
+  "carbohydrate": 44.0
+}
+```
+
+#### 回應資料
+```json
+{
+  "code": 200,
+  "message": "操作成功",
+  "success": true,
+  "data": {
+    "calories_per_100g": 350.4,
+    "protein_percentage": 25.5,
+    "fat_percentage": 12.8,
+    "carbohydrate_percentage": 44.0,
+    "protein_to_fat_ratio": 1.99,
+    "evaluation": {
+      "quality": "good",
+      "suitable_for": ["成年貓", "成年狗"],
+      "recommendations": ["適合一般體重的成年寵物", "蛋白質含量適中"]
+    }
+  }
+}
+```
+
+### 上傳飼料資訊
+- **端點**: `/api/v1/feeds/upload/`
+- **方法**: POST
+- **認證**: 需要
+- **功能**: 上傳新飼料資訊
+
+#### 請求資料
+```json
+{
+  "name": "優質貓糧",
+  "brand": "健康寵物",
+  "type": "dry",
+  "target_species": "cat",
+  "life_stage": "adult",
+  "ingredients": "雞肉、糙米、玉米、雞油...",
+  "protein": 25.5,
+  "fat": 12.8,
+  "fiber": 3.2,
+  "moisture": 8.0,
+  "ash": 6.5,
+  "carbohydrate": 44.0,
+  "feeding_guide": "體重4-5kg的貓，每日餵食量約60-75g",
+  "images": ["base64編碼的圖片內容"]
+}
+```
+
+#### 回應資料
+```json
+{
+  "code": 201,
+  "message": "飼料資訊上傳成功",
+  "success": true,
+  "data": {
+    "id": 1,
+    "name": "優質貓糧",
+    "brand": "健康寵物",
+    "type": "dry",
+    "target_species": "cat",
+    "life_stage": "adult",
+    "protein": 25.5,
+    "fat": 12.8,
+    "fiber": 3.2,
+    "moisture": 8.0,
+    "ash": 6.5,
+    "carbohydrate": 44.0,
+    "calories_per_100g": 350.4,
+    "feeding_guide": "體重4-5kg的貓，每日餵食量約60-75g",
+    "status": "processing",
+    "created_at": "2023-06-01T10:00:00Z",
+    "updated_at": "2023-06-01T10:00:00Z",
+    "images": [
+      {"id": 1, "url": "https://example.com/media/feeds/feed1.jpg"}
+    ]
+  }
+}
+```
+
+### 獲取最近使用的飼料
+- **端點**: `/api/v1/feeds/recent/`
+- **方法**: GET
+- **認證**: 需要
+- **功能**: 獲取用戶最近使用的飼料列表
+
+#### 回應資料
+```json
+{
+  "code": 200,
+  "message": "操作成功",
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "name": "優質貓糧",
+      "brand": "健康寵物",
+      "protein": 25.5,
+      "fat": 12.8,
+      "calories_per_100g": 350.4,
+      "last_used": "2023-06-01T15:00:00Z",
+      "image_url": "https://example.com/media/feeds/feed1.jpg"
+    }
+  ]
+}
+```
+
+### 查詢飼料處理狀態
+- **端點**: `/api/v1/feeds/status/{feed_id}/`
+- **方法**: GET
+- **認證**: 需要
+- **功能**: 查詢飼料資訊處理狀態
+
+#### 回應資料
+```json
+{
+  "code": 200,
+  "message": "操作成功",
+  "success": true,
+  "data": {
+    "id": 1,
+    "status": "completed",
+    "processing_steps": [
+      {"step": "upload", "status": "completed", "timestamp": "2023-06-01T10:00:00Z"},
+      {"step": "image_analysis", "status": "completed", "timestamp": "2023-06-01T10:01:00Z"},
+      {"step": "nutrition_analysis", "status": "completed", "timestamp": "2023-06-01T10:02:00Z"}
+    ],
+    "result": {
+      "is_verified": true,
+      "quality_score": 8.5,
+      "recommendations": ["適合一般體重的成年寵物", "蛋白質含量適中"]
+    }
+  }
+}
+```
+
+### 獲取寵物飼料記錄
+- **端點**: `/api/v1/feeds/pets/{pet_id}/feeds/`
+- **方法**: GET
+- **認證**: 需要
+- **功能**: 獲取指定寵物的飼料記錄
+
+#### 回應資料
+```json
+{
+  "code": 200,
+  "message": "操作成功",
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "feed": {
+        "id": 1,
+        "name": "優質貓糧",
+        "brand": "健康寵物"
+      },
+      "start_date": "2023-05-01",
+      "end_date": "2023-06-01",
+      "daily_amount": 70,
+      "notes": "每日早晚各餵食一次"
+    }
+  ],
+  "pagination": {
+    "count": 3,
+    "next": null,
+    "previous": null
+  }
+}
+```
+
+### 獲取寵物當前飼料
+- **端點**: `/api/v1/feeds/pets/{pet_id}/current-feed/`
+- **方法**: GET
+- **認證**: 需要
+- **功能**: 獲取指定寵物當前正在使用的飼料資訊
+
+#### 回應資料
+```json
+{
+  "code": 200,
+  "message": "操作成功",
+  "success": true,
+  "data": {
+    "id": 1,
+    "feed": {
+      "id": 1,
+      "name": "優質貓糧",
+      "brand": "健康寵物",
+      "type": "dry",
+      "protein": 25.5,
+      "fat": 12.8,
+      "fiber": 3.2,
+      "moisture": 8.0,
+      "calories_per_100g": 350.4,
+      "image_url": "https://example.com/media/feeds/feed1.jpg"
+    },
+    "start_date": "2023-05-01",
+    "daily_amount": 70,
+    "notes": "每日早晚各餵食一次",
+    "feeding_schedule": [
+      {"time": "08:00", "amount": 35},
+      {"time": "18:00", "amount": 35}
+    ]
+  }
+}
+```
+
+## 媒體管理 (Media)
+
+### 上傳圖片
+- **端點**: `/api/v1/media/images/upload/`
+- **方法**: POST
+- **認證**: 需要
+- **功能**: 上傳單張或多張圖片
+
+#### 請求資料
+```json
+{
+  "images": ["base64編碼的圖片內容1", "base64編碼的圖片內容2"],
+  "type": "post",
+  "reference_id": 1
+}
+```
+
+#### 回應資料
+```json
+{
+  "code": 201,
+  "message": "圖片上傳成功",
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "url": "https://example.com/media/posts/img1.jpg",
+      "thumbnail_url": "https://example.com/media/posts/img1_thumb.jpg",
+      "type": "post",
+      "reference_id": 1,
+      "created_at": "2023-06-01T10:00:00Z"
+    },
+    {
+      "id": 2,
+      "url": "https://example.com/media/posts/img2.jpg",
+      "thumbnail_url": "https://example.com/media/posts/img2_thumb.jpg",
+      "type": "post",
+      "reference_id": 1,
+      "created_at": "2023-06-01T10:00:00Z"
+    }
+  ]
+}
+```
+
+### 獲取圖片
+- **端點**: `/api/v1/media/images/{image_id}/`
+- **方法**: GET
+- **認證**: 需要
+- **功能**: 獲取指定圖片的資訊
+
+#### 回應資料
+```json
+{
+  "code": 200,
+  "message": "操作成功",
+  "success": true,
+  "data": {
+    "id": 1,
+    "url": "https://example.com/media/posts/img1.jpg",
+    "thumbnail_url": "https://example.com/media/posts/img1_thumb.jpg",
+    "type": "post",
+    "reference_id": 1,
+    "created_at": "2023-06-01T10:00:00Z",
+    "metadata": {
+      "width": 1200,
+      "height": 800,
+      "format": "jpeg",
+      "size": 1024000
+    }
+  }
+}
+```
+
+### 刪除圖片
+- **端點**: `/api/v1/media/images/{image_id}/`
+- **方法**: DELETE
+- **認證**: 需要
+- **功能**: 刪除指定圖片
+
+#### 回應資料
+```json
+{
+  "code": 200,
+  "message": "圖片刪除成功",
+  "success": true
+}
+```
+
+### 獲取參考對象的所有圖片
+- **端點**: `/api/v1/media/reference/{type}/{reference_id}/images/`
+- **方法**: GET
+- **認證**: 需要
+- **功能**: 獲取特定參考對象（如貼文、寵物）的所有圖片
+
+#### 回應資料
+```json
+{
+  "code": 200,
+  "message": "操作成功",
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "url": "https://example.com/media/posts/img1.jpg",
+      "thumbnail_url": "https://example.com/media/posts/img1_thumb.jpg",
+      "created_at": "2023-06-01T10:00:00Z"
+    },
+    {
+      "id": 2,
+      "url": "https://example.com/media/posts/img2.jpg",
+      "thumbnail_url": "https://example.com/media/posts/img2_thumb.jpg",
+      "created_at": "2023-06-01T10:00:00Z"
+    }
+  ],
+  "pagination": {
+    "count": 2,
+    "next": null,
+    "previous": null
+  }
+}
+``` 
