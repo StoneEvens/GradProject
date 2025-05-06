@@ -1,0 +1,87 @@
+INFO 2025-05-06 17:42:16,957 autoreload 27504 1428 Watching for file changes with StatReloader
+WARNING 2025-05-06 17:43:33,033 basehttp 27504 58272 "POST /api/v1/accounts/token/ HTTP/1.1" 400 147
+WARNING 2025-05-06 17:43:59,737 basehttp 27504 70624 "POST /api/v1/accounts/token/ HTTP/1.1" 401 61
+INFO 2025-05-06 17:45:01,349 autoreload 27504 1428 C:\Users\leo\grad-test\backend\accounts\serializers.py changed, reloading.
+INFO 2025-05-06 17:45:02,695 autoreload 7484 64488 Watching for file changes with StatReloader
+INFO 2025-05-06 17:45:21,357 autoreload 7484 64488 C:\Users\leo\grad-test\backend\accounts\serializers.py changed, reloading.
+INFO 2025-05-06 17:45:22,829 autoreload 62612 57416 Watching for file changes with StatReloader
+INFO 2025-05-06 17:45:53,137 basehttp 62612 57476 "POST /api/v1/accounts/token/ HTTP/1.1" 200 570
+WARNING 2025-05-06 17:49:25,678 basehttp 62612 70748 "POST /api/v1/accounts/token/ HTTP/1.1" 400 147
+INFO 2025-05-06 17:49:36,691 basehttp 62612 66448 "POST /api/v1/accounts/token/ HTTP/1.1" 200 570
+WARNING 2025-05-06 17:50:15,864 basehttp 62612 50632 "GET / HTTP/1.1" 404 3817
+INFO 2025-05-06 17:50:21,923 basehttp 62612 50632 "GET /admin HTTP/1.1" 301 0
+INFO 2025-05-06 17:50:21,952 basehttp 62612 65884 "GET /admin/ HTTP/1.1" 302 0
+INFO 2025-05-06 17:50:21,996 basehttp 62612 65884 "GET /admin/login/?next=/admin/ HTTP/1.1" 200 4184
+INFO 2025-05-06 17:50:22,106 basehttp 62612 65884 "GET /static/admin/css/base.css HTTP/1.1" 200 22154
+INFO 2025-05-06 17:50:22,107 basehttp 62612 47240 "GET /static/admin/css/dark_mode.css HTTP/1.1" 200 2808
+INFO 2025-05-06 17:50:22,110 basehttp 62612 65884 "GET /static/admin/css/nav_sidebar.css HTTP/1.1" 200 2810
+INFO 2025-05-06 17:50:22,111 basehttp 62612 47240 "GET /static/admin/css/login.css HTTP/1.1" 200 951
+INFO 2025-05-06 17:50:22,113 basehttp 62612 65884 "GET /static/admin/css/responsive.css HTTP/1.1" 200 16632
+INFO 2025-05-06 17:50:22,116 basehttp 62612 47240 "GET /static/admin/js/theme.js HTTP/1.1" 200 1653
+INFO 2025-05-06 17:50:22,118 basehttp 62612 65884 "GET /static/admin/js/nav_sidebar.js HTTP/1.1" 200 3063
+INFO 2025-05-06 17:50:30,518 basehttp 62612 65884 "POST /admin/login/?next=/admin/ HTTP/1.1" 302 0
+INFO 2025-05-06 17:50:30,536 basehttp 62612 65884 "GET /admin/ HTTP/1.1" 200 13777
+INFO 2025-05-06 17:50:30,584 basehttp 62612 65884 "GET /static/admin/css/dashboard.css HTTP/1.1" 200 441
+INFO 2025-05-06 17:50:30,612 basehttp 62612 47240 "GET /static/admin/img/icon-changelink.svg HTTP/1.1" 200 380
+INFO 2025-05-06 17:50:30,612 basehttp 62612 65884 "GET /static/admin/img/icon-addlink.svg HTTP/1.1" 200 331
+INFO 2025-05-06 17:50:42,748 basehttp 62612 65884 "GET /admin/token_blacklist/blacklistedtoken/ HTTP/1.1" 200 16923
+INFO 2025-05-06 17:50:42,785 basehttp 62612 70972 "GET /static/admin/js/core.js HTTP/1.1" 200 6208
+INFO 2025-05-06 17:50:42,785 basehttp 62612 20544 "GET /static/admin/js/jquery.init.js HTTP/1.1" 200 347
+INFO 2025-05-06 17:50:42,786 basehttp 62612 65884 "GET /static/admin/css/changelists.css HTTP/1.1" 200 6878
+INFO 2025-05-06 17:50:42,788 basehttp 62612 60244 "GET /static/admin/js/admin/RelatedObjectLookups.js HTTP/1.1" 200 9777
+INFO 2025-05-06 17:50:42,792 basehttp 62612 20544 "GET /static/admin/js/prepopulate.js HTTP/1.1" 200 1531
+INFO 2025-05-06 17:50:42,792 basehttp 62612 70972 "GET /static/admin/js/actions.js HTTP/1.1" 200 8076
+INFO 2025-05-06 17:50:42,793 basehttp 62612 47240 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-05-06 17:50:42,793 basehttp 62612 65884 "GET /static/admin/js/urlify.js HTTP/1.1" 200 7887
+INFO 2025-05-06 17:50:42,796 basehttp 62612 25896 "GET /static/admin/js/vendor/jquery/jquery.js HTTP/1.1" 200 285314
+INFO 2025-05-06 17:50:42,797 basehttp 62612 20544 "GET /static/admin/img/search.svg HTTP/1.1" 200 458
+INFO 2025-05-06 17:50:42,797 basehttp 62612 60244 "GET /static/admin/js/vendor/xregexp/xregexp.js HTTP/1.1" 200 325171
+INFO 2025-05-06 17:50:42,822 basehttp 62612 20544 "GET /static/admin/js/filters.js HTTP/1.1" 200 978
+INFO 2025-05-06 17:50:42,838 basehttp 62612 20544 "GET /static/admin/img/tooltag-add.svg HTTP/1.1" 200 331
+INFO 2025-05-06 17:50:42,838 basehttp 62612 60244 "GET /static/admin/img/sorting-icons.svg HTTP/1.1" 200 1097
+INFO 2025-05-06 17:50:47,010 basehttp 62612 60244 "GET /admin/token_blacklist/outstandingtoken/ HTTP/1.1" 200 16150
+INFO 2025-05-06 17:50:52,199 basehttp 62612 60244 "GET /admin/auth/group/ HTTP/1.1" 200 13800
+INFO 2025-05-06 17:50:52,246 basehttp 62612 60244 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-05-06 17:50:53,728 basehttp 62612 60244 "GET /admin/django_celery_results/groupresult/ HTTP/1.1" 200 15096
+INFO 2025-05-06 17:50:53,803 basehttp 62612 60244 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-05-06 17:50:53,818 basehttp 62612 60244 "GET /static/admin/img/icon-viewlink.svg HTTP/1.1" 200 581
+INFO 2025-05-06 17:50:54,816 basehttp 62612 60244 "GET /admin/django_celery_results/taskresult/ HTTP/1.1" 200 15811
+INFO 2025-05-06 17:50:54,862 basehttp 62612 60244 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-05-06 17:50:55,664 basehttp 62612 60244 "GET /admin/comments/comment/ HTTP/1.1" 200 18954
+INFO 2025-05-06 17:50:55,711 basehttp 62612 60244 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-05-06 17:50:56,718 basehttp 62612 60244 "GET /admin/feeds/petfeed/ HTTP/1.1" 200 15355
+INFO 2025-05-06 17:50:56,761 basehttp 62612 60244 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-05-06 17:50:57,609 basehttp 62612 60244 "GET /admin/feeds/userfeed/ HTTP/1.1" 200 15031
+INFO 2025-05-06 17:50:57,655 basehttp 62612 60244 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-05-06 17:50:58,235 basehttp 62612 60244 "GET /admin/feeds/feed/ HTTP/1.1" 200 14825
+INFO 2025-05-06 17:50:58,297 basehttp 62612 60244 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-05-06 17:50:59,440 basehttp 62612 60244 "GET /admin/ HTTP/1.1" 200 13777
+INFO 2025-05-06 17:51:22,544 basehttp 62612 60244 "GET /admin/comments/comment/ HTTP/1.1" 200 18954
+INFO 2025-05-06 17:51:22,598 basehttp 62612 60244 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-05-06 17:51:24,889 basehttp 62612 60244 "GET /admin/ HTTP/1.1" 200 13777
+INFO 2025-05-06 17:51:26,533 basehttp 62612 60244 "GET /admin/django_celery_results/groupresult/ HTTP/1.1" 200 15096
+INFO 2025-05-06 17:51:26,586 basehttp 62612 60244 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-05-06 17:51:28,463 basehttp 62612 60244 "GET /admin/django_celery_results/taskresult/ HTTP/1.1" 200 15811
+INFO 2025-05-06 17:51:28,509 basehttp 62612 60244 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-05-06 17:51:32,157 basehttp 62612 60244 "GET /admin/comments/comment/ HTTP/1.1" 200 18954
+INFO 2025-05-06 17:51:32,200 basehttp 62612 60244 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-05-06 17:51:42,036 basehttp 62612 60244 "GET /admin/feeds/petfeed/ HTTP/1.1" 200 15355
+INFO 2025-05-06 17:51:42,080 basehttp 62612 60244 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-05-06 17:51:42,769 basehttp 62612 60244 "GET /admin/feeds/userfeed/ HTTP/1.1" 200 15031
+INFO 2025-05-06 17:51:42,823 basehttp 62612 60244 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-05-06 17:51:53,518 basehttp 62612 60244 "GET /admin/interactions/userinteraction/ HTTP/1.1" 200 19315
+INFO 2025-05-06 17:51:53,563 basehttp 62612 60244 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-05-06 17:54:34,860 autoreload 62612 57416 C:\Users\leo\grad-test\backend\accounts\admin.py changed, reloading.
+INFO 2025-05-06 17:54:36,921 autoreload 59172 20828 Watching for file changes with StatReloader
+INFO 2025-05-06 17:54:57,506 autoreload 59172 20828 C:\Users\leo\grad-test\backend\pets\admin.py changed, reloading.
+INFO 2025-05-06 17:54:59,426 autoreload 60140 70952 Watching for file changes with StatReloader
+INFO 2025-05-06 17:55:09,242 autoreload 60140 70952 C:\Users\leo\grad-test\backend\social\admin.py changed, reloading.
+INFO 2025-05-06 17:55:11,210 autoreload 46684 70472 Watching for file changes with StatReloader
+INFO 2025-05-06 17:55:21,926 autoreload 46684 70472 C:\Users\leo\grad-test\backend\media\admin.py changed, reloading.
+INFO 2025-05-06 17:55:23,821 autoreload 63784 65800 Watching for file changes with StatReloader
+INFO 2025-05-06 18:13:22,002 autoreload 64136 67724 Watching for file changes with StatReloader
+INFO 2025-05-06 18:13:38,580 basehttp 64136 24124 "GET /admin/ HTTP/1.1" 200 32250
+INFO 2025-05-06 18:13:43,624 basehttp 64136 24124 "GET /admin/accounts/customuser/ HTTP/1.1" 200 31757
+INFO 2025-05-06 18:13:43,681 basehttp 64136 24124 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-05-06 18:13:43,760 basehttp 64136 62004 "GET /static/admin/img/icon-yes.svg HTTP/1.1" 200 436
+INFO 2025-05-06 18:13:47,119 basehttp 64136 62004 "GET /admin/ HTTP/1.1" 200 32250

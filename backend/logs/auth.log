@@ -1,0 +1,16 @@
+INFO 2025-05-06 17:43:32,013 serializers 27504 58272 開始驗證用戶登入：abcd@gmail.com
+INFO 2025-05-06 17:43:32,022 serializers 27504 58272 找到帳戶：john123, 活躍狀態：True
+WARNING 2025-05-06 17:43:33,008 serializers 27504 58272 帳戶 abcd@gmail.com 認證失敗，密碼不正確
+INFO 2025-05-06 17:43:58,832 serializers 27504 70624 開始驗證用戶登入：abcd@gmail.com
+INFO 2025-05-06 17:43:58,837 serializers 27504 70624 找到帳戶：john123, 活躍狀態：True
+INFO 2025-05-06 17:43:59,729 serializers 27504 70624 用戶 abcd@gmail.com 登入成功
+ERROR 2025-05-06 17:43:59,730 serializers 27504 70624 JWT 令牌生成過程中發生錯誤：No active account found with the given credentials
+INFO 2025-05-06 17:45:52,338 serializers 62612 57476 開始驗證用戶登入：abcd@gmail.com
+INFO 2025-05-06 17:45:52,345 serializers 62612 57476 找到帳戶：john123, 活躍狀態：True
+INFO 2025-05-06 17:45:53,114 serializers 62612 57476 用戶 abcd@gmail.com 登入成功
+INFO 2025-05-06 17:49:25,333 serializers 62612 70748 開始驗證用戶登入：abcd@gmail.com
+INFO 2025-05-06 17:49:25,336 serializers 62612 70748 找到帳戶：john123, 活躍狀態：True
+WARNING 2025-05-06 17:49:25,675 serializers 62612 70748 帳戶 abcd@gmail.com 認證失敗，密碼不正確
+INFO 2025-05-06 17:49:36,347 serializers 62612 66448 開始驗證用戶登入：abcd@gmail.com
+INFO 2025-05-06 17:49:36,350 serializers 62612 66448 找到帳戶：john123, 活躍狀態：True
+INFO 2025-05-06 17:49:36,682 serializers 62612 66448 用戶 abcd@gmail.com 登入成功
