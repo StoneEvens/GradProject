@@ -1,0 +1,38 @@
+.header {
+  width: 100%;
+  background-color: #FFB370;
+  padding: 12px 0;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 999;
+  border-bottom-left-radius: 24px;
+  border-bottom-right-radius: 24px;
+}
+
+.header-buttons {
+  display: flex;
+  justify-content: space-between; /* ✅ 左右貼齊 */
+  align-items: center;
+  max-width: 400px;               /* ✅ 和主容器一致 */
+  margin: 0 auto;
+  padding: 0 10px;                /* ✅ 留內邊距，不會貼邊 */
+}
+
+.header-icon {
+  background-color: #FFEED6;
+  border: none;
+  border-radius: 50%;
+  padding: 10px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.1);
+}
+
+.header-icon img {
+  width: 40px;
+  height: 40px;
+}

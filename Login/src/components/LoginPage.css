@@ -1,0 +1,120 @@
+/* LoginPage.css */
+.login-container {
+  max-width: 420px;
+  width: 100%;
+  margin: 0 auto;
+  padding-top: 80px;
+  padding-bottom: 80px;
+  min-height: 100vh;
+  background-color: #FFCA9C;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+  position: relative;
+  overflow-y: auto;
+  }
+
+  .login-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 400px;
+    padding: 0 2rem;
+  }
+  
+  .login-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 80px;
+  }
+  
+  .input-group {
+    margin-bottom: 20px; /* ✅ 預留錯誤訊息空間，避免擠到按鈕 */
+  }
+  
+  .input-label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 0.25rem;
+    text-align: left;
+  }
+  
+  /* 外框包裹 input + icon（讓 icon 不受下方錯誤訊息影響） */
+  .input-wrapper {
+    position: relative;
+    width: 100%;
+  }
+
+  /* 密碼欄本體 */
+  .input-field {
+    width: 100%;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    background-color: #FFEED6;
+    color: black;
+    border: none;
+    font-size: 1rem;
+    padding-right: 40px;
+  }
+  
+  
+  .password-group {
+    position: relative;
+  }
+  
+  .password-field {
+    padding-right: 2.5rem;
+  }
+  
+  /* 顯示／隱藏密碼按鈕固定在右側垂直置中 ✅ */
+  .toggle-password-btn {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+  } 
+  
+  .login-button {
+    width: 33.33%;
+    background-color: #F08651;
+    color: #FFEED6;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    margin-bottom: 20px;
+    border: none;
+    font-size: 1rem;
+    cursor: pointer;
+    margin: 16px auto 12px;
+  }
+  
+  .divider {
+    width: 100%;
+    border-top: 1px solid #F08651;
+    margin-bottom: 20px;
+  }
+  
+  .register-prompt {
+    margin-bottom: 0.5rem;
+  }
+  
+  .register-button {
+    width: 33.33%;
+    background-color: #D4EAFF;
+    color: black;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    border: none;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+  
+  /* 輸入欄位錯誤提示 */
+  .error-msg {
+    color: red;
+    opacity: 0.5;
+    font-size: 0.85rem;
+    margin-top: 4px;
+  }
+

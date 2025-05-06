@@ -1,0 +1,46 @@
+.task-schedule-wrapper {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between; /* 可改為 center / start / gap 視情況 */
+  align-items: flex-start;
+  gap: 12px;
+}
+
+/* 每日任務欄位 */
+.task-card {
+  background-color: #fbd4aa;
+  border-radius: 20px;
+  padding: 12px;
+  flex: 1;              /* 平均分配寬度 */
+  min-width: 0;         /* 避免撐爆 flex */
+  box-sizing: border-box;
+}
+
+
+/* 行程列表的圓點 */
+.task-list {
+    list-style: none;
+    padding-left: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: left;
+  }
+  
+
+/* 任務內容 */
+.task {
+    background-color: #fff5e6;
+    border-radius: 16px;
+    padding: 10px 10px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+/* 已完成任務 */
+  .task.completed {
+    text-decoration: line-through;
+    color: #aaa;
+  }
