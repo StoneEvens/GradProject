@@ -36,3 +36,53 @@
     width: 32px;  /* ✅ 放大 icon 圖片 */
     height: 32px;
   }
+
+.create-post-dialog {
+  position: fixed;
+  left: 50%;
+  bottom: 70px;
+  transform: translateX(-50%);
+  background: #FDF6EC;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 12px 14px 12px;
+  z-index: 2000;
+  max-width: 270px;
+  width: 92vw;
+}
+
+.dialog-tab {
+  font-size: 1.2rem;
+  font-weight: bold;
+  padding: 8px 18px;
+  background: #FFB370;
+  color: #222;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.dialog-tab + .dialog-tab {
+  margin-left: 12px;
+}
+.dialog-tab:hover {
+  background: #F08651;
+  color: #fff;
+}
+
+.dialog-arrow {
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 18px solid transparent;
+  border-right: 18px solid transparent;
+  border-top: 18px solid #F5F5F5;
+  z-index: 2001;
+}

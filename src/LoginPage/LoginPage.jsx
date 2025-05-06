@@ -45,7 +45,7 @@ export default function LoginPage() {
   const displayedPassword = showPassword ? password : maskedPassword
 
   return (
-    <div className="login-container">
+    <form className="login-container">
       <div className="login-box">
         <h1 className="login-title">寵物健康管理系統</h1>
 
@@ -96,6 +96,6 @@ export default function LoginPage() {
           註冊
         </button>
       </div>
-    </div>
+    </form>
   )
 }

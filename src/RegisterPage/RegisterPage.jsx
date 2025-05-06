@@ -67,7 +67,7 @@ export default function RegisterPage() {
   const displayedPassword = showPassword ? password : maskedPassword
 
   return (
-    <div className="register-container">
+    <form className="register-container">
       <div className="register-box">
         <h1 className="register-title">寵物健康管理系統</h1>
 
@@ -139,6 +139,6 @@ export default function RegisterPage() {
 
         <button className="register-button">註冊</button>
       </div>
-    </div>
+    </form>
   )
 }

@@ -12,11 +12,12 @@
 
 .header-buttons {
   display: flex;
-  justify-content: space-between; /* ✅ 左右貼齊 */
+  justify-content: space-between;
   align-items: center;
-  max-width: 400px;               /* ✅ 和主容器一致 */
+  max-width: 420px;
   margin: 0 auto;
-  padding: 0 10px;                /* ✅ 留內邊距，不會貼邊 */
+  padding: 0 10px;
+  gap: 10px;
 }
 
 .header-icon {
@@ -30,9 +31,22 @@
   justify-content: center;
   align-items: center;
   box-shadow: 0 0 4px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
 }
 
 .header-icon img {
   width: 40px;
   height: 40px;
+}
+
+.header-search {
+  flex: 1;
+  min-width: 0;
+  margin: 0 10px;
+}
+
+.header-right-group {
+  display: flex;
+  gap: 10px;
+  align-items: center;
 }

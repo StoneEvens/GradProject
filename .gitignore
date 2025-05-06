@@ -1,3 +1,6 @@
+# Mock 假圖片不上傳
+src/assets/MockPicture/
+
 # Logs
 logs
 *.log
