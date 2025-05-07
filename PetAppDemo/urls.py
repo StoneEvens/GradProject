@@ -15,16 +15,16 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib.auth.views import LoginView, LogoutView
-from django.urls import path
+from django.urls import include, path
 from django.contrib import admin
 from django.contrib.auth.decorators import login_required
 from Home.views import index as home
-from Register.views import index as register
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('home/', login_required(home, login_url='/login/'), name='home'),
-    path('login/', LoginView.as_view(template_name='login/index.html'), name='login'),
-    path('register/', register, name='register'),
-    path('logout/', LogoutView.as_view(next_page='/login/'), name='logout'),
+    path('login/', include('Login.urls'), name='login'),
+    path('register/', include('Register.urls'), name='register'),
+    #path('logout/', LogoutView.as_view(next_page='/login/'), name='logout'),
+    path('ocrtest/', include('OCRTest.urls'), name='ocrtest'),
 ]

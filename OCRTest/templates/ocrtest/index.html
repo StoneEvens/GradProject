@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Image Upload Test</title>
+</head>
+<body>
+  <h1>Select an Image</h1>
+  
+  <form method="POST" enctype="multipart/form-data" action="upload/">
+    {% csrf_token %}
+    <label for="image">Upload an image:</label>
+    <input type="file" name="image" id="image" accept="image/*" required>
+    <button type="submit">Submit</button>
+  </form>
+
+  {% if message %}
+      <p>{{ message }}</p>
+  {% endif %}
+</body>
+</html>

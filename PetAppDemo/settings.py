@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'Login.apps.LoginConfig',
     'Register.apps.RegisterConfig',
     'Home.apps.HomeConfig',
+    'OCRTest.apps.OcrtestConfig',
 ]
 
 MIDDLEWARE = [
