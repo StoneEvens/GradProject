@@ -106,19 +106,25 @@ class PostHashtagSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 #預覽用post
-class PostPreviewSerializer(serializers.Serializer):
-    id = serializers.IntegerField()
+class PostPreviewSerializer(serializers.ModelSerializer):
     first_image_url = serializers.SerializerMethodField()
 
-    def get_first_image_url(self, obj: Post):
-        # 這個方法現在會在視圖的 list 方法中被覆蓋
-        # 但我們保留它以防視圖以外的地方使用序列化器
-        qs = Image.objects.filter(
-            content_type__model='post',
-            object_id=obj.id
-        ).order_by('sort_order')
-        if qs.exists():
-            return qs.first().img_url
+    class Meta:
+        model = Post
+        fields = ['id', 'content', 'created_at', 'first_image_url']
+
+    def get_first_image_url(self, obj):
+        try:
+            post_content_type = ContentType.objects.get_for_model(Post)
+            first_image = Image.objects.filter(
+                content_type=post_content_type, 
+                object_id=obj.id
+            ).order_by('sort_order').first()
+            
+            if first_image:
+                return first_image.url if hasattr(first_image, 'url') else (first_image.img_url if hasattr(first_image, 'img_url') else None)
+        except Exception as e:
+            pass
         return None
 
 # === 搜尋結果用户序列化器 ===

@@ -27,48 +27,30 @@ class UserPostsPreviewListAPIView(generics.ListAPIView):
     @log_queries
     def get_queryset(self):
         user_id = self.kwargs['pk']
-        # 只需要 select_related user，因為 PostPreviewSerializer 目前不使用 user 數據
+        # 只需要 select_related user，如果 PostPreviewSerializer 不需要 user 數據則可移除
+        # 預加載圖片以優化 SerializerMethodField
+        # 假設 Image 模型通過 GenericRelation 與 Post 關聯，related_query_name 可能是 'images'
+        # 需要根據 Image 與 Post 的實際關聯方式調整 prefetch_related
+        # ContentType.objects.get_for_model(Post) 可以用於過濾 Image
+        
+        # 由於 first_image_url 在 Serializer 中查詢，這裡可以簡化
+        # 如果 Serializer 中的查詢效率不高，可以考慮在此處預加載 Post 的第一張 Image
         return Post.objects.filter(user_id=user_id).select_related(
-            'user'
+            'user' # 如果 serializer 需要 user
         ).order_by('-created_at')
     
-    # 覆寫 list 方法以使用統一的 APIResponse 格式，並優化圖片查詢
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
-        
-        # 獲取所有貼文 ID
-        post_ids = list(queryset.values_list('id', flat=True))
-        
-        # 使用 ImageService 一次性查詢所有相關圖片
-        post_images = {}
-        if post_ids:
-            # 預加載每個貼文的第一張圖片
-            image_map = ImageService.preload_first_image_for_objects(queryset, model_class=Post)
-            
-            # 將圖片映射轉換為 URL 映射
-            for post_id, image in image_map.items():
-                if image and hasattr(image.img_url, 'url'):
-                    post_images[post_id] = image.img_url.url
         
         # 如果使用分頁，處理分頁
         page = self.paginate_queryset(queryset)
         if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            
-            # 修改序列化器數據，直接使用預加載的圖片
-            for item in serializer.data:
-                post_id = item['id']
-                item['first_image_url'] = post_images.get(post_id)
-            
+            # context={'request': request}  如果序列化器需要 request context
+            serializer = self.get_serializer(page, many=True, context={'request': request})
             return self.get_paginated_response(serializer.data)
         
         # 如果不使用分頁
-        serializer = self.get_serializer(queryset, many=True)
-        
-        # 修改序列化器數據，直接使用預加載的圖片
-        for item in serializer.data:
-            post_id = item['id']
-            item['first_image_url'] = post_images.get(post_id)
+        serializer = self.get_serializer(queryset, many=True, context={'request': request})
         
         return APIResponse(
             data=serializer.data,
@@ -223,7 +205,6 @@ class CreatePostAPIView(APIView):
             content = request.data.get('content', '')
             hashtag_data = request.data.get('hashtags', [])
             pet_ids = request.data.get('pet_ids', [])
-            images = request.FILES.getlist('images', [])
             
             # 創建貼文
             post = Post.objects.create(
@@ -231,62 +212,47 @@ class CreatePostAPIView(APIView):
                 content=content
             )
             
-            # 提取並保存標籤(hashtags)
-            # 從內容中提取的標籤
-            extracted_hashtags = set(re.findall(r'#(\w+)', content))
+            # 更新 Hashtags (從內容提取和前端提供)
+            post.update_hashtags(content, hashtag_data) 
             
-            # 從前端直接傳來的標籤
-            if isinstance(hashtag_data, str):
+            # 標記寵物
+            # 確保 pet_ids 是列表
+            parsed_pet_ids = []
+            if isinstance(pet_ids, str):
                 try:
-                    hashtag_data = json.loads(hashtag_data)
+                    parsed_pet_ids = json.loads(pet_ids)
+                    if not isinstance(parsed_pet_ids, list):
+                        parsed_pet_ids = [parsed_pet_ids] # 如果解析出來不是列表，嘗試轉為列表
                 except json.JSONDecodeError:
-                    hashtag_data = []
+                    # 如果不是有效的JSON字符串，可以嘗試按逗號分割等方式，或忽略
+                    # logger.warning(f"無法解析 pet_ids JSON 字串: {pet_ids}")
+                    parsed_pet_ids = [] # 或者根據業務邏輯處理
+            elif isinstance(pet_ids, list):
+                parsed_pet_ids = pet_ids
             
-            # 合併所有標籤
-            all_hashtags = set(hashtag_data) | extracted_hashtags
+            if parsed_pet_ids: # 只有在解析出 ID 後才調用
+                post.tag_pets(parsed_pet_ids)
             
-            # 保存所有標籤
-            for tag in all_hashtags:
-                tag = slugify(tag)  # 標準化標籤格式
-                if tag:  # 確保標籤不為空
-                    PostHashtag.objects.create(
-                        post=post,
-                        tag=tag
-                    )
-            
-            # 處理寵物標記功能
-            # 確認寵物是否屬於該使用者並建立關聯
-            if pet_ids:
-                if isinstance(pet_ids, str):
+            # 處理圖片上傳 (使用 ImageService 風格)
+            uploaded_image_files = request.FILES.getlist('images')
+            if uploaded_image_files:
+                # from utils.image_service import ImageService # 確保 ImageService 已導入
+                # from django.contrib.contenttypes.models import ContentType
+                # post_content_type = ContentType.objects.get_for_model(Post)
+                for index, image_file_obj in enumerate(uploaded_image_files):
                     try:
-                        pet_ids = json.loads(pet_ids)
-                    except json.JSONDecodeError:
-                        pet_ids = []
-                
-                user_pets = Pet.objects.filter(
-                    owner=request.user,
-                    id__in=pet_ids
-                )
-                
-                # 創建寵物與貼文的關聯
-                post_content_type = ContentType.objects.get_for_model(Post)
-                for pet in user_pets:
-                    PetGenericRelation.objects.create(
-                        pet=pet,
-                        content_type=post_content_type,
-                        object_id=post.id
-                    )
-            
-            # 處理圖片上傳
-            for index, image_file in enumerate(images):
-                # 保存圖片
-                img = Image.objects.create(
-                    content_type=ContentType.objects.get_for_model(Post),
-                    object_id=post.id,
-                    img_url=image_file,
-                    sort_order=index,
-                    alt_text=f"{request.user.username}的貼文圖片 {index+1}"
-                )
+                        ImageService.save_image(
+                            image_file=image_file_obj,
+                            owner=request.user,
+                            content_object=post, # 直接傳遞 Post 實例
+                            image_type='post_image', # 定義一個合適的圖片類型
+                            sort_order=index,
+                            alt_text=f"{request.user.username} 的貼文圖片 {index+1}"
+                        )
+                    except Exception as img_e:
+                        # logger.error(f"保存貼文圖片時出錯: {str(img_e)}", exc_info=True)
+                        # 根據需求決定是否中止，或僅記錄錯誤並繼續
+                        pass 
             
             # 返回創建成功的貼文
             serializer = PostSerializer(post, context={'request': request})

@@ -32,54 +32,34 @@ class UserPetsAPIView(APIView):
     def get(self, request):
         user = request.user
         # 使用 prefetch_related 預加載相關數據，避免 N+1 查詢
-        pets = Pet.objects.filter(owner=user).prefetch_related(
-            'headshot',
+        pets_queryset = Pet.objects.filter(owner=user).prefetch_related(
+            'headshot', # 預加載 PetHeadshot (OneToOneField)
             Prefetch(
-                'illness_archives',
-                queryset=IllnessArchive.objects.prefetch_related('illnesses__illness')
+                'illness_archives', # Pet -> IllnessArchive (related_name)
+                queryset=IllnessArchive.objects.prefetch_related(
+                    'illnesses__illness' # IllnessArchive -> ArchiveIllnessRelation (related_name='illnesses') -> Illness
+                )
             )
         )
 
-        # 預加載所有寵物的頭像
-        image_map = {}
-        try:
-            # 對於每個寵物，獲取頭像
-            pet_ids = list(pets.values_list('id', flat=True))
-            pet_headshots = {}
-            
-            if pet_ids:
-                from pets.models import PetHeadshot
-                # 批量獲取所有頭像
-                headshots = PetHeadshot.objects.filter(pet_id__in=pet_ids)
-                for headshot in headshots:
-                    pet_headshots[headshot.pet_id] = headshot.img_url.url if hasattr(headshot.img_url, 'url') else None
-        except Exception as e:
-            logger.error(f"預加載寵物頭像時發生錯誤: {str(e)}", exc_info=True)
-            # 如果發生錯誤，繼續處理其他數據，僅記錄錯誤
-
         result = []
-        for pet in pets:
-            # 由於已經預加載了相關數據，這裡的查詢不會觸發額外的數據庫請求
-            illness_names = set()
-            for archive in pet.illness_archives.all():
-                for relation in archive.illnesses.all():
-                    illness_names.add(relation.illness.illness_name)
-
-            # 從預加載的頭像中獲取 URL
-            headshot_url = pet_headshots.get(pet.id)
-
+        for pet_instance in pets_queryset:
+            headshot_url_str = None
+            if hasattr(pet_instance, 'headshot') and pet_instance.headshot and hasattr(pet_instance.headshot, 'url'):
+                headshot_url_str = pet_instance.headshot.url # 使用 PetHeadshot 的 url 屬性
+            
             result.append({
-                "pet_id": pet.id,
-                "pet_name": pet.pet_name,
-                "pet_type": pet.pet_type,
-                "weight": pet.weight,
-                "height": pet.height,
-                "age": pet.age,
-                "breed": pet.breed,
-                "pet_stage": pet.pet_stage,
-                "predicted_adult_weight": pet.predicted_adult_weight,
-                "illnesses": list(illness_names),
-                "headshot_url": headshot_url
+                "pet_id": pet_instance.id,
+                "pet_name": pet_instance.pet_name,
+                "pet_type": pet_instance.pet_type,
+                "weight": pet_instance.weight,
+                "height": pet_instance.height,
+                "age": pet_instance.age,
+                "breed": pet_instance.breed,
+                "pet_stage": pet_instance.pet_stage,
+                "predicted_adult_weight": pet_instance.predicted_adult_weight,
+                "illnesses": pet_instance.all_illness_names, # 使用新的屬性方法
+                "headshot_url": headshot_url_str
             })
 
         return APIResponse(
@@ -175,38 +155,42 @@ class CreateAbnormalPostAPIView(APIView):
                 pet=pet,
                 user=request.user,
                 content=content,
-                weight=float(weight) if weight else 0,
-                body_temperature=float(body_temperature) if body_temperature else 0,
-                water_amount=int(water_amount) if water_amount else 0
+                weight=float(weight) if weight is not None and weight != '' else None, # 允許空值或None
+                body_temperature=float(body_temperature) if body_temperature is not None and body_temperature != '' else None,
+                water_amount=int(water_amount) if water_amount is not None and water_amount != '' else None
             )
             
             # 新增症狀關聯
             if symptoms_ids:
-                for symptom_id in symptoms_ids:
-                    try:
-                        symptom = Symptom.objects.get(id=symptom_id)
-                        PostSymptomsRelation.objects.create(
-                            post=abnormal_post,
-                            symptom=symptom
-                        )
-                    except Symptom.DoesNotExist:
-                        # 記錄錯誤但繼續處理
-                        logger.warning(f"嘗試關聯不存在的症狀ID: {symptom_id}")
+                abnormal_post.add_symptoms_by_ids(symptoms_ids)
             
-            # 處理圖片
-            if images_data:
-                content_type = ContentType.objects.get_for_model(AbnormalPost)
-                for index, image_data in enumerate(images_data):
-                    img_url = image_data.get('image_data')
-                    if img_url:
-                        Image.objects.create(
-                            content_type=content_type,
-                            object_id=abnormal_post.id,
-                            img_url=img_url,
-                            sort_order=index
-                        )
+            # 處理圖片 (假設使用 ImageService)
+            if images_data: # images_data 是 request.FILES.getlist('images') 在序列化器中處理或直接用 request.FILES
+                # images_data 應該是 request.FILES.getlist('images')
+                # 如果序列化器已處理，這裡的 images_data 可能是文件名或已上傳的實例列表
+                # 為保持一致性，假設 View 直接處理 request.FILES
+                uploaded_images = request.FILES.getlist('images') # 直接從 request files 獲取
+                if uploaded_images:
+                    # from utils.image_service import ImageService # 確保 ImageService 被正確導入
+                    # from django.contrib.contenttypes.models import ContentType
+                    # abnormal_post_content_type = ContentType.objects.get_for_model(AbnormalPost)
+                    
+                    for index, image_file_obj in enumerate(uploaded_images):
+                        try:
+                            # 假設 ImageService.save_image 存在且功能如預期
+                            ImageService.save_image(
+                                image_file=image_file_obj,
+                                owner=request.user,
+                                content_object=abnormal_post, # 直接傳遞 AbnormalPost 實例
+                                image_type='abnormal_post_image', # 定義一個合適的圖片類型
+                                sort_order=index,
+                                alt_text=f"寵物 {pet.pet_name} 的異常記錄圖片 {index+1}"
+                            )
+                        except Exception as img_e:
+                            logger.error(f"保存異常記錄圖片時出錯: {str(img_e)}", exc_info=True)
+                            # 根據需求決定是否因為單張圖片失敗而中止整個請求
             
-            # 獲取完整的異常記錄資料（包括關聯的症狀）
+            # 獲取完整的異常記錄資料（包括關聯的症狀和圖片）
             serializer = AbnormalPostSerializer(abnormal_post)
             
             return APIResponse(

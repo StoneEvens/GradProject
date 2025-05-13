@@ -202,75 +202,53 @@ class UserSummaryView(APIView):
 class CompleteMissionAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
-    @staticmethod
-    def award_points(user_mission):
-        """
-        給用戶添加任務積分
-        
-        Args:
-            user_mission: UserMission實例
-        """
-        points_earned = user_mission.mission.point
-        user = user_mission.user
-        user.points += points_earned
-        user.save(update_fields=['points'])
-        
-        return points_earned, user.points
-
     def post(self, request, mission_id):
         try:
             # 獲取用戶任務
-            user_mission = UserMission.objects.get(
+            user_mission = UserMission.objects.select_related('mission', 'user').get(
                 id=mission_id,
                 user=request.user,
                 status='pending'
-            ).select_related('mission')
+            )
             
             # 檢查是否有條件需要滿足
             mission_conditions = user_mission.mission.conditions.all()
+            points_earned = user_mission.mission.point
+            user = user_mission.user
             
             if mission_conditions.exists():
                 # 如果任務需要滿足特定條件
-                from accounts.services import MissionConditionService
-                is_completed = MissionConditionService.check_mission_completion(user_mission)
+                from accounts.services import MissionConditionService # 假設此服務存在
+                is_completed, message = MissionConditionService.check_mission_completion(user_mission)
                 
                 if not is_completed:
                     return APIResponse(
-                        message="任務條件尚未滿足，無法完成任務",
+                        message=message or "任務條件尚未滿足，無法完成任務",
                         code=drf_status.HTTP_400_BAD_REQUEST,
                         status=drf_status.HTTP_400_BAD_REQUEST
                     )
                 
-                # 任務已在check_mission_completion中被標記為完成並獲得積分
-                points_earned = user_mission.mission.point
-                return APIResponse(
-                    message="任務完成成功！",
-                    data={
-                        'mission_id': user_mission.id,
-                        'points_earned': points_earned,
-                        'total_points': request.user.points
-                    }
-                )
+                # 假設 MissionConditionService.check_mission_completion 會處理狀態更新和積分 (如果它會)
+                # 如果 MissionConditionService 不處理積分，則在這裡處理
+                # current_total_points = user.add_points(points_earned) # 移到下方統一處理或由 service 處理
             else:
-                # 沒有特定條件的任務，直接標記為完成
-                # 標記為已完成
-                today = date.today()
+                # 如果沒有條件，直接標記完成並給予積分
                 user_mission.status = 'completed'
-                user_mission.date_achieved = today
+                user_mission.date_achieved = date.today()
                 user_mission.save(update_fields=['status', 'date_achieved'])
-                
-                # 給用戶添加積分
-                points_earned, total_points = self.award_points(user_mission)
-                
-                return APIResponse(
-                    message="任務完成成功！",
-                    data={
-                        'mission_id': user_mission.id,
-                        'points_earned': points_earned,
-                        'total_points': total_points
-                    }
-                )
+                # 給予積分
             
+            current_total_points = user.add_points(points_earned)
+
+            return APIResponse(
+                message="任務完成成功！",
+                data={
+                    'mission_id': user_mission.id,
+                    'points_earned': points_earned,
+                    'current_total_points': current_total_points
+                }
+            )
+
         except UserMission.DoesNotExist:
             return APIResponse(
                 message="找不到指定的任務或任務已完成",

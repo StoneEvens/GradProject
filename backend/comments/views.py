@@ -82,7 +82,7 @@ class CommentDetailView(generics.RetrieveUpdateDestroyAPIView):
     
     def destroy(self, request, *args, **kwargs):
         """
-        軟刪除評論：保留模型但清空內容和刪除相關圖片
+        軟刪除評論：調用模型的 soft_delete 方法
         """
         comment = self.get_object()
         if comment.user != request.user:
@@ -91,17 +91,7 @@ class CommentDetailView(generics.RetrieveUpdateDestroyAPIView):
                 status=drf_status.HTTP_403_FORBIDDEN
             )
         
-        # 將評論內容替換為刪除標記
-        comment.content = "[此評論已刪除]"
-        comment.popularity = 0  # 重置熱度
-        comment.save()
-        
-        # 刪除關聯的圖片
-        comment_type = ContentType.objects.get_for_model(Comment)
-        Image.objects.filter(
-            content_type=comment_type,
-            object_id=comment.id
-        ).delete()
+        comment.soft_delete() # 調用模型方法
         
         return Response(
             {"detail": "評論已成功刪除"}, 

@@ -22,7 +22,7 @@ from django.db import transaction
 from django.contrib.contenttypes.models import ContentType
 from .serializers import UploadFeedSerializer, NutritionCalculatorRequestSerializer, FeedStatusSerializer, FeedSerializer, PetFeedSerializer, PetFeedCreateSerializer
 from .tasks import process_feed_ocr
-from .utils import extract_nutrition_info_for_chinese
+from feeds.services import calculate_der
 from django.core.exceptions import ValidationError
 from django.http import Http404
 from drf_yasg.utils import swagger_auto_schema
@@ -153,46 +153,27 @@ class FeedNutritionCalculatorAPIView(APIView):
         try:
             feed = Feed.objects.get(id=feed_id)
             
-            # 檢查飼料處理狀態
-            if feed.processing_status == 'pending' or feed.processing_status == 'processing':
-                return APIResponse(
-                    code=202, 
-                    message="飼料營養信息正在處理中，請稍後再試",
-                    data={
-                        "feed_id": feed.id,
-                        "name": feed.name,
-                        "processing_status": feed.processing_status
-                    }
-                )
-            
-            if feed.processing_status == 'failed':
-                return APIResponse(
-                    code=400, 
-                    message="飼料營養信息處理失敗，請重新上傳",
-                    data={
-                        "feed_id": feed.id,
-                        "name": feed.name,
-                        "processing_status": feed.processing_status,
-                        "error": feed.processing_error
-                    }
-                )
-            
-            # 檢查飼料營養數據完整性
-            required_nutrients = ['protein', 'fat', 'carbohydrate']
-            missing_nutrients = [nutrient for nutrient in required_nutrients 
-                              if getattr(feed, nutrient, 0) == 0]
-            
-            if missing_nutrients:
-                return APIResponse(
-                    code=400,
-                    message="飼料營養數據不完整，無法進行準確計算",
-                    data={
-                        "feed_id": feed.id,
-                        "name": feed.name,
-                        "missing_nutrients": missing_nutrients
-                    }
-                )
+            # 使用模型方法檢查飼料狀態和數據完整性
+            is_ready, message, status_code_hint = feed.is_ready_for_calculation()
+            if not is_ready:
+                response_status = drf_status.HTTP_400_BAD_REQUEST
+                if status_code_hint == 'failed': # 處理失敗
+                    response_status = drf_status.HTTP_400_BAD_REQUEST
+                elif status_code_hint is None: # pending or processing
+                    response_status = drf_status.HTTP_202_ACCEPTED 
                 
+                return APIResponse(
+                    code=response_status, 
+                    message=message,
+                    data={
+                        "feed_id": feed.id,
+                        "name": feed.feed_name,
+                        "processing_status": feed.processing_status,
+                        "error_detail": feed.processing_error if status_code_hint == 'failed' else None
+                    },
+                    status=response_status
+                )
+            
             # 添加用户最近使用的飼料記錄
             UserFeed.objects.update_or_create(
                 user=request.user,
@@ -220,84 +201,42 @@ class FeedNutritionCalculatorAPIView(APIView):
             
         except Feed.DoesNotExist:
             return APIResponse(
-                code=404, 
+                code=drf_status.HTTP_404_NOT_FOUND, 
                 message=f"找不到ID為 {feed_id} 的飼料",
                 status=drf_status.HTTP_404_NOT_FOUND
             )
         
         # 從已驗證的數據中提取寵物信息
-        pet_type = pet_info['pet_type']
-        
+        # pet_type = pet_info['pet_type'] # 改為從 pet_info 字典中獲取
+        # pet_weight = float(pet_info['weight'])
+        # pet_stage = pet_info['pet_stage']
+        # is_spayed_neutered = pet_info.get('is_spayed_neutered', False) # 移到 service 中處理
+
+        # 準備傳遞給 calculate_der 的 pet_info
+        # 確保 weight 是 float
         try:
-            pet_weight = float(pet_info['weight'])
-            
-            # 添加體重合理性檢查
-            if pet_weight <= 0:
-                return APIResponse(
-                    code=400,
-                    message="寵物體重必須大於0",
-                    status=drf_status.HTTP_400_BAD_REQUEST
-                )
-                
-            if pet_type == 'dog' and pet_weight > 100:
-                return APIResponse(
-                    code=400,
-                    message="狗狗體重超出合理範圍",
-                    data={"valid_range": {"min": 0.1, "max": 100}},
-                    status=drf_status.HTTP_400_BAD_REQUEST
-                )
-                
-            if pet_type == 'cat' and pet_weight > 20:
-                return APIResponse(
-                    code=400,
-                    message="貓咪體重超出合理範圍",
-                    data={"valid_range": {"min": 0.1, "max": 20}},
-                    status=drf_status.HTTP_400_BAD_REQUEST
-                )
+            pet_info_for_calc = {
+                'weight_kg': float(pet_info['weight']),
+                'pet_type': pet_info['pet_type'],
+                'pet_stage': pet_info['pet_stage'],
+                'is_spayed_neutered': pet_info.get('is_spayed_neutered', False),
+                'activity_level': pet_info.get('activity_level', 'moderate') # 假設 activity_level 也可能傳入
+            }
+            if pet_info_for_calc['weight_kg'] <= 0:
+                return APIResponse(code=400, message="寵物體重必須大於0", status=drf_status.HTTP_400_BAD_REQUEST)
+            # 可以在此處添加更詳細的體重範圍檢查，或者依賴 service 中的檢查
+
         except (ValueError, TypeError):
-            return APIResponse(
-                code=400,
-                message="寵物體重必須為有效數字",
-                status=drf_status.HTTP_400_BAD_REQUEST
-            )
-            
-        pet_stage = pet_info['pet_stage']
+            return APIResponse(code=400, message="寵物體重必須為有效數字", status=drf_status.HTTP_400_BAD_REQUEST)
         
         # 計算寵物的每日代謝能量需求 (kcal/day)
-        daily_energy_need = 0
-        
-        if pet_type == 'dog':
-            # 狗的能量需求計算
-            if pet_stage == 'adult':
-                # 成年犬: 70 * 體重^0.75 * 1.6
-                daily_energy_need = 70 * (pet_weight ** 0.75) * 1.6
-            elif pet_stage == 'pregnant':
-                # 懷孕母犬: 成年犬需求 * 1.5
-                daily_energy_need = 70 * (pet_weight ** 0.75) * 1.6 * 1.5
-            elif pet_stage == 'lactating':
-                # 哺乳母犬: 成年犬需求 * 3
-                daily_energy_need = 70 * (pet_weight ** 0.75) * 1.6 * 3
-            elif pet_stage == 'puppy':
-                # 幼犬: 成年犬需求 * 2
-                daily_energy_need = 70 * (pet_weight ** 0.75) * 1.6 * 2
-        else:  # cat
-            # 貓的能量需求計算
-            if pet_stage == 'adult':
-                # 成年貓: 70 * 體重^0.75 * 1.4
-                daily_energy_need = 70 * (pet_weight ** 0.75) * 1.4
-            elif pet_stage == 'pregnant':
-                # 懷孕母貓: 成年貓需求 * 1.5
-                daily_energy_need = 70 * (pet_weight ** 0.75) * 1.4 * 1.5
-            elif pet_stage == 'lactating':
-                # 哺乳母貓: 成年貓需求 * 3
-                daily_energy_need = 70 * (pet_weight ** 0.75) * 1.4 * 3
-            elif pet_stage == 'kitten':
-                # 幼貓: 成年貓需求 * 2.5
-                daily_energy_need = 70 * (pet_weight ** 0.75) * 1.4 * 2.5
+        try:
+            daily_energy_need = calculate_der(pet_info_for_calc)
+        except ValueError as e:
+             return APIResponse(code=400, message=str(e), status=drf_status.HTTP_400_BAD_REQUEST)
         
         # 計算飼料的代謝能量 (kcal/100g)
-        # 修菲公式: ME (kcal/100g) = 4 * 蛋白質% + 9 * 脂肪% + 4 * 碳水化合物%
-        feed_energy_per_100g = (4 * feed.protein) + (9 * feed.fat) + (4 * feed.carbohydrate)
+        feed_energy_per_100g = feed.get_energy_per_100g()
         
         # 合理性檢查: 確保飼料能量不為零
         if feed_energy_per_100g <= 0:
@@ -331,10 +270,10 @@ class FeedNutritionCalculatorAPIView(APIView):
         energy_per_gram = feed_energy_per_100g / 100
         max_reasonable_amount = 0
         
-        if pet_type == 'dog':
-            max_reasonable_amount = pet_weight * 30  # 假設狗狗最多吃自身體重30%的飼料
+        if pet_info['pet_type'] == 'dog':
+            max_reasonable_amount = pet_info['weight'] * 30  # 假設狗狗最多吃自身體重30%的飼料
         else:  # cat
-            max_reasonable_amount = pet_weight * 20  # 假設貓咪最多吃自身體重20%的飼料
+            max_reasonable_amount = pet_info['weight'] * 20  # 假設貓咪最多吃自身體重20%的飼料
             
         if daily_feed_grams > max_reasonable_amount:
             warnings.append(f"計算出的飼料量可能超出寵物可接受範圍，建議諮詢獸醫")
@@ -383,9 +322,9 @@ class FeedNutritionCalculatorAPIView(APIView):
             extra={
                 'user_id': request.user.id,
                 'feed_id': feed.id,
-                'pet_type': pet_type,
-                'pet_weight': pet_weight,
-                'pet_stage': pet_stage,
+                'pet_type': pet_info['pet_type'],
+                'pet_weight': pet_info['weight'],
+                'pet_stage': pet_info['pet_stage'],
                 'daily_feed_grams': daily_feed_grams,
                 'has_warnings': bool(warnings)
             }
@@ -531,63 +470,37 @@ class RecentUsedFeedsAPIView(APIView):
         返回用戶最近使用過的所有處理完成的飼料，按最近使用時間降序排列
         """
         try:
-            # 優化查詢 - 使用 select_related 和 prefetch_related 減少數據庫查詢
             user_feeds = UserFeed.objects.filter(
-                user=request.user
+                user=request.user,
+                feed__processing_status__in=['completed', 'completed_with_warnings'] # 過濾處理完成的飼料
             ).select_related(
-                'feed'  # 預加載 feed 數據
-            ).prefetch_related(
-                Prefetch(
-                    'feed__users',
-                    queryset=UserFeed.objects.filter(user=request.user),
-                    to_attr='user_feed_cache'
-                )
+                'feed'
             ).order_by('-last_used')
             
-            # 提取所有飼料對象，用於後續批量加載圖片
-            feeds = [user_feed.feed for user_feed in user_feeds 
-                    if user_feed.feed.processing_status in ['completed', 'completed_with_warnings']]
-            
-            if not feeds:
-                # 如果沒有符合條件的飼料，直接返回空列表
-                paginator = self.pagination_class()
-                return paginator.get_paginated_response([])
+            feeds_for_pagination = [uf.feed for uf in user_feeds]
             
             # 批量預加載所有飼料的圖片
-            from feeds.models import Feed
-            feed_ids = [feed.id for feed in feeds]
-            image_map = ImageService.preload_images_for_objects(feeds, model_class=Feed)
-            
-            # 構建結果數據
-            feeds_data = []
-            for user_feed in user_feeds:
-                feed = user_feed.feed
-                
-                # 只顯示處理完成或處理完成但有警告的飼料
-                if feed.processing_status in ['completed', 'completed_with_warnings']:
-                    # 使用序列化器獲取數據
-                    feed_serializer = FeedSerializer(feed)
-                    feed_data = feed_serializer.data
-                    feed_data['last_used'] = user_feed.last_used.strftime('%Y-%m-%d %H:%M:%S')
-                    
-                    # 從預加載的圖片中獲取 URL
-                    feed_images = image_map.get(feed.id, [])
-                    if feed_images:
-                        feed_data['front_image_url'] = feed_images[0].img_url.url if len(feed_images) >= 1 and hasattr(feed_images[0].img_url, 'url') else None
-                        feed_data['nutrition_image_url'] = feed_images[1].img_url.url if len(feed_images) >= 2 and hasattr(feed_images[1].img_url, 'url') else None
-                    
-                    feeds_data.append(feed_data)
-            
-            # 應用分頁
+            image_map = {}
+            if feeds_for_pagination:
+                # 假設 ImageService.preload_images_for_objects 返回 {obj_id: [Image, Image, ...]} 的映射
+                # 並且 Image 實例有 image_type 屬性 和 url 屬性 (或 img_url)
+                image_map = ImageService.preload_images_for_objects(feeds_for_pagination, model_class=Feed)
+
+            # 應用分頁 - 分頁 queryset 而不是序列化後的數據
             paginator = self.pagination_class()
-            result_page = paginator.paginate_queryset(feeds_data, request)
+            page = paginator.paginate_queryset(feeds_for_pagination, request, view=self)
+            if page is not None:
+                # 在序列化時傳遞 image_map 和 request 到 context
+                serializer = FeedSerializer(page, many=True, context={'request': request, 'image_map': image_map})
+                return paginator.get_paginated_response(serializer.data)
             
-            # 返回分頁結果
-            return paginator.get_paginated_response(result_page)
+            # 如果不使用分頁 (或者 paginator 返回 None)
+            serializer = FeedSerializer(feeds_for_pagination, many=True, context={'request': request, 'image_map': image_map})
+            return APIResponse(data=serializer.data, message="獲取最近使用飼料成功")
             
         except Exception as e:
             logger.error(f"獲取最近使用的飼料列表時發生錯誤: {str(e)}", exc_info=True)
-            return APIResponse(code=500, message=f"獲取飼料列表時發生錯誤: {str(e)}")
+            return APIResponse(code=drf_status.HTTP_500_INTERNAL_SERVER_ERROR, message=f"獲取飼料列表時發生錯誤: {str(e)}")
 
 #檢查飼料處理狀態
 class FeedStatusAPIView(APIView):

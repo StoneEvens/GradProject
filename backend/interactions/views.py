@@ -15,83 +15,39 @@ class BaseInteractionView(APIView):
     """
     permission_classes = [permissions.IsAuthenticated]
     model = None  # 子類需要指定
-    allowed_relations = ['upvoted', 'downvoted']  # 子類可以覆蓋
+    allowed_relations = ['upvoted', 'downvoted']  # 子類可以覆蓋 (例如 Post 可能有 'saved', 'shared')
 
     def post(self, request, object_id, format=None):
         """
-        添加或移除互動
+        通過調用目標物件的 handle_interaction 方法來添加或移除互動。
         """
-        # 獲取對象
         target_object = get_object_or_404(self.model, id=object_id)
         relation = request.data.get('relation')
-        
-        # 檢查互動類型是否有效
-        if relation not in self.allowed_relations:
+
+        if not relation:
             return Response(
-                {"detail": f"互動類型無效，僅支持 {', '.join(self.allowed_relations)}"},
+                {"detail": "未提供 'relation' 參數。"},
                 status=drf_status.HTTP_400_BAD_REQUEST
             )
-        
-        content_type = ContentType.objects.get_for_model(self.model)
-        
-        # 檢查互動是否已存在
-        interaction = UserInteraction.objects.filter(
-            user=request.user,
-            content_type=content_type,
-            object_id=object_id,
-            relation=relation
-        ).first()
-        
-        # 如已存在則刪除 (取消互動)
-        if interaction:
-            interaction.delete()
-            
-            # 如果是取消點讚，且對象有熱度屬性，則更新熱度
-            if relation == 'upvoted' and hasattr(target_object, 'popularity'):
-                target_object.popularity = max(0, target_object.popularity - 1)
-                target_object.save()
-            
+
+        if not hasattr(target_object, 'handle_interaction'):
             return Response(
-                {"detail": f"已取消{self._get_action_name(relation)}"},
-                status=drf_status.HTTP_200_OK
+                {"detail": f"模型 '{self.model.__name__}' 未實現 'handle_interaction' 方法。"},
+                status=drf_status.HTTP_501_NOT_IMPLEMENTED
             )
         
-        # 檢查是否有互斥的互動 (若已踩，則不能點讚，反之亦然)
-        if relation in ['upvoted', 'downvoted']:
-            opposite_relation = 'downvoted' if relation == 'upvoted' else 'upvoted'
-            opposite = UserInteraction.objects.filter(
-                user=request.user,
-                content_type=content_type,
-                object_id=object_id,
-                relation=opposite_relation
-            ).first()
-            
-            # 若存在互斥互動，則刪除
-            if opposite:
-                opposite.delete()
-                
-                # 若刪除的是踩，且對象有熱度屬性，則更新熱度
-                if opposite_relation == 'downvoted' and hasattr(target_object, 'popularity'):
-                    target_object.popularity = target_object.popularity + 1
-                    target_object.save()
-        
-        # 創建新互動
-        UserInteraction.objects.create(
-            user=request.user,
-            content_type=content_type,
-            object_id=object_id,
-            relation=relation
+        # allowed_relations 應該在子視圖中根據模型具體定義
+        # 例如 PostInteractionView.allowed_relations = ['upvoted', 'downvoted', 'saved', 'shared']
+        success, message, response_status_code = target_object.handle_interaction(
+            request.user,
+            relation,
+            self.allowed_relations 
         )
+
+        if not success:
+            return Response({"detail": message}, status=response_status_code)
         
-        # 更新熱度
-        if relation == 'upvoted' and hasattr(target_object, 'popularity'):
-            target_object.popularity = target_object.popularity + 1
-            target_object.save()
-        
-        return Response(
-            {"detail": f"已成功{self._get_action_name(relation)}"},
-            status=drf_status.HTTP_201_CREATED
-        )
+        return Response({"detail": message}, status=response_status_code)
     
     def _get_action_name(self, relation):
         """獲取互動類型的中文名稱"""

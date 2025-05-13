@@ -3,16 +3,56 @@ from .models import Feed, UserFeed, PetFeed
 from utils.file_safety import validate_image_content, MAX_FILE_SIZE, SAFE_IMAGE_MIMETYPES
 from django.core.validators import MinValueValidator, MaxValueValidator
 import re
+from media.models import Image
+from django.contrib.contenttypes.models import ContentType
 
 # === 飼料基本信息序列化器 ===
 class FeedSerializer(serializers.ModelSerializer):
     """
     飼料數據序列化器，用於展示飼料詳細信息
     """
+    front_image_url = serializers.SerializerMethodField()
+    nutrition_image_url = serializers.SerializerMethodField()
+    user_interaction = serializers.SerializerMethodField()
+    interaction_stats = serializers.SerializerMethodField()
+
     class Meta:
         model = Feed
-        exclude = ['extracted_text', 'processing_error']
-        read_only_fields = ['processing_status', 'created_at', 'updated_at']
+        fields = [
+            'id', 'feed_name', 'protein', 'fat', 'calcium', 'phosphorus', 
+            'magnesium', 'sodium', 'carbohydrate', 'extracted_text',
+            'processing_status', 'processing_error', 'popularity',
+            'created_at', 'updated_at', 
+            'front_image_url', 'nutrition_image_url',
+            'user_interaction', 'interaction_stats'
+        ]
+        read_only_fields = ['popularity', 'created_at', 'updated_at', 'processing_status', 'processing_error', 'extracted_text']
+
+    def _get_image_url_from_context(self, obj, image_type_prefix):
+        image_map = self.context.get('image_map', {})
+        images_for_obj = image_map.get(obj.id, [])
+        for img in images_for_obj:
+            if hasattr(img, 'image_type') and img.image_type == image_type_prefix:
+                return img.url if hasattr(img, 'url') else (img.img_url if hasattr(img, 'img_url') else None)
+        return None
+
+    def get_front_image_url(self, obj):
+        return self._get_image_url_from_context(obj, 'feed_front')
+
+    def get_nutrition_image_url(self, obj):
+        return self._get_image_url_from_context(obj, 'feed_nutrition')
+
+    def get_user_interaction(self, obj):
+        request = self.context.get('request')
+        if request and hasattr(request, "user") and request.user.is_authenticated:
+            return {
+                'upvoted': obj.check_user_interaction(request.user, 'upvoted'),
+                'saved': obj.check_user_interaction(request.user, 'saved'),
+            }
+        return None
+
+    def get_interaction_stats(self, obj):
+        return obj.get_interaction_stats()
 
 # === 飼料處理狀態序列化器 ===
 class FeedStatusSerializer(serializers.ModelSerializer):

@@ -13,6 +13,14 @@ class CustomUser(AbstractUser):
     def __str__(self):
         return self.username
 
+    def add_points(self, points_to_add):
+        """為使用者增加指定數量的積分並保存。"""
+        if points_to_add == 0:
+            return self.points
+        self.points += points_to_add
+        self.save(update_fields=['points'])
+        return self.points
+
 # 使用者追蹤功能
 class UserFollow(models.Model):
     user = models.ForeignKey(
