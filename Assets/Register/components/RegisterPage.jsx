@@ -21,16 +21,20 @@ export default function RegisterPage() {
   const [hasSymbol, setHasSymbol] = useState(false)
 
   const handleSubmit = (e) => {
-    // Validate form
-    if (!name || !username || !email || !password) {
-      e.preventDefault();
-      alert('請填寫所有欄位');
+    const isFormValid = name && username && email && password && isLengthValid && hasUppercase && hasSymbol;
+    
+    if (!isFormValid) {
+      if (!name || !username || !email || !password) {
+        alert('請填寫所有欄位');
+      } else {
+        alert('請確認密碼符合所有條件');
+      }
+      return;
     }
     
-    if (!isLengthValid || !hasUppercase || !hasSymbol) {
-      e.preventDefault();
-      alert('請確認密碼符合所有條件');
-    }
+    // If validation passes, submit the form
+    const form = e.target;
+    form.submit();
   }
 
   const handlePasswordChange = (e) => {
