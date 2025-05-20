@@ -1,44 +1,59 @@
-import React, { useState } from 'react';
-import './LoginPage.css';
+import React, { useState } from 'react'
+import './LoginPage.css'
 import hideIcon from '../icons/LoginButton_HidePassword.png';
 import showIcon from '../icons/LoginButton_ShowPassword.png';
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [emailError, setEmailError] = useState(false);
-  const [passwordError, setPasswordError] = useState(false);
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [maskedPassword, setMaskedPassword] = useState('')
+  const [timeoutId, setTimeoutId] = useState(null)
+  const [emailError, setEmailError] = useState(false)
+  const [passwordError, setPasswordError] = useState(false)
 
-  const handleSubmit = (e) => {
-    // Validate input fields.
-    const isEmailEmpty = email.trim() === '';
-    const isPasswordEmpty = password.trim() === '';
+  const handlePasswordChange = (e) => {
+    const input = e.target.value
+    setPassword(input)
 
-    setEmailError(isEmailEmpty);
-    setPasswordError(isPasswordEmpty);
+    if (timeoutId) clearTimeout(timeoutId)
+    const id = setTimeout(() => {
+      setMaskedPassword('*'.repeat(input.length))
+    }, 1000)
 
-    // Prevent submission if there are errors.
-    if (isEmailEmpty || isPasswordEmpty) {
-      e.preventDefault();
+    setMaskedPassword(input)
+    setTimeoutId(id)
+  }
+
+  const handleLogin = () => {
+    const isEmailEmpty = email.trim() === ''
+    const isPasswordEmpty = password.trim() === ''
+
+    setEmailError(isEmailEmpty)
+    setPasswordError(isPasswordEmpty)
+
+    if (isEmailEmpty && isPasswordEmpty) {
+      e.preventDefault()
     }
-    // If valid, the form submission is handed off to Django.
-  };
+  }
+
+  const handleEmailFocus = () => setEmailError(false)
+  const handlePasswordFocus = () => setPasswordError(false)
+  const displayedPassword = showPassword ? password : maskedPassword
 
   return (
     <form
       className="login-container"
       action="/login/"          // Django’s LoginView will handle this POST.
       method="POST"
-      onSubmit={handleSubmit}
+      onSubmit={handleLogin}
     >
-      {/* CSRF protection – the CSRF token is injected by the Django template */}
       <input
         type="hidden"
         name="csrfmiddlewaretoken"
         value={window.CSRF_TOKEN}
       />
-
+      
       <div className="login-box">
         <h1 className="login-title">寵物健康管理系統</h1>
 
@@ -46,10 +61,10 @@ export default function LoginPage() {
           <label className="input-label">Email</label>
           <input
             type="text"
-            name="username" // Django uses “username”. If you use email as username, simply treat email as the username.
+            name="username"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            onFocus={() => setEmailError(false)}
+            onFocus={handleEmailFocus}
             className={`input-field ${emailError ? 'error' : ''}`}
           />
           {emailError && <p className="error-msg">請填入Email</p>}
@@ -59,16 +74,16 @@ export default function LoginPage() {
           <label className="input-label">密碼</label>
           <div className="input-wrapper">
             <input
-              type={showPassword ? "text" : "password"} // Toggle showing/hiding password.
+              type={showPassword ? "text" : "password"}
               name="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              onFocus={() => setPasswordError(false)}
+              value={displayedPassword}
+              onChange={handlePasswordChange}
+              onFocus={handlePasswordFocus}
               className={`input-field password-field ${passwordError ? 'error' : ''}`}
             />
             <img
               src={showPassword ? hideIcon : showIcon}
-              alt="Toggle Password Visibility"
+              alt="Toggle Password"
               className="toggle-password-btn"
               onClick={() => setShowPassword(!showPassword)}
             />
@@ -76,21 +91,16 @@ export default function LoginPage() {
           {passwordError && <p className="error-msg">請填入密碼</p>}
         </div>
 
-        {/* This submit button will trigger the form submission to the Django LoginView */}
-        <button type="submit" className="login-button">
+        <button className="login-button">
           登入
         </button>
 
         <hr className="divider" />
         <p className="register-prompt">還沒有帳號？</p>
-        <button
-          type="button"
-          className="register-button"
-          onClick={() => (window.location.href = '/register')}
-        >
+        <button className="register-button" type="button" onClick={() => (window.location.href = '/register')}>
           註冊
         </button>
       </div>
     </form>
-  );
+  )
 }

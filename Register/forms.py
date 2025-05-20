@@ -1,12 +1,19 @@
+from django.shortcuts import render, redirect
+from django.contrib.auth import login
+from Accounts.models import CustomUser
 from django import forms
-from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.models import User
 
-class CustomUserCreationForm(UserCreationForm):
-    #email = forms.EmailField(required=True)
-    #name = forms.CharField(required=True)  # You can map this to first_name or a separate profile model
-
+class CustomUserCreationForm(forms.ModelForm):
     class Meta:
-        model = User
-        #fields = ("username", "email", "name", "password1", "password2")
-        fields = ("username", "password1", "password2")
+        model = CustomUser
+        fields = ["first_name", "username", "email", "password"]
+        labels = {
+            'first_name': 'Name',
+        }
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.set_password(self.cleaned_data["password"])
+        if commit:
+            user.save()
+        return user

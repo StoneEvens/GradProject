@@ -1,61 +1,110 @@
-import React, { useState, useEffect } from 'react';
-import "./RegisterPage.css";
+import React, { useState, useEffect } from 'react'
+import "./RegisterPage.css"
 
-import checkIcon from '../icons/RegisterPage_CheckIcon.png';
-import notCheckIcon from '../icons/RegisterPage_NotCheckIcon.png';
-import showIcon from '../icons/LoginButton_ShowPassword.png';
-import hideIcon from '../icons/LoginButton_HidePassword.png';
+import checkIcon from '../icons/RegisterPage_CheckIcon.png'
+import notCheckIcon from '../icons/RegisterPage_NotCheckIcon.png'
+import showIcon from '../icons/LoginButton_ShowPassword.png'
+import hideIcon from '../icons/LoginButton_HidePassword.png'
 
 export default function RegisterPage() {
-  // Only include the fields required by your form.
-  const [username, setUsername] = useState('');
-  const [password1, setPassword1] = useState('');
-  const [password2, setPassword2] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
+  const [name, setName] = useState('')
+  const [username, setUsername] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [maskedPassword, setMaskedPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [timeoutId, setTimeoutId] = useState(null)
 
-  // Password criteria state
-  const [isLengthValid, setIsLengthValid] = useState(false);
-  const [hasUppercase, setHasUppercase] = useState(false);
-  const [hasSymbol, setHasSymbol] = useState(false);
+  // 密碼條件檢查
+  const [isLengthValid, setIsLengthValid] = useState(false)
+  const [hasUppercase, setHasUppercase] = useState(false)
+  const [hasSymbol, setHasSymbol] = useState(false)
 
-  // When password1 changes, update criteria
-  useEffect(() => {
-    setIsLengthValid(password1.length >= 8);
-    setHasUppercase(/[A-Z]/.test(password1));
-    setHasSymbol(/[^A-Za-z0-9]/.test(password1));
-  }, [password1]);
-
-  // Basic client-side validation.
   const handleSubmit = (e) => {
-    if (!username || !password1 || !password2) {
+    // Validate form
+    if (!name || !username || !email || !password) {
       e.preventDefault();
-      alert("請填寫所有欄位");
-    } else if (password1 !== password2) {
-      e.preventDefault();
-      alert("兩次密碼輸入不一致");
-    } else if (!isLengthValid || !hasUppercase || !hasSymbol) {
-      e.preventDefault();
-      alert("密碼條件未達標，請確認密碼至少 8 字元、含 1 個大寫英文及 1 個標點符號");
+      alert('請填寫所有欄位');
     }
-    // If validation passes, let the browser submit the form.
-  };
+    
+    if (!isLengthValid || !hasUppercase || !hasSymbol) {
+      e.preventDefault();
+      alert('請確認密碼符合所有條件');
+    }
+  }
+
+  const handlePasswordChange = (e) => {
+    const inputType = e.nativeEvent.inputType
+    const isDelete = inputType === 'deleteContentBackward'
+  
+    if (showPassword) {
+      // 顯示狀態：正常輸入
+      setPassword(e.target.value)
+      setMaskedPassword(e.target.value)
+    } else {
+      if (isDelete) {
+        // 刪除一個字元
+        setPassword((prev) => {
+          const updated = prev.slice(0, -1)
+          setMaskedPassword('*'.repeat(updated.length))
+          return updated
+        })
+      } else {
+        const newChar = e.target.value[e.target.value.length - 1]
+        setPassword((prev) => {
+          const updated = prev + newChar
+          setMaskedPassword('*'.repeat(prev.length) + newChar)
+  
+          // 1 秒後遮罩該字元
+          if (timeoutId) clearTimeout(timeoutId)
+          const timeout = setTimeout(() => {
+            setMaskedPassword('*'.repeat(updated.length))
+          }, 1000)
+          setTimeoutId(timeout)
+  
+          return updated
+        })
+      }
+    }
+  }
+
+  
+  // 放在 function RegisterPage() 內任何 useState 後面
+  useEffect(() => {
+    setIsLengthValid(password.length >= 8)
+    setHasUppercase(/[A-Z]/.test(password))
+    setHasSymbol(/[^A-Za-z0-9]/.test(password))
+  }, [password])
+  
+
+  const displayedPassword = showPassword ? password : maskedPassword
 
   return (
-    <form 
+    <form
       className="register-container"
-      action="/register/"   // Django's registration view
+      action="/register/"
       method="POST"
       onSubmit={handleSubmit}
     >
-      {/* CSRF protection: ensure this token is set in your Django template */}
       <input
         type="hidden"
         name="csrfmiddlewaretoken"
         value={window.CSRF_TOKEN}
       />
-
       <div className="register-box">
         <h1 className="register-title">寵物健康管理系統</h1>
+
+        <div className="input-group">
+          <label className="input-label">姓名</label>
+          <input
+            type="text"
+            name="first_name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="input-field"
+          />
+          <p className="input-hint">請輸入真實姓名</p>
+        </div>
 
         <div className="input-group">
           <label className="input-label">帳號</label>
@@ -69,14 +118,26 @@ export default function RegisterPage() {
           <p className="input-hint">限英文、數字或標點符號</p>
         </div>
 
+        <div className="input-group">
+          <label className="input-label">Email</label>
+          <input
+            type="email"
+            name="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="input-field"
+          />
+        </div>
+
         <div className="input-group password-with-check">
           <label className="input-label">創建密碼</label>
           <div className="input-wrapper">
             <input
-              type={showPassword ? "text" : "password"} // browser masks input if type="password"
-              name="password1"
-              value={password1}
-              onChange={(e) => setPassword1(e.target.value)}
+              type="text"
+              inputMode="latin"
+              name="password"
+              value={showPassword ? password : maskedPassword}
+              onChange={handlePasswordChange}
               className="input-field password-field"
             />
             <img
@@ -103,23 +164,10 @@ export default function RegisterPage() {
           </div>
         </div>
 
-        <div className="input-group">
-          <label className="input-label">確認密碼</label>
-          <div className="input-wrapper">
-            <input
-              type={showPassword ? "text" : "password"}
-              name="password2"
-              value={password2}
-              onChange={(e) => setPassword2(e.target.value)}
-              className="input-field password-field"
-            />
-          </div>
-        </div>
-
-        <button type="submit" className="register-button">
+        <button className="register-button">
           註冊
         </button>
       </div>
     </form>
-  );
+  )
 }
