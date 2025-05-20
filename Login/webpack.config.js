@@ -2,7 +2,7 @@ import path from 'path';
 import webpack from 'webpack';
 
 export default {
-  entry: './src/components/index.jsx',
+  entry: '../Assets/Login/components/index.jsx',
   output: {
     path: path.resolve('./static/login'),
     filename: '[name].js',
