@@ -54,7 +54,7 @@ function ProfilePage() {
           </button>
           <button
             className="profile-tab profile-tab-forum"
-            onClick={() => navigate('/ForumPage')}
+            onClick={() => window.location.href = '/forum'}
           >
             論壇
           </button>

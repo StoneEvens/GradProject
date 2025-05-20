@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'Accounts.apps.AccountsConfig',
     'Profile.apps.ProfileConfig',
     'Community.apps.CommunityConfig',
+    'Forum.apps.ForumConfig',
 ]
 
 MIDDLEWARE = [

@@ -1,7 +1,7 @@
 import React from 'react';
 import './CommunityPage.css';
 import Header from '../../Public/components/Header';
-import BottomNavigationBar from '../../Public/components/BottomNavigationBar';
+import BottomNavigationBar from '../../Profile/icons/mock_profile_pic.jpg';
 import userProfileIcon from '../../Profile/icons/mock_profile_pic.jpg';
 import mockCat2 from '../icons/cat_dog.png';
 import mockDog2 from '../icons/dog_cat.jpg';

@@ -29,4 +29,5 @@ urlpatterns = [
     path('ocrtest/', include('OCRTest.urls'), name='ocrtest'),
     path('profile/', include('Profile.urls'), name='profile'),
     path('community/', include('Community.urls'), name='community'),
+    path('forum/', include('Forum.urls'), name='forum'),
 ]
