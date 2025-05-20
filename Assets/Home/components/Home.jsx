@@ -1,6 +1,6 @@
 // src/pages/Home.jsx
 import React from 'react'
-import Header from './Header'
+import Header from '../../Public/components/Header'
 import DailyTasks from './DailyTasks'
 import DailySchedule from './DailySchedule'
 import Calendar from './Calendar'
@@ -9,7 +9,7 @@ import BottomNavigationBar from '../../Public/components/BottomNavigationBar'
 
 function Home() {
   return (
-    <>
+    <form>
       <Header />
       <div className="app-container">
         <div className="main-content">
@@ -22,7 +22,7 @@ function Home() {
         </div>
       </div>
       <BottomNavigationBar />
-    </>
+    </form>
   )
 }
 

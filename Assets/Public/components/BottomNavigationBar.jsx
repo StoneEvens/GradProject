@@ -20,7 +20,7 @@ function BottomNavigationBar() {
         <button className="nav-icon">
           <img src={postIcon} alt="Add" />
         </button>
-        <button className="nav-icon">
+        <button className="nav-icon" type='button' onClick={() => window.location.href = '/profile'}>
           <img src={forumIcon} alt="Forum" />
         </button>
         <button className="nav-icon">

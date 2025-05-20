@@ -42,6 +42,8 @@ INSTALLED_APPS = [
     'Home.apps.HomeConfig',
     'OCRTest.apps.OcrtestConfig',
     'Accounts.apps.AccountsConfig',
+    'Profile.apps.ProfileConfig',
+    'Community.apps.CommunityConfig',
 ]
 
 MIDDLEWARE = [

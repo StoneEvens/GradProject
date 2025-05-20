@@ -27,4 +27,6 @@ urlpatterns = [
     path('register/', include('Register.urls'), name='register'),
     #path('logout/', LogoutView.as_view(next_page='/login/'), name='logout'),
     path('ocrtest/', include('OCRTest.urls'), name='ocrtest'),
+    path('profile/', include('Profile.urls'), name='profile'),
+    path('community/', include('Community.urls'), name='community'),
 ]
