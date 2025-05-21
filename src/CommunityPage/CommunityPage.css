@@ -18,7 +18,7 @@
 
 .post-container {
   width: 100%;
-  max-width: 420px;
+  min-width: 380px;
   background-color: #EFEFEF;
   border-radius: 16px;
   padding: 16px;

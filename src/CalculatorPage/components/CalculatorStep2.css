@@ -1,0 +1,74 @@
+.calculator-title {
+  font-size: 2rem;
+  font-weight: bold;
+  text-align: center;
+  margin: 32px 0 24px 0;
+}
+
+.pet-select-label {
+  font-size: 1.1rem;
+  font-weight: bold;
+  margin-bottom: 12px;
+  margin-left: 14px;
+}
+
+.feed-select-section {
+  background: #FFCA9C;
+  border-radius: 18px;
+  padding: 20px 16px 24px 16px;
+  margin: 0px 10px 28px 10px;
+  min-height: 380px;
+  position: relative;
+}
+
+.feed-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.feed-item {
+  width: 90px;
+  height: 90px;
+  background: #fff;
+  border: 3px solid #fff;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: border 0.2s;
+  overflow: hidden;
+}
+.feed-item.selected {
+  border: 3px solid #F08651;
+}
+.feed-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.add-feed-btn {
+  grid-column: 3;
+  grid-row: 3;
+  width: 90px;
+  height: 90px;
+  background: #D9D9D9;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  color: #666;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin-left: auto;
+  margin-top: 16px;
+}
+
+.step-btn-row {
+  display: flex;
+  justify-content: space-between;
+  margin: 32px 10px 0 10px;
+}

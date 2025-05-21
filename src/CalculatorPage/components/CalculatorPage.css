@@ -1,0 +1,63 @@
+/* 背景與外層容器 */
+.calculator-page-container {
+    min-height: 100vh;
+    background: #FFF2D9;
+    padding-top: 80px; /* 預留Header高度 */
+    padding-bottom: 80px; /* 預留底部導航高度 */
+    box-sizing: border-box;
+    min-width: 380px;
+  }
+  
+  .calculator-content {
+    min-width: 380px;
+    margin: 0 auto;
+    padding: 0 12px;
+  }
+  
+  .calculator-title {
+    font-size: 2rem;
+    font-weight: bold;
+    text-align: center;
+    margin: 32px 0 24px 0;
+  }
+
+  .next-step-btn {
+    display: block;
+    margin: 24px 10px 0 auto;
+    background: #FFB370;
+    color: #222;
+    font-size: 1rem;
+    font-weight: bold;
+    border: none;
+    border-radius: 10px;
+    padding: 12px 36px;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(255, 140, 26, 0.08);
+    transition: background 0.2s;
+    width: 80%;
+    max-width: 120px;
+    margin-right: 10px;
+  }
+  
+  .previous-step-btn {
+    display: block;
+    margin: 24px auto 0 10px;
+    background: #FFB370;
+    color: #222;
+    font-size: 1rem;
+    font-weight: bold;
+    border: none;
+    border-radius: 10px;
+    padding: 12px 36px;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(255, 140, 26, 0.08);
+    transition: background 0.2s;
+    width: 80%;
+    max-width: 120px;
+    margin-left: 10px;
+  }
+  
+  .previous-step-btn:hover, .next-step-btn:hover  {
+    background: #F08651;
+    color: #fff;
+  }

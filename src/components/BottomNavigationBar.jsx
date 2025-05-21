@@ -54,7 +54,7 @@ function BottomNavigationBar() {
         </div>
       )}
       <div className="nav-buttons-container">
-        <button type="button" className="nav-icon" onClick={e => handleNavButtonClick(e)}>
+        <button type="button" className="nav-icon" onClick={e => handleNavButtonClick(e, () => navigate('/CalculatorPage'))}>
           <img src={calculatorIcon} alt="Calculator" />
         </button>
         <button type="button" className="nav-icon" onClick={e => handleNavButtonClick(e)}>

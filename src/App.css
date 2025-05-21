@@ -23,7 +23,7 @@ html, body {
 
 /* ✅ App畫面容器 */
 .app-container {
-  max-width: 420px;
+  min-width: 380px;
   width: 100%;
   margin: 0 auto;
   padding-top: 80px;

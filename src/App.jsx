@@ -8,6 +8,7 @@ import RegisterPage from './RegisterPage/RegisterPage'
 import ProfilePage from './ProfilePage/ProfilePage'
 import CommunityPage from './CommunityPage/CommunityPage'
 import ForumPage from './ForumPage/ForumPage'
+import CalculatorPage from './CalculatorPage/CalculatorPage'
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
         <Route path="/profilepage" element={<ProfilePage />} />
         <Route path="/communitypage" element={<CommunityPage />} />
         <Route path="/forumpage" element={<ForumPage />} />
+        <Route path="/calculatorpage" element={<CalculatorPage />} />
       </Routes>
     </Router>
   )
