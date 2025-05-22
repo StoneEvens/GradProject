@@ -67,12 +67,14 @@ const PetHomePage = () => {
         <section className="section-box">
           <div className="section-title">飼料食用中</div>
           <div className="food-items">
-            <button className="food-add">Add</button>
+            <button className="food-add">
+              +
+            </button>
             <div className="food-card" title="卡比主食罐：$85 / 成分：雞肉、南瓜">
-              <img src="https://i.imgur.com/qPtQ1Iv.png" alt="food1" />
+              <img src="/food.jpg" alt="food1" />
             </div>
             <div className="food-card" title="CIAO肉泥條：$25 / 成分：鮪魚、雞肉精華">
-              <img src="https://i.imgur.com/W9gkFbC.png" alt="food2" />
+              <img src="/food.jpg" alt="food1" />
             </div>
           </div>
         </section>
