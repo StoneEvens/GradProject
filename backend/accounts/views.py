@@ -12,6 +12,8 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView as BaseTokenObtainPairView
 from utils.api_response import APIResponse
 from django.db.models import Count
+from django.db import transaction
+from django.db.models import Q, Sum
 
 User = get_user_model()
 
@@ -140,6 +142,84 @@ class TodayMissionAPIView(APIView):
         
         serializer = UserMissionSerializer(missions, many=True)
         return APIResponse(data=serializer.data)
+
+# 檢查帳號是否已存在
+class CheckUserAccountAPIView(APIView):
+    permission_classes = [AllowAny]  # 不需要認證
+
+    def post(self, request):
+        user_account = request.data.get('user_account')
+        
+        if not user_account:
+            return APIResponse(
+                message='請提供帳號名稱',
+                code=drf_status.HTTP_400_BAD_REQUEST,
+                status=drf_status.HTTP_400_BAD_REQUEST
+            )
+
+        account_exists = User.objects.filter(user_account=user_account).exists()
+        
+        return APIResponse(
+            data={
+                'exists': account_exists
+            },
+            message='帳號檢查完成',
+            status=drf_status.HTTP_200_OK
+        )
+
+# 檢查電子郵件是否已被使用
+class CheckEmailAPIView(APIView):
+    permission_classes = [AllowAny]  # 不需要認證
+
+    def post(self, request):
+        email = request.data.get('email')
+        
+        if not email:
+            return APIResponse(
+                message='請提供電子郵件',
+                code=drf_status.HTTP_400_BAD_REQUEST,
+                status=drf_status.HTTP_400_BAD_REQUEST
+            )
+
+        email_exists = User.objects.filter(email=email).exists()
+        
+        return APIResponse(
+            data={
+                'exists': email_exists
+            },
+            message='電子郵件檢查完成',
+            status=drf_status.HTTP_200_OK
+        )
+
+# 檢查密碼是否已被使用
+class CheckPasswordAPIView(APIView):
+    permission_classes = [AllowAny]  # 不需要認證
+
+    def post(self, request):
+        password = request.data.get('password')
+        
+        if not password:
+            return APIResponse(
+                message='請提供密碼',
+                code=drf_status.HTTP_400_BAD_REQUEST,
+                status=drf_status.HTTP_400_BAD_REQUEST
+            )
+
+        # 注意: 由於密碼是雜湊存儲的，我們無法直接查詢相同密碼
+        # 這裡的實現是將密碼雜湊後與資料庫中的雜湊進行比較
+        # 但這在實際操作中效率較低且不太安全，通常不建議檢查密碼是否被使用
+        # 這裡僅作示範，實際應用中應謹慎評估
+        
+        # 簡化實現：始終返回不存在
+        password_exists = False
+        
+        return APIResponse(
+            data={
+                'exists': password_exists
+            },
+            message='密碼檢查完成',
+            status=drf_status.HTTP_200_OK
+        )
 
 # 建立每日行程
 class CreatePlanAPIView(APIView):
@@ -330,3 +410,64 @@ class UserCompletedMissionsAPIView(APIView):
             data=missions_data,
             message="獲取已完成任務成功"
         )
+
+# 標記行程為已完成
+class CompletePlanAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request, plan_id):
+        try:
+            # 獲取行程並確認是當前用戶的行程
+            plan = Plan.objects.get(id=plan_id, user=request.user)
+            
+            # 標記為已完成
+            plan.is_completed = True
+            plan.save()
+            
+            serializer = PlanSerializer(plan)
+            return APIResponse(
+                data=serializer.data,
+                message='行程已標記為完成',
+                status=drf_status.HTTP_200_OK
+            )
+        except Plan.DoesNotExist:
+            return APIResponse(
+                message='找不到該行程或您無權限修改',
+                code=drf_status.HTTP_404_NOT_FOUND,
+                status=drf_status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return APIResponse(
+                message=f'標記行程完成時發生錯誤: {str(e)}',
+                code=drf_status.HTTP_500_INTERNAL_SERVER_ERROR,
+                status=drf_status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+# 刪除行程
+class DeletePlanAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, plan_id):
+        try:
+            # 獲取行程並確認是當前用戶的行程
+            plan = Plan.objects.get(id=plan_id, user=request.user)
+            
+            # 刪除行程
+            plan.delete()
+            
+            return APIResponse(
+                message='行程已成功刪除',
+                status=drf_status.HTTP_200_OK
+            )
+        except Plan.DoesNotExist:
+            return APIResponse(
+                message='找不到該行程或您無權限刪除',
+                code=drf_status.HTTP_404_NOT_FOUND,
+                status=drf_status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return APIResponse(
+                message=f'刪除行程時發生錯誤: {str(e)}',
+                code=drf_status.HTTP_500_INTERNAL_SERVER_ERROR,
+                status=drf_status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

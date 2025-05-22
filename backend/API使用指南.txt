@@ -293,32 +293,66 @@ async function login(email, password) {
 ### 建立每日行程
 - **端點**: `/api/v1/accounts/plans/create/`
 - **方法**: POST
-- **認證**: 需要
+- **授權**: 需要 Bearer Token
 - **功能**: 為當前用戶創建新行程
-
-#### 請求資料
+- **請求示例**:
 ```json
 {
   "title": "行程標題",
   "description": "行程描述",
-  "date": "2023-06-01T10:00:00Z",
-  "is_completed": false
+  "date": "2023-11-10T15:30:00Z"
 }
 ```
 
-#### 回應資料
+- **成功響應**:
 ```json
 {
-  "code": 201,
+  "code": 0,
   "message": "行程創建成功",
-  "success": true,
   "data": {
     "id": 1,
     "title": "行程標題",
     "description": "行程描述",
-    "date": "2023-06-01T10:00:00Z",
+    "date": "2023-11-10T15:30:00Z",
     "is_completed": false
   }
+}
+```
+
+### 標記行程為已完成
+- **端點**: `/api/v1/accounts/plans/{plan_id}/complete/`
+- **方法**: PATCH
+- **授權**: 需要 Bearer Token
+- **功能**: 將指定行程標記為已完成
+- **URL 參數**:
+  - `plan_id`: 行程ID
+- **成功響應**:
+```json
+{
+  "code": 0,
+  "message": "行程已標記為完成",
+  "data": {
+    "id": 1,
+    "title": "行程標題",
+    "description": "行程描述",
+    "date": "2023-11-10T15:30:00Z",
+    "is_completed": true
+  }
+}
+```
+
+### 刪除行程
+- **端點**: `/api/v1/accounts/plans/{plan_id}/`
+- **方法**: DELETE
+- **授權**: 需要 Bearer Token
+- **功能**: 刪除指定行程
+- **URL 參數**:
+  - `plan_id`: 行程ID
+- **成功響應**:
+```json
+{
+  "code": 0,
+  "message": "行程已成功刪除"
 }
 ```
 

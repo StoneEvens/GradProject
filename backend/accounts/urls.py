@@ -14,7 +14,14 @@ urlpatterns = [
     path('missions/today/', TodayMissionAPIView.as_view(), name='today-missions'),
     path('profile/image/', UserImageAPIView.as_view(), name='user-image'),
     path('plans/create/', CreatePlanAPIView.as_view(), name='create-plan'),
+    path('plans/<int:plan_id>/complete/', CompletePlanAPIView.as_view(), name='complete-plan'),
+    path('plans/<int:plan_id>/', DeletePlanAPIView.as_view(), name='delete-plan'),
     path('user/<int:pk>/summary/', UserSummaryView.as_view(), name='user-summary'),
+    
+    # 註冊驗證 API
+    path('check/account/', CheckUserAccountAPIView.as_view(), name='check-account'),
+    path('check/email/', CheckEmailAPIView.as_view(), name='check-email'),
+    path('check/password/', CheckPasswordAPIView.as_view(), name='check-password'),
     
     # 任務相關的API
     path('missions/active/', UserActiveMissionsAPIView.as_view(), name='active-missions'),
