@@ -14,3 +14,110 @@ WARNING 2025-05-06 17:49:25,675 serializers 62612 70748 帳戶 abcd@gmail.com 認證
 INFO 2025-05-06 17:49:36,347 serializers 62612 66448 開始驗證用戶登入：abcd@gmail.com
 INFO 2025-05-06 17:49:36,350 serializers 62612 66448 找到帳戶：john123, 活躍狀態：True
 INFO 2025-05-06 17:49:36,682 serializers 62612 66448 用戶 abcd@gmail.com 登入成功
+INFO 2025-05-22 00:28:18,257 serializers 27016 9968 開始驗證用戶登入：12345@gmail.com
+INFO 2025-05-22 00:28:18,261 serializers 27016 9968 找到帳戶：leon123, 活躍狀態：True
+INFO 2025-05-22 00:28:18,602 serializers 27016 9968 用戶 12345@gmail.com 登入成功
+INFO 2025-05-22 00:55:11,568 serializers 36312 2584 開始驗證用戶登入：12345@gmail.com
+INFO 2025-05-22 00:55:11,574 serializers 36312 2584 找到帳戶：leon123, 活躍狀態：True
+INFO 2025-05-22 00:55:12,449 serializers 36312 2584 用戶 12345@gmail.com 登入成功
+INFO 2025-05-22 00:55:37,955 serializers 36312 2584 開始驗證用戶登入：12345@gmail.com
+INFO 2025-05-22 00:55:37,959 serializers 36312 2584 找到帳戶：leon123, 活躍狀態：True
+INFO 2025-05-22 00:55:38,301 serializers 36312 2584 用戶 12345@gmail.com 登入成功
+INFO 2025-05-22 01:19:18,515 serializers 36312 4012 開始驗證用戶登入：12345@gmail.com
+INFO 2025-05-22 01:19:18,527 serializers 36312 4012 找到帳戶：leon123, 活躍狀態：True
+INFO 2025-05-22 01:19:19,389 serializers 36312 4012 用戶 12345@gmail.com 登入成功
+INFO 2025-05-22 01:22:21,306 serializers 36312 4012 開始驗證用戶登入：12345@gmail.com
+INFO 2025-05-22 01:22:21,312 serializers 36312 4012 找到帳戶：leon123, 活躍狀態：True
+INFO 2025-05-22 01:22:22,192 serializers 36312 4012 用戶 12345@gmail.com 登入成功
+INFO 2025-05-22 01:26:58,656 serializers 36312 4012 開始驗證用戶登入：12345@gmail.com
+INFO 2025-05-22 01:26:58,662 serializers 36312 4012 找到帳戶：leon123, 活躍狀態：True
+INFO 2025-05-22 01:26:59,520 serializers 36312 4012 用戶 12345@gmail.com 登入成功
+INFO 2025-05-22 01:27:11,061 serializers 36312 4012 開始驗證用戶登入：12345@gmail.com
+INFO 2025-05-22 01:27:11,068 serializers 36312 4012 找到帳戶：leon123, 活躍狀態：True
+WARNING 2025-05-22 01:27:11,988 serializers 36312 4012 帳戶 12345@gmail.com 認證失敗，密碼不正確
+INFO 2025-05-22 01:31:40,119 serializers 36312 4012 開始驗證用戶登入：12345@gmail.com
+INFO 2025-05-22 01:31:40,125 serializers 36312 4012 找到帳戶：leon123, 活躍狀態：True
+WARNING 2025-05-22 01:31:41,050 serializers 36312 4012 帳戶 12345@gmail.com 認證失敗，密碼不正確
+INFO 2025-05-22 01:31:48,161 serializers 36312 4012 開始驗證用戶登入：12345@gmail.com
+INFO 2025-05-22 01:31:48,167 serializers 36312 4012 找到帳戶：leon123, 活躍狀態：True
+WARNING 2025-05-22 01:31:49,349 serializers 36312 4012 帳戶 12345@gmail.com 認證失敗，密碼不正確
+INFO 2025-05-22 01:36:23,569 serializers 36312 4012 開始驗證用戶登入：12345@gmail.com
+INFO 2025-05-22 01:36:23,574 serializers 36312 4012 找到帳戶：leon123, 活躍狀態：True
+WARNING 2025-05-22 01:36:24,750 serializers 36312 4012 帳戶 12345@gmail.com 認證失敗，密碼不正確
+INFO 2025-05-22 01:36:30,464 serializers 36312 4012 開始驗證用戶登入：1@gmail.com
+WARNING 2025-05-22 01:36:30,469 serializers 36312 4012 嘗試使用不存在的電子郵件登入：1@gmail.com
+INFO 2025-05-22 01:41:28,975 serializers 36312 4012 開始驗證用戶登入：12345@gmail.com
+INFO 2025-05-22 01:41:28,981 serializers 36312 4012 找到帳戶：leon123, 活躍狀態：True
+INFO 2025-05-22 01:41:29,789 serializers 36312 4012 用戶 12345@gmail.com 登入成功
+INFO 2025-05-22 02:01:41,206 serializers 30768 16164 開始驗證用戶登入：12345@gmail.com
+INFO 2025-05-22 02:01:41,208 serializers 30768 16164 找到帳戶：leon123, 活躍狀態：True
+INFO 2025-05-22 02:01:41,565 serializers 30768 16164 用戶 12345@gmail.com 登入成功
+INFO 2025-05-22 02:04:43,032 serializers 30768 16164 開始驗證用戶登入：12345@gmail.com
+INFO 2025-05-22 02:04:43,043 serializers 30768 16164 找到帳戶：leon123, 活躍狀態：True
+WARNING 2025-05-22 02:04:43,924 serializers 30768 16164 帳戶 12345@gmail.com 認證失敗，密碼不正確
+INFO 2025-05-22 02:04:53,072 serializers 30768 16164 開始驗證用戶登入：12345@gmail.com
+INFO 2025-05-22 02:04:53,078 serializers 30768 16164 找到帳戶：leon123, 活躍狀態：True
+INFO 2025-05-22 02:04:53,947 serializers 30768 16164 用戶 12345@gmail.com 登入成功
+INFO 2025-05-22 03:27:30,802 serializers 30768 46868 開始驗證用戶登入：12345@gmail.com
+INFO 2025-05-22 03:27:30,809 serializers 30768 46868 找到帳戶：leon123, 活躍狀態：True
+INFO 2025-05-22 03:27:31,702 serializers 30768 46868 用戶 12345@gmail.com 登入成功
+INFO 2025-05-22 11:42:59,437 serializers 48896 9476 開始驗證用戶登入：12345@gmail.com
+INFO 2025-05-22 11:42:59,441 serializers 48896 9476 找到帳戶：leon123, 活躍狀態：True
+INFO 2025-05-22 11:42:59,785 serializers 48896 9476 用戶 12345@gmail.com 登入成功
+INFO 2025-05-22 12:11:43,503 serializers 48896 13768 開始驗證用戶登入：12345@gmail.com
+INFO 2025-05-22 12:11:43,517 serializers 48896 13768 找到帳戶：leon123, 活躍狀態：True
+INFO 2025-05-22 12:11:44,087 serializers 48896 13768 用戶 12345@gmail.com 登入成功
+INFO 2025-05-22 12:20:56,596 serializers 48896 22412 開始驗證用戶登入：12345@gmail.com
+INFO 2025-05-22 12:20:56,606 serializers 48896 22412 找到帳戶：leon123, 活躍狀態：True
+INFO 2025-05-22 12:20:57,790 serializers 48896 22412 用戶 12345@gmail.com 登入成功
+INFO 2025-05-22 12:43:27,123 serializers 48896 44704 開始驗證用戶登入：12345@gmail.com
+INFO 2025-05-22 12:43:27,133 serializers 48896 44704 找到帳戶：leon123, 活躍狀態：True
+INFO 2025-05-22 12:43:27,683 serializers 48896 44704 用戶 12345@gmail.com 登入成功
+INFO 2025-05-22 12:57:34,133 serializers 48896 24748 開始驗證用戶登入：12345@gmail.com
+INFO 2025-05-22 12:57:34,142 serializers 48896 24748 找到帳戶：leon123, 活躍狀態：True
+INFO 2025-05-22 12:57:34,665 serializers 48896 24748 用戶 12345@gmail.com 登入成功
+INFO 2025-05-22 13:15:57,407 serializers 48896 29824 開始驗證用戶登入：12345@gmail.com
+INFO 2025-05-22 13:15:57,417 serializers 48896 29824 找到帳戶：leon123, 活躍狀態：True
+WARNING 2025-05-22 13:15:58,041 serializers 48896 29824 帳戶 12345@gmail.com 認證失敗，密碼不正確
+INFO 2025-05-22 13:16:04,888 serializers 48896 29824 開始驗證用戶登入：12345@gmail.com
+INFO 2025-05-22 13:16:04,900 serializers 48896 29824 找到帳戶：leon123, 活躍狀態：True
+WARNING 2025-05-22 13:16:05,538 serializers 48896 29824 帳戶 12345@gmail.com 認證失敗，密碼不正確
+INFO 2025-05-22 13:16:26,879 serializers 48896 29824 開始驗證用戶登入：12345@gmail.com
+INFO 2025-05-22 13:16:26,890 serializers 48896 29824 找到帳戶：leon123, 活躍狀態：True
+WARNING 2025-05-22 13:16:28,039 serializers 48896 29824 帳戶 12345@gmail.com 認證失敗，密碼不正確
+INFO 2025-05-22 13:16:53,547 serializers 48896 29824 開始驗證用戶登入：12345@gmail.com
+INFO 2025-05-22 13:16:53,554 serializers 48896 29824 找到帳戶：leon123, 活躍狀態：True
+WARNING 2025-05-22 13:16:54,749 serializers 48896 29824 帳戶 12345@gmail.com 認證失敗，密碼不正確
+INFO 2025-05-22 13:19:46,058 serializers 48896 28664 開始驗證用戶登入：12345@gmail.com
+INFO 2025-05-22 13:19:46,066 serializers 48896 28664 找到帳戶：leon123, 活躍狀態：True
+INFO 2025-05-22 13:19:47,274 serializers 48896 28664 用戶 12345@gmail.com 登入成功
+INFO 2025-05-22 21:13:40,208 serializers 41736 51436 開始驗證用戶登入：12345@gmail.com
+INFO 2025-05-22 21:13:40,217 serializers 41736 51436 找到帳戶：leon123, 活躍狀態：True
+INFO 2025-05-22 21:13:41,108 serializers 41736 51436 用戶 12345@gmail.com 登入成功
+INFO 2025-05-22 21:38:36,749 serializers 47332 27692 開始驗證用戶登入：12345@gmail.com
+INFO 2025-05-22 21:38:36,753 serializers 47332 27692 找到帳戶：leon123, 活躍狀態：True
+INFO 2025-05-22 21:38:37,572 serializers 47332 27692 用戶 12345@gmail.com 登入成功
+INFO 2025-05-22 22:11:13,242 serializers 13416 12044 開始驗證用戶登入：12345@gmail.com
+INFO 2025-05-22 22:11:13,245 serializers 13416 12044 找到帳戶：leon123, 活躍狀態：True
+INFO 2025-05-22 22:11:13,600 serializers 13416 12044 用戶 12345@gmail.com 登入成功
+INFO 2025-05-22 22:12:51,949 serializers 13416 49604 開始驗證用戶登入：12345@gmail.com
+INFO 2025-05-22 22:12:51,951 serializers 13416 49604 找到帳戶：leon123, 活躍狀態：True
+INFO 2025-05-22 22:12:52,296 serializers 13416 49604 用戶 12345@gmail.com 登入成功
+INFO 2025-05-22 22:41:51,653 serializers 13416 44400 開始驗證用戶登入：12345@gmail.com
+INFO 2025-05-22 22:41:51,657 serializers 13416 44400 找到帳戶：leon123, 活躍狀態：True
+INFO 2025-05-22 22:41:52,006 serializers 13416 44400 用戶 12345@gmail.com 登入成功
+INFO 2025-05-22 23:19:40,201 serializers 13416 51328 開始驗證用戶登入：12345@gmail.com
+INFO 2025-05-22 23:19:40,208 serializers 13416 51328 找到帳戶：leon123, 活躍狀態：True
+INFO 2025-05-22 23:19:41,105 serializers 13416 51328 用戶 12345@gmail.com 登入成功
+INFO 2025-05-23 00:54:36,868 serializers 13416 40996 開始驗證用戶登入：12345@gmail.com
+INFO 2025-05-23 00:54:36,884 serializers 13416 40996 找到帳戶：leon123, 活躍狀態：True
+INFO 2025-05-23 00:54:37,721 serializers 13416 40996 用戶 12345@gmail.com 登入成功
+INFO 2025-05-23 01:35:26,698 serializers 20708 50968 開始驗證用戶登入：12345@gmail.com
+INFO 2025-05-23 01:35:26,705 serializers 20708 50968 找到帳戶：leon123, 活躍狀態：True
+INFO 2025-05-23 01:35:27,638 serializers 20708 50968 用戶 12345@gmail.com 登入成功
+INFO 2025-05-23 02:07:07,941 serializers 20708 38956 開始驗證用戶登入：12345@gmail.com
+INFO 2025-05-23 02:07:07,947 serializers 20708 38956 找到帳戶：leon123, 活躍狀態：True
+INFO 2025-05-23 02:07:08,825 serializers 20708 38956 用戶 12345@gmail.com 登入成功
+INFO 2025-05-23 02:38:15,747 serializers 20708 17264 開始驗證用戶登入：12345@gmail.com
+INFO 2025-05-23 02:38:15,752 serializers 20708 17264 找到帳戶：leon123, 活躍狀態：True
+INFO 2025-05-23 02:38:16,630 serializers 20708 17264 用戶 12345@gmail.com 登入成功

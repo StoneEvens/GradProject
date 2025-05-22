@@ -26,7 +26,6 @@
   overflow-y: auto;
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
-  padding-right: 10px; /* 為滾動按鈕留出空間 */
 }
 
 /* 隱藏 Webkit 瀏覽器的滾動條 */
@@ -75,27 +74,6 @@
   flex-direction: column;
   gap: 8px;
   z-index: 10;
-}
-
-.scrollButton {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  border: none;
-  background-color: #F08651;
-  color: white;
-  font-size: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  opacity: 0.7;
-  transition: all 0.2s ease;
-}
-
-.scrollButton:hover {
-  opacity: 1;
-  transform: scale(1.1);
 }
 
 .scrollUp {

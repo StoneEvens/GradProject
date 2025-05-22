@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { getAccessToken, getRefreshToken, saveTokens, refreshAccessToken as refreshToken } from '../services/authService';
 
 // 創建 axios 實例
 const instance = axios.create({
@@ -12,7 +13,7 @@ const instance = axios.create({
 // 請求攔截器
 instance.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('accessToken');
+    const token = getAccessToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -36,33 +37,17 @@ instance.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        // 嘗試使用 refresh token 獲取新的 access token
-        const refreshToken = localStorage.getItem('refreshToken');
-        if (!refreshToken) {
-          throw new Error('No refresh token available');
-        }
-
-        const response = await axios.post(
-          `${import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1'}/accounts/token/refresh/`,
-          {
-            refresh: refreshToken
-          }
-        );
-
-        // 更新 localStorage 中的 token
-        localStorage.setItem('accessToken', response.data.access);
-
+        // 使用 authService 中的方法刷新 token
+        const newToken = await refreshToken();
+        
         // 更新原始請求的 Authorization header
-        originalRequest.headers.Authorization = `Bearer ${response.data.access}`;
+        originalRequest.headers.Authorization = `Bearer ${newToken}`;
 
         // 重試原始請求
         return instance(originalRequest);
       } catch (refreshError) {
-        // 如果刷新 token 失敗，清除所有認證信息並重定向到登入頁面
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('userData');
-        window.location.href = '/login';
+        // 如果刷新 token 失敗，由 authService 處理登出邏輯
+        // authService 中會觸發 auth-logout 事件
         return Promise.reject(refreshError);
       }
     }

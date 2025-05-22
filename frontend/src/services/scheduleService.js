@@ -14,6 +14,19 @@ export const getUserSchedules = async () => {
   }
 };
 
+// 根據日期獲取用戶行程
+export const getUserSchedulesByDate = async (date) => {
+  try {
+    // 格式化日期為 YYYY-MM-DD
+    const formattedDate = typeof date === 'string' ? date : formatDate(date);
+    const response = await authAxios.get(`/accounts/plans/date/${formattedDate}/`);
+    return response.data.data || [];
+  } catch (error) {
+    console.error('獲取指定日期行程失敗:', error);
+    throw error;
+  }
+};
+
 // 新增用戶行程
 export const addUserSchedule = async (scheduleData) => {
   try {
@@ -21,7 +34,9 @@ export const addUserSchedule = async (scheduleData) => {
     const formattedData = {
       title: scheduleData.title,
       description: scheduleData.description || "",
-      date: formatDateTimeForAPI(scheduleData.time)
+      date: scheduleData.date || formatDateForAPI(),
+      start_time: scheduleData.startTime,
+      end_time: scheduleData.endTime
     };
     
     const response = await authAxios.post('/accounts/plans/create/', formattedData);
@@ -32,16 +47,61 @@ export const addUserSchedule = async (scheduleData) => {
   }
 };
 
+// 獲取行程詳情
+export const getScheduleDetail = async (scheduleId) => {
+  try {
+    const response = await authAxios.get(`/accounts/plans/${scheduleId}/edit/`);
+    return response.data.data;
+  } catch (error) {
+    console.error('獲取行程詳情失敗:', error);
+    throw error;
+  }
+};
+
+// 更新行程
+export const updateSchedule = async (scheduleId, scheduleData) => {
+  try {
+    // 將時間和標題轉換為後端期望的格式
+    const formattedData = {
+      title: scheduleData.title,
+      description: scheduleData.description || "",
+      date: scheduleData.date || formatDateForAPI(),
+      start_time: scheduleData.startTime,
+      end_time: scheduleData.endTime
+    };
+    
+    const response = await authAxios.put(`/accounts/plans/${scheduleId}/edit/`, formattedData);
+    return response.data.data;
+  } catch (error) {
+    console.error('更新行程失敗:', error);
+    throw error;
+  }
+};
+
 // 標記行程為已完成
 export const markScheduleAsCompleted = async (scheduleId) => {
   try {
     const response = await authAxios.patch(
       `/accounts/plans/${scheduleId}/complete/`,
-      {}  // 不需要發送數據，因為後端會直接將 is_completed 設為 true
+      { is_completed: true }
     );
     return response.data.data;
   } catch (error) {
     console.error('標記行程完成失敗:', error);
+    throw error;
+  }
+};
+
+// 重新開始行程（標記為未完成）
+export const reopenSchedule = async (scheduleId) => {
+  try {
+    const response = await authAxios.patch(
+      `/accounts/plans/${scheduleId}/complete/`,
+      { is_completed: false }
+    );
+    return response.data.data;
+  } catch (error) {
+    console.error('重新開始行程失敗:', error);
     throw error;
   }
 };
@@ -57,20 +117,13 @@ export const deleteSchedule = async (scheduleId) => {
   }
 };
 
-// 將時間格式化為後端期望的格式
-const formatDateTimeForAPI = (time) => {
+// 將日期對象格式化為後端期望的格式 YYYY-MM-DD
+export const formatDate = (date) => {
+  return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+};
+
+// 只獲取日期部分，格式化為後端期望的格式 YYYY-MM-DD
+const formatDateForAPI = () => {
   const now = new Date();
-  const [hours, minutes] = time.split(':').map(Number);
-  
-  // 設置時間
-  const dateObj = new Date(
-    now.getFullYear(),
-    now.getMonth(),
-    now.getDate(),
-    hours,
-    minutes
-  );
-  
-  // 返回 ISO 格式的日期時間
-  return dateObj.toISOString();
+  return formatDate(now);
 }; 

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import styles from '../styles/Calendar.module.css';
+import { formatDate } from '../services/scheduleService';
 
-const Calendar = () => {
+const Calendar = ({ onDateSelect, selectedDate }) => {
   const weekDays = ['日', '一', '二', '三', '四', '五', '六'];
   const [currentDate, setCurrentDate] = useState(new Date());
   const today = new Date();
@@ -10,6 +11,12 @@ const Calendar = () => {
   const isCurrentMonth = 
     currentDate.getMonth() === today.getMonth() && 
     currentDate.getFullYear() === today.getFullYear();
+
+  // 判斷選擇的日期是否是今天
+  const isSelectedToday = selectedDate && 
+    selectedDate.getDate() === today.getDate() && 
+    selectedDate.getMonth() === today.getMonth() && 
+    selectedDate.getFullYear() === today.getFullYear();
 
   const getDaysInMonth = (date) => {
     const year = date.getFullYear();
@@ -36,6 +43,19 @@ const Calendar = () => {
   
   const handleBackToToday = () => {
     setCurrentDate(new Date());
+    if (onDateSelect) {
+      onDateSelect(new Date());
+    }
+  };
+
+  // 處理日期點擊
+  const handleDayClick = (day) => {
+    if (day === 0) return; // 不處理空白格
+    
+    const selectedDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+    if (onDateSelect) {
+      onDateSelect(selectedDate);
+    }
   };
 
   // 計算最小和最大可瀏覽日期（前後兩年）
@@ -57,6 +77,43 @@ const Calendar = () => {
     return 0;
   });
 
+  // 判斷日期是否為過去日期（相對於今天）
+  const isPastDate = (day) => {
+    if (day === 0) return false;
+    const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+    return date < new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  };
+  
+  // 判斷日期是否為未來日期（相對於今天）
+  const isFutureDate = (day) => {
+    if (day === 0) return false;
+    const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+    return date > new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  };
+
+  // 判斷日期是否被選中
+  const isSelectedDate = (day) => {
+    if (!selectedDate || day === 0) return false;
+    const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+    return date.getDate() === selectedDate.getDate() && 
+           date.getMonth() === selectedDate.getMonth() && 
+           date.getFullYear() === selectedDate.getFullYear();
+  };
+
+  // 判斷是否為今天且沒有選擇其他日期
+  const isTodayAndHighlighted = (day) => {
+    if (day === 0) return false;
+    const isToday = day === today.getDate() &&
+                    currentDate.getMonth() === today.getMonth() &&
+                    currentDate.getFullYear() === today.getFullYear();
+    
+    // 如果沒有選擇日期或選擇的就是今天，才高亮顯示今天
+    return isToday && (!selectedDate || isSelectedDate(day));
+  };
+
+  // 判斷是否需要顯示回到今天按鈕
+  const shouldShowTodayButton = (!isCurrentMonth || (selectedDate && !isSelectedToday));
+
   return (
     <div className={styles.calendarContainer}>
       <div className={styles.header}>
@@ -73,7 +130,7 @@ const Calendar = () => {
         )}
       </div>
       
-      {!isCurrentMonth && (
+      {shouldShowTodayButton && (
         <button className={styles.todayButton} onClick={handleBackToToday}>
           回到今天
         </button>
@@ -91,13 +148,14 @@ const Calendar = () => {
           {days.map((day, index) => (
             <div
               key={index}
-              className={`${styles.day} ${day === 0 ? styles.empty : ''} ${
-                day === today.getDate() &&
-                currentDate.getMonth() === today.getMonth() &&
-                currentDate.getFullYear() === today.getFullYear()
-                  ? styles.today
-                  : ''
-              }`}
+              className={`${styles.day} 
+                ${day === 0 ? styles.empty : ''} 
+                ${isTodayAndHighlighted(day) ? styles.today : ''}
+                ${isPastDate(day) ? styles.pastDate : ''}
+                ${isFutureDate(day) ? styles.futureDate : ''}
+                ${isSelectedDate(day) ? styles.selectedDate : ''}
+              `}
+              onClick={() => handleDayClick(day)}
             >
               {day !== 0 && day}
             </div>

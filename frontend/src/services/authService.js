@@ -46,6 +46,7 @@ export const clearTokens = () => {
   localStorage.removeItem('refreshToken');
   localStorage.removeItem('token');
   localStorage.removeItem('refresh_token');
+  localStorage.removeItem('userData');
 };
 
 // 使用 refresh token 獲取新的 access token
@@ -53,30 +54,48 @@ export const refreshAccessToken = async () => {
   try {
     const refreshToken = getRefreshToken();
     if (!refreshToken) {
+      console.warn('沒有可用的刷新令牌');
       throw new Error('沒有可用的刷新令牌');
     }
 
+    // 使用獨立的 axios 實例發送刷新請求，避免循環依賴
     const response = await axios.post(`${API_URL}/accounts/token/refresh/`, {
       refresh: refreshToken
     });
 
+    // 嘗試從不同格式的回應中獲取 access token
+    let newAccessToken = null;
+    
     if (response.data.access) {
-      saveTokens(response.data.access, null);
-      return response.data.access;
+      newAccessToken = response.data.access;
     } else if (response.data.data && response.data.data.access) {
-      // 處理自定義回應格式
-      saveTokens(response.data.data.access, null);
-      return response.data.data.access;
+      newAccessToken = response.data.data.access;
     } else {
+      console.error('刷新令牌響應格式錯誤:', response.data);
       throw new Error('刷新令牌響應格式錯誤');
     }
+    
+    // 保存新的 access token
+    saveTokens(newAccessToken, null);
+    
+    // 觸發認證狀態更新事件
+    window.dispatchEvent(new Event('auth-change'));
+    
+    return newAccessToken;
   } catch (error) {
     console.error('刷新令牌失敗:', error);
-    clearTokens();
-    // 可以在這裡觸發一個事件，通知用戶需要重新登入
-    window.dispatchEvent(new CustomEvent('auth-logout', { 
-      detail: { reason: 'token-refresh-failed' } 
-    }));
+    
+    // 對於 401 或 403 錯誤，意味著刷新令牌已失效，需要重新登入
+    if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+      console.warn('刷新令牌已失效，需要重新登入');
+      clearTokens();
+      
+      // 觸發登出事件，但不立即重定向（讓使用者可以保存目前工作）
+      window.dispatchEvent(new CustomEvent('auth-logout', { 
+        detail: { reason: 'token-refresh-failed' } 
+      }));
+    }
+    
     throw error;
   }
 };
@@ -97,9 +116,7 @@ authAxios.interceptors.request.use(
         token = await refreshAccessToken();
       } catch (error) {
         console.error('自動刷新 token 失敗:', error);
-        // 如果刷新失敗，清除 token 並將用戶重定向到登入頁
-        clearTokens();
-        window.location.href = '/login';
+        // 如果刷新失敗，將由 refreshAccessToken 函數處理登出邏輯
         return Promise.reject(error);
       }
     }
@@ -136,8 +153,7 @@ authAxios.interceptors.response.use(
         return authAxios(originalRequest);
       } catch (refreshError) {
         console.error('在響應攔截器中刷新 token 失敗:', refreshError);
-        clearTokens();
-        window.location.href = '/login';
+        // 如果刷新失敗，已在 refreshAccessToken 函數中處理登出邏輯
         return Promise.reject(refreshError);
       }
     }

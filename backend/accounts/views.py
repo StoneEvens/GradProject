@@ -411,7 +411,7 @@ class UserCompletedMissionsAPIView(APIView):
             message="獲取已完成任務成功"
         )
 
-# 標記行程為已完成
+# 標記行程為已完成或重新開始
 class CompletePlanAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -420,14 +420,21 @@ class CompletePlanAPIView(APIView):
             # 獲取行程並確認是當前用戶的行程
             plan = Plan.objects.get(id=plan_id, user=request.user)
             
-            # 標記為已完成
-            plan.is_completed = True
+            # 獲取請求中的 is_completed 值，默認為 True
+            is_completed = request.data.get('is_completed', True)
+            
+            # 更新完成狀態
+            plan.is_completed = is_completed
             plan.save()
             
             serializer = PlanSerializer(plan)
+            
+            # 根據操作類型返回不同的消息
+            message = '行程已標記為完成' if is_completed else '行程已重新開始'
+            
             return APIResponse(
                 data=serializer.data,
-                message='行程已標記為完成',
+                message=message,
                 status=drf_status.HTTP_200_OK
             )
         except Plan.DoesNotExist:
@@ -438,7 +445,7 @@ class CompletePlanAPIView(APIView):
             )
         except Exception as e:
             return APIResponse(
-                message=f'標記行程完成時發生錯誤: {str(e)}',
+                message=f'更新行程狀態時發生錯誤: {str(e)}',
                 code=drf_status.HTTP_500_INTERNAL_SERVER_ERROR,
                 status=drf_status.HTTP_500_INTERNAL_SERVER_ERROR
             )
@@ -468,6 +475,106 @@ class DeletePlanAPIView(APIView):
         except Exception as e:
             return APIResponse(
                 message=f'刪除行程時發生錯誤: {str(e)}',
+                code=drf_status.HTTP_500_INTERNAL_SERVER_ERROR,
+                status=drf_status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+# 編輯行程
+class EditPlanAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, plan_id):
+        try:
+            # 獲取行程並確認是當前用戶的行程
+            plan = Plan.objects.get(id=plan_id, user=request.user)
+            serializer = PlanSerializer(plan)
+            return APIResponse(
+                data=serializer.data,
+                message='成功獲取行程詳情',
+                status=drf_status.HTTP_200_OK
+            )
+        except Plan.DoesNotExist:
+            return APIResponse(
+                message='找不到該行程或您無權限查看',
+                code=drf_status.HTTP_404_NOT_FOUND,
+                status=drf_status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return APIResponse(
+                message=f'獲取行程詳情時發生錯誤: {str(e)}',
+                code=drf_status.HTTP_500_INTERNAL_SERVER_ERROR,
+                status=drf_status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    def put(self, request, plan_id):
+        try:
+            # 獲取行程並確認是當前用戶的行程
+            plan = Plan.objects.get(id=plan_id, user=request.user)
+            
+            # 更新行程資訊
+            serializer = PlanSerializer(plan, data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return APIResponse(
+                    data=serializer.data,
+                    message='行程更新成功',
+                    status=drf_status.HTTP_200_OK
+                )
+            return APIResponse(
+                message='驗證失敗',
+                errors=serializer.errors,
+                code=drf_status.HTTP_400_BAD_REQUEST,
+                status=drf_status.HTTP_400_BAD_REQUEST
+            )
+        except Plan.DoesNotExist:
+            return APIResponse(
+                message='找不到該行程或您無權限修改',
+                code=drf_status.HTTP_404_NOT_FOUND,
+                status=drf_status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return APIResponse(
+                message=f'更新行程時發生錯誤: {str(e)}',
+                code=drf_status.HTTP_500_INTERNAL_SERVER_ERROR,
+                status=drf_status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+# 按日期獲取行程
+class DatePlanAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, date_str):
+        try:
+            # 將日期字符串轉換為日期對象
+            try:
+                date_obj = datetime.strptime(date_str, '%Y-%m-%d').date()
+            except ValueError:
+                return APIResponse(
+                    message='日期格式無效，請使用YYYY-MM-DD格式',
+                    code=drf_status.HTTP_400_BAD_REQUEST,
+                    status=drf_status.HTTP_400_BAD_REQUEST
+                )
+            
+            # 設置一天的開始和結束時間
+            start_of_day = datetime.combine(date_obj, time.min)
+            end_of_day = datetime.combine(date_obj, time.max)
+            
+            # 查詢當前用戶在指定日期的行程
+            plans = Plan.objects.filter(
+                user=request.user,
+                date__range=(start_of_day, end_of_day)
+            ).select_related('user')
+            
+            serializer = PlanSerializer(plans, many=True)
+            
+            return APIResponse(
+                data=serializer.data,
+                message=f'獲取{date_str}的行程成功',
+                status=drf_status.HTTP_200_OK
+            )
+        except Exception as e:
+            return APIResponse(
+                message=f'獲取行程時發生錯誤: {str(e)}',
                 code=drf_status.HTTP_500_INTERNAL_SERVER_ERROR,
                 status=drf_status.HTTP_500_INTERNAL_SERVER_ERROR
             )

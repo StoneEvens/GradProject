@@ -23,12 +23,13 @@
 .scheduleList {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
   overflow-y: auto;
   flex: 1;
   margin-bottom: 12px;
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
+  padding: 4px;
 }
 
 /* 隱藏 Webkit 瀏覽器的滾動條 */
@@ -38,46 +39,83 @@
 
 .scheduleItem {
   display: flex;
+  flex-direction: column;
+  border-radius: 4px;
+  width: 100%;
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  min-height: 60px;
+}
+
+/* 行程上半部分 */
+.scheduleHeader {
+  display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 10px;
-  background-color: #ffeed6;
-  border-radius: 8px;
-  min-height: 48px;
+  padding: 0 4px;
+  height: 20px; /* 上半部分高度為整體的三分之一 */
   width: 100%;
-  transition: background-color 0.2s ease;
+  box-sizing: border-box;
+  gap: 4px; /* 添加間距 */
 }
 
-.scheduleItem.completed {
-  background-color: #e5e5e5;
-  opacity: 0.8;
-}
-
+/* 行程下半部分 */
 .scheduleContent {
-  flex: 1;
-}
-
-.scheduleActions {
-  display: flex;
-  gap: 5px;
-}
-
-.completeButton, .deleteButton {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  border: none;
+  background-color: #ffeed6;
+  padding: 8px;
+  text-align: center;
+  font-weight: 500;
+  color: #333;
+  font-size: 12px;
+  height: 40px; /* 下半部分高度為整體的三分之二 */
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  font-size: 14px;
-  transition: all 0.2s ease;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-.completeButton {
-  background-color: #4CAF50;
-  color: white;
+/* 行程狀態樣式 */
+.statusPending {
+  background-color: #fff3cd; /* 淡黃色，未超過時間且未完成 */
+}
+
+.statusOverdue {
+  background-color: #ffcdd2; /* 淡紅色，超過時間且未完成 */
+}
+
+.statusCompleted {
+  background-color: #d4edda; /* 淡綠色，已完成 */
+}
+
+/* 時間顯示 */
+.timeDisplay {
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  flex: 1;
+  color: #333;
+  white-space: nowrap;
+  min-width: 45px; /* 確保時間顯示有足夠空間 */
+}
+
+/* 按鈕樣式 */
+.deleteButton, .completeButton, .resetButton, .statusButton {
+  padding: 2px 4px;
+  border-radius: 2px;
+  border: none;
+  font-size: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 20px;
+  text-align: center;
+  white-space: nowrap;
+  flex-shrink: 0;
+  height: 12px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .deleteButton {
@@ -85,25 +123,32 @@
   color: white;
 }
 
-.completeButton:hover, .deleteButton:hover {
-  transform: scale(1.1);
+.deleteButton:hover {
+  background-color: #d32f2f;
 }
 
-.time {
-  font-size: 12px;
-  color: #666;
+.completeButton {
+  background-color: #4CAF50;
+  color: white;
 }
 
-.event {
-  font-size: 14px;
-  color: #333;
-  font-weight: 500;
+.completeButton:hover {
+  background-color: #388e3c;
 }
 
-.completed .time,
-.completed .event {
-  text-decoration: line-through;
-  color: #888;
+.resetButton {
+  background-color: #2196F3;
+  color: white;
+}
+
+.resetButton:hover {
+  background-color: #1976D2;
+}
+
+.statusButton {
+  background-color: #6c757d;
+  color: white;
+  cursor: default;
 }
 
 .addButton {
@@ -122,6 +167,12 @@
 
 .addButton:hover {
   background-color: #FF7B54;
+}
+
+.addButton:disabled {
+  background-color: #cccccc;
+  color: #999999;
+  cursor: not-allowed;
 }
 
 .message {

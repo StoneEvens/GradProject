@@ -5,16 +5,40 @@ import HomePage from './pages/HomePage';
 import RegisterPage from './pages/RegisterPage';
 import LoginPage from './pages/LoginPage';
 import MainPage from './pages/MainPage';
-import { isAuthenticated } from './services/authService';
+import TokenTestPage from './pages/TokenTestPage';
+import { isAuthenticated, refreshAccessToken } from './services/authService';
 
 const App = () => {
   const [isUserAuthenticated, setIsUserAuthenticated] = useState(false);
 
   useEffect(() => {
-    // 檢查認證狀態
-    const checkAuth = () => {
-      const authStatus = isAuthenticated();
-      setIsUserAuthenticated(authStatus);
+    // 檢查認證狀態並嘗試刷新 Token
+    const checkAuth = async () => {
+      try {
+        // 如果有 token 但即將過期，先嘗試刷新
+        const token = localStorage.getItem('accessToken');
+        if (token) {
+          // 解碼 token 查看過期時間
+          try {
+            const payload = token.split('.')[1];
+            const decodedPayload = JSON.parse(atob(payload));
+            const currentTime = Math.floor(Date.now() / 1000);
+            // 如果 token 將在 5 分鐘內過期，主動刷新
+            if ((decodedPayload.exp - currentTime) < 300) {
+              await refreshAccessToken();
+            }
+          } catch (error) {
+            console.error('解析 token 失敗:', error);
+          }
+        }
+        
+        // 檢查認證狀態
+        const authStatus = isAuthenticated();
+        setIsUserAuthenticated(authStatus);
+      } catch (error) {
+        console.error('認證檢查失敗:', error);
+        setIsUserAuthenticated(false);
+      }
     };
 
     // 初始檢查
@@ -72,6 +96,11 @@ const App = () => {
         <Route 
           path="/symptom-record" 
           element={isUserAuthenticated ? <MainPage /> : <Navigate to="/login" />} 
+        />
+        {/* 添加新的 token 測試頁面路由 */}
+        <Route 
+          path="/token-test" 
+          element={isUserAuthenticated ? <TokenTestPage /> : <Navigate to="/login" />} 
         />
         {/* 未定義路徑：根據登入狀態重定向 */}
         <Route 

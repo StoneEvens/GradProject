@@ -290,6 +290,34 @@ async function login(email, password) {
 }
 ```
 
+### 按日期獲取行程
+- **端點**: `/api/v1/accounts/plans/date/{date_str}/`
+- **方法**: GET
+- **認證**: 需要
+- **功能**: 獲取當前用戶在指定日期的行程
+- **URL 參數**:
+  - `date_str`: 日期字符串，格式為YYYY-MM-DD，例如2023-11-10
+
+#### 回應資料
+```json
+{
+  "code": 200,
+  "message": "獲取2023-11-10的行程成功",
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "title": "行程標題",
+      "description": "行程描述",
+      "date": "2023-11-10",
+      "start_time": "08:00",
+      "end_time": "09:00",
+      "is_completed": false
+    }
+  ]
+}
+```
+
 ### 建立每日行程
 - **端點**: `/api/v1/accounts/plans/create/`
 - **方法**: POST

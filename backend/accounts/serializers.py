@@ -152,5 +152,5 @@ class UserAchievementSerializer(serializers.ModelSerializer):
 class PlanSerializer(serializers.ModelSerializer):
     class Meta:
         model = Plan
-        fields = ['id', 'title', 'description', 'date', 'is_completed']
+        fields = ['id', 'title', 'description', 'date', 'start_time', 'end_time', 'is_completed']
 

@@ -31,9 +31,20 @@ const LoginPage = () => {
     return emailRegex.test(email);
   };
 
+  const validateAccountName = (accountName) => {
+    // 只允許英文、數字和標點符號
+    const accountNameRegex = /^[a-zA-Z0-9\s!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]*$/;
+    return accountNameRegex.test(accountName);
+  };
+
   const validateForm = () => {
     if (formData.accountName.trim() === '') {
       showNotification('請輸入電子信箱');
+      return false;
+    }
+
+    if (!validateAccountName(formData.accountName)) {
+      showNotification('帳號只能包含英文、數字和標點符號');
       return false;
     }
 

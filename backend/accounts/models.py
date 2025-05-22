@@ -216,7 +216,9 @@ class Plan(models.Model):
     )
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
-    date = models.DateTimeField()  
+    date = models.DateField()  # 改為只存儲日期
+    start_time = models.TimeField(default='08:00')  # 預設早上 8 點
+    end_time = models.TimeField(default='09:00')  # 預設早上 9 點
     is_completed = models.BooleanField(default=False)
 
     def __str__(self):

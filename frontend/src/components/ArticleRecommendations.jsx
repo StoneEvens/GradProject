@@ -72,22 +72,6 @@ const ArticleRecommendations = () => {
     <div className={styles.container}>
       <div className={styles.header}>好文推薦</div>
       
-      <div className={styles.scrollControls}>
-        <button 
-          className={`${styles.scrollButton} ${styles.scrollUp}`}
-          onClick={() => handleScroll('up')}
-          aria-label="向上滾動"
-        >
-          ▲
-        </button>
-        <button 
-          className={`${styles.scrollButton} ${styles.scrollDown}`}
-          onClick={() => handleScroll('down')}
-          aria-label="向下滾動"
-        >
-          ▼
-        </button>
-      </div>
       
       <div className={styles.articleList} ref={articleListRef}>
         {recommendedArticles.map((article) => (
