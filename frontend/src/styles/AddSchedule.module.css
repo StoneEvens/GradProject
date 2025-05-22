@@ -1,0 +1,167 @@
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal {
+  background-color: #FFca9c;
+  border-radius: 15px;
+  padding: 20px;
+  width: 85%;
+  max-width: 350px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.header {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  text-align: center;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #ffeed6;
+}
+
+.timeSection {
+  display: flex;
+  margin-bottom: 16px;
+  gap: 10px;
+}
+
+.periodButton {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 10px;
+  background-color: #ffeed6;
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.periodButton.active {
+  background-color: #F08651;
+  color: #fff;
+}
+
+.timeInputSection {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.timeInput {
+  width: 50px;
+  height: 40px;
+  border: none;
+  border-radius: 8px;
+  background-color: #ffeed6;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 500;
+  color: #333;
+  padding: 0 5px;
+}
+
+.timeInput:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #F08651;
+}
+
+.timeSeparator {
+  font-size: 24px;
+  margin: 0 10px;
+  color: #333;
+  font-weight: 600;
+}
+
+.titleInput {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  background-color: #ffeed6;
+  font-size: 16px;
+  color: #333;
+  margin-bottom: 16px;
+  box-sizing: border-box;
+}
+
+.titleInput:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #F08651;
+}
+
+.descriptionInput {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  background-color: #ffeed6;
+  font-size: 16px;
+  color: #333;
+  margin-bottom: 16px;
+  resize: none;
+  box-sizing: border-box;
+}
+
+.descriptionInput:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #F08651;
+}
+
+.buttonSection {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.cancelButton {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  background-color: #ffeed6;
+  font-size: 16px;
+  font-weight: 500;
+  color: #666;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  flex: 1;
+}
+
+.cancelButton:hover {
+  background-color: #ffdbaa;
+}
+
+.saveButton {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  background-color: #F08651;
+  font-size: 16px;
+  font-weight: 500;
+  color: #fff;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  flex: 1;
+}
+
+.saveButton:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.saveButton:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+} 

@@ -1,0 +1,148 @@
+.loginPage {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #ffca9c;
+  padding: 0;
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+.canvasArea {
+  flex: 0.8;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px 20px;
+}
+
+.animationContainer {
+  width: 100%;
+  max-width: 350px;
+  height: 350px;
+  margin-bottom: 1rem;
+  background-color: #ffca9c;
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.formArea {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 20px 20px;
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: -30px;
+}
+
+.loginForm {
+  width: 100%;
+  max-width: 350px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.input {
+  padding: 15px;
+  border-radius: 30px;
+  border: none;
+  background-color: #ffeed6;
+  font-size: 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.input::placeholder {
+  color: #888;
+}
+
+.input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #ff9f43;
+}
+
+.passwordContainer {
+  position: relative;
+  width: 100%;
+}
+
+.passwordToggle {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+}
+
+.passwordToggle img {
+  width: 20px;
+  height: 20px;
+  opacity: 0.6;
+}
+
+.passwordToggle:hover img {
+  opacity: 1;
+}
+
+.loginButton {
+  width: 100%;
+  padding: 15px;
+  border-radius: 30px;
+  border: none;
+  background-color: #f08651;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: background-color 0.3s ease;
+}
+
+.loginButton:hover {
+  background-color: #d35400;
+}
+
+.forgotPassword {
+  text-align: center;
+  margin-top: 15px;
+  font-size: 14px;
+  color: #555;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.forgotPassword:hover {
+  text-decoration: underline;
+  color: #f08651;
+}
+
+@media (min-width: 768px) {
+  .loginPage {
+    align-items: center;
+    padding: 40px;
+  }
+  
+  .animationContainer {
+    width: 400px;
+    height: 300px;
+  }
+  
+  .loginForm {
+    max-width: 400px;
+  }
+  
+  .formArea {
+    margin-top: -40px;
+  }
+} 

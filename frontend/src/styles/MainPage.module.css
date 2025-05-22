@@ -1,0 +1,59 @@
+.container {
+  min-height: 100vh;
+  background-color: #ffeed6;
+  position: relative;
+  width: 100%;
+  max-width: 430px;  /* 限制為標準手機寬度 */
+  margin: 0 auto;
+}
+
+.content {
+  padding: 60px 16px 70px;  /* 上方留出TopNavbar的空間，下方留出BottomNavbar的空間 */
+  min-height: calc(100vh - 130px);  /* 減去上下導航欄的高度 */
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 30px;
+}
+
+.topSection {
+  display: flex;
+  gap: 16px;
+  
+  margin-bottom: 24px;
+  height: 320px; /* 固定高度 */
+}
+
+.column {
+  flex: 1;
+  min-width: 0; /* 防止內容溢出 */
+  height: 100%; /* 確保列高度填滿父容器 */
+}
+
+.calendarSection {
+  margin-bottom: 24px;
+}
+
+.recommendationsSection {
+  margin-bottom: 24px;
+}
+
+/* 在小螢幕上改為垂直排列 */
+@media (max-width: 768px) {
+  .topSection {
+    flex-direction: column;
+    height: auto;
+    gap: 12px;
+  }
+  
+  .column {
+    height: 320px; /* 在垂直排列時給予固定高度 */
+  }
+}
+
+/* 確保導航欄寬度與容器一致 */
+.container :global(.navbar) {
+  max-width: 430px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+} 

@@ -1,0 +1,91 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  padding: 1rem 1rem 1rem;
+  background-color: #ffca9c;
+  text-align: center;
+}
+
+.title {
+  color: #f08651;
+  font-size: 2.1rem;
+  margin: 5rem 0 0;
+  font-weight: bold;
+  position: relative;
+  z-index: 2;
+}
+
+.canvasWrapper {
+  width: 100%;
+  max-width: 420px;
+  height: 56vh;
+  margin-top: 1rem;
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px;
+  background-color: #ffca9c;
+}
+
+.authContainer {
+  width: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 2rem 0 4rem;
+  margin-top: 1rem;
+}
+
+.registerButton {
+  display: block;
+  width: 100%;
+  max-width: 300px;
+  padding: 0.8rem;
+  background-color: #f08651;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  text-decoration: none;
+  margin: 0 auto 1rem;
+  transition: background-color 0.3s;
+  text-align: center;
+}
+
+.registerButton:hover {
+  background-color: #d35400;
+}
+
+.loginLink {
+  font-size: 0.9rem;
+  color: #666;
+  margin-top: 0.8rem;
+  text-align: center;
+  cursor: pointer;
+}
+
+.loginLink:hover {
+  color: #e67e22;
+  text-decoration: underline;
+}
+
+/* 響應式設計 */
+@media screen and (min-width: 768px) {
+  .title {
+    font-size: 2.5rem;
+  }
+  
+  .canvasWrapper {
+    background: linear-gradient(to bottom, #fdf6f0, #ffe5ca);
+    border-radius: 12px;
+    max-width: 340px;
+    height: 43vh;
+  }
+  
+  .authContainer {
+    padding: 3rem 0 5rem;
+  }
+} 
