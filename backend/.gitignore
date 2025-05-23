@@ -1,0 +1,162 @@
+# Django 專案 .gitignore
+
+# Python 相關
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Django 相關
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+logs/
+*.log
+
+# 環境變數和敏感配置
+.env
+.env.local
+.env.production
+.env.staging
+*.env
+.dotenv
+
+# 媒體檔案和上傳內容
+media/
+staticfiles/
+static_collected/
+
+# 快取
+.cache/
+*.cache
+
+# Sessions
+.session/
+
+# 單元測試 / 覆蓋率報告
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Translations
+*.mo
+*.pot
+
+# Django 遷移文件（視需求決定是否忽略）
+# */migrations/*
+# !*/migrations/__init__.py
+
+# 資料庫備份
+*.sql
+*.dump
+*.backup
+
+# IDE 相關
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# 臨時文件
+*.tmp
+*.temp
+.temp/
+temp/
+
+# 文檔相關
+docs/_build/
+
+# Celery 相關
+celerybeat-schedule
+celerybeat.pid
+
+# Redis 相關
+dump.rdb
+
+# 備份文件
+*.bak
+*.backup
+
+# 測試相關
+.coverage
+htmlcov/
+.pytest_cache/
+test-results/
+
+# 虛擬環境
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# PyCharm
+.idea/
+.pycharm/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# pipenv
+Pipfile.lock
+
+# PEP 582
+__pypackages__/
+
+# SageMath parsed files
+*.sage.py
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/ 

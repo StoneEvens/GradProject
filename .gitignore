@@ -1,0 +1,15 @@
+# Python
+__pycache__/
+*.pyc
+# Django / media uploads
+media/
+# VS Code
+.vscode/
+# Node / frontend
+node_modules/
+dist/
+# IDE
+.idea/
+# PyCharm
+.idea/
+.pycharm/
