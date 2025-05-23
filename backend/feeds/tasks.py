@@ -34,7 +34,6 @@ def process_feed_ocr(self, feed_id, nutrition_image_temp_path, front_image_id, n
         feed = Feed.objects.get(id=feed_id)
         
         # 獲取圖像對象
-        # TODO: [雲端存儲] 雲端實現後，這裡將獲取圖片URL而非本地路徑
         front_image = Image.objects.get(id=front_image_id)
         nutrition_image = Image.objects.get(id=nutrition_image_id)
         
@@ -64,8 +63,6 @@ def process_feed_ocr(self, feed_id, nutrition_image_temp_path, front_image_id, n
         reader = Reader(['ch_sim', 'en'])
 
         # 從臨時文件讀取圖像並進行 OCR
-        # TODO: [雲端存儲] 雲端實現後，可能需要從雲端URL直接獲取圖片數據
-        # 或先下載到本地臨時文件再處理
         logger.debug(f"讀取營養成分圖片並進行 OCR")
         with open(nutrition_image_temp_path, 'rb') as f:
             nutrition_image_data = f.read()

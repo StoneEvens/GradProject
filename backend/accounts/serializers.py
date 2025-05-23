@@ -129,16 +129,6 @@ class UserBlockSerializer(serializers.ModelSerializer):
         model = UserBlock
         fields = '__all__'
 
-class MissionSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Mission
-        fields = '__all__'
-
-class UserMissionSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = UserMission
-        fields = '__all__'
-
 class AchievementSerializer(serializers.ModelSerializer):
     class Meta:
         model = Achievement

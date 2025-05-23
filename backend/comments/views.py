@@ -1,6 +1,5 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import get_object_or_404
 from django.contrib.contenttypes.models import ContentType
-from django.db.models import F, Count
 from rest_framework import generics, status as drf_status, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -8,7 +7,6 @@ from rest_framework.pagination import PageNumberPagination
 from social.models import Post
 from .models import Comment
 from .serializers import CommentSerializer, CommentReplySerializer
-from media.models import Image
 
 class CommentPagination(PageNumberPagination):
     page_size = 20

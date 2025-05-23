@@ -1,7 +1,6 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView, TokenVerifyView
 from .views import *
-from .api import RecordUserActionAPIView, CheckMissionConditionsAPIView
 
 urlpatterns = [
     path('token/', TokenObtainPairView.as_view(), name='token-obtain-pair'),
@@ -12,7 +11,6 @@ urlpatterns = [
     path('me/', MeAPIView.as_view(), name='accounts-me'),
     path('plans/today/', TodayPlanAPIView.as_view(), name='today-plans'),
     path('plans/date/<str:date_str>/', DatePlanAPIView.as_view(), name='date-plans'),
-    path('missions/today/', TodayMissionAPIView.as_view(), name='today-missions'),
     path('profile/image/', UserImageAPIView.as_view(), name='user-image'),
     path('plans/create/', CreatePlanAPIView.as_view(), name='create-plan'),
     path('plans/<int:plan_id>/complete/', CompletePlanAPIView.as_view(), name='complete-plan'),
@@ -24,13 +22,4 @@ urlpatterns = [
     path('check/account/', CheckUserAccountAPIView.as_view(), name='check-account'),
     path('check/email/', CheckEmailAPIView.as_view(), name='check-email'),
     path('check/password/', CheckPasswordAPIView.as_view(), name='check-password'),
-    
-    # 任務相關的API
-    path('missions/active/', UserActiveMissionsAPIView.as_view(), name='active-missions'),
-    path('missions/completed/', UserCompletedMissionsAPIView.as_view(), name='completed-missions'),
-    path('missions/<int:mission_id>/complete/', CompleteMissionAPIView.as_view(), name='complete-mission'),
-    
-    # 任務條件相關API
-    path('user-action/record/', RecordUserActionAPIView.as_view(), name='record-user-action'),
-    path('missions/<int:mission_id>/conditions/', CheckMissionConditionsAPIView.as_view(), name='check-mission-conditions'),
 ]

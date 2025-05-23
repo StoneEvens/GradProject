@@ -147,7 +147,7 @@ class ImageService:
                 return cached_url
         
         image = ImageService.get_object_first_image(obj, model_class, use_cache=False)
-        image_url = image.img_url.url if image and hasattr(image.img_url, 'url') else None
+        image_url = image.img_url if image else None
         
         if use_cache and image_url:
             # 緩存 URL

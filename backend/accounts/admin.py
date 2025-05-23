@@ -1,7 +1,6 @@
 from django.contrib import admin
 from .models import (
-    CustomUser, UserFollow, UserBlock, MissionCondition, Mission, 
-    UserMission, UserConditionRecord, Achievement, UserAchievement, 
+    CustomUser, UserFollow, UserBlock, Achievement, UserAchievement, 
     Notification, Plan
 )
 
@@ -31,37 +30,6 @@ class UserBlockAdmin(admin.ModelAdmin):
     list_display = ('blocker', 'blocked', 'date')
     list_filter = ('date',)
     search_fields = ('blocker__username', 'blocked__username')
-
-# 任務條件管理
-@admin.register(MissionCondition)
-class MissionConditionAdmin(admin.ModelAdmin):
-    list_display = ('name', 'type', 'target_count')
-    list_filter = ('type',)
-    search_fields = ('name', 'description')
-
-# 任務管理
-@admin.register(Mission)
-class MissionAdmin(admin.ModelAdmin):
-    list_display = ('mission_name', 'point', 'level')
-    search_fields = ('mission_name', 'description')
-    list_filter = ('level',)
-    filter_horizontal = ('conditions',)
-
-# 用戶任務管理
-@admin.register(UserMission)
-class UserMissionAdmin(admin.ModelAdmin):
-    list_display = ('user', 'mission', 'status', 'due', 'date_assigned', 'date_achieved')
-    list_filter = ('status', 'due', 'date_assigned')
-    search_fields = ('user__username', 'mission__mission_name')
-    readonly_fields = ('date_assigned',)
-
-# 用戶條件記錄管理
-@admin.register(UserConditionRecord)
-class UserConditionRecordAdmin(admin.ModelAdmin):
-    list_display = ('user', 'condition', 'count', 'timestamp')
-    list_filter = ('timestamp',)
-    search_fields = ('user__username', 'condition__name')
-    readonly_fields = ('timestamp',)
 
 # 成就管理
 @admin.register(Achievement)
