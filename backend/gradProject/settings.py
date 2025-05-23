@@ -14,13 +14,6 @@ from pathlib import Path
 from datetime import timedelta
 import os  
 
-# 載入 .env 檔案 (如果存在)
-try:
-    from dotenv import load_dotenv
-    load_dotenv()
-except ImportError:
-    # 如果沒有安裝 python-dotenv，跳過載入
-    pass
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -52,7 +45,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django_celery_results',  # Celery results backend
     "accounts",
     "pets",
     "social",

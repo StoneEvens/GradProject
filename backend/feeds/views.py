@@ -9,19 +9,13 @@ from pets.models import Pet
 from pets.models import IllnessArchive
 from feeds.models import * 
 import math
-import re
-import easyocr
-from PIL import Image as PilImage
-from io import BytesIO
 from utils.api_response import APIResponse
 from utils.decorators import log_queries
 import os
-import tempfile
 import logging
 from django.db import transaction
 from django.contrib.contenttypes.models import ContentType
 from .serializers import UploadFeedSerializer, NutritionCalculatorRequestSerializer, FeedStatusSerializer, FeedSerializer, PetFeedSerializer, PetFeedCreateSerializer
-from .tasks import process_feed_ocr
 from feeds.services import calculate_der
 from django.core.exceptions import ValidationError
 from django.http import Http404
@@ -417,11 +411,14 @@ class UploadFeedAPIView(APIView):
                 feed.nutrition_image = nutrition_image_obj
                 feed.save()
                 
-                # 啟動異步OCR處理任務
-                process_feed_ocr.delay(feed.id)
+                # 保持 pending 狀態，等待 OCR 處理
+                # TODO: 整合新的 OCR 處理邏輯
+                # 暫時設定為 pending，等待團隊成員的 OCR 實作
+                feed.processing_status = 'pending'
+                feed.save()
                 
                 logger.info(
-                    f"用戶 {request.user.id} 成功上傳飼料 '{feed.name}'", 
+                    f"用戶 {request.user.id} 成功上傳飼料 '{feed.name}'，等待 OCR 處理", 
                     extra={
                         'user_id': request.user.id, 
                         'feed_id': feed.id
@@ -429,10 +426,11 @@ class UploadFeedAPIView(APIView):
                 )
                 
                 return APIResponse(
-                    message="飼料上傳成功，開始進行營養信息處理",
+                    message="飼料上傳成功，營養數據處理中，請稍後查看",
                     data={
                         "feed_id": feed.id,
-                        "name": feed.name
+                        "name": feed.name,
+                        "processing_status": feed.processing_status
                     }
                 )
                 
