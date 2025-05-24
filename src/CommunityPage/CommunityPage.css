@@ -6,7 +6,7 @@
 }
 
 .posts-container {
-  max-width: 100%;
+  max-width: 380px;
   width: 100%;
   margin: 0 auto;
   padding: 16px;
@@ -18,7 +18,7 @@
 
 .post-container {
   width: 100%;
-  min-width: 380px;
+  max-width: 380px;
   background-color: #EFEFEF;
   border-radius: 16px;
   padding: 16px;

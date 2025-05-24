@@ -6,8 +6,8 @@ html, body {
   margin: 0;
   padding: 0;
   background-color: #FFEED6;
-  display: flex;
-  justify-content: center;
+  /* display: flex; */
+  /* place-items: center; */
 }
 
 #root {
@@ -24,6 +24,7 @@ html, body {
 /* ✅ App畫面容器 */
 .app-container {
   min-width: 380px;
+  max-width: 420px;
   width: 100%;
   margin: 0 auto;
   padding-top: 80px;

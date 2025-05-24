@@ -59,6 +59,25 @@
   border: 5px solid #F08651;
 }
 
+.add-pet-btn-rect {
+  background: #D9D9D9;
+  font-size: 0.8rem;
+  color: #333;
+  font-weight: bold;
+  border: 3px solid transparent;
+  border-radius: 10px;
+  padding: 8px 16px;
+  cursor: pointer;
+  margin-top: 18px;
+  margin-left: auto;
+  display: block;
+  transition: border 0.2s;
+}
+
+.add-pet-btn-rect.selected {
+  border: 3px solid #F08651;
+}
+
 .pet-info-section {
   background: #FFCA9C;
   border-radius: 18px;
@@ -88,8 +107,4 @@
   min-width: 80px;
   max-width: 150px;
   text-align: left;
-}
-
-.pet-info-input {
-  border: 1.5px solid #FFB370;
 }

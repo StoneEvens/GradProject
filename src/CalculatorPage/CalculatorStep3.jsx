@@ -10,16 +10,13 @@ const mockFeeds = [
   { id: 3, name: '飼料3', img: mockFeed3 },
 ];
 
-function CalculatorStep3({ onPrev, selectedFeed = 0 }) {
+function CalculatorStep3({ onPrev, selectedFeed, selectedPet }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 2000);
     return () => clearTimeout(timer);
   }, []);
-
-  // 假設 selectedFeed 由父元件傳入，這裡預設為 0
-  const feed = mockFeeds[selectedFeed] || mockFeeds[0];
 
   return (
     <>
@@ -30,19 +27,23 @@ function CalculatorStep3({ onPrev, selectedFeed = 0 }) {
           <div className="ai-loading">AI 計算中...</div>
         ) : (
           <div className="result-content">
-            <div className="result-row">
-              <div className="result-label">使用飼料：</div>
-              <div className="result-value result-feed-img">
-                <img src={feed.img} alt={feed.name} />
+            <div className="result-top-row">
+              <div className="result-col">
+                <div className="result-col-badge">飼料</div>
+                <div className="result-col-name">{selectedFeed?.name || ''}</div>
+                <div className="result-col-img"><img src={selectedFeed?.img} alt={selectedFeed?.name} /></div>
+              </div>
+              <div className="result-col">
+                <div className="result-col-badge">寵物</div>
+                <div className="result-col-name">{selectedPet?.name || ''}</div>
+                <div className="result-col-img"><img src={selectedPet?.avatar} alt={selectedPet?.name} /></div>
               </div>
             </div>
-            <div className="result-row">
-              <div className="result-label">計算結果：</div>
-              <div className="result-value">此飼料的建議攝取量為每日四餐，一餐約40g，但綜合健康報告進行客製化計算之後，發現牛磺酸會不足約100mg，建議購買相關保健食品補充。</div>
-            </div>
-            <div className="result-row">
-              <div className="result-label">注意事項：</div>
-              <div className="result-value">布偶貓容易罹患腎臟相關疾病，建議提供充足水分。</div>
+            <div className="result-bottom-box">
+              <div className="result-bottom-title">計算結果：</div>
+              <div className="result-bottom-text">經計算，此飼料的建議攝取量為每日四餐，一餐約40g，但綜合健康報告進行客製化計算之後，發現牛磺酸會不足約100mg，建議購買相關保健食品補充。</div>
+              <div className="result-bottom-title" style={{marginTop:'18px'}}>注意事項：</div>
+              <div className="result-bottom-text">布偶貓容易罹患腎臟相關疾病，建議提供充足水分。</div>
             </div>
           </div>
         )}

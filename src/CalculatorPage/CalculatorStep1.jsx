@@ -17,20 +17,20 @@ const mockPets = [
   },
   {
     id: 2,
-    name: '小白',
+    name: '肥肥',
     species: '貓',
     weight: 5.2,
     length: 38,
-    note: '怕生',
+    note: '有糖尿病',
     avatar: mockCat2,
   },
   {
     id: 3,
-    name: '圓圓',
+    name: '咪寶',
     species: '貓',
     weight: 6.1,
     length: 40,
-    note: '愛吃',
+    note: '愛吃零食',
     avatar: mockCat3,
   },
 ];
@@ -45,6 +45,7 @@ function CalculatorStep1({ onNext }) {
   });
   const [isAdding, setIsAdding] = useState(false);
   const [newPet, setNewPet] = useState({ name: '', species: '貓', weight: '', length: '', note: '' });
+  const [errorMsg, setErrorMsg] = useState('');
 
   // 切換寵物時同步資訊
   const handleSelectPet = idx => {
@@ -63,6 +64,32 @@ function CalculatorStep1({ onNext }) {
     setPets(prev => prev.map((pet, idx) => idx === selectedPet ? { ...pet, [field]: value } : pet));
   };
 
+  // 驗證必填欄位
+  const validate = () => {
+    if (isAdding) {
+      if (!newPet.name) return '請輸入名字！';
+      if (!newPet.weight) return '請輸入體重！';
+      if (!newPet.length) return '請輸入身長！';
+    } else {
+      if (!pets[selectedPet].name) return '請輸入名字！';
+      if (!editInfo.weight) return '請輸入體重！';
+      if (!editInfo.length) return '請輸入身長！';
+    }
+    return '';
+  };
+
+  // 下一步按鈕事件
+  const handleNext = () => {
+    const err = validate();
+    if (err) {
+      setErrorMsg(err);
+      return;
+    }
+    setErrorMsg('');
+    const pet = isAdding ? newPet : pets[selectedPet];
+    onNext(pet);
+  };
+
   return (
     <>
       <div className="calculator-title">營養計算機</div>
@@ -78,10 +105,17 @@ function CalculatorStep1({ onNext }) {
               onClick={() => handleSelectPet(idx)}
             />
           ))}
-          <button className={`add-pet-btn${isAdding ? ' selected' : ''}`} type="button" onClick={() => { setIsAdding(true); setNewPet({ name: '', species: '貓', weight: '', length: '', note: '' }); }}>
-            <img src={addPetIcon} alt="add-pet" style={{width: '40px', height: '40px'}} />
-          </button>
         </div>
+        <button
+          className={`add-pet-btn-rect${isAdding ? ' selected' : ''}`}
+          type="button"
+          onClick={() => {
+            setIsAdding(true);
+            setNewPet({ name: '', species: '貓', weight: '', length: '', note: '' });
+          }}
+        >
+          新增寵物
+        </button>
       </div>
       <div className="pet-select-label">寵物資訊</div>
       <div className="pet-info-section">
@@ -173,8 +207,11 @@ function CalculatorStep1({ onNext }) {
             />
           )}
         </div>
+        {errorMsg && (
+          <div style={{ color: 'red', marginTop: 4, marginLeft: 8, fontSize: '0.95rem' }}>{errorMsg}</div>
+        )}
       </div>
-      <button className="next-step-btn" onClick={onNext}>下一步</button>
+      <button className="next-step-btn" onClick={handleNext}>下一步</button>
     </>
   );
 }
