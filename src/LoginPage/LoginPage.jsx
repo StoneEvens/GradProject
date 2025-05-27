@@ -4,7 +4,6 @@ import '../components/Header.css'
 import '../components/BottomNavigationBar.css'
 import { useNavigate } from 'react-router-dom'
 
-
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -48,7 +47,6 @@ export default function LoginPage() {
     <form className="login-container">
       <div className="login-box">
         <h1 className="login-title">寵物健康管理系統</h1>
-
         <div className="input-group">
           <label className="input-label">Email</label>
           <input
@@ -60,7 +58,6 @@ export default function LoginPage() {
           />
           {emailError && <p className="error-msg">請填入Email</p>}
         </div>
-
         <div className="input-group">
           <label className="input-label">密碼</label>
           <div className="input-wrapper">
@@ -85,11 +82,9 @@ export default function LoginPage() {
           </div>
           {passwordError && <p className="error-msg">請填入密碼</p>}
         </div>
-
         <button className="login-button" onClick={handleLogin}>
           登入
         </button>
-
         <hr className="divider" />
         <p className="register-prompt">還沒有帳號？</p>
         <button className="register-button" onClick={() => navigate('/register')}>
