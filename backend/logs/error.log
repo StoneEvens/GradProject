@@ -1,1 +1,2 @@
 ERROR 2025-05-22 21:33:43,640 log 42608 51104 Internal Server Error: /api/v1/accounts/plans/today/
+ERROR 2025-06-07 16:13:21,036 log 17260 6204 Internal Server Error: /api/v1/accounts/check/account/
