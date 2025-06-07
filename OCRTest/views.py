@@ -10,7 +10,7 @@ def index(request, *args, **kwargs):
 
 def upload(request, *args, **kwargs):
     if request.method == 'POST':
-        credentials_path = "D:/Shared/ai-project-454107-a1e8b881803e.json"  # Path to your Google JSON
+        credentials_path = "c:/Users/steve/Downloads/ai-project-454107-a1e8b881803e.json"  # Path to your Google JSON
 
         # Check if an image file is uploaded
         if 'image' not in request.FILES:
