@@ -6,6 +6,9 @@ import RegisterPage from './pages/RegisterPage';
 import LoginPage from './pages/LoginPage';
 import MainPage from './pages/MainPage';
 import TokenTestPage from './pages/TokenTestPage';
+import ProfilePage from './pages/ProfilePage';
+import CommunityPage from './pages/CommunityPage';
+import ForumPage from './pages/ForumPage';
 import { isAuthenticated, refreshAccessToken } from './services/authService';
 
 const App = () => {
@@ -96,6 +99,21 @@ const App = () => {
         <Route 
           path="/symptom-record" 
           element={isUserAuthenticated ? <MainPage /> : <Navigate to="/login" />} 
+        />
+        {/* 個人頁面 */}
+        <Route 
+          path="/profile" 
+          element={isUserAuthenticated ? <ProfilePage /> : <Navigate to="/login" />} 
+        />
+        {/* 社群頁面 */}
+        <Route 
+          path="/community" 
+          element={isUserAuthenticated ? <CommunityPage /> : <Navigate to="/login" />} 
+        />
+        {/* 論壇頁面 */}
+        <Route 
+          path="/forum" 
+          element={isUserAuthenticated ? <ForumPage /> : <Navigate to="/login" />} 
         />
         {/* 添加新的 token 測試頁面路由 */}
         <Route 

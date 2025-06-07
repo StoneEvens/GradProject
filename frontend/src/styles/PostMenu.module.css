@@ -44,11 +44,7 @@
   transform: scale(0.95);
 }
 
-.dailyRecord {
-  background-color: #FFB26B;
-}
-
-.symptomRecord {
+.buttonElement {
   background-color: #FFB26B;
 }
 
