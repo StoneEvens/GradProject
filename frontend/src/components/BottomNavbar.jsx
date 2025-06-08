@@ -8,19 +8,6 @@ const BottomNavbar = () => {
   const postButtonRef = useRef(null);
   const navigate = useNavigate();
 
-  const menuItems = [
-    {
-      label: '日常紀錄',
-      path: '/daily-record',
-      className: 'dailyRecord'
-    },
-    {
-      label: '症狀紀錄',
-      path: '/symptom-record',
-      className: 'symptomRecord'
-    }
-  ];
-
   function getMenuItem() {
     if (location.pathname === '/main') {
       return [
@@ -37,7 +24,7 @@ const BottomNavbar = () => {
       return [
         {
           label: '社群貼文',
-          path: '/community-post'
+          path: '/test-community-post-upload'
         },
         {
           label: '論壇貼文',
@@ -51,7 +38,7 @@ const BottomNavbar = () => {
     // 如果點擊的是發文按鈕，則切換發文選單的顯示狀態
     if (action === 'post') {
       if (location.pathname === '/community') {
-        navigate('/community/create-post');
+        navigate('/test-community-post-upload');
         return;
       } else if (location.pathname === '/forum') {
         navigate('/forum/create-post');

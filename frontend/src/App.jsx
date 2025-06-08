@@ -9,6 +9,7 @@ import TokenTestPage from './pages/TokenTestPage';
 import ProfilePage from './pages/ProfilePage';
 import CommunityPage from './pages/CommunityPage';
 import ForumPage from './pages/ForumPage';
+import TestCommunityPostUpload from './pages/TestCommunityPostUpload';
 import { isAuthenticated, refreshAccessToken } from './services/authService';
 
 const App = () => {
@@ -115,6 +116,13 @@ const App = () => {
           path="/forum" 
           element={isUserAuthenticated ? <ForumPage /> : <Navigate to="/login" />} 
         />
+
+        {/* 論壇頁面 */}
+        <Route 
+          path="/test-community-post-upload" 
+          element={isUserAuthenticated ? <TestCommunityPostUpload /> : <Navigate to="/login" />} 
+        />
+
         {/* 添加新的 token 測試頁面路由 */}
         <Route 
           path="/token-test" 

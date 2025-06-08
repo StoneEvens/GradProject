@@ -143,3 +143,24 @@ INFO 2025-06-08 01:31:23,606 serializers 14716 24516 用戶 steven930211@gmail.com
 INFO 2025-06-08 02:01:36,851 serializers 14328 8376 開始驗證用戶登入：steven930211@gmail.com
 INFO 2025-06-08 02:01:36,853 serializers 14328 8376 找到帳戶：Steven, 活躍狀態：True
 INFO 2025-06-08 02:01:37,203 serializers 14328 8376 用戶 steven930211@gmail.com 登入成功
+INFO 2025-06-08 14:47:33,106 serializers 9040 11724 開始驗證用戶登入：steven930211@gmail.com
+INFO 2025-06-08 14:47:33,109 serializers 9040 11724 找到帳戶：Steven, 活躍狀態：True
+WARNING 2025-06-08 14:47:33,452 serializers 9040 11724 帳戶 steven930211@gmail.com 認證失敗，密碼不正確
+INFO 2025-06-08 14:47:38,489 serializers 9040 11724 開始驗證用戶登入：steven930211@gmail.com
+INFO 2025-06-08 14:47:38,491 serializers 9040 11724 找到帳戶：Steven, 活躍狀態：True
+INFO 2025-06-08 14:47:38,839 serializers 9040 11724 用戶 steven930211@gmail.com 登入成功
+INFO 2025-06-08 15:38:54,114 serializers 10560 17936 開始驗證用戶登入：steven930211@gmail.com
+INFO 2025-06-08 15:38:54,117 serializers 10560 17936 找到帳戶：Steven, 活躍狀態：True
+INFO 2025-06-08 15:38:54,696 serializers 10560 17936 用戶 steven930211@gmail.com 登入成功
+INFO 2025-06-08 19:30:52,442 serializers 21388 13024 開始驗證用戶登入：steven930211@gmail.com
+INFO 2025-06-08 19:30:52,444 serializers 21388 13024 找到帳戶：Steven, 活躍狀態：True
+INFO 2025-06-08 19:30:52,804 serializers 21388 13024 用戶 steven930211@gmail.com 登入成功
+INFO 2025-06-08 20:19:15,284 serializers 21388 5544 開始驗證用戶登入：steven930211@gmail.com
+INFO 2025-06-08 20:19:15,286 serializers 21388 5544 找到帳戶：Steven, 活躍狀態：True
+INFO 2025-06-08 20:19:15,839 serializers 21388 5544 用戶 steven930211@gmail.com 登入成功
+INFO 2025-06-08 21:36:01,566 serializers 21388 13700 開始驗證用戶登入：steven930211@gmail.com
+INFO 2025-06-08 21:36:01,568 serializers 21388 13700 找到帳戶：Steven, 活躍狀態：True
+INFO 2025-06-08 21:36:02,130 serializers 21388 13700 用戶 steven930211@gmail.com 登入成功
+INFO 2025-06-08 22:25:28,147 serializers 21388 10896 開始驗證用戶登入：steven930211@gmail.com
+INFO 2025-06-08 22:25:28,149 serializers 21388 10896 找到帳戶：Steven, 活躍狀態：True
+INFO 2025-06-08 22:25:28,711 serializers 21388 10896 用戶 steven930211@gmail.com 登入成功

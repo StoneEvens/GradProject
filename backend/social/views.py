@@ -193,7 +193,7 @@ class SearchSuggestionAPIView(APIView):
 
 # === 建立貼文 API ===
 class CreatePostAPIView(APIView):
-    permission_classes = [IsAuthenticated]
+    ##permission_classes = [IsAuthenticated]
     
     @transaction.atomic
     def post(self, request, *args, **kwargs):
@@ -202,16 +202,23 @@ class CreatePostAPIView(APIView):
         """
         try:
             # 獲取基本貼文數據
+            user = request.user
             content = request.data.get('content', '')
+            uploaded_image_files = request.FILES.getlist('images')
             hashtag_data = request.data.get('hashtags', [])
             pet_ids = request.data.get('pet_ids', [])
+
+            if (user is None or not user.is_authenticated):
+                print("用戶未登錄或無效")
+            else:
+                print(f"當前用戶: {user.username} (ID: {user.id})")
             
             # 創建貼文
             post = Post.objects.create(
-                user=request.user,
+                user=user,
                 content=content
             )
-            
+
             # 更新 Hashtags (從內容提取和前端提供)
             post.update_hashtags(content, hashtag_data) 
             
@@ -234,7 +241,7 @@ class CreatePostAPIView(APIView):
                 post.tag_pets(parsed_pet_ids)
             
             # 處理圖片上傳 (使用 ImageService 風格)
-            uploaded_image_files = request.FILES.getlist('images')
+            uploaded_image_files
             if uploaded_image_files:
                 # from utils.image_service import ImageService # 確保 ImageService 已導入
                 # from django.contrib.contenttypes.models import ContentType
@@ -243,11 +250,11 @@ class CreatePostAPIView(APIView):
                     try:
                         ImageService.save_image(
                             image_file=image_file_obj,
-                            owner=request.user,
+                            owner=user, # 使用當前用戶作為擁有者
                             content_object=post, # 直接傳遞 Post 實例
                             image_type='post_image', # 定義一個合適的圖片類型
                             sort_order=index,
-                            alt_text=f"{request.user.username} 的貼文圖片 {index+1}"
+                            alt_text=f"{user.username} 的貼文圖片 {index+1}"
                         )
                     except Exception as img_e:
                         # logger.error(f"保存貼文圖片時出錯: {str(img_e)}", exc_info=True)
@@ -266,7 +273,6 @@ class CreatePostAPIView(APIView):
         except Exception as e:
             return APIResponse(
                 message="創建貼文失敗",
-                errors=serializer.errors,
                 status=drf_status.HTTP_400_BAD_REQUEST,
             )
 
