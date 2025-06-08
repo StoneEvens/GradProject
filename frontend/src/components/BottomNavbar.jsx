@@ -8,9 +8,43 @@ const BottomNavbar = () => {
   const postButtonRef = useRef(null);
   const navigate = useNavigate();
 
+  function getMenuItem() {
+    if (location.pathname === '/main') {
+      return [
+        {
+          label: '日常紀錄',
+          path: '/daily-record'
+        },
+        {
+          label: '症狀紀錄',
+          path: '/symptom-record'
+        }
+      ];
+    } else if (location.pathname === '/profile') {
+      return [
+        {
+          label: '社群貼文',
+          path: '/test-community-post-upload'
+        },
+        {
+          label: '論壇貼文',
+          path: '/forum-post'
+        }
+      ];
+    }
+  }
+
   const handleNavItemClick = (action) => {
     // 如果點擊的是發文按鈕，則切換發文選單的顯示狀態
     if (action === 'post') {
+      if (location.pathname === '/community') {
+        navigate('/test-community-post-upload');
+        return;
+      } else if (location.pathname === '/forum') {
+        navigate('/forum/create-post');
+        return;
+      }
+
       setIsPostMenuOpen(prevState => !prevState);
       return;
     }
@@ -22,8 +56,8 @@ const BottomNavbar = () => {
     
     // 處理其他導航按鈕
     switch (action) {
-      case 'forum':
-        navigate('/forum');
+      case 'profile':
+        navigate('/profile');
         break;
       case 'pet':
         navigate('/pet');
@@ -43,15 +77,16 @@ const BottomNavbar = () => {
     <>
       <PostMenu 
         isOpen={isPostMenuOpen} 
-        onClose={() => setIsPostMenuOpen(false)} 
+        onClose={() => setIsPostMenuOpen(false)}
+        menuItems={getMenuItem()}
       />
       <nav className={styles.navbar}>
         <div className={styles.navItem}>
           <img 
             src="/assets/icon/BottomButton_Forum.png" 
-            alt="論壇"
+            alt="社群"
             className={styles.icon}
-            onClick={() => handleNavItemClick('forum')}
+            onClick={() => handleNavItemClick('profile')}
           />
         </div>
         <div className={styles.navItem}>

@@ -58,6 +58,7 @@ const TopNavbar = () => {
             src="/assets/icon/HeaderButton_UserProfile.png" 
             alt="用戶資料"
             className={styles.icon}
+            onClick={() => navigate('/token-test')}
           />
         </div>
       </nav>

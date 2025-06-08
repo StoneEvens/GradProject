@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from '../styles/PostMenu.module.css';
 
-const PostMenu = ({ isOpen, onClose }) => {
+const PostMenu = ({ isOpen, onClose, menuItems }) => {
   const navigate = useNavigate();
   
   // 點擊 ESC 鍵關閉選單
@@ -46,6 +46,19 @@ const PostMenu = ({ isOpen, onClose }) => {
       
       {/* 選單內容 */}
       <div className={styles.menuContainer}>
+        {menuItems.map((item, index) => (
+          <button
+            key={index}
+            className={`${styles.menuItem} ${styles.buttonElement}`}
+            onClick={() => {
+              navigate(item.path);
+              onClose();
+            }}
+          >
+            {item.label}
+          </button>
+        ))}
+        {/*
         <button 
           className={`${styles.menuItem} ${styles.dailyRecord}`}
           onClick={() => {
@@ -65,6 +78,7 @@ const PostMenu = ({ isOpen, onClose }) => {
         >
           症狀紀錄
         </button>
+        */}
       </div>
     </>
   );

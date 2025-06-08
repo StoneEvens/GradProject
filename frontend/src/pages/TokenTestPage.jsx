@@ -65,6 +65,7 @@ const TokenTestPage = () => {
 
   // 返回主頁
   const handleBackToMain = () => {
+    e.preventDefault();
     navigate('/main');
   };
 

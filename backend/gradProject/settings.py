@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     "interactions",
     "comments",
     "media",
+    "articleRecommendation",
 ]
 
 MIDDLEWARE = [

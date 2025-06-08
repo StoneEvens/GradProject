@@ -48,7 +48,8 @@ urlpatterns = [
     path(f'{api_v1_prefix}interactions/', include('interactions.urls')),
     path(f'{api_v1_prefix}comments/', include('comments.urls')),
     path(f'{api_v1_prefix}media/', include('media.urls')),
-    
+    path(f'{api_v1_prefix}article_recommendations/', include('articleRecommendation.urls')),
+
     # Swagger 文檔
     re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
