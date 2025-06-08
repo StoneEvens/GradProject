@@ -14,3 +14,5 @@ dist/
 .pycharm/
 backend/utils/__pycache__/image_service.cpython-312.pyc
 
+.cursor/rules/test.mdc
+backend/config/petapp-c2e46-firebase-adminsdk-fbsvc-0ec3a87ef4.json
