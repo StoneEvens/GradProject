@@ -1,5 +1,6 @@
 .container {
   min-height: 100vh;
+  min-height: -webkit-fill-available;
   background-color: #ffeed6;
   position: relative;
   width: 100%;
@@ -8,8 +9,11 @@
 }
 
 .content {
-  padding: 60px 16px 70px;  /* 上方留出TopNavbar的空間，下方留出BottomNavbar的空間 */
-  min-height: calc(100vh - 130px);  /* 減去上下導航欄的高度 */
+  padding-top: calc(60px + max(env(safe-area-inset-top), 10px));
+  padding-bottom: calc(70px + max(env(safe-area-inset-bottom), 8px));
+  padding-left: 16px;
+  padding-right: 16px;
+  min-height: calc(100vh - 130px - max(env(safe-area-inset-top), 10px) - max(env(safe-area-inset-bottom), 8px));
   width: 100%;
   box-sizing: border-box;
   margin-top: 30px;

@@ -11,9 +11,11 @@
   justify-content: space-around;
   align-items: center;
   padding: 8px 0;
+  padding-bottom: max(env(safe-area-inset-bottom), 8px);
   box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
   z-index: 1000;
   box-sizing: border-box;
+  min-height: calc(70px + max(env(safe-area-inset-bottom), 8px));
 }
 
 .navItem {

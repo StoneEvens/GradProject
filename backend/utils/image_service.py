@@ -1,5 +1,5 @@
 """
-圖片服務模塊
+圖片服務模塊 - Firebase Storage 版本
 
 提供統一的圖片處理功能，用於減少代碼重複並提高查詢效率
 """
@@ -14,7 +14,7 @@ import hashlib
 logger = logging.getLogger(__name__)
 
 class ImageService:
-    """圖片服務類，提供統一的圖片處理功能"""
+    """圖片服務類，提供統一的圖片處理功能 - Firebase Storage 版本"""
     
     # 默認緩存超時時間（24小時）
     DEFAULT_CACHE_TIMEOUT = 60 * 60 * 24
@@ -32,7 +32,7 @@ class ImageService:
         Returns:
         - str: 緩存鍵名
         """
-        key = f"img_{model_name}_{object_id}"
+        key = f"firebase_img_{model_name}_{object_id}"
         if position:
             key = f"{key}_{position}"
         return key
@@ -113,7 +113,7 @@ class ImageService:
                 obj.id, 
                 'first'
             )
-            image_url = image.img_url.url if hasattr(image.img_url, 'url') else None
+            image_url = image.firebase_url
             cache.set(cache_key, image_url, ImageService.DEFAULT_CACHE_TIMEOUT)
             return image_url
             
@@ -147,7 +147,7 @@ class ImageService:
                 return cached_url
         
         image = ImageService.get_object_first_image(obj, model_class, use_cache=False)
-        image_url = image.img_url if image else None
+        image_url = image.firebase_url if image else None
         
         if use_cache and image_url:
             # 緩存 URL
@@ -200,7 +200,7 @@ class ImageService:
     @staticmethod
     def preload_images_for_objects(objects, model_class=None, limit=None, use_cache=True):
         """
-        預加載多個對象的圖片，並返回映射
+        預加載多個對象的圖片，並返回映射 - Firebase Storage 版本
         
         Parameters:
         - objects: 對象列表或查詢集
@@ -287,7 +287,7 @@ class ImageService:
                         
                         # 如果使用緩存，將第一張圖片的URL緩存
                         if use_cache and counter[image.object_id] == 1:
-                            image_url = image.img_url.url if hasattr(image.img_url, 'url') else None
+                            image_url = image.firebase_url
                             if image_url:
                                 cache_key = ImageService.get_cache_key(model_name, image.object_id, 'first')
                                 cache.set(cache_key, image_url, ImageService.DEFAULT_CACHE_TIMEOUT)
@@ -306,7 +306,7 @@ class ImageService:
                     # 緩存每個對象的第一張圖片
                     for obj_id, obj_images in image_by_object.items():
                         if obj_images:
-                            image_url = obj_images[0].img_url.url if hasattr(obj_images[0].img_url, 'url') else None
+                            image_url = obj_images[0].firebase_url
                             if image_url:
                                 cache_key = ImageService.get_cache_key(model_name, obj_id, 'first')
                                 cache.set(cache_key, image_url, ImageService.DEFAULT_CACHE_TIMEOUT)
@@ -325,7 +325,7 @@ class ImageService:
     @staticmethod
     def preload_first_image_for_objects(objects, model_class=None, use_cache=True):
         """
-        預加載多個對象的第一張圖片，並返回映射
+        預加載多個對象的第一張圖片，並返回映射 - Firebase Storage 版本
         
         Parameters:
         - objects: 對象列表或查詢集
@@ -348,7 +348,7 @@ class ImageService:
     @staticmethod
     def get_feed_images(feed_id, use_cache=True):
         """
-        獲取飼料的正面圖和營養成分圖
+        獲取飼料的正面圖和營養成分圖 - Firebase Storage 版本
         
         Parameters:
         - feed_id: 飼料ID
@@ -390,8 +390,8 @@ class ImageService:
                 
             # 如果使用緩存，緩存圖片URL
             if use_cache:
-                front_url = front_image.img_url.url if front_image and hasattr(front_image.img_url, 'url') else None
-                nutrition_url = nutrition_image.img_url.url if nutrition_image and hasattr(nutrition_image.img_url, 'url') else None
+                front_url = front_image.firebase_url if front_image else None
+                nutrition_url = nutrition_image.firebase_url if nutrition_image else None
                 
                 if front_url:
                     front_key = ImageService.get_cache_key('feed', feed_id, 'front')
@@ -406,7 +406,7 @@ class ImageService:
     @staticmethod
     def get_feed_image_urls(feed_id, use_cache=True):
         """
-        獲取飼料的正面圖和營養成分圖URL
+        獲取飼料的正面圖和營養成分圖URL - Firebase Storage 版本
         
         Parameters:
         - feed_id: 飼料ID
@@ -429,8 +429,8 @@ class ImageService:
         
         front_image, nutrition_image = ImageService.get_feed_images(feed_id, use_cache=False)
         
-        front_image_url = front_image.img_url.url if front_image and hasattr(front_image.img_url, 'url') else None
-        nutrition_image_url = nutrition_image.img_url.url if nutrition_image and hasattr(nutrition_image.img_url, 'url') else None
+        front_image_url = front_image.firebase_url if front_image else None
+        nutrition_image_url = nutrition_image.firebase_url if nutrition_image else None
         
         # 如果使用緩存，緩存URL
         if use_cache:
@@ -447,7 +447,7 @@ class ImageService:
     @staticmethod
     def optimize_queryset_with_images(queryset, model_class=None, attr_name='images'):
         """
-        使用 prefetch_related 優化查詢集，預加載相關圖片
+        使用 prefetch_related 優化查詢集，預加載相關圖片 - Firebase Storage 版本
         
         Parameters:
         - queryset: 要優化的查詢集

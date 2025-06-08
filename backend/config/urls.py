@@ -46,7 +46,6 @@ urlpatterns = [
     path('', include('accounts.urls')),
 ]
 
-# 開發環境下的靜態文件和媒體文件路由
+# 開發環境下的靜態文件路由（媒體文件已改用 Firebase Storage）
 if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT) 

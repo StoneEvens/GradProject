@@ -93,6 +93,9 @@ SIMPLE_JWT = {
     'BLACKLIST_AFTER_ROTATION': True,
     'UPDATE_LAST_LOGIN': True,
     
+    # 添加寬鬆時間以處理時鐘同步問題
+    'LEEWAY': timedelta(seconds=10),
+    
     'ALGORITHM': 'HS256',
     'SIGNING_KEY': SECRET_KEY,
     'VERIFYING_KEY': None,
@@ -189,9 +192,9 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-# 媒體檔案配置（暫時使用本地儲存）
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+# Firebase Storage 配置
+FIREBASE_CREDENTIALS_PATH = os.path.join(BASE_DIR, 'config', 'petapp-c2e46-firebase-adminsdk-fbsvc-0ec3a87ef4.json')
+FIREBASE_STORAGE_BUCKET = 'petapp-c2e46.appspot.com'
 
 # 日誌配置
 LOGGING = {

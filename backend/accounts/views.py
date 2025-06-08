@@ -100,6 +100,76 @@ class LogoutAPIView(APIView):
                 status=drf_status.HTTP_400_BAD_REQUEST
             )
 
+# 自定義Token刷新視圖，提供更好的錯誤處理
+class CustomTokenRefreshAPIView(APIView):
+    permission_classes = [AllowAny]
+    
+    def post(self, request):
+        try:
+            refresh_token = request.data.get('refresh')
+            if not refresh_token:
+                return APIResponse(
+                    message='刷新令牌不能為空',
+                    code=40101,
+                    status=drf_status.HTTP_400_BAD_REQUEST
+                )
+            
+            # 嘗試創建RefreshToken實例
+            try:
+                token = RefreshToken(refresh_token)
+                # token.verify() 會自動檢查黑名單
+                
+                # 生成新的access token
+                access_token = str(token.access_token)
+                
+                # 如果需要輪換refresh token
+                new_refresh_token = str(token)
+                if hasattr(token, 'rotate'):
+                    new_refresh_token = str(token.rotate())
+                
+                return APIResponse(
+                    data={
+                        'access': access_token,
+                        'refresh': new_refresh_token
+                    },
+                    message='Token刷新成功',
+                    status=drf_status.HTTP_200_OK
+                )
+                
+            except Exception as token_error:
+                error_msg = str(token_error)
+                
+                # 檢查是否為黑名單錯誤
+                if 'blacklisted' in error_msg.lower():
+                    return APIResponse(
+                        message='身份驗證失敗',
+                        code=40101,
+                        status=drf_status.HTTP_401_UNAUTHORIZED,
+                        data={'detail': 'Token已被列入黑名單，請重新登入'}
+                    )
+                elif 'expired' in error_msg.lower():
+                    return APIResponse(
+                        message='身份驗證失敗',
+                        code=40101,
+                        status=drf_status.HTTP_401_UNAUTHORIZED,
+                        data={'detail': 'Token已過期，請重新登入'}
+                    )
+                else:
+                    return APIResponse(
+                        message='身份驗證失敗',
+                        code=40101,
+                        status=drf_status.HTTP_401_UNAUTHORIZED,
+                        data={'detail': f'Token驗證失敗: {error_msg}'}
+                    )
+                    
+        except Exception as e:
+            logger.error(f'Token刷新過程中發生未預期錯誤: {str(e)}')
+            return APIResponse(
+                message='伺服器內部錯誤',
+                code=50001,
+                status=drf_status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
 # 查詢個人資料
 class MeAPIView(APIView):
     permission_classes = [IsAuthenticated]

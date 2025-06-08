@@ -4,7 +4,7 @@ from .views import *
 
 urlpatterns = [
     path('token/', TokenObtainPairView.as_view(), name='token-obtain-pair'),
-    path('token/refresh/', TokenRefreshView.as_view(), name='token-refresh'),
+    path('token/refresh/', CustomTokenRefreshAPIView.as_view(), name='token-refresh'),
     path('token/verify/', TokenVerifyView.as_view(), name='token-verify'),
     path('register/', RegisterAPIView.as_view(), name='accounts-register'),
     path('logout/', LogoutAPIView.as_view(), name='accounts-logout'),

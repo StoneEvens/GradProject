@@ -8,6 +8,9 @@
 html {
   height: 100%;
   width: 100%;
+  /* 支援手機安全區域 */
+  height: 100vh;
+  height: -webkit-fill-available;
 }
 
 body {
@@ -15,6 +18,7 @@ body {
   justify-content: center;
   width: 100%;
   min-height: 100vh;
+  min-height: -webkit-fill-available;
   overflow-x: hidden;
 }
 
@@ -22,7 +26,9 @@ body {
   width: 100%;
   max-width: 430px; /* 限制為標準手機寬度 */
   min-height: 100vh;
+  min-height: -webkit-fill-available;
   background-color: #FFEED6;
+  position: relative;
 }
 
 a {

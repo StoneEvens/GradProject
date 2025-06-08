@@ -40,7 +40,7 @@ class AbnormalPostSerializer(serializers.ModelSerializer):
         return symptoms_data
     
     def get_images(self, obj):
-        """獲取異常記錄關聯的所有圖片"""
+        """獲取異常記錄關聯的所有圖片 - Firebase Storage 版本"""
         from django.contrib.contenttypes.models import ContentType
         content_type = ContentType.objects.get_for_model(AbnormalPost)
         images = Image.objects.filter(
@@ -50,12 +50,12 @@ class AbnormalPostSerializer(serializers.ModelSerializer):
         
         images_data = []
         for image in images:
-            img_url = image.img_url
-            if hasattr(img_url, 'url'):
-                img_url = img_url.url
             images_data.append({
                 'id': image.id,
-                'img_url': img_url
+                'firebase_url': image.firebase_url,
+                'firebase_path': image.firebase_path,
+                'url': image.url,  # 使用模型的 url 屬性
+                'alt_text': image.alt_text
             })
         return images_data
 

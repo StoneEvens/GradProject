@@ -1,48 +1,91 @@
 from django.contrib import admin
 from .models import Image, PetHeadshot, UserHeadshot
 
-# 圖片管理
+# 圖片管理 - Firebase Storage 版本
 @admin.register(Image)
 class ImageAdmin(admin.ModelAdmin):
-    list_display = ('id', 'content_type', 'object_id', 'img_url_preview', 'created_at')
-    list_filter = ('content_type', 'created_at')
-    search_fields = ('img_url', 'alt_text')
+    list_display = ('id', 'content_type', 'object_id', 'firebase_url_preview', 'sort_order', 'created_at')
+    list_filter = ('content_type', 'created_at', 'content_type_mime')
+    search_fields = ('firebase_url', 'firebase_path', 'alt_text', 'original_filename')
     readonly_fields = ('created_at', 'updated_at')
+    ordering = ('content_type', 'object_id', 'sort_order')
     
-    def img_url_preview(self, obj):
-        """顯示圖片URL的預覽"""
+    fieldsets = (
+        ('基本資訊', {
+            'fields': ('content_type', 'object_id', 'sort_order', 'alt_text')
+        }),
+        ('Firebase Storage', {
+            'fields': ('firebase_url', 'firebase_path')
+        }),
+        ('檔案資訊', {
+            'fields': ('original_filename', 'file_size', 'content_type_mime')
+        }),
+        ('時間戳記', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def firebase_url_preview(self, obj):
+        """顯示 Firebase URL 的預覽"""
         max_length = 50
-        if len(obj.img_url) > max_length:
-            return f"{obj.img_url[:max_length]}..."
-        return obj.img_url
-    img_url_preview.short_description = '圖片URL預覽'
+        if obj.firebase_url and len(obj.firebase_url) > max_length:
+            return f"{obj.firebase_url[:max_length]}..."
+        return obj.firebase_url or "無"
+    firebase_url_preview.short_description = 'Firebase URL 預覽'
 
-# 寵物頭像管理
+# 寵物頭像管理 - Firebase Storage 版本
 @admin.register(PetHeadshot)
 class PetHeadshotAdmin(admin.ModelAdmin):
-    list_display = ('id', 'pet', 'img_url_preview', 'uploaded_at')
-    search_fields = ('pet__pet_name', 'img_url')
+    list_display = ('id', 'pet', 'firebase_url_preview', 'uploaded_at')
+    search_fields = ('pet__pet_name', 'firebase_url', 'firebase_path')
     readonly_fields = ('uploaded_at',)
     
-    def img_url_preview(self, obj):
-        """顯示圖片URL的預覽"""
+    fieldsets = (
+        ('基本資訊', {
+            'fields': ('pet',)
+        }),
+        ('Firebase Storage', {
+            'fields': ('firebase_url', 'firebase_path')
+        }),
+        ('時間戳記', {
+            'fields': ('uploaded_at',),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def firebase_url_preview(self, obj):
+        """顯示 Firebase URL 的預覽"""
         max_length = 50
-        if len(obj.img_url) > max_length:
-            return f"{obj.img_url[:max_length]}..."
-        return obj.img_url
-    img_url_preview.short_description = '圖片URL預覽'
+        if obj.firebase_url and len(obj.firebase_url) > max_length:
+            return f"{obj.firebase_url[:max_length]}..."
+        return obj.firebase_url or "無"
+    firebase_url_preview.short_description = 'Firebase URL 預覽'
 
-# 用戶頭像管理
+# 用戶頭像管理 - Firebase Storage 版本
 @admin.register(UserHeadshot)
 class UserHeadshotAdmin(admin.ModelAdmin):
-    list_display = ('id', 'user', 'img_url_preview', 'uploaded_at')
-    search_fields = ('user__username', 'img_url')
+    list_display = ('id', 'user', 'firebase_url_preview', 'uploaded_at')
+    search_fields = ('user__username', 'firebase_url', 'firebase_path')
     readonly_fields = ('uploaded_at',)
     
-    def img_url_preview(self, obj):
-        """顯示圖片URL的預覽"""
+    fieldsets = (
+        ('基本資訊', {
+            'fields': ('user',)
+        }),
+        ('Firebase Storage', {
+            'fields': ('firebase_url', 'firebase_path')
+        }),
+        ('時間戳記', {
+            'fields': ('uploaded_at',),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def firebase_url_preview(self, obj):
+        """顯示 Firebase URL 的預覽"""
         max_length = 50
-        if len(obj.img_url) > max_length:
-            return f"{obj.img_url[:max_length]}..."
-        return obj.img_url
-    img_url_preview.short_description = '圖片URL預覽'
+        if obj.firebase_url and len(obj.firebase_url) > max_length:
+            return f"{obj.firebase_url[:max_length]}..."
+        return obj.firebase_url or "無"
+    firebase_url_preview.short_description = 'Firebase URL 預覽'

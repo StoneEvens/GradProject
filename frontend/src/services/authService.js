@@ -49,8 +49,31 @@ export const clearTokens = () => {
   localStorage.removeItem('userData');
 };
 
+// 防止同時多次刷新token的Promise快取
+let refreshPromise = null;
+
 // 使用 refresh token 獲取新的 access token
 export const refreshAccessToken = async () => {
+  // 如果已有進行中的刷新請求，直接返回該Promise
+  if (refreshPromise) {
+    console.log('檢測到進行中的token刷新請求，等待現有請求完成...');
+    return refreshPromise;
+  }
+
+  // 創建新的刷新Promise
+  refreshPromise = performTokenRefresh();
+  
+  try {
+    const result = await refreshPromise;
+    return result;
+  } finally {
+    // 清除Promise快取，無論成功或失敗
+    refreshPromise = null;
+  }
+};
+
+// 實際執行token刷新的函數
+const performTokenRefresh = async () => {
   try {
     const refreshToken = getRefreshToken();
     if (!refreshToken) {
@@ -58,25 +81,32 @@ export const refreshAccessToken = async () => {
       throw new Error('沒有可用的刷新令牌');
     }
 
+    console.log('開始刷新access token...');
+    
     // 使用獨立的 axios 實例發送刷新請求，避免循環依賴
     const response = await axios.post(`${API_URL}/accounts/token/refresh/`, {
       refresh: refreshToken
     });
 
-    // 嘗試從不同格式的回應中獲取 access token
+    // 嘗試從不同格式的回應中獲取 access token 和新的 refresh token
     let newAccessToken = null;
+    let newRefreshToken = null;
     
     if (response.data.access) {
       newAccessToken = response.data.access;
+      newRefreshToken = response.data.refresh; // 獲取新的refresh token
     } else if (response.data.data && response.data.data.access) {
       newAccessToken = response.data.data.access;
+      newRefreshToken = response.data.data.refresh;
     } else {
       console.error('刷新令牌響應格式錯誤:', response.data);
       throw new Error('刷新令牌響應格式錯誤');
     }
     
-    // 保存新的 access token
-    saveTokens(newAccessToken, null);
+    // 保存新的 tokens（包括新的refresh token）
+    saveTokens(newAccessToken, newRefreshToken);
+    
+    console.log('Token刷新成功');
     
     // 觸發認證狀態更新事件
     window.dispatchEvent(new Event('auth-change'));
@@ -85,14 +115,21 @@ export const refreshAccessToken = async () => {
   } catch (error) {
     console.error('刷新令牌失敗:', error);
     
-    // 對於 401 或 403 錯誤，意味著刷新令牌已失效，需要重新登入
-    if (error.response && (error.response.status === 401 || error.response.status === 403)) {
-      console.warn('刷新令牌已失效，需要重新登入');
-      clearTokens();
+    // 檢查是否為token blacklist錯誤
+    if (error.response) {
+      const { status, data } = error.response;
       
-      // 觸發登出事件，但不立即重定向（讓使用者可以保存目前工作）
+      // Token已被列入黑名單或無效
+      if (status === 401 && data?.detail?.includes('blacklisted')) {
+        console.warn('Refresh token已被列入黑名單，需要重新登入');
+      } else if (status === 401 || status === 403) {
+        console.warn('刷新令牌已失效，需要重新登入');
+      }
+      
+      // 清除所有token並觸發登出
+      clearTokens();
       window.dispatchEvent(new CustomEvent('auth-logout', { 
-        detail: { reason: 'token-refresh-failed' } 
+        detail: { reason: 'token-refresh-failed', error: data } 
       }));
     }
     
@@ -204,4 +241,43 @@ export const logout = async () => {
 export const isAuthenticated = () => {
   const token = getAccessToken();
   return !!token && !isTokenExpired(token);
-}; 
+};
+
+// 添加認證狀態監聽器，處理自動登出通知
+export const setupAuthEventListeners = () => {
+  // 監聽登出事件
+  window.addEventListener('auth-logout', (event) => {
+    const { reason, error } = event.detail || {};
+    
+    let message = '您已登出系統';
+    
+    if (reason === 'token-refresh-failed') {
+      if (error?.detail?.includes('blacklisted')) {
+        message = '登入狀態已過期，請重新登入';
+      } else if (error?.detail?.includes('expired')) {
+        message = '登入時間已過期，請重新登入';
+      } else {
+        message = '身份驗證失效，請重新登入';
+      }
+    }
+    
+    // 顯示友善的通知訊息
+    if (window.showNotification) {
+      window.showNotification(message);
+    }
+    
+    // 延遲跳轉到登入頁面，讓用戶看到通知
+    setTimeout(() => {
+      window.location.href = '/login';
+    }, 2000);
+  });
+  
+  // 監聽認證狀態變化
+  window.addEventListener('auth-change', () => {
+    // 可以在這裡添加其他認證狀態變化的處理邏輯
+    console.log('認證狀態已變更');
+  });
+};
+
+// 全域通知函數（由App組件設定）
+window.showNotification = null; 

@@ -1,8 +1,7 @@
 # Python
 __pycache__/
 *.pyc
-# Django / media uploads
-media/
+.pyc
 # VS Code
 .vscode/
 # Node / frontend
@@ -13,3 +12,5 @@ dist/
 # PyCharm
 .idea/
 .pycharm/
+backend/utils/__pycache__/image_service.cpython-312.pyc
+

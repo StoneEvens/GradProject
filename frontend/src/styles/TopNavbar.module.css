@@ -11,9 +11,11 @@
   justify-content: space-between;
   align-items: center;
   padding: 0 16px;
+  padding-top: max(env(safe-area-inset-top), 10px);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   z-index: 1000;
   box-sizing: border-box;
+  min-height: calc(60px + max(env(safe-area-inset-top), 10px));
 }
 
 .leftSection, .rightSection {

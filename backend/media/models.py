@@ -5,21 +5,25 @@ from gradProject import settings
 from pets.models import Pet
 
 class Image(models.Model):
+    """通用圖片模型 - 使用 Firebase Storage"""
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey('content_type', 'object_id')
 
-    # 儲存圖片 URL（暫時保留結構，之後會使用新的雲端儲存）
-    img_url = models.URLField(max_length=500, blank=True, null=True)
+    # Firebase Storage 相關欄位
+    firebase_url = models.URLField(max_length=500, help_text="Firebase Storage 圖片 URL")
+    firebase_path = models.CharField(max_length=255, help_text="Firebase Storage 檔案路徑")
     
-    # 圖片相關欄位（保留結構，之後會用於新的雲端儲存）
-    public_id = models.CharField(max_length=255, blank=True, null=True)
+    # 圖片基本資訊
     original_filename = models.CharField(max_length=255, blank=True, null=True)
-    file_size = models.PositiveIntegerField(blank=True, null=True)
+    file_size = models.PositiveIntegerField(blank=True, null=True, help_text="檔案大小（bytes）")
     content_type_mime = models.CharField(max_length=100, blank=True, null=True)
     
+    # 排序和描述
     sort_order = models.IntegerField(default=0)
-    alt_text = models.CharField(max_length=255, blank=True)
+    alt_text = models.CharField(max_length=255, blank=True, help_text="替代文字")
+    
+    # 時間戳記
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -27,7 +31,7 @@ class Image(models.Model):
         ordering = ['content_type', 'object_id', 'sort_order']
         indexes = [
             models.Index(fields=['content_type', 'object_id']),
-            models.Index(fields=['public_id']),
+            models.Index(fields=['firebase_path']),
         ]
 
     def __str__(self):
@@ -35,18 +39,18 @@ class Image(models.Model):
     
     @property
     def url(self):
-        """
-        獲取圖片的完整 URL
-        """
-        return self.img_url or ""
+        """獲取圖片的完整 URL"""
+        return self.firebase_url
 
 
 class PetHeadshot(models.Model):
+    """寵物頭像模型 - 使用 Firebase Storage"""
     pet = models.OneToOneField(Pet, on_delete=models.CASCADE, related_name='headshot')
     
-    # 儲存圖片 URL（暫時保留結構，之後會使用新的雲端儲存）
-    img_url = models.URLField(max_length=500, blank=True, null=True)
-    public_id = models.CharField(max_length=255, blank=True, null=True)
+    # Firebase Storage 相關欄位
+    firebase_url = models.URLField(max_length=500, help_text="Firebase Storage 圖片 URL")
+    firebase_path = models.CharField(max_length=255, help_text="Firebase Storage 檔案路徑")
+    
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -54,18 +58,18 @@ class PetHeadshot(models.Model):
     
     @property
     def url(self):
-        """
-        獲取圖片的完整 URL
-        """
-        return self.img_url or ""
+        """獲取圖片的完整 URL"""
+        return self.firebase_url
 
 
 class UserHeadshot(models.Model):
+    """用戶頭像模型 - 使用 Firebase Storage"""
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='headshot')
     
-    # 儲存圖片 URL（暫時保留結構，之後會使用新的雲端儲存）
-    img_url = models.URLField(max_length=500, blank=True, null=True)
-    public_id = models.CharField(max_length=255, blank=True, null=True)
+    # Firebase Storage 相關欄位
+    firebase_url = models.URLField(max_length=500, help_text="Firebase Storage 圖片 URL")
+    firebase_path = models.CharField(max_length=255, help_text="Firebase Storage 檔案路徑")
+    
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -73,7 +77,5 @@ class UserHeadshot(models.Model):
     
     @property
     def url(self):
-        """
-        獲取圖片的完整 URL
-        """
-        return self.img_url or ""
+        """獲取圖片的完整 URL"""
+        return self.firebase_url
