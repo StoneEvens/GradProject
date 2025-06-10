@@ -1592,3 +1592,16 @@ INFO 2025-06-08 22:28:52,295 basehttp 21388 11036 "GET /api/v1/article_recommend
 INFO 2025-06-08 22:28:52,296 basehttp 21388 10896 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
 INFO 2025-06-08 22:28:52,298 basehttp 21388 24000 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
 INFO 2025-06-08 22:28:52,302 basehttp 21388 10896 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-06-10 21:17:02,213 autoreload 20748 8364 Watching for file changes with StatReloader
+INFO 2025-06-10 21:17:09,562 basehttp 20748 10108 "GET /admin/ HTTP/1.1" 200 28014
+INFO 2025-06-10 21:17:09,574 basehttp 20748 17804 "GET /static/admin/css/nav_sidebar.css HTTP/1.1" 304 0
+INFO 2025-06-10 21:17:09,574 basehttp 20748 10108 "GET /static/admin/css/base.css HTTP/1.1" 304 0
+INFO 2025-06-10 21:17:09,574 basehttp 20748 380 "GET /static/admin/css/dark_mode.css HTTP/1.1" 304 0
+INFO 2025-06-10 21:17:09,574 basehttp 20748 24344 "GET /static/admin/css/dashboard.css HTTP/1.1" 304 0
+INFO 2025-06-10 21:17:09,575 basehttp 20748 12696 "GET /static/admin/css/responsive.css HTTP/1.1" 304 0
+INFO 2025-06-10 21:17:09,575 basehttp 20748 21296 "GET /static/admin/js/theme.js HTTP/1.1" 304 0
+INFO 2025-06-10 21:17:09,577 basehttp 20748 21296 "GET /static/admin/js/nav_sidebar.js HTTP/1.1" 304 0
+INFO 2025-06-10 21:17:09,582 basehttp 20748 12696 "GET /static/admin/img/icon-changelink.svg HTTP/1.1" 304 0
+INFO 2025-06-10 21:17:09,582 basehttp 20748 21296 "GET /static/admin/img/icon-addlink.svg HTTP/1.1" 304 0
+INFO 2025-06-10 21:17:09,634 basehttp 20748 24344 "GET /static/admin/img/icon-deletelink.svg HTTP/1.1" 200 392
+WARNING 2025-06-10 21:17:09,668 basehttp 20748 24344 "GET /favicon.ico HTTP/1.1" 404 4042
