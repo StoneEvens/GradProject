@@ -6,29 +6,17 @@ from django.contrib.contenttypes.models import ContentType
 from rest_framework import status as drf_status
 
 class Pet(models.Model):
-    PET_STAGE_CHOICES = [
-        ('puppy', '幼犬'),
-        ('adult', '成犬/成貓'),
-        ('pregnant', '懷孕期'),
-        ('lactating', '哺乳期'),
-        ('kitten', '幼貓'),
-    ]
-
-    pet_name = models.CharField(max_length=100)
-    pet_type = models.CharField(max_length=100)  
-    owner = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name='pets'
-    )
+    PET_STAGE_CHOICES = [('puppy', '幼犬'), ('adult', '成犬/成貓'), ('pregnant', '懷孕期'), ('lactating', '哺乳期'), ('kitten', '幼貓'),]
 
     age = models.IntegerField(null=True, blank=True, help_text="年齡 (歲)")
     breed = models.CharField(max_length=100, null=True, blank=True, help_text="品種")
-
-    weight = models.FloatField(null=True, blank=True, help_text="體重 (公斤)")
     height = models.FloatField(null=True, blank=True, help_text="身高 (公分)")
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='pets')
+    pet_name = models.CharField(max_length=100)
     pet_stage = models.CharField(max_length=20, choices=PET_STAGE_CHOICES, null=True, blank=True, help_text="年齡階段")
+    pet_type = models.CharField(max_length=100)  
     predicted_adult_weight = models.FloatField(null=True, blank=True, help_text="預期成犬/成貓體重 (公斤)")
+    weight = models.FloatField(null=True, blank=True, help_text="體重 (公斤)")
 
     def __str__(self):
         return f"{self.pet_name} ({self.pet_type})"
@@ -48,14 +36,10 @@ class Pet(models.Model):
 
 # 寵物對各種貼文/異常紀錄的多型關聯
 class PetGenericRelation(models.Model):
-    pet = models.ForeignKey(
-        'Pet',
-        on_delete=models.CASCADE,
-        related_name='generic_relations'
-    )
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey('content_type', 'object_id')
+    object_id = models.PositiveIntegerField()
+    pet = models.ForeignKey('Pet', on_delete=models.CASCADE, related_name='generic_relations')
 
     class Meta:
         unique_together = ('pet', 'content_type', 'object_id')
@@ -87,11 +71,8 @@ class AbnormalPost(models.Model):
 
         for symptom_id in symptom_ids:
             try:
-                symptom = Symptom.objects.get(id=symptom_id)
-                _, created = PostSymptomsRelation.objects.get_or_create(
-                    post=self,
-                    symptom=symptom
-                )
+                symptom = Symptom.objects.get(id==symptom_id)
+                created = PostSymptomsRelation.objects.get_or_create(post=self, symptom=symptom)
                 if created:
                     added_symptoms_count += 1
                 symptom_instances.append(symptom)
