@@ -19,6 +19,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(os.path.join(BASE_DIR, '.env'))
 
 
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
@@ -48,6 +49,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'drf_yasg',
     'calculator',
+    'ocrapp',
+    'abnormal_record_upload',
 ]
 
 

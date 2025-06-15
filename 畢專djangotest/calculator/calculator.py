@@ -8,70 +8,11 @@ from openai import OpenAI, APIError
 from dotenv import load_dotenv
 import os, math, json
 from pathlib import Path
-import io
 
 # 載入 OpenAI API 金鑰
 load_dotenv()
 api_key = os.getenv('OPENAI_API_KEY')
 client = OpenAI(api_key=api_key)
-
-def convert_ocr_to_health_data(ocr_result):
-    FIELD_CHINESE_TO_ENGLISH = {
-        "白血球計數": "WBC",
-        "紅血球計數": "RBC",
-        "血紅蛋白": "HGB",
-        "血比容": "PCV",
-        "平均紅血球體積": "MCV",
-        "平均紅血球血紅蛋白量": "MCH",
-        "平均紅血球血紅蛋白濃度": "MCHC",
-        "紅血球分布寬度": "RDW",
-        "嗜中性球計數": "Neutrophils",
-        "淋巴球計數": "Lymphocytes",
-        "單核球計數": "Monocytes",
-        "嗜酸性球計數": "Eosinophils",
-        "嗜鹼性球計數": "Basophils",
-        "血小板計數": "Platelet",
-        "網狀紅血球計數": "Reticulocytes",
-        "白蛋白": "Albumin",
-        "球蛋白": "Globulin",
-        "總蛋白": "Total Protein",
-        "丙氨酸轉氨酶": "ALT",
-        "天門冬酸轉氨酶": "AST",
-        "鹼性磷酸酶": "ALP",
-        "血中尿素氮": "BUN",
-        "肌酸酐": "Creatinine",
-        "葡萄糖": "Glucose",
-        "磷": "Phosphorus",
-        "尿比重": "USG",
-        "尿液酸鹼值": "Urine pH",
-        "尿中紅血球": "Urine RBC",
-        "尿中白血球": "Urine WBC",
-        "尿蛋白／肌酐比值": "UPC",
-        "總甲狀腺素": "T4",
-        "胰臟特異性脂酶": "Pancreatic Lipase",
-        "C-反應蛋白": "CRP",
-        "血清淀粉樣蛋白A": "Serum Amyloid A"
-    }
-
-    converted = []
-    for chinese_field, value_unit in ocr_result.items():
-        if value_unit is None:
-            continue
-        english_field = FIELD_CHINESE_TO_ENGLISH.get(chinese_field)
-        if not english_field:
-            continue
-
-        value_str = value_unit.get("result", "").replace(",", "")
-        try:
-            value = float(value_str)
-        except ValueError:
-            continue
-
-        converted.append({
-            "英文名稱": english_field,
-            "檢查結果": value
-        })
-    return converted
 
 class PetNutritionCalculator(APIView):
     parser_classes = [FormParser, MultiPartParser]
@@ -124,38 +65,8 @@ class PetNutritionCalculator(APIView):
         recommended = self.calculate_recommended_nutrients(pet_type, daily_ME)
 
         # 上傳健康報告
-        # health_report_raw = request.FILES.get('health_report')
-        # health_data = json.load(health_report_raw) if health_report_raw else {}
-        # 讀取 OCR 結果 JSON
-        # health_report_raw = request.FILES.get('health_report')
-        # health_data = {}
-
-        # if health_report_raw:
-        #     raw_json = json.load(health_report_raw)
-
-        #     # 判斷是否來自 OCR
-        #     if 'extracted_results' in raw_json:
-        #         ocr_result = raw_json['extracted_results']
-        #         health_data = convert_ocr_to_health_data(ocr_result)
-        #     else:
-        #         health_data = raw_json
         health_report_raw = request.FILES.get('health_report')
-        health_data = []
-
-        if health_report_raw:
-            try:
-                # raw_json = json.load(health_report_raw)
-                raw_json = json.load(io.TextIOWrapper(health_report_raw, encoding='utf-8'))
-                if 'extracted_results' in raw_json:
-                    ocr_result = raw_json['extracted_results']
-                    health_data = convert_ocr_to_health_data(ocr_result)
-                else:
-                    health_data = raw_json
-            except json.JSONDecodeError:
-                return Response({'error': '健康報告 JSON 格式錯誤。'}, status=status.HTTP_400_BAD_REQUEST)
-
-
-
+        health_data = json.load(health_report_raw) if health_report_raw else {}
 
         ref_path = Path(__file__).resolve().parent / 'reference_ranges.json'
         with open(ref_path, 'r', encoding='utf-8') as f:
@@ -287,7 +198,6 @@ class PetNutritionCalculator(APIView):
             if item in ["Calcium", "鈣"] and status == "低於標準":
                 rec["calcium"] = round(rec["calcium"] * 1.2, 2)
         return rec
-    
 
     def generate_description(self, pet_type, life_stage, weight, daily_ME, ME_feed, feed_amount, rec, actual, abnormal_items):
         try:
@@ -301,7 +211,7 @@ class PetNutritionCalculator(APIView):
                 + "\n".join([f"- {k}: {v}g" for k, v in rec.items()]) +
                 "\n實際攝取量:\n"
                 + "\n".join([f"- {k}: {v}g" for k, v in actual.items()]) +
-                "\n請先列出你的計算結果，包含一天飼料建議攝取量、各項營養素建議攝取量、和與飼料提供營養素量對比，若有健康報告，再根據健康報告給出微調建議。"
+                "\n請針對是否營養足夠與健康狀況，給出具體建議。"
             )
 
             response = client.chat.completions.create(
