@@ -1,6 +1,5 @@
 import axios from "axios";
 import { getAccessToken } from "./authService";
-import { authAxios } from "./authService";
 
 class CommunityPostService {
     constructor() {
@@ -8,16 +7,9 @@ class CommunityPostService {
             baseURL: 'http://localhost:8000/api/v1',
             headers: {
                 'Content-Type': 'application/json',
-                'Accept': 'application/json'
+                'Accept': 'application/json',
+                'Authorization': `Bearer ${getAccessToken()}`
             }
-        });
-
-        this.axiosInstance.interceptors.request.use((config) => {
-            const token = getAccessToken();
-            if (token) {
-                config.headers.Authorization = `Bearer ${token}`;
-            }
-            return config;
         });
     }
 

@@ -11,8 +11,8 @@ class Image(models.Model):
     content_object = GenericForeignKey('content_type', 'object_id')
 
     # Firebase Storage 相關欄位
-    firebase_url = models.URLField(max_length=500, help_text="Firebase Storage 圖片 URL")
-    firebase_path = models.CharField(max_length=255, help_text="Firebase Storage 檔案路徑")
+    firebase_url = models.URLField(max_length=500, help_text="Firebase Storage 圖片 URL", blank=True, null=True)
+    firebase_path = models.CharField(max_length=255, help_text="Firebase Storage 檔案路徑", blank=True, null=True)
     
     # 圖片基本資訊
     original_filename = models.CharField(max_length=255, blank=True, null=True)
@@ -48,8 +48,8 @@ class PetHeadshot(models.Model):
     pet = models.OneToOneField(Pet, on_delete=models.CASCADE, related_name='headshot')
     
     # Firebase Storage 相關欄位
-    firebase_url = models.URLField(max_length=500, help_text="Firebase Storage 圖片 URL")
-    firebase_path = models.CharField(max_length=255, help_text="Firebase Storage 檔案路徑")
+    firebase_url = models.URLField(max_length=500, help_text="Firebase Storage 圖片 URL", blank=True, null=True)
+    firebase_path = models.CharField(max_length=255, help_text="Firebase Storage 檔案路徑", blank=True, null=True)
     
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
@@ -67,8 +67,8 @@ class UserHeadshot(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='headshot')
     
     # Firebase Storage 相關欄位
-    firebase_url = models.URLField(max_length=500, help_text="Firebase Storage 圖片 URL")
-    firebase_path = models.CharField(max_length=255, help_text="Firebase Storage 檔案路徑")
+    firebase_url = models.URLField(max_length=500, help_text="Firebase Storage 圖片 URL", blank=True, null=True)
+    firebase_path = models.CharField(max_length=255, help_text="Firebase Storage 檔案路徑", blank=True, null=True)
     
     uploaded_at = models.DateTimeField(auto_now_add=True)
 

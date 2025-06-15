@@ -193,7 +193,7 @@ class SearchSuggestionAPIView(APIView):
 
 # === 建立貼文 API ===
 class CreatePostAPIView(APIView):
-    ##permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     
     @transaction.atomic
     def post(self, request, *args, **kwargs):
@@ -241,7 +241,6 @@ class CreatePostAPIView(APIView):
                 post.tag_pets(parsed_pet_ids)
             
             # 處理圖片上傳 (使用 ImageService 風格)
-            uploaded_image_files
             if uploaded_image_files:
                 # from utils.image_service import ImageService # 確保 ImageService 已導入
                 # from django.contrib.contenttypes.models import ContentType
@@ -271,6 +270,7 @@ class CreatePostAPIView(APIView):
             )
             
         except Exception as e:
+            print(f"創建貼文時出錯: {str(e)}")  # 使用 print 代替 logger
             return APIResponse(
                 message="創建貼文失敗",
                 status=drf_status.HTTP_400_BAD_REQUEST,

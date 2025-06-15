@@ -1605,3 +1605,142 @@ INFO 2025-06-10 21:17:09,582 basehttp 20748 12696 "GET /static/admin/img/icon-ch
 INFO 2025-06-10 21:17:09,582 basehttp 20748 21296 "GET /static/admin/img/icon-addlink.svg HTTP/1.1" 304 0
 INFO 2025-06-10 21:17:09,634 basehttp 20748 24344 "GET /static/admin/img/icon-deletelink.svg HTTP/1.1" 200 392
 WARNING 2025-06-10 21:17:09,668 basehttp 20748 24344 "GET /favicon.ico HTTP/1.1" 404 4042
+INFO 2025-06-11 20:10:56,961 autoreload 19344 24048 Watching for file changes with StatReloader
+INFO 2025-06-11 20:11:23,475 basehttp 19344 5820 "OPTIONS /api/v1/accounts/token/ HTTP/1.1" 200 0
+ERROR 2025-06-11 20:11:23,585 basehttp 19344 5820 "POST /api/v1/accounts/token/ HTTP/1.1" 500 64
+ERROR 2025-06-11 20:11:29,315 basehttp 19344 5820 "POST /api/v1/accounts/token/ HTTP/1.1" 500 64
+ERROR 2025-06-11 20:11:45,734 basehttp 19344 5820 "POST /api/v1/accounts/token/ HTTP/1.1" 500 64
+INFO 2025-06-11 20:14:34,424 autoreload 27584 4196 Watching for file changes with StatReloader
+WARNING 2025-06-11 20:14:38,191 basehttp 27584 25944 "POST /api/v1/accounts/token/ HTTP/1.1" 400 147
+INFO 2025-06-11 20:15:14,269 autoreload 25668 24708 Watching for file changes with StatReloader
+INFO 2025-06-11 20:15:17,320 basehttp 25668 20100 "POST /api/v1/accounts/token/ HTTP/1.1" 200 577
+INFO 2025-06-11 20:15:17,355 basehttp 25668 20100 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-06-11 20:15:17,355 basehttp 25668 26168 "OPTIONS /api/v1/accounts/plans/today/ HTTP/1.1" 200 0
+INFO 2025-06-11 20:15:17,358 basehttp 25668 26168 "OPTIONS /api/v1/accounts/plans/today/ HTTP/1.1" 200 0
+INFO 2025-06-11 20:15:17,358 basehttp 25668 20100 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-06-11 20:15:17,362 basehttp 25668 26168 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-06-11 20:15:17,365 basehttp 25668 20100 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-06-11 20:15:28,603 basehttp 25668 20100 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-06-11 20:15:28,606 basehttp 25668 12576 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-06-11 20:15:28,608 basehttp 25668 26168 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-06-11 20:15:28,612 basehttp 25668 12576 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-06-11 20:15:35,362 basehttp 25668 12576 "OPTIONS /api/v1/social/posts/create/ HTTP/1.1" 200 0
+WARNING 2025-06-11 20:15:35,391 basehttp 25668 12576 "POST /api/v1/social/posts/create/ HTTP/1.1" 400 58
+WARNING 2025-06-11 20:15:48,634 basehttp 25668 12576 "POST /api/v1/social/posts/create/ HTTP/1.1" 400 58
+INFO 2025-06-11 20:15:55,483 basehttp 25668 12576 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-06-11 20:15:55,485 basehttp 25668 20100 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-06-11 20:15:55,488 basehttp 25668 26168 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-06-11 20:15:55,491 basehttp 25668 20100 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-06-11 20:16:12,069 basehttp 25668 20100 "POST /api/v1/accounts/token/ HTTP/1.1" 200 577
+INFO 2025-06-11 20:16:12,093 basehttp 25668 20100 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-06-11 20:16:12,095 basehttp 25668 12576 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-06-11 20:16:12,097 basehttp 25668 26168 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-06-11 20:16:12,101 basehttp 25668 12576 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+WARNING 2025-06-11 20:16:19,339 basehttp 25668 12576 "POST /api/v1/social/posts/create/ HTTP/1.1" 400 58
+INFO 2025-06-11 20:19:05,878 basehttp 25668 12576 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-06-11 20:19:05,878 basehttp 25668 20100 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-06-11 20:19:05,880 basehttp 25668 26168 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-06-11 20:19:05,883 basehttp 25668 20100 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+WARNING 2025-06-11 20:19:10,014 basehttp 25668 20100 "POST /api/v1/social/posts/create/ HTTP/1.1" 401 68
+INFO 2025-06-11 20:19:25,456 basehttp 25668 20100 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-06-11 20:19:25,458 basehttp 25668 26168 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-06-11 20:19:25,460 basehttp 25668 20100 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-06-11 20:19:25,463 basehttp 25668 26168 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+WARNING 2025-06-11 20:19:30,627 basehttp 25668 26168 "POST /api/v1/social/posts/create/ HTTP/1.1" 400 58
+INFO 2025-06-11 20:21:36,624 autoreload 25668 24708 C:\Users\Steven\GradProject\GradProject\backend\social\views.py changed, reloading.
+INFO 2025-06-11 20:21:37,023 autoreload 26704 1696 Watching for file changes with StatReloader
+INFO 2025-06-11 20:21:40,628 basehttp 26704 11112 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-06-11 20:21:40,630 basehttp 26704 11112 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-06-11 20:21:40,657 basehttp 26704 5660 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-06-11 20:21:40,659 basehttp 26704 11112 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+WARNING 2025-06-11 20:21:44,203 basehttp 26704 11112 "POST /api/v1/social/posts/create/ HTTP/1.1" 400 58
+INFO 2025-06-11 20:23:12,294 autoreload 26704 1696 C:\Users\Steven\GradProject\GradProject\backend\social\views.py changed, reloading.
+INFO 2025-06-11 20:23:12,684 autoreload 24520 7696 Watching for file changes with StatReloader
+WARNING 2025-06-11 20:23:15,160 basehttp 24520 24744 "POST /api/v1/social/posts/create/ HTTP/1.1" 400 58
+INFO 2025-06-11 20:23:55,387 autoreload 24520 7696 C:\Users\Steven\GradProject\GradProject\backend\social\views.py changed, reloading.
+INFO 2025-06-11 20:23:55,764 autoreload 17412 27024 Watching for file changes with StatReloader
+WARNING 2025-06-11 20:23:58,766 basehttp 17412 10904 "POST /api/v1/social/posts/create/ HTTP/1.1" 400 58
+INFO 2025-06-11 20:26:25,830 basehttp 17412 27432 "GET /admin/ HTTP/1.1" 302 0
+INFO 2025-06-11 20:26:25,936 basehttp 17412 27432 "GET /admin/login/?next=/admin/ HTTP/1.1" 200 4184
+INFO 2025-06-11 20:26:25,963 basehttp 17412 25728 "GET /static/admin/css/base.css HTTP/1.1" 304 0
+INFO 2025-06-11 20:26:25,964 basehttp 17412 23856 "GET /static/admin/css/dark_mode.css HTTP/1.1" 304 0
+INFO 2025-06-11 20:26:25,964 basehttp 17412 2544 "GET /static/admin/css/nav_sidebar.css HTTP/1.1" 304 0
+INFO 2025-06-11 20:26:25,964 basehttp 17412 23220 "GET /static/admin/js/theme.js HTTP/1.1" 304 0
+INFO 2025-06-11 20:26:25,965 basehttp 17412 27092 "GET /static/admin/css/responsive.css HTTP/1.1" 304 0
+INFO 2025-06-11 20:26:25,967 basehttp 17412 27092 "GET /static/admin/js/nav_sidebar.js HTTP/1.1" 304 0
+INFO 2025-06-11 20:26:26,014 basehttp 17412 27432 "GET /static/admin/css/login.css HTTP/1.1" 200 951
+WARNING 2025-06-11 20:26:26,060 basehttp 17412 27432 "GET /favicon.ico HTTP/1.1" 404 4042
+INFO 2025-06-11 20:26:30,589 basehttp 17412 27432 "POST /admin/login/?next=/admin/ HTTP/1.1" 302 0
+INFO 2025-06-11 20:26:30,624 basehttp 17412 27432 "GET /admin/ HTTP/1.1" 200 27675
+INFO 2025-06-11 20:26:30,630 basehttp 17412 27432 "GET /static/admin/css/dashboard.css HTTP/1.1" 304 0
+INFO 2025-06-11 20:26:30,635 basehttp 17412 27432 "GET /static/admin/img/icon-addlink.svg HTTP/1.1" 304 0
+INFO 2025-06-11 20:26:30,635 basehttp 17412 27092 "GET /static/admin/img/icon-changelink.svg HTTP/1.1" 304 0
+INFO 2025-06-11 20:26:37,882 basehttp 17412 27092 "GET /admin/accounts/customuser/ HTTP/1.1" 200 27333
+INFO 2025-06-11 20:26:37,897 basehttp 17412 27092 "GET /static/admin/css/changelists.css HTTP/1.1" 200 6878
+INFO 2025-06-11 20:26:37,898 basehttp 17412 23220 "GET /static/admin/js/jquery.init.js HTTP/1.1" 200 347
+INFO 2025-06-11 20:26:37,901 basehttp 17412 2544 "GET /static/admin/js/core.js HTTP/1.1" 200 6208
+INFO 2025-06-11 20:26:37,904 basehttp 17412 25728 "GET /static/admin/js/actions.js HTTP/1.1" 200 8076
+INFO 2025-06-11 20:26:37,904 basehttp 17412 23856 "GET /static/admin/js/admin/RelatedObjectLookups.js HTTP/1.1" 200 9777
+INFO 2025-06-11 20:26:37,908 basehttp 17412 23220 "GET /static/admin/js/prepopulate.js HTTP/1.1" 200 1531
+INFO 2025-06-11 20:26:37,908 basehttp 17412 27092 "GET /static/admin/js/urlify.js HTTP/1.1" 200 7887
+INFO 2025-06-11 20:26:37,912 basehttp 17412 25728 "GET /static/admin/img/search.svg HTTP/1.1" 200 458
+INFO 2025-06-11 20:26:37,915 basehttp 17412 27092 "GET /static/admin/img/icon-yes.svg HTTP/1.1" 200 436
+INFO 2025-06-11 20:26:37,917 basehttp 17412 2544 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-06-11 20:26:37,922 basehttp 17412 27432 "GET /static/admin/js/vendor/jquery/jquery.js HTTP/1.1" 200 285314
+INFO 2025-06-11 20:26:37,934 basehttp 17412 27432 "GET /static/admin/js/filters.js HTTP/1.1" 200 978
+INFO 2025-06-11 20:26:37,952 basehttp 17412 23856 "GET /static/admin/js/vendor/xregexp/xregexp.js HTTP/1.1" 200 325171
+INFO 2025-06-11 20:26:37,967 basehttp 17412 27432 "GET /static/admin/img/icon-viewlink.svg HTTP/1.1" 200 581
+INFO 2025-06-11 20:26:37,967 basehttp 17412 23856 "GET /static/admin/img/tooltag-add.svg HTTP/1.1" 200 331
+INFO 2025-06-11 20:26:47,746 basehttp 17412 23856 "GET /admin/social/post/ HTTP/1.1" 200 30396
+INFO 2025-06-11 20:26:47,754 basehttp 17412 23856 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-06-11 20:27:01,456 basehttp 17412 23856 "POST /admin/social/post/ HTTP/1.1" 200 25001
+INFO 2025-06-11 20:27:01,471 basehttp 17412 23856 "GET /static/admin/js/cancel.js HTTP/1.1" 200 884
+INFO 2025-06-11 20:27:03,034 basehttp 17412 23856 "POST /admin/social/post/ HTTP/1.1" 302 0
+INFO 2025-06-11 20:27:03,051 basehttp 17412 23856 "GET /admin/social/post/ HTTP/1.1" 200 25420
+INFO 2025-06-11 20:27:03,059 basehttp 17412 23856 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+WARNING 2025-06-11 20:27:14,788 basehttp 17412 10904 "POST /api/v1/social/posts/create/ HTTP/1.1" 400 58
+ERROR 2025-06-11 20:27:34,829 basehttp 17412 23856 "GET /admin/media/image/ HTTP/1.1" 500 194179
+INFO 2025-06-11 20:27:37,855 basehttp 17412 23856 "GET /admin/social/post/ HTTP/1.1" 200 27503
+ERROR 2025-06-11 20:27:43,024 basehttp 17412 23856 "GET /admin/media/image/ HTTP/1.1" 500 194179
+INFO 2025-06-11 20:27:50,692 basehttp 17412 23856 "GET /admin/social/post/ HTTP/1.1" 200 27503
+INFO 2025-06-11 20:29:00,942 autoreload 17412 27024 C:\Users\Steven\GradProject\GradProject\backend\media\models.py changed, reloading.
+INFO 2025-06-11 20:29:01,363 autoreload 23648 26084 Watching for file changes with StatReloader
+INFO 2025-06-11 20:30:51,735 autoreload 25156 21984 Watching for file changes with StatReloader
+INFO 2025-06-11 20:31:04,262 basehttp 25156 17832 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-06-11 20:31:04,264 basehttp 25156 17832 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-06-11 20:31:04,299 basehttp 25156 1936 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-06-11 20:31:04,303 basehttp 25156 17832 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-06-11 20:31:11,022 basehttp 25156 17832 "POST /api/v1/social/posts/create/ HTTP/1.1" 201 503
+INFO 2025-06-11 20:31:20,085 basehttp 25156 24660 "GET /admin/social/post/ HTTP/1.1" 200 27986
+INFO 2025-06-11 20:31:20,094 basehttp 25156 24660 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-06-11 20:31:25,623 basehttp 25156 24660 "POST /admin/social/post/ HTTP/1.1" 200 24106
+INFO 2025-06-11 20:31:26,521 basehttp 25156 24660 "POST /admin/social/post/ HTTP/1.1" 302 0
+INFO 2025-06-11 20:31:26,539 basehttp 25156 24660 "GET /admin/social/post/ HTTP/1.1" 200 25420
+INFO 2025-06-11 20:31:26,547 basehttp 25156 24660 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-06-11 20:31:29,382 basehttp 25156 24660 "GET /admin/media/image/ HTTP/1.1" 200 28947
+INFO 2025-06-11 20:31:29,390 basehttp 25156 24660 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-06-11 20:31:32,076 basehttp 25156 24660 "GET /admin/media/image/add/ HTTP/1.1" 200 34780
+INFO 2025-06-11 20:31:32,086 basehttp 25156 20420 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-06-11 20:31:32,231 basehttp 25156 1272 "GET /static/admin/js/prepopulate_init.js HTTP/1.1" 200 586
+INFO 2025-06-11 20:31:32,235 basehttp 25156 24660 "GET /static/admin/css/forms.css HTTP/1.1" 200 8525
+INFO 2025-06-11 20:31:32,239 basehttp 25156 1272 "GET /static/admin/js/change_form.js HTTP/1.1" 200 606
+INFO 2025-06-11 20:31:32,242 basehttp 25156 24660 "GET /static/admin/css/widgets.css HTTP/1.1" 200 11991
+INFO 2025-06-11 20:31:43,761 basehttp 25156 24660 "GET /admin/accounts/customuser/ HTTP/1.1" 200 27333
+INFO 2025-06-11 20:31:43,769 basehttp 25156 24660 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-06-11 20:31:59,180 autoreload 25156 21984 C:\Users\Steven\GradProject\GradProject\backend\social\views.py changed, reloading.
+INFO 2025-06-11 20:31:59,571 autoreload 24320 22340 Watching for file changes with StatReloader
+INFO 2025-06-11 20:32:04,645 basehttp 24320 16348 "POST /api/v1/social/posts/create/ HTTP/1.1" 201 504
+INFO 2025-06-11 20:33:03,444 autoreload 24320 22340 C:\Users\Steven\GradProject\GradProject\backend\social\views.py changed, reloading.
+INFO 2025-06-11 20:33:03,820 autoreload 20248 16712 Watching for file changes with StatReloader
+INFO 2025-06-11 20:33:08,369 basehttp 20248 25488 "POST /api/v1/social/posts/create/ HTTP/1.1" 201 504
+INFO 2025-06-11 20:33:15,105 basehttp 20248 17224 "GET /admin/social/post/ HTTP/1.1" 200 27992
+INFO 2025-06-11 20:33:15,113 basehttp 20248 17224 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-06-11 20:33:23,851 basehttp 20248 17224 "GET /admin/social/posthashtag/ HTTP/1.1" 200 24685
+INFO 2025-06-11 20:33:23,859 basehttp 20248 17224 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-06-11 20:33:31,763 basehttp 20248 25488 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-06-11 20:33:31,765 basehttp 20248 25488 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-06-11 20:33:31,768 basehttp 20248 26852 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-06-11 20:33:31,772 basehttp 20248 25488 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-06-11 20:41:35,590 basehttp 20248 2940 "OPTIONS /api/v1/accounts/token/refresh/ HTTP/1.1" 200 0
+INFO 2025-06-11 20:41:35,594 basehttp 20248 2940 "POST /api/v1/accounts/token/refresh/ HTTP/1.1" 200 548
+INFO 2025-06-11 21:07:31,972 basehttp 20248 11196 "POST /api/v1/accounts/token/refresh/ HTTP/1.1" 200 548
