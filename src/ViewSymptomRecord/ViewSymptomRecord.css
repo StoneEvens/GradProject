@@ -246,7 +246,7 @@
 }
 
 .calendar-day.today {
-    background-color: #F08651;
+    background-color: #db7e46;
     color: white;
     font-weight: bold;
 }
@@ -270,38 +270,19 @@
     margin-left: 0px;
 }
 
-.calendar-day.custom.has-record {
+.symptom-calendar-day.has-record {
     opacity: 1;
-    background: #fff1db;
-    color: #222;
-    cursor: pointer;
+    background-color: #fff1db;
+    transition: background 0.2s, border 0.2s;
 }
-.calendar-day.custom.no-record {
+.symptom-calendar-day.no-record {
     opacity: 0.5;
-    background: #fff1db;
-    color: #222;
-    cursor: not-allowed;
+    background-color: #fff1db;
+    pointer-events: none;
 }
-.calendar-day.custom.selected {
-    background: #F08651 !important;
-    color: #fff !important;
-    font-weight: bold;
-}
-
-.record-action-btns {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin: 0 10px 0 10px;
-    /* 與 section-box 左右邊界一致 */
-}
-.record-action-btns .upload-btn {
-    min-width: 120px;
-}
-.delete-btn {
-    background: #e53935;
+.symptom-calendar-day.selected {
+    background-color: #FFB370 !important;
+    border: 2px solid #FFB370 !important;
     color: #fff;
-}
-.delete-btn:hover {
-    background: #b71c1c;
+    font-weight: bold;
 }

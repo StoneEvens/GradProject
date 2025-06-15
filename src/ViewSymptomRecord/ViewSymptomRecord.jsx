@@ -1,4 +1,3 @@
-/** 新增多日假資料與互動日曆功能，並根據點選日期顯示對應紀錄 **/
 import React, { useState } from 'react';
 import './ViewSymptomRecord.css';
 import Header from '../components/Header';
@@ -12,8 +11,9 @@ const SYMPTOMS = [
   '抽搐顫抖', '焦躁不安', '過度舔咬'
 ];
 
-// 假資料：有紀錄的日期與內容
-const recordsByDate = {
+
+// 假資料：紀錄日期為 2025/6/14、2025/6/17
+const symptomRecords = {
   '2025-06-14': {
     date: '2025/06/14',
     symptoms: ['嘔吐', '掉毛'],
@@ -24,7 +24,7 @@ const recordsByDate = {
   },
   '2025-06-17': {
     date: '2025/06/17',
-    symptoms: ['腹瀉', '流鼻涕', '皮膚紅腫'],
+    symptoms: ['腹瀉', '咳嗽', '流鼻涕'],
     otherSymptom: '有點發燒',
     water: '0.7',
     temperature: '39.2',
@@ -32,23 +32,23 @@ const recordsByDate = {
   },
 };
 
-function CustomCalendar({ selectedDate, onSelectDate }) {
+
+function CustomCalendar({ records, selectedDate, onSelectDate }) {
   const today = new Date();
-  const [currentYear, setCurrentYear] = useState(today.getFullYear());
-  const [currentMonth, setCurrentMonth] = useState(today.getMonth() + 1);
-  const daysInMonth = new Date(currentYear, currentMonth, 0).getDate();
+  const [currentYear, setCurrentYear] = useState(2025);
+  const [currentMonth, setCurrentMonth] = useState(6);
+  const weekNames = ['日', '一', '二', '三', '四', '五', '六'];
   const firstDay = new Date(currentYear, currentMonth - 1, 1).getDay();
+  const daysInMonth = new Date(currentYear, currentMonth, 0).getDate();
   const calendarDays = Array(firstDay).fill(null);
   for (let i = 1; i <= daysInMonth; i++) {
     calendarDays.push(i);
   }
+
+  const formattedTitle = `${currentYear}年${currentMonth}月`;
+
   // 取得有紀錄的日期集合
-  const recordDays = Object.keys(recordsByDate)
-    .filter(dateStr => {
-      const d = new Date(dateStr);
-      return d.getFullYear() === currentYear && d.getMonth() + 1 === currentMonth;
-    })
-    .map(dateStr => new Date(dateStr).getDate());
+  const recordDates = Object.keys(records);
 
   // 切換月份
   const lastMonth = () => {
@@ -67,51 +67,41 @@ function CustomCalendar({ selectedDate, onSelectDate }) {
       setCurrentMonth(currentMonth + 1);
     }
   };
-  // 回到今天
-  const backToToday = () => {
-    setCurrentYear(today.getFullYear());
-    setCurrentMonth(today.getMonth() + 1);
-  };
 
-  // 判斷是否為當月
-  const isCurrentMonth = currentYear === today.getFullYear() && currentMonth === today.getMonth() + 1;
+  // 判斷某天是否有紀錄
+  function getDateKey(day) {
+    return `${currentYear}-${String(currentMonth).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+  }
 
   return (
-    <div className="calendar-container">
+    <div className="calendar-container symptom-calendar-container">
       <div className="calendar-title-bar">
         <h3 className="section-title">
           <button name="lastMonth" className="calendar-arrow left" type="button" aria-label="上一月" onClick={lastMonth} />
-          {!isCurrentMonth && (
-            <button className="calendar-today-btn" type="button" onClick={backToToday}>回到今天</button>
-          )}
-          <span className={isCurrentMonth ? "calendar-title-text-current" : "calendar-title-text"}>
-            {isCurrentMonth
-              ? `${today.getFullYear()}年${today.getMonth() + 1}月${today.getDate()}號（${['日','一','二','三','四','五','六'][today.getDay()]}）`
-              : `${currentYear}年${currentMonth}月`}
-          </span>
+          <span className="calendar-title-text">{formattedTitle}</span>
           <button name="nextMonth" className="calendar-arrow right" type="button" aria-label="下一月" onClick={nextMonth} />
         </h3>
       </div>
       <div className="calendar-grid">
-        {['日', '一', '二', '三', '四', '五', '六'].map((day, idx) => (
-          <div key={idx} className="calendar-day-name">{day}</div>
+        {weekNames.map((day, index) => (
+          <div key={index} className="calendar-day-name">{day}</div>
         ))}
-        {calendarDays.map((d, idx) => {
-          if (d === null) return <div key={idx} className="calendar-day empty"></div>;
-          const dateStr = `${currentYear}-${String(currentMonth).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-          const hasRecord = !!recordsByDate[dateStr];
-          const isSelected = selectedDate === dateStr;
-          const isToday = isCurrentMonth && d === today.getDate();
+        {calendarDays.map((d, index) => {
+          if (d === null) return <div key={index} className="calendar-day empty"></div>;
+          const dateKey = getDateKey(d);
+          const hasRecord = recordDates.includes(dateKey);
+          const isSelected = selectedDate === dateKey;
           return (
             <div
-              key={idx}
-              className={`calendar-day custom${hasRecord ? ' has-record' : ' no-record'}${isSelected ? ' selected' : ''}${isToday ? ' today' : ''}`}
+              key={index}
+              className={`calendar-day symptom-calendar-day${hasRecord ? ' has-record' : ' no-record'}${isSelected ? ' selected' : ''}`}
               style={{
                 opacity: hasRecord ? 1 : 0.5,
-                background: isSelected ? '#F08651' : hasRecord ? '#fff1db' : '#fff1db',
                 cursor: hasRecord ? 'pointer' : 'not-allowed',
+                backgroundColor: isSelected ? '#FFB370' : hasRecord ? '#fff1db' : '#fff1db',
+                border: isSelected ? '2px solid #FFB370' : 'none',
               }}
-              onClick={() => hasRecord && onSelectDate(dateStr)}
+              onClick={() => hasRecord && onSelectDate(dateKey)}
             >
               {d}
             </div>
@@ -124,9 +114,9 @@ function CustomCalendar({ selectedDate, onSelectDate }) {
 
 export default function ViewSymptomRecord() {
   // 預設選中有紀錄的第一天
-  const defaultDate = Object.keys(recordsByDate)[0];
-  const [selectedDate, setSelectedDate] = useState(defaultDate);
-  const record = recordsByDate[selectedDate];
+  const firstRecordDate = Object.keys(symptomRecords)[0];
+  const [selectedDate, setSelectedDate] = useState(firstRecordDate);
+  const record = symptomRecords[selectedDate];
 
   return (
     <div className="symptom-record-container">
@@ -135,7 +125,12 @@ export default function ViewSymptomRecord() {
         <h2 className="main-title">檢視症狀紀錄</h2>
       </div>
       <div className="section-box calendar-section">
-        <CustomCalendar selectedDate={selectedDate} onSelectDate={setSelectedDate} />
+
+        <CustomCalendar
+          records={symptomRecords}
+          selectedDate={selectedDate}
+          onSelectDate={setSelectedDate}
+        />
       </div>
       {/* 症狀區塊 */}
       <div className="section-box">
@@ -151,13 +146,13 @@ export default function ViewSymptomRecord() {
               <span>{symptom}</span>
             </label>
           ))}
-          {record?.otherSymptom && (
-            <label className="symptom-checkbox">
-              <input type="checkbox" checked readOnly />
-              <span>其他：{record.otherSymptom}</span>
-            </label>
-          )}
         </div>
+        {record?.otherSymptom && (
+          <div className="other-symptom-container">
+            <span className="other-symptom-label">其他：</span>
+            <span>{record.otherSymptom}</span>
+          </div>
+        )}
       </div>
       {/* 身體數值區塊 */}
       <div className="section-box">
@@ -193,12 +188,7 @@ export default function ViewSymptomRecord() {
         />
       </div>
       {/* 預留空間 */}
-      <div style={{ height: 16 }} />
-      <div className="record-action-btns">
-        <button className="upload-btn" style={{marginRight: '12px'}}>編輯記錄</button>
-        <button className="upload-btn delete-btn">刪除紀錄</button>
-      </div>
-      <div style={{ height: 24 }} />
+      <div style={{ height: 40 }} />
       <BottomNavigationBar />
     </div>
   );
