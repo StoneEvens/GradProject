@@ -14,6 +14,10 @@ from utils.api_response import APIResponse
 from django.db.models import Count
 from django.db import transaction
 from django.db.models import Q, Sum
+import logging
+
+# 設置日誌記錄器
+logger = logging.getLogger(__name__)
 
 User = get_user_model()
 
@@ -175,9 +179,83 @@ class MeAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        user = request.user
+        # 預載入頭像資料
+        user = CustomUser.objects.select_related('headshot').get(id=request.user.id)
         serializer = UserProfileSerializer(user)
         return APIResponse(data=serializer.data)
+    
+    def put(self, request):
+        user = request.user
+        data = request.data.copy()
+        
+        # 處理頭像上傳
+        if 'headshot' in request.FILES:
+            from utils.firebase_service import FirebaseStorageService
+            firebase_service = FirebaseStorageService()
+            
+            try:
+                # 上傳頭像到 Firebase Storage
+                headshot_file = request.FILES['headshot']
+                success, message, download_url, file_path = firebase_service.upload_user_avatar(user.id, headshot_file)
+                
+                if not success:
+                    return APIResponse(
+                        message=message,
+                        code=drf_status.HTTP_400_BAD_REQUEST,
+                        status=drf_status.HTTP_400_BAD_REQUEST
+                    )
+                
+                # 儲存頭像資料到資料庫
+                from media.models import UserHeadshot
+                headshot_image, created = UserHeadshot.objects.get_or_create(
+                    user=user,
+                    defaults={
+                        'firebase_url': download_url,
+                        'firebase_path': file_path,
+                    }
+                )
+                
+                if not created:
+                    # 如果已存在頭像，先刪除舊的 Firebase Storage 檔案
+                    from utils.firebase_service import cleanup_old_headshot
+                    old_firebase_path = headshot_image.firebase_path
+                    cleanup_old_headshot(old_firebase_path, logger)
+                    
+                    # 更新為新的URL和路徑
+                    headshot_image.firebase_url = download_url
+                    headshot_image.firebase_path = file_path
+                    headshot_image.save()
+                
+            except Exception as e:
+                return APIResponse(
+                    message=f'頭像上傳失敗: {str(e)}',
+                    code=drf_status.HTTP_400_BAD_REQUEST,
+                    status=drf_status.HTTP_400_BAD_REQUEST
+                )
+        
+        # 更新用戶基本資料
+        serializer = UserProfileSerializer(user, data=data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            
+            # 重新從資料庫載入用戶資料以確保包含最新的頭像
+            from django.db import transaction
+            with transaction.atomic():
+                user = CustomUser.objects.select_related('headshot').get(id=user.id)
+            updated_serializer = UserProfileSerializer(user)
+            
+            return APIResponse(
+                data=updated_serializer.data,
+                message='個人資料更新成功',
+                status=drf_status.HTTP_200_OK
+            )
+        
+        return APIResponse(
+            message='驗證失敗',
+            errors=serializer.errors,
+            code=drf_status.HTTP_400_BAD_REQUEST,
+            status=drf_status.HTTP_400_BAD_REQUEST
+        )
 
 # 取今日行程
 class TodayPlanAPIView(APIView):
@@ -301,7 +379,7 @@ class UserImageAPIView(APIView):
 
     def get(self, request):
         try:
-            user_image_url = request.user.headshot.img_url
+            user_image_url = request.user.headshot.firebase_url
         except AttributeError:
             user_image_url = None
         return APIResponse(data={'user_image_url': user_image_url})

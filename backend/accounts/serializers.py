@@ -97,13 +97,25 @@ class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = ['id', 'username', 'email', 'headshot_url', 'user_fullname', 'user_account', 'points', 'user_intro']
-        read_only_fields = ['id', 'points', 'user_account']
+        read_only_fields = ['id', 'points']
 
     def get_headshot_url(self, obj):
         try:
-            return obj.headshot.img_url
+            return obj.headshot.firebase_url
         except:
             return None
+    
+    def validate_user_account(self, value):
+        """驗證用戶帳號是否唯一"""
+        if value:
+            # 檢查是否與當前用戶的帳號相同（允許不更改）
+            if self.instance and self.instance.user_account == value:
+                return value
+            
+            # 檢查是否有其他用戶使用這個帳號
+            if CustomUser.objects.filter(user_account=value).exists():
+                raise serializers.ValidationError("此用戶名稱已被使用")
+        return value
 
 class UserSummarySerializer(serializers.Serializer):
     id = serializers.IntegerField()

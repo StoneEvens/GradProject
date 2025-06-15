@@ -41,6 +41,15 @@ class Image(models.Model):
     def url(self):
         """獲取圖片的完整 URL"""
         return self.firebase_url
+    
+    def delete(self, *args, **kwargs):
+        """刪除模型時同時清理 Firebase Storage 檔案"""
+        if self.firebase_path:
+            from utils.firebase_service import cleanup_old_headshot
+            import logging
+            logger = logging.getLogger(__name__)
+            cleanup_old_headshot(self.firebase_path, logger)
+        super().delete(*args, **kwargs)
 
 
 class PetHeadshot(models.Model):
@@ -60,6 +69,15 @@ class PetHeadshot(models.Model):
     def url(self):
         """獲取圖片的完整 URL"""
         return self.firebase_url
+    
+    def delete(self, *args, **kwargs):
+        """刪除模型時同時清理 Firebase Storage 檔案"""
+        if self.firebase_path:
+            from utils.firebase_service import cleanup_old_headshot
+            import logging
+            logger = logging.getLogger(__name__)
+            cleanup_old_headshot(self.firebase_path, logger)
+        super().delete(*args, **kwargs)
 
 
 class UserHeadshot(models.Model):
@@ -79,3 +97,12 @@ class UserHeadshot(models.Model):
     def url(self):
         """獲取圖片的完整 URL"""
         return self.firebase_url
+    
+    def delete(self, *args, **kwargs):
+        """刪除模型時同時清理 Firebase Storage 檔案"""
+        if self.firebase_path:
+            from utils.firebase_service import cleanup_old_headshot
+            import logging
+            logger = logging.getLogger(__name__)
+            cleanup_old_headshot(self.firebase_path, logger)
+        super().delete(*args, **kwargs)

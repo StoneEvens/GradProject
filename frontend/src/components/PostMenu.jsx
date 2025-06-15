@@ -46,7 +46,7 @@ const PostMenu = ({ isOpen, onClose, menuItems }) => {
       
       {/* 選單內容 */}
       <div className={styles.menuContainer}>
-        {menuItems.map((item, index) => (
+        {(menuItems || []).map((item, index) => (
           <button
             key={index}
             className={`${styles.menuItem} ${styles.buttonElement}`}

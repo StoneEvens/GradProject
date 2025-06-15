@@ -5,15 +5,12 @@ import HomePage from './pages/HomePage';
 import RegisterPage from './pages/RegisterPage';
 import LoginPage from './pages/LoginPage';
 import MainPage from './pages/MainPage';
-import TokenTestPage from './pages/TokenTestPage';
-import ProfilePage from './pages/ProfilePage';
-import CommunityPage from './pages/CommunityPage';
-import ForumPage from './pages/ForumPage';
-import TestCommunityPostUpload from './pages/TestCommunityPostUpload';
+import UserProfilePage from './pages/UserProfilePage';
 import { isAuthenticated, refreshAccessToken } from './services/authService';
 
 const App = () => {
   const [isUserAuthenticated, setIsUserAuthenticated] = useState(false);
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
 
   useEffect(() => {
     // 檢查認證狀態並嘗試刷新 Token
@@ -42,6 +39,8 @@ const App = () => {
       } catch (error) {
         console.error('認證檢查失敗:', error);
         setIsUserAuthenticated(false);
+      } finally {
+        setIsAuthLoading(false);
       }
     };
 
@@ -68,6 +67,23 @@ const App = () => {
     };
   }, []);
 
+  // 認證檢查中顯示載入畫面
+  if (isAuthLoading) {
+    return (
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+        backgroundColor: '#FFF2D9',
+        fontSize: '1.2rem',
+        color: '#333'
+      }}>
+        載入中...
+      </div>
+    );
+  }
+
   return (
     <BrowserRouter>
       <Routes>
@@ -91,43 +107,12 @@ const App = () => {
           path="/main" 
           element={isUserAuthenticated ? <MainPage /> : <Navigate to="/" />} 
         />
-        {/* 日常紀錄頁面 */}
+        {/* 用戶個人頁：未登入導向HomePage */}
         <Route 
-          path="/daily-record" 
-          element={isUserAuthenticated ? <MainPage /> : <Navigate to="/login" />} 
-        />
-        {/* 症狀紀錄頁面 */}
-        <Route 
-          path="/symptom-record" 
-          element={isUserAuthenticated ? <MainPage /> : <Navigate to="/login" />} 
-        />
-        {/* 個人頁面 */}
-        <Route 
-          path="/profile" 
-          element={isUserAuthenticated ? <ProfilePage /> : <Navigate to="/login" />} 
-        />
-        {/* 社群頁面 */}
-        <Route 
-          path="/community" 
-          element={isUserAuthenticated ? <CommunityPage /> : <Navigate to="/login" />} 
-        />
-        {/* 論壇頁面 */}
-        <Route 
-          path="/forum" 
-          element={isUserAuthenticated ? <ForumPage /> : <Navigate to="/login" />} 
+          path="/user-profile" 
+          element={isUserAuthenticated ? <UserProfilePage /> : <Navigate to="/" />} 
         />
 
-        {/* 論壇頁面 */}
-        <Route 
-          path="/test-community-post-upload" 
-          element={isUserAuthenticated ? <TestCommunityPostUpload /> : <Navigate to="/login" />} 
-        />
-
-        {/* 添加新的 token 測試頁面路由 */}
-        <Route 
-          path="/token-test" 
-          element={isUserAuthenticated ? <TokenTestPage /> : <Navigate to="/login" />} 
-        />
         {/* 未定義路徑：根據登入狀態重定向 */}
         <Route 
           path="*" 

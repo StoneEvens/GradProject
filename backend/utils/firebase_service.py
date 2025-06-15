@@ -49,6 +49,13 @@ class FirebaseStorageService:
         - tuple: (是否有效, 錯誤訊息)
         """
         try:
+            # 儲存當前檔案流位置
+            original_position = None
+            if hasattr(image_file, 'file') and hasattr(image_file.file, 'tell'):
+                original_position = image_file.file.tell()
+            elif hasattr(image_file, 'tell'):
+                original_position = image_file.tell()
+            
             # 檢查檔案大小
             if hasattr(image_file, 'size') and image_file.size > self.MAX_FILE_SIZE:
                 return False, f"檔案大小超過限制 ({self.MAX_FILE_SIZE / 1024 / 1024:.1f}MB)"
@@ -63,6 +70,13 @@ class FirebaseStorageService:
             if hasattr(image_file, 'content_type'):
                 if not image_file.content_type.startswith('image/'):
                     return False, "檔案不是有效的圖片格式"
+            
+            # 恢復原始檔案流位置
+            if original_position is not None:
+                if hasattr(image_file, 'file') and hasattr(image_file.file, 'seek'):
+                    image_file.file.seek(original_position)
+                elif hasattr(image_file, 'seek'):
+                    image_file.seek(original_position)
             
             return True, ""
             
@@ -109,17 +123,18 @@ class FirebaseStorageService:
             if not is_valid:
                 return False, error_msg, None
             
-            
-            blob = self.bucket.blob(file_path)
+            # 重置檔案流到開頭位置
             if isinstance(image_file, (InMemoryUploadedFile, TemporaryUploadedFile)):
-                blob.upload_from_file(image_file.file)
+                image_file.file.seek(0)
             else:
-                blob.upload_from_file(image_file)
+                image_file.seek(0)
             
-            blob.make_public()
-
+            # 建立 blob 物件
+            blob = self.bucket.blob(file_path)
+            
             # 設定檔案內容類型
-            blob.content_type = image_file.content_type
+            if hasattr(image_file, 'content_type') and image_file.content_type:
+                blob.content_type = image_file.content_type
             
             # 上傳檔案
             if isinstance(image_file, (InMemoryUploadedFile, TemporaryUploadedFile)):
@@ -135,7 +150,6 @@ class FirebaseStorageService:
             
             logger.info(f"圖片上傳成功: {file_path}")
             return True, "圖片上傳成功", firebase_url
-            
             
         except Exception as e:
             logger.error(f"圖片上傳失敗: {str(e)}")
@@ -234,4 +248,33 @@ class FirebaseStorageService:
 
 
 # 全域服務實例
-firebase_storage_service = FirebaseStorageService() 
+firebase_storage_service = FirebaseStorageService()
+
+def cleanup_old_headshot(old_firebase_path: str, logger=None) -> bool:
+    """
+    清理舊的頭像檔案的輔助函數
+    
+    Parameters:
+    - old_firebase_path: 舊檔案的 Firebase Storage 路徑
+    - logger: 日誌記錄器 (可選)
+    
+    Returns:
+    - bool: 是否成功刪除
+    """
+    if not old_firebase_path:
+        return True
+    
+    try:
+        delete_success, delete_message = firebase_storage_service.delete_image(old_firebase_path)
+        if delete_success:
+            if logger:
+                logger.info(f"成功刪除舊頭像檔案: {old_firebase_path}")
+            return True
+        else:
+            if logger:
+                logger.warning(f"刪除舊頭像檔案失敗: {delete_message}")
+            return False
+    except Exception as delete_error:
+        if logger:
+            logger.error(f"刪除舊頭像檔案時發生錯誤: {str(delete_error)}")
+        return False 

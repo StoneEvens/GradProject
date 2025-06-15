@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import styles from '../styles/BottomNavbar.module.css';
 import PostMenu from './PostMenu';
 
@@ -7,31 +7,20 @@ const BottomNavbar = () => {
   const [isPostMenuOpen, setIsPostMenuOpen] = useState(false);
   const postButtonRef = useRef(null);
   const navigate = useNavigate();
+  const location = useLocation();
 
   function getMenuItem() {
-    if (location.pathname === '/main') {
-      return [
-        {
-          label: '日常紀錄',
-          path: '/daily-record'
-        },
-        {
-          label: '症狀紀錄',
-          path: '/symptom-record'
-        }
-      ];
-    } else if (location.pathname === '/profile') {
-      return [
-        {
-          label: '社群貼文',
-          path: '/test-community-post-upload'
-        },
-        {
-          label: '論壇貼文',
-          path: '/forum-post'
-        }
-      ];
-    }
+    // 在所有頁面都提供相同的基本紀錄功能
+    return [
+      {
+        label: '日常紀錄',
+        path: '/daily-record'
+      },
+      {
+        label: '異常紀錄',
+        path: '/symptom-record'
+      }
+    ];
   }
 
   const handleNavItemClick = (action) => {
