@@ -9,6 +9,7 @@ import ProfilePage from './ProfilePage/ProfilePage'
 import CommunityPage from './CommunityPage/CommunityPage'
 import ForumPage from './ForumPage/ForumPage'
 import CalculatorPage from './CalculatorPage/CalculatorPage'
+import CreateSymptomRecord from './CreateSymptomRecord/CreateSymptomRecord'
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
         <Route path="/communitypage" element={<CommunityPage />} />
         <Route path="/forumpage" element={<ForumPage />} />
         <Route path="/calculatorpage" element={<CalculatorPage />} />
+        <Route path="/create-symptom-record" element={<CreateSymptomRecord />} />
       </Routes>
     </Router>
   )
