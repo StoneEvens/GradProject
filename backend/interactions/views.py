@@ -4,7 +4,7 @@ from rest_framework import viewsets, permissions, status as drf_status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from comments.models import Comment
-from social.models import Post
+from social.models import PostFrame
 from pets.models import IllnessArchive
 from .models import UserInteraction
 from .serializers import UserInteractionSerializer
@@ -101,7 +101,7 @@ class PostInteractionView(BaseInteractionView):
     """
     處理貼文的互動操作 (點讚/踩/收藏/分享)
     """
-    model = Post
+    model = PostFrame
     allowed_relations = ['upvoted', 'downvoted', 'saved', 'shared']
 
 class IllnessArchiveInteractionView(BaseInteractionView):

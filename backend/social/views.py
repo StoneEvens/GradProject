@@ -1,5 +1,5 @@
 from rest_framework import generics, status as drf_status
-from .models import Post, PostHashtag
+from .models import PostHashtag
 from .serializers import *
 from rest_framework.permissions import IsAuthenticated
 from utils.api_response import APIResponse
@@ -280,7 +280,7 @@ class CreatePostAPIView(APIView):
 class PostDetailAPIView(generics.RetrieveAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = PostSerializer
-    queryset = Post.objects.all()
+    queryset = PostFrame.objects.all()
     
     def retrieve(self, request, *args, **kwargs):
         try:

@@ -1869,3 +1869,30 @@ INFO 2025-06-15 18:01:22,848 autoreload 25080 30968 C:\Users\Steven\GradProject\
 INFO 2025-06-15 18:01:23,503 autoreload 35292 29768 Watching for file changes with StatReloader
 INFO 2025-06-15 18:01:28,608 autoreload 35292 29768 C:\Users\Steven\GradProject\backend\interactions\views.py changed, reloading.
 INFO 2025-06-15 18:01:29,264 autoreload 33732 8964 Watching for file changes with StatReloader
+INFO 2025-06-15 20:28:47,673 autoreload 13176 19896 Watching for file changes with StatReloader
+INFO 2025-06-15 20:29:00,650 autoreload 13176 19896 C:\Users\Steven\GradProject\GradProject\backend\social\models.py changed, reloading.
+INFO 2025-06-15 20:29:01,066 autoreload 7028 6968 Watching for file changes with StatReloader
+INFO 2025-06-15 20:29:11,826 autoreload 7028 6968 C:\Users\Steven\GradProject\GradProject\backend\social\admin.py changed, reloading.
+INFO 2025-06-15 20:29:12,198 autoreload 20248 1184 Watching for file changes with StatReloader
+INFO 2025-06-15 20:29:18,850 autoreload 20248 1184 C:\Users\Steven\GradProject\GradProject\backend\social\admin.py changed, reloading.
+INFO 2025-06-15 20:29:19,234 autoreload 16700 6892 Watching for file changes with StatReloader
+INFO 2025-06-15 20:29:30,214 autoreload 16700 6892 C:\Users\Steven\GradProject\GradProject\backend\social\views.py changed, reloading.
+INFO 2025-06-15 20:29:30,596 autoreload 14000 22924 Watching for file changes with StatReloader
+INFO 2025-06-15 20:29:37,440 autoreload 14000 22924 C:\Users\Steven\GradProject\GradProject\backend\social\serializers.py changed, reloading.
+INFO 2025-06-15 20:29:37,825 autoreload 21700 17088 Watching for file changes with StatReloader
+INFO 2025-06-15 20:30:01,320 autoreload 21700 17088 C:\Users\Steven\GradProject\GradProject\backend\social\serializers.py changed, reloading.
+INFO 2025-06-15 20:30:01,683 autoreload 23968 7164 Watching for file changes with StatReloader
+INFO 2025-06-15 20:30:12,707 autoreload 23968 7164 C:\Users\Steven\GradProject\GradProject\backend\social\serializers.py changed, reloading.
+INFO 2025-06-15 20:30:13,083 autoreload 4784 16356 Watching for file changes with StatReloader
+INFO 2025-06-15 20:30:17,817 autoreload 4784 16356 C:\Users\Steven\GradProject\GradProject\backend\social\serializers.py changed, reloading.
+INFO 2025-06-15 20:30:18,194 autoreload 15160 11120 Watching for file changes with StatReloader
+INFO 2025-06-15 20:30:27,081 autoreload 15160 11120 C:\Users\Steven\GradProject\GradProject\backend\social\views.py changed, reloading.
+INFO 2025-06-15 20:30:27,465 autoreload 20684 17504 Watching for file changes with StatReloader
+INFO 2025-06-15 20:30:35,379 autoreload 20684 17504 C:\Users\Steven\GradProject\GradProject\backend\interactions\views.py changed, reloading.
+INFO 2025-06-15 20:30:35,759 autoreload 3540 11408 Watching for file changes with StatReloader
+INFO 2025-06-15 20:30:41,581 autoreload 3540 11408 C:\Users\Steven\GradProject\GradProject\backend\interactions\views.py changed, reloading.
+INFO 2025-06-15 20:30:41,958 autoreload 11480 11512 Watching for file changes with StatReloader
+INFO 2025-06-15 20:30:50,920 autoreload 11480 11512 C:\Users\Steven\GradProject\GradProject\backend\comments\views.py changed, reloading.
+INFO 2025-06-15 20:30:51,305 autoreload 21940 21944 Watching for file changes with StatReloader
+INFO 2025-06-15 20:31:28,584 autoreload 21940 21944 C:\Users\Steven\GradProject\GradProject\backend\comments\views.py changed, reloading.
+INFO 2025-06-15 20:31:28,959 autoreload 15620 21948 Watching for file changes with StatReloader

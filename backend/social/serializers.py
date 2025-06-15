@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from media.models import Image
-from .models import Post, PostHashtag
+from .models import PostFrame, PostHashtag
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from pets.models import Pet, PetGenericRelation
@@ -18,7 +18,7 @@ class PostSerializer(serializers.ModelSerializer):
     user_interaction = serializers.SerializerMethodField()
     
     class Meta:
-        model = Post
+        model = PostFrame
         fields = [
             'id', 'user', 'user_info', 'content', 'created_at', 
             'updated_at', 'popularity', 'hashtags', 'tagged_pets', 
@@ -110,12 +110,12 @@ class PostPreviewSerializer(serializers.ModelSerializer):
     first_image_url = serializers.SerializerMethodField()
 
     class Meta:
-        model = Post
+        model = PostFrame
         fields = ['id', 'content', 'created_at', 'first_image_url']
 
     def get_first_image_url(self, obj):
         try:
-            post_content_type = ContentType.objects.get_for_model(Post)
+            post_content_type = ContentType.objects.get_for_model(PostFrame)
             first_image = Image.objects.filter(
                 content_type=post_content_type, 
                 object_id=obj.id
@@ -164,7 +164,7 @@ class PostSearchSerializer(serializers.ModelSerializer):
     user_interaction = serializers.SerializerMethodField()
     
     class Meta:
-        model = Post
+        model = PostFrame
         fields = [
             'id', 'user', 'content', 'created_at', 'updated_at', 
             'popularity', 'hashtags', 'first_image_url', 

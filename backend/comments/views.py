@@ -4,7 +4,7 @@ from rest_framework import generics, status as drf_status, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.pagination import PageNumberPagination
-from social.models import Post
+from social.models import PostFrame
 from .models import Comment
 from .serializers import CommentSerializer, CommentReplySerializer
 
@@ -27,10 +27,10 @@ class PostCommentsView(generics.ListCreateAPIView):
         按照熱門程度(popularity)和時間排序，最新和最熱門的在前
         """
         post_id = self.kwargs.get('post_id')
-        get_object_or_404(Post, id=post_id)  # 確認貼文存在，否則返回404
-        
-        post_type = ContentType.objects.get_for_model(Post)
-        
+        get_object_or_404(PostFrame, id=post_id)  # 確認貼文存在，否則返回404
+
+        post_type = ContentType.objects.get_for_model(PostFrame)
+
         # 只獲取頂層評論 (parent=None 或 depth=0)
         queryset = Comment.objects.filter(
             content_type=post_type,
