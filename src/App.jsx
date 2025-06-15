@@ -10,6 +10,7 @@ import CommunityPage from './CommunityPage/CommunityPage'
 import ForumPage from './ForumPage/ForumPage'
 import CalculatorPage from './CalculatorPage/CalculatorPage'
 import CreateSymptomRecord from './CreateSymptomRecord/CreateSymptomRecord'
+import ViewSymptomRecord from './ViewSymptomRecord/ViewSymptomRecord'
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
         <Route path="/forumpage" element={<ForumPage />} />
         <Route path="/calculatorpage" element={<CalculatorPage />} />
         <Route path="/create-symptom-record" element={<CreateSymptomRecord />} />
+        <Route path="/view-symptom-record" element={<ViewSymptomRecord />} />
       </Routes>
     </Router>
   )

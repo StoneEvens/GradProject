@@ -57,7 +57,8 @@ function BottomNavigationBar() {
         <button type="button" className="nav-icon" onClick={e => handleNavButtonClick(e, () => navigate('/CalculatorPage'))}>
           <img src={calculatorIcon} alt="Calculator" />
         </button>
-        <button type="button" className="nav-icon" onClick={e => handleNavButtonClick(e)}>
+        {/* 暫時設置為跳轉到「檢視症狀紀錄」頁面，後續需再修改 */}
+        <button type="button" className="nav-icon" onClick={e => handleNavButtonClick(e, () => navigate('/view-symptom-record'))}>
           <img src={petIcon} alt="Pet" />
         </button>
         <button type="button" className="nav-icon" onClick={e => handleNavButtonClick(e, () => setShowDialog(v => !v))}>

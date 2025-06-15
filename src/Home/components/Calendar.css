@@ -1,5 +1,5 @@
 .calendar-container {
-    background-color: #fdcfa6;
+    background-color: #FFCA9C;
     border-radius: 20px;
     padding: 16px;
     width: 100%;
@@ -9,7 +9,10 @@
 
   .calendar-title-bar {
     position: relative;
-    margin-bottom: 8px;
+    margin-top: 0;
+    margin-bottom: 4px;
+    padding-top: 2px;
+    padding-bottom: 2px;
   }
 
   .section-title {
@@ -142,7 +145,7 @@
   }
   
   .calendar-day.today {
-    background-color: #db7e46;
+    background-color: #F08651;
     color: white;
     font-weight: bold;
   }
