@@ -8,6 +8,37 @@ from social.models import Post
 from pets.models import IllnessArchive
 from .models import UserInteraction
 from .serializers import UserInteractionSerializer
+from social.models import PostFrame
+
+class UserInteractionView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def handleInteraction(self, user, postID, relation):
+        fromRelation = None
+        toRelation = relation
+
+        if relation == 'upvoted':
+            fromRelation = UserInteraction.get_user_interaction(user, postID, 'downvoted')
+        elif relation == 'downvoted':
+            fromRelation = UserInteraction.get_user_interaction(user, postID, 'upvoted')
+        
+        postFrame = PostFrame.get_postFrame(postID)
+        postFrameStatus = postFrame.handle_interaction(user, fromRelation, toRelation)
+
+        interactionStatus = UserInteraction.create_interaction(
+            user=user,
+            postID=postID,
+            relation=toRelation
+        )
+
+        if interactionStatus & postFrameStatus:
+            action_taken_message = f"成功{self._get_action_name(toRelation)}貼文。"
+            status_code = drf_status.HTTP_200_OK
+        else:
+            action_taken_message = f"無法{self._get_action_name(toRelation)}貼文。"
+            status_code = drf_status.HTTP_400_BAD_REQUEST
+        
+        return True, action_taken_message, status_code
 
 class BaseInteractionView(APIView):
     """

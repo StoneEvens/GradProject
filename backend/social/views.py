@@ -127,7 +127,7 @@ class SearchAPIView(APIView):
     
     def _search_users(self, query):
         return User.objects.filter(
-            Q(username__icontains=query) |
+            Q(username__icontains=query) | 
             Q(user_fullname__icontains=query) |
             Q(user_account__icontains=query)
         )
