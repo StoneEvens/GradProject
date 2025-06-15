@@ -140,9 +140,3 @@ class ArchiveIllnessRelationSerializer(serializers.ModelSerializer):
     class Meta:
         model = ArchiveIllnessRelation
         fields = '__all__'
-
-# === ArchiveSymptomsRelation (病程紀錄和症狀的關聯) ===
-class ArchiveSymptomsRelationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ArchiveSymptomsRelation
-        fields = '__all__'

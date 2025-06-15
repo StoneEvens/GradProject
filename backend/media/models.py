@@ -16,7 +16,6 @@ class Image(models.Model):
     
     # 圖片基本資訊
     original_filename = models.CharField(max_length=255, blank=True, null=True)
-    file_size = models.PositiveIntegerField(blank=True, null=True, help_text="檔案大小（bytes）")
     content_type_mime = models.CharField(max_length=100, blank=True, null=True)
     
     # 排序和描述

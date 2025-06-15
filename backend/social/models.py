@@ -6,6 +6,102 @@ from django.utils.text import slugify
 import re
 from pets.models import Pet, PetGenericRelation
 
+#----------貼文的"框"----------
+class PostFrame(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='postsframes')
+    upvotes = models.IntegerField(default=0, help_text="點讚數")
+    downvotes = models.IntegerField(default=0, help_text="點踩數")
+    saves = models.IntegerField(default=0, help_text="收藏數")
+    shares = models.IntegerField(default=0, help_text="分享數")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.user.username}'s Post at {self.created_at}"
+    
+    # 獲取貼文的唯一ID
+    def get_postFrame_ID(self):
+        return self.id
+    
+    def get_postFrame(self, postID):
+        """
+        根據貼文ID獲取對應的PostFrame實例。
+        """
+        try:
+            return PostFrame.objects.get(id=postID)
+        except PostFrame.DoesNotExist:
+            return None
+    
+    def handle_interaction(self, fromRelation = None, toRelation = None):
+        update_fields = []
+        ops = 0
+
+        if fromRelation is not None:
+            if fromRelation == 'upvoted':
+                self.upvotes = max(0, self.upvotes - 1)
+                update_fields.append('upvotes')
+                ops += 1
+            elif fromRelation == 'downvoted':
+                self.downvotes = max(0, self.downvotes - 1)
+                update_fields.append('downvotes')
+                ops += 1
+            elif fromRelation == 'saved':
+                self.saves = max(0, self.saves - 1)
+                update_fields.append('saves')
+                ops += 1
+            elif fromRelation == 'shared':
+                self.shares = max(0, self.shares - 1)
+                update_fields.append('shares')
+                ops += 1
+        
+        if toRelation is not None:
+            if toRelation == 'upvoted':
+                self.upvotes = max(0, self.upvotes + 1)
+                update_fields.append('upvotes')
+                ops += 1
+            elif toRelation == 'downvoted':
+                self.downvotes = max(0, self.downvotes + 1)
+                update_fields.append('downvotes')
+                ops += 1
+            elif toRelation == 'saved':
+                self.saves = max(0, self.saves + 1)
+                update_fields.append('saves')
+                ops += 1
+            elif toRelation == 'shared':
+                self.shares = max(0, self.shares + 1)
+                update_fields.append('shares')
+                ops += 1
+        
+        if len(update_fields) == ops:
+            self.save(update_fields=update_fields)
+            return True
+        return False
+
+    
+    def get_interaction_stats(self):
+        
+        return {
+            'upvotes': self.upvotes,
+            'downvotes': self.downvotes,
+            'saves': self.saves,
+            'shares': self.shares,
+            'total_score': self.upvotes - self.downvotes
+        }
+
+#----------貼文內容----------
+#SoL (Slice of Life) 貼文內容
+class SoLContent(models.Model):
+    postFrame = models.ForeignKey(
+        PostFrame,
+        on_delete=models.CASCADE,
+        related_name='contents'
+    )
+    content_text = models.TextField(help_text="存儲具體內容文本")
+
+    def __str__(self):
+        return f"Content for Post {self.post.id} - Type: {self.content_type}"
+
+
 # === 日常貼文 ===
 class Post(models.Model):
     user = models.ForeignKey(
@@ -253,8 +349,8 @@ class Post(models.Model):
 
 # === 貼文的 Hashtag ===
 class PostHashtag(models.Model):
-    post = models.ForeignKey(
-        Post,
+    postFrame = models.ForeignKey(
+        PostFrame,
         on_delete=models.CASCADE,
         related_name='hashtags'
     )
