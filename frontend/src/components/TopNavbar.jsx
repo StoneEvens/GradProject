@@ -1,12 +1,48 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from '../styles/TopNavbar.module.css';
 import { useNavigate } from 'react-router-dom';
 import Notification from './Notification';
 import { NotificationProvider } from '../context/NotificationContext';
+import { getUserProfile } from '../services/userService';
 
 const TopNavbar = () => {
   const navigate = useNavigate();
   const [notification, setNotification] = useState('');
+  const [userHeadshot, setUserHeadshot] = useState('/assets/icon/DefaultAvatar.jpg');
+
+  // 獲取用戶頭像
+  useEffect(() => {
+    const fetchUserHeadshot = async () => {
+      try {
+        const userData = await getUserProfile();
+        if (userData.headshot_url) {
+          setUserHeadshot(userData.headshot_url);
+        }
+      } catch (error) {
+        console.error('獲取用戶頭像失敗:', error);
+        // 如果 API 失敗，保持預設頭像
+      }
+    };
+
+    // 只在用戶已登入時獲取頭像
+    const token = localStorage.getItem('accessToken');
+    if (token) {
+      fetchUserHeadshot();
+    }
+
+    // 監聽認證狀態變化
+    const handleAuthChange = () => {
+      const newToken = localStorage.getItem('accessToken');
+      if (newToken) {
+        fetchUserHeadshot();
+      } else {
+        setUserHeadshot('/assets/icon/DefaultAvatar.jpg');
+      }
+    };
+
+    window.addEventListener('auth-change', handleAuthChange);
+    return () => window.removeEventListener('auth-change', handleAuthChange);
+  }, []);
 
   const handleLogout = () => {
     // 清除所有認證信息
@@ -55,9 +91,9 @@ const TopNavbar = () => {
             onClick={handleLogout}
           />
           <img 
-            src="/assets/icon/HeaderButton_UserProfile.png" 
-            alt="用戶資料"
-            className={styles.icon}
+            src={userHeadshot} 
+            alt="用戶頭像"
+            className={styles.userHeadshot}
             onClick={() => navigate('/user-profile')}
           />
         </div>

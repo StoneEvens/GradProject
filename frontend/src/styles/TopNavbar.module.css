@@ -33,4 +33,18 @@
 
 .icon:hover {
   transform: scale(1.1);
+}
+
+.userHeadshot {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  object-fit: cover;
+  border: 2px solid #ffffff;
+}
+
+.userHeadshot:hover {
+  transform: scale(1.1);
 } 
