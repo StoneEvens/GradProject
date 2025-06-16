@@ -49,7 +49,7 @@ function BottomNavigationBar() {
       {showDialog && (
         <div className="create-post-dialog" ref={dialogRef}>
           <div className="dialog-arrow"></div>
-          <button type="button" className="dialog-tab" onClick={handleDialogButtonClick}>日常紀錄</button>
+          <button type="button" className="dialog-tab" onClick={e => { handleDialogButtonClick(e); navigate('/create-community-post'); }}>日常紀錄</button>
           <button type="button" className="dialog-tab" onClick={e => { handleDialogButtonClick(e); navigate('/create-symptom-record'); }}>症狀紀錄</button>
         </div>
       )}

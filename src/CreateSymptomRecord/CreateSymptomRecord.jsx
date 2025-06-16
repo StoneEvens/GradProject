@@ -115,7 +115,7 @@ export default function CreateSymptomRecord() {
     <div className="symptom-record-container">
       <Header showSearchBar={false} />
       <div className="header-row">
-        <h2 className="main-title">建立症狀紀錄</h2>
+        <h2 className="main-title">新增症狀紀錄</h2>
       </div>
       <div className="date-row">
         <span>時間：{date.replace(/-/g, '/')}</span>
