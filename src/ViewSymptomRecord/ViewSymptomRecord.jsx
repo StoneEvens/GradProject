@@ -34,7 +34,6 @@ const symptomRecords = {
 
 
 function CustomCalendar({ records, selectedDate, onSelectDate }) {
-  const today = new Date();
   const [currentYear, setCurrentYear] = useState(2025);
   const [currentMonth, setCurrentMonth] = useState(6);
   const weekNames = ['日', '一', '二', '三', '四', '五', '六'];
