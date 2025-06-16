@@ -8,25 +8,23 @@ from pets.models import Pet, PetGenericRelation
 
 #----------貼文的"框"----------
 class PostFrame(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='postsframes')
-    upvotes = models.IntegerField(default=0, help_text="點讚數")
+    created_at = models.DateTimeField(auto_now_add=True)
     downvotes = models.IntegerField(default=0, help_text="點踩數")
     saves = models.IntegerField(default=0, help_text="收藏數")
     shares = models.IntegerField(default=0, help_text="分享數")
-    created_at = models.DateTimeField(auto_now_add=True)
+    upvotes = models.IntegerField(default=0, help_text="點讚數")
     updated_at = models.DateTimeField(auto_now=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='postsframes')
 
     def __str__(self):
         return f"{self.user.username}'s Post at {self.created_at}"
     
-    # 獲取貼文的唯一ID
+    # 獲取貼文ID
     def get_postFrame_ID(self):
         return self.id
     
+    # 獲取貼文框本身
     def get_postFrame(self, postID):
-        """
-        根據貼文ID獲取對應的PostFrame實例。
-        """
         try:
             return PostFrame.objects.get(id=postID)
         except PostFrame.DoesNotExist:
