@@ -1896,3 +1896,4 @@ INFO 2025-06-15 20:30:50,920 autoreload 11480 11512 C:\Users\Steven\GradProject\
 INFO 2025-06-15 20:30:51,305 autoreload 21940 21944 Watching for file changes with StatReloader
 INFO 2025-06-15 20:31:28,584 autoreload 21940 21944 C:\Users\Steven\GradProject\GradProject\backend\comments\views.py changed, reloading.
 INFO 2025-06-15 20:31:28,959 autoreload 15620 21948 Watching for file changes with StatReloader
+INFO 2025-06-16 13:52:29,264 autoreload 10524 23300 Watching for file changes with StatReloader
