@@ -1,61 +1,54 @@
 from rest_framework import serializers
-from media.models import Image
-from .models import PostFrame, PostHashtag
+from media.models import Image, UserHeadshot
+from .models import PostFrame, PostHashtag, SoLContent
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from pets.models import Pet, PetGenericRelation
 from interactions.models import UserInteraction
+from accounts.serializers import UserBasicSerializer
 
 User = get_user_model()
 
 # === 貼文序列化器 ===
-class PostSerializer(serializers.ModelSerializer):
+class PostFrameSerializer(serializers.ModelSerializer):
     user_info = serializers.SerializerMethodField()
     hashtags = serializers.SerializerMethodField()
     tagged_pets = serializers.SerializerMethodField()
     images = serializers.SerializerMethodField()
     interaction_stats = serializers.SerializerMethodField()
     user_interaction = serializers.SerializerMethodField()
-    
+    content = serializers.SerializerMethodField()
+
     class Meta:
         model = PostFrame
         fields = [
-            'id', 'user', 'user_info', 'content', 'created_at', 
-            'updated_at', 'popularity', 'hashtags', 'tagged_pets', 
-            'images', 'interaction_stats', 'user_interaction'
+            'id', 'user', 'created_at', 
+            'updated_at', 'upvotes', 'downvotes',
+            'saves', 'shares',
+            'user_info', 'hashtags', 'tagged_pets', 'images', 'interaction_stats', 'user_interaction', 'content'
         ]
-        read_only_fields = ['user', 'created_at', 'updated_at', 'popularity']
+        read_only_fields = ['user', 'created_at', 'updated_at']
     
-    def get_user_info(self, obj):
-        """獲取貼文作者的基本資訊"""
+    def get_user_info(self, postFrame: PostFrame):
         return {
-            'id': obj.user.id,
-            'username': obj.user.username,
-            'user_fullname': getattr(obj.user, 'user_fullname', ''),
-            'user_account': getattr(obj.user, 'user_account', '')
+            'username': postFrame.getUser().username,
+            'user_account': getattr(postFrame.getUser(), 'user_account', '')
         }
-    
-    def get_hashtags(self, obj):
-        """獲取貼文的標籤"""
-        hashtags = PostHashtag.objects.filter(post=obj)
-        return [hashtag.tag for hashtag in hashtags]
-    
-    def get_tagged_pets(self, obj):
-        """獲取被標記的寵物資訊"""
-        post_content_type = ContentType.objects.get_for_model(Post)
+
+    def get_hashtags(self, postFrame: PostFrame):
+        hashtags = PostHashtag.get_hashtags(postFrame)
+
+        return [{'hashtag': hashtag.tag} for hashtag in hashtags]
+
+    def get_tagged_pets(self, postFrame: PostFrame):
+        post_content_type = ContentType.objects.get_for_model(PostFrame)
         pet_relations = PetGenericRelation.objects.filter(
             content_type=post_content_type,
-            object_id=obj.id
+            object_id=postFrame.id
         ).select_related('pet')
         
         return [
-            {
-                'id': relation.pet.id,
-                'pet_name': relation.pet.pet_name,
-                'pet_type': relation.pet.pet_type,
-                'breed': relation.pet.breed
-            }
-            for relation in pet_relations
+            {'pet_name': relation.pet.pet_name} for relation in pet_relations
         ]
     
     def get_images(self, obj):
@@ -77,61 +70,74 @@ class PostSerializer(serializers.ModelSerializer):
             for image in images
         ]
     
-    def get_interaction_stats(self, obj):
-        """獲取貼文的互動統計"""
-        return obj.get_interaction_stats()
-    
-    def get_user_interaction(self, obj):
-        """獲取當前用戶與貼文的互動狀態"""
-        request = self.context.get('request')
-        if request and hasattr(request, 'user'):
-            user = request.user
-            return {
-                'is_upvoted': obj.check_user_interaction(user, 'upvoted'),
-                'is_downvoted': obj.check_user_interaction(user, 'downvoted'),
-                'is_saved': obj.check_user_interaction(user, 'saved'),
-                'is_shared': obj.check_user_interaction(user, 'shared')
-            }
+    def get_interaction_stats(self, postFrame: PostFrame):
+        status = postFrame.get_interaction_stats()
         return {
-            'is_upvoted': False,
-            'is_downvoted': False,
-            'is_saved': False,
-            'is_shared': False
+            'upvotes': status.get('upvotes', 0),
+            'downvotes': status.get('downvotes', 0),
+            'saves': status.get('saves', 0),
+            'shares': status.get('shares', 0),
+            'total_score': status.get('upvotes', 0) - status.get('downvotes', 0)
         }
 
-# === 貼文 Hashtag 序列化器 ===
-class PostHashtagSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = PostHashtag
-        fields = '__all__'
+    def get_user_interaction(self, postFrame: PostFrame):
+        request = self.context.get('request')
+        user = request.user
+        postID = postFrame.id
+
+        records = UserInteraction.get_user_interactions(user, postID)
+        if not records.exists():
+            return {
+                'is_upvoted': False,
+                'is_downvoted': False,
+                'is_saved': False,
+                'is_shared': False
+            }
+
+        return {
+            'is_upvoted': records.filter(relation='upvoted').exists(),
+            'is_downvoted': records.filter(relation='downvoted').exists(),
+            'is_saved': records.filter(relation='saved').exists(),
+            'is_shared': records.filter(relation='shared').exists()
+        }
+    
+    def get_context(self, postFrame: PostFrame):
+        request = self.context.get('request')
+        user = request.user
+
+        return SoLContent.get_content(postFrame, user)
 
 #預覽用post
 class PostPreviewSerializer(serializers.ModelSerializer):
     first_image_url = serializers.SerializerMethodField()
+    content = serializers.SerializerMethodField()
 
     class Meta:
         model = PostFrame
-        fields = ['id', 'content', 'created_at', 'first_image_url']
+        fields = ['content', 'created_at', 'first_image_url']
 
-    def get_first_image_url(self, obj):
+    def get_first_image_url(self, postFrame: PostFrame):
         try:
-            post_content_type = ContentType.objects.get_for_model(PostFrame)
-            first_image = Image.objects.filter(
-                content_type=post_content_type, 
-                object_id=obj.id
-            ).order_by('sort_order').first()
-            
-            if first_image:
-                return first_image.url if hasattr(first_image, 'url') else (first_image.img_url if hasattr(first_image, 'img_url') else None)
+            return Image.get_first_image_url(postFrame)
         except Exception as e:
             pass
         return None
+    
+    def get_content(self, postFrame: PostFrame):
+        request = self.context.get('request')
+        user = request.user
+
+        content = SoLContent.get_content(postFrame, user)
+
+        return {
+            'content': content.content
+        }
 
 # === 搜尋結果用户序列化器 ===
 class UserSearchSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'user_fullname', 'user_account']
+        fields = ['id', 'username', 'user_account']
 
 # === 使用者詳細搜尋結果序列化器 ===
 class UserDetailSearchSerializer(serializers.ModelSerializer):
@@ -139,19 +145,15 @@ class UserDetailSearchSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = User
-        fields = ['id', 'user_account', 'user_fullname', 'headshot']
+        fields = ['id', 'user_account', 'username', 'headshot']
     
-    def get_headshot(self, obj):
+    def get_headshot(self, user: User):
         try:
-            user_type = ContentType.objects.get_for_model(User)
-            image = Image.objects.filter(
-                content_type=user_type,
-                object_id=obj.id
-            ).first()
-            
-            if image and hasattr(image.img_url, 'url'):
-                return image.img_url.url
-            return None
+            image = UserHeadshot.get_headshot_url(user)
+
+            return {
+                'headshot': image.firebase_url
+            }
         except:
             return None
 

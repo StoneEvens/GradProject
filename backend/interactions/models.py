@@ -33,15 +33,19 @@ class UserInteraction(models.Model):
     def check_user_interaction(self, user, postID, relation):
         return UserInteraction.objects.filter(
             user=user,
-            content_type=PostFrame,
             object_id=postID,
             relation=relation
         ).exists()
     
+    def get_user_interactions(self, user, postID):
+        return UserInteraction.objects.filter(
+            user=user,
+            object_id=postID
+        )
+    
     def get_user_interaction(self, user, postID, relation):
         return UserInteraction.objects.filter(
             user=user,
-            content_type=PostFrame,
             object_id=postID,
             relation=relation
         ).first()

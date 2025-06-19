@@ -3,11 +3,10 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from gradProject import settings
 from pets.models import Pet
+from social.models import PostFrame
 
 class Image(models.Model):
-    """通用圖片模型 - 使用 Firebase Storage"""
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    object_id = models.PositiveIntegerField()
+    post_frame = models.ForeignKey(PostFrame, on_delete=models.CASCADE, related_name='images')
     content_object = GenericForeignKey('content_type', 'object_id')
 
     # Firebase Storage 相關欄位
@@ -38,8 +37,10 @@ class Image(models.Model):
     
     @property
     def url(self):
-        """獲取圖片的完整 URL"""
         return self.firebase_url
+    
+    def get_first_image_url(self, postFrame: PostFrame):
+        return self.objects.filter(post_frame=postFrame).order_by('sort_order').first().url
 
 
 class PetHeadshot(models.Model):
@@ -64,7 +65,7 @@ class PetHeadshot(models.Model):
 class UserHeadshot(models.Model):
     """用戶頭像模型 - 使用 Firebase Storage"""
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='headshot')
-    
+
     # Firebase Storage 相關欄位
     firebase_url = models.URLField(max_length=500, help_text="Firebase Storage 圖片 URL", blank=True, null=True)
     firebase_path = models.CharField(max_length=255, help_text="Firebase Storage 檔案路徑", blank=True, null=True)
@@ -74,7 +75,5 @@ class UserHeadshot(models.Model):
     def __str__(self):
         return f"Headshot of {self.user.username}"
     
-    @property
-    def url(self):
-        """獲取圖片的完整 URL"""
-        return self.firebase_url
+    def get_headshot_url(self, user):
+        return self.objects.filter(user=user).first().firebase_url
