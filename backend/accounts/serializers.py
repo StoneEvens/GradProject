@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 class UserBasicSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['id', 'username', 'user_fullname', 'user_account']
+        fields = ['username', 'user_account']
 
 # 自定義 TokenObtainPairSerializer 以包含用戶資料
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):

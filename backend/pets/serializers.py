@@ -89,7 +89,7 @@ class IllnessArchiveSerializer(serializers.ModelSerializer):
     user_interaction = serializers.SerializerMethodField()
     
     class Meta:
-        model = IllnessArchive
+        model = IllnessArchiveContent
         fields = [
             'id', 'pet', 'pet_name', 'user', 'user_name', 'archive_title',
             'post_date', 'content', 'popularity', 'go_to_doctor', 'health_status',

@@ -1896,6 +1896,58 @@ INFO 2025-06-15 20:30:50,920 autoreload 11480 11512 C:\Users\Steven\GradProject\
 INFO 2025-06-15 20:30:51,305 autoreload 21940 21944 Watching for file changes with StatReloader
 INFO 2025-06-15 20:31:28,584 autoreload 21940 21944 C:\Users\Steven\GradProject\GradProject\backend\comments\views.py changed, reloading.
 INFO 2025-06-15 20:31:28,959 autoreload 15620 21948 Watching for file changes with StatReloader
+<<<<<<< HEAD
 INFO 2025-06-16 12:19:11,229 autoreload 15936 18096 Watching for file changes with StatReloader
 INFO 2025-06-16 12:22:35,871 autoreload 11208 24080 Watching for file changes with StatReloader
 INFO 2025-06-16 12:24:54,443 autoreload 29396 27628 Watching for file changes with StatReloader
+=======
+INFO 2025-06-16 13:52:29,264 autoreload 10524 23300 Watching for file changes with StatReloader
+INFO 2025-06-16 14:04:23,401 autoreload 10704 28368 Watching for file changes with StatReloader
+INFO 2025-06-16 14:04:48,210 autoreload 28300 9368 Watching for file changes with StatReloader
+INFO 2025-06-17 19:56:40,632 autoreload 23668 17768 Watching for file changes with StatReloader
+INFO 2025-06-17 19:57:04,158 basehttp 23668 2164 "GET /admin HTTP/1.1" 301 0
+INFO 2025-06-17 19:57:04,199 basehttp 23668 20944 "GET /admin/ HTTP/1.1" 302 0
+INFO 2025-06-17 19:57:04,306 basehttp 23668 20944 "GET /admin/login/?next=/admin/ HTTP/1.1" 200 4184
+INFO 2025-06-17 19:57:04,558 basehttp 23668 23488 "GET /static/admin/css/nav_sidebar.css HTTP/1.1" 200 2810
+INFO 2025-06-17 19:57:04,579 basehttp 23668 24572 "GET /static/admin/css/login.css HTTP/1.1" 200 951
+INFO 2025-06-17 19:57:04,622 basehttp 23668 20944 "GET /static/admin/css/base.css HTTP/1.1" 200 22154
+INFO 2025-06-17 19:57:04,629 basehttp 23668 10476 "GET /static/admin/css/dark_mode.css HTTP/1.1" 200 2808
+INFO 2025-06-17 19:57:04,646 basehttp 23668 10696 "GET /static/admin/css/responsive.css HTTP/1.1" 200 16632
+INFO 2025-06-17 19:57:04,656 basehttp 23668 10696 "GET /static/admin/js/nav_sidebar.js HTTP/1.1" 200 3063
+INFO 2025-06-17 19:57:04,681 basehttp 23668 10804 "GET /static/admin/js/theme.js HTTP/1.1" 200 1653
+WARNING 2025-06-17 19:57:04,720 basehttp 23668 10804 "GET /favicon.ico HTTP/1.1" 404 4042
+INFO 2025-06-17 19:57:09,593 basehttp 23668 10804 "POST /admin/login/?next=/admin/ HTTP/1.1" 302 0
+INFO 2025-06-17 19:57:09,627 basehttp 23668 10804 "GET /admin/ HTTP/1.1" 200 27001
+INFO 2025-06-17 19:57:09,640 basehttp 23668 10804 "GET /static/admin/css/dashboard.css HTTP/1.1" 200 441
+INFO 2025-06-17 19:57:09,651 basehttp 23668 10804 "GET /static/admin/img/icon-addlink.svg HTTP/1.1" 200 331
+INFO 2025-06-17 19:57:09,652 basehttp 23668 10696 "GET /static/admin/img/icon-changelink.svg HTTP/1.1" 200 380
+INFO 2025-06-17 19:57:24,433 basehttp 23668 21032 "OPTIONS /api/v1/accounts/token/ HTTP/1.1" 200 0
+INFO 2025-06-17 19:57:25,377 basehttp 23668 21032 "POST /api/v1/accounts/token/ HTTP/1.1" 200 577
+INFO 2025-06-17 19:57:25,402 basehttp 23668 21032 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-06-17 19:57:25,402 basehttp 23668 15948 "OPTIONS /api/v1/accounts/plans/today/ HTTP/1.1" 200 0
+INFO 2025-06-17 19:57:25,405 basehttp 23668 15948 "OPTIONS /api/v1/accounts/plans/today/ HTTP/1.1" 200 0
+INFO 2025-06-17 19:57:25,405 basehttp 23668 21032 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-06-17 19:57:25,410 basehttp 23668 15948 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-06-17 19:57:25,414 basehttp 23668 21032 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-06-17 20:06:59,793 autoreload 23668 17768 C:\Users\Steven\GradProject\GradProject\backend\social\models.py changed, reloading.
+INFO 2025-06-17 20:07:00,196 autoreload 20692 23160 Watching for file changes with StatReloader
+INFO 2025-06-17 20:11:53,232 autoreload 20692 23160 C:\Users\Steven\GradProject\GradProject\backend\social\views.py changed, reloading.
+INFO 2025-06-17 20:11:53,623 autoreload 15076 19828 Watching for file changes with StatReloader
+INFO 2025-06-17 20:13:11,697 autoreload 15076 19828 C:\Users\Steven\GradProject\GradProject\backend\pets\admin.py changed, reloading.
+INFO 2025-06-17 20:13:12,090 autoreload 9832 19400 Watching for file changes with StatReloader
+INFO 2025-06-17 20:13:13,797 autoreload 9832 19400 C:\Users\Steven\GradProject\GradProject\backend\pets\models.py changed, reloading.
+INFO 2025-06-17 20:13:14,178 autoreload 2248 2824 Watching for file changes with StatReloader
+INFO 2025-06-17 20:22:40,947 basehttp 2248 19776 "OPTIONS /api/v1/accounts/token/refresh/ HTTP/1.1" 200 0
+INFO 2025-06-17 20:22:40,989 basehttp 2248 19776 "POST /api/v1/accounts/token/refresh/ HTTP/1.1" 200 548
+INFO 2025-06-17 20:48:40,873 basehttp 2248 21264 "POST /api/v1/accounts/token/refresh/ HTTP/1.1" 200 548
+INFO 2025-06-17 21:02:06,420 autoreload 2248 2824 C:\Users\Steven\GradProject\GradProject\backend\pets\models.py changed, reloading.
+INFO 2025-06-17 21:02:06,836 autoreload 4632 17672 Watching for file changes with StatReloader
+INFO 2025-06-17 21:03:42,549 autoreload 4632 17672 C:\Users\Steven\GradProject\GradProject\backend\pets\admin.py changed, reloading.
+INFO 2025-06-17 21:03:42,949 autoreload 18376 1476 Watching for file changes with StatReloader
+INFO 2025-06-17 21:04:47,237 autoreload 18376 1476 C:\Users\Steven\GradProject\GradProject\backend\pets\admin.py changed, reloading.
+INFO 2025-06-17 21:04:47,632 autoreload 21268 11004 Watching for file changes with StatReloader
+INFO 2025-06-17 21:05:04,978 autoreload 21268 11004 C:\Users\Steven\GradProject\GradProject\backend\pets\admin.py changed, reloading.
+INFO 2025-06-17 21:05:05,377 autoreload 11020 5816 Watching for file changes with StatReloader
+INFO 2025-06-17 21:05:16,457 autoreload 11020 5816 C:\Users\Steven\GradProject\GradProject\backend\pets\admin.py changed, reloading.
+INFO 2025-06-17 21:05:16,861 autoreload 3020 19312 Watching for file changes with StatReloader
+>>>>>>> a0c59441da9bbeccb894652d43cc2a97ce0113b7

@@ -58,72 +58,33 @@ class Illness(models.Model):
         return self.illness_name
 
 # 病程紀錄
-class IllnessArchive(models.Model):
+class IllnessArchiveContent(models.Model):
     archive_title = models.CharField(max_length=100)
     content = models.TextField()
     go_to_doctor = models.BooleanField(default=False)
     health_status = models.CharField(max_length=100)
     pet = models.ForeignKey('Pet', on_delete=models.CASCADE, related_name='illness_archives')
-    popularity = models.IntegerField(default=0)
-    post_date = models.DateField(default=date.today)
-    updated_at = models.DateTimeField(auto_now=True)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='illness_archives')
+    postFrame = models.ForeignKey(
+        'social.PostFrame', on_delete=models.CASCADE, related_name='illness_archives'
+    )
 
     def __str__(self):
         return f"Archive: {self.archive_title} for {self.pet.pet_name}"
-
-    #病程紀錄統計數據
-    def get_interaction_stats(self):
-        from interactions.models import UserInteraction
-        
-        archive_type = ContentType.objects.get_for_model(IllnessArchive)
-        
-        upvotes = UserInteraction.objects.filter(
-            content_type=archive_type,
-            object_id=self.id,
-            relation='upvoted'
-        ).count()
-        
-        downvotes = UserInteraction.objects.filter(
-            content_type=archive_type,
-            object_id=self.id,
-            relation='downvoted'
-        ).count()
-        
-        saves = UserInteraction.objects.filter(
-            content_type=archive_type,
-            object_id=self.id,
-            relation='saved'
-        ).count()
-        
-        shares = UserInteraction.objects.filter(
-            content_type=archive_type,
-            object_id=self.id,
-            relation='shared'
-        ).count()
-        
-        return {
-            'upvotes': upvotes,
-            'downvotes': downvotes,
-            'saves': saves,
-            'shares': shares,
-            'total_score': upvotes - downvotes
-        }
     
-    def check_user_interaction(self, user, relation):
-        """
-        檢查用戶是否對疾病檔案有特定互動
-        """
-        from interactions.models import UserInteraction
-        
-        archive_type = ContentType.objects.get_for_model(IllnessArchive)
-        
-        return UserInteraction.objects.filter(
-            user=user,
-            content_type=archive_type,
-            object_id=self.id,
-            relation=relation
-        ).exists()
+    def get_content(self, user):
+        return IllnessArchiveContent.objects.filter(
+            user=user
+        )[:50]
+    
+    def get_content(self, hashtag):
+        return IllnessArchiveContent.objects.filter(
+            content__icontains=hashtag
+        )[:50]
+    
+    def get_content(self, query):
+        return IllnessArchiveContent.objects.filter(
+            content__icontains=query
+        )[:50]
 
 # 異常貼文的症狀(多對多關聯拆分)
 class PostSymptomsRelation(models.Model):
@@ -139,7 +100,7 @@ class PostSymptomsRelation(models.Model):
 # 病程紀錄的異常貼文(多對多關聯拆分)
 class ArchiveAbnormalPostRelation(models.Model):
     archive = models.ForeignKey(
-        IllnessArchive,
+        IllnessArchiveContent,
         on_delete=models.CASCADE,
         related_name='abnormal_posts'
     )
@@ -157,7 +118,7 @@ class ArchiveAbnormalPostRelation(models.Model):
 
 # 病程紀錄的病因(多對多關聯拆分)
 class ArchiveIllnessRelation(models.Model):
-    archive = models.ForeignKey(IllnessArchive, on_delete=models.CASCADE, related_name='illnesses')
+    archive = models.ForeignKey(IllnessArchiveContent, on_delete=models.CASCADE, related_name='illnesses')
     illness = models.ForeignKey(Illness, on_delete=models.CASCADE, related_name='archives')
 
     class Meta:

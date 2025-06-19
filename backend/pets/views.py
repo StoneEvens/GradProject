@@ -20,7 +20,7 @@ class TodayPopularIllnessArchiveAPIView(APIView):
 
     def get(self, request):
         today = date.today()
-        archives = IllnessArchive.objects.filter(post_date=today).order_by('-popularity')[:4]
+        archives = IllnessArchiveContent.objects.filter(post_date=today).order_by('-popularity')[:4]
         serializer = IllnessArchiveSerializer(archives, many=True, context={'request': request})
         return APIResponse(data=serializer.data)
 
@@ -36,7 +36,7 @@ class UserPetsAPIView(APIView):
             'headshot', # 預加載 PetHeadshot (OneToOneField)
             Prefetch(
                 'illness_archives', # Pet -> IllnessArchive (related_name)
-                queryset=IllnessArchive.objects.prefetch_related(
+                queryset=IllnessArchiveContent.objects.prefetch_related(
                     'illnesses__illness' # IllnessArchive -> ArchiveIllnessRelation (related_name='illnesses') -> Illness
                 )
             )
@@ -76,7 +76,7 @@ class UserIllnessArchiveListAPIView(generics.ListAPIView):
     def get_queryset(self):
         user_id = self.kwargs['pk']
         # 正確使用 select_related 和 prefetch_related
-        return IllnessArchive.objects.filter(user_id=user_id).select_related(
+        return IllnessArchiveContent.objects.filter(user_id=user_id).select_related(
             'pet', 'user'
         ).prefetch_related(
             'illnesses__illness'

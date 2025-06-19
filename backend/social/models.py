@@ -19,6 +19,9 @@ class PostFrame(models.Model):
     def __str__(self):
         return f"{self.user.username}'s Post at {self.created_at}"
     
+    def getUser(self):
+        return self.user
+    
     # 獲取貼文ID
     def get_postFrame_ID(self):
         return self.id
@@ -29,6 +32,9 @@ class PostFrame(models.Model):
             return PostFrame.objects.get(id=postID)
         except PostFrame.DoesNotExist:
             return None
+    
+    def get_postFrame(self, user):
+        return PostFrame.objects.filter(user=user).order_by('-created_at')[:50]
     
     def handle_interaction(self, fromRelation = None, toRelation = None):
         update_fields = []
@@ -79,11 +85,10 @@ class PostFrame(models.Model):
     def get_interaction_stats(self):
         
         return {
-            'upvotes': self.upvotes,
-            'downvotes': self.downvotes,
-            'saves': self.saves,
-            'shares': self.shares,
-            'total_score': self.upvotes - self.downvotes
+            self.upvotes,
+            self.downvotes,
+            self.saves,
+            self.shares
         }
 
 #----------貼文內容----------
@@ -98,6 +103,26 @@ class SoLContent(models.Model):
 
     def __str__(self):
         return f"Content for Post {self.post.id} - Type: {self.content_type}"
+    
+    def get_content(self, PostFrame):
+        return SoLContent.objects.filter(
+            postFrame=PostFrame
+        )
+    
+    def get_content(self, user):
+        return SoLContent.objects.filter(
+            postFrame__user=user
+        )[:50]
+    
+    def get_content(self, hashtag):
+        return SoLContent.objects.filter(
+            postFrame__hashtags__tag=hashtag
+        )[:50]
+    
+    def get_content(self, query):
+        return SoLContent.objects.filter(
+            content_text__icontains=query
+        )[:50]
 
 # === 貼文的 Hashtag ===
 class PostHashtag(models.Model):
@@ -110,3 +135,8 @@ class PostHashtag(models.Model):
 
     def __str__(self):
         return f"#{self.tag} for Post {self.post.id}"
+    
+    def get_hashtags(self, PostFrame):
+        return PostHashtag.objects.filter(
+            postFrame=PostFrame
+        )

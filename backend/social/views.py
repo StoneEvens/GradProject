@@ -1,5 +1,5 @@
 from rest_framework import generics, status as drf_status
-from .models import PostHashtag
+from .models import PostHashtag, PostFrame, SoLContent
 from .serializers import *
 from rest_framework.permissions import IsAuthenticated
 from utils.api_response import APIResponse
@@ -35,9 +35,12 @@ class UserPostsPreviewListAPIView(generics.ListAPIView):
         
         # 由於 first_image_url 在 Serializer 中查詢，這裡可以簡化
         # 如果 Serializer 中的查詢效率不高，可以考慮在此處預加載 Post 的第一張 Image
-        return Post.objects.filter(user_id=user_id).select_related(
-            'user' # 如果 serializer 需要 user
-        ).order_by('-created_at')
+        postFrame = PostFrame.objects.get_postFrame(user_id)
+        serializers = PostPreviewSerializer(
+            postFrame,
+            many=True,
+            context={'request': self.request}
+        )
     
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
@@ -197,9 +200,6 @@ class CreatePostAPIView(APIView):
     
     @transaction.atomic
     def post(self, request, *args, **kwargs):
-        """
-        建立新的貼文，可以包含文字內容、標籤和寵物標記
-        """
         try:
             # 獲取基本貼文數據
             user = request.user
