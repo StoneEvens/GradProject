@@ -233,7 +233,7 @@ export const logout = async () => {
     console.error('登出請求失敗:', error);
   } finally {
     clearTokens();
-    window.location.href = '/login';
+    window.location.href = '/';
   }
 };
 

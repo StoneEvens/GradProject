@@ -1,0 +1,199 @@
+.accountSettingsContainer {
+  margin-bottom: 20px;
+}
+
+/* 帳號標題列 */
+.accountHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: transparent;
+  border-radius: 12px;
+  padding: 16px 0 0 0;
+  cursor: pointer;
+  min-height: 60px;
+  margin-bottom: 2px;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 7.5px;
+}
+
+.pawIcon {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+.accountText {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+}
+
+.arrowIcon {
+  color: #FFB370;
+  font-size: 1.2rem;
+  transition: transform 0.3s ease;
+}
+
+.arrowIcon.expanded {
+  transform: rotate(0deg);
+}
+
+.arrowIcon.collapsed {
+  transform: rotate(-90deg);
+}
+
+/* 摺疊內容區域 */
+.settingsContent {
+  background: transparent;
+  border-radius: 0 0 12px 12px;
+  padding: 0;
+  margin-top: 0;
+  border-top: 1px solid #FFB370;
+  padding-top: 8px;
+}
+
+.settingItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  min-height: 50px;
+  background: transparent;
+}
+
+.settingLeft {
+  display: flex;
+  align-items: center;
+}
+
+.settingTextContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.settingText {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #333;
+}
+
+.settingRight {
+  display: flex;
+  align-items: center;
+}
+
+/* 切換開關 */
+.toggleContainer {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.toggle {
+  --toggle-bg: #ccc;
+  --toggle-x: 2px;
+  width: 50px;
+  height: 24px;
+  border-radius: 12px;
+  position: relative;
+  cursor: pointer;
+  background-color: var(--toggle-bg);
+  transition: background-color 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.toggleOn {
+  --toggle-bg: #FFB370;
+  --toggle-x: 26px;
+}
+
+.toggleOff {
+  --toggle-bg: #ccc;
+  --toggle-x: 2px;
+}
+
+
+
+.toggleSlider {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  position: absolute;
+  top: 2px;
+  left: 0;
+  transform: translateX(var(--toggle-x));
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.toggleLabel {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #333;
+  min-width: 35px;
+}
+
+/* 手機版優化 */
+@media (max-width: 480px) {
+  .accountHeader {
+    padding: 14px 0 0 0;
+    min-height: 55px;
+  }
+  
+  .accountText {
+    font-size: 1rem;
+  }
+  
+  .pawIcon {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .settingItem {
+    padding: 10px 0;
+    min-height: 45px;
+  }
+  
+  .settingText {
+    font-size: 0.95rem;
+  }
+  
+  .settingDescription {
+    font-size: 0.8rem;
+  }
+  
+  .toggleLabel {
+    font-size: 0.9rem;
+    min-width: 55px;
+  }
+}
+
+/* 小屏手機優化 */
+@media (max-width: 360px) {
+  .accountHeader {
+    padding: 12px 0 0 0;
+  }
+  
+  .settingItem {
+    padding: 8px 0;
+  }
+  
+  .settingText {
+    font-size: 0.9rem;
+  }
+  
+  .settingDescription {
+    font-size: 0.75rem;
+  }
+} 

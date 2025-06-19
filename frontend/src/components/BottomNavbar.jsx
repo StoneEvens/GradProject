@@ -45,8 +45,8 @@ const BottomNavbar = () => {
     
     // 處理其他導航按鈕
     switch (action) {
-      case 'profile':
-        navigate('/profile');
+      case 'social':
+        navigate('/social');
         break;
       case 'pet':
         navigate('/pet');
@@ -75,7 +75,7 @@ const BottomNavbar = () => {
             src="/assets/icon/BottomButton_Forum.png" 
             alt="社群"
             className={styles.icon}
-            onClick={() => handleNavItemClick('profile')}
+            onClick={() => handleNavItemClick('social')}
           />
         </div>
         <div className={styles.navItem}>

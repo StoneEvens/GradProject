@@ -1,0 +1,237 @@
+.container {
+  min-height: 100vh;
+  background: #FFF2D9;
+  padding-top: 60px;
+  padding-bottom: 70px;
+  min-width: 320px;
+}
+
+.content {
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 0 10px;
+}
+
+.profileHeader {
+  display: flex;
+  align-items: center;
+  margin-top: 40px;
+  margin-bottom: 40px;
+  position: relative;
+}
+
+.avatarSection {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatar {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #FFB370;
+  background: #fff;
+}
+
+.editButton {
+  background: #FFB370;
+  color: #333;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+  white-space: nowrap;
+  width: 100px;
+}
+
+.editButton:hover {
+  background: #F08651;
+  color: #fff;
+}
+
+.profileInfo {
+  flex: 2;
+  min-width: 0;
+  padding-left: 16px;
+  align-self: flex-start;
+}
+
+.nickname {
+  font-size: 1.3rem;
+  font-weight: 900;
+  margin-bottom: 1px;
+  text-align: left;
+}
+
+.realname {
+  font-size: 0.85rem;
+  font-weight: normal;
+  margin-bottom: 10px;
+  text-align: left;
+}
+
+.followStats {
+  font-size: 0.85rem;
+  color: #666;
+  margin-bottom: 10px;
+  text-align: left;
+  display: flex;
+  gap: 16px;
+}
+
+.followStatItem {
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.followStatItem:hover {
+  color: #F08651;
+}
+
+.followStatItem.disabled {
+  cursor: not-allowed;
+  color: #666;
+}
+
+.followStatItem.disabled:hover {
+  color: #999;
+}
+
+.desc {
+  font-size: 0.8rem;
+  color: #333;
+  text-align: left;
+  word-break: break-all;
+}
+
+.tabs {
+  display: flex;
+  margin: 18px 0 10px 0;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+.tab {
+  flex: 1;
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: bold;
+  padding: 8px 0;
+  background: #FFB370;
+  color: #222;
+  border-radius: 6px 6px 0 0;
+  margin-right: 4px;
+  cursor: pointer;
+  border: none;
+  transition: background 0.2s, color 0.2s;
+}
+
+.tab:last-child {
+  margin-right: 0;
+}
+
+.tab.active, .tab:hover {
+  background: #F08651;
+  color: #fff;
+}
+
+.photoGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 24px;
+  margin-top: 20px;
+}
+
+.photoCell {
+  width: 100%;
+  aspect-ratio: 1/1;
+  background: #fdcfa6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(255, 140, 26, 0.08);
+}
+
+.catPhoto {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.followButton {
+  background: #f08651;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+  white-space: nowrap;
+  width: 100px;
+}
+
+.followButton:hover {
+  background: #e07045;
+  color: #fff;
+}
+
+/* 追蹤按鈕狀態樣式 */
+.followButton.following {
+  background: #ffb370;
+  color: #fff;
+}
+
+.followButton.following:hover {
+  background: #ffca8c;
+}
+
+.followButton.requested {
+  background: #f08651;
+  color: #fff;
+}
+
+.followButton.requested:hover {
+  background: #f08651;
+}
+
+/* 私人帳戶提示信息 */
+.privateAccountMessage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: 60px;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.lockIcon {
+  font-size: 3rem;
+  margin-bottom: 16px;
+  opacity: 0.6;
+}
+
+.privateText {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.privateSubText {
+  font-size: 1rem;
+  color: #666;
+  line-height: 1.4;
+}

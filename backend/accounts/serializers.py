@@ -96,7 +96,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ['id', 'username', 'email', 'headshot_url', 'user_fullname', 'user_account', 'points', 'user_intro']
+        fields = ['id', 'username', 'email', 'headshot_url', 'user_fullname', 'user_account', 'points', 'user_intro', 'account_privacy']
         read_only_fields = ['id', 'points']
 
     def get_headshot_url(self, obj):
@@ -127,9 +127,34 @@ class UserSummarySerializer(serializers.Serializer):
     posts_count = serializers.IntegerField()
 
 class NotificationSerializer(serializers.ModelSerializer):
+    follow_request_from_info = serializers.SerializerMethodField()
+    
     class Meta:
         model = Notification
-        fields = '__all__'
+        fields = [
+            'id', 'user', 'notification_type', 'content', 'date', 'is_read',
+            'follow_request_from', 'follow_request_from_info', 'related_follow'
+        ]
+        read_only_fields = ['id', 'date']
+    
+    def get_follow_request_from_info(self, obj):
+        """獲取發送追蹤請求的使用者基本資訊"""
+        if obj.follow_request_from:
+            headshot_url = None
+            try:
+                if hasattr(obj.follow_request_from, 'headshot') and obj.follow_request_from.headshot:
+                    headshot_url = obj.follow_request_from.headshot.firebase_url
+            except:
+                headshot_url = None
+                
+            return {
+                'id': obj.follow_request_from.id,
+                'username': obj.follow_request_from.username,
+                'user_fullname': obj.follow_request_from.user_fullname,
+                'user_account': obj.follow_request_from.user_account,
+                'headshot_url': headshot_url
+            }
+        return None
 
 class UserFollowSerializer(serializers.ModelSerializer):
     class Meta:

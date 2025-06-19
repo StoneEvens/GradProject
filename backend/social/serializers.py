@@ -129,29 +129,30 @@ class PostPreviewSerializer(serializers.ModelSerializer):
 
 # === 搜尋結果用户序列化器 ===
 class UserSearchSerializer(serializers.ModelSerializer):
+    headshot_url = serializers.SerializerMethodField()
+    
     class Meta:
         model = User
-        fields = ['id', 'username', 'user_fullname', 'user_account']
+        fields = ['id', 'username', 'user_fullname', 'user_account', 'headshot_url']
+    
+    def get_headshot_url(self, obj):
+        try:
+            return obj.headshot.firebase_url
+        except:
+            return None
 
 # === 使用者詳細搜尋結果序列化器 ===
 class UserDetailSearchSerializer(serializers.ModelSerializer):
-    headshot = serializers.SerializerMethodField()
+    headshot_url = serializers.SerializerMethodField()
     
     class Meta:
         model = User
-        fields = ['id', 'user_account', 'user_fullname', 'headshot']
+        fields = ['id', 'user_account', 'user_fullname', 'headshot_url', 'account_privacy']
     
-    def get_headshot(self, obj):
+    def get_headshot_url(self, obj):
         try:
-            user_type = ContentType.objects.get_for_model(User)
-            image = Image.objects.filter(
-                content_type=user_type,
-                object_id=obj.id
-            ).first()
-            
-            if image and hasattr(image.img_url, 'url'):
-                return image.img_url.url
-            return None
+            # 使用與UserProfileSerializer相同的方式獲取頭像
+            return obj.headshot.firebase_url
         except:
             return None
 

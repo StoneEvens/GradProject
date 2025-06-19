@@ -1,0 +1,31 @@
+.container {
+  min-height: 100vh;
+  background: #ffeed6;
+  display: flex;
+  flex-direction: column;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+.content {
+  flex: 1;
+  padding: 20px 16px;
+  margin-top: 60px;
+  margin-bottom: 80px;
+  overflow-y: auto;
+}
+
+.loadingContainer {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 60px;
+  margin-bottom: 80px;
+}
+
+.loading {
+  font-size: 1.1rem;
+  color: #f08651;
+  font-weight: 500;
+} 

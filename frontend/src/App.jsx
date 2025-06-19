@@ -6,6 +6,11 @@ import RegisterPage from './pages/RegisterPage';
 import LoginPage from './pages/LoginPage';
 import MainPage from './pages/MainPage';
 import UserProfilePage from './pages/UserProfilePage';
+import OtherUserProfilePage from './pages/OtherUserProfilePage';
+import UserFollowConditionPage from './pages/UserFollowConditionPage';
+import SocialPage from './pages/SocialPage';
+import SettingsPage from './pages/SettingsPage';
+import NotificationPage from './pages/NotificationPage';
 import { isAuthenticated, refreshAccessToken } from './services/authService';
 
 const App = () => {
@@ -111,6 +116,36 @@ const App = () => {
         <Route 
           path="/user-profile" 
           element={isUserAuthenticated ? <UserProfilePage /> : <Navigate to="/" />} 
+        />
+        {/* 其他用戶個人頁：未登入導向HomePage */}
+        <Route 
+          path="/user/:userAccount" 
+          element={isUserAuthenticated ? <OtherUserProfilePage /> : <Navigate to="/" />} 
+        />
+        {/* 用戶追蹤狀況頁面：未登入導向HomePage */}
+        <Route 
+          path="/user/:userAccount/follow/:type" 
+          element={isUserAuthenticated ? <UserFollowConditionPage /> : <Navigate to="/" />} 
+        />
+        {/* 社群頁面：未登入導向HomePage */}
+        <Route 
+          path="/social" 
+          element={isUserAuthenticated ? <SocialPage /> : <Navigate to="/" />} 
+        />
+        {/* 社群搜尋結果頁面：未登入導向HomePage */}
+        <Route 
+          path="/social/search" 
+          element={isUserAuthenticated ? <SocialPage /> : <Navigate to="/" />} 
+        />
+        {/* 設定頁面：未登入導向HomePage */}
+        <Route 
+          path="/settings" 
+          element={isUserAuthenticated ? <SettingsPage /> : <Navigate to="/" />} 
+        />
+        {/* 通知頁面：未登入導向HomePage */}
+        <Route 
+          path="/notifications" 
+          element={isUserAuthenticated ? <NotificationPage /> : <Navigate to="/" />} 
         />
 
         {/* 未定義路徑：根據登入狀態重定向 */}

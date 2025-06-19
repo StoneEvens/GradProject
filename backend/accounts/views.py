@@ -15,6 +15,7 @@ from django.db.models import Count
 from django.db import transaction
 from django.db.models import Q, Sum
 import logging
+from django.db import models
 
 # 設置日誌記錄器
 logger = logging.getLogger(__name__)
@@ -384,15 +385,61 @@ class UserImageAPIView(APIView):
             user_image_url = None
         return APIResponse(data={'user_image_url': user_image_url})
 
-# 回傳使用者基本資料＋追蹤數、被追蹤數、發文（Post+Archive）數）
+# 獲取特定用戶的基本資料（通過ID）
+class UserProfileView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request, pk):
+        try:
+            # 獲取目標用戶的基本資料
+            user = CustomUser.objects.select_related('headshot').get(pk=pk)
+            serializer = UserProfileSerializer(user)
+            return APIResponse(data=serializer.data, message='獲取用戶資料成功')
+        except CustomUser.DoesNotExist:
+            return APIResponse(
+                message='找不到該使用者',
+                code=drf_status.HTTP_404_NOT_FOUND,
+                status=drf_status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return APIResponse(
+                message=f'獲取用戶資料失敗: {str(e)}',
+                code=drf_status.HTTP_500_INTERNAL_SERVER_ERROR,
+                status=drf_status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+# 獲取特定用戶的基本資料（通過user_account）
+class UserProfileByAccountView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request, user_account):
+        try:
+            # 獲取目標用戶的基本資料
+            user = CustomUser.objects.select_related('headshot').get(user_account=user_account)
+            serializer = UserProfileSerializer(user)
+            return APIResponse(data=serializer.data, message='獲取用戶資料成功')
+        except CustomUser.DoesNotExist:
+            return APIResponse(
+                message='找不到該使用者',
+                code=drf_status.HTTP_404_NOT_FOUND,
+                status=drf_status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return APIResponse(
+                message=f'獲取用戶資料失敗: {str(e)}',
+                code=drf_status.HTTP_500_INTERNAL_SERVER_ERROR,
+                status=drf_status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+# 回傳使用者基本資料＋追蹤數、被追蹤數、發文（Post+Archive）數）- 通過ID
 class UserSummaryView(APIView):
     permission_classes = [IsAuthenticated]
     
     def get(self, request, pk):
         # 使用單一查詢並包含聚合函數，減少數據庫請求次數
         user = CustomUser.objects.annotate(
-            followers_count=Count('followers', distinct=True),
-            following_count=Count('following', distinct=True),
+            followers_count=Count('followers', filter=models.Q(followers__confirm_or_not=True), distinct=True),
+            following_count=Count('following', filter=models.Q(following__confirm_or_not=True), distinct=True),
             posts_count=Count('posts', distinct=True),
             archives_count=Count('illness_archives', distinct=True)
         ).get(pk=pk)
@@ -409,6 +456,45 @@ class UserSummaryView(APIView):
         
         serializer = UserSummarySerializer(data)
         return APIResponse(data=serializer.data)
+
+# 回傳使用者基本資料＋追蹤數、被追蹤數、發文（Post+Archive）數）- 通過user_account
+class UserSummaryByAccountView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request, user_account):
+        try:
+            # 使用單一查詢並包含聚合函數，減少數據庫請求次數
+            user = CustomUser.objects.annotate(
+                followers_count=Count('followers', filter=models.Q(followers__confirm_or_not=True), distinct=True),
+                following_count=Count('following', filter=models.Q(following__confirm_or_not=True), distinct=True),
+                posts_count=Count('posts', distinct=True),
+                archives_count=Count('illness_archives', distinct=True)
+            ).get(user_account=user_account)
+            
+            data = {
+                'id': user.id,
+                'username': user.username,
+                'user_fullname': user.user_fullname,
+                'user_intro': user.user_intro,
+                'followers_count': user.followers_count,
+                'following_count': user.following_count,
+                'posts_count': user.posts_count + user.archives_count,
+            }
+            
+            serializer = UserSummarySerializer(data)
+            return APIResponse(data=serializer.data, message='獲取用戶摘要成功')
+        except CustomUser.DoesNotExist:
+            return APIResponse(
+                message='找不到該使用者',
+                code=drf_status.HTTP_404_NOT_FOUND,
+                status=drf_status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return APIResponse(
+                message=f'獲取用戶摘要失敗: {str(e)}',
+                code=drf_status.HTTP_500_INTERNAL_SERVER_ERROR,
+                status=drf_status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 # 標記行程為已完成或重新開始
 class CompletePlanAPIView(APIView):
@@ -574,6 +660,729 @@ class DatePlanAPIView(APIView):
         except Exception as e:
             return APIResponse(
                 message=f'獲取行程時發生錯誤: {str(e)}',
+                code=drf_status.HTTP_500_INTERNAL_SERVER_ERROR,
+                status=drf_status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+# 追蹤相關API
+class FollowAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request, user_id):
+        """追蹤或取消追蹤使用者"""
+        try:
+            # 檢查要追蹤的使用者是否存在
+            target_user = CustomUser.objects.get(id=user_id)
+            
+            # 不能追蹤自己
+            if target_user == request.user:
+                return APIResponse(
+                    message='不能追蹤自己',
+                    code=drf_status.HTTP_400_BAD_REQUEST,
+                    status=drf_status.HTTP_400_BAD_REQUEST
+                )
+            
+            # 檢查是否已經有追蹤關係
+            try:
+                follow_relation = UserFollow.objects.get(
+                    user=request.user,
+                    follows=target_user
+                )
+                # 已存在關係，取消追蹤
+                # 如果是待確認的追蹤請求，刪除相關通知
+                if not follow_relation.confirm_or_not:
+                    # 刪除相關的追蹤請求通知
+                    Notification.objects.filter(
+                        user=target_user,
+                        notification_type='follow_request',
+                        follow_request_from=request.user,
+                        related_follow=follow_relation
+                    ).delete()
+                
+                follow_relation.delete()
+                return APIResponse(
+                    data={
+                        'is_following': False, 
+                        'is_requested': False,
+                        'message': f'已取消追蹤 {target_user.username}'
+                    },
+                    message='取消追蹤成功',
+                    status=drf_status.HTTP_200_OK
+                )
+            except UserFollow.DoesNotExist:
+                # 沒有追蹤關係，建立新的
+                if target_user.account_privacy == 'private':
+                    # private帳戶需要等待確認
+                    follow_relation = UserFollow.objects.create(
+                        user=request.user,
+                        follows=target_user,
+                        confirm_or_not=False  # 等待確認
+                    )
+                    
+                    # 建立追蹤請求通知
+                    notification = Notification.objects.create(
+                        user=target_user,
+                        notification_type='follow_request',
+                        content=f'{request.user.username} 希望追蹤您',
+                        follow_request_from=request.user,
+                        related_follow=follow_relation
+                    )
+                    
+                    return APIResponse(
+                        data={
+                            'is_following': False,
+                            'is_requested': True,
+                            'message': f'已發送追蹤請求給 {target_user.username}'
+                        },
+                        message='追蹤請求已發送',
+                        status=drf_status.HTTP_201_CREATED
+                    )
+                else:
+                    # public帳戶直接確認
+                    follow_relation = UserFollow.objects.create(
+                        user=request.user,
+                        follows=target_user,
+                        confirm_or_not=True  # 直接確認
+                    )
+                    return APIResponse(
+                        data={
+                            'is_following': True,
+                            'is_requested': False,
+                            'message': f'已開始追蹤 {target_user.username}'
+                        },
+                        message='追蹤成功',
+                        status=drf_status.HTTP_201_CREATED
+                    )
+                
+        except CustomUser.DoesNotExist:
+            return APIResponse(
+                message='找不到該使用者',
+                code=drf_status.HTTP_404_NOT_FOUND,
+                status=drf_status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return APIResponse(
+                message=f'追蹤操作失敗: {str(e)}',
+                code=drf_status.HTTP_500_INTERNAL_SERVER_ERROR,
+                status=drf_status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+    def get(self, request, user_id):
+        """獲取單個使用者的追蹤狀態"""
+        try:
+            target_user = CustomUser.objects.get(id=user_id)
+            
+            # 檢查追蹤關係
+            try:
+                follow_relation = UserFollow.objects.get(
+                    user=request.user,
+                    follows=target_user
+                )
+                # 有追蹤關係，檢查是否已確認
+                is_following = follow_relation.confirm_or_not
+                is_requested = not follow_relation.confirm_or_not
+            except UserFollow.DoesNotExist:
+                # 沒有追蹤關係
+                is_following = False
+                is_requested = False
+            
+            return APIResponse(
+                data={
+                    'is_following': is_following,
+                    'is_requested': is_requested,
+                    'account_privacy': target_user.account_privacy
+                },
+                message='獲取追蹤狀態成功',
+                status=drf_status.HTTP_200_OK
+            )
+            
+        except CustomUser.DoesNotExist:
+            return APIResponse(
+                message='找不到該使用者',
+                code=drf_status.HTTP_404_NOT_FOUND,
+                status=drf_status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return APIResponse(
+                message=f'獲取追蹤狀態失敗: {str(e)}',
+                code=drf_status.HTTP_500_INTERNAL_SERVER_ERROR,
+                status=drf_status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+# 通過user_account進行追蹤操作
+class FollowByAccountAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request, user_account):
+        """追蹤或取消追蹤使用者（通過user_account）"""
+        try:
+            # 檢查要追蹤的使用者是否存在
+            target_user = CustomUser.objects.get(user_account=user_account)
+            
+            # 不能追蹤自己
+            if target_user == request.user:
+                return APIResponse(
+                    message='不能追蹤自己',
+                    code=drf_status.HTTP_400_BAD_REQUEST,
+                    status=drf_status.HTTP_400_BAD_REQUEST
+                )
+            
+            # 檢查是否已經有追蹤關係
+            try:
+                follow_relation = UserFollow.objects.get(
+                    user=request.user,
+                    follows=target_user
+                )
+                # 已存在關係，取消追蹤
+                # 如果是待確認的追蹤請求，刪除相關通知
+                if not follow_relation.confirm_or_not:
+                    # 刪除相關的追蹤請求通知
+                    Notification.objects.filter(
+                        user=target_user,
+                        notification_type='follow_request',
+                        follow_request_from=request.user,
+                        related_follow=follow_relation
+                    ).delete()
+                
+                follow_relation.delete()
+                return APIResponse(
+                    data={
+                        'is_following': False, 
+                        'is_requested': False,
+                        'message': f'已取消追蹤 {target_user.username}'
+                    },
+                    message='取消追蹤成功',
+                    status=drf_status.HTTP_200_OK
+                )
+            except UserFollow.DoesNotExist:
+                # 沒有追蹤關係，建立新的
+                if target_user.account_privacy == 'private':
+                    # private帳戶需要等待確認
+                    follow_relation = UserFollow.objects.create(
+                        user=request.user,
+                        follows=target_user,
+                        confirm_or_not=False  # 等待確認
+                    )
+                    
+                    # 建立追蹤請求通知
+                    notification = Notification.objects.create(
+                        user=target_user,
+                        notification_type='follow_request',
+                        content=f'{request.user.username} 希望追蹤您',
+                        follow_request_from=request.user,
+                        related_follow=follow_relation
+                    )
+                    
+                    return APIResponse(
+                        data={
+                            'is_following': False,
+                            'is_requested': True,
+                            'message': f'已發送追蹤請求給 {target_user.username}'
+                        },
+                        message='追蹤請求已發送',
+                        status=drf_status.HTTP_201_CREATED
+                    )
+                else:
+                    # public帳戶直接確認
+                    follow_relation = UserFollow.objects.create(
+                        user=request.user,
+                        follows=target_user,
+                        confirm_or_not=True  # 直接確認
+                    )
+                    return APIResponse(
+                        data={
+                            'is_following': True,
+                            'is_requested': False,
+                            'message': f'已開始追蹤 {target_user.username}'
+                        },
+                        message='追蹤成功',
+                        status=drf_status.HTTP_201_CREATED
+                    )
+                
+        except CustomUser.DoesNotExist:
+            return APIResponse(
+                message='找不到該使用者',
+                code=drf_status.HTTP_404_NOT_FOUND,
+                status=drf_status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return APIResponse(
+                message=f'追蹤操作失敗: {str(e)}',
+                code=drf_status.HTTP_500_INTERNAL_SERVER_ERROR,
+                status=drf_status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+    def get(self, request, user_account):
+        """獲取使用者的追蹤狀態（通過user_account）"""
+        try:
+            target_user = CustomUser.objects.get(user_account=user_account)
+            
+            # 檢查追蹤關係
+            try:
+                follow_relation = UserFollow.objects.get(
+                    user=request.user,
+                    follows=target_user
+                )
+                # 有追蹤關係，檢查是否已確認
+                is_following = follow_relation.confirm_or_not
+                is_requested = not follow_relation.confirm_or_not
+            except UserFollow.DoesNotExist:
+                # 沒有追蹤關係
+                is_following = False
+                is_requested = False
+            
+            return APIResponse(
+                data={
+                    'is_following': is_following,
+                    'is_requested': is_requested,
+                    'account_privacy': target_user.account_privacy
+                },
+                message='獲取追蹤狀態成功',
+                status=drf_status.HTTP_200_OK
+            )
+            
+        except CustomUser.DoesNotExist:
+            return APIResponse(
+                message='找不到該使用者',
+                code=drf_status.HTTP_404_NOT_FOUND,
+                status=drf_status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return APIResponse(
+                message=f'獲取追蹤狀態失敗: {str(e)}',
+                code=drf_status.HTTP_500_INTERNAL_SERVER_ERROR,
+                status=drf_status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+class FollowStatusBatchAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request):
+        """批量獲取多個使用者的追蹤狀態"""
+        try:
+            user_ids = request.data.get('user_ids', [])
+            
+            if not user_ids:
+                return APIResponse(
+                    message='請提供使用者ID列表',
+                    code=drf_status.HTTP_400_BAD_REQUEST,
+                    status=drf_status.HTTP_400_BAD_REQUEST
+                )
+            
+            # 獲取追蹤關係
+            follow_relations = UserFollow.objects.filter(
+                user=request.user,
+                follows__id__in=user_ids
+            ).select_related('follows')
+            
+            # 建立結果字典
+            follow_status = {}
+            for user_id in user_ids:
+                follow_status[str(user_id)] = {
+                    'is_following': False,
+                    'is_requested': False
+                }
+            
+            # 更新有追蹤關係的狀態
+            for relation in follow_relations:
+                user_id_str = str(relation.follows.id)
+                if relation.confirm_or_not:
+                    follow_status[user_id_str]['is_following'] = True
+                else:
+                    follow_status[user_id_str]['is_requested'] = True
+            
+            return APIResponse(
+                data={'follow_status': follow_status},
+                message='批量獲取追蹤狀態成功',
+                status=drf_status.HTTP_200_OK
+            )
+            
+        except Exception as e:
+            return APIResponse(
+                message=f'批量獲取追蹤狀態失敗: {str(e)}',
+                code=drf_status.HTTP_500_INTERNAL_SERVER_ERROR,
+                status=drf_status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+class FollowingListAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        """獲取指定使用者的追蹤列表"""
+        try:
+            # 檢查是否有 user 參數（userAccount 或 userId）
+            user_param = request.GET.get('user')
+            if user_param:
+                # 嘗試先用 user_account 查找，如果不行就用 id 查找
+                try:
+                    if user_param.isdigit():
+                        target_user = User.objects.get(id=int(user_param))
+                    else:
+                        target_user = User.objects.get(user_account=user_param)
+                except User.DoesNotExist:
+                    return APIResponse(
+                        message='找不到指定的用戶',
+                        code=drf_status.HTTP_404_NOT_FOUND,
+                        status=drf_status.HTTP_404_NOT_FOUND
+                    )
+                
+                # 檢查隱私設定
+                if target_user.account_privacy == 'private' and target_user != request.user:
+                    # 檢查當前用戶是否已追蹤該私人帳戶
+                    is_following = UserFollow.objects.filter(
+                        user=request.user,
+                        follows=target_user,
+                        confirm_or_not=True
+                    ).exists()
+                    
+                    if not is_following:
+                        return APIResponse(
+                            message='此用戶的追蹤列表為私密',
+                            code=drf_status.HTTP_403_FORBIDDEN,
+                            status=drf_status.HTTP_403_FORBIDDEN
+                        )
+            else:
+                # 沒有 user 參數，獲取當前用戶的追蹤列表
+                target_user = request.user
+            
+            following_relations = UserFollow.objects.filter(
+                user=target_user,
+                confirm_or_not=True
+            ).select_related('follows')
+            
+            following_users = []
+            for relation in following_relations:
+                user_data = {
+                    'id': relation.follows.id,
+                    'user_account': relation.follows.user_account,
+                    'username': relation.follows.username,
+                    'user_fullname': relation.follows.user_fullname,
+                    'headshot_url': relation.follows.headshot.firebase_url if hasattr(relation.follows, 'headshot') and relation.follows.headshot else None,
+                    'account_privacy': relation.follows.account_privacy,
+                    'date_followed': relation.date
+                }
+                following_users.append(user_data)
+            
+            return APIResponse(
+                data=following_users,
+                message='獲取追蹤列表成功',
+                status=drf_status.HTTP_200_OK
+            )
+            
+        except Exception as e:
+            return APIResponse(
+                message=f'獲取追蹤列表失敗: {str(e)}',
+                code=drf_status.HTTP_500_INTERNAL_SERVER_ERROR,
+                status=drf_status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+class FollowersListAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        """獲取指定使用者的粉絲列表"""
+        try:
+            # 檢查是否有 user 參數（userAccount 或 userId）
+            user_param = request.GET.get('user')
+            if user_param:
+                # 嘗試先用 user_account 查找，如果不行就用 id 查找
+                try:
+                    if user_param.isdigit():
+                        target_user = User.objects.get(id=int(user_param))
+                    else:
+                        target_user = User.objects.get(user_account=user_param)
+                except User.DoesNotExist:
+                    return APIResponse(
+                        message='找不到指定的用戶',
+                        code=drf_status.HTTP_404_NOT_FOUND,
+                        status=drf_status.HTTP_404_NOT_FOUND
+                    )
+                
+                # 檢查隱私設定
+                if target_user.account_privacy == 'private' and target_user != request.user:
+                    # 檢查當前用戶是否已追蹤該私人帳戶
+                    is_following = UserFollow.objects.filter(
+                        user=request.user,
+                        follows=target_user,
+                        confirm_or_not=True
+                    ).exists()
+                    
+                    if not is_following:
+                        return APIResponse(
+                            message='此用戶的粉絲列表為私密',
+                            code=drf_status.HTTP_403_FORBIDDEN,
+                            status=drf_status.HTTP_403_FORBIDDEN
+                        )
+            else:
+                # 沒有 user 參數，獲取當前用戶的粉絲列表
+                target_user = request.user
+            
+            follower_relations = UserFollow.objects.filter(
+                follows=target_user,
+                confirm_or_not=True  # 只獲取已確認的追蹤關係
+            ).select_related('user')
+            
+            followers = []
+            for relation in follower_relations:
+                user_data = {
+                    'id': relation.user.id,
+                    'user_account': relation.user.user_account,
+                    'username': relation.user.username,
+                    'user_fullname': relation.user.user_fullname,
+                    'headshot_url': relation.user.headshot.firebase_url if hasattr(relation.user, 'headshot') and relation.user.headshot else None,
+                    'account_privacy': relation.user.account_privacy,
+                    'date_followed': relation.date
+                }
+                followers.append(user_data)
+            
+            return APIResponse(
+                data=followers,
+                message='獲取粉絲列表成功',
+                status=drf_status.HTTP_200_OK
+            )
+            
+        except Exception as e:
+            return APIResponse(
+                message=f'獲取粉絲列表失敗: {str(e)}',
+                code=drf_status.HTTP_500_INTERNAL_SERVER_ERROR,
+                status=drf_status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+class RemoveFollowerAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def delete(self, request, user_account):
+        """移除粉絲（單方面解除對方對你的追蹤關係）"""
+        try:
+            # 查找要移除的粉絲用戶
+            try:
+                follower_user = User.objects.get(user_account=user_account)
+            except User.DoesNotExist:
+                return APIResponse(
+                    message='找不到指定的用戶',
+                    code=drf_status.HTTP_404_NOT_FOUND,
+                    status=drf_status.HTTP_404_NOT_FOUND
+                )
+            
+            # 查找追蹤關係（該用戶追蹤當前用戶）
+            try:
+                follow_relation = UserFollow.objects.get(
+                    user=follower_user,  # 粉絲用戶
+                    follows=request.user,  # 當前用戶
+                    confirm_or_not=True  # 只處理已確認的追蹤關係
+                )
+            except UserFollow.DoesNotExist:
+                return APIResponse(
+                    message='該用戶並非您的粉絲',
+                    code=drf_status.HTTP_400_BAD_REQUEST,
+                    status=drf_status.HTTP_400_BAD_REQUEST
+                )
+            
+            # 刪除追蹤關係
+            follow_relation.delete()
+            
+            # 刪除相關的通知（如果存在）
+            try:
+                Notification.objects.filter(
+                    user=request.user,
+                    follow_request_from=follower_user,
+                    notification_type__in=['follow_request', 'info']
+                ).delete()
+            except Exception as notification_error:
+                # 刪除通知失敗不應該影響主要操作
+                logger.warning(f'刪除相關通知時出現錯誤: {notification_error}')
+            
+            return APIResponse(
+                data={
+                    'removed_user': {
+                        'id': follower_user.id,
+                        'user_account': follower_user.user_account,
+                        'user_fullname': follower_user.user_fullname
+                    }
+                },
+                message=f'已成功移除粉絲 @{follower_user.user_account}',
+                status=drf_status.HTTP_200_OK
+            )
+            
+        except Exception as e:
+            return APIResponse(
+                message=f'移除粉絲失敗: {str(e)}',
+                code=drf_status.HTTP_500_INTERNAL_SERVER_ERROR,
+                status=drf_status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+# 通知相關API
+class NotificationListAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        """獲取當前使用者的所有通知"""
+        try:
+            notifications = Notification.objects.filter(
+                user=request.user
+            ).select_related('follow_request_from', 'related_follow').order_by('-date', '-id')
+            
+            serializer = NotificationSerializer(notifications, many=True)
+            
+            # 統計未讀通知數量
+            unread_count = notifications.filter(is_read=False).count()
+            
+            return APIResponse(
+                data={
+                    'notifications': serializer.data,
+                    'unread_count': unread_count,
+                    'total_count': notifications.count()
+                },
+                message='獲取通知列表成功',
+                status=drf_status.HTTP_200_OK
+            )
+            
+        except Exception as e:
+            return APIResponse(
+                message=f'獲取通知列表失敗: {str(e)}',
+                code=drf_status.HTTP_500_INTERNAL_SERVER_ERROR,
+                status=drf_status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+class MarkNotificationAsReadAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def patch(self, request, notification_id):
+        """將指定通知標記為已讀"""
+        try:
+            notification = Notification.objects.get(
+                id=notification_id,
+                user=request.user
+            )
+            
+            notification.is_read = True
+            notification.save()
+            
+            return APIResponse(
+                message='通知已標記為已讀',
+                status=drf_status.HTTP_200_OK
+            )
+            
+        except Notification.DoesNotExist:
+            return APIResponse(
+                message='找不到該通知',
+                code=drf_status.HTTP_404_NOT_FOUND,
+                status=drf_status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return APIResponse(
+                message=f'標記通知失敗: {str(e)}',
+                code=drf_status.HTTP_500_INTERNAL_SERVER_ERROR,
+                status=drf_status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+class MarkAllNotificationsAsReadAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def patch(self, request):
+        """將所有通知標記為已讀"""
+        try:
+            updated_count = Notification.objects.filter(
+                user=request.user,
+                is_read=False
+            ).update(is_read=True)
+            
+            return APIResponse(
+                data={'updated_count': updated_count},
+                message=f'已將 {updated_count} 個通知標記為已讀',
+                status=drf_status.HTTP_200_OK
+            )
+            
+        except Exception as e:
+            return APIResponse(
+                message=f'標記通知失敗: {str(e)}',
+                code=drf_status.HTTP_500_INTERNAL_SERVER_ERROR,
+                status=drf_status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+class FollowRequestResponseAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request, notification_id):
+        """回應追蹤請求（接受或拒絕）"""
+        try:
+            # 獲取通知
+            notification = Notification.objects.get(
+                id=notification_id,
+                user=request.user,
+                notification_type='follow_request'
+            )
+            
+            if not notification.related_follow:
+                return APIResponse(
+                    message='該通知沒有相關的追蹤請求',
+                    code=drf_status.HTTP_400_BAD_REQUEST,
+                    status=drf_status.HTTP_400_BAD_REQUEST
+                )
+            
+            action = request.data.get('action')  # 'accept' 或 'reject'
+            
+            if action == 'accept':
+                # 接受追蹤請求
+                requester_username = notification.follow_request_from.username
+                notification.related_follow.confirm_or_not = True
+                notification.related_follow.save()
+                
+                # 刪除原通知
+                notification.delete()
+                
+                # 創建新的info通知
+                Notification.objects.create(
+                    user=request.user,
+                    notification_type='info',
+                    is_read=True,
+                    content=f'您已確認 {requester_username} 的追蹤請求',
+                    follow_request_from=notification.follow_request_from  # 關聯到相關用戶
+                )
+                
+                return APIResponse(
+                    message='已接受追蹤請求',
+                    status=drf_status.HTTP_200_OK
+                )
+                
+            elif action == 'reject':
+                # 拒絕追蹤請求
+                requester_username = notification.follow_request_from.username
+                follow_relation = notification.related_follow
+                
+                # 刪除原通知和追蹤關係
+                notification.delete()
+                follow_relation.delete()
+                
+                # 創建新的info通知
+                Notification.objects.create(
+                    user=request.user,
+                    notification_type='info',
+                    is_read=True,
+                    content=f'您已拒絕 {requester_username} 的追蹤請求',
+                    follow_request_from=notification.follow_request_from  # 關聯到相關用戶
+                )
+                
+                return APIResponse(
+                    message='已拒絕追蹤請求',
+                    status=drf_status.HTTP_200_OK
+                )
+            else:
+                return APIResponse(
+                    message='無效的操作，請使用 "accept" 或 "reject"',
+                    code=drf_status.HTTP_400_BAD_REQUEST,
+                    status=drf_status.HTTP_400_BAD_REQUEST
+                )
+                
+        except Notification.DoesNotExist:
+            return APIResponse(
+                message='找不到該追蹤請求通知',
+                code=drf_status.HTTP_404_NOT_FOUND,
+                status=drf_status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return APIResponse(
+                message=f'處理追蹤請求失敗: {str(e)}',
                 code=drf_status.HTTP_500_INTERNAL_SERVER_ERROR,
                 status=drf_status.HTTP_500_INTERNAL_SERVER_ERROR
             )

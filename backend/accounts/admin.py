@@ -7,13 +7,13 @@ from .models import (
 # 自定義用戶管理
 @admin.register(CustomUser)
 class CustomUserAdmin(admin.ModelAdmin):
-    list_display = ('username', 'email', 'user_fullname', 'user_account', 'points', 'is_active')
+    list_display = ('username', 'email', 'user_fullname', 'user_account', 'account_privacy', 'points', 'is_active')
     search_fields = ('username', 'email', 'user_fullname', 'user_account')
-    list_filter = ('is_active', 'is_staff')
+    list_filter = ('is_active', 'is_staff', 'account_privacy')
     readonly_fields = ('date_joined', 'last_login')
     fieldsets = (
         ('基本信息', {'fields': ('username', 'email', 'password')}),
-        ('個人資料', {'fields': ('user_fullname', 'user_account', 'user_intro')}),
+        ('個人資料', {'fields': ('user_fullname', 'user_account', 'user_intro', 'account_privacy')}),
         ('系統狀態', {'fields': ('points', 'is_active', 'is_staff', 'is_superuser', 'date_joined', 'last_login')}),
     )
 

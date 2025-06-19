@@ -1,0 +1,330 @@
+.container {
+  width: 100%;
+  background-color: #FFF2D9;
+}
+
+/* 標籤切換區域 */
+.tabContainer {
+  display: flex;
+  padding: 16px;
+  margin-left: 8px;
+  gap: 8px;
+  border-bottom: 1px solid rgba(240, 134, 81, 0.2);
+}
+
+.tab {
+  background-color: #FFCA9C;
+  border: none;
+  border-radius: 5px;
+  padding: 8px 26.5px;
+  font-size: 14px;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.tab:hover {
+  background-color: #FFB370;
+}
+
+.activeTab {
+  background-color: #F08651;
+  color: white;
+  font-weight: 600;
+}
+
+.activeTab:hover {
+  background-color: #F08651;
+}
+
+/* 搜尋結果容器 */
+.resultsContainer {
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* 用戶列表 */
+.userList {
+  padding: 0;
+}
+
+.userItem {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(240, 134, 81, 0.1);
+  gap: 12px;
+  transition: background-color 0.2s ease;
+}
+
+.userItem:hover {
+  background-color: rgba(255, 202, 156, 0.3);
+}
+
+.userAvatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  cursor: pointer;
+  border: 2px solid rgba(240, 134, 81, 0.3);
+  transition: transform 0.2s ease;
+}
+
+.userAvatar:hover {
+  transform: scale(1.05);
+}
+
+.userInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.username {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  line-height: 1.2;
+}
+
+.displayName {
+  font-size: 14px;
+  color: #666;
+  line-height: 1.2;
+}
+
+
+
+/* 追蹤按鈕樣式 */
+.followButton {
+  border: none;
+  border-radius: 5px;
+  padding: 6px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 80px;
+  text-align: center;
+  background-color: #F08651;
+  color: #fff;
+}
+
+.followButton:hover {
+  background-color: #E07045;
+  transform: translateY(-1px);
+}
+
+/* 追蹤中狀態 */
+.followButton.following {
+  background-color: #ffb370;
+  color: #fff;
+}
+
+.followButton.following:hover {
+  background-color: #ffca8c;
+  transform: translateY(-1px);
+}
+
+/* 已要求狀態 */
+.followButton.requested {
+  background-color: #f08651;
+  color: white;
+}
+
+.followButton.requested:hover {
+  background-color: #E07045;
+  transform: translateY(-1px);
+}
+
+/* 載入狀態 */
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.loading p {
+  color: #F08651;
+  font-size: 16px;
+  margin: 0;
+  font-weight: 500;
+}
+
+/* 錯誤狀態 */
+.error {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.error p {
+  color: #E74C3C;
+  font-size: 16px;
+  margin: 0;
+  font-weight: 500;
+}
+
+/* 無結果狀態 */
+.noResults {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.noResults p {
+  color: #888;
+  font-size: 16px;
+  margin: 0;
+}
+
+/* 貼文列表 */
+.postList {
+  padding: 0;
+}
+
+.postItem {
+  padding: 16px;
+  border-bottom: 1px solid rgba(240, 134, 81, 0.1);
+  transition: background-color 0.2s ease;
+}
+
+.postItem:hover {
+  background-color: rgba(255, 202, 156, 0.3);
+}
+
+.postHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.postUserAvatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(240, 134, 81, 0.3);
+}
+
+.postUserInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.postUsername {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  line-height: 1.2;
+}
+
+.postDate {
+  font-size: 12px;
+  color: #888;
+  line-height: 1.2;
+}
+
+.postContent {
+  font-size: 15px;
+  color: #333;
+  line-height: 1.4;
+  margin-bottom: 12px;
+  word-wrap: break-word;
+}
+
+.postImage {
+  width: 100%;
+  max-height: 200px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 140, 66, 0.2);
+}
+
+/* 開發中提示 */
+.comingSoon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.comingSoon p {
+  color: #888;
+  font-size: 16px;
+  margin: 0;
+}
+
+/* 響應式設計 */
+@media (max-width: 380px) {
+  .tabContainer {
+    padding: 12px;
+    gap: 6px;
+  }
+  
+  .tab {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+  
+  .userItem {
+    padding: 10px 12px;
+    gap: 10px;
+  }
+  
+  .userAvatar {
+    width: 44px;
+    height: 44px;
+  }
+  
+  .username {
+    font-size: 15px;
+  }
+  
+  .displayName {
+    font-size: 13px;
+  }
+  
+  .followButton {
+    padding: 5px 12px;
+    font-size: 11px;
+    min-width: 70px;
+  }
+  
+  .postItem {
+    padding: 12px;
+  }
+  
+  .postHeader {
+    gap: 10px;
+  }
+  
+  .postUserAvatar {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .postUsername {
+    font-size: 13px;
+  }
+  
+  .postDate {
+    font-size: 11px;
+  }
+  
+  .postContent {
+    font-size: 14px;
+  }
+} 

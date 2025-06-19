@@ -4,11 +4,23 @@ from django.contrib.auth.models import AbstractUser
 
 # 使用者模型：擴充自 Django AbstractUser
 class CustomUser(AbstractUser):
+    # 帳號隱私選項
+    PRIVACY_CHOICES = [
+        ('public', '公開'),
+        ('private', '私人'),
+    ]
+    
     # 擴充使用者欄位
     points = models.IntegerField(default=0)
     user_intro = models.TextField(blank=True, null=True)  # 使用者自我介紹
     user_fullname = models.CharField(max_length=150, blank=True)  # 使用者真實姓名
     user_account = models.CharField(max_length=150, unique=True)  # 唯一帳號
+    account_privacy = models.CharField(
+        max_length=10, 
+        choices=PRIVACY_CHOICES, 
+        default='public',
+        help_text='設定帳號隱私狀態，決定其他用戶是否可以查看您的個人資料'
+    )  # 帳號隱私設定
     
     def __str__(self):
         return self.username
@@ -192,6 +204,7 @@ class Notification(models.Model):
         ('warning', 'Warning'),
         ('alert', 'Alert'),
         ('custom', 'Custom'),
+        ('follow_request', 'Follow Request'),  # 追蹤請求通知
     ]
 
     user = models.ForeignKey(
@@ -202,7 +215,24 @@ class Notification(models.Model):
     notification_type = models.CharField(max_length=50, choices=NOTIFICATION_TYPES)
     content = models.CharField(max_length=255)
     date = models.DateField(auto_now_add=True)
-    is_read = models.BooleanField(default=False) 
+    is_read = models.BooleanField(default=False)
+    
+    # 追蹤請求相關欄位
+    follow_request_from = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='sent_follow_notifications',
+        null=True,
+        blank=True,
+        help_text="發送追蹤請求的使用者"
+    )
+    related_follow = models.ForeignKey(
+        'UserFollow',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        help_text="相關的追蹤關係"
+    )
 
     def __str__(self):
         return f"{self.user.username} - {self.notification_type}: {self.content[:20]}"
