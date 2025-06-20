@@ -140,3 +140,8 @@ class PostHashtag(models.Model):
         return PostHashtag.objects.filter(
             postFrame=PostFrame
         )
+    
+    def get_hashtags(self, query):
+        return PostHashtag.objects.filter(
+            tag__icontains=query
+        )[:50]

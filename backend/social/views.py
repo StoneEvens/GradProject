@@ -41,6 +41,11 @@ class UserPostsPreviewListAPIView(generics.ListAPIView):
             many=True,
             context={'request': self.request}
         )
+
+        return APIResponse(
+            data=serializers.data,
+            message="獲取用戶貼文預覽成功"
+        )
     
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
@@ -100,7 +105,7 @@ class SearchAPIView(APIView):
                 
                 # 獲取這些用戶的貼文
                 user_ids = list(users.values_list('id', flat=True))
-                posts = Post.objects.filter(user__in=user_ids).select_related('user').order_by('-created_at')
+                posts = PostFrame.objects.filter(user__in=user_ids).select_related('user').order_by('-created_at')
                 post_serializer = PostSearchSerializer(posts, many=True, context={'request': request})
                 
                 return APIResponse(
@@ -124,19 +129,41 @@ class SearchAPIView(APIView):
                 )
     
     def _search_by_hashtag(self, tag_query):
-        hashtags = PostHashtag.objects.filter(tag__icontains=tag_query)
-        post_ids = hashtags.values_list('post_id', flat=True)
-        return Post.objects.filter(id__in=post_ids).select_related('user').order_by('-created_at')
-    
+        hashtags = PostHashtag.get_hashtags(tag_query)
+        postFrames = hashtags.postFrame
+        serializers = PostSearchSerializer(
+            postFrames,
+            many=True,
+            context={'request': self.request}
+        )
+
+        return APIResponse(
+            data=serializers.data,
+            message="搜尋Hashtag成功"
+        )
+
     def _search_users(self, query):
-        return User.objects.filter(
-            Q(username__icontains=query) | 
-            Q(user_fullname__icontains=query) |
-            Q(user_account__icontains=query)
+        users = User.search_users(query)
+        serializers = UserDetailSearchSerializer(users, many=True)
+
+        return APIResponse(
+            data=serializers.data,
+            message="搜尋用戶成功"
         )
     
     def _search_posts_by_content(self, query):
-        return Post.objects.filter(content__icontains=query).select_related('user').order_by('-created_at')
+        content = SoLContent.get_content(query)
+        postFrame = content.postFrame
+        serializers = PostFrameSerializer(
+            postFrame,
+            many=True,
+            context={'request': self.request}
+        )
+
+        return APIResponse(
+            data=serializers.data,
+            message="搜尋貼文內容成功"
+        )
 
 # === 搜尋建議 API ===
 class SearchSuggestionAPIView(APIView):

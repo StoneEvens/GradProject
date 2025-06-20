@@ -1,6 +1,7 @@
 from django.db import models
 from gradProject import settings
 from django.contrib.auth.models import AbstractUser
+from django.db.models import Q
 
 # 使用者模型：擴充自 Django AbstractUser
 class CustomUser(AbstractUser):
@@ -13,10 +14,20 @@ class CustomUser(AbstractUser):
     def __str__(self):
         return self.username
 
-    def add_points(self, points_to_add):
-        self.points += points_to_add
-        self.save(update_fields=['points'])
-        return self.points
+    def add_points(self, user_account, points_to_add):
+        user = self._search_users(user_account).first()
+        if user:
+            user.points += points_to_add
+            user.save(update_fields=['points'])
+            return user.points
+        return None
+
+    def search_users(self, query):
+        return self.objects.filter(
+            Q(username__icontains=query) | 
+            Q(user_fullname__icontains=query) |
+            Q(user_account__icontains=query)
+        )
 
 # 使用者追蹤功能
 class UserFollow(models.Model):

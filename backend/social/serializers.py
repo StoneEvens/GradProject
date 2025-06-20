@@ -164,6 +164,7 @@ class PostSearchSerializer(serializers.ModelSerializer):
     first_image_url = serializers.SerializerMethodField()
     interaction_stats = serializers.SerializerMethodField()
     user_interaction = serializers.SerializerMethodField()
+    content = serializers.SerializerMethodField()
     
     class Meta:
         model = PostFrame
