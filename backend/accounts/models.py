@@ -27,7 +27,7 @@ class CustomUser(AbstractUser):
             Q(username__icontains=query) | 
             Q(user_fullname__icontains=query) |
             Q(user_account__icontains=query)
-        )
+        )[:5]
 
 # 使用者追蹤功能
 class UserFollow(models.Model):

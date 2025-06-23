@@ -1,5 +1,5 @@
 from rest_framework import generics, status as drf_status
-from .models import PostHashtag, PostFrame, SoLContent
+from .models import PostHashtag, PostFrame, SoLContent, PostPets
 from .serializers import *
 from rest_framework.permissions import IsAuthenticated
 from utils.api_response import APIResponse
@@ -11,7 +11,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.db.models import Q
 from django.contrib.auth import get_user_model
-from pets.models import Pet, PetGenericRelation
+from pets.models import Pet
+from accounts.models import CustomUser
 from django.db import transaction
 from django.utils.text import slugify
 import json
@@ -19,6 +20,25 @@ import re
 
 User = get_user_model()
 
+class DataHandler:
+    def parse_hashtags(self, content:str, tags:str):
+        implicit_tags = re.findall(r'#(\w+)', content)
+        explicit_tags = tags.split(',') if tags else []
+
+        hashtags = slugify(set(implicit_tags + explicit_tags))
+
+        return hashtags
+    
+    def parse_pets(self, pet_ids: str):
+        ids = str.split(pet_ids, ',')
+        pets = [Pet]
+
+        for id in ids:
+            pet = Pet.get_pet(id)
+            pets.append(pet)
+
+        return pets
+# 
 #使用者社群首頁post預覽圖
 class UserPostsPreviewListAPIView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
@@ -35,7 +55,7 @@ class UserPostsPreviewListAPIView(generics.ListAPIView):
         
         # 由於 first_image_url 在 Serializer 中查詢，這裡可以簡化
         # 如果 Serializer 中的查詢效率不高，可以考慮在此處預加載 Post 的第一張 Image
-        postFrame = PostFrame.objects.get_postFrame(user_id)
+        postFrame = PostFrame.get_postFrame(user_id)
         serializers = PostPreviewSerializer(
             postFrame,
             many=True,
@@ -193,21 +213,17 @@ class SearchSuggestionAPIView(APIView):
                 })
         else:
             # 建議用戶
-            users = User.objects.filter(
-                Q(username__icontains=query) | 
-                Q(user_fullname__icontains=query) |
-                Q(user_account__icontains=query)
-            )[:5]
+            users = CustomUser.search_users(query)  # 限制最多5個建議
             
             for user in users:
                 suggestions.append({
                     'type': 'user',
-                    'value': f'{user.user_fullname} ({user.user_account})'
+                    'value': UserBasicSerializer(user).data
                 })
                 
             # 如果建議不足5個，添加部分hashtag建議
             if len(suggestions) < 5:
-                hashtags = PostHashtag.objects.filter(tag__icontains=query).values_list('tag', flat=True).distinct()[:5-len(suggestions)]
+                hashtags = PostHashtag.get_hashtags(query, count=5-len(suggestions))
                 
                 for tag in hashtags:
                     suggestions.append({
@@ -228,44 +244,30 @@ class CreatePostAPIView(APIView):
     @transaction.atomic
     def post(self, request, *args, **kwargs):
         try:
-            # 獲取基本貼文數據
-            user = request.user
-            content = request.data.get('content', '')
+            user: CustomUser = request.user
+            content = request.data.get('content')
             uploaded_image_files = request.FILES.getlist('images')
-            hashtag_data = request.data.get('hashtags', [])
-            pet_ids = request.data.get('pet_ids', [])
-
-            if (user is None or not user.is_authenticated):
-                print("用戶未登錄或無效")
-            else:
-                print(f"當前用戶: {user.username} (ID: {user.id})")
+            hashtag_data = request.data.get('hashtags')
+            pet_ids = request.data.get('pet_ids')
             
-            # 創建貼文
-            post = Post.objects.create(
-                user=user,
-                content=content
+            #Create PostFrame
+            postFrame = PostFrame.create(user=user)
+
+            #Create SoLContent
+            solContent = SoLContent.create(
+                postFrame=postFrame,
+                content_text=content
             )
 
-            # 更新 Hashtags (從內容提取和前端提供)
-            post.update_hashtags(content, hashtag_data) 
+            #Create Post Hashtag References
+            hashtags = DataHandler().parse_hashtags(content, hashtag_data)
+            for tag in hashtags:
+                PostHashtag.create(postFrame=postFrame, tag=tag)
             
-            # 標記寵物
-            # 確保 pet_ids 是列表
-            parsed_pet_ids = []
-            if isinstance(pet_ids, str):
-                try:
-                    parsed_pet_ids = json.loads(pet_ids)
-                    if not isinstance(parsed_pet_ids, list):
-                        parsed_pet_ids = [parsed_pet_ids] # 如果解析出來不是列表，嘗試轉為列表
-                except json.JSONDecodeError:
-                    # 如果不是有效的JSON字符串，可以嘗試按逗號分割等方式，或忽略
-                    # logger.warning(f"無法解析 pet_ids JSON 字串: {pet_ids}")
-                    parsed_pet_ids = [] # 或者根據業務邏輯處理
-            elif isinstance(pet_ids, list):
-                parsed_pet_ids = pet_ids
-            
-            if parsed_pet_ids: # 只有在解析出 ID 後才調用
-                post.tag_pets(parsed_pet_ids)
+            #Create Post Pet References
+            pets = DataHandler.parse_pets(pet_ids=pet_ids)
+            for pet in pets:
+                PostPets.create(postFrame=postFrame, pet=pet) 
             
             # 處理圖片上傳 (使用 ImageService 風格)
             if uploaded_image_files:
@@ -285,7 +287,7 @@ class CreatePostAPIView(APIView):
                     except Exception as img_e:
                         # logger.error(f"保存貼文圖片時出錯: {str(img_e)}", exc_info=True)
                         # 根據需求決定是否中止，或僅記錄錯誤並繼續
-                        pass 
+                        pass
             
             # 返回創建成功的貼文
             serializer = PostSerializer(post, context={'request': request})

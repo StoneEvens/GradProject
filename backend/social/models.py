@@ -4,7 +4,12 @@ from django.contrib.contenttypes.models import ContentType
 from rest_framework import status as drf_status
 from django.utils.text import slugify
 import re
+from typing import TYPE_CHECKING
 from pets.models import Pet, PetGenericRelation
+from accounts.models import CustomUser
+
+if TYPE_CHECKING:
+    from .models import PostFrame
 
 #----------貼文的"框"----------
 class PostFrame(models.Model):
@@ -19,12 +24,16 @@ class PostFrame(models.Model):
     def __str__(self):
         return f"{self.user.username}'s Post at {self.created_at}"
     
-    def getUser(self):
-        return self.user
+    def create(self, user: CustomUser):
+        postFrame = PostFrame.objects.create(user=user)
+        return postFrame
     
+    def getUser(self, postFrame: PostFrame):
+        return postFrame.user
+
     # 獲取貼文ID
-    def get_postFrame_ID(self):
-        return self.id
+    def get_postFrame_ID(self, postFrame: PostFrame):
+        return postFrame.id
     
     # 獲取貼文框本身
     def get_postFrame(self, postID):
@@ -35,8 +44,8 @@ class PostFrame(models.Model):
     
     def get_postFrame(self, user):
         return PostFrame.objects.filter(user=user).order_by('-created_at')[:50]
-    
-    def handle_interaction(self, fromRelation = None, toRelation = None):
+
+    def handle_interaction(self, postFrame:PostFrame, fromRelation:str = None, toRelation:str = None):
         update_fields = []
         ops = 0
 
@@ -104,22 +113,29 @@ class SoLContent(models.Model):
     def __str__(self):
         return f"Content for Post {self.post.id} - Type: {self.content_type}"
     
-    def get_content(self, PostFrame):
+    def create(self, postFrame: PostFrame, content_text: str):
+        content = SoLContent.objects.create(
+            postFrame=postFrame,
+            content_text=content_text
+        )
+        return content
+    
+    def get_content(self, PostFrame: PostFrame):
         return SoLContent.objects.filter(
             postFrame=PostFrame
         )
-    
-    def get_content(self, user):
+
+    def get_content(self, user: CustomUser):
         return SoLContent.objects.filter(
             postFrame__user=user
         )[:50]
     
-    def get_content(self, hashtag):
+    def get_content(self, hashtag: str):
         return SoLContent.objects.filter(
             postFrame__hashtags__tag=hashtag
         )[:50]
     
-    def get_content(self, query):
+    def get_content(self, query: str):
         return SoLContent.objects.filter(
             content_text__icontains=query
         )[:50]
@@ -136,12 +152,47 @@ class PostHashtag(models.Model):
     def __str__(self):
         return f"#{self.tag} for Post {self.post.id}"
     
-    def get_hashtags(self, PostFrame):
+    def create(self, postFrame: PostFrame, tag: str):
+        tag = slugify(tag)
+        hashtag = PostHashtag.objects.create(
+            postFrame=postFrame,
+            tag=tag
+        )
+        return hashtag
+
+    def get_hashtags(self, PostFrame: PostFrame):
         return PostHashtag.objects.filter(
             postFrame=PostFrame
         )
-    
-    def get_hashtags(self, query):
+
+    def get_hashtags(self, query: str):
         return PostHashtag.objects.filter(
             tag__icontains=query
         )[:50]
+    
+    def get_hashtags(self, query:str, count: int):
+        return PostHashtag.objects.filter(
+            tag__icontains=query
+        )[:count]
+
+class PostPets(models.Model):
+    postFrame = models.ForeignKey(
+        PostFrame,
+        on_delete=models.CASCADE,
+        related_name='tagged_pets'
+    )
+    pet = models.ForeignKey(
+        Pet,
+        on_delete=models.CASCADE,
+        related_name='tagged_posts'
+    )
+
+    def __str__(self):
+        return f"{self.pet.pet_name} tagged in Post {self.postFrame.id}"
+    
+    def create(self, postFrame: PostFrame, pet: Pet):
+        tagged_pet = PostPets.objects.create(
+            postFrame=postFrame,
+            pet=pet
+        )
+        return tagged_pet

@@ -22,6 +22,11 @@ class Pet(models.Model):
 
     def __str__(self):
         return f"{self.pet_name} ({self.pet_type})"
+    
+    def get_pet(self, pet_id:str):
+        return Pet.objects.filter(
+            id=pet_id
+        )
 
     #Removed 獲取此寵物所有病程記錄中的獨特疾病名稱列表。
 
@@ -126,18 +131,3 @@ class ArchiveIllnessRelation(models.Model):
 
     def __str__(self):
         return f"{self.archive.archive_title} - {self.illness.illness_name}"
-
-#----------標註----------
-
-# 在各種貼文中的寵物(多對多關聯拆分)
-class PetGenericRelation(models.Model):
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    content_object = GenericForeignKey('content_type', 'object_id')
-    object_id = models.PositiveIntegerField()
-    pet = models.ForeignKey('Pet', on_delete=models.CASCADE, related_name='generic_relations')
-
-    class Meta:
-        unique_together = ('pet', 'content_type', 'object_id')
-
-    def __str__(self):
-        return f"Pet {self.pet.pet_name} in {self.content_type} {self.object_id}"
