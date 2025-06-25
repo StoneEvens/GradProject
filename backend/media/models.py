@@ -6,6 +6,8 @@ from pets.models import Pet
 from social.models import PostFrame
 from accounts.models import CustomUser
 
+from utils.firebase_service import cleanup_old_headshot
+
 class SuperImage(models.Model):
     #Storage Details
     firebase_url = models.URLField(max_length=500, help_text="Firebase Storage 圖片 URL", blank=True, null=True)
@@ -13,6 +15,7 @@ class SuperImage(models.Model):
     
     #Image Details
     original_filename = models.CharField(max_length=255, blank=True, null=True)
+    file_size = models.PositiveIntegerField(blank=True, null=True, help_text='File Size')
     content_type_mime = models.CharField(max_length=100, blank=True, null=True)
     
     #Sort & Text Replacements
@@ -22,6 +25,9 @@ class SuperImage(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        abstract = True
+
     def url(self):
         return self.firebase_url
     
@@ -30,14 +36,24 @@ class SuperImage(models.Model):
 
         self.save(firebase_path)
 
+    def delete(self):
+        image_url = self.firebase_path
+
+        try:
+            cleanup_old_headshot(image_url)
+        except TypeError:
+            return
+        
+        self.delete()
+
 class Image(SuperImage):
-    postFrame = models.ForeignKey(PostFrame, on_delete=models.CASCADE, related_name='images')
+    postFrame = models.ForeignKey(PostFrame, on_delete=models.CASCADE, related_name='images', null=True)
     sort_order = models.IntegerField(default=0)
 
     class Meta:
-        ordering = ['object_id', 'sort_order']
+        ordering = ['id', 'sort_order']
         indexes = [
-            models.Index(fields=['object_id']),
+            models.Index(fields=['id']),
             models.Index(fields=['firebase_path'])
         ]
     
@@ -46,6 +62,7 @@ class Image(SuperImage):
     
     def create(self, postFrame: PostFrame, firebase_path:str):
         super().create(firebase_path=firebase_path)
+        Image.objects.create(postFrame=postFrame)
     
     def get_first_image_url(self, postFrame: PostFrame):
         return self.objects.filter(post_frame=postFrame).order_by('sort_order').first().url

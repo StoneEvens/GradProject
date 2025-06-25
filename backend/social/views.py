@@ -308,7 +308,6 @@ class CreatePostAPIView(APIView):
 # === 貼文詳情 API ===
 class PostDetailAPIView(generics.RetrieveAPIView):
     permission_classes = [IsAuthenticated]
-    serializer_class = PostSerializer
     queryset = PostFrame.objects.all()
     
     def retrieve(self, request, *args, **kwargs):
@@ -358,7 +357,6 @@ class PostTagPetsAPIView(APIView):
 # === 用戶貼文列表 API ===
 class UserPostListAPIView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
-    serializer_class = PostSerializer
     
     @log_queries
     def get_queryset(self):

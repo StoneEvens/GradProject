@@ -3,7 +3,7 @@ from media.models import Image, UserHeadshot
 from .models import PostFrame, PostHashtag, SoLContent
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
-from pets.models import Pet, PetGenericRelation
+from pets.models import Pet
 from interactions.models import UserInteraction
 from accounts.serializers import UserBasicSerializer
 

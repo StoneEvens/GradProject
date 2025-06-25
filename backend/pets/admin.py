@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import (
-    Pet, PetGenericRelation, AbnormalPost, Symptom, PostSymptomsRelation,
+    Pet, AbnormalPost, Symptom, PostSymptomsRelation,
     Illness, IllnessArchiveContent, ArchiveAbnormalPostRelation, ArchiveIllnessRelation
 )
 
@@ -10,14 +10,7 @@ class PetAdmin(admin.ModelAdmin):
     list_display = ('pet_name', 'pet_type', 'breed', 'owner', 'age', 'weight', 'pet_stage')
     list_filter = ('pet_type', 'pet_stage')
     search_fields = ('pet_name', 'pet_type', 'breed', 'owner__username')
-
-# 寵物通用關係管理
-@admin.register(PetGenericRelation)
-class PetGenericRelationAdmin(admin.ModelAdmin):
-    list_display = ('pet', 'content_type', 'object_id')
-    list_filter = ('content_type',)
-    search_fields = ('pet__pet_name',)
-
+    
 # 異常貼文管理
 @admin.register(AbnormalPost)
 class AbnormalPostAdmin(admin.ModelAdmin):

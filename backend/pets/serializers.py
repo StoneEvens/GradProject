@@ -10,12 +10,6 @@ class PetSerializer(serializers.ModelSerializer):
         model = Pet
         fields = '__all__'
 
-# === PetGenericRelation (寵物的通用貼文關聯) ===
-class PetGenericRelationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = PetGenericRelation
-        fields = '__all__'
-
 # === AbnormalPost (異常紀錄) ===
 class AbnormalPostSerializer(serializers.ModelSerializer):
     pet_name = serializers.CharField(source='pet.pet_name', read_only=True)

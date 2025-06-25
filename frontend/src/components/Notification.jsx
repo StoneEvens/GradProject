@@ -4,23 +4,40 @@ import { useNotification } from '../context/NotificationContext';
 
 const Notification = ({ message, onClose }) => {
   const [isFading, setIsFading] = useState(false);
-  const { setIsNotificationVisible } = useNotification();
+  
+  // 嘗試使用 context，如果不存在則不使用
+  let setIsNotificationVisible = null;
+  try {
+    const notificationContext = useNotification();
+    if (notificationContext) {
+      setIsNotificationVisible = notificationContext.setIsNotificationVisible;
+    }
+  } catch (error) {
+    // Context 不存在時忽略錯誤
+  }
 
   useEffect(() => {
-    setIsNotificationVisible(true);
+    if (setIsNotificationVisible) {
+      setIsNotificationVisible(true);
+    }
+    
     const timer = setTimeout(() => {
       handleClose();
     }, 4000);
 
     return () => {
       clearTimeout(timer);
-      setIsNotificationVisible(false);
+      if (setIsNotificationVisible) {
+        setIsNotificationVisible(false);
+      }
     };
   }, [onClose, setIsNotificationVisible]);
 
   const handleClose = () => {
     setIsFading(true);
-    setIsNotificationVisible(false);
+    if (setIsNotificationVisible) {
+      setIsNotificationVisible(false);
+    }
     setTimeout(() => {
       onClose();
     }, 300);

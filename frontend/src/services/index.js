@@ -4,7 +4,16 @@ export * from './authService';
 // 行程服務
 export * from './scheduleService';
 
-// 測試工具 (僅開發環境使用)
-export * as tokenTest from './tokenTest';
+// 社群服務
+export * from './socialService';
+
+// 通知服務
+export * from './notificationService';
+
+// 用戶服務
+export * from './userService';
+
+// 文章推薦服務
+export * from './articleRecommendationsService';
 
 // 其他服務可以在這裡添加... 

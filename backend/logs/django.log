@@ -1951,3 +1951,51 @@ INFO 2025-06-17 21:05:05,377 autoreload 11020 5816 Watching for file changes wit
 INFO 2025-06-17 21:05:16,457 autoreload 11020 5816 C:\Users\Steven\GradProject\GradProject\backend\pets\admin.py changed, reloading.
 INFO 2025-06-17 21:05:16,861 autoreload 3020 19312 Watching for file changes with StatReloader
 >>>>>>> a0c59441da9bbeccb894652d43cc2a97ce0113b7
+INFO 2025-06-24 17:06:25,418 autoreload 23780 24572 Watching for file changes with StatReloader
+INFO 2025-06-24 17:06:40,080 autoreload 23780 24572 C:\Users\Steven\GradProject\backend\social\models.py changed, reloading.
+INFO 2025-06-24 17:06:40,761 autoreload 24092 7296 Watching for file changes with StatReloader
+INFO 2025-06-24 17:07:25,447 autoreload 24092 7296 C:\Users\Steven\GradProject\backend\social\models.py changed, reloading.
+INFO 2025-06-24 17:07:26,055 autoreload 11260 13892 Watching for file changes with StatReloader
+INFO 2025-06-24 17:07:38,343 autoreload 11260 13892 C:\Users\Steven\GradProject\backend\social\models.py changed, reloading.
+INFO 2025-06-24 17:07:38,945 autoreload 22724 22704 Watching for file changes with StatReloader
+INFO 2025-06-24 17:08:42,317 autoreload 22724 22704 C:\Users\Steven\GradProject\backend\social\models.py changed, reloading.
+INFO 2025-06-24 17:08:42,949 autoreload 10288 30308 Watching for file changes with StatReloader
+INFO 2025-06-24 17:08:53,118 autoreload 10288 30308 C:\Users\Steven\GradProject\backend\social\models.py changed, reloading.
+INFO 2025-06-24 17:08:53,735 autoreload 30684 24400 Watching for file changes with StatReloader
+INFO 2025-06-24 17:09:13,305 autoreload 30684 24400 C:\Users\Steven\GradProject\backend\social\models.py changed, reloading.
+INFO 2025-06-24 17:09:13,914 autoreload 25612 26480 Watching for file changes with StatReloader
+INFO 2025-06-24 17:09:43,961 autoreload 25612 26480 C:\Users\Steven\GradProject\backend\social\models.py changed, reloading.
+INFO 2025-06-24 17:09:44,630 autoreload 11076 21084 Watching for file changes with StatReloader
+INFO 2025-06-24 17:10:33,054 autoreload 17396 21536 Watching for file changes with StatReloader
+INFO 2025-06-24 17:10:44,364 autoreload 17396 21536 C:\Users\Steven\GradProject\backend\pets\admin.py changed, reloading.
+INFO 2025-06-24 17:10:45,003 autoreload 22052 28708 Watching for file changes with StatReloader
+INFO 2025-06-24 17:10:55,217 autoreload 22052 28708 C:\Users\Steven\GradProject\backend\pets\admin.py changed, reloading.
+INFO 2025-06-24 17:10:55,940 autoreload 28424 11320 Watching for file changes with StatReloader
+INFO 2025-06-24 17:11:05,636 autoreload 28424 11320 C:\Users\Steven\GradProject\backend\pets\serializers.py changed, reloading.
+INFO 2025-06-24 17:11:06,266 autoreload 27936 27588 Watching for file changes with StatReloader
+INFO 2025-06-24 17:11:14,866 autoreload 27936 27588 C:\Users\Steven\GradProject\backend\social\serializers.py changed, reloading.
+INFO 2025-06-24 17:11:15,509 autoreload 24520 23396 Watching for file changes with StatReloader
+INFO 2025-06-24 17:11:29,180 autoreload 24520 23396 C:\Users\Steven\GradProject\backend\social\views.py changed, reloading.
+INFO 2025-06-24 17:11:29,822 autoreload 22532 24236 Watching for file changes with StatReloader
+INFO 2025-06-24 17:11:36,215 autoreload 22532 24236 C:\Users\Steven\GradProject\backend\social\views.py changed, reloading.
+INFO 2025-06-24 17:11:36,864 autoreload 27972 24736 Watching for file changes with StatReloader
+INFO 2025-06-24 17:15:03,519 autoreload 27972 24736 C:\Users\Steven\GradProject\backend\media\admin.py changed, reloading.
+INFO 2025-06-24 17:15:04,176 autoreload 29184 20844 Watching for file changes with StatReloader
+INFO 2025-06-24 17:15:17,115 autoreload 29184 20844 C:\Users\Steven\GradProject\backend\media\admin.py changed, reloading.
+INFO 2025-06-24 17:15:17,742 autoreload 24220 27644 Watching for file changes with StatReloader
+INFO 2025-06-24 17:15:30,687 autoreload 24220 27644 C:\Users\Steven\GradProject\backend\media\admin.py changed, reloading.
+INFO 2025-06-24 17:15:31,358 autoreload 29384 30444 Watching for file changes with StatReloader
+INFO 2025-06-24 17:16:04,771 autoreload 29384 30444 C:\Users\Steven\GradProject\backend\media\admin.py changed, reloading.
+INFO 2025-06-24 17:16:05,417 autoreload 22560 22640 Watching for file changes with StatReloader
+INFO 2025-06-24 17:31:35,432 autoreload 22560 22640 C:\Users\Steven\GradProject\backend\media\models.py changed, reloading.
+INFO 2025-06-24 17:31:36,133 autoreload 24032 27444 Watching for file changes with StatReloader
+INFO 2025-06-24 17:31:54,491 autoreload 24032 27444 C:\Users\Steven\GradProject\backend\media\models.py changed, reloading.
+INFO 2025-06-24 17:31:55,160 autoreload 28764 18340 Watching for file changes with StatReloader
+INFO 2025-06-24 17:32:15,706 autoreload 28764 18340 C:\Users\Steven\GradProject\backend\media\admin.py changed, reloading.
+INFO 2025-06-24 17:32:16,385 autoreload 27432 16452 Watching for file changes with StatReloader
+INFO 2025-06-24 17:32:28,205 autoreload 27432 16452 C:\Users\Steven\GradProject\backend\media\admin.py changed, reloading.
+INFO 2025-06-24 17:32:28,878 autoreload 5604 15172 Watching for file changes with StatReloader
+INFO 2025-06-24 17:32:42,934 autoreload 5604 15172 C:\Users\Steven\GradProject\backend\media\models.py changed, reloading.
+INFO 2025-06-24 17:32:43,583 autoreload 29536 18312 Watching for file changes with StatReloader
+INFO 2025-06-24 17:39:28,102 autoreload 11324 13660 Watching for file changes with StatReloader
+INFO 2025-06-24 20:34:52,603 autoreload 17964 23964 Watching for file changes with StatReloader

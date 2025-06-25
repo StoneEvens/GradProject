@@ -5,7 +5,7 @@ from rest_framework import status as drf_status
 from django.utils.text import slugify
 import re
 from typing import TYPE_CHECKING
-from pets.models import Pet, PetGenericRelation
+from pets.models import Pet
 from accounts.models import CustomUser
 
 if TYPE_CHECKING:
@@ -28,12 +28,12 @@ class PostFrame(models.Model):
         postFrame = PostFrame.objects.create(user=user)
         return postFrame
     
-    def getUser(self, postFrame: PostFrame):
-        return postFrame.user
+    def getUser(self):
+        return self.user
 
     # 獲取貼文ID
-    def get_postFrame_ID(self, postFrame: PostFrame):
-        return postFrame.id
+    def get_postFrame_ID(self):
+        return self.id
     
     # 獲取貼文框本身
     def get_postFrame(self, postID):
@@ -45,7 +45,7 @@ class PostFrame(models.Model):
     def get_postFrame(self, user):
         return PostFrame.objects.filter(user=user).order_by('-created_at')[:50]
 
-    def handle_interaction(self, postFrame:PostFrame, fromRelation:str = None, toRelation:str = None):
+    def handle_interaction(self, fromRelation:str = None, toRelation:str = None):
         update_fields = []
         ops = 0
 
