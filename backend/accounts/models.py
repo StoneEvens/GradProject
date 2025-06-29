@@ -28,6 +28,18 @@ class CustomUser(AbstractUser):
             Q(user_fullname__icontains=query) |
             Q(user_account__icontains=query)
         )[:5]
+    
+    def check_duplicate_user(self, user_account: str, user_email: str) -> str:
+        account_exist = CustomUser.objects.filter(user_account=user_account).exists()
+        email_exist = CustomUser.objects.filter(user_email=user_email).exists()
+
+        if account_exist:
+            return "帳號已存在。"
+        
+        if email_exist:
+            return "Email 已被使用。"
+        
+        return "OK"
 
 # 使用者追蹤功能
 class UserFollow(models.Model):

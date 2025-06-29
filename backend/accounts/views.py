@@ -38,17 +38,12 @@ class RegisterAPIView(APIView):
                 code=drf_status.HTTP_400_BAD_REQUEST,
                 status=drf_status.HTTP_400_BAD_REQUEST
             )
+        
+        message = CustomUser.check_duplicate_user(user_account, email)
 
-        if User.objects.filter(user_account=user_account).exists():
+        if not message == "OK":
             return APIResponse(
-                message='帳號已存在。',
-                code=drf_status.HTTP_400_BAD_REQUEST,
-                status=drf_status.HTTP_400_BAD_REQUEST
-            )
-
-        if User.objects.filter(email=email).exists():
-            return APIResponse(
-                message='Email 已被使用。',
+                message=message,
                 code=drf_status.HTTP_400_BAD_REQUEST,
                 status=drf_status.HTTP_400_BAD_REQUEST
             )
