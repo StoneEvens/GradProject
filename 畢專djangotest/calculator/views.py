@@ -12,6 +12,7 @@ import io
 
 from calculator.models import Pet
 from .serializers import PetSerializer
+from django.contrib.auth.models import User
 
 class PetListByUser(APIView):
     def get(self, request):
@@ -22,6 +23,30 @@ class PetListByUser(APIView):
         pets = Pet.objects.filter(keeper_id=user_id)
         serializer = PetSerializer(pets, many=True, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+class PetCreateView(APIView):
+    def post(self, request):
+        data = request.data
+        user_id = request.data.get("user_id")
+
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return Response({"error": "找不到使用者"}, status=status.HTTP_400_BAD_REQUEST)
+
+        pet = Pet.objects.create(
+            name=data.get("name"),
+            is_dog=data.get("is_dog") in ['true', 'True', True],
+            life_stage=data.get("life_stage"),
+            weight=data.get("weight"),
+            expect_adult_weight=data.get("expect_adult_weight"),
+            litter_size=data.get("litter_size"),
+            weeks_of_lactation=data.get("weeks_of_lactation"),
+            keeper_id=user,
+            pet_avatar=data.get("pet_avatar")
+        )
+
+        return Response({"message": "寵物建立成功", "pet_id": pet.id}, status=status.HTTP_201_CREATED)
 
 # 載入 OpenAI API 金鑰
 load_dotenv()
