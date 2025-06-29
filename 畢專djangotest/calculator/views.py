@@ -48,6 +48,34 @@ class PetCreateView(APIView):
 
         return Response({"message": "寵物建立成功", "pet_id": pet.id}, status=status.HTTP_201_CREATED)
 
+class PetUpdateView(APIView):
+    def post(self, request):
+        pet_id = request.data.get("pet_id")
+        weight = request.data.get("weight")
+        length = request.data.get("length")
+
+        if not pet_id:
+            return Response({"error": "請提供 pet_id"}, status=400)
+
+        try:
+            pet = Pet.objects.get(id=pet_id)
+        except Pet.DoesNotExist:
+            return Response({"error": "找不到該寵物"}, status=404)
+
+        if weight:
+            pet.weight = weight
+        if length:
+            pet.length = length
+
+        pet.save()
+
+        return Response({
+            "message": "更新成功",
+            "pet_id": pet.id,
+            "new_weight": pet.weight,
+            "new_length": pet.length,
+        }, status=200)
+
 # 載入 OpenAI API 金鑰
 load_dotenv()
 api_key = os.getenv('OPENAI_API_KEY')

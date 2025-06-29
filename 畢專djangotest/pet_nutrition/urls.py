@@ -1,7 +1,7 @@
 from django.urls import path, include
 from django.contrib import admin
 from ocrapp.views import OCRUploadView
-from calculator.views import PetNutritionCalculator, PetListByUser, PetCreateView
+from calculator.views import PetNutritionCalculator, PetListByUser, PetCreateView, PetUpdateView
 from abnormal_record_upload.views import SymptomRecordViewSet, generate_summary
 
 # Swagger
@@ -30,6 +30,7 @@ urlpatterns = [
     path('api/generate-summary/', generate_summary),
     path("api/pets/", PetListByUser.as_view(), name="pet-list-by-user"),
     path('api/pets/create/', PetCreateView.as_view(), name='pet-create'),
+    path("api/pets/update/", PetUpdateView.as_view(), name="pet-update"),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
