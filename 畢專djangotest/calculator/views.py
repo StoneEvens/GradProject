@@ -10,6 +10,19 @@ import os, math, json
 from pathlib import Path
 import io
 
+from calculator.models import Pet
+from .serializers import PetSerializer
+
+class PetListByUser(APIView):
+    def get(self, request):
+        user_id = request.query_params.get("user_id")
+        if not user_id:
+            return Response({"error": "請提供 user_id"}, status=status.HTTP_400_BAD_REQUEST)
+
+        pets = Pet.objects.filter(keeper_id=user_id)
+        serializer = PetSerializer(pets, many=True, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 # 載入 OpenAI API 金鑰
 load_dotenv()
 api_key = os.getenv('OPENAI_API_KEY')
