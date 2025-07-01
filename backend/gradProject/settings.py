@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     "comments",
     "media",
     "articleRecommendation",
+    "calculator",
 ]
 
 MIDDLEWARE = [
@@ -79,7 +80,7 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
+        'rest_framework.permissions.AllowAny',
     ],
     'EXCEPTION_HANDLER': 'utils.exception_handler.custom_exception_handler',
     'DEFAULT_PAGINATION_CLASS': 'utils.pagination.StandardResultsSetPagination',
