@@ -2202,3 +2202,4 @@ INFO 2025-07-01 12:17:35,770 basehttp 23188 26452 "OPTIONS /api/v1/accounts/toke
 INFO 2025-07-01 12:17:35,791 basehttp 23188 26452 "POST /api/v1/accounts/token/refresh/ HTTP/1.1" 200 548
 INFO 2025-07-01 12:17:35,795 basehttp 23188 26452 "OPTIONS /api/v1/accounts/me/ HTTP/1.1" 200 0
 INFO 2025-07-01 12:17:35,803 basehttp 23188 26452 "GET /api/v1/accounts/me/ HTTP/1.1" 200 207
+INFO 2025-07-02 01:04:45,627 autoreload 16036 22580 Watching for file changes with StatReloader
