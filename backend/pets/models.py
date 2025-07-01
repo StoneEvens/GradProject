@@ -4,6 +4,8 @@ from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from rest_framework import status as drf_status
+from django.contrib.auth import get_user_model
+User = get_user_model()
 
 #----------寵物本身----------
 
@@ -27,6 +29,58 @@ class Pet(models.Model):
         return Pet.objects.filter(
             id=pet_id
         )
+    
+    def get_pet(self, user: User):
+        return Pet.objects.filter(owner=user)
+    
+    def create(self, owner, weight, pet_stage, age=None, pet_name=None, breed=None, pet_type=None, predicted_adult_weight=None):
+        Pet.create(
+            owner=owner,
+            weight=weight,
+            pet_stage=pet_stage,
+            age=age,
+            pet_name=pet_name,
+            breed=breed,
+            pet_type=pet_type,
+            predicted_adult_weight=predicted_adult_weight
+        )
+
+    def update(self, owner=None, weight=None, pet_stage=None, age=None, pet_name=None, breed=None, pet_type=None, predicted_adult_weight=None):
+        update_fields = []
+
+        if owner:
+            self.owner = owner
+            update_fields.append("owner")
+        
+        if weight:
+            self.weight = weight
+            update_fields.append("weight")
+        
+        if pet_stage:
+            self.pet_stage = pet_stage
+            update_fields.append("pet_stage")
+        
+        if age:
+            self.age = age
+            update_fields.append("age")
+        
+        if pet_name:
+            self.pet_name = pet_name
+            update_fields.append("pet_name")
+
+        if breed:
+            self.breed = breed
+            update_fields.append("breed")
+        
+        if pet_type:
+            self.pet_type = pet_type
+            update_fields.append("pet_type")
+        
+        if predicted_adult_weight:
+            self.predicted_adult_weight = predicted_adult_weight
+            update_fields.append("predicted_adult_weight")
+
+        self.save(update_fields=update_fields)
 
     #Removed 獲取此寵物所有病程記錄中的獨特疾病名稱列表。
 

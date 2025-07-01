@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import QuerySet
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from rest_framework import status as drf_status
@@ -160,17 +161,17 @@ class PostHashtag(models.Model):
         )
         return hashtag
 
-    def get_hashtags(self, PostFrame: PostFrame):
+    def get_hashtags(PostFrame: PostFrame) -> QuerySet:
         return PostHashtag.objects.filter(
             postFrame=PostFrame
         )
 
-    def get_hashtags(self, query: str):
+    def get_hashtags(query:str) -> QuerySet:
         return PostHashtag.objects.filter(
             tag__icontains=query
         )[:50]
     
-    def get_hashtags(self, query:str, count: int):
+    def get_hashtags(query:str, count: int) -> QuerySet:
         return PostHashtag.objects.filter(
             tag__icontains=query
         )[:count]

@@ -29,6 +29,9 @@ class CustomUser(AbstractUser):
             Q(user_account__icontains=query)
         )[:5]
     
+    def get_user(self, user_id):
+        return self.objects.filter(user_id=user_id).first()
+    
     def check_duplicate_user(self, user_account: str, user_email: str) -> str:
         account_exist = CustomUser.objects.filter(user_account=user_account).exists()
         email_exist = CustomUser.objects.filter(user_email=user_email).exists()

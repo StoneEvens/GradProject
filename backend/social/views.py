@@ -9,7 +9,7 @@ from django.contrib.contenttypes.models import ContentType
 from media.models import Image, PetHeadshot
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from django.db.models import Q
+from django.db.models import Q, QuerySet
 from django.contrib.auth import get_user_model
 from pets.models import Pet
 from accounts.models import CustomUser
@@ -149,7 +149,7 @@ class SearchAPIView(APIView):
                 )
     
     def _search_by_hashtag(self, tag_query):
-        hashtags = PostHashtag.get_hashtags(tag_query)
+        hashtags = PostHashtag.get_hashtags(query=tag_query)
         postFrames = hashtags.postFrame
         serializers = PostSearchSerializer(
             postFrames,
@@ -204,7 +204,7 @@ class SearchSuggestionAPIView(APIView):
         # 如果以#開頭，建議Hashtags
         if query.startswith('#'):
             tag_query = query[1:]  # 去除#符號
-            hashtags = PostHashtag.objects.filter(tag__icontains=tag_query).values_list('tag', flat=True).distinct()[:5]
+            hashtags = PostHashtag.get_hashtags(tag_query)
             
             for tag in hashtags:
                 suggestions.append({
@@ -290,7 +290,7 @@ class CreatePostAPIView(APIView):
                         pass
             
             # 返回創建成功的貼文
-            serializer = PostSerializer(post, context={'request': request})
+            serializer = PostFrameSerializer(postFrame, context={'request': request})
             
             return APIResponse(
                 data=serializer.data,
@@ -363,15 +363,12 @@ class UserPostListAPIView(generics.ListAPIView):
         user_id = self.kwargs.get('pk')
         
         # 檢查用戶是否存在
-        try:
-            user = User.objects.get(id=user_id)
-        except User.DoesNotExist:
-            return Post.objects.none()
+        user = CustomUser.get_user(user_id)
         
         # 按創建時間降序獲取該用戶的所有貼文
-        return Post.objects.filter(user=user).select_related(
-            'user'
-        ).order_by('-created_at')
+        posts = PostFrame.get_postFrame(user)
+
+        return PostFrameSerializer(posts, many=True)
     
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
