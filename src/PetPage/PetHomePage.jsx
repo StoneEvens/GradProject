@@ -1,4 +1,3 @@
-// src/PetHomePage.jsx
 import React from 'react';
 import './PetHomePage.css';
 import '../components/Header.css';

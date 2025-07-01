@@ -1,25 +1,24 @@
-// src/PetPage/components/SummaryPage.jsx
 import React from 'react';
 import '../DiseaseRecord.css';
 
-const SummaryPage = ({ goBack }) => {
+const SummaryPage = ({ petName, aiText, setAiText }) => {
   return (
     <>
-      <div className="form-section">
-        <div className="form-switch blue">AI 疾病摘要</div>
+      <div className="record-pet-subtitle wide">{petName}</div>
 
-        <textarea
-          className="input-box big"
-          defaultValue={`
-在這段期間內，胖胖體重變化顯著···（此處放自動產生或使用者輸入的完整病程文字）
-`}
-          readOnly
-        />
+      <div className="summary-section">
+        <div className="summary-title">AI 病程總覽</div>
+        <div className="summary-wrapper">
+          <textarea
+            className="summary-textarea"
+            value={aiText}
+            onChange={(e) => setAiText(e.target.value)}
+          />
+        </div>
       </div>
 
-      <div className="two-btns">
-        <button className="btn wide" onClick={goBack}>編輯</button>
-        <button className="btn wide send">上傳</button>
+      <div className="summary-btn-group">
+        <button className="btn upload">上傳</button>
       </div>
     </>
   );

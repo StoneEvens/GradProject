@@ -7,6 +7,7 @@ import LoginPage from './LoginPage/LoginPage'
 import RegisterPage from './RegisterPage/RegisterPage'
 import PetHomePage from './PetPage/PetHomePage'
 import DiseaseRecord from './PetPage/DiseaseRecord'
+import HealthReport from './PetPage/HealthReport'
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/pet" element={<PetHomePage />} />
         <Route path="/dr" element={<DiseaseRecord />} />
+        <Route path="/hr" element={<HealthReport />} />
       </Routes>
     </Router>
   )
