@@ -51,6 +51,7 @@ function BottomNavigationBar() {
           <div className="dialog-arrow"></div>
           <button type="button" className="dialog-tab" onClick={e => { handleDialogButtonClick(e); navigate('/create-community-post'); }}>日常貼文</button>
           <button type="button" className="dialog-tab" onClick={e => { handleDialogButtonClick(e); navigate('/create-symptom-record'); }}>症狀紀錄</button>
+          <button type="button" className="dialog-tab" onClick={e => { handleDialogButtonClick(e); navigate('/create-forum-post'); }}>病程紀錄</button>
         </div>
       )}
       <div className="nav-buttons-container">

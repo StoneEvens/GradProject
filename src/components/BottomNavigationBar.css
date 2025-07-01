@@ -51,12 +51,12 @@
   justify-content: center;
   padding: 14px 12px 14px 12px;
   z-index: 2000;
-  max-width: 270px;
+  max-width: 380px;
   width: 92vw;
 }
 
 .dialog-tab {
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   font-weight: bold;
   padding: 8px 18px;
   background: #FFB370;

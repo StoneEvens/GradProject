@@ -26,7 +26,12 @@
 }
 
 .section-box.calendar-section {
-    padding: 0;
+    padding: 20px 16px 20px 16px;
+}
+
+.section-box.calendar-section .section-label {
+    margin-left: 14px;
+    margin-bottom: 0px;
 }
 
 .section-label {
@@ -39,13 +44,44 @@
 }
 
 .symptom-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px 16px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
     margin-top: 8px;
     justify-content: center;
 }
 
+/* 新的症狀計數項目樣式 */
+.symptom-count-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #eaf6ff;
+    border-radius: 8px;
+    padding: 6px 8px;
+    font-size: 0.9rem;
+    margin-bottom: 4px;
+    min-width: 80px;
+    gap: 4px;
+}
+
+.symptom-name {
+    flex: 1;
+    text-align: left;
+}
+
+.symptom-count {
+    font-weight: bold;
+    color: #ff1c1c;
+    min-width: 20px;
+    text-align: center;
+}
+
+.symptom-count.zero {
+    color: #5f5e5e;
+}
+
+/* 原本的症狀勾選樣式（暫時備註）
 .symptom-checkbox {
     display: flex;
     align-items: center;
@@ -55,6 +91,7 @@
     font-size: 1rem;
     margin-bottom: 4px;
 }
+*/
 
 .body-record-row {
     display: flex;
@@ -75,6 +112,32 @@
     margin: 0 4px;
 }
 
+/* 補充描述列表樣式 */
+.description-list {
+    width: 100%;
+    min-height: 60px;
+}
+
+.description-item {
+    margin-bottom: 12px;
+    line-height: 1.5;
+}
+
+.description-item:last-child {
+    margin-bottom: 0;
+}
+
+.description-date {
+    font-weight: bold;
+    color: #333;
+    margin-right: 8px;
+}
+
+.description-text {
+    color: #555;
+}
+
+/* 恢復原本的 textarea 樣式 */
 .desc-input {
     width: calc(100% - 40px);
     min-height: 60px;
@@ -295,12 +358,29 @@
 /* 操作按鈕樣式 */
 .action-buttons-container {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
     align-items: center;
     margin: 0 10px 20px 10px;
-    gap: 16px;
 }
 
+.upload-record-btn {
+    background: #FFB370;
+    color: #222;
+    border: none;
+    border-radius: 12px;
+    padding: 12px 24px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.upload-record-btn:hover {
+    background: #F08651;
+    color: #fff;
+}
+
+/* 原本的編輯和刪除按鈕樣式（暫時備註）
 .edit-record-btn {
     background: #FFB370;
     color: #222;
@@ -336,3 +416,4 @@
     background: #da2417;
     color: #fff;
 }
+*/
