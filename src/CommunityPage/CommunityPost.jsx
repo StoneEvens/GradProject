@@ -1,5 +1,7 @@
 import React from 'react';
 import './CommunityPost.css';
+import Header from '../components/Header';
+import BottomNavigationBar from '../components/BottomNavigationBar';
 
 export default function CommunityPost() {
   // 假資料，可日後用 props 或 API 替換
@@ -15,22 +17,26 @@ export default function CommunityPost() {
   };
 
   return (
-    <div className="community-post-container">
-      <h2 className="post-title">{post.title}</h2>
-      <div className="post-meta">
-        <span className="post-author">{post.author}</span>
-        <span className="post-date">{post.date}</span>
+    <div className="community-post-page-container">
+      <Header />
+      <div className="community-post-container">
+        <h2 className="post-title">{post.title}</h2>
+        <div className="post-meta">
+          <span className="post-author">{post.author}</span>
+          <span className="post-date">{post.date}</span>
+        </div>
+        <div className="post-content">{post.content}</div>
+        <div className="post-comments-section">
+          <h3 className="comments-title">留言</h3>
+          {post.comments.map(comment => (
+            <div className="comment" key={comment.id}>
+              <span className="comment-author">{comment.author}：</span>
+              <span className="comment-content">{comment.content}</span>
+            </div>
+          ))}
+        </div>
       </div>
-      <div className="post-content">{post.content}</div>
-      <div className="post-comments-section">
-        <h3 className="comments-title">留言</h3>
-        {post.comments.map(comment => (
-          <div className="comment" key={comment.id}>
-            <span className="comment-author">{comment.author}：</span>
-            <span className="comment-content">{comment.content}</span>
-          </div>
-        ))}
-      </div>
+      <BottomNavigationBar />
     </div>
   );
 }

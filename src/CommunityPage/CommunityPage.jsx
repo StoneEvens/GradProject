@@ -8,6 +8,7 @@ import mockCat2 from '../assets/MockPicture/mockCat2.jpg';
 import mockDog2 from '../assets/MockPicture/mockDog2.jpg';
 import mockCat4 from '../assets/MockPicture/mockCat4.jpg';
 import mockDog3 from '../assets/MockPicture/mockDog3.jpg';
+import { useNavigate } from 'react-router-dom';
 
 // 模擬貼文數據
 const posts = [
@@ -46,8 +47,9 @@ const posts = [
 ];
 
 function Post({ post }) {
+  const navigate = useNavigate();
   return (
-    <div className="post-container">
+    <div className="post-container" onClick={() => navigate(`/community-post/${post.id}`)} style={{ cursor: 'pointer' }}>
       <div className="post-header">
         <img src={post.userAvatar} alt="用戶頭像" className="post-avatar" />
         <span className="post-username">{post.userId}</span>
