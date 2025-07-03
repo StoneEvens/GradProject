@@ -4363,3 +4363,15 @@ INFO 2025-07-03 23:05:31,388 basehttp 10836 28360 "GET /admin/jsi18n/ HTTP/1.1" 
 INFO 2025-07-03 23:05:40,353 basehttp 10836 28360 "POST /admin/social/solcontent/add/ HTTP/1.1" 302 0
 INFO 2025-07-03 23:05:40,370 basehttp 10836 28360 "GET /admin/social/solcontent/ HTTP/1.1" 200 25662
 INFO 2025-07-03 23:05:40,378 basehttp 10836 28360 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-03 23:05:48,579 basehttp 10836 27432 "GET /api/v1/accounts/me/ HTTP/1.1" 200 226
+INFO 2025-07-03 23:05:48,583 basehttp 10836 7956 "GET /api/v1/accounts/me/ HTTP/1.1" 200 226
+INFO 2025-07-03 23:05:49,763 basehttp 10836 7956 "GET /api/v1/accounts/me/ HTTP/1.1" 200 226
+INFO 2025-07-03 23:05:49,767 basehttp 10836 27432 "GET /api/v1/accounts/me/ HTTP/1.1" 200 226
+INFO 2025-07-03 23:05:49,773 basehttp 10836 7956 "GET /api/v1/accounts/me/ HTTP/1.1" 200 226
+INFO 2025-07-03 23:05:49,774 basehttp 10836 27432 "GET /api/v1/accounts/user/3/summary/ HTTP/1.1" 200 194
+INFO 2025-07-03 23:05:49,778 basehttp 10836 29880 "GET /api/v1/accounts/me/ HTTP/1.1" 200 226
+INFO 2025-07-03 23:05:49,781 basehttp 10836 27432 "GET /api/v1/social/users/3/posts/preview/ HTTP/1.1" 200 368
+INFO 2025-07-03 23:05:49,785 basehttp 10836 29880 "GET /api/v1/accounts/user/3/summary/ HTTP/1.1" 200 194
+INFO 2025-07-03 23:05:49,789 basehttp 10836 27432 "GET /api/v1/pets/users/3/archives/ HTTP/1.1" 200 347
+INFO 2025-07-03 23:05:49,791 basehttp 10836 29880 "GET /api/v1/social/users/3/posts/preview/ HTTP/1.1" 200 368
+INFO 2025-07-03 23:05:49,796 basehttp 10836 29880 "GET /api/v1/pets/users/3/archives/ HTTP/1.1" 200 347
