@@ -73,6 +73,9 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5174",
+]
 
 # REST Framework 設置
 REST_FRAMEWORK = {
