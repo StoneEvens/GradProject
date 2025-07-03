@@ -11,6 +11,7 @@ import UserFollowConditionPage from './pages/UserFollowConditionPage';
 import SocialPage from './pages/SocialPage';
 import SettingsPage from './pages/SettingsPage';
 import NotificationPage from './pages/NotificationPage';
+import PetPage from './pages/PetPage';
 import { isAuthenticated, refreshAccessToken } from './services/authService';
 
 const App = () => {
@@ -146,6 +147,11 @@ const App = () => {
         <Route 
           path="/notifications" 
           element={isUserAuthenticated ? <NotificationPage /> : <Navigate to="/" />} 
+        />
+        {/* 寵物頁面：未登入導向HomePage */}
+        <Route 
+          path="/pet" 
+          element={isUserAuthenticated ? <PetPage /> : <Navigate to="/" />} 
         />
 
         {/* 未定義路徑：根據登入狀態重定向 */}

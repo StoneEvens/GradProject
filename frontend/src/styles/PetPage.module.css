@@ -1,0 +1,368 @@
+/* PetPage 主容器 */
+.container {
+  min-height: 100vh;
+  background: #FFF2D9;
+  padding-top: 80px;
+  padding-bottom: 80px;
+  box-sizing: border-box;
+  min-width: 380px;
+}
+
+.content {
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 0 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.loadingContainer {
+  text-align: center;
+  margin: 40px 0;
+  font-size: 1.2rem;
+  color: #333;
+}
+
+/* 沒有寵物時的界面 */
+.noPetsContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  min-height: 400px;
+}
+
+.noPetsIcon {
+  margin-bottom: 0px;
+}
+
+.noPetImage {
+  width: 180px;
+  height: 180px;
+  object-fit: contain;
+  opacity: 0.8;
+}
+
+.noPetsText {
+  margin-bottom: 40px;
+}
+
+.noPetsTitle {
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: #89350c;
+  margin-bottom: 12px;
+}
+
+.noPetsSubtitle {
+  font-size: 0.85rem;
+  color: #666;
+  line-height: 1.5;
+  max-width: 280px;
+  margin: 0 auto;
+}
+
+.addFirstPetButton {
+  background: #FFB370;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(255, 140, 26, 0.2);
+}
+
+.addFirstPetButton:hover {
+  background: #F08651;
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 140, 26, 0.3);
+}
+
+.addFirstPetButton:active {
+  transform: translateY(0);
+}
+
+/* 寵物頭像與基本資訊 */
+.petHeader {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-top: 24px;
+}
+
+.petAvatar {
+  position: relative;
+}
+
+.avatarImage {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid #FFB370;
+  background: #fff;
+}
+
+.petInfo {
+  flex: 1;
+}
+
+.petName {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.petDescription {
+  font-size: 1.1rem;
+  color: #666;
+  line-height: 1.4;
+}
+
+/* 選項卡 */
+.tabs {
+  display: flex;
+  gap: 4px;
+  margin: 16px 0;
+}
+
+.tab {
+  flex: 1;
+  padding: 12px 16px;
+  background: #FFB370;
+  color: #333;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.tab:hover {
+  background: #F08651;
+  color: #fff;
+}
+
+.tab.active {
+  background: #F08651;
+  color: #fff;
+}
+
+/* 功能按鈕網格 */
+.functionGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin: 16px 0;
+}
+
+.functionButton {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #FDCFA6;
+  border-radius: 12px;
+  padding: 20px 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-height: 120px;
+  box-shadow: 0 2px 8px rgba(255, 140, 26, 0.1);
+}
+
+.functionButton:hover {
+  background: #F9C193;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 140, 26, 0.2);
+}
+
+.functionButton:active {
+  transform: translateY(0);
+}
+
+.functionIcon {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  margin-bottom: 8px;
+}
+
+.functionLabel {
+  font-size: 1rem;
+  font-weight: bold;
+  color: #333;
+  text-align: center;
+  line-height: 1.2;
+}
+
+/* 切換寵物區域 */
+.petSwitchSection {
+  margin-top: 32px;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.sectionTitle {
+  font-size: 1.3rem;
+  font-weight: bold;
+  color: #333;
+}
+
+.addPetButton {
+  background: #FFB370;
+  color: #333;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.addPetButton:hover {
+  background: #F08651;
+  color: #fff;
+}
+
+/* 寵物列表 */
+.petList {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding: 8px 0;
+}
+
+.petItem {
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-radius: 50%;
+  padding: 4px;
+  background: transparent;
+}
+
+.petItem:hover {
+  background: rgba(255, 179, 112, 0.3);
+}
+
+.petItem.activePet {
+  background: #FFB370;
+  box-shadow: 0 2px 8px rgba(255, 140, 26, 0.3);
+}
+
+.petItemAvatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #FFB370;
+  background: #fff;
+}
+
+.petItem.activePet .petItemAvatar {
+  border-color: #F08651;
+}
+
+/* 響應式設計 */
+@media (max-width: 400px) {
+  .container {
+    min-width: 320px;
+  }
+  
+  .content {
+    padding: 0 12px;
+  }
+  
+  /* 沒有寵物時的響應式設計 */
+  .noPetsContainer {
+    padding: 40px 16px;
+    min-height: 300px;
+  }
+  
+  .noPetImage {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .noPetsTitle {
+    font-size: 1.4rem;
+  }
+  
+  .noPetsSubtitle {
+    font-size: 1rem;
+  }
+  
+  .addFirstPetButton {
+    padding: 14px 28px;
+    font-size: 1.2rem;
+  }
+  
+  .petHeader {
+    gap: 16px;
+  }
+  
+  .avatarImage {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .petName {
+    font-size: 1.5rem;
+  }
+  
+  .petDescription {
+    font-size: 1rem;
+  }
+  
+  .functionGrid {
+    gap: 12px;
+  }
+  
+  .functionButton {
+    min-height: 100px;
+    padding: 16px 12px;
+  }
+  
+  .functionIcon {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .functionLabel {
+    font-size: 0.9rem;
+  }
+}
+
+/* 滾動條樣式 */
+.petList::-webkit-scrollbar {
+  height: 4px;
+}
+
+.petList::-webkit-scrollbar-track {
+  background: rgba(255, 179, 112, 0.2);
+  border-radius: 2px;
+}
+
+.petList::-webkit-scrollbar-thumb {
+  background: #FFB370;
+  border-radius: 2px;
+}
+
+.petList::-webkit-scrollbar-thumb:hover {
+  background: #F08651;
+} 
