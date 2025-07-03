@@ -91,7 +91,7 @@ function CalculatorStep1({ onNext, pets: apiPets }) {
           type="button"
           onClick={() => {
             setIsAdding(true);
-            setNewPet({ name: '', species: '貓', weight: '', length: '', note: '' });
+            setNewPet({ name: '', species: '貓', weight: '', length: ''});
           }}
         >
           <img src={addPetIcon} alt="新增寵物" />
@@ -168,7 +168,7 @@ function CalculatorStep1({ onNext, pets: apiPets }) {
           )}
           <span>公分</span>
         </div>
-        <div className="pet-info-row">
+        {/* <div className="pet-info-row">
           <span className="pet-info-label">注意事項：</span>
           {isAdding ? (
             <input
@@ -186,7 +186,7 @@ function CalculatorStep1({ onNext, pets: apiPets }) {
               onChange={(e) => handleInfoChange('note', e.target.value)}
             />
           )}
-        </div>
+        </div> */}
         {errorMsg && (
           <div style={{ color: 'red', marginTop: 4, marginLeft: 8, fontSize: '0.95rem' }}>{errorMsg}</div>
         )}

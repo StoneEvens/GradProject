@@ -85,13 +85,7 @@
 .pet-avatar.selected {
     border: 5px solid #F08651;
 }
-  
-.pet-info-section {
-    background: #FFCA9C;
-    border-radius: 18px;
-    padding: 24px 18px 0px 18px;
-    margin: 0px 10px 10px 10px;
-}
+
   
 .pet-info-row {
     display: flex;

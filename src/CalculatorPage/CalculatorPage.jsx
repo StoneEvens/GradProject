@@ -37,10 +37,14 @@ function CalculatorPage() {
     setStep(2);
   };
 
-  const handleStep2Next = (feed) => {
+  const [calculationResult, setCalculationResult] = useState(null);
+
+  const handleStep2Next = (feed, result) => {
     setSelectedFeed(feed);
+    setCalculationResult(result);
     setStep(3);
   };
+
 
   return (
     <div className="calculator-page-container">
@@ -51,8 +55,8 @@ function CalculatorPage() {
         ) : (
           <>
             {step === 1 && <CalculatorStep1 onNext={handleStep1Next} pets={pets} />}
-            {step === 2 && <CalculatorStep2 onNext={handleStep2Next} onPrev={() => setStep(1)} />}
-            {step === 3 && <CalculatorStep3 onPrev={() => setStep(2)} selectedFeed={selectedFeed} selectedPet={selectedPet} />}
+            {step === 2 && <CalculatorStep2 selectedPet={selectedPet} onNext={handleStep2Next} onPrev={() => setStep(1)} />}
+            {step === 3 && <CalculatorStep3 onPrev={() => setStep(2)} selectedFeed={selectedFeed} selectedPet={selectedPet} calculationResult={calculationResult}/>}
           </>
         )}
       </div>
