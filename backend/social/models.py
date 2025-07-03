@@ -136,7 +136,7 @@ class SoLContent(models.Model):
             return SoLContent.objects.filter(postFrame__in=postFrameList)
         
         if user is not None:
-            return SoLContent.objects.filter(postFrame__user=user)[:50]
+            return SoLContent.objects.filter(postFrame__user=user).order_by('-postFrame__created_at')[:50]
         
         if hashtag is not None:
             return SoLContent.objects.filter(postFrame__hashtags__tag=hashtag)[:50]

@@ -16,7 +16,10 @@ urlpatterns = [
     path('plans/<int:plan_id>/complete/', CompletePlanAPIView.as_view(), name='complete-plan'),
     path('plans/<int:plan_id>/', DeletePlanAPIView.as_view(), name='delete-plan'),
     path('plans/<int:plan_id>/edit/', EditPlanAPIView.as_view(), name='edit-plan'),
+    path('user/<int:pk>/profile/', UserProfileView.as_view(), name='user-profile'),
+    path('user/<str:user_account>/profile/', UserProfileByAccountView.as_view(), name='user-profile-by-account'),
     path('user/<int:pk>/summary/', UserSummaryView.as_view(), name='user-summary'),
+    path('user/<str:user_account>/summary/', UserSummaryByAccountView.as_view(), name='user-summary-by-account'),
     
     # 註冊驗證 API
     path('check/account/', CheckUserAccountAPIView.as_view(), name='check-account'),

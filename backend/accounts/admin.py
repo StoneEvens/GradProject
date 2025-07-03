@@ -7,7 +7,7 @@ from .models import (
 # 自定義用戶管理
 @admin.register(CustomUser)
 class CustomUserAdmin(admin.ModelAdmin):
-    list_display = ('username', 'email', 'user_fullname', 'user_account', 'points', 'is_active')
+    list_display = ('id','username', 'email', 'user_fullname', 'user_account', 'points', 'is_active', 'account_privacy')
     search_fields = ('username', 'email', 'user_fullname', 'user_account')
     list_filter = ('is_active', 'is_staff')
     readonly_fields = ('date_joined', 'last_login')

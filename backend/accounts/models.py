@@ -36,7 +36,7 @@ class CustomUser(AbstractUser):
     def get_user(username:str=None, id:str=None):
 
         if username is not None:
-            return CustomUser.objects.filter(user_account=username).first()
+            return CustomUser.objects.filter(username=username).first()
         
         if id is not None:
             return CustomUser.objects.filter(id=id).first()
@@ -253,6 +253,22 @@ class Notification(models.Model):
 # 系統通知模型（資訊、警告、自定義類型）
 class FollowNotification(Notification):
     content = models.CharField(max_length=255)
+    follow_request_from = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='sent_follow_notifications',
+        null=True,
+        blank=True,
+        help_text="發送追蹤請求的使用者"
+    )
+
+    related_follow = models.ForeignKey(
+        'UserFollow',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        help_text="相關的追蹤關係"
+    )
 
     def __str__(self):
         return f"{self.user.username} - {self.notification_type}: {self.content[:20]}"

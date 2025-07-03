@@ -45,19 +45,23 @@ class UserPostsPreviewListAPIView(generics.ListAPIView):
     serializer_class = PostPreviewSerializer
     
     def list(self, request, *args, **kwargs):
-        username = self.kwargs['pk']
-        user = CustomUser.get_user(username=username)
+        id = self.kwargs['pk']
+        user = CustomUser.get_user(id=id)
         solContents = SoLContent.get_content(user=user)
         
         # 如果使用分頁，處理分頁
         page = self.paginate_queryset(solContents)
         if page is not None:
             # context={'request': request}  如果序列化器需要 request context
-            serializer = self.get_serializer(page, many=True, context={'request': request})
-            return self.get_paginated_response(serializer.data)
+            serializer = SolPostSerializer(page, many=True, context={'request': request})
+            
+            return APIResponse(
+                data=serializer.data,
+                message="Success"
+            )
         
         # 如果不使用分頁
-        serializer = self.get_serializer(solContents, many=True, context={'request': request})
+        serializer = SolPostSerializer(solContents, many=True, context={'request': request})
         
         return APIResponse(
             data=serializer.data,

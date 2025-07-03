@@ -22,7 +22,7 @@ class SuperImage(models.Model):
     alt_text = models.CharField(max_length=255, blank=True, help_text="替代文字")
     
     #Time Stamps
-    created_at = models.DateTimeField(auto_now_add=True)
+    uploaded_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
@@ -31,10 +31,11 @@ class SuperImage(models.Model):
     def url(self):
         return self.firebase_url
     
-    def create(self, firebase_path:str):
+    def create(self, firebase_path:str, firebase_url:str):
         self.firebase_path = firebase_path
+        self.firebase_url = firebase_url
 
-        self.save(firebase_path)
+        self.save(firebase_path, firebase_url)
 
     def delete(self):
         image_url = self.firebase_path
@@ -57,8 +58,8 @@ class Image(SuperImage):
             models.Index(fields=['firebase_path'])
         ]
     
-    def create(self, postFrame: PostFrame, firebase_path:str):
-        super().create(firebase_path=firebase_path)
+    def create(self, postFrame: PostFrame, firebase_path:str, firebase_url:str):
+        super().create(firebase_path=firebase_path, firebase_url=firebase_url)
         Image.objects.create(postFrame=postFrame)
     
     def get_first_image_url(self, postFrame: PostFrame):
@@ -80,3 +81,9 @@ class UserHeadshot(SuperImage):
             return UserHeadshot.objects.filter(user=user).first().url()
         except AttributeError:
             return ""
+        
+    def get_headshot(user:CustomUser):
+        return UserHeadshot.objects.filter(user=user).first
+        
+    def create(user:CustomUser, firebase_path:str, firebase_url:str):
+        return UserHeadshot.objects.create(user=user, firebase_path=firebase_path, firebase_url=firebase_url)

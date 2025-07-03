@@ -98,8 +98,8 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ['id', 'username', 'email', 'headshot_url', 'user_fullname', 'user_account', 'points', 'user_intro']
-        read_only_fields = ['id', 'points', 'user_account']
+        fields = ['id', 'username', 'email', 'headshot_url', 'user_fullname', 'user_account', 'points', 'user_intro', 'account_privacy']
+        read_only_fields = ['id', 'points']
 
     def get_headshot_url(self, user:CustomUser):
         return UserHeadshot.get_headshot_url(user=user)
@@ -114,9 +114,38 @@ class UserSummarySerializer(serializers.Serializer):
     posts_count = serializers.IntegerField()
 
 class NotificationSerializer(serializers.ModelSerializer):
+    follow_request_from_info = serializers.SerializerMethodField()
+    notification_type = serializers.SerializerMethodField()
+    
     class Meta:
         model = FollowNotification
-        fields = '__all__'
+        fields = [
+            'id', 'user', 'notification_type', 'content', 'date', 'is_read',
+            'follow_request_from', 'follow_request_from_info'
+        ]
+        read_only_fields = ['id', 'date']
+
+    def get_notification_type(self, notification:FollowNotification):
+        return {"notification_type":"follow_request"}
+    
+    def get_follow_request_from_info(self, notification:FollowNotification):
+        """獲取發送追蹤請求的使用者基本資訊"""
+        if notification.follow_request_from:
+            headshot_url = None
+            try:
+                if hasattr(notification.follow_request_from, 'headshot') and notification.follow_request_from.headshot:
+                    headshot_url = notification.follow_request_from.headshot.firebase_url
+            except:
+                headshot_url = None
+                
+            return {
+                'id': notification.follow_request_from.id,
+                'username': notification.follow_request_from.username,
+                'user_fullname': notification.follow_request_from.user_fullname,
+                'user_account': notification.follow_request_from.user_account,
+                'headshot_url': headshot_url
+            }
+        return None
 
 class UserFollowSerializer(serializers.ModelSerializer):
     class Meta:

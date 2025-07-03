@@ -14,6 +14,7 @@ from utils.api_response import APIResponse
 from django.db.models import Count
 from django.db import transaction
 from django.db.models import Q, Sum
+from utils.firebase_service import FirebaseStorageService
 
 User = get_user_model()
 
@@ -170,16 +171,79 @@ class MeAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        user = request.user
+        user = CustomUser.get_user(username=request.user)
         serializer = UserProfileSerializer(user)
         return APIResponse(data=serializer.data)
     
     def put(self, request):
+        print(request)
+        print(request.data)
+        print(request.user)
+
+        user = CustomUser.get_user(username=request.user)
+        found = True if user is not None else False
+        print(found)
+
+        if 'headshot' in request.FILES:
+            firebase_service = FirebaseStorageService()
+            
+            try:
+                # 上傳頭像到 Firebase Storage   
+                headshot_file = request.FILES['headshot']
+                success, message, download_url, file_path = firebase_service.upload_user_avatar(user.id, headshot_file)
+                
+                if not success:
+                    return APIResponse(
+                        message=message,
+                        code=drf_status.HTTP_400_BAD_REQUEST,
+                        status=drf_status.HTTP_400_BAD_REQUEST
+                    )
+                
+                # 儲存頭像資料到資料庫
+                headshot_image = UserHeadshot.get_headshot(user=user)
+                
+                if headshot_image is not None:
+                    # 如果已存在頭像，先刪除舊的 Firebase Storage 檔案
+                    from utils.firebase_service import cleanup_old_headshot
+                    old_firebase_path = headshot_image.firebase_path
+                    cleanup_old_headshot(old_firebase_path, logger)
+                    
+                    # 更新為新的URL和路徑
+                    headshot_image.firebase_url = download_url
+                    headshot_image.firebase_path = file_path
+                    headshot_image.save()
+                else:
+                    UserHeadshot.create(user=user, firebase_path=file_path, firebase_url=download_url)
+                
+            except Exception as e:
+                return APIResponse(
+                    message=f'頭像上傳失敗: {str(e)}',
+                    code=drf_status.HTTP_400_BAD_REQUEST,
+                    status=drf_status.HTTP_400_BAD_REQUEST
+                )
+
         serializer = UserProfileSerializer(request.user, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=drf_status.HTTP_400_BAD_REQUEST)
+
+            with transaction.atomic():
+                user = CustomUser.objects.select_related('headshot').get(id=user.id)
+            updated_serializer = UserProfileSerializer(user)
+
+            print(updated_serializer.data)
+
+            return APIResponse(
+                data=updated_serializer.data,
+                message='個人資料更新成功',
+                status=drf_status.HTTP_200_OK
+            )
+        
+        return APIResponse(
+            message='驗證失敗',
+            errors=serializer.errors,
+            code=drf_status.HTTP_400_BAD_REQUEST,
+            status=drf_status.HTTP_400_BAD_REQUEST
+        )
 
 # 取今日行程
 class TodayPlanAPIView(APIView):
@@ -315,8 +379,8 @@ class UserSummaryView(APIView):
     def get(self, request, pk):
         # 使用單一查詢並包含聚合函數，減少數據庫請求次數
         user = CustomUser.objects.annotate(
-            followers_count=Count('followers', distinct=True),
-            following_count=Count('following', distinct=True),
+            followers_count=Count('followers', filter=models.Q(followers__confirm_or_not=True), distinct=True),
+            following_count=Count('following', filter=models.Q(following__confirm_or_not=True), distinct=True),
             posts_count=Count('postframes', distinct=True),
             #archives_count=Count('illness_archives', distinct=True)
         ).get(pk=pk)
@@ -333,6 +397,82 @@ class UserSummaryView(APIView):
         
         serializer = UserSummarySerializer(data)
         return APIResponse(data=serializer.data)
+
+#----------Not Checked Yet----------#
+
+# 獲取特定用戶的基本資料（通過ID）
+class UserProfileView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request, pk):
+        try:
+            # 獲取目標用戶的基本資料
+            user = CustomUser.objects.select_related('headshot').get(pk=pk)
+            serializer = UserProfileSerializer(user)
+            return APIResponse(data=serializer.data, message='獲取用戶資料成功')
+        except CustomUser.DoesNotExist:
+            return APIResponse(
+                message='找不到該使用者',
+                code=drf_status.HTTP_404_NOT_FOUND,
+                status=drf_status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return APIResponse(
+                message=f'獲取用戶資料失敗: {str(e)}',
+                code=drf_status.HTTP_500_INTERNAL_SERVER_ERROR,
+                status=drf_status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+# 獲取特定用戶的基本資料（通過user_account）
+class UserProfileByAccountView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request, user_account):
+        try:
+            # 獲取目標用戶的基本資料
+            user = CustomUser.objects.select_related('headshot').get(user_account=user_account)
+            serializer = UserProfileSerializer(user)
+            return APIResponse(data=serializer.data, message='獲取用戶資料成功')
+        except CustomUser.DoesNotExist:
+            return APIResponse(
+                message='找不到該使用者',
+                code=drf_status.HTTP_404_NOT_FOUND,
+                status=drf_status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return APIResponse(
+                message=f'獲取用戶資料失敗: {str(e)}',
+                code=drf_status.HTTP_500_INTERNAL_SERVER_ERROR,
+                status=drf_status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+        
+# 回傳使用者基本資料＋追蹤數、被追蹤數、發文（Post+Archive）數）- 通過user_account
+class UserSummaryByAccountView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, user_account):
+        # 使用單一查詢並包含聚合函數，減少數據庫請求次數
+        user = CustomUser.objects.annotate(
+            followers_count=Count('followers', distinct=True),
+            following_count=Count('following', distinct=True),
+            posts_count=Count('postframes', distinct=True),
+            #archives_count=Count('illness_archives', distinct=True)
+        ).get(user_account=user_account)
+        
+        data = {
+            'id': user.id,
+            'username': user.username,
+            'user_fullname': user.user_fullname,
+            'user_intro': user.user_intro,
+            'followers_count': user.followers_count,
+            'following_count': user.following_count,
+            'posts_count': user.posts_count# + user.archives_count,
+        }
+        
+        serializer = UserSummarySerializer(data)
+        return APIResponse(data=serializer.data)
+        
+#----------Not Checked Ended----------#
 
 # 標記行程為已完成或重新開始
 class CompletePlanAPIView(APIView):
@@ -769,7 +909,7 @@ class FollowByAccountAPIView(APIView):
             # 檢查是否已經有追蹤關係
             try:
                 follow_relation = UserFollow.objects.get(
-                    user=request.user,
+                    user=CustomUser.get_user(username=request.user),
                     follows=target_user
                 )
                 # 已存在關係，取消追蹤
@@ -795,6 +935,8 @@ class FollowByAccountAPIView(APIView):
                 )
             except UserFollow.DoesNotExist:
                 # 沒有追蹤關係，建立新的
+                print(target_user.account_privacy)
+
                 if target_user.account_privacy == 'private':
                     # private帳戶需要等待確認
                     follow_relation = UserFollow.objects.create(
@@ -806,10 +948,7 @@ class FollowByAccountAPIView(APIView):
                     # 建立追蹤請求通知
                     notification = FollowNotification.objects.create(
                         user=target_user,
-                        notification_type='follow_request',
-                        content=f'{request.user.username} 希望追蹤您',
-                        follow_request_from=request.user,
-                        related_follow=follow_relation
+                        content=f'{request.user.username} 希望追蹤您'
                     )
                     
                     return APIResponse(
@@ -1157,6 +1296,10 @@ class NotificationListAPIView(APIView):
     def get(self, request):
         """獲取當前使用者的所有通知"""
         try:
+            
+
+
+
             notifications = FollowNotification.objects.filter(
                 user=request.user
             )
