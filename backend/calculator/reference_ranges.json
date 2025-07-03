@@ -1,0 +1,807 @@
+{
+  "Red Blood Cell count": {
+    "category": "Complete Blood Count",
+    "name": "紅血球計數",
+    "unit": "10^6/μL",
+    "reference_ranges": [
+      {
+        "species": "dog",
+        "age_group": "all",
+        "range": [
+          5.65,
+          8.87
+        ]
+      },
+      {
+        "species": "cat",
+        "age_group": "all",
+        "range": [
+          6.54,
+          12.2
+        ]
+      }
+    ]
+  },
+  "Hemoglobin": {
+    "category": "Complete Blood Count",
+    "name": "血紅蛋白",
+    "unit": "g/dL",
+    "reference_ranges": [
+      {
+        "species": "dog",
+        "age_group": "all",
+        "range": [
+          13.1,
+          20.5
+        ]
+      },
+      {
+        "species": "cat",
+        "age_group": "all",
+        "range": [
+          9.8,
+          16.2
+        ]
+      }
+    ]
+  },
+  "Hematocrit, PCV": {
+    "category": "Complete Blood Count",
+    "name": "血比容（紅血球壓積）",
+    "unit": "%",
+    "reference_ranges": [
+      {
+        "species": "dog",
+        "age_group": "all",
+        "range": [
+          37.3,
+          61.7
+        ]
+      },
+      {
+        "species": "cat",
+        "age_group": "all",
+        "range": [
+          30.3,
+          52.3
+        ]
+      }
+    ]
+  },
+  "MCV": {
+    "category": "Complete Blood Count",
+    "name": "平均紅血球體積",
+    "unit": "fL",
+    "reference_ranges": [
+      {
+        "species": "dog",
+        "age_group": "all",
+        "range": [
+          61.6,
+          73.5
+        ]
+      },
+      {
+        "species": "cat",
+        "age_group": "all",
+        "range": [
+          35.9,
+          53.1
+        ]
+      }
+    ]
+  },
+  "MCH": {
+    "category": "Complete Blood Count",
+    "name": "平均紅血球血紅蛋白量",
+    "unit": "pg",
+    "reference_ranges": [
+      {
+        "species": "dog",
+        "age_group": "all",
+        "range": [
+          21.2,
+          25.9
+        ]
+      },
+      {
+        "species": "cat",
+        "age_group": "all",
+        "range": [
+          11.8,
+          17.3
+        ]
+      }
+    ]
+  },
+  "MCHC": {
+    "category": "Complete Blood Count",
+    "name": "平均紅血球血紅蛋白濃度",
+    "unit": "g/dL",
+    "reference_ranges": [
+      {
+        "species": "dog",
+        "age_group": "all",
+        "range": [
+          32.0,
+          37.9
+        ]
+      },
+      {
+        "species": "cat",
+        "age_group": "all",
+        "range": [
+          28.1,
+          35.8
+        ]
+      }
+    ]
+  },
+  "RDW": {
+    "category": "Complete Blood Count",
+    "name": "紅血球分布寬度",
+    "unit": "%",
+    "reference_ranges": [
+      {
+        "species": "dog",
+        "age_group": "all",
+        "range": [
+          13.6,
+          21.7
+        ]
+      },
+      {
+        "species": "cat",
+        "age_group": "all",
+        "range": [
+          15.0,
+          27.0
+        ]
+      }
+    ]
+  },
+  "White Blood Cell count": {
+    "category": "Complete Blood Count",
+    "name": "白血球計數",
+    "unit": "10^3/μL",
+    "reference_ranges": [
+      {
+        "species": "dog",
+        "age_group": "all",
+        "range": [
+          5.05,
+          16.76
+        ]
+      },
+      {
+        "species": "cat",
+        "age_group": "all",
+        "range": [
+          2.87,
+          17.02
+        ]
+      }
+    ]
+  },
+  "Neutrophils (absolute)": {
+    "category": "Complete Blood Count",
+    "name": "嗜中性球計數",
+    "unit": "10^3/μL",
+    "reference_ranges": [
+      {
+        "species": "dog",
+        "age_group": "all",
+        "range": [
+          2.95,
+          11.64
+        ]
+      },
+      {
+        "species": "cat",
+        "age_group": "all",
+        "range": [
+          2.3,
+          10.29
+        ]
+      }
+    ]
+  },
+  "Lymphocytes (absolute)": {
+    "category": "Complete Blood Count",
+    "name": "淋巴球計數",
+    "unit": "10^3/μL",
+    "reference_ranges": [
+      {
+        "species": "dog",
+        "age_group": "all",
+        "range": [
+          1.05,
+          5.1
+        ]
+      },
+      {
+        "species": "cat",
+        "age_group": "all",
+        "range": [
+          0.92,
+          6.88
+        ]
+      }
+    ]
+  },
+  "Monocytes (absolute)": {
+    "category": "Complete Blood Count",
+    "name": "單核球計數",
+    "unit": "10^3/μL",
+    "reference_ranges": [
+      {
+        "species": "dog",
+        "age_group": "all",
+        "range": [
+          0.16,
+          1.12
+        ]
+      },
+      {
+        "species": "cat",
+        "age_group": "all",
+        "range": [
+          0.05,
+          0.67
+        ]
+      }
+    ]
+  },
+  "Eosinophils (absolute)": {
+    "category": "Complete Blood Count",
+    "name": "嗜酸性球計數",
+    "unit": "10^3/μL",
+    "reference_ranges": [
+      {
+        "species": "dog",
+        "age_group": "all",
+        "range": [
+          0.06,
+          1.23
+        ]
+      },
+      {
+        "species": "cat",
+        "age_group": "all",
+        "range": [
+          0.17,
+          1.57
+        ]
+      }
+    ]
+  },
+  "Basophils (absolute)": {
+    "category": "Complete Blood Count",
+    "name": "嗜鹼性球計數",
+    "unit": "10^3/μL",
+    "reference_ranges": [
+      {
+        "species": "dog",
+        "age_group": "all",
+        "range": [
+          0.0,
+          0.1
+        ]
+      },
+      {
+        "species": "cat",
+        "age_group": "all",
+        "range": [
+          0.01,
+          0.26
+        ]
+      }
+    ]
+  },
+  "Platelet count": {
+    "category": "Complete Blood Count",
+    "name": "血小板計數",
+    "unit": "10^3/μL",
+    "reference_ranges": [
+      {
+        "species": "dog",
+        "age_group": "all",
+        "range": [
+          148.0,
+          484.0
+        ]
+      },
+      {
+        "species": "cat",
+        "age_group": "all",
+        "range": [
+          151.0,
+          600.0
+        ]
+      }
+    ]
+  },
+  "Reticulocytes (absolute)": {
+    "category": "Complete Blood Count",
+    "name": "網狀紅血球計數",
+    "unit": "10^3/μL",
+    "reference_ranges": [
+      {
+        "species": "dog",
+        "age_group": "all",
+        "range": [
+          10.0,
+          110.0
+        ]
+      },
+      {
+        "species": "cat",
+        "age_group": "all",
+        "range": [
+          3.0,
+          50.0
+        ]
+      }
+    ]
+  },
+  "Albumin": {
+    "category": "Serum Biochemistry",
+    "name": "白蛋白",
+    "unit": "g/dL",
+    "reference_ranges": [
+      {
+        "species": "dog",
+        "age_group": "all",
+        "range": [
+          2.3,
+          4.1
+        ]
+      },
+      {
+        "species": "cat",
+        "age_group": "all",
+        "range": [
+          3.2,
+          4.3
+        ]
+      }
+    ]
+  },
+  "Globulin": {
+    "category": "Serum Biochemistry",
+    "name": "球蛋白",
+    "unit": "g/dL",
+    "reference_ranges": [
+      {
+        "species": "dog",
+        "age_group": "all",
+        "range": [
+          1.9,
+          3.7
+        ]
+      },
+      {
+        "species": "cat",
+        "age_group": "all",
+        "range": [
+          2.9,
+          4.7
+        ]
+      }
+    ]
+  },
+  "Total Protein": {
+    "category": "Serum Biochemistry",
+    "name": "總蛋白",
+    "unit": "g/dL",
+    "reference_ranges": [
+      {
+        "species": "dog",
+        "age_group": "all",
+        "range": [
+          5.5,
+          7.2
+        ]
+      },
+      {
+        "species": "cat",
+        "age_group": "all",
+        "range": [
+          6.6,
+          8.4
+        ]
+      }
+    ]
+  },
+  "ALT": {
+    "category": "Serum Biochemistry",
+    "name": "丙氨酸轉氨酶",
+    "unit": "U/L",
+    "reference_ranges": [
+      {
+        "species": "dog",
+        "age_group": "all",
+        "range": [
+          17.0,
+          95.0
+        ]
+      },
+      {
+        "species": "cat",
+        "age_group": "all",
+        "range": [
+          28.0,
+          109.0
+        ]
+      }
+    ]
+  },
+  "AST": {
+    "category": "Serum Biochemistry",
+    "name": "天門冬酸轉氨酶",
+    "unit": "U/L",
+    "reference_ranges": [
+      {
+        "species": "dog",
+        "age_group": "all",
+        "range": [
+          18.0,
+          56.0
+        ]
+      },
+      {
+        "species": "cat",
+        "age_group": "all",
+        "range": [
+          17.0,
+          48.0
+        ]
+      }
+    ]
+  },
+  "ALP": {
+    "category": "Serum Biochemistry",
+    "name": "鹼性磷酸酶",
+    "unit": "U/L",
+    "reference_ranges": [
+      {
+        "species": "dog",
+        "age_group": "puppy",
+        "range": [
+          23.0,
+          337.0
+        ]
+      },
+      {
+        "species": "dog",
+        "age_group": "adult",
+        "range": [
+          23.0,
+          212.0
+        ]
+      },
+      {
+        "species": "cat",
+        "age_group": "kitten",
+        "range": [
+          14.0,
+          192.0
+        ]
+      },
+      {
+        "species": "cat",
+        "age_group": "adult",
+        "range": [
+          14.0,
+          111.0
+        ]
+      }
+    ]
+  },
+  "BUN": {
+    "category": "Serum Biochemistry",
+    "name": "血中尿素氮",
+    "unit": "mg/dL",
+    "reference_ranges": [
+      {
+        "species": "dog",
+        "age_group": "all",
+        "range": [
+          9.0,
+          26.0
+        ]
+      },
+      {
+        "species": "cat",
+        "age_group": "all",
+        "range": [
+          17.0,
+          35.0
+        ]
+      }
+    ]
+  },
+  "Creatinine": {
+    "category": "Serum Biochemistry",
+    "name": "肌酸酐",
+    "unit": "mg/dL",
+    "reference_ranges": [
+      {
+        "species": "dog",
+        "age_group": "all",
+        "range": [
+          0.6,
+          1.4
+        ]
+      },
+      {
+        "species": "cat",
+        "age_group": "all",
+        "range": [
+          0.8,
+          2.1
+        ]
+      }
+    ]
+  },
+  "Glucose": {
+    "category": "Serum Biochemistry",
+    "name": "葡萄糖",
+    "unit": "mg/dL",
+    "reference_ranges": [
+      {
+        "species": "dog",
+        "age_group": "all",
+        "range": [
+          68.0,
+          104.0
+        ]
+      },
+      {
+        "species": "cat",
+        "age_group": "all",
+        "range": [
+          71.0,
+          182.0
+        ]
+      }
+    ]
+  },
+  "Phosphorus": {
+    "category": "Serum Biochemistry",
+    "name": "磷",
+    "unit": "mg/dL",
+    "reference_ranges": [
+      {
+        "species": "dog",
+        "age_group": "puppy",
+        "range": [
+          2.5,
+          10.4
+        ]
+      },
+      {
+        "species": "dog",
+        "age_group": "adult",
+        "range": [
+          2.5,
+          6.8
+        ]
+      },
+      {
+        "species": "cat",
+        "age_group": "kitten",
+        "range": [
+          3.1,
+          10.4
+        ]
+      },
+      {
+        "species": "cat",
+        "age_group": "adult",
+        "range": [
+          3.1,
+          7.5
+        ]
+      }
+    ]
+  },
+  "Specific Gravity (USG)": {
+    "category": "Urinalysis",
+    "name": "尿比重",
+    "unit": "-",
+    "reference_ranges": [
+      {
+        "species": "dog",
+        "age_group": "all",
+        "range": [
+          1.015,
+          1.045
+        ]
+      },
+      {
+        "species": "cat",
+        "age_group": "all",
+        "range": [
+          1.035,
+          1.06
+        ]
+      }
+    ]
+  },
+  "pH (urine)": {
+    "category": "Urinalysis",
+    "name": "尿液酸鹼值",
+    "unit": "pH",
+    "reference_ranges": [
+      {
+        "species": "dog",
+        "age_group": "all",
+        "range": [
+          5.5,
+          8.5
+        ]
+      },
+      {
+        "species": "cat",
+        "age_group": "all",
+        "range": [
+          5.5,
+          8.5
+        ]
+      }
+    ]
+  },
+  "RBC (urine)": {
+    "category": "Urinalysis",
+    "name": "尿中紅血球 (高倍視野)",
+    "unit": "個/HPF",
+    "reference_ranges": [
+      {
+        "species": "dog",
+        "age_group": "all",
+        "range": [
+          0.0,
+          5.0
+        ]
+      },
+      {
+        "species": "cat",
+        "age_group": "all",
+        "range": [
+          0.0,
+          5.0
+        ]
+      }
+    ]
+  },
+  "WBC (urine)": {
+    "category": "Urinalysis",
+    "name": "尿中白血球 (高倍視野)",
+    "unit": "個/HPF",
+    "reference_ranges": [
+      {
+        "species": "dog",
+        "age_group": "all",
+        "range": [
+          0.0,
+          5.0
+        ]
+      },
+      {
+        "species": "cat",
+        "age_group": "all",
+        "range": [
+          0.0,
+          5.0
+        ]
+      }
+    ]
+  },
+  "UPC": {
+    "category": "Urinalysis",
+    "name": "尿蛋白／肌酐比值",
+    "unit": "-",
+    "reference_ranges": [
+      {
+        "species": "dog",
+        "age_group": "all",
+        "range": [
+          0.0,
+          0.5
+        ]
+      },
+      {
+        "species": "cat",
+        "age_group": "all",
+        "range": [
+          0.0,
+          0.4
+        ]
+      }
+    ]
+  },
+  "T4 (Total Thyroxine)": {
+    "category": "Other",
+    "name": "總甲狀腺素",
+    "unit": "μg/dL",
+    "reference_ranges": [
+      {
+        "species": "dog",
+        "age_group": "all",
+        "range": [
+          1.0,
+          4.0
+        ]
+      },
+      {
+        "species": "cat",
+        "age_group": "all",
+        "range": [
+          0.8,
+          4.7
+        ]
+      }
+    ]
+  },
+  "Pancreatic Lipase (cPL)": {
+    "category": "Other",
+    "name": "胰臟特異性脂酶",
+    "unit": "μg/L",
+    "reference_ranges": [
+      {
+        "species": "dog",
+        "age_group": "all",
+        "range": [
+          0.0,
+          200.0
+        ]
+      }
+    ]
+  },
+  "Pancreatic Lipase (fPL)": {
+    "category": "Other",
+    "name": "胰臟特異性脂酶",
+    "unit": "μg/L",
+    "reference_ranges": [
+      {
+        "species": "cat",
+        "age_group": "all",
+        "range": [
+          0.0,
+          4.4
+        ]
+      }
+    ]
+  },
+  "CRP": {
+    "category": "Other",
+    "name": "C-反應蛋白",
+    "unit": "mg/dL",
+    "reference_ranges": [
+      {
+        "species": "dog",
+        "age_group": "all",
+        "range": [
+          0.0,
+          1.0
+        ]
+      }
+    ]
+  },
+  "Serum Amyloid A": {
+    "category": "Other",
+    "name": "血清淀粉樣蛋白A",
+    "unit": "μg/mL",
+    "reference_ranges": [
+      {
+        "species": "cat",
+        "age_group": "all",
+        "range": [
+          0.0,
+          5.4
+        ]
+      }
+    ]
+  }
+}

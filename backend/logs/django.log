@@ -8242,3 +8242,130 @@ INFO 2025-06-19 23:44:54,475 basehttp 29752 17888 "OPTIONS /api/v1/accounts/me/ 
 INFO 2025-06-19 23:44:54,488 basehttp 29752 17888 "GET /api/v1/accounts/me/ HTTP/1.1" 200 414
 INFO 2025-06-20 00:10:54,463 basehttp 29752 18252 "POST /api/v1/accounts/token/refresh/ HTTP/1.1" 200 548
 INFO 2025-06-20 00:10:54,482 basehttp 29752 18252 "GET /api/v1/accounts/me/ HTTP/1.1" 200 414
+INFO 2025-06-30 19:30:11,877 autoreload 4644 10796 Watching for file changes with StatReloader
+WARNING 2025-06-30 19:30:23,531 basehttp 4644 4864 "GET / HTTP/1.1" 404 3420
+INFO 2025-06-30 23:52:25,853 autoreload 2604 20084 Watching for file changes with StatReloader
+WARNING 2025-06-30 23:53:21,087 basehttp 2604 21776 "GET / HTTP/1.1" 404 3548
+INFO 2025-06-30 23:53:29,683 basehttp 2604 21776 "GET /admin/ HTTP/1.1" 302 0
+INFO 2025-06-30 23:53:29,768 basehttp 2604 21776 "GET /admin/login/?next=/admin/ HTTP/1.1" 200 4181
+INFO 2025-06-30 23:53:30,092 basehttp 2604 21776 "GET /static/admin/css/login.css HTTP/1.1" 200 958
+INFO 2025-06-30 23:53:32,440 basehttp 2604 21776 "POST /admin/login/?next=/admin/ HTTP/1.1" 302 0
+INFO 2025-06-30 23:53:32,518 basehttp 2604 21776 "GET /admin/ HTTP/1.1" 200 21118
+INFO 2025-06-30 23:53:44,863 basehttp 2604 21776 "GET /admin/feeds/petfeed/ HTTP/1.1" 200 20020
+INFO 2025-06-30 23:53:44,942 basehttp 2604 21776 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2025-06-30 23:53:48,423 basehttp 2604 21776 "GET /admin/ HTTP/1.1" 200 21118
+INFO 2025-06-30 23:54:22,641 basehttp 2604 21776 "GET /admin/calculator/feed/ HTTP/1.1" 200 18404
+INFO 2025-06-30 23:54:22,717 basehttp 2604 21776 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2025-06-30 23:54:24,947 basehttp 2604 21776 "GET /admin/ HTTP/1.1" 200 21118
+INFO 2025-06-30 23:54:28,593 basehttp 2604 21776 "GET /admin/accounts/customuser/ HTTP/1.1" 200 22116
+INFO 2025-06-30 23:54:28,667 basehttp 2604 21776 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2025-07-01 00:29:28,830 autoreload 13748 20200 Watching for file changes with StatReloader
+WARNING 2025-07-01 00:29:35,568 basehttp 13748 4692 "GET / HTTP/1.1" 404 4188
+INFO 2025-07-01 00:31:54,871 autoreload 14824 18416 Watching for file changes with StatReloader
+INFO 2025-07-01 00:34:01,005 autoreload 14824 18416 C:\Users\lxzhe\Graduation-Project\GradProject-backend\backend\gradProject\urls.py changed, reloading.
+INFO 2025-07-01 00:34:02,000 autoreload 8556 18816 Watching for file changes with StatReloader
+INFO 2025-07-01 00:34:32,928 autoreload 8556 18816 C:\Users\lxzhe\Graduation-Project\GradProject-backend\backend\gradProject\urls.py changed, reloading.
+INFO 2025-07-01 00:34:33,897 autoreload 22432 24540 Watching for file changes with StatReloader
+INFO 2025-07-01 00:48:34,664 basehttp 22432 1188 "GET /admin/accounts/customuser/add/ HTTP/1.1" 200 27806
+INFO 2025-07-01 00:48:34,726 basehttp 22432 1188 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2025-07-01 00:50:51,578 basehttp 22432 1188 "POST /admin/accounts/customuser/add/ HTTP/1.1" 200 27976
+INFO 2025-07-01 00:50:51,621 basehttp 22432 1188 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2025-07-01 00:51:05,558 basehttp 22432 1188 "POST /admin/accounts/customuser/add/ HTTP/1.1" 302 0
+INFO 2025-07-01 00:51:05,616 basehttp 22432 1188 "GET /admin/accounts/customuser/ HTTP/1.1" 200 22793
+INFO 2025-07-01 00:51:05,654 basehttp 22432 1188 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2025-07-01 00:51:08,647 basehttp 22432 1188 "GET /admin/accounts/customuser/add/ HTTP/1.1" 200 27806
+INFO 2025-07-01 00:51:08,680 basehttp 22432 1188 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2025-07-01 00:51:40,171 basehttp 22432 1188 "POST /admin/accounts/customuser/add/ HTTP/1.1" 302 0
+INFO 2025-07-01 00:51:40,209 basehttp 22432 1188 "GET /admin/accounts/customuser/ HTTP/1.1" 200 23273
+INFO 2025-07-01 00:51:40,247 basehttp 22432 1188 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+WARNING 2025-07-01 00:55:18,636 basehttp 22432 10920 "POST /api/feeds/create/?user_id=1&protein=32&fat=21&carbohydrates=12&calcium=0.1&phosphorus=0.3&magnesium=0.1&sodium=0.05 HTTP/1.1" 401 68
+INFO 2025-07-01 01:05:17,418 autoreload 22432 24540 C:\Users\lxzhe\Graduation-Project\GradProject-backend\backend\gradProject\settings.py changed, reloading.
+INFO 2025-07-01 01:05:18,137 autoreload 18836 9580 Watching for file changes with StatReloader
+ERROR 2025-07-01 01:05:33,015 basehttp 18836 22056 "POST /api/feeds/create/?user_id=1&protein=32&fat=21&carbohydrates=12&calcium=0.1&phosphorus=0.3&magnesium=0.1&sodium=0.05 HTTP/1.1" 500 875
+INFO 2025-07-01 01:07:09,727 autoreload 18836 9580 C:\Users\lxzhe\Graduation-Project\GradProject-backend\backend\calculator\views.py changed, reloading.
+INFO 2025-07-01 01:07:10,390 autoreload 4320 14532 Watching for file changes with StatReloader
+INFO 2025-07-01 01:07:12,686 autoreload 4320 14532 C:\Users\lxzhe\Graduation-Project\GradProject-backend\backend\calculator\views.py changed, reloading.
+INFO 2025-07-01 01:07:13,306 autoreload 14832 17788 Watching for file changes with StatReloader
+INFO 2025-07-01 01:07:20,817 autoreload 14832 17788 C:\Users\lxzhe\Graduation-Project\GradProject-backend\backend\calculator\views.py changed, reloading.
+INFO 2025-07-01 01:07:21,450 autoreload 10516 2888 Watching for file changes with StatReloader
+INFO 2025-07-01 01:07:47,569 autoreload 10516 2888 C:\Users\lxzhe\Graduation-Project\GradProject-backend\backend\calculator\views.py changed, reloading.
+INFO 2025-07-01 01:07:48,156 autoreload 22132 12732 Watching for file changes with StatReloader
+INFO 2025-07-01 01:07:53,962 autoreload 22132 12732 C:\Users\lxzhe\Graduation-Project\GradProject-backend\backend\calculator\views.py changed, reloading.
+INFO 2025-07-01 01:07:54,572 autoreload 21248 2036 Watching for file changes with StatReloader
+INFO 2025-07-01 01:08:42,988 autoreload 21248 2036 C:\Users\lxzhe\Graduation-Project\GradProject-backend\backend\calculator\views.py changed, reloading.
+INFO 2025-07-01 01:08:43,581 autoreload 15272 5840 Watching for file changes with StatReloader
+INFO 2025-07-01 01:10:12,508 autoreload 15272 5840 C:\Users\lxzhe\Graduation-Project\GradProject-backend\backend\calculator\views.py changed, reloading.
+INFO 2025-07-01 01:10:13,124 autoreload 21736 5144 Watching for file changes with StatReloader
+INFO 2025-07-01 01:10:18,382 basehttp 21736 23728 "GET /api/pets/?user_id=2%20%20 HTTP/1.1" 200 2
+INFO 2025-07-01 01:12:45,474 basehttp 21736 14672 "POST /api/feeds/create/?user_id=1&protein=32&fat=21&carbohydrates=12&calcium=0.1&phosphorus=0.3&magnesium=0.1&sodium=0.05 HTTP/1.1" 201 44
+INFO 2025-07-01 01:14:44,048 autoreload 21736 5144 C:\Users\lxzhe\Graduation-Project\GradProject-backend\backend\calculator\views.py changed, reloading.
+INFO 2025-07-01 01:14:44,649 autoreload 16216 23728 Watching for file changes with StatReloader
+INFO 2025-07-01 01:15:25,687 autoreload 16216 23728 C:\Users\lxzhe\Graduation-Project\GradProject-backend\backend\calculator\views.py changed, reloading.
+INFO 2025-07-01 01:15:26,380 autoreload 21220 18604 Watching for file changes with StatReloader
+INFO 2025-07-01 01:15:51,746 autoreload 21220 18604 C:\Users\lxzhe\Graduation-Project\GradProject-backend\backend\calculator\views.py changed, reloading.
+INFO 2025-07-01 01:15:52,473 autoreload 20676 3520 Watching for file changes with StatReloader
+INFO 2025-07-01 01:16:29,622 autoreload 20676 3520 C:\Users\lxzhe\Graduation-Project\GradProject-backend\backend\calculator\views.py changed, reloading.
+INFO 2025-07-01 01:16:30,334 autoreload 6204 19996 Watching for file changes with StatReloader
+INFO 2025-07-01 01:16:49,108 autoreload 6204 19996 C:\Users\lxzhe\Graduation-Project\GradProject-backend\backend\calculator\views.py changed, reloading.
+INFO 2025-07-01 01:16:49,706 autoreload 24364 23448 Watching for file changes with StatReloader
+INFO 2025-07-01 01:17:25,595 basehttp 24364 8256 "POST /api/feeds/create/?user_id=1&protein=32&fat=21&carbohydrates=12&calcium=0.1&phosphorus=0.3&magnesium=0.1&sodium=0.05 HTTP/1.1" 201 159
+WARNING 2025-07-01 01:19:14,724 basehttp 24364 22620 "GET /api/feeds/ HTTP/1.1" 400 29
+WARNING 2025-07-01 01:19:27,327 basehttp 24364 9948 "GET /api/feeds/ HTTP/1.1" 400 29
+INFO 2025-07-01 01:19:59,209 basehttp 24364 5420 "GET /api/feeds/?user_id=1 HTTP/1.1" 200 2
+INFO 2025-07-01 01:20:09,010 basehttp 24364 12692 "GET /api/feeds/?user_id=1 HTTP/1.1" 200 2
+INFO 2025-07-01 01:20:18,521 basehttp 24364 14396 "GET /api/feeds/?user_id=2 HTTP/1.1" 200 2
+INFO 2025-07-01 01:20:26,017 basehttp 24364 22152 "GET /api/feeds/?user_id=1 HTTP/1.1" 200 2
+INFO 2025-07-01 04:49:24,624 autoreload 24364 23448 C:\Users\lxzhe\Graduation-Project\GradProject-backend\backend\calculator\views.py changed, reloading.
+INFO 2025-07-01 04:49:25,662 autoreload 8648 11208 Watching for file changes with StatReloader
+INFO 2025-07-01 04:57:20,855 autoreload 8648 11208 C:\Users\lxzhe\Graduation-Project\GradProject-backend\backend\calculator\views.py changed, reloading.
+INFO 2025-07-01 04:57:21,883 autoreload 22068 7216 Watching for file changes with StatReloader
+INFO 2025-07-01 04:57:24,586 basehttp 22068 23592 "GET /api/feeds/?user_id=1 HTTP/1.1" 200 2
+INFO 2025-07-01 04:57:26,417 basehttp 22068 4604 "GET /api/feeds/?user_id=1 HTTP/1.1" 200 2
+WARNING 2025-07-01 04:58:00,239 basehttp 22068 6160 "GET /api/feeds/?user_id HTTP/1.1" 400 29
+INFO 2025-07-01 04:58:03,733 basehttp 22068 15232 "GET /api/feeds/?user_id=1 HTTP/1.1" 200 2
+INFO 2025-07-01 05:06:06,237 autoreload 2792 3860 Watching for file changes with StatReloader
+INFO 2025-07-01 05:06:19,018 basehttp 2792 4000 "GET /api/feeds/?user_id=2 HTTP/1.1" 200 2
+INFO 2025-07-01 05:06:20,209 basehttp 2792 7712 "GET /api/feeds/?user_id=2 HTTP/1.1" 200 2
+INFO 2025-07-01 05:06:24,092 basehttp 2792 1620 "GET /api/feeds/?user_id=1 HTTP/1.1" 200 2
+INFO 2025-07-01 05:06:39,094 basehttp 2792 10992 "POST /api/feeds/create/?user_id=1&protein=32&fat=21&carbohydrates=12&calcium=0.1&phosphorus=0.3&magnesium=0.1&sodium=0.05 HTTP/1.1" 201 155
+INFO 2025-07-01 05:09:06,865 autoreload 2792 3860 C:\Users\lxzhe\Graduation-Project\GradProject-backend\backend\calculator\views.py changed, reloading.
+INFO 2025-07-01 05:09:08,049 autoreload 3640 17056 Watching for file changes with StatReloader
+INFO 2025-07-01 05:09:09,827 autoreload 3640 17056 C:\Users\lxzhe\Graduation-Project\GradProject-backend\backend\calculator\views.py changed, reloading.
+INFO 2025-07-01 05:09:10,776 autoreload 22424 13596 Watching for file changes with StatReloader
+INFO 2025-07-01 05:09:19,796 autoreload 22424 13596 C:\Users\lxzhe\Graduation-Project\GradProject-backend\backend\calculator\views.py changed, reloading.
+INFO 2025-07-01 05:09:20,704 autoreload 23208 6232 Watching for file changes with StatReloader
+INFO 2025-07-01 05:09:25,137 basehttp 23208 10036 "POST /api/feeds/create/?user_id=1&protein=32&fat=21&carbohydrates=12&calcium=0.1&phosphorus=0.3&magnesium=0.1&sodium=0.05 HTTP/1.1" 201 155
+INFO 2025-07-01 05:09:30,892 basehttp 23208 9708 "GET /api/feeds/?user_id=1 HTTP/1.1" 200 135
+INFO 2025-07-01 05:11:39,539 basehttp 23208 12688 "GET /admin/calculator/feed/ HTTP/1.1" 200 20165
+INFO 2025-07-01 05:11:39,625 basehttp 23208 12688 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+WARNING 2025-07-01 05:11:44,707 basehttp 23208 12688 "GET / HTTP/1.1" 404 4461
+INFO 2025-07-01 05:11:47,455 basehttp 23208 12688 "GET /admin/calculator/feed/ HTTP/1.1" 200 20165
+INFO 2025-07-01 05:11:51,455 basehttp 23208 12688 "GET /admin/calculator/feed/4/change/ HTTP/1.1" 200 24967
+INFO 2025-07-01 05:11:51,500 basehttp 23208 12688 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2025-07-01 05:15:01,108 autoreload 23208 6232 C:\Users\lxzhe\Graduation-Project\GradProject-backend\backend\calculator\models.py changed, reloading.
+INFO 2025-07-01 05:15:02,180 autoreload 12692 12740 Watching for file changes with StatReloader
+INFO 2025-07-01 05:15:11,398 basehttp 12692 12128 "POST /admin/calculator/feed/4/change/ HTTP/1.1" 302 0
+INFO 2025-07-01 05:15:11,561 basehttp 12692 12128 "GET /admin/calculator/feed/ HTTP/1.1" 200 20363
+INFO 2025-07-01 05:15:11,605 basehttp 12692 12128 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2025-07-01 05:15:14,554 basehttp 12692 12128 "GET /admin/calculator/feed/4/change/ HTTP/1.1" 200 24967
+INFO 2025-07-01 05:15:14,590 basehttp 12692 12128 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2025-07-01 05:15:19,301 basehttp 12692 12128 "POST /admin/calculator/feed/4/change/ HTTP/1.1" 302 0
+INFO 2025-07-01 05:15:19,362 basehttp 12692 12128 "GET /admin/calculator/feed/ HTTP/1.1" 200 20363
+INFO 2025-07-01 05:15:19,399 basehttp 12692 12128 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2025-07-01 05:15:20,871 basehttp 12692 12128 "GET /admin/calculator/feed/3/change/ HTTP/1.1" 200 24967
+INFO 2025-07-01 05:15:20,912 basehttp 12692 12128 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2025-07-01 05:15:25,214 basehttp 12692 12128 "POST /admin/calculator/feed/3/change/ HTTP/1.1" 302 0
+INFO 2025-07-01 05:15:25,268 basehttp 12692 12128 "GET /admin/calculator/feed/ HTTP/1.1" 200 20363
+INFO 2025-07-01 05:15:25,303 basehttp 12692 12128 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2025-07-01 05:15:27,078 basehttp 12692 12128 "GET /admin/calculator/feed/2/change/ HTTP/1.1" 200 24963
+INFO 2025-07-01 05:15:27,120 basehttp 12692 12128 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2025-07-01 05:15:30,056 basehttp 12692 12128 "POST /admin/calculator/feed/2/change/ HTTP/1.1" 302 0
+INFO 2025-07-01 05:15:30,098 basehttp 12692 12128 "GET /admin/calculator/feed/ HTTP/1.1" 200 20363
+INFO 2025-07-01 05:15:30,137 basehttp 12692 12128 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2025-07-01 05:15:32,013 basehttp 12692 12128 "GET /admin/calculator/feed/1/change/ HTTP/1.1" 200 24963
+INFO 2025-07-01 05:15:32,101 basehttp 12692 12128 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2025-07-01 05:15:35,563 basehttp 12692 12128 "POST /admin/calculator/feed/1/change/ HTTP/1.1" 302 0
+INFO 2025-07-01 05:15:35,597 basehttp 12692 12128 "GET /admin/calculator/feed/ HTTP/1.1" 200 20363
+INFO 2025-07-01 05:15:35,651 basehttp 12692 12128 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2025-07-01 05:17:39,032 autoreload 12692 12740 C:\Users\lxzhe\Graduation-Project\GradProject-backend\backend\calculator\models.py changed, reloading.
+INFO 2025-07-01 05:17:40,069 autoreload 9956 24048 Watching for file changes with StatReloader
