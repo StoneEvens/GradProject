@@ -43,42 +43,21 @@ class DataHandler:
 class UserPostsPreviewListAPIView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = PostPreviewSerializer
-
-    @log_queries
-    def get_queryset(self):
-        user_id = self.kwargs['pk']
-        # 只需要 select_related user，如果 PostPreviewSerializer 不需要 user 數據則可移除
-        # 預加載圖片以優化 SerializerMethodField
-        # 假設 Image 模型通過 GenericRelation 與 Post 關聯，related_query_name 可能是 'images'
-        # 需要根據 Image 與 Post 的實際關聯方式調整 prefetch_related
-        # ContentType.objects.get_for_model(Post) 可以用於過濾 Image
-        
-        # 由於 first_image_url 在 Serializer 中查詢，這裡可以簡化
-        # 如果 Serializer 中的查詢效率不高，可以考慮在此處預加載 Post 的第一張 Image
-        postFrame = PostFrame.get_postFrame(user_id)
-        serializers = PostPreviewSerializer(
-            postFrame,
-            many=True,
-            context={'request': self.request}
-        )
-
-        return APIResponse(
-            data=serializers.data,
-            message="獲取用戶貼文預覽成功"
-        )
     
     def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
+        username = self.kwargs['pk']
+        user = CustomUser.get_user(username=username)
+        solContents = SoLContent.get_content(user=user)
         
         # 如果使用分頁，處理分頁
-        page = self.paginate_queryset(queryset)
+        page = self.paginate_queryset(solContents)
         if page is not None:
             # context={'request': request}  如果序列化器需要 request context
             serializer = self.get_serializer(page, many=True, context={'request': request})
             return self.get_paginated_response(serializer.data)
         
         # 如果不使用分頁
-        serializer = self.get_serializer(queryset, many=True, context={'request': request})
+        serializer = self.get_serializer(solContents, many=True, context={'request': request})
         
         return APIResponse(
             data=serializer.data,
@@ -105,8 +84,12 @@ class SearchAPIView(APIView):
         # 如果以#開頭，搜尋Hashtag
         if query.startswith('#'):
             tag_query = query[1:]  # 去除#符號
-            posts = self._search_by_hashtag(tag_query)
-            post_serializer = PostSearchSerializer(posts, many=True, context={'request': request})
+            
+            hashtags = PostHashtag.get_hashtags(query=tag_query)
+            postFrameList = PostHashtag.get_postFrame(hashtags.values_list('postFrame_id', flat=True))
+            solContents = SoLContent.get_content(postFrameList=postFrameList)
+
+            post_serializer = SolPostSerializer(solContents, many=True, context={'request': request})
             
             return APIResponse(
                 data={
@@ -117,7 +100,7 @@ class SearchAPIView(APIView):
             )
         else:
             # 先嘗試查找用戶
-            users = self._search_users(query)
+            users = CustomUser.search_users(query)
             
             if users.exists():
                 # 序列化找到的用戶
@@ -125,8 +108,10 @@ class SearchAPIView(APIView):
                 
                 # 獲取這些用戶的貼文
                 user_ids = list(users.values_list('id', flat=True))
-                posts = PostFrame.objects.filter(user__in=user_ids).select_related('user').order_by('-created_at')
-                post_serializer = PostSearchSerializer(posts, many=True, context={'request': request})
+                postFrameList = PostFrame.get_postFrames(userList=user_ids)
+                solContents = SoLContent.get_content(postFrameList=postFrameList)
+
+                post_serializer = SolPostSerializer(solContents, many=True, context={'request': request})
                 
                 return APIResponse(
                     data={
@@ -137,8 +122,11 @@ class SearchAPIView(APIView):
                 )
             else:
                 # 若找不到用戶，則從貼文內容中搜尋
-                posts = self._search_posts_by_content(query)
-                post_serializer = PostSearchSerializer(posts, many=True, context={'request': request})
+                contents = SoLContent.get_content(query=query)
+                postFrameList = PostFrame.get_postFrames(idList=contents.values_list('postFrame_id', flat=True))
+                solContents = SoLContent.get_content(postFrameList=postFrameList)
+
+                post_serializer = SolPostSerializer(solContents, many=True, context={'request': request})
                 
                 return APIResponse(
                     data={
@@ -147,43 +135,6 @@ class SearchAPIView(APIView):
                     },
                     message="根據貼文內容搜尋結果"
                 )
-    
-    def _search_by_hashtag(self, tag_query):
-        hashtags = PostHashtag.get_hashtags(query=tag_query)
-        postFrames = hashtags.postFrame
-        serializers = PostSearchSerializer(
-            postFrames,
-            many=True,
-            context={'request': self.request}
-        )
-
-        return APIResponse(
-            data=serializers.data,
-            message="搜尋Hashtag成功"
-        )
-
-    def _search_users(self, query):
-        users = User.search_users(query)
-        serializers = UserDetailSearchSerializer(users, many=True)
-
-        return APIResponse(
-            data=serializers.data,
-            message="搜尋用戶成功"
-        )
-    
-    def _search_posts_by_content(self, query):
-        content = SoLContent.get_content(query)
-        postFrame = content.postFrame
-        serializers = PostFrameSerializer(
-            postFrame,
-            many=True,
-            context={'request': self.request}
-        )
-
-        return APIResponse(
-            data=serializers.data,
-            message="搜尋貼文內容成功"
-        )
 
 # === 搜尋建議 API ===
 class SearchSuggestionAPIView(APIView):
@@ -204,7 +155,7 @@ class SearchSuggestionAPIView(APIView):
         # 如果以#開頭，建議Hashtags
         if query.startswith('#'):
             tag_query = query[1:]  # 去除#符號
-            hashtags = PostHashtag.get_hashtags(tag_query)
+            hashtags = PostHashtag.get_hashtags(query=tag_query)
             
             for tag in hashtags:
                 suggestions.append({
@@ -223,7 +174,7 @@ class SearchSuggestionAPIView(APIView):
                 
             # 如果建議不足5個，添加部分hashtag建議
             if len(suggestions) < 5:
-                hashtags = PostHashtag.get_hashtags(query, count=5-len(suggestions))
+                hashtags = PostHashtag.get_hashtags(query=query, count=5-len(suggestions))
                 
                 for tag in hashtags:
                     suggestions.append({
@@ -366,9 +317,9 @@ class UserPostListAPIView(generics.ListAPIView):
         user = CustomUser.get_user(user_id)
         
         # 按創建時間降序獲取該用戶的所有貼文
-        posts = PostFrame.get_postFrame(user)
+        posts = SoLContent.get_content(user=user)
 
-        return PostFrameSerializer(posts, many=True)
+        return SolPostSerializer(posts, many=True)
     
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
@@ -386,4 +337,3 @@ class UserPostListAPIView(generics.ListAPIView):
             data=serializer.data,
             message="獲取用戶貼文列表成功"
         )
-

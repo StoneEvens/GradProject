@@ -20,12 +20,12 @@ class PostFrame(models.Model):
     shares = models.IntegerField(default=0, help_text="分享數")
     upvotes = models.IntegerField(default=0, help_text="點讚數")
     updated_at = models.DateTimeField(auto_now=True)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='postsframes')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='postframes')
 
     def __str__(self):
         return f"{self.user.username}'s Post at {self.created_at}"
     
-    def create(self, user: CustomUser):
+    def create(user: CustomUser):
         postFrame = PostFrame.objects.create(user=user)
         return postFrame
     
@@ -37,14 +37,20 @@ class PostFrame(models.Model):
         return self.id
     
     # 獲取貼文框本身
-    def get_postFrame(self, postID):
-        try:
+    def get_postFrames(postID=None, user=None, userList:list=None, idList:list=None):
+        if postID is not None:
             return PostFrame.objects.get(id=postID)
-        except PostFrame.DoesNotExist:
-            return None
-    
-    def get_postFrame(self, user):
-        return PostFrame.objects.filter(user=user).order_by('-created_at')[:50]
+            
+        if user is not None:
+            return PostFrame.objects.filter(user=user).order_by('-created_at')[:50]
+        
+        if userList is not None:
+            return PostFrame.objects.filter(user__in=userList).order_by('-created_at')[:50]
+        
+        if idList is not None:
+            return PostFrame.objects.filter(id__in=idList).order_by('-created_at')[:50]
+        
+        return PostFrame.objects.none()
 
     def handle_interaction(self, fromRelation:str = None, toRelation:str = None):
         update_fields = []
@@ -94,12 +100,12 @@ class PostFrame(models.Model):
     
     def get_interaction_stats(self):
         
-        return {
+        return [
             self.upvotes,
             self.downvotes,
             self.saves,
             self.shares
-        }
+        ]
 
 #----------貼文內容----------
 #SoL (Slice of Life) 貼文內容
@@ -112,34 +118,33 @@ class SoLContent(models.Model):
     content_text = models.TextField(help_text="存儲具體內容文本")
 
     def __str__(self):
-        return f"Content for Post {self.post.id} - Type: {self.content_type}"
+        return f"Content for Post {self.postFrame.id}"
     
-    def create(self, postFrame: PostFrame, content_text: str):
+    def create(postFrame: PostFrame, content_text: str):
         content = SoLContent.objects.create(
             postFrame=postFrame,
             content_text=content_text
         )
         return content
     
-    def get_content(self, PostFrame: PostFrame):
-        return SoLContent.objects.filter(
-            postFrame=PostFrame
-        )
+    def get_content(postFrame:PostFrame=None, postFrameList:list = None, user=None, hashtag:str=None, query:str=None):
 
-    def get_content(self, user: CustomUser):
-        return SoLContent.objects.filter(
-            postFrame__user=user
-        )[:50]
-    
-    def get_content(self, hashtag: str):
-        return SoLContent.objects.filter(
-            postFrame__hashtags__tag=hashtag
-        )[:50]
-    
-    def get_content(self, query: str):
-        return SoLContent.objects.filter(
-            content_text__icontains=query
-        )[:50]
+        if postFrame is not None:
+            return SoLContent.objects.filter(postFrame=postFrame)
+        
+        if postFrameList is not None:
+            return SoLContent.objects.filter(postFrame__in=postFrameList)
+        
+        if user is not None:
+            return SoLContent.objects.filter(postFrame__user=user)[:50]
+        
+        if hashtag is not None:
+            return SoLContent.objects.filter(postFrame__hashtags__tag=hashtag)[:50]
+        
+        if query is not None:
+            return SoLContent.objects.filter(content_text__icontains=query)[:50]
+        
+        return SoLContent.objects.none()
 
 # === 貼文的 Hashtag ===
 class PostHashtag(models.Model):
@@ -153,7 +158,7 @@ class PostHashtag(models.Model):
     def __str__(self):
         return f"#{self.tag} for Post {self.post.id}"
     
-    def create(self, postFrame: PostFrame, tag: str):
+    def create(postFrame: PostFrame, tag: str):
         tag = slugify(tag)
         hashtag = PostHashtag.objects.create(
             postFrame=postFrame,
@@ -161,20 +166,22 @@ class PostHashtag(models.Model):
         )
         return hashtag
 
-    def get_hashtags(PostFrame: PostFrame) -> QuerySet:
-        return PostHashtag.objects.filter(
-            postFrame=PostFrame
-        )
+    def get_hashtags(postFrame: PostFrame = None, query: str = None, count: int = None) -> QuerySet:
 
-    def get_hashtags(query:str) -> QuerySet:
-        return PostHashtag.objects.filter(
-            tag__icontains=query
-        )[:50]
+        if PostFrame is not None:
+            return PostHashtag.objects.filter(postFrame=postFrame)
+        
+        if query is not None and count is not None:
+            return PostHashtag.objects.filter(tag__icontains=query)[:count]
+        
+        if query is not None:
+            return PostHashtag.objects.filter(tag__icontains=query)[:50]
+        
+        return PostHashtag.objects.none()
     
-    def get_hashtags(query:str, count: int) -> QuerySet:
-        return PostHashtag.objects.filter(
-            tag__icontains=query
-        )[:count]
+    def get_postFrame(taglist: list):
+
+        return PostFrame.objects.filter(id__in=taglist)
 
 class PostPets(models.Model):
     postFrame = models.ForeignKey(
@@ -191,9 +198,12 @@ class PostPets(models.Model):
     def __str__(self):
         return f"{self.pet.pet_name} tagged in Post {self.postFrame.id}"
     
-    def create(self, postFrame: PostFrame, pet: Pet):
+    def create(postFrame: PostFrame, pet: Pet):
         tagged_pet = PostPets.objects.create(
             postFrame=postFrame,
             pet=pet
         )
         return tagged_pet
+    
+    def get_pets(postFrame:PostFrame):
+        return PostPets.objects.filter(postFrame=postFrame)

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import PostHashtag, PostFrame
+from .models import PostHashtag, PostFrame, SoLContent
 
 # 貼文標籤管理
 @admin.register(PostHashtag)
@@ -7,6 +7,10 @@ class PostHashtagAdmin(admin.ModelAdmin):
     list_display = ('tag', 'postFrame')
     search_fields = ('tag', 'post__content')
     list_filter = ('tag',)
+
+@admin.register(SoLContent)
+class SoLContentAdmin(admin.ModelAdmin):
+    list_display = ('id', 'postFrame', 'content_text')
 
 @admin.register(PostFrame)
 class PostFrameAdmin(admin.ModelAdmin):

@@ -20,7 +20,7 @@ class TodayPopularIllnessArchiveAPIView(APIView):
 
     def get(self, request):
         today = date.today()
-        archives = IllnessArchiveContent.objects.filter(post_date=today).order_by('-popularity')[:4]
+        archives = ForumContent.objects.filter(post_date=today).order_by('-popularity')[:4]
         serializer = IllnessArchiveSerializer(archives, many=True, context={'request': request})
         return APIResponse(data=serializer.data)
 
@@ -36,7 +36,7 @@ class UserPetsAPIView(APIView):
             'headshot', # 預加載 PetHeadshot (OneToOneField)
             Prefetch(
                 'illness_archives', # Pet -> IllnessArchive (related_name)
-                queryset=IllnessArchiveContent.objects.prefetch_related(
+                queryset=ForumContent.objects.prefetch_related(
                     'illnesses__illness' # IllnessArchive -> ArchiveIllnessRelation (related_name='illnesses') -> Illness
                 )
             )
@@ -72,28 +72,20 @@ class UserIllnessArchiveListAPIView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = IllnessArchiveSerializer
     
-    @log_queries
-    def get_queryset(self):
-        user_id = self.kwargs['pk']
-        # 正確使用 select_related 和 prefetch_related
-        return IllnessArchiveContent.objects.filter(user_id=user_id).select_related(
-            'pet', 'user'
-        ).prefetch_related(
-            'illnesses__illness'
-        ).order_by('-post_date')
-    
     # 覆寫 list 方法以使用標準化響應格式（如果不使用分頁）
     def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
+        username = self.kwargs['pk']
+        user = CustomUser.get_user(username=username)
+        forumContents = ForumContent.get_content(user=user)
         
         # 如果使用分頁，分頁類會處理響應格式
-        page = self.paginate_queryset(queryset)
+        page = self.paginate_queryset(forumContents)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
             return self.get_paginated_response(serializer.data)
         
         # 如果不使用分頁，手動使用 APIResponse
-        serializer = self.get_serializer(queryset, many=True)
+        serializer = self.get_serializer(forumContents, many=True)
         return APIResponse(
             data=serializer.data,
             message="獲取病程紀錄成功"

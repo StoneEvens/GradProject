@@ -2,6 +2,8 @@ from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.contrib.auth import authenticate
 from django.utils.translation import gettext_lazy as _
+
+from media.models import UserHeadshot
 from .models import *
 import logging
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -99,11 +101,8 @@ class UserProfileSerializer(serializers.ModelSerializer):
         fields = ['id', 'username', 'email', 'headshot_url', 'user_fullname', 'user_account', 'points', 'user_intro']
         read_only_fields = ['id', 'points', 'user_account']
 
-    def get_headshot_url(self, obj):
-        try:
-            return obj.headshot.img_url
-        except:
-            return None
+    def get_headshot_url(self, user:CustomUser):
+        return UserHeadshot.get_headshot_url(user=user)
 
 class UserSummarySerializer(serializers.Serializer):
     id = serializers.IntegerField()
@@ -116,7 +115,7 @@ class UserSummarySerializer(serializers.Serializer):
 
 class NotificationSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Notification
+        model = FollowNotification
         fields = '__all__'
 
 class UserFollowSerializer(serializers.ModelSerializer):

@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from comments.models import Comment
 from social.models import PostFrame
-from pets.models import IllnessArchiveContent
+from pets.models import ForumContent
 from .models import UserInteraction
 from .serializers import UserInteractionSerializer
 from social.models import PostFrame
@@ -108,5 +108,5 @@ class IllnessArchiveInteractionView(BaseInteractionView):
     """
     處理疾病檔案的互動操作 (點讚/踩/收藏/分享)
     """
-    model = IllnessArchiveContent  # 使用正確的疾病檔案模型
+    model = ForumContent  # 使用正確的疾病檔案模型
     allowed_relations = ['upvoted', 'downvoted', 'saved', 'shared']

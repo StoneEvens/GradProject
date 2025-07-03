@@ -57,26 +57,26 @@ class Image(SuperImage):
             models.Index(fields=['firebase_path'])
         ]
     
-    def url(self):
-        return self.firebase_url
-    
     def create(self, postFrame: PostFrame, firebase_path:str):
         super().create(firebase_path=firebase_path)
         Image.objects.create(postFrame=postFrame)
     
     def get_first_image_url(self, postFrame: PostFrame):
-        return self.objects.filter(post_frame=postFrame).order_by('sort_order').first().url
+        return self.objects.filter(post_frame=postFrame).order_by('sort_order').first().url()
 
 
 class PetHeadshot(SuperImage):
     pet = models.OneToOneField(Pet, on_delete=models.CASCADE, related_name='headshot')
     
-    def url(self, pet:Pet):
-        return self.objects.filter(pet=pet).first().firebase_url
+    def url(pet:Pet):
+        return PetHeadshot.objects.filter(pet=pet).first().firebase_url
 
 
 class UserHeadshot(SuperImage):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='headshot')
     
-    def get_headshot_url(self, user:CustomUser):
-        return self.objects.filter(user=user).first().firebase_url
+    def get_headshot_url(user:CustomUser):
+        try:
+            return UserHeadshot.objects.filter(user=user).first().url()
+        except AttributeError:
+            return ""

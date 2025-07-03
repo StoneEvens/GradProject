@@ -5,11 +5,22 @@ from django.db.models import Q
 
 # 使用者模型：擴充自 Django AbstractUser
 class CustomUser(AbstractUser):
+    PRIVACY_CHOICES = [
+        ('public', '公開'),
+        ('private', '私人'),
+    ]
+
     # 擴充使用者欄位
     points = models.IntegerField(default=0)
     user_intro = models.TextField(blank=True, null=True)  # 使用者自我介紹
     user_fullname = models.CharField(max_length=150, blank=True)  # 使用者真實姓名
     user_account = models.CharField(max_length=150, unique=True)  # 唯一帳號
+    account_privacy = models.CharField(
+        max_length=10, 
+        choices=PRIVACY_CHOICES, 
+        default='public',
+        help_text='設定帳號隱私狀態，決定其他用戶是否可以查看您的個人資料'
+    )  # 帳號隱私設定
     
     def __str__(self):
         return self.username
@@ -21,20 +32,31 @@ class CustomUser(AbstractUser):
             user.save(update_fields=['points'])
             return user.points
         return None
+    
+    def get_user(username:str=None, id:str=None):
 
-    def search_users(self, query):
-        return self.objects.filter(
+        if username is not None:
+            return CustomUser.objects.filter(user_account=username).first()
+        
+        if id is not None:
+            return CustomUser.objects.filter(id=id).first()
+
+    def search_users(query):
+        return CustomUser.objects.filter(
             Q(username__icontains=query) | 
             Q(user_fullname__icontains=query) |
             Q(user_account__icontains=query)
         )[:5]
     
-    def get_user(self, user_id):
-        return self.objects.filter(user_id=user_id).first()
+    def check_username(username:str) -> bool:
+        return CustomUser.objects.filter(user_account=username).exists()
     
-    def check_duplicate_user(self, user_account: str, user_email: str) -> str:
-        account_exist = CustomUser.objects.filter(user_account=user_account).exists()
-        email_exist = CustomUser.objects.filter(user_email=user_email).exists()
+    def check_email(email:str) -> bool:
+        return CustomUser.objects.filter(email=email).exists()
+    
+    def check_duplicate_user(user_account: str, user_email: str) -> str:
+        account_exist = CustomUser.check_username(username=user_account)
+        email_exist = CustomUser.check_email(email=user_email)
 
         if account_exist:
             return "帳號已存在。"
@@ -43,6 +65,7 @@ class CustomUser(AbstractUser):
             return "Email 已被使用。"
         
         return "OK"
+        
 
 # 使用者追蹤功能
 class UserFollow(models.Model):
@@ -61,6 +84,9 @@ class UserFollow(models.Model):
 
     class Meta:
         unique_together = ('user', 'follows')
+
+    def check_follow(user:CustomUser, follows:CustomUser):
+        return UserFollow.objects.filter(user=user, follows=follows)
 
 # 使用者封鎖功能
 class UserBlock(models.Model):
@@ -208,24 +234,25 @@ class UserAchievement(models.Model):
     def __str__(self):
         return f"{self.user.username} - {self.achievement.achievement_name}" 
 
-# 系統通知模型（資訊、警告、自定義類型）
+# 通知Superclass，通知類別直接繼承Notification即可
 class Notification(models.Model):
-    NOTIFICATION_TYPES = [
-        ('info', 'Info'),
-        ('warning', 'Warning'),
-        ('alert', 'Alert'),
-        ('custom', 'Custom'),
-    ]
-
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='notifications'
     )
-    notification_type = models.CharField(max_length=50, choices=NOTIFICATION_TYPES)
-    content = models.CharField(max_length=255)
     date = models.DateField(auto_now_add=True)
-    is_read = models.BooleanField(default=False) 
+    is_read = models.BooleanField(default=False)
+
+    class Meta:
+        abstract=True
+
+    def __str__(self):
+        return f"{self.user.username} - {self.notification_type}: {self.content[:20]}"
+
+# 系統通知模型（資訊、警告、自定義類型）
+class FollowNotification(Notification):
+    content = models.CharField(max_length=255)
 
     def __str__(self):
         return f"{self.user.username} - {self.notification_type}: {self.content[:20]}"
@@ -246,4 +273,12 @@ class Plan(models.Model):
 
     def __str__(self):
         return f"{self.user.username}'s Plan: {self.title} ({self.date})"
+    
+    def get_plan(user:CustomUser, start_time=None, end_time=None, id=None):
+
+        if id is not None:
+            return Plan.objects.get(id=id, user=user)
+        
+        if start_time and end_time is not None:
+            return Plan.objects.filter(user=user, date__range=(start_time, end_time))
     

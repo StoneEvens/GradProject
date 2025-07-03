@@ -6,7 +6,7 @@ from rest_framework import status as drf_status
 from rest_framework.permissions import IsAuthenticated
 from media.models import Image
 from pets.models import Pet
-from pets.models import IllnessArchiveContent
+from pets.models import ForumContent
 from feeds.models import * 
 import math
 from utils.api_response import APIResponse

@@ -22,4 +22,19 @@ urlpatterns = [
     path('check/account/', CheckUserAccountAPIView.as_view(), name='check-account'),
     path('check/email/', CheckEmailAPIView.as_view(), name='check-email'),
     path('check/password/', CheckPasswordAPIView.as_view(), name='check-password'),
+
+    
+    # 追蹤相關 API
+    path('follow/<int:user_id>/', FollowAPIView.as_view(), name='follow-user'),
+    path('follow/<str:user_account>/', FollowByAccountAPIView.as_view(), name='follow-user-by-account'),
+    path('follow/status/batch/', FollowStatusBatchAPIView.as_view(), name='follow-status-batch'),
+    path('following/', FollowingListAPIView.as_view(), name='following-list'),
+    path('followers/', FollowersListAPIView.as_view(), name='followers-list'),
+    path('followers/remove/<str:user_account>/', RemoveFollowerAPIView.as_view(), name='remove-follower'),
+    
+    # 通知相關路由
+    path('notifications/', NotificationListAPIView.as_view(), name='notification-list'),
+    path('notifications/<int:notification_id>/read/', MarkNotificationAsReadAPIView.as_view(), name='mark-notification-read'),
+    path('notifications/read-all/', MarkAllNotificationsAsReadAPIView.as_view(), name='mark-all-notifications-read'),
+    path('notifications/<int:notification_id>/follow-request/', FollowRequestResponseAPIView.as_view(), name='follow-request-response'),
 ]

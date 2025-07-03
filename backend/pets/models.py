@@ -5,6 +5,8 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from rest_framework import status as drf_status
 from django.contrib.auth import get_user_model
+
+from accounts.models import CustomUser
 User = get_user_model()
 
 #----------寵物本身----------
@@ -15,7 +17,7 @@ class Pet(models.Model):
     age = models.IntegerField(null=True, blank=True, help_text="年齡 (歲)")
     breed = models.CharField(max_length=100, null=True, blank=True, help_text="品種")
     height = models.FloatField(null=True, blank=True, help_text="身高 (公分)")
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='pets')
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='pets', null=True)
     pet_name = models.CharField(max_length=100)
     pet_stage = models.CharField(max_length=20, choices=PET_STAGE_CHOICES, null=True, blank=True, help_text="年齡階段")
     pet_type = models.CharField(max_length=100)  
@@ -91,9 +93,9 @@ class AbnormalPost(models.Model):
     body_temperature = models.FloatField()
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
-    pet = models.ForeignKey('Pet', on_delete=models.CASCADE, related_name='abnormal_posts')
+    pet = models.ForeignKey('Pet', on_delete=models.CASCADE, related_name='abnormal_posts', null=True)
     updated_at = models.DateTimeField(auto_now=True)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='abnormal_posts')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='abnormal_posts', null=True)
     water_amount = models.IntegerField()
     weight = models.FloatField()
 
@@ -117,38 +119,35 @@ class Illness(models.Model):
         return self.illness_name
 
 # 病程紀錄
-class IllnessArchiveContent(models.Model):
+class ForumContent(models.Model):
     archive_title = models.CharField(max_length=100)
     content = models.TextField()
     go_to_doctor = models.BooleanField(default=False)
     health_status = models.CharField(max_length=100)
-    pet = models.ForeignKey('Pet', on_delete=models.CASCADE, related_name='illness_archives')
+    pet = models.ForeignKey('Pet', on_delete=models.CASCADE, related_name='illness_archives', null=True)
     postFrame = models.ForeignKey(
-        'social.PostFrame', on_delete=models.CASCADE, related_name='illness_archives'
+        'social.PostFrame', on_delete=models.CASCADE, related_name='illness_archives_postFrame', null=True
     )
 
     def __str__(self):
         return f"Archive: {self.archive_title} for {self.pet.pet_name}"
     
-    def get_content(self, user):
-        return IllnessArchiveContent.objects.filter(
-            user=user
-        )[:50]
-    
-    def get_content(self, hashtag):
-        return IllnessArchiveContent.objects.filter(
-            content__icontains=hashtag
-        )[:50]
-    
-    def get_content(self, query):
-        return IllnessArchiveContent.objects.filter(
-            content__icontains=query
-        )[:50]
+    def get_content(user: CustomUser = None, hashtag: str = None, query:str = None):
+        if user:
+            return ForumContent.objects.filter(postFrame__user=user).order_by('-post_date')[:50]
+        
+        if hashtag:
+            return ForumContent.objects.filter(content__icontains=query)[:50]
+        
+        if query:
+            return ForumContent.objects.filter(content__icontains=query)[:50]
+        
+        return ForumContent.objects.none()
 
 # 異常貼文的症狀(多對多關聯拆分)
 class PostSymptomsRelation(models.Model):
-    post = models.ForeignKey(AbnormalPost, on_delete=models.CASCADE, related_name='symptoms')
-    symptom = models.ForeignKey(Symptom, on_delete=models.CASCADE, related_name='posts')
+    post = models.ForeignKey(AbnormalPost, on_delete=models.CASCADE, related_name='symptoms', null=True)
+    symptom = models.ForeignKey(Symptom, on_delete=models.CASCADE, related_name='posts', null=True)
 
     class Meta:
         unique_together = ('post', 'symptom')
@@ -159,14 +158,16 @@ class PostSymptomsRelation(models.Model):
 # 病程紀錄的異常貼文(多對多關聯拆分)
 class ArchiveAbnormalPostRelation(models.Model):
     archive = models.ForeignKey(
-        IllnessArchiveContent,
+        ForumContent,
         on_delete=models.CASCADE,
-        related_name='abnormal_posts'
+        related_name='abnormal_posts',
+        null=True
     )
     post = models.ForeignKey(
         AbnormalPost,
         on_delete=models.CASCADE,
-        related_name='archive_links'
+        related_name='archive_links',
+        null=True
     )
 
     class Meta:
@@ -177,7 +178,7 @@ class ArchiveAbnormalPostRelation(models.Model):
 
 # 病程紀錄的病因(多對多關聯拆分)
 class ArchiveIllnessRelation(models.Model):
-    archive = models.ForeignKey(IllnessArchiveContent, on_delete=models.CASCADE, related_name='illnesses')
+    archive = models.ForeignKey(ForumContent, on_delete=models.CASCADE, related_name='illnesses', null=True)
     illness = models.ForeignKey(Illness, on_delete=models.CASCADE, related_name='archives')
 
     class Meta:

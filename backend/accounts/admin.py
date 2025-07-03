@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .models import (
     CustomUser, UserFollow, UserBlock, Achievement, UserAchievement, 
-    Notification, Plan
+    FollowNotification, Plan
 )
 
 # 自定義用戶管理
@@ -46,10 +46,10 @@ class UserAchievementAdmin(admin.ModelAdmin):
     readonly_fields = ('date_achieved',)
 
 # 通知管理
-@admin.register(Notification)
+@admin.register(FollowNotification)
 class NotificationAdmin(admin.ModelAdmin):
-    list_display = ('user', 'notification_type', 'content', 'date', 'is_read')
-    list_filter = ('notification_type', 'date', 'is_read')
+    list_display = ('user', 'content', 'date', 'is_read')
+    list_filter = ('date', 'is_read')
     search_fields = ('user__username', 'content')
     readonly_fields = ('date',)
 
