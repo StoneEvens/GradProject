@@ -12,6 +12,8 @@ import SocialPage from './pages/SocialPage';
 import SettingsPage from './pages/SettingsPage';
 import NotificationPage from './pages/NotificationPage';
 import PetPage from './pages/PetPage';
+import AddPetPage from './pages/AddPetPage';
+import EditPetPage from './pages/EditPetPage';
 import { isAuthenticated, refreshAccessToken } from './services/authService';
 
 const App = () => {
@@ -152,6 +154,16 @@ const App = () => {
         <Route 
           path="/pet" 
           element={isUserAuthenticated ? <PetPage /> : <Navigate to="/" />} 
+        />
+        {/* 新增寵物頁面：未登入導向HomePage */}
+        <Route 
+          path="/pet/add" 
+          element={isUserAuthenticated ? <AddPetPage /> : <Navigate to="/" />} 
+        />
+        {/* 編輯寵物頁面：未登入導向HomePage */}
+        <Route 
+          path="/pet/:petId/edit" 
+          element={isUserAuthenticated ? <EditPetPage /> : <Navigate to="/" />} 
         />
 
         {/* 未定義路徑：根據登入狀態重定向 */}

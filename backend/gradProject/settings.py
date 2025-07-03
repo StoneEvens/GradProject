@@ -53,7 +53,7 @@ INSTALLED_APPS = [
     "comments",
     "media",
     "articleRecommendation",
-    "calculator",
+    # "calculator",  # 已忽略 calculator app
 ]
 
 MIDDLEWARE = [
@@ -187,6 +187,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+
+# Media files configuration (for file uploads)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

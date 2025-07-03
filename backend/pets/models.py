@@ -22,13 +22,14 @@ class Pet(models.Model):
         related_name='pets'
     )
 
-    age = models.IntegerField(null=True, blank=True, help_text="年齡 (歲)")
+    age = models.FloatField(null=True, blank=True, help_text="年齡 (歲)")
     breed = models.CharField(max_length=100, null=True, blank=True, help_text="品種")
 
     weight = models.FloatField(null=True, blank=True, help_text="體重 (公斤)")
     height = models.FloatField(null=True, blank=True, help_text="身高 (公分)")
     pet_stage = models.CharField(max_length=20, choices=PET_STAGE_CHOICES, null=True, blank=True, help_text="年齡階段")
     predicted_adult_weight = models.FloatField(null=True, blank=True, help_text="預期成犬/成貓體重 (公斤)")
+    description = models.TextField(blank=True, null=True, help_text="寵物簡介")
 
     def __str__(self):
         return f"{self.pet_name} ({self.pet_type})"

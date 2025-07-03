@@ -1,0 +1,187 @@
+/* PetSwitcher 組件樣式 */
+.petSwitcherContainer {
+  
+  padding: 20px 20px;
+  margin: 20px 0;
+  position: relative;
+}
+
+/* 標題區域 */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #F08651;
+}
+
+.title {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #8B4513;
+}
+
+.addButton {
+  background: #FFB370;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 5px 10px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  cursor: pointer;
+ 
+}
+
+.addButton:hover {
+  background: #F08651;
+}
+
+.addButton:active {
+  transform: translateY(0);
+}
+
+/* 寵物列表 */
+.petList {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding: 8px 0;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE 10+ */
+}
+
+.petList::-webkit-scrollbar {
+  display: none; /* WebKit */
+}
+
+.petItem {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 8px;
+  border-radius: 12px;
+}
+
+.petItem:hover {
+  background: rgba(255, 179, 112, 0.1);
+}
+
+/* 寵物頭像包裝器 */
+.petAvatarWrapper {
+  position: relative;
+  margin-bottom: 8px;
+}
+
+.petAvatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #E0E0E0;
+  background: #fff;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 選中狀態的寵物 */
+.activePet .petAvatar {
+  border-color: #FFB370;
+  box-shadow: 0 4px 12px rgba(255, 179, 112, 0.4);
+  transform: scale(1.05);
+}
+
+/* 選中指示器 */
+.activeIndicator {
+  position: absolute;
+  bottom: -1px;
+  right: -1px;
+  width: 16px;
+  height: 16px;
+  background: #FFB370;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(255, 179, 112, 0.4);
+}
+
+.activeIndicator::before {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #fff;
+  font-size: 10px;
+  font-weight: bold;
+}
+
+/* 寵物名稱 */
+.petName {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #666;
+  text-align: center;
+  max-width: 50px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 0.3s ease;
+}
+
+.activePet .petName {
+  color: #FFB370;
+  font-weight: 700;
+}
+
+/* 響應式設計 */
+@media (max-width: 400px) {
+  .petSwitcherContainer {
+    padding: 16px 0;
+    margin: 16px 0;
+  }
+  
+  .header {
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+  }
+  
+  .title {
+    font-size: 1rem;
+  }
+  
+  .addButton {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+    border-radius: 16px;
+  }
+  
+  .petList {
+    gap: 12px;
+  }
+  
+  .petAvatar {
+    width: 40px;
+    height: 40px;
+    border-width: 2px;
+  }
+  
+  .activeIndicator {
+    width: 14px;
+    height: 14px;
+    border-width: 2px;
+    bottom: -1px;
+    right: -1px;
+  }
+  
+  .activeIndicator::before {
+    font-size: 7px;
+  }
+  
+  .petName {
+    font-size: 0.8rem;
+    max-width: 40px;
+  }
+} 

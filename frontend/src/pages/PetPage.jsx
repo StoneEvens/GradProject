@@ -4,6 +4,7 @@ import styles from '../styles/PetPage.module.css';
 import TopNavbar from '../components/TopNavbar';
 import BottomNavbar from '../components/BottomNavbar';
 import Notification from '../components/Notification';
+import PetSwitcher from '../components/PetSwitcher';
 import { NotificationProvider } from '../context/NotificationContext';
 import { getUserPets } from '../services/petService';
 
@@ -49,7 +50,8 @@ const PetPage = () => {
           pet_stage: pet.pet_stage,
           predicted_adult_weight: pet.predicted_adult_weight,
           illnesses: pet.illnesses,
-          description: `${pet.age ? pet.age + '歲' : ''}${pet.breed ? '，' + pet.breed : ''}${pet.pet_stage ? '，' + pet.pet_stage : ''}`,
+          description: pet.description || '',
+          basicInfo: `${pet.age ? pet.age + '歲' : ''}${pet.breed ? '，' + pet.breed : ''}${pet.pet_stage ? '，' + pet.pet_stage : ''}`,
           avatarUrl: pet.headshot_url
         }));
         
@@ -81,7 +83,6 @@ const PetPage = () => {
   // 切換寵物
   const handlePetSwitch = (pet) => {
     setCurrentPet(pet);
-    showNotification(`已切換到 ${pet.name}`);
   };
 
   // 功能按鈕點擊處理
@@ -91,9 +92,16 @@ const PetPage = () => {
 
   // 新增寵物
   const handleAddPet = () => {
-    showNotification('新增寵物功能開發中');
-    // TODO: 實現新增寵物的 Modal 或導航到新增寵物頁面
-    // 成功新增後應該調用 fetchPets() 重新獲取資料
+    navigate('/pet/add');
+  };
+
+  // 編輯寵物資料
+  const handleEditPet = () => {
+    if (currentPet) {
+      navigate(`/pet/${currentPet.id}/edit`);
+    } else {
+      showNotification('請選擇要編輯的寵物');
+    }
   };
 
   // 重新獲取寵物資料
@@ -133,20 +141,23 @@ const PetPage = () => {
             <>
               {/* 寵物頭像與基本資訊 */}
               <div className={styles.petHeader}>
-                <div className={styles.petAvatar}>
+                <div className={styles.avatarSection}>
                   <img 
                     src={currentPet.avatarUrl || '/assets/icon/DefaultAvatar.jpg'} 
                     alt={currentPet.name} 
-                    className={styles.avatarImage}
+                    className={styles.avatar}
                   />
                 </div>
                 <div className={styles.petInfo}>
                   <div className={styles.petName}>{currentPet.name}</div>
-                  <div className={styles.petDescription}>{currentPet.description}</div>
+                  <div className={styles.petBreed}>{currentPet.breed}</div>
+                  <div className={styles.petDescription}>
+                    {currentPet.description || currentPet.basicInfo || '這隻寵物很可愛，主人還沒有添加描述。'}
+                  </div>
                 </div>
               </div>
 
-              {/* 選項卡 */}
+              {/* 分頁切換 */}
               <div className={styles.tabs}>
                 <button
                   className={`${styles.tab} ${activeTab === 'social' ? styles.active : ''}`}
@@ -172,15 +183,15 @@ const PetPage = () => {
               <div className={styles.functionGrid}>
                 {activeTab === 'social' && (
                   <>
-                    <div className={styles.functionButton} onClick={() => handleFunctionClick('編輯資料')}>
+                    <div className={styles.functionCell} onClick={handleEditPet}>
                       <img src="/assets/icon/PetpageEditButton.png" alt="編輯資料" className={styles.functionIcon} />
                       <span className={styles.functionLabel}>編輯資料</span>
                     </div>
-                    <div className={styles.functionButton} onClick={() => handleFunctionClick('相關貼文')}>
+                    <div className={styles.functionCell} onClick={() => handleFunctionClick('相關貼文')}>
                       <img src="/assets/icon/PetpagePastPostButton.png" alt="相關貼文" className={styles.functionIcon} />
                       <span className={styles.functionLabel}>相關貼文</span>
                     </div>
-                    <div className={styles.functionButton} onClick={() => handleFunctionClick('寵物社群')}>
+                    <div className={styles.functionCell} onClick={() => handleFunctionClick('寵物社群')}>
                       <img src="/assets/icon/PetpagePetFriendsButton.png" alt="寵物社群" className={styles.functionIcon} />
                       <span className={styles.functionLabel}>寵物社群</span>
                     </div>
@@ -189,32 +200,36 @@ const PetPage = () => {
                 
                 {activeTab === 'health' && (
                   <>
-                    <div className={styles.functionButton} onClick={() => handleFunctionClick('健康報告')}>
+                    <div className={styles.functionCell} onClick={() => handleFunctionClick('健康報告')}>
                       <img src="/assets/icon/PetpageHealthReportButton.png" alt="健康報告" className={styles.functionIcon} />
                       <span className={styles.functionLabel}>健康報告</span>
                     </div>
-                    <div className={styles.functionButton} onClick={() => handleFunctionClick('疾病檔案')}>
+                    <div className={styles.functionCell} onClick={() => handleFunctionClick('疾病檔案')}>
                       <img src="/assets/icon/PetpageIllnessArchiveButton.png" alt="疾病檔案" className={styles.functionIcon} />
                       <span className={styles.functionLabel}>疾病檔案</span>
                     </div>
-                    <div className={styles.functionButton} onClick={() => handleFunctionClick('異常貼文')}>
+                    <div className={styles.functionCell} onClick={() => handleFunctionClick('異常貼文')}>
                       <img src="/assets/icon/PetpagePetAbnormalPostButton.png" alt="異常貼文" className={styles.functionIcon} />
                       <span className={styles.functionLabel}>異常貼文</span>
+                    </div>
+                    <div className={styles.functionCell} onClick={() => handleFunctionClick('統計資料')}>
+                      <img src="/assets/icon/PetpageStatisticsButton.png" alt="統計資料" className={styles.functionIcon} />
+                      <span className={styles.functionLabel}>統計資料</span>
                     </div>
                   </>
                 )}
 
                 {activeTab === 'daily' && (
                   <>
-                    <div className={styles.functionButton} onClick={() => handleFunctionClick('日程安排')}>
+                    <div className={styles.functionCell} onClick={() => handleFunctionClick('日程安排')}>
                       <img src="/assets/icon/PetpageScheduleButton.png" alt="日程安排" className={styles.functionIcon} />
                       <span className={styles.functionLabel}>日程安排</span>
                     </div>
-                    <div className={styles.functionButton} onClick={() => handleFunctionClick('統計資料')}>
-                      <img src="/assets/icon/PetpageStatisticsButton.png" alt="統計資料" className={styles.functionIcon} />
-                      <span className={styles.functionLabel}>統計資料</span>
+                    <div className={styles.functionCell} onClick={() => handleFunctionClick('常用飼料')}>
+                      <img src="/assets/icon/PetpageFeedButton.png" alt="常用飼料" className={styles.functionIcon} />
+                      <span className={styles.functionLabel}>常用飼料</span>
                     </div>
-                    <div className={styles.functionButton} onClick={() => handleFunctionClick('購物記錄')}>
+                    <div className={styles.functionCell} onClick={() => handleFunctionClick('購物記錄')}>
                       <img src="/assets/icon/PetpageShoppingRecordsButton.png" alt="購物記錄" className={styles.functionIcon} />
                       <span className={styles.functionLabel}>購物記錄</span>
                     </div>
@@ -222,31 +237,14 @@ const PetPage = () => {
                 )}
               </div>
 
-              {/* 切換寵物區域 */}
-              <div className={styles.petSwitchSection}>
-                <div className={styles.sectionHeader}>
-                  <span className={styles.sectionTitle}>切換目前寵物</span>
-                  <button className={styles.addPetButton} onClick={handleAddPet}>
-                    新增寵物
-                  </button>
-                </div>
-                
-                <div className={styles.petList}>
-                  {allPets.map((pet) => (
-                    <div
-                      key={pet.id}
-                      className={`${styles.petItem} ${currentPet.id === pet.id ? styles.activePet : ''}`}
-                      onClick={() => handlePetSwitch(pet)}
-                    >
-                      <img
-                        src={pet.avatarUrl || '/assets/icon/DefaultAvatar.jpg'}
-                        alt={pet.name}
-                        className={styles.petItemAvatar}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
+              {/* 新的切換寵物組件 */}
+              <PetSwitcher
+                allPets={allPets}
+                currentPet={currentPet}
+                onPetSwitch={handlePetSwitch}
+                onAddPet={handleAddPet}
+                showNotification={showNotification}
+              />
             </>
           )}
         </main>
