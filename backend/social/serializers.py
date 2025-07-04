@@ -106,7 +106,7 @@ class UserDetailSearchSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = User
-        fields = ['id', 'user_account', 'username', 'headshot']
+        fields = ['id', 'user_account', 'username', 'headshot', 'account_privacy']
     
     def get_headshot(self, user: User):
         try:

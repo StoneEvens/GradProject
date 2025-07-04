@@ -48,7 +48,7 @@ class UserAchievementAdmin(admin.ModelAdmin):
 # 通知管理
 @admin.register(FollowNotification)
 class NotificationAdmin(admin.ModelAdmin):
-    list_display = ('user', 'content', 'date', 'is_read')
+    list_display = ('user', 'content', 'date', 'is_read', 'follow_request_from')
     list_filter = ('date', 'is_read')
     search_fields = ('user__username', 'content')
     readonly_fields = ('date',)

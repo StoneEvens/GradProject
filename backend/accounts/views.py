@@ -896,7 +896,8 @@ class FollowByAccountAPIView(APIView):
         """追蹤或取消追蹤使用者（通過user_account）"""
         try:
             # 檢查要追蹤的使用者是否存在
-            target_user = CustomUser.objects.get(user_account=user_account)
+            print(user_account)
+            target_user = CustomUser.get_user(user_account=user_account)
             
             # 不能追蹤自己
             if target_user == request.user:
@@ -907,23 +908,21 @@ class FollowByAccountAPIView(APIView):
                 )
             
             # 檢查是否已經有追蹤關係
-            try:
-                follow_relation = UserFollow.objects.get(
-                    user=CustomUser.get_user(username=request.user),
-                    follows=target_user
-                )
-                # 已存在關係，取消追蹤
-                # 如果是待確認的追蹤請求，刪除相關通知
+            user=CustomUser.get_user(username=request.user)
+
+            follow_relation = UserFollow.check_follow(user=user, follows=target_user)
+            # 已存在關係，取消追蹤
+            # 如果是待確認的追蹤請求，刪除相關通知
+            if follow_relation is not None:
+
                 if not follow_relation.confirm_or_not:
-                    # 刪除相關的追蹤請求通知
-                    FollowNotification.objects.filter(
-                        user=target_user,
-                        notification_type='follow_request',
-                        follow_request_from=request.user,
-                        related_follow=follow_relation
-                    ).delete()
-                
+                # 刪除相關的追蹤請求通知
+                    FollowNotification.delete_notification(target_user=target_user, user=user)
+
+                    print(FollowNotification.check_notification(target_user=target_user, user=user))
+            
                 follow_relation.delete()
+
                 return APIResponse(
                     data={
                         'is_following': False, 
@@ -932,9 +931,8 @@ class FollowByAccountAPIView(APIView):
                     },
                     message='取消追蹤成功',
                     status=drf_status.HTTP_200_OK
-                )
-            except UserFollow.DoesNotExist:
-                # 沒有追蹤關係，建立新的
+                ) 
+            else:
                 print(target_user.account_privacy)
 
                 if target_user.account_privacy == 'private':
@@ -946,10 +944,7 @@ class FollowByAccountAPIView(APIView):
                     )
                     
                     # 建立追蹤請求通知
-                    notification = FollowNotification.objects.create(
-                        user=target_user,
-                        content=f'{request.user.username} 希望追蹤您'
-                    )
+                    FollowNotification.create_notification(target_user=target_user, user=user, content=f'{request.user.username} 希望追蹤您')
                     
                     return APIResponse(
                         data={
@@ -984,6 +979,8 @@ class FollowByAccountAPIView(APIView):
                 status=drf_status.HTTP_404_NOT_FOUND
             )
         except Exception as e:
+            logger.exception("追蹤操作失敗")
+
             return APIResponse(
                 message=f'追蹤操作失敗: {str(e)}',
                 code=drf_status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -1391,35 +1388,31 @@ class FollowRequestResponseAPIView(APIView):
             # 獲取通知
             notification = FollowNotification.objects.get(
                 id=notification_id,
-                user=request.user,
-                notification_type='follow_request'
+                user=request.user
             )
-            
-            if not notification.related_follow:
-                return APIResponse(
-                    message='該通知沒有相關的追蹤請求',
-                    code=drf_status.HTTP_400_BAD_REQUEST,
-                    status=drf_status.HTTP_400_BAD_REQUEST
-                )
             
             action = request.data.get('action')  # 'accept' 或 'reject'
             
             if action == 'accept':
                 # 接受追蹤請求
                 requester_username = notification.follow_request_from.username
-                notification.related_follow.confirm_or_not = True
-                notification.related_follow.save()
+                requester = CustomUser.get_user(username=requester_username)
+
+                user = notification.user
+
+                related_follow = UserFollow.get_follow(user=requester, follows=user)
+                related_follow.confirm_or_not = True
+                related_follow.save()
                 
                 # 刪除原通知
                 notification.delete()
                 
                 # 創建新的info通知
-                FollowNotification.objects.create(
-                    user=request.user,
-                    notification_type='info',
+                FollowNotification.create_notification(
+                    target_user=request.user,
                     is_read=True,
                     content=f'您已確認 {requester_username} 的追蹤請求',
-                    follow_request_from=notification.follow_request_from  # 關聯到相關用戶
+                    user=notification.follow_request_from  # 關聯到相關用戶
                 )
                 
                 return APIResponse(
@@ -1430,19 +1423,22 @@ class FollowRequestResponseAPIView(APIView):
             elif action == 'reject':
                 # 拒絕追蹤請求
                 requester_username = notification.follow_request_from.username
-                follow_relation = notification.related_follow
+                requester = CustomUser.get_user(username=requester_username)
+
+                user = notification.user
+
+                related_follow = UserFollow.get_follow(user=requester, follows=user)
                 
                 # 刪除原通知和追蹤關係
                 notification.delete()
-                follow_relation.delete()
+                related_follow.delete()
                 
                 # 創建新的info通知
-                FollowNotification.objects.create(
-                    user=request.user,
-                    notification_type='info',
+                FollowNotification.create_notification(
+                    target_user=request.user,
                     is_read=True,
                     content=f'您已拒絕 {requester_username} 的追蹤請求',
-                    follow_request_from=notification.follow_request_from  # 關聯到相關用戶
+                    user=notification.follow_request_from  # 關聯到相關用戶
                 )
                 
                 return APIResponse(

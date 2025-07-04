@@ -7961,3 +7961,959 @@ ERROR 2025-07-04 04:52:04,983 basehttp 10668 27388 "POST /api/v1/accounts/follow
 INFO 2025-07-04 04:52:13,550 autoreload 10668 1620 C:\Users\Steven\GradProject\GradProject\backend\accounts\views.py changed, reloading.
 INFO 2025-07-04 04:52:14,266 autoreload 23052 12336 Watching for file changes with StatReloader
 ERROR 2025-07-04 04:52:17,139 basehttp 23052 27852 "POST /api/v1/accounts/follow/Stone%20Evens/ HTTP/1.1" 500 250
+INFO 2025-07-04 11:45:44,995 autoreload 12028 23856 Watching for file changes with StatReloader
+INFO 2025-07-04 11:46:05,052 basehttp 12028 15636 "OPTIONS /api/v1/accounts/token/ HTTP/1.1" 200 0
+INFO 2025-07-04 11:46:05,714 basehttp 12028 15636 "POST /api/v1/accounts/token/ HTTP/1.1" 200 579
+INFO 2025-07-04 11:46:05,746 basehttp 12028 15608 "OPTIONS /api/v1/accounts/me/ HTTP/1.1" 200 0
+INFO 2025-07-04 11:46:05,746 basehttp 12028 15636 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-04 11:46:05,747 basehttp 12028 15608 "OPTIONS /api/v1/accounts/me/ HTTP/1.1" 200 0
+INFO 2025-07-04 11:46:05,747 basehttp 12028 15636 "OPTIONS /api/v1/accounts/plans/today/ HTTP/1.1" 200 0
+INFO 2025-07-04 11:46:05,750 basehttp 12028 15608 "OPTIONS /api/v1/accounts/plans/today/ HTTP/1.1" 200 0
+INFO 2025-07-04 11:46:05,751 basehttp 12028 15608 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-04 11:46:05,756 basehttp 12028 15636 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 11:46:05,759 basehttp 12028 15608 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-04 11:46:05,763 basehttp 12028 15636 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 11:46:05,777 basehttp 12028 15608 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-04 11:46:11,480 basehttp 12028 15636 "OPTIONS /api/v1/accounts/notifications/ HTTP/1.1" 200 0
+INFO 2025-07-04 11:46:11,480 basehttp 12028 15640 "OPTIONS /api/v1/accounts/notifications/ HTTP/1.1" 200 0
+INFO 2025-07-04 11:46:11,486 basehttp 12028 15608 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 11:46:11,489 basehttp 12028 15640 "GET /api/v1/accounts/notifications/ HTTP/1.1" 200 332
+INFO 2025-07-04 11:46:11,493 basehttp 12028 15636 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 11:46:11,494 basehttp 12028 15608 "GET /api/v1/accounts/notifications/ HTTP/1.1" 200 332
+INFO 2025-07-04 11:46:23,095 basehttp 12028 15608 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 11:46:23,099 basehttp 12028 15636 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 11:46:23,102 basehttp 12028 15636 "OPTIONS /api/v1/accounts/user/3/summary/ HTTP/1.1" 200 0
+INFO 2025-07-04 11:46:23,107 basehttp 12028 15608 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 11:46:23,109 basehttp 12028 15636 "GET /api/v1/accounts/user/3/summary/ HTTP/1.1" 200 194
+INFO 2025-07-04 11:46:23,111 basehttp 12028 15636 "OPTIONS /api/v1/social/users/3/posts/preview/ HTTP/1.1" 200 0
+INFO 2025-07-04 11:46:23,113 basehttp 12028 15640 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 11:46:23,120 basehttp 12028 15640 "GET /api/v1/accounts/user/3/summary/ HTTP/1.1" 200 194
+INFO 2025-07-04 11:46:23,127 basehttp 12028 15636 "GET /api/v1/social/users/3/posts/preview/ HTTP/1.1" 200 706
+INFO 2025-07-04 11:46:23,129 basehttp 12028 15636 "OPTIONS /api/v1/pets/users/3/archives/ HTTP/1.1" 200 0
+INFO 2025-07-04 11:46:23,134 basehttp 12028 15636 "GET /api/v1/pets/users/3/archives/ HTTP/1.1" 200 347
+INFO 2025-07-04 11:46:23,141 basehttp 12028 15640 "GET /api/v1/social/users/3/posts/preview/ HTTP/1.1" 200 706
+INFO 2025-07-04 11:46:23,148 basehttp 12028 15640 "GET /api/v1/pets/users/3/archives/ HTTP/1.1" 200 347
+INFO 2025-07-04 11:46:27,043 basehttp 12028 15640 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 11:46:27,048 basehttp 12028 15636 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 11:46:27,051 basehttp 12028 15636 "OPTIONS /api/v1/accounts/followers/?user=Stone%20Evens HTTP/1.1" 200 0
+INFO 2025-07-04 11:46:27,051 basehttp 12028 15608 "OPTIONS /api/v1/accounts/following/?user=Stone%20Evens HTTP/1.1" 200 0
+INFO 2025-07-04 11:46:27,056 basehttp 12028 15640 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 11:46:27,060 basehttp 12028 15636 "GET /api/v1/accounts/following/?user=Stone%20Evens HTTP/1.1" 200 231
+INFO 2025-07-04 11:46:27,061 basehttp 12028 15608 "GET /api/v1/accounts/followers/?user=Stone%20Evens HTTP/1.1" 200 74
+INFO 2025-07-04 11:46:27,063 basehttp 12028 15608 "OPTIONS /api/v1/accounts/follow/status/batch/ HTTP/1.1" 200 0
+INFO 2025-07-04 11:46:27,063 basehttp 12028 15556 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 11:46:27,068 basehttp 12028 15608 "POST /api/v1/accounts/follow/status/batch/ HTTP/1.1" 200 144
+INFO 2025-07-04 11:46:27,070 basehttp 12028 15636 "GET /api/v1/accounts/following/?user=Stone%20Evens HTTP/1.1" 200 231
+INFO 2025-07-04 11:46:27,071 basehttp 12028 15556 "GET /api/v1/accounts/followers/?user=Stone%20Evens HTTP/1.1" 200 74
+INFO 2025-07-04 11:46:27,075 basehttp 12028 15556 "POST /api/v1/accounts/follow/status/batch/ HTTP/1.1" 200 144
+INFO 2025-07-04 11:46:29,243 basehttp 12028 15556 "OPTIONS /api/v1/accounts/follow/Test123/ HTTP/1.1" 200 0
+INFO 2025-07-04 11:46:29,255 basehttp 12028 15556 "POST /api/v1/accounts/follow/Test123/ HTTP/1.1" 200 145
+INFO 2025-07-04 11:46:29,263 basehttp 12028 15556 "GET /api/v1/accounts/followers/?user=Stone%20Evens HTTP/1.1" 200 74
+INFO 2025-07-04 11:46:29,263 basehttp 12028 15636 "GET /api/v1/accounts/following/?user=Stone%20Evens HTTP/1.1" 200 74
+INFO 2025-07-04 11:46:31,116 basehttp 12028 15636 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-04 11:46:31,119 basehttp 12028 15608 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-04 11:46:31,123 basehttp 12028 15556 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 11:46:31,125 basehttp 12028 15636 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-04 11:46:31,130 basehttp 12028 15608 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 11:46:31,131 basehttp 12028 15556 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-04 11:46:46,613 basehttp 12028 15556 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 11:46:46,617 basehttp 12028 15608 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 11:46:46,620 basehttp 12028 15556 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 11:46:46,623 basehttp 12028 15608 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 11:46:47,932 basehttp 12028 15608 "PUT /api/v1/accounts/me/ HTTP/1.1" 200 266
+INFO 2025-07-04 11:46:48,975 basehttp 12028 15608 "PUT /api/v1/accounts/me/ HTTP/1.1" 200 267
+INFO 2025-07-04 11:46:53,339 basehttp 12028 15608 "OPTIONS /api/v1/accounts/logout/ HTTP/1.1" 200 0
+INFO 2025-07-04 11:46:53,349 basehttp 12028 15608 "POST /api/v1/accounts/logout/ HTTP/1.1" 200 55
+INFO 2025-07-04 11:47:02,861 basehttp 12028 15608 "POST /api/v1/accounts/token/ HTTP/1.1" 200 573
+INFO 2025-07-04 11:47:02,882 basehttp 12028 15608 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-04 11:47:02,885 basehttp 12028 15556 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-04 11:47:02,890 basehttp 12028 15608 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-04 11:47:02,890 basehttp 12028 15636 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 11:47:02,895 basehttp 12028 15608 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 11:47:02,895 basehttp 12028 15556 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-04 11:47:06,493 basehttp 12028 15556 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 11:47:06,498 basehttp 12028 15608 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 11:47:08,426 basehttp 12028 15608 "OPTIONS /api/v1/social/search/?q=stone HTTP/1.1" 200 0
+INFO 2025-07-04 11:47:08,427 basehttp 12028 15556 "OPTIONS /api/v1/social/search/?q=stone HTTP/1.1" 200 0
+INFO 2025-07-04 11:47:08,439 basehttp 12028 15608 "GET /api/v1/social/search/?q=stone HTTP/1.1" 200 827
+INFO 2025-07-04 11:47:08,446 basehttp 12028 15608 "POST /api/v1/accounts/follow/status/batch/ HTTP/1.1" 200 144
+INFO 2025-07-04 11:47:08,451 basehttp 12028 15556 "GET /api/v1/social/search/?q=stone HTTP/1.1" 200 827
+INFO 2025-07-04 11:47:08,454 basehttp 12028 15556 "POST /api/v1/accounts/follow/status/batch/ HTTP/1.1" 200 144
+INFO 2025-07-04 11:47:10,250 basehttp 12028 15556 "OPTIONS /api/v1/accounts/follow/Stone%20Evens/ HTTP/1.1" 200 0
+ERROR 2025-07-04 11:47:10,254 basehttp 12028 15556 "POST /api/v1/accounts/follow/Stone%20Evens/ HTTP/1.1" 500 250
+INFO 2025-07-04 11:48:55,371 autoreload 12028 23856 C:\Users\Steven\GradProject\GradProject\backend\accounts\views.py changed, reloading.
+INFO 2025-07-04 11:48:58,591 autoreload 4944 18840 Watching for file changes with StatReloader
+ERROR 2025-07-04 11:49:03,622 basehttp 4944 24884 "POST /api/v1/accounts/follow/Stone%20Evens/ HTTP/1.1" 500 113
+INFO 2025-07-04 11:49:19,758 autoreload 4944 18840 C:\Users\Steven\GradProject\GradProject\backend\accounts\views.py changed, reloading.
+INFO 2025-07-04 11:49:20,518 autoreload 18816 20540 Watching for file changes with StatReloader
+ERROR 2025-07-04 11:49:24,146 basehttp 18816 3372 "POST /api/v1/accounts/follow/Stone%20Evens/ HTTP/1.1" 500 113
+INFO 2025-07-04 11:49:46,164 basehttp 18816 8264 "GET /admin/ HTTP/1.1" 200 28553
+WARNING 2025-07-04 11:49:46,233 basehttp 18816 8264 "GET /favicon.ico HTTP/1.1" 404 4042
+INFO 2025-07-04 11:49:47,784 basehttp 18816 8264 "GET /admin/accounts/customuser/ HTTP/1.1" 200 28411
+INFO 2025-07-04 11:49:47,805 basehttp 18816 8264 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-04 11:50:40,185 autoreload 18816 20540 C:\Users\Steven\GradProject\GradProject\backend\accounts\models.py changed, reloading.
+INFO 2025-07-04 11:50:40,936 autoreload 10288 22460 Watching for file changes with StatReloader
+INFO 2025-07-04 11:50:46,651 autoreload 10288 22460 C:\Users\Steven\GradProject\GradProject\backend\accounts\views.py changed, reloading.
+INFO 2025-07-04 11:50:47,366 autoreload 13548 23280 Watching for file changes with StatReloader
+ERROR 2025-07-04 11:50:52,341 basehttp 13548 9180 "POST /api/v1/accounts/follow/Stone%20Evens/ HTTP/1.1" 500 250
+INFO 2025-07-04 11:54:34,936 autoreload 13548 23280 C:\Users\Steven\GradProject\GradProject\backend\accounts\models.py changed, reloading.
+INFO 2025-07-04 11:54:35,680 autoreload 19348 20796 Watching for file changes with StatReloader
+INFO 2025-07-04 11:56:21,150 autoreload 19348 20796 C:\Users\Steven\GradProject\GradProject\backend\accounts\views.py changed, reloading.
+INFO 2025-07-04 11:56:21,882 autoreload 22456 7120 Watching for file changes with StatReloader
+INFO 2025-07-04 11:56:27,603 basehttp 22456 24880 "POST /api/v1/accounts/follow/Stone%20Evens/ HTTP/1.1" 200 148
+INFO 2025-07-04 11:56:45,590 basehttp 22456 24880 "POST /api/v1/accounts/follow/Stone%20Evens/ HTTP/1.1" 201 159
+INFO 2025-07-04 11:56:51,057 basehttp 22456 24880 "POST /api/v1/accounts/follow/Stone%20Evens/ HTTP/1.1" 200 148
+INFO 2025-07-04 11:56:52,427 basehttp 22456 24880 "POST /api/v1/accounts/follow/Stone%20Evens/ HTTP/1.1" 201 159
+INFO 2025-07-04 11:56:53,967 basehttp 22456 24880 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 11:56:53,970 basehttp 22456 24588 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 11:56:53,973 basehttp 22456 24880 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 11:56:53,977 basehttp 22456 24588 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 11:56:55,302 basehttp 22456 24588 "POST /api/v1/accounts/logout/ HTTP/1.1" 200 55
+INFO 2025-07-04 11:57:02,970 basehttp 22456 24588 "POST /api/v1/accounts/token/ HTTP/1.1" 200 579
+INFO 2025-07-04 11:57:02,991 basehttp 22456 24588 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-04 11:57:02,994 basehttp 22456 24588 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-04 11:57:02,998 basehttp 22456 24880 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 11:57:02,999 basehttp 22456 24588 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-04 11:57:03,003 basehttp 22456 24880 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 11:57:03,004 basehttp 22456 24588 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-04 11:57:05,601 basehttp 22456 24588 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 11:57:05,601 basehttp 22456 24880 "GET /api/v1/accounts/notifications/ HTTP/1.1" 200 748
+INFO 2025-07-04 11:57:05,605 basehttp 22456 24588 "GET /api/v1/accounts/notifications/ HTTP/1.1" 200 748
+INFO 2025-07-04 11:57:05,616 basehttp 22456 4892 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 11:58:16,935 autoreload 22456 7120 C:\Users\Steven\GradProject\GradProject\backend\accounts\models.py changed, reloading.
+INFO 2025-07-04 11:58:17,659 autoreload 15288 10596 Watching for file changes with StatReloader
+ERROR 2025-07-04 11:58:36,576 basehttp 15288 22476 "GET /admin/accounts/follownotification/ HTTP/1.1" 500 467864
+INFO 2025-07-04 11:59:19,174 autoreload 15288 10596 C:\Users\Steven\GradProject\GradProject\backend\accounts\models.py changed, reloading.
+INFO 2025-07-04 11:59:19,934 autoreload 24092 6036 Watching for file changes with StatReloader
+INFO 2025-07-04 11:59:21,640 basehttp 24092 23984 "GET /admin/accounts/follownotification/ HTTP/1.1" 200 27834
+INFO 2025-07-04 11:59:21,650 basehttp 24092 23984 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-04 11:59:21,705 basehttp 24092 2324 "GET /static/admin/img/icon-no.svg HTTP/1.1" 200 560
+INFO 2025-07-04 12:02:40,413 basehttp 24092 16980 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 12:02:40,416 basehttp 24092 16980 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 12:02:40,419 basehttp 24092 16980 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 12:02:40,423 basehttp 24092 16980 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 12:02:40,953 basehttp 24092 16980 "POST /api/v1/accounts/logout/ HTTP/1.1" 200 55
+INFO 2025-07-04 12:02:53,799 basehttp 24092 16980 "POST /api/v1/accounts/token/ HTTP/1.1" 200 573
+INFO 2025-07-04 12:02:53,823 basehttp 24092 16980 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-04 12:02:53,824 basehttp 24092 9164 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-04 12:02:53,829 basehttp 24092 8188 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 12:02:53,835 basehttp 24092 9164 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 12:02:53,842 basehttp 24092 10592 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-04 12:02:53,846 basehttp 24092 9164 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-04 12:02:58,007 basehttp 24092 9164 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 12:02:58,007 basehttp 24092 10592 "GET /api/v1/accounts/notifications/ HTTP/1.1" 200 125
+INFO 2025-07-04 12:02:58,012 basehttp 24092 9164 "GET /api/v1/accounts/notifications/ HTTP/1.1" 200 125
+INFO 2025-07-04 12:02:58,024 basehttp 24092 8188 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 12:03:00,448 basehttp 24092 8188 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 12:03:00,452 basehttp 24092 9164 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 12:03:02,900 basehttp 24092 9164 "GET /api/v1/social/search/?q=stone HTTP/1.1" 200 827
+INFO 2025-07-04 12:03:02,907 basehttp 24092 9164 "POST /api/v1/accounts/follow/status/batch/ HTTP/1.1" 200 144
+INFO 2025-07-04 12:03:02,915 basehttp 24092 8188 "GET /api/v1/social/search/?q=stone HTTP/1.1" 200 827
+INFO 2025-07-04 12:03:02,920 basehttp 24092 8188 "POST /api/v1/accounts/follow/status/batch/ HTTP/1.1" 200 144
+INFO 2025-07-04 12:03:05,403 basehttp 24092 8188 "POST /api/v1/accounts/follow/Stone%20Evens/ HTTP/1.1" 200 148
+INFO 2025-07-04 12:03:41,474 autoreload 24092 6036 C:\Users\Steven\GradProject\GradProject\backend\accounts\models.py changed, reloading.
+INFO 2025-07-04 12:03:42,219 autoreload 24148 21364 Watching for file changes with StatReloader
+INFO 2025-07-04 12:03:44,423 basehttp 24148 17924 "POST /api/v1/accounts/follow/Stone%20Evens/ HTTP/1.1" 201 159
+INFO 2025-07-04 12:03:47,109 basehttp 24148 17924 "POST /api/v1/accounts/follow/Stone%20Evens/ HTTP/1.1" 200 148
+INFO 2025-07-04 12:03:56,996 basehttp 24148 12228 "GET /admin/accounts/follownotification/ HTTP/1.1" 200 28331
+INFO 2025-07-04 12:03:57,004 basehttp 24148 12228 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-04 12:03:57,877 basehttp 24148 12228 "GET /admin/accounts/follownotification/ HTTP/1.1" 200 28331
+INFO 2025-07-04 12:03:57,885 basehttp 24148 12228 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-04 12:03:58,745 basehttp 24148 12228 "GET /admin/accounts/follownotification/ HTTP/1.1" 200 28331
+INFO 2025-07-04 12:03:58,753 basehttp 24148 12228 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-04 12:07:53,486 autoreload 24148 21364 C:\Users\Steven\GradProject\GradProject\backend\accounts\models.py changed, reloading.
+INFO 2025-07-04 12:07:54,235 autoreload 18112 6716 Watching for file changes with StatReloader
+INFO 2025-07-04 12:08:27,287 autoreload 18112 6716 C:\Users\Steven\GradProject\GradProject\backend\accounts\views.py changed, reloading.
+INFO 2025-07-04 12:08:27,998 autoreload 5408 16988 Watching for file changes with StatReloader
+INFO 2025-07-04 12:08:37,584 basehttp 5408 12336 "POST /admin/accounts/follownotification/ HTTP/1.1" 200 24095
+INFO 2025-07-04 12:08:37,645 basehttp 5408 12336 "GET /static/admin/js/cancel.js HTTP/1.1" 200 884
+INFO 2025-07-04 12:08:38,556 basehttp 5408 12336 "POST /admin/accounts/follownotification/ HTTP/1.1" 302 0
+INFO 2025-07-04 12:08:38,572 basehttp 5408 12336 "GET /admin/accounts/follownotification/ HTTP/1.1" 200 25050
+INFO 2025-07-04 12:08:38,581 basehttp 5408 12336 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+ERROR 2025-07-04 12:08:41,764 basehttp 5408 7232 "POST /api/v1/accounts/follow/Stone%20Evens/ HTTP/1.1" 500 112
+ERROR 2025-07-04 12:09:10,339 basehttp 5408 7232 "POST /api/v1/accounts/follow/Stone%20Evens/ HTTP/1.1" 500 112
+INFO 2025-07-04 12:11:47,447 autoreload 5408 16988 C:\Users\Steven\GradProject\GradProject\backend\accounts\models.py changed, reloading.
+INFO 2025-07-04 12:11:48,197 autoreload 18112 10532 Watching for file changes with StatReloader
+INFO 2025-07-04 12:12:00,233 autoreload 18112 10532 C:\Users\Steven\GradProject\GradProject\backend\accounts\views.py changed, reloading.
+INFO 2025-07-04 12:12:00,958 autoreload 5176 1360 Watching for file changes with StatReloader
+ERROR 2025-07-04 12:12:03,373 basehttp 5176 12496 "POST /api/v1/accounts/follow/Stone%20Evens/ HTTP/1.1" 500 109
+INFO 2025-07-04 12:12:43,585 autoreload 5176 1360 C:\Users\Steven\GradProject\GradProject\backend\accounts\models.py changed, reloading.
+INFO 2025-07-04 12:12:44,305 autoreload 24532 15096 Watching for file changes with StatReloader
+INFO 2025-07-04 12:12:50,036 autoreload 24532 15096 C:\Users\Steven\GradProject\GradProject\backend\accounts\views.py changed, reloading.
+INFO 2025-07-04 12:12:50,779 autoreload 4732 20692 Watching for file changes with StatReloader
+INFO 2025-07-04 12:12:54,404 autoreload 4732 20692 C:\Users\Steven\GradProject\GradProject\backend\accounts\models.py changed, reloading.
+INFO 2025-07-04 12:12:55,149 autoreload 25228 10584 Watching for file changes with StatReloader
+ERROR 2025-07-04 12:13:06,607 basehttp 25228 23068 "POST /api/v1/accounts/follow/Stone%20Evens/ HTTP/1.1" 500 112
+INFO 2025-07-04 12:16:30,065 autoreload 25228 10584 C:\Users\Steven\GradProject\GradProject\backend\accounts\views.py changed, reloading.
+INFO 2025-07-04 12:16:30,801 autoreload 2468 23180 Watching for file changes with StatReloader
+ERROR 2025-07-04 12:16:34,272 basehttp 2468 9132 "POST /api/v1/accounts/follow/Stone%20Evens/ HTTP/1.1" 500 104
+INFO 2025-07-04 12:17:42,951 autoreload 2468 23180 C:\Users\Steven\GradProject\GradProject\backend\accounts\views.py changed, reloading.
+INFO 2025-07-04 12:17:43,657 autoreload 12760 25288 Watching for file changes with StatReloader
+ERROR 2025-07-04 12:17:47,239 basehttp 12760 12312 "POST /api/v1/accounts/follow/Stone%20Evens/ HTTP/1.1" 500 91288
+INFO 2025-07-04 12:20:59,589 basehttp 12760 12064 "GET /admin/accounts/follownotification/ HTTP/1.1" 200 24900
+INFO 2025-07-04 12:20:59,599 basehttp 12760 12064 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+ERROR 2025-07-04 12:21:33,113 basehttp 12760 12312 "POST /api/v1/accounts/follow/Stone%20Evens/ HTTP/1.1" 500 91288
+INFO 2025-07-04 12:22:45,547 autoreload 12760 25288 C:\Users\Steven\GradProject\GradProject\backend\accounts\views.py changed, reloading.
+INFO 2025-07-04 12:22:46,299 autoreload 19748 22244 Watching for file changes with StatReloader
+ERROR 2025-07-04 12:22:50,017 basehttp 19748 20596 "POST /api/v1/accounts/follow/Stone%20Evens/ HTTP/1.1" 500 91288
+INFO 2025-07-04 12:25:28,915 autoreload 21120 10560 Watching for file changes with StatReloader
+INFO 2025-07-04 12:25:32,731 basehttp 21120 20676 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-04 12:25:32,732 basehttp 21120 20676 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-04 12:25:32,747 basehttp 21120 11612 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 12:25:32,748 basehttp 21120 20144 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-04 12:25:32,752 basehttp 21120 20676 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 12:25:32,753 basehttp 21120 11612 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-04 12:25:34,139 basehttp 21120 11612 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 12:25:34,142 basehttp 21120 20676 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 12:25:38,740 basehttp 21120 20676 "GET /api/v1/social/search/?q=stone HTTP/1.1" 200 827
+INFO 2025-07-04 12:25:38,747 basehttp 21120 20676 "POST /api/v1/accounts/follow/status/batch/ HTTP/1.1" 200 145
+INFO 2025-07-04 12:25:38,757 basehttp 21120 11612 "GET /api/v1/social/search/?q=stone HTTP/1.1" 200 827
+INFO 2025-07-04 12:25:38,761 basehttp 21120 11612 "POST /api/v1/accounts/follow/status/batch/ HTTP/1.1" 200 145
+ERROR 2025-07-04 12:25:41,483 basehttp 21120 11612 "POST /api/v1/accounts/follow/Stone%20Evens/ HTTP/1.1" 500 91288
+INFO 2025-07-04 12:26:12,189 autoreload 21120 10560 C:\Users\Steven\GradProject\GradProject\backend\accounts\views.py changed, reloading.
+INFO 2025-07-04 12:26:12,915 autoreload 9108 20976 Watching for file changes with StatReloader
+ERROR 2025-07-04 12:26:16,564 basehttp 9108 3540 "POST /api/v1/accounts/follow/Stone%20Evens/ HTTP/1.1" 500 91288
+INFO 2025-07-04 12:26:25,316 autoreload 9108 20976 C:\Users\Steven\GradProject\GradProject\backend\accounts\views.py changed, reloading.
+INFO 2025-07-04 12:26:26,016 autoreload 19980 17852 Watching for file changes with StatReloader
+ERROR 2025-07-04 12:26:32,614 basehttp 19980 1756 "POST /api/v1/accounts/follow/Stone%20Evens/ HTTP/1.1" 500 91288
+INFO 2025-07-04 12:28:41,263 basehttp 19980 1756 "OPTIONS /api/v1/accounts/token/refresh/ HTTP/1.1" 200 0
+INFO 2025-07-04 12:28:41,266 basehttp 19980 1756 "POST /api/v1/accounts/token/refresh/ HTTP/1.1" 200 548
+INFO 2025-07-04 12:28:41,270 basehttp 19980 1756 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 12:28:55,303 basehttp 19980 1756 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 12:28:55,306 basehttp 19980 1756 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 12:28:55,310 basehttp 19980 1756 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 12:28:55,310 basehttp 19980 1756 "OPTIONS /api/v1/accounts/user/4/summary/ HTTP/1.1" 200 0
+INFO 2025-07-04 12:28:55,314 basehttp 19980 1756 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 12:28:55,317 basehttp 19980 1756 "GET /api/v1/accounts/user/4/summary/ HTTP/1.1" 200 190
+INFO 2025-07-04 12:28:55,320 basehttp 19980 1756 "GET /api/v1/accounts/user/4/summary/ HTTP/1.1" 200 190
+INFO 2025-07-04 12:28:55,321 basehttp 19980 1756 "OPTIONS /api/v1/social/users/4/posts/preview/ HTTP/1.1" 200 0
+INFO 2025-07-04 12:28:55,322 basehttp 19980 1756 "OPTIONS /api/v1/social/users/4/posts/preview/ HTTP/1.1" 200 0
+INFO 2025-07-04 12:28:55,325 basehttp 19980 1756 "GET /api/v1/social/users/4/posts/preview/ HTTP/1.1" 200 57
+INFO 2025-07-04 12:28:55,327 basehttp 19980 1756 "GET /api/v1/social/users/4/posts/preview/ HTTP/1.1" 200 57
+INFO 2025-07-04 12:28:55,328 basehttp 19980 1756 "OPTIONS /api/v1/pets/users/4/archives/ HTTP/1.1" 200 0
+INFO 2025-07-04 12:28:55,331 basehttp 19980 1756 "GET /api/v1/pets/users/4/archives/ HTTP/1.1" 200 347
+INFO 2025-07-04 12:28:55,334 basehttp 19980 1756 "GET /api/v1/pets/users/4/archives/ HTTP/1.1" 200 347
+INFO 2025-07-04 12:28:57,133 basehttp 19980 1756 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 12:28:57,136 basehttp 19980 4072 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 12:28:59,920 basehttp 19980 4072 "OPTIONS /api/v1/social/search/?q=Stone HTTP/1.1" 200 0
+INFO 2025-07-04 12:28:59,921 basehttp 19980 1756 "OPTIONS /api/v1/social/search/?q=Stone HTTP/1.1" 200 0
+INFO 2025-07-04 12:28:59,935 basehttp 19980 4072 "GET /api/v1/social/search/?q=Stone HTTP/1.1" 200 827
+INFO 2025-07-04 12:28:59,941 basehttp 19980 4072 "POST /api/v1/accounts/follow/status/batch/ HTTP/1.1" 200 145
+INFO 2025-07-04 12:28:59,952 basehttp 19980 1756 "GET /api/v1/social/search/?q=Stone HTTP/1.1" 200 827
+INFO 2025-07-04 12:28:59,957 basehttp 19980 1756 "POST /api/v1/accounts/follow/status/batch/ HTTP/1.1" 200 145
+ERROR 2025-07-04 12:29:02,007 basehttp 19980 1756 "POST /api/v1/accounts/follow/Stone%20Evens/ HTTP/1.1" 500 91288
+INFO 2025-07-04 12:32:42,165 autoreload 19980 17852 C:\Users\Steven\GradProject\GradProject\backend\accounts\views.py changed, reloading.
+INFO 2025-07-04 12:32:42,901 autoreload 3336 20096 Watching for file changes with StatReloader
+ERROR 2025-07-04 12:32:45,322 basehttp 3336 12308 "POST /api/v1/accounts/follow/Stone%20Evens/ HTTP/1.1" 500 91288
+INFO 2025-07-04 12:35:47,369 autoreload 3336 20096 C:\Users\Steven\GradProject\GradProject\backend\accounts\models.py changed, reloading.
+INFO 2025-07-04 12:35:48,130 autoreload 10344 3392 Watching for file changes with StatReloader
+INFO 2025-07-04 12:36:36,917 autoreload 10344 3392 C:\Users\Steven\GradProject\GradProject\backend\accounts\views.py changed, reloading.
+INFO 2025-07-04 12:36:37,636 autoreload 24952 16716 Watching for file changes with StatReloader
+ERROR 2025-07-04 12:36:42,572 basehttp 24952 14724 "POST /api/v1/accounts/follow/Stone%20Evens/ HTTP/1.1" 500 91288
+INFO 2025-07-04 12:36:52,994 autoreload 24952 16716 C:\Users\Steven\GradProject\GradProject\backend\accounts\views.py changed, reloading.
+INFO 2025-07-04 12:36:53,700 autoreload 17308 4108 Watching for file changes with StatReloader
+ERROR 2025-07-04 12:36:57,015 basehttp 17308 2932 "POST /api/v1/accounts/follow/Stone%20Evens/ HTTP/1.1" 500 91288
+INFO 2025-07-04 12:37:02,761 autoreload 17308 4108 C:\Users\Steven\GradProject\GradProject\backend\accounts\views.py changed, reloading.
+INFO 2025-07-04 12:37:03,477 autoreload 8764 1736 Watching for file changes with StatReloader
+INFO 2025-07-04 12:39:28,832 autoreload 8764 1736 C:\Users\Steven\GradProject\GradProject\backend\accounts\views.py changed, reloading.
+INFO 2025-07-04 12:39:29,557 autoreload 8536 17048 Watching for file changes with StatReloader
+ERROR 2025-07-04 12:39:34,747 basehttp 8536 20700 "POST /api/v1/accounts/follow/Stone%20Evens/ HTTP/1.1" 500 91288
+INFO 2025-07-04 12:44:02,321 autoreload 8536 17048 C:\Users\Steven\GradProject\GradProject\backend\accounts\views.py changed, reloading.
+INFO 2025-07-04 12:44:03,072 autoreload 7644 4924 Watching for file changes with StatReloader
+INFO 2025-07-04 12:44:13,803 autoreload 7644 4924 C:\Users\Steven\GradProject\GradProject\backend\accounts\views.py changed, reloading.
+INFO 2025-07-04 12:44:14,525 autoreload 1128 1488 Watching for file changes with StatReloader
+INFO 2025-07-04 12:44:19,364 basehttp 1128 2296 "POST /api/v1/accounts/follow/Stone%20Evens/ HTTP/1.1" 201 159
+INFO 2025-07-04 12:44:28,691 basehttp 1128 5736 "GET /admin/accounts/follownotification/ HTTP/1.1" 200 26839
+INFO 2025-07-04 12:44:28,700 basehttp 1128 5736 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-04 12:44:30,199 basehttp 1128 2296 "POST /api/v1/accounts/follow/Stone%20Evens/ HTTP/1.1" 200 148
+INFO 2025-07-04 12:44:31,500 basehttp 1128 5736 "GET /admin/accounts/follownotification/ HTTP/1.1" 200 26839
+INFO 2025-07-04 12:44:31,508 basehttp 1128 5736 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-04 12:44:32,052 basehttp 1128 5736 "GET /admin/accounts/follownotification/ HTTP/1.1" 200 26839
+INFO 2025-07-04 12:44:32,059 basehttp 1128 5736 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-04 12:44:32,222 basehttp 1128 5736 "GET /admin/accounts/follownotification/ HTTP/1.1" 200 26839
+INFO 2025-07-04 12:44:32,229 basehttp 1128 5736 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-04 12:44:32,401 basehttp 1128 5736 "GET /admin/accounts/follownotification/ HTTP/1.1" 200 26839
+INFO 2025-07-04 12:44:32,408 basehttp 1128 5736 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-04 12:44:32,579 basehttp 1128 5736 "GET /admin/accounts/follownotification/ HTTP/1.1" 200 26839
+INFO 2025-07-04 12:44:32,586 basehttp 1128 5736 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-04 12:44:33,087 basehttp 1128 5736 "GET /admin/accounts/follownotification/ HTTP/1.1" 200 26839
+INFO 2025-07-04 12:44:33,095 basehttp 1128 5736 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-04 12:44:33,369 basehttp 1128 5736 "GET /admin/accounts/follownotification/ HTTP/1.1" 200 26839
+INFO 2025-07-04 12:44:33,376 basehttp 1128 5736 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-04 12:44:33,911 basehttp 1128 5736 "GET /admin/accounts/follownotification/ HTTP/1.1" 200 26839
+INFO 2025-07-04 12:44:33,918 basehttp 1128 5736 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-04 12:44:34,305 basehttp 1128 5736 "GET /admin/accounts/follownotification/ HTTP/1.1" 200 26839
+INFO 2025-07-04 12:44:34,312 basehttp 1128 5736 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-04 12:44:34,575 basehttp 1128 5736 "GET /admin/accounts/follownotification/ HTTP/1.1" 200 26839
+INFO 2025-07-04 12:44:34,582 basehttp 1128 5736 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-04 12:44:34,764 basehttp 1128 5736 "GET /admin/accounts/follownotification/ HTTP/1.1" 200 26839
+INFO 2025-07-04 12:44:34,772 basehttp 1128 5736 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-04 12:44:44,206 basehttp 1128 2296 "POST /api/v1/accounts/follow/Stone%20Evens/ HTTP/1.1" 201 159
+INFO 2025-07-04 12:44:47,605 basehttp 1128 2296 "POST /api/v1/accounts/follow/Stone%20Evens/ HTTP/1.1" 200 148
+INFO 2025-07-04 12:44:55,367 basehttp 1128 5736 "GET /admin/accounts/follownotification/ HTTP/1.1" 200 27337
+INFO 2025-07-04 12:44:55,374 basehttp 1128 5736 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-04 12:54:57,543 basehttp 1128 11336 "POST /api/v1/accounts/token/refresh/ HTTP/1.1" 200 548
+INFO 2025-07-04 12:54:57,549 basehttp 1128 11336 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 12:55:48,377 autoreload 1128 1488 C:\Users\Steven\GradProject\GradProject\backend\accounts\views.py changed, reloading.
+INFO 2025-07-04 12:55:49,134 autoreload 1360 2800 Watching for file changes with StatReloader
+INFO 2025-07-04 12:57:21,027 autoreload 1360 2800 C:\Users\Steven\GradProject\GradProject\backend\accounts\models.py changed, reloading.
+INFO 2025-07-04 12:57:21,750 autoreload 24876 15240 Watching for file changes with StatReloader
+INFO 2025-07-04 12:57:46,345 autoreload 24876 15240 C:\Users\Steven\GradProject\GradProject\backend\accounts\views.py changed, reloading.
+INFO 2025-07-04 12:57:47,090 autoreload 22592 1084 Watching for file changes with StatReloader
+INFO 2025-07-04 12:57:50,056 basehttp 22592 20472 "POST /api/v1/accounts/follow/Stone%20Evens/ HTTP/1.1" 201 159
+INFO 2025-07-04 12:57:53,048 basehttp 22592 20472 "POST /api/v1/accounts/follow/Stone%20Evens/ HTTP/1.1" 200 148
+INFO 2025-07-04 13:03:31,159 basehttp 22592 10072 "GET /admin/accounts/follownotification/ HTTP/1.1" 200 27834
+INFO 2025-07-04 13:03:31,168 basehttp 22592 10072 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-04 13:03:35,281 basehttp 22592 10072 "GET /admin/accounts/follownotification/ HTTP/1.1" 200 27834
+INFO 2025-07-04 13:03:35,288 basehttp 22592 10072 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-04 13:03:36,304 basehttp 22592 10072 "GET /admin/accounts/follownotification/ HTTP/1.1" 200 27834
+INFO 2025-07-04 13:03:36,311 basehttp 22592 10072 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-04 13:03:36,859 basehttp 22592 10072 "GET /admin/accounts/follownotification/ HTTP/1.1" 200 27834
+INFO 2025-07-04 13:03:36,867 basehttp 22592 10072 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-04 13:03:37,033 basehttp 22592 10072 "GET /admin/accounts/follownotification/ HTTP/1.1" 200 27834
+INFO 2025-07-04 13:03:37,041 basehttp 22592 10072 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-04 13:03:37,221 basehttp 22592 10072 "GET /admin/accounts/follownotification/ HTTP/1.1" 200 27834
+INFO 2025-07-04 13:03:37,228 basehttp 22592 10072 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-04 13:03:37,394 basehttp 22592 10072 "GET /admin/accounts/follownotification/ HTTP/1.1" 200 27834
+INFO 2025-07-04 13:03:37,401 basehttp 22592 10072 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-04 13:03:37,575 basehttp 22592 10072 "GET /admin/accounts/follownotification/ HTTP/1.1" 200 27834
+INFO 2025-07-04 13:03:37,582 basehttp 22592 10072 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-04 13:03:37,738 basehttp 22592 10072 "GET /admin/accounts/follownotification/ HTTP/1.1" 200 27834
+INFO 2025-07-04 13:03:37,745 basehttp 22592 10072 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-04 13:04:41,314 autoreload 22592 1084 C:\Users\Steven\GradProject\GradProject\backend\accounts\views.py changed, reloading.
+INFO 2025-07-04 13:04:42,053 autoreload 2716 3036 Watching for file changes with StatReloader
+INFO 2025-07-04 13:04:45,187 basehttp 2716 9000 "POST /api/v1/accounts/follow/Stone%20Evens/ HTTP/1.1" 201 159
+INFO 2025-07-04 13:04:46,870 basehttp 2716 9000 "POST /api/v1/accounts/follow/Stone%20Evens/ HTTP/1.1" 200 148
+INFO 2025-07-04 13:05:16,203 basehttp 2716 16608 "GET /admin/accounts/userfollow/ HTTP/1.1" 200 24872
+INFO 2025-07-04 13:05:16,210 basehttp 2716 16608 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-04 13:05:24,894 autoreload 2716 3036 C:\Users\Steven\GradProject\GradProject\backend\accounts\views.py changed, reloading.
+INFO 2025-07-04 13:05:25,609 autoreload 22600 3384 Watching for file changes with StatReloader
+INFO 2025-07-04 13:05:28,150 basehttp 22600 17936 "POST /api/v1/accounts/follow/Stone%20Evens/ HTTP/1.1" 201 159
+INFO 2025-07-04 13:05:30,199 basehttp 22600 21368 "GET /admin/accounts/userfollow/ HTTP/1.1" 200 26796
+INFO 2025-07-04 13:05:30,207 basehttp 22600 21368 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-04 13:05:34,614 basehttp 22600 17936 "POST /api/v1/accounts/follow/Stone%20Evens/ HTTP/1.1" 200 148
+INFO 2025-07-04 13:05:37,275 basehttp 22600 21368 "GET /admin/accounts/userfollow/ HTTP/1.1" 200 24872
+INFO 2025-07-04 13:05:37,281 basehttp 22600 21368 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-04 13:05:41,818 basehttp 22600 21368 "GET /admin/accounts/follownotification/ HTTP/1.1" 200 28828
+INFO 2025-07-04 13:05:41,826 basehttp 22600 21368 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-04 13:06:53,551 autoreload 22600 3384 C:\Users\Steven\GradProject\GradProject\backend\accounts\models.py changed, reloading.
+INFO 2025-07-04 13:06:54,286 autoreload 18080 9304 Watching for file changes with StatReloader
+INFO 2025-07-04 13:06:56,836 basehttp 18080 15660 "POST /api/v1/accounts/follow/Stone%20Evens/ HTTP/1.1" 201 159
+INFO 2025-07-04 13:06:57,491 basehttp 18080 15660 "POST /api/v1/accounts/follow/Stone%20Evens/ HTTP/1.1" 200 148
+INFO 2025-07-04 13:07:25,432 autoreload 18080 9304 C:\Users\Steven\GradProject\GradProject\backend\accounts\models.py changed, reloading.
+INFO 2025-07-04 13:07:26,160 autoreload 5884 20824 Watching for file changes with StatReloader
+INFO 2025-07-04 13:07:28,373 basehttp 5884 20420 "POST /api/v1/accounts/follow/Stone%20Evens/ HTTP/1.1" 201 159
+INFO 2025-07-04 13:07:28,870 basehttp 5884 20420 "POST /api/v1/accounts/follow/Stone%20Evens/ HTTP/1.1" 200 148
+INFO 2025-07-04 13:08:55,367 basehttp 5884 20420 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 13:08:55,372 basehttp 5884 20420 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 13:08:55,376 basehttp 5884 20420 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 13:08:55,379 basehttp 5884 20420 "GET /api/v1/accounts/user/4/summary/ HTTP/1.1" 200 190
+INFO 2025-07-04 13:08:55,382 basehttp 5884 20420 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 13:08:55,385 basehttp 5884 20420 "GET /api/v1/social/users/4/posts/preview/ HTTP/1.1" 200 57
+INFO 2025-07-04 13:08:55,388 basehttp 5884 20420 "GET /api/v1/accounts/user/4/summary/ HTTP/1.1" 200 190
+INFO 2025-07-04 13:08:55,390 basehttp 5884 20420 "GET /api/v1/pets/users/4/archives/ HTTP/1.1" 200 347
+INFO 2025-07-04 13:08:55,393 basehttp 5884 20420 "GET /api/v1/social/users/4/posts/preview/ HTTP/1.1" 200 57
+INFO 2025-07-04 13:08:55,396 basehttp 5884 20420 "GET /api/v1/pets/users/4/archives/ HTTP/1.1" 200 347
+INFO 2025-07-04 13:08:56,939 basehttp 5884 20420 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 13:08:56,944 basehttp 5884 8768 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 13:09:00,533 basehttp 5884 8768 "GET /api/v1/social/search/?q=stone HTTP/1.1" 200 827
+INFO 2025-07-04 13:09:00,539 basehttp 5884 8768 "POST /api/v1/accounts/follow/status/batch/ HTTP/1.1" 200 145
+INFO 2025-07-04 13:09:00,550 basehttp 5884 20420 "GET /api/v1/social/search/?q=stone HTTP/1.1" 200 827
+INFO 2025-07-04 13:09:00,554 basehttp 5884 20420 "POST /api/v1/accounts/follow/status/batch/ HTTP/1.1" 200 145
+INFO 2025-07-04 13:09:48,044 autoreload 5884 20824 C:\Users\Steven\GradProject\GradProject\backend\accounts\models.py changed, reloading.
+INFO 2025-07-04 13:09:48,790 autoreload 4212 19824 Watching for file changes with StatReloader
+INFO 2025-07-04 13:09:51,344 autoreload 4212 19824 C:\Users\Steven\GradProject\GradProject\backend\accounts\admin.py changed, reloading.
+INFO 2025-07-04 13:09:52,073 autoreload 14740 17936 Watching for file changes with StatReloader
+INFO 2025-07-04 13:10:08,273 autoreload 14740 17936 C:\Users\Steven\GradProject\GradProject\backend\accounts\admin.py changed, reloading.
+INFO 2025-07-04 13:10:09,001 autoreload 19516 10784 Watching for file changes with StatReloader
+INFO 2025-07-04 13:10:26,300 autoreload 19516 10784 C:\Users\Steven\GradProject\GradProject\backend\accounts\admin.py changed, reloading.
+INFO 2025-07-04 13:10:27,021 autoreload 8660 20720 Watching for file changes with StatReloader
+INFO 2025-07-04 13:10:29,692 basehttp 8660 4340 "GET /admin/accounts/follownotification/ HTTP/1.1" 200 30349
+INFO 2025-07-04 13:10:29,700 basehttp 8660 4340 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-04 13:11:09,744 autoreload 8660 20720 C:\Users\Steven\GradProject\GradProject\backend\accounts\models.py changed, reloading.
+INFO 2025-07-04 13:11:10,467 autoreload 13260 18700 Watching for file changes with StatReloader
+INFO 2025-07-04 13:11:12,856 basehttp 13260 24804 "POST /api/v1/accounts/follow/Stone%20Evens/ HTTP/1.1" 201 159
+INFO 2025-07-04 13:11:13,506 basehttp 13260 24804 "POST /api/v1/accounts/follow/Stone%20Evens/ HTTP/1.1" 200 148
+INFO 2025-07-04 13:15:27,441 autoreload 13260 18700 C:\Users\Steven\GradProject\GradProject\backend\accounts\models.py changed, reloading.
+INFO 2025-07-04 13:15:28,203 autoreload 18980 21096 Watching for file changes with StatReloader
+INFO 2025-07-04 13:15:45,504 autoreload 18980 21096 C:\Users\Steven\GradProject\GradProject\backend\accounts\views.py changed, reloading.
+INFO 2025-07-04 13:15:46,224 autoreload 6832 10644 Watching for file changes with StatReloader
+INFO 2025-07-04 13:15:51,762 basehttp 6832 19476 "POST /admin/accounts/follownotification/ HTTP/1.1" 200 24672
+INFO 2025-07-04 13:15:52,643 basehttp 6832 19476 "POST /admin/accounts/follownotification/ HTTP/1.1" 302 0
+INFO 2025-07-04 13:15:52,664 basehttp 6832 19476 "GET /admin/accounts/follownotification/ HTTP/1.1" 200 27208
+INFO 2025-07-04 13:15:52,671 basehttp 6832 19476 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-04 13:15:58,791 basehttp 6832 19476 "POST /admin/accounts/follownotification/ HTTP/1.1" 200 23523
+INFO 2025-07-04 13:15:59,801 basehttp 6832 19476 "POST /admin/accounts/follownotification/ HTTP/1.1" 302 0
+INFO 2025-07-04 13:15:59,818 basehttp 6832 19476 "GET /admin/accounts/follownotification/ HTTP/1.1" 200 25049
+INFO 2025-07-04 13:15:59,825 basehttp 6832 19476 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-04 13:16:01,066 basehttp 6832 19476 "GET /admin/accounts/follownotification/ HTTP/1.1" 200 24900
+INFO 2025-07-04 13:16:01,074 basehttp 6832 19476 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-04 13:16:07,063 basehttp 6832 21340 "POST /api/v1/accounts/follow/Stone%20Evens/ HTTP/1.1" 201 159
+INFO 2025-07-04 13:16:08,797 basehttp 6832 19476 "GET /admin/accounts/follownotification/ HTTP/1.1" 200 27064
+INFO 2025-07-04 13:16:08,805 basehttp 6832 19476 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-04 13:16:10,319 basehttp 6832 21340 "POST /api/v1/accounts/follow/Stone%20Evens/ HTTP/1.1" 200 148
+INFO 2025-07-04 13:16:11,394 basehttp 6832 19476 "GET /admin/accounts/follownotification/ HTTP/1.1" 200 27064
+INFO 2025-07-04 13:16:11,401 basehttp 6832 19476 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-04 13:16:12,590 basehttp 6832 19476 "GET /admin/accounts/follownotification/ HTTP/1.1" 200 27064
+INFO 2025-07-04 13:16:12,596 basehttp 6832 19476 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-04 13:16:12,847 basehttp 6832 19476 "GET /admin/accounts/follownotification/ HTTP/1.1" 200 27064
+INFO 2025-07-04 13:16:12,853 basehttp 6832 19476 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-04 13:16:13,010 basehttp 6832 19476 "GET /admin/accounts/follownotification/ HTTP/1.1" 200 27064
+INFO 2025-07-04 13:16:13,017 basehttp 6832 19476 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-04 13:16:13,180 basehttp 6832 19476 "GET /admin/accounts/follownotification/ HTTP/1.1" 200 27064
+INFO 2025-07-04 13:16:13,187 basehttp 6832 19476 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-04 13:16:13,358 basehttp 6832 19476 "GET /admin/accounts/follownotification/ HTTP/1.1" 200 27064
+INFO 2025-07-04 13:16:13,365 basehttp 6832 19476 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-04 13:16:13,535 basehttp 6832 19476 "GET /admin/accounts/follownotification/ HTTP/1.1" 200 27064
+INFO 2025-07-04 13:16:13,543 basehttp 6832 19476 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-04 13:16:13,707 basehttp 6832 19476 "GET /admin/accounts/follownotification/ HTTP/1.1" 200 27064
+INFO 2025-07-04 13:16:13,714 basehttp 6832 19476 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-04 13:16:13,898 basehttp 6832 19476 "GET /admin/accounts/follownotification/ HTTP/1.1" 200 27064
+INFO 2025-07-04 13:16:13,905 basehttp 6832 19476 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-04 13:16:15,025 basehttp 6832 19476 "GET /admin/accounts/follownotification/ HTTP/1.1" 200 27064
+INFO 2025-07-04 13:16:15,032 basehttp 6832 19476 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-04 13:16:15,247 basehttp 6832 19476 "GET /admin/accounts/follownotification/ HTTP/1.1" 200 27064
+INFO 2025-07-04 13:16:15,254 basehttp 6832 19476 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-04 13:16:15,438 basehttp 6832 19476 "GET /admin/accounts/follownotification/ HTTP/1.1" 200 27064
+INFO 2025-07-04 13:16:15,446 basehttp 6832 19476 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-04 13:19:52,075 autoreload 6832 10644 C:\Users\Steven\GradProject\GradProject\backend\accounts\models.py changed, reloading.
+INFO 2025-07-04 13:19:52,848 autoreload 2176 3872 Watching for file changes with StatReloader
+INFO 2025-07-04 13:20:01,720 basehttp 2176 7244 "POST /admin/accounts/follownotification/ HTTP/1.1" 200 23523
+INFO 2025-07-04 13:20:02,423 basehttp 2176 7244 "POST /admin/accounts/follownotification/ HTTP/1.1" 302 0
+INFO 2025-07-04 13:20:02,438 basehttp 2176 7244 "GET /admin/accounts/follownotification/ HTTP/1.1" 200 25049
+INFO 2025-07-04 13:20:02,448 basehttp 2176 7244 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-04 13:20:04,385 basehttp 2176 7244 "GET /admin/accounts/follownotification/ HTTP/1.1" 200 24900
+INFO 2025-07-04 13:20:04,392 basehttp 2176 7244 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-04 13:20:06,995 basehttp 2176 22244 "POST /api/v1/accounts/follow/Stone%20Evens/ HTTP/1.1" 201 159
+INFO 2025-07-04 13:20:08,697 basehttp 2176 7244 "GET /admin/accounts/follownotification/ HTTP/1.1" 200 27064
+INFO 2025-07-04 13:20:08,704 basehttp 2176 7244 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-04 13:20:10,911 basehttp 2176 7244 "GET /admin/accounts/userfollow/ HTTP/1.1" 200 26796
+INFO 2025-07-04 13:20:10,919 basehttp 2176 7244 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-04 13:20:14,999 basehttp 2176 7244 "GET /admin/accounts/follownotification/ HTTP/1.1" 200 27064
+INFO 2025-07-04 13:20:15,007 basehttp 2176 7244 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-04 13:20:16,696 basehttp 2176 22244 "POST /api/v1/accounts/follow/Stone%20Evens/ HTTP/1.1" 200 148
+INFO 2025-07-04 13:20:17,890 basehttp 2176 7244 "GET /admin/accounts/follownotification/ HTTP/1.1" 200 24900
+INFO 2025-07-04 13:20:17,898 basehttp 2176 7244 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-04 13:20:21,490 basehttp 2176 7244 "GET /admin/accounts/userfollow/ HTTP/1.1" 200 24872
+INFO 2025-07-04 13:20:21,497 basehttp 2176 7244 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-04 13:20:25,614 basehttp 2176 22244 "POST /api/v1/accounts/follow/Stone%20Evens/ HTTP/1.1" 201 159
+INFO 2025-07-04 13:20:26,818 basehttp 2176 22244 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 13:20:26,823 basehttp 2176 5068 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 13:20:26,831 basehttp 2176 22244 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 13:20:26,831 basehttp 2176 5068 "GET /api/v1/accounts/user/4/summary/ HTTP/1.1" 200 190
+INFO 2025-07-04 13:20:26,838 basehttp 2176 22244 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 13:20:26,839 basehttp 2176 5068 "GET /api/v1/social/users/4/posts/preview/ HTTP/1.1" 200 57
+INFO 2025-07-04 13:20:26,844 basehttp 2176 22244 "GET /api/v1/accounts/user/4/summary/ HTTP/1.1" 200 190
+INFO 2025-07-04 13:20:26,846 basehttp 2176 5068 "GET /api/v1/pets/users/4/archives/ HTTP/1.1" 200 347
+INFO 2025-07-04 13:20:26,849 basehttp 2176 22244 "GET /api/v1/social/users/4/posts/preview/ HTTP/1.1" 200 57
+INFO 2025-07-04 13:20:26,854 basehttp 2176 22244 "GET /api/v1/pets/users/4/archives/ HTTP/1.1" 200 347
+INFO 2025-07-04 13:20:28,661 basehttp 2176 22244 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 13:20:28,666 basehttp 2176 5068 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 13:20:28,670 basehttp 2176 22244 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 13:20:28,674 basehttp 2176 5068 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 13:20:30,123 basehttp 2176 5068 "POST /api/v1/accounts/logout/ HTTP/1.1" 200 55
+INFO 2025-07-04 13:20:42,378 basehttp 2176 5068 "POST /api/v1/accounts/token/ HTTP/1.1" 200 579
+INFO 2025-07-04 13:20:42,399 basehttp 2176 5068 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-04 13:20:42,402 basehttp 2176 7384 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-04 13:20:42,407 basehttp 2176 22244 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:20:42,409 basehttp 2176 5068 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-04 13:20:42,414 basehttp 2176 7384 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:20:42,416 basehttp 2176 22244 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-04 13:20:44,353 basehttp 2176 22244 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:20:44,355 basehttp 2176 7384 "GET /api/v1/accounts/notifications/ HTTP/1.1" 200 427
+INFO 2025-07-04 13:20:44,359 basehttp 2176 5068 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:20:44,362 basehttp 2176 22244 "GET /api/v1/accounts/notifications/ HTTP/1.1" 200 427
+INFO 2025-07-04 13:28:26,383 autoreload 3320 7320 Watching for file changes with StatReloader
+INFO 2025-07-04 13:28:29,376 basehttp 3320 15104 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:28:29,377 basehttp 3320 15984 "GET /api/v1/accounts/notifications/ HTTP/1.1" 200 427
+INFO 2025-07-04 13:28:29,380 basehttp 3320 15104 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:28:29,383 basehttp 3320 15984 "GET /api/v1/accounts/notifications/ HTTP/1.1" 200 427
+INFO 2025-07-04 13:32:51,126 autoreload 3320 7320 C:\Users\Steven\GradProject\GradProject\backend\accounts\serializers.py changed, reloading.
+INFO 2025-07-04 13:32:51,866 autoreload 12312 5200 Watching for file changes with StatReloader
+INFO 2025-07-04 13:32:54,283 basehttp 12312 7544 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-04 13:32:54,285 basehttp 12312 7544 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-04 13:32:54,298 basehttp 12312 23800 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-04 13:32:54,303 basehttp 12312 18904 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:32:54,305 basehttp 12312 7544 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-04 13:32:54,307 basehttp 12312 23800 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:32:55,185 basehttp 12312 23800 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:32:55,189 basehttp 12312 7544 "GET /api/v1/accounts/notifications/ HTTP/1.1" 200 405
+INFO 2025-07-04 13:32:55,190 basehttp 12312 18904 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:32:55,193 basehttp 12312 23800 "GET /api/v1/accounts/notifications/ HTTP/1.1" 200 405
+INFO 2025-07-04 13:33:00,336 basehttp 12312 23800 "OPTIONS /api/v1/accounts/notifications/15/follow-request/ HTTP/1.1" 200 0
+ERROR 2025-07-04 13:33:00,340 basehttp 12312 23800 "POST /api/v1/accounts/notifications/15/follow-request/ HTTP/1.1" 500 221
+INFO 2025-07-04 13:33:46,258 autoreload 12312 5200 C:\Users\Steven\GradProject\GradProject\backend\accounts\views.py changed, reloading.
+INFO 2025-07-04 13:33:46,982 autoreload 21328 21952 Watching for file changes with StatReloader
+ERROR 2025-07-04 13:33:50,943 basehttp 21328 18236 "POST /api/v1/accounts/notifications/15/follow-request/ HTTP/1.1" 500 128
+INFO 2025-07-04 13:36:21,041 autoreload 21328 21952 C:\Users\Steven\GradProject\GradProject\backend\accounts\models.py changed, reloading.
+INFO 2025-07-04 13:36:21,778 autoreload 22044 18940 Watching for file changes with StatReloader
+INFO 2025-07-04 13:38:34,564 autoreload 22044 18940 C:\Users\Steven\GradProject\GradProject\backend\accounts\models.py changed, reloading.
+INFO 2025-07-04 13:38:35,310 autoreload 18484 11796 Watching for file changes with StatReloader
+INFO 2025-07-04 13:40:12,392 autoreload 18484 11796 C:\Users\Steven\GradProject\GradProject\backend\accounts\views.py changed, reloading.
+INFO 2025-07-04 13:40:13,099 autoreload 24216 19844 Watching for file changes with StatReloader
+ERROR 2025-07-04 13:40:16,646 basehttp 24216 18296 "POST /api/v1/accounts/notifications/15/follow-request/ HTTP/1.1" 500 128
+INFO 2025-07-04 13:41:23,112 autoreload 24216 19844 C:\Users\Steven\GradProject\GradProject\backend\accounts\views.py changed, reloading.
+INFO 2025-07-04 13:41:23,825 autoreload 9356 18256 Watching for file changes with StatReloader
+ERROR 2025-07-04 13:41:27,024 basehttp 9356 18412 "POST /api/v1/accounts/notifications/15/follow-request/ HTTP/1.1" 500 164
+INFO 2025-07-04 13:43:36,869 autoreload 9356 18256 C:\Users\Steven\GradProject\GradProject\backend\accounts\views.py changed, reloading.
+INFO 2025-07-04 13:43:37,596 autoreload 20616 25388 Watching for file changes with StatReloader
+WARNING 2025-07-04 13:43:42,567 basehttp 20616 11932 "POST /api/v1/accounts/notifications/15/follow-request/ HTTP/1.1" 404 71
+INFO 2025-07-04 13:43:55,402 basehttp 20616 22200 "GET /admin/accounts/userfollow/ HTTP/1.1" 200 26796
+INFO 2025-07-04 13:43:55,412 basehttp 20616 22200 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-04 13:43:58,936 basehttp 20616 22200 "GET /admin/accounts/follownotification/ HTTP/1.1" 200 24900
+INFO 2025-07-04 13:43:58,943 basehttp 20616 22200 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-04 13:43:59,499 basehttp 20616 22200 "GET /admin/accounts/follownotification/ HTTP/1.1" 200 24900
+INFO 2025-07-04 13:43:59,506 basehttp 20616 22200 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-04 13:44:03,526 basehttp 20616 11932 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-04 13:44:03,532 basehttp 20616 12884 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:44:03,534 basehttp 20616 11932 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-04 13:44:03,534 basehttp 20616 12884 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-04 13:44:03,542 basehttp 20616 11932 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-04 13:44:03,542 basehttp 20616 12884 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:44:05,466 basehttp 20616 12884 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:44:05,467 basehttp 20616 11932 "GET /api/v1/accounts/notifications/ HTTP/1.1" 200 125
+INFO 2025-07-04 13:44:05,472 basehttp 20616 12148 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:44:05,473 basehttp 20616 12884 "GET /api/v1/accounts/notifications/ HTTP/1.1" 200 125
+INFO 2025-07-04 13:44:11,900 basehttp 20616 22200 "GET /admin/accounts/userfollow/ HTTP/1.1" 200 26796
+INFO 2025-07-04 13:44:11,907 basehttp 20616 22200 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-04 13:44:18,841 basehttp 20616 22200 "GET /admin/accounts/userfollow/ HTTP/1.1" 200 26796
+INFO 2025-07-04 13:44:18,848 basehttp 20616 22200 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-04 13:44:22,791 basehttp 20616 12884 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:44:22,795 basehttp 20616 12148 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:44:22,800 basehttp 20616 12884 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:44:22,804 basehttp 20616 12148 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:44:23,351 basehttp 20616 12148 "POST /api/v1/accounts/logout/ HTTP/1.1" 200 55
+INFO 2025-07-04 13:44:31,598 basehttp 20616 12148 "POST /api/v1/accounts/token/ HTTP/1.1" 200 573
+INFO 2025-07-04 13:44:31,621 basehttp 20616 12148 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-04 13:44:31,624 basehttp 20616 11932 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-04 13:44:31,629 basehttp 20616 12884 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 13:44:31,631 basehttp 20616 12148 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-04 13:44:31,637 basehttp 20616 11932 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 13:44:31,638 basehttp 20616 12884 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-04 13:44:34,028 basehttp 20616 12884 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 13:44:34,032 basehttp 20616 11932 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 13:44:36,044 basehttp 20616 11932 "GET /api/v1/social/search/?q=stone HTTP/1.1" 200 827
+INFO 2025-07-04 13:44:36,050 basehttp 20616 11932 "POST /api/v1/accounts/follow/status/batch/ HTTP/1.1" 200 144
+INFO 2025-07-04 13:44:36,061 basehttp 20616 12884 "GET /api/v1/social/search/?q=stone HTTP/1.1" 200 827
+INFO 2025-07-04 13:44:36,065 basehttp 20616 12884 "POST /api/v1/accounts/follow/status/batch/ HTTP/1.1" 200 144
+INFO 2025-07-04 13:44:37,695 basehttp 20616 12884 "POST /api/v1/accounts/follow/Stone%20Evens/ HTTP/1.1" 200 148
+INFO 2025-07-04 13:44:40,075 basehttp 20616 12884 "POST /api/v1/accounts/follow/Stone%20Evens/ HTTP/1.1" 201 159
+INFO 2025-07-04 13:44:42,174 basehttp 20616 12884 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 13:44:42,179 basehttp 20616 11932 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 13:44:42,183 basehttp 20616 12884 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 13:44:42,188 basehttp 20616 11932 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 13:44:43,106 basehttp 20616 11932 "POST /api/v1/accounts/logout/ HTTP/1.1" 200 55
+INFO 2025-07-04 13:44:51,869 basehttp 20616 11932 "POST /api/v1/accounts/token/ HTTP/1.1" 200 579
+INFO 2025-07-04 13:44:51,888 basehttp 20616 11932 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-04 13:44:51,890 basehttp 20616 12148 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-04 13:44:51,895 basehttp 20616 12884 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:44:51,897 basehttp 20616 11932 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-04 13:44:51,902 basehttp 20616 12148 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:44:51,903 basehttp 20616 12884 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-04 13:44:53,742 basehttp 20616 12884 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:44:53,744 basehttp 20616 12148 "GET /api/v1/accounts/notifications/ HTTP/1.1" 200 405
+INFO 2025-07-04 13:44:53,748 basehttp 20616 11932 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:44:53,750 basehttp 20616 12884 "GET /api/v1/accounts/notifications/ HTTP/1.1" 200 405
+INFO 2025-07-04 13:44:55,532 basehttp 20616 12884 "OPTIONS /api/v1/accounts/notifications/16/follow-request/ HTTP/1.1" 200 0
+ERROR 2025-07-04 13:44:55,550 basehttp 20616 12884 "POST /api/v1/accounts/notifications/16/follow-request/ HTTP/1.1" 500 164
+INFO 2025-07-04 13:45:42,862 autoreload 20616 25388 C:\Users\Steven\GradProject\GradProject\backend\accounts\views.py changed, reloading.
+INFO 2025-07-04 13:45:43,582 autoreload 2716 2788 Watching for file changes with StatReloader
+INFO 2025-07-04 13:45:50,737 basehttp 2716 20560 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-04 13:45:50,739 basehttp 2716 20560 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-04 13:45:50,754 basehttp 2716 13268 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-04 13:45:50,754 basehttp 2716 23136 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:45:50,760 basehttp 2716 13268 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:45:50,760 basehttp 2716 20560 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-04 13:45:50,977 basehttp 2716 13268 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:45:50,978 basehttp 2716 20560 "GET /api/v1/accounts/notifications/ HTTP/1.1" 200 125
+INFO 2025-07-04 13:45:50,983 basehttp 2716 13268 "GET /api/v1/accounts/notifications/ HTTP/1.1" 200 125
+INFO 2025-07-04 13:45:50,983 basehttp 2716 23136 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:45:54,215 basehttp 2716 23136 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:45:54,219 basehttp 2716 13268 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:45:54,227 basehttp 2716 23136 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:45:54,228 basehttp 2716 13268 "GET /api/v1/accounts/user/3/summary/ HTTP/1.1" 200 194
+INFO 2025-07-04 13:45:54,232 basehttp 2716 20560 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:45:54,240 basehttp 2716 20560 "GET /api/v1/accounts/user/3/summary/ HTTP/1.1" 200 194
+INFO 2025-07-04 13:45:54,245 basehttp 2716 13268 "GET /api/v1/social/users/3/posts/preview/ HTTP/1.1" 200 706
+INFO 2025-07-04 13:45:54,252 basehttp 2716 13268 "GET /api/v1/pets/users/3/archives/ HTTP/1.1" 200 347
+INFO 2025-07-04 13:45:54,261 basehttp 2716 20560 "GET /api/v1/social/users/3/posts/preview/ HTTP/1.1" 200 706
+INFO 2025-07-04 13:45:54,265 basehttp 2716 20560 "GET /api/v1/pets/users/3/archives/ HTTP/1.1" 200 347
+INFO 2025-07-04 13:45:55,145 basehttp 2716 20560 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:45:55,149 basehttp 2716 13268 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:45:55,159 basehttp 2716 23136 "GET /api/v1/accounts/following/?user=Stone%20Evens HTTP/1.1" 200 74
+INFO 2025-07-04 13:45:55,160 basehttp 2716 13268 "GET /api/v1/accounts/followers/?user=Stone%20Evens HTTP/1.1" 200 231
+INFO 2025-07-04 13:45:55,160 basehttp 2716 20560 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:45:55,166 basehttp 2716 13268 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:45:55,166 basehttp 2716 20560 "POST /api/v1/accounts/follow/status/batch/ HTTP/1.1" 200 145
+INFO 2025-07-04 13:45:55,175 basehttp 2716 13268 "GET /api/v1/accounts/following/?user=Stone%20Evens HTTP/1.1" 200 74
+INFO 2025-07-04 13:45:55,175 basehttp 2716 20560 "GET /api/v1/accounts/followers/?user=Stone%20Evens HTTP/1.1" 200 231
+INFO 2025-07-04 13:45:55,180 basehttp 2716 20560 "POST /api/v1/accounts/follow/status/batch/ HTTP/1.1" 200 145
+INFO 2025-07-04 13:45:56,818 basehttp 2716 20560 "OPTIONS /api/v1/accounts/followers/remove/Test123/ HTTP/1.1" 200 0
+INFO 2025-07-04 13:45:56,828 basehttp 2716 20560 "DELETE /api/v1/accounts/followers/remove/Test123/ HTTP/1.1" 200 155
+INFO 2025-07-04 13:45:56,836 basehttp 2716 13268 "GET /api/v1/accounts/following/?user=Stone%20Evens HTTP/1.1" 200 74
+INFO 2025-07-04 13:45:56,837 basehttp 2716 20560 "GET /api/v1/accounts/followers/?user=Stone%20Evens HTTP/1.1" 200 74
+INFO 2025-07-04 13:46:02,517 basehttp 2716 20560 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:46:02,522 basehttp 2716 13268 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:46:02,527 basehttp 2716 20560 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:46:02,531 basehttp 2716 13268 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:46:03,317 basehttp 2716 13268 "POST /api/v1/accounts/logout/ HTTP/1.1" 200 55
+INFO 2025-07-04 13:46:11,696 basehttp 2716 13268 "OPTIONS /api/v1/accounts/token/ HTTP/1.1" 200 0
+INFO 2025-07-04 13:46:12,287 basehttp 2716 13268 "POST /api/v1/accounts/token/ HTTP/1.1" 200 573
+INFO 2025-07-04 13:46:12,309 basehttp 2716 13268 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-04 13:46:12,309 basehttp 2716 20560 "OPTIONS /api/v1/accounts/me/ HTTP/1.1" 200 0
+INFO 2025-07-04 13:46:12,313 basehttp 2716 23136 "OPTIONS /api/v1/accounts/me/ HTTP/1.1" 200 0
+INFO 2025-07-04 13:46:12,313 basehttp 2716 4164 "OPTIONS /api/v1/accounts/plans/today/ HTTP/1.1" 200 0
+INFO 2025-07-04 13:46:12,313 basehttp 2716 13268 "OPTIONS /api/v1/accounts/plans/today/ HTTP/1.1" 200 0
+INFO 2025-07-04 13:46:12,313 basehttp 2716 11612 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-04 13:46:12,319 basehttp 2716 20560 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 13:46:12,322 basehttp 2716 11612 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-04 13:46:12,325 basehttp 2716 4164 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 13:46:12,328 basehttp 2716 20560 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-04 13:46:14,107 basehttp 2716 20560 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 13:46:14,111 basehttp 2716 4164 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 13:46:16,234 basehttp 2716 4164 "GET /api/v1/social/search/?q=stone HTTP/1.1" 200 827
+INFO 2025-07-04 13:46:16,241 basehttp 2716 4164 "POST /api/v1/accounts/follow/status/batch/ HTTP/1.1" 200 145
+INFO 2025-07-04 13:46:16,250 basehttp 2716 20560 "GET /api/v1/social/search/?q=stone HTTP/1.1" 200 827
+INFO 2025-07-04 13:46:16,255 basehttp 2716 20560 "POST /api/v1/accounts/follow/status/batch/ HTTP/1.1" 200 145
+INFO 2025-07-04 13:46:18,931 basehttp 2716 20560 "POST /api/v1/accounts/follow/Stone%20Evens/ HTTP/1.1" 201 159
+INFO 2025-07-04 13:49:16,831 basehttp 2716 20560 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 13:49:16,836 basehttp 2716 4164 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 13:49:16,839 basehttp 2716 20560 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 13:49:16,843 basehttp 2716 4164 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 13:49:17,641 basehttp 2716 4164 "OPTIONS /api/v1/accounts/logout/ HTTP/1.1" 200 0
+INFO 2025-07-04 13:49:17,651 basehttp 2716 4164 "POST /api/v1/accounts/logout/ HTTP/1.1" 200 55
+INFO 2025-07-04 13:49:27,118 basehttp 2716 4164 "POST /api/v1/accounts/token/ HTTP/1.1" 200 579
+INFO 2025-07-04 13:49:27,138 basehttp 2716 4164 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-04 13:49:27,141 basehttp 2716 20560 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-04 13:49:27,146 basehttp 2716 11612 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-04 13:49:27,147 basehttp 2716 4164 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:49:27,151 basehttp 2716 20560 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-04 13:49:27,151 basehttp 2716 11612 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:49:28,938 basehttp 2716 11612 "OPTIONS /api/v1/accounts/notifications/ HTTP/1.1" 200 0
+INFO 2025-07-04 13:49:28,938 basehttp 2716 4164 "OPTIONS /api/v1/accounts/notifications/ HTTP/1.1" 200 0
+INFO 2025-07-04 13:49:28,943 basehttp 2716 20560 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:49:28,946 basehttp 2716 4164 "GET /api/v1/accounts/notifications/ HTTP/1.1" 200 405
+INFO 2025-07-04 13:49:28,948 basehttp 2716 11612 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:49:28,950 basehttp 2716 20560 "GET /api/v1/accounts/notifications/ HTTP/1.1" 200 405
+INFO 2025-07-04 13:49:30,488 basehttp 2716 20560 "OPTIONS /api/v1/accounts/notifications/17/follow-request/ HTTP/1.1" 200 0
+INFO 2025-07-04 13:49:30,511 basehttp 2716 20560 "POST /api/v1/accounts/notifications/17/follow-request/ HTTP/1.1" 200 61
+INFO 2025-07-04 13:49:30,517 basehttp 2716 20560 "GET /api/v1/accounts/notifications/ HTTP/1.1" 200 125
+INFO 2025-07-04 13:49:32,307 basehttp 2716 20560 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:49:32,308 basehttp 2716 11612 "GET /api/v1/accounts/notifications/ HTTP/1.1" 200 125
+INFO 2025-07-04 13:49:32,312 basehttp 2716 4164 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:49:32,313 basehttp 2716 20560 "GET /api/v1/accounts/notifications/ HTTP/1.1" 200 125
+INFO 2025-07-04 13:49:33,889 basehttp 2716 20560 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-04 13:49:33,890 basehttp 2716 13268 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-04 13:49:33,893 basehttp 2716 11612 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-04 13:49:33,895 basehttp 2716 4164 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:49:33,899 basehttp 2716 13268 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-04 13:49:33,899 basehttp 2716 11612 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:49:34,564 basehttp 2716 11612 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:49:34,564 basehttp 2716 13268 "GET /api/v1/accounts/notifications/ HTTP/1.1" 200 125
+INFO 2025-07-04 13:49:34,570 basehttp 2716 4164 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:49:34,570 basehttp 2716 11612 "GET /api/v1/accounts/notifications/ HTTP/1.1" 200 125
+INFO 2025-07-04 13:49:40,951 basehttp 2716 2492 "GET /admin/accounts/userfollow/ HTTP/1.1" 200 26796
+INFO 2025-07-04 13:49:40,958 basehttp 2716 2492 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-04 13:49:43,652 basehttp 2716 2492 "GET /admin/accounts/follownotification/ HTTP/1.1" 200 27087
+INFO 2025-07-04 13:49:43,659 basehttp 2716 2492 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-04 13:49:44,427 basehttp 2716 2492 "GET /admin/accounts/follownotification/ HTTP/1.1" 200 27087
+INFO 2025-07-04 13:49:44,434 basehttp 2716 2492 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-04 13:51:14,318 basehttp 2716 2492 "GET /admin/accounts/follownotification/ HTTP/1.1" 200 27087
+INFO 2025-07-04 13:51:14,326 basehttp 2716 2492 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-04 13:51:16,283 basehttp 2716 2492 "GET /admin/accounts/follownotification/ HTTP/1.1" 200 27087
+INFO 2025-07-04 13:51:16,290 basehttp 2716 2492 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-04 13:51:46,752 autoreload 2716 2788 C:\Users\Steven\GradProject\GradProject\backend\accounts\views.py changed, reloading.
+INFO 2025-07-04 13:51:47,468 autoreload 6900 4144 Watching for file changes with StatReloader
+INFO 2025-07-04 13:51:51,411 basehttp 6900 6772 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:51:51,415 basehttp 6900 6772 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:51:51,419 basehttp 6900 6772 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:51:51,420 basehttp 6900 6772 "OPTIONS /api/v1/accounts/user/3/summary/ HTTP/1.1" 200 0
+INFO 2025-07-04 13:51:51,423 basehttp 6900 6772 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:51:51,427 basehttp 6900 6772 "GET /api/v1/accounts/user/3/summary/ HTTP/1.1" 200 194
+INFO 2025-07-04 13:51:51,430 basehttp 6900 6772 "GET /api/v1/accounts/user/3/summary/ HTTP/1.1" 200 194
+INFO 2025-07-04 13:51:51,431 basehttp 6900 6772 "OPTIONS /api/v1/social/users/3/posts/preview/ HTTP/1.1" 200 0
+INFO 2025-07-04 13:51:51,432 basehttp 6900 6772 "OPTIONS /api/v1/social/users/3/posts/preview/ HTTP/1.1" 200 0
+INFO 2025-07-04 13:51:51,440 basehttp 6900 6772 "GET /api/v1/social/users/3/posts/preview/ HTTP/1.1" 200 706
+INFO 2025-07-04 13:51:51,448 basehttp 6900 6772 "GET /api/v1/social/users/3/posts/preview/ HTTP/1.1" 200 706
+INFO 2025-07-04 13:51:51,449 basehttp 6900 6772 "OPTIONS /api/v1/pets/users/3/archives/ HTTP/1.1" 200 0
+INFO 2025-07-04 13:51:51,450 basehttp 6900 6772 "OPTIONS /api/v1/pets/users/3/archives/ HTTP/1.1" 200 0
+INFO 2025-07-04 13:51:51,453 basehttp 6900 6772 "GET /api/v1/pets/users/3/archives/ HTTP/1.1" 200 347
+INFO 2025-07-04 13:51:51,457 basehttp 6900 6772 "GET /api/v1/pets/users/3/archives/ HTTP/1.1" 200 347
+INFO 2025-07-04 13:51:52,464 basehttp 6900 6772 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:51:52,466 basehttp 6900 4344 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:51:52,469 basehttp 6900 13012 "OPTIONS /api/v1/accounts/following/?user=Stone%20Evens HTTP/1.1" 200 0
+INFO 2025-07-04 13:51:52,469 basehttp 6900 4344 "OPTIONS /api/v1/accounts/followers/?user=Stone%20Evens HTTP/1.1" 200 0
+INFO 2025-07-04 13:51:52,473 basehttp 6900 6772 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:51:52,477 basehttp 6900 13012 "GET /api/v1/accounts/followers/?user=Stone%20Evens HTTP/1.1" 200 231
+INFO 2025-07-04 13:51:52,477 basehttp 6900 4344 "GET /api/v1/accounts/following/?user=Stone%20Evens HTTP/1.1" 200 74
+INFO 2025-07-04 13:51:52,479 basehttp 6900 12304 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:51:52,479 basehttp 6900 4344 "OPTIONS /api/v1/accounts/follow/status/batch/ HTTP/1.1" 200 0
+INFO 2025-07-04 13:51:52,484 basehttp 6900 4344 "POST /api/v1/accounts/follow/status/batch/ HTTP/1.1" 200 145
+INFO 2025-07-04 13:51:52,486 basehttp 6900 12304 "GET /api/v1/accounts/followers/?user=Stone%20Evens HTTP/1.1" 200 231
+INFO 2025-07-04 13:51:52,486 basehttp 6900 13012 "GET /api/v1/accounts/following/?user=Stone%20Evens HTTP/1.1" 200 74
+INFO 2025-07-04 13:51:52,490 basehttp 6900 13012 "POST /api/v1/accounts/follow/status/batch/ HTTP/1.1" 200 145
+INFO 2025-07-04 13:51:53,938 basehttp 6900 13012 "DELETE /api/v1/accounts/followers/remove/Test123/ HTTP/1.1" 200 155
+INFO 2025-07-04 13:51:53,946 basehttp 6900 12304 "GET /api/v1/accounts/following/?user=Stone%20Evens HTTP/1.1" 200 74
+INFO 2025-07-04 13:51:53,946 basehttp 6900 13012 "GET /api/v1/accounts/followers/?user=Stone%20Evens HTTP/1.1" 200 74
+INFO 2025-07-04 13:51:55,353 basehttp 6900 13012 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:51:55,357 basehttp 6900 12304 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:51:55,362 basehttp 6900 13012 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:51:55,366 basehttp 6900 12304 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:51:55,946 basehttp 6900 12304 "POST /api/v1/accounts/logout/ HTTP/1.1" 200 55
+INFO 2025-07-04 13:52:05,181 basehttp 6900 12304 "POST /api/v1/accounts/token/ HTTP/1.1" 200 573
+INFO 2025-07-04 13:52:05,205 basehttp 6900 12304 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-04 13:52:05,207 basehttp 6900 6772 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-04 13:52:05,210 basehttp 6900 13012 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 13:52:05,213 basehttp 6900 4344 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-04 13:52:05,217 basehttp 6900 6772 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 13:52:05,218 basehttp 6900 13012 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-04 13:52:06,702 basehttp 6900 13012 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 13:52:06,706 basehttp 6900 13012 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-04 13:52:06,706 basehttp 6900 6772 "GET /api/v1/accounts/notifications/ HTTP/1.1" 200 427
+INFO 2025-07-04 13:52:06,709 basehttp 6900 11552 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-04 13:52:06,712 basehttp 6900 4344 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 13:52:06,714 basehttp 6900 12304 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-04 13:52:06,718 basehttp 6900 13012 "GET /api/v1/accounts/notifications/ HTTP/1.1" 200 427
+INFO 2025-07-04 13:52:06,721 basehttp 6900 11552 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 13:52:06,723 basehttp 6900 4344 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-04 13:52:06,726 basehttp 6900 13012 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 13:52:07,442 basehttp 6900 13012 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 13:52:07,444 basehttp 6900 4344 "GET /api/v1/accounts/notifications/ HTTP/1.1" 200 427
+INFO 2025-07-04 13:52:07,448 basehttp 6900 11552 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 13:52:07,450 basehttp 6900 13012 "GET /api/v1/accounts/notifications/ HTTP/1.1" 200 427
+INFO 2025-07-04 13:52:13,979 basehttp 6900 23196 "POST /admin/accounts/follownotification/ HTTP/1.1" 200 23533
+INFO 2025-07-04 13:52:14,636 basehttp 6900 23196 "POST /admin/accounts/follownotification/ HTTP/1.1" 302 0
+INFO 2025-07-04 13:52:14,661 basehttp 6900 23196 "GET /admin/accounts/follownotification/ HTTP/1.1" 200 25049
+INFO 2025-07-04 13:52:14,669 basehttp 6900 23196 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-04 13:52:16,316 basehttp 6900 23196 "GET /admin/accounts/follownotification/ HTTP/1.1" 200 24900
+INFO 2025-07-04 13:52:16,324 basehttp 6900 23196 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-04 13:52:18,175 basehttp 6900 13012 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-04 13:52:18,176 basehttp 6900 12304 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-04 13:52:18,179 basehttp 6900 11552 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 13:52:18,181 basehttp 6900 4344 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-04 13:52:18,185 basehttp 6900 12304 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 13:52:18,186 basehttp 6900 11552 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-04 13:52:19,892 basehttp 6900 11552 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 13:52:19,893 basehttp 6900 12304 "GET /api/v1/accounts/notifications/ HTTP/1.1" 200 125
+INFO 2025-07-04 13:52:19,898 basehttp 6900 4344 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 13:52:19,898 basehttp 6900 11552 "GET /api/v1/accounts/notifications/ HTTP/1.1" 200 125
+INFO 2025-07-04 13:53:17,886 basehttp 6900 11552 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 13:53:17,890 basehttp 6900 4344 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 13:53:21,644 basehttp 6900 4344 "OPTIONS /api/v1/social/search/?q=stone HTTP/1.1" 200 0
+INFO 2025-07-04 13:53:21,644 basehttp 6900 11552 "OPTIONS /api/v1/social/search/?q=stone HTTP/1.1" 200 0
+INFO 2025-07-04 13:53:21,658 basehttp 6900 4344 "GET /api/v1/social/search/?q=stone HTTP/1.1" 200 827
+INFO 2025-07-04 13:53:21,665 basehttp 6900 4344 "POST /api/v1/accounts/follow/status/batch/ HTTP/1.1" 200 145
+INFO 2025-07-04 13:53:21,675 basehttp 6900 11552 "GET /api/v1/social/search/?q=stone HTTP/1.1" 200 827
+INFO 2025-07-04 13:53:21,679 basehttp 6900 11552 "POST /api/v1/accounts/follow/status/batch/ HTTP/1.1" 200 145
+INFO 2025-07-04 13:53:23,197 basehttp 6900 11552 "OPTIONS /api/v1/accounts/follow/Stone%20Evens/ HTTP/1.1" 200 0
+INFO 2025-07-04 13:53:23,214 basehttp 6900 11552 "POST /api/v1/accounts/follow/Stone%20Evens/ HTTP/1.1" 201 159
+INFO 2025-07-04 13:54:16,269 basehttp 6900 11552 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 13:54:16,274 basehttp 6900 4344 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 13:54:16,278 basehttp 6900 11552 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 13:54:16,283 basehttp 6900 4344 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 13:54:16,889 basehttp 6900 4344 "POST /api/v1/accounts/logout/ HTTP/1.1" 200 55
+INFO 2025-07-04 13:54:27,320 basehttp 6900 4344 "POST /api/v1/accounts/token/ HTTP/1.1" 200 579
+INFO 2025-07-04 13:54:27,341 basehttp 6900 4344 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-04 13:54:27,344 basehttp 6900 12304 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-04 13:54:27,349 basehttp 6900 11552 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:54:27,349 basehttp 6900 4344 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-04 13:54:27,356 basehttp 6900 12304 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:54:27,356 basehttp 6900 11552 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-04 13:54:31,333 basehttp 6900 11552 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:54:31,335 basehttp 6900 12304 "GET /api/v1/accounts/notifications/ HTTP/1.1" 200 405
+INFO 2025-07-04 13:54:31,339 basehttp 6900 4344 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:54:31,341 basehttp 6900 11552 "GET /api/v1/accounts/notifications/ HTTP/1.1" 200 405
+INFO 2025-07-04 13:54:32,194 basehttp 6900 11552 "OPTIONS /api/v1/accounts/notifications/19/follow-request/ HTTP/1.1" 200 0
+INFO 2025-07-04 13:54:32,218 basehttp 6900 11552 "POST /api/v1/accounts/notifications/19/follow-request/ HTTP/1.1" 200 61
+INFO 2025-07-04 13:54:32,225 basehttp 6900 11552 "GET /api/v1/accounts/notifications/ HTTP/1.1" 200 417
+INFO 2025-07-04 13:54:39,144 basehttp 6900 11552 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:54:39,149 basehttp 6900 4344 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:54:39,157 basehttp 6900 11552 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:54:39,157 basehttp 6900 4344 "GET /api/v1/accounts/user/3/summary/ HTTP/1.1" 200 194
+INFO 2025-07-04 13:54:39,162 basehttp 6900 12304 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:54:39,168 basehttp 6900 12304 "GET /api/v1/accounts/user/3/summary/ HTTP/1.1" 200 194
+INFO 2025-07-04 13:54:39,175 basehttp 6900 4344 "GET /api/v1/social/users/3/posts/preview/ HTTP/1.1" 200 706
+INFO 2025-07-04 13:54:39,182 basehttp 6900 4344 "GET /api/v1/pets/users/3/archives/ HTTP/1.1" 200 347
+INFO 2025-07-04 13:54:39,190 basehttp 6900 12304 "GET /api/v1/social/users/3/posts/preview/ HTTP/1.1" 200 706
+INFO 2025-07-04 13:54:39,196 basehttp 6900 12304 "GET /api/v1/pets/users/3/archives/ HTTP/1.1" 200 347
+INFO 2025-07-04 13:55:13,440 basehttp 6900 12304 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:55:13,443 basehttp 6900 4344 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:55:21,156 basehttp 6900 12304 "OPTIONS /api/v1/social/search/?q=Test HTTP/1.1" 200 0
+INFO 2025-07-04 13:55:21,157 basehttp 6900 4344 "OPTIONS /api/v1/social/search/?q=Test HTTP/1.1" 200 0
+INFO 2025-07-04 13:55:21,164 basehttp 6900 4344 "GET /api/v1/social/search/?q=Test HTTP/1.1" 200 171
+INFO 2025-07-04 13:55:21,170 basehttp 6900 4344 "POST /api/v1/accounts/follow/status/batch/ HTTP/1.1" 200 145
+INFO 2025-07-04 13:55:21,171 basehttp 6900 12304 "GET /api/v1/social/search/?q=Test HTTP/1.1" 200 171
+INFO 2025-07-04 13:55:21,175 basehttp 6900 12304 "POST /api/v1/accounts/follow/status/batch/ HTTP/1.1" 200 145
+INFO 2025-07-04 13:58:14,689 autoreload 6900 4144 C:\Users\Steven\GradProject\GradProject\backend\social\serializers.py changed, reloading.
+INFO 2025-07-04 13:58:15,425 autoreload 7316 23136 Watching for file changes with StatReloader
+INFO 2025-07-04 13:58:18,343 basehttp 7316 916 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-04 13:58:18,344 basehttp 7316 916 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-04 13:58:18,357 basehttp 7316 25044 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:58:18,359 basehttp 7316 24776 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-04 13:58:18,363 basehttp 7316 916 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:58:18,364 basehttp 7316 25044 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-04 13:58:19,094 basehttp 7316 25044 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:58:19,098 basehttp 7316 916 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:58:19,103 basehttp 7316 25044 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:58:19,106 basehttp 7316 24776 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:58:19,117 basehttp 7316 916 "GET /api/v1/accounts/user/3/summary/ HTTP/1.1" 200 194
+INFO 2025-07-04 13:58:19,122 basehttp 7316 24776 "GET /api/v1/accounts/user/3/summary/ HTTP/1.1" 200 194
+INFO 2025-07-04 13:58:19,128 basehttp 7316 916 "GET /api/v1/social/users/3/posts/preview/ HTTP/1.1" 200 706
+INFO 2025-07-04 13:58:19,134 basehttp 7316 916 "GET /api/v1/pets/users/3/archives/ HTTP/1.1" 200 347
+INFO 2025-07-04 13:58:19,139 basehttp 7316 24776 "GET /api/v1/social/users/3/posts/preview/ HTTP/1.1" 200 706
+INFO 2025-07-04 13:58:19,143 basehttp 7316 24776 "GET /api/v1/pets/users/3/archives/ HTTP/1.1" 200 347
+INFO 2025-07-04 13:58:22,048 basehttp 7316 24776 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:58:22,052 basehttp 7316 916 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:58:22,058 basehttp 7316 24776 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:58:22,061 basehttp 7316 25044 "GET /api/v1/accounts/following/?user=Stone%20Evens HTTP/1.1" 200 74
+INFO 2025-07-04 13:58:22,063 basehttp 7316 3764 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:58:22,063 basehttp 7316 916 "GET /api/v1/accounts/followers/?user=Stone%20Evens HTTP/1.1" 200 231
+INFO 2025-07-04 13:58:22,069 basehttp 7316 3764 "GET /api/v1/accounts/following/?user=Stone%20Evens HTTP/1.1" 200 74
+INFO 2025-07-04 13:58:22,070 basehttp 7316 916 "GET /api/v1/accounts/followers/?user=Stone%20Evens HTTP/1.1" 200 231
+INFO 2025-07-04 13:58:22,071 basehttp 7316 25044 "POST /api/v1/accounts/follow/status/batch/ HTTP/1.1" 200 145
+INFO 2025-07-04 13:58:22,073 basehttp 7316 25044 "POST /api/v1/accounts/follow/status/batch/ HTTP/1.1" 200 145
+INFO 2025-07-04 13:58:23,242 basehttp 7316 25044 "DELETE /api/v1/accounts/followers/remove/Test123/ HTTP/1.1" 200 155
+INFO 2025-07-04 13:58:23,251 basehttp 7316 916 "GET /api/v1/accounts/following/?user=Stone%20Evens HTTP/1.1" 200 74
+INFO 2025-07-04 13:58:23,251 basehttp 7316 25044 "GET /api/v1/accounts/followers/?user=Stone%20Evens HTTP/1.1" 200 74
+INFO 2025-07-04 13:58:25,748 basehttp 7316 25044 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:58:25,753 basehttp 7316 916 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:58:27,259 basehttp 7316 916 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:58:27,264 basehttp 7316 25044 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:58:27,269 basehttp 7316 916 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:58:27,274 basehttp 7316 25044 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 13:58:27,911 basehttp 7316 25044 "POST /api/v1/accounts/logout/ HTTP/1.1" 200 55
+INFO 2025-07-04 13:58:34,521 basehttp 7316 25044 "POST /api/v1/accounts/token/ HTTP/1.1" 200 573
+INFO 2025-07-04 13:58:34,541 basehttp 7316 25044 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-04 13:58:34,542 basehttp 7316 24776 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-04 13:58:34,548 basehttp 7316 916 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 13:58:34,549 basehttp 7316 3764 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-04 13:58:34,554 basehttp 7316 24776 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 13:58:34,556 basehttp 7316 916 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-04 13:58:37,519 basehttp 7316 916 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 13:58:37,523 basehttp 7316 24776 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 13:58:39,902 basehttp 7316 24776 "GET /api/v1/social/search/?q=Stone HTTP/1.1" 200 855
+INFO 2025-07-04 13:58:39,907 basehttp 7316 24776 "POST /api/v1/accounts/follow/status/batch/ HTTP/1.1" 200 145
+INFO 2025-07-04 13:58:39,917 basehttp 7316 916 "GET /api/v1/social/search/?q=Stone HTTP/1.1" 200 855
+INFO 2025-07-04 13:58:39,922 basehttp 7316 916 "POST /api/v1/accounts/follow/status/batch/ HTTP/1.1" 200 145
+INFO 2025-07-04 13:58:51,686 basehttp 7316 916 "POST /api/v1/accounts/follow/Stone%20Evens/ HTTP/1.1" 201 159
+INFO 2025-07-04 13:59:24,151 basehttp 7316 3764 "OPTIONS /api/v1/pets/my-pets/ HTTP/1.1" 200 0
+INFO 2025-07-04 13:59:24,151 basehttp 7316 24776 "OPTIONS /api/v1/pets/my-pets/ HTTP/1.1" 200 0
+INFO 2025-07-04 13:59:24,155 basehttp 7316 916 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 13:59:24,157 basehttp 7316 24776 "GET /api/v1/pets/my-pets/ HTTP/1.1" 200 74
+INFO 2025-07-04 13:59:24,162 basehttp 7316 3764 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 13:59:24,162 basehttp 7316 916 "GET /api/v1/pets/my-pets/ HTTP/1.1" 200 74
+INFO 2025-07-04 13:59:26,830 basehttp 7316 916 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-04 13:59:26,832 basehttp 7316 24776 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-04 13:59:26,837 basehttp 7316 3764 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 13:59:26,837 basehttp 7316 916 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-04 13:59:26,844 basehttp 7316 24776 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 13:59:26,845 basehttp 7316 3764 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-04 13:59:29,749 basehttp 7316 3764 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 13:59:29,753 basehttp 7316 24776 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 13:59:29,759 basehttp 7316 3764 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 13:59:29,759 basehttp 7316 24776 "GET /api/v1/accounts/user/4/summary/ HTTP/1.1" 200 190
+INFO 2025-07-04 13:59:29,764 basehttp 7316 916 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 13:59:29,767 basehttp 7316 24776 "GET /api/v1/social/users/4/posts/preview/ HTTP/1.1" 200 57
+INFO 2025-07-04 13:59:29,770 basehttp 7316 916 "GET /api/v1/accounts/user/4/summary/ HTTP/1.1" 200 190
+INFO 2025-07-04 13:59:29,773 basehttp 7316 24776 "GET /api/v1/pets/users/4/archives/ HTTP/1.1" 200 347
+INFO 2025-07-04 13:59:29,776 basehttp 7316 916 "GET /api/v1/social/users/4/posts/preview/ HTTP/1.1" 200 57
+INFO 2025-07-04 13:59:29,781 basehttp 7316 916 "GET /api/v1/pets/users/4/archives/ HTTP/1.1" 200 347
+WARNING 2025-07-04 13:59:37,015 basehttp 7316 916 "PUT /api/v1/accounts/me/ HTTP/1.1" 400 562
+INFO 2025-07-04 14:13:54,964 basehttp 7316 23736 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 14:13:54,968 basehttp 7316 23736 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 14:13:56,148 basehttp 7316 23736 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-04 14:13:56,150 basehttp 7316 23736 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-04 14:13:56,153 basehttp 7316 22040 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 14:13:56,155 basehttp 7316 13084 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-04 14:13:56,160 basehttp 7316 23736 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 14:13:56,161 basehttp 7316 22040 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-04 14:13:57,515 basehttp 7316 22040 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 14:13:57,517 basehttp 7316 23736 "GET /api/v1/accounts/notifications/ HTTP/1.1" 200 125
+INFO 2025-07-04 14:13:57,523 basehttp 7316 13084 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 14:13:57,523 basehttp 7316 22040 "GET /api/v1/accounts/notifications/ HTTP/1.1" 200 125
+INFO 2025-07-04 14:13:58,107 basehttp 7316 22040 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 14:13:58,112 basehttp 7316 13084 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 14:13:58,118 basehttp 7316 22040 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 14:13:58,120 basehttp 7316 13084 "GET /api/v1/accounts/user/4/summary/ HTTP/1.1" 200 190
+INFO 2025-07-04 14:13:58,124 basehttp 7316 23736 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 14:13:58,127 basehttp 7316 13084 "GET /api/v1/social/users/4/posts/preview/ HTTP/1.1" 200 57
+INFO 2025-07-04 14:13:58,131 basehttp 7316 23736 "GET /api/v1/accounts/user/4/summary/ HTTP/1.1" 200 190
+INFO 2025-07-04 14:13:58,134 basehttp 7316 13084 "GET /api/v1/pets/users/4/archives/ HTTP/1.1" 200 347
+INFO 2025-07-04 14:13:58,137 basehttp 7316 23736 "GET /api/v1/social/users/4/posts/preview/ HTTP/1.1" 200 57
+INFO 2025-07-04 14:13:58,141 basehttp 7316 23736 "GET /api/v1/pets/users/4/archives/ HTTP/1.1" 200 347
+INFO 2025-07-04 14:14:00,476 basehttp 7316 23736 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 14:14:00,476 basehttp 7316 13084 "GET /api/v1/pets/my-pets/ HTTP/1.1" 200 74
+INFO 2025-07-04 14:14:00,482 basehttp 7316 22040 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 14:14:00,483 basehttp 7316 23736 "GET /api/v1/pets/my-pets/ HTTP/1.1" 200 74
+INFO 2025-07-04 14:14:04,049 basehttp 7316 23736 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 14:14:04,053 basehttp 7316 22040 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 14:14:04,061 basehttp 7316 23736 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 14:14:04,061 basehttp 7316 22040 "GET /api/v1/accounts/user/4/summary/ HTTP/1.1" 200 190
+INFO 2025-07-04 14:14:04,067 basehttp 7316 13084 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 14:14:04,068 basehttp 7316 22040 "GET /api/v1/social/users/4/posts/preview/ HTTP/1.1" 200 57
+INFO 2025-07-04 14:14:04,073 basehttp 7316 13084 "GET /api/v1/accounts/user/4/summary/ HTTP/1.1" 200 190
+INFO 2025-07-04 14:14:04,075 basehttp 7316 22040 "GET /api/v1/pets/users/4/archives/ HTTP/1.1" 200 347
+INFO 2025-07-04 14:14:04,079 basehttp 7316 13084 "GET /api/v1/social/users/4/posts/preview/ HTTP/1.1" 200 57
+INFO 2025-07-04 14:14:04,083 basehttp 7316 13084 "GET /api/v1/pets/users/4/archives/ HTTP/1.1" 200 347
+INFO 2025-07-04 14:14:06,404 basehttp 7316 13084 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 14:14:06,409 basehttp 7316 22040 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 14:14:06,414 basehttp 7316 13084 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 14:14:06,418 basehttp 7316 22040 "GET /api/v1/accounts/me/ HTTP/1.1" 200 243
+INFO 2025-07-04 14:14:07,686 basehttp 7316 22040 "POST /api/v1/accounts/logout/ HTTP/1.1" 200 55
+INFO 2025-07-04 14:14:15,876 basehttp 7316 22040 "POST /api/v1/accounts/token/ HTTP/1.1" 200 579
+INFO 2025-07-04 14:14:15,898 basehttp 7316 22040 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-04 14:14:15,901 basehttp 7316 23736 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-04 14:14:15,906 basehttp 7316 13084 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 14:14:15,908 basehttp 7316 22040 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-04 14:14:15,913 basehttp 7316 23736 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 14:14:15,914 basehttp 7316 13084 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-04 14:14:20,150 basehttp 7316 13084 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 14:14:20,155 basehttp 7316 23736 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 14:14:20,162 basehttp 7316 13084 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 14:14:20,163 basehttp 7316 23736 "GET /api/v1/accounts/user/3/summary/ HTTP/1.1" 200 194
+INFO 2025-07-04 14:14:20,167 basehttp 7316 22040 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 14:14:20,174 basehttp 7316 22040 "GET /api/v1/accounts/user/3/summary/ HTTP/1.1" 200 194
+INFO 2025-07-04 14:14:20,180 basehttp 7316 23736 "GET /api/v1/social/users/3/posts/preview/ HTTP/1.1" 200 706
+INFO 2025-07-04 14:14:20,186 basehttp 7316 23736 "GET /api/v1/pets/users/3/archives/ HTTP/1.1" 200 347
+INFO 2025-07-04 14:14:20,196 basehttp 7316 22040 "GET /api/v1/social/users/3/posts/preview/ HTTP/1.1" 200 706
+INFO 2025-07-04 14:14:20,200 basehttp 7316 22040 "GET /api/v1/pets/users/3/archives/ HTTP/1.1" 200 347
+INFO 2025-07-04 14:14:54,539 basehttp 7316 22040 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 14:14:54,543 basehttp 7316 23736 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 14:14:55,751 basehttp 7316 23736 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 14:14:55,751 basehttp 7316 22040 "GET /api/v1/pets/my-pets/ HTTP/1.1" 200 74
+INFO 2025-07-04 14:14:55,757 basehttp 7316 13084 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 14:14:55,757 basehttp 7316 23736 "GET /api/v1/pets/my-pets/ HTTP/1.1" 200 74
+INFO 2025-07-04 14:15:02,058 basehttp 7316 13084 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 14:15:02,061 basehttp 7316 23736 "GET /api/v1/accounts/notifications/ HTTP/1.1" 200 698
+INFO 2025-07-04 14:15:02,064 basehttp 7316 22040 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 14:15:02,069 basehttp 7316 13084 "GET /api/v1/accounts/notifications/ HTTP/1.1" 200 698
+INFO 2025-07-04 14:15:13,519 basehttp 7316 13084 "OPTIONS /api/v1/accounts/notifications/21/follow-request/ HTTP/1.1" 200 0
+INFO 2025-07-04 14:15:13,543 basehttp 7316 13084 "POST /api/v1/accounts/notifications/21/follow-request/ HTTP/1.1" 200 61
+INFO 2025-07-04 14:15:13,551 basehttp 7316 13084 "GET /api/v1/accounts/notifications/ HTTP/1.1" 200 710
+INFO 2025-07-04 14:15:15,977 basehttp 7316 13084 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 14:15:15,981 basehttp 7316 22040 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 14:15:15,985 basehttp 7316 13084 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 14:15:15,990 basehttp 7316 22040 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 14:15:16,859 basehttp 7316 22040 "POST /api/v1/accounts/logout/ HTTP/1.1" 200 55
+INFO 2025-07-04 14:15:29,489 basehttp 7316 22040 "POST /api/v1/accounts/token/ HTTP/1.1" 200 579
+INFO 2025-07-04 14:15:29,510 basehttp 7316 22040 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-04 14:15:29,512 basehttp 7316 23736 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-04 14:15:29,517 basehttp 7316 13084 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 14:15:29,519 basehttp 7316 22040 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-04 14:15:29,523 basehttp 7316 23736 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 14:15:29,525 basehttp 7316 13084 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-04 14:15:31,085 basehttp 7316 13084 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 14:15:31,089 basehttp 7316 23736 "GET /api/v1/accounts/notifications/ HTTP/1.1" 200 710
+INFO 2025-07-04 14:15:31,091 basehttp 7316 22040 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 14:15:31,096 basehttp 7316 13084 "GET /api/v1/accounts/notifications/ HTTP/1.1" 200 710
+INFO 2025-07-04 14:15:40,754 basehttp 7316 13084 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-04 14:15:40,755 basehttp 7316 22040 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-04 14:15:40,762 basehttp 7316 23736 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-04 14:15:40,762 basehttp 7316 13084 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 14:15:40,770 basehttp 7316 22040 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 14:15:40,770 basehttp 7316 13084 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-04 14:19:44,176 basehttp 7316 13084 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 14:19:44,180 basehttp 7316 22040 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 14:19:44,184 basehttp 7316 13084 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 14:19:44,189 basehttp 7316 22040 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-04 14:19:44,892 basehttp 7316 22040 "POST /api/v1/accounts/logout/ HTTP/1.1" 200 55

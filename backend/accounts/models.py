@@ -33,13 +33,16 @@ class CustomUser(AbstractUser):
             return user.points
         return None
     
-    def get_user(username:str=None, id:str=None):
+    def get_user(username:str=None, id:str=None, user_account:str=None):
 
         if username is not None:
             return CustomUser.objects.filter(username=username).first()
         
         if id is not None:
             return CustomUser.objects.filter(id=id).first()
+        
+        if user_account is not None:
+            return CustomUser.objects.filter(user_account=user_account).first()
 
     def search_users(query):
         return CustomUser.objects.filter(
@@ -86,7 +89,10 @@ class UserFollow(models.Model):
         unique_together = ('user', 'follows')
 
     def check_follow(user:CustomUser, follows:CustomUser):
-        return UserFollow.objects.filter(user=user, follows=follows)
+        return UserFollow.objects.filter(user=user, follows=follows).first()
+    
+    def get_follow(user:CustomUser, follows:CustomUser):
+        return UserFollow.objects.filter(user=user, follows=follows).first()
 
 # 使用者封鎖功能
 class UserBlock(models.Model):
@@ -262,16 +268,32 @@ class FollowNotification(Notification):
         help_text="發送追蹤請求的使用者"
     )
 
-    related_follow = models.ForeignKey(
-        'UserFollow',
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True,
-        help_text="相關的追蹤關係"
-    )
-
     def __str__(self):
-        return f"{self.user.username} - {self.notification_type}: {self.content[:20]}"
+        return f"{self.user.username}: {self.content[:20]}"\
+        
+    def create_notification(target_user:CustomUser, user:CustomUser, content:str, is_read:bool=False):
+        FollowNotification.objects.create(user=target_user, follow_request_from = user, content=content, is_read=is_read)
+    
+    def delete_notification(target_user:CustomUser, user:CustomUser):
+        print(target_user)
+        print(user)
+
+        notification = FollowNotification.objects.filter(
+            user=target_user,
+            follow_request_from=user
+        )
+
+        print(notification)
+
+        count = notification.delete()
+
+        print(count)
+    
+    def check_notification(target_user:CustomUser, user:CustomUser):
+        FollowNotification.objects.filter(
+            user=target_user,
+            follow_request_from=user
+        ).exists()
 
 # 當日行程
 class Plan(models.Model):

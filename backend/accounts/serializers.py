@@ -126,7 +126,7 @@ class NotificationSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'date']
 
     def get_notification_type(self, notification:FollowNotification):
-        return {"notification_type":"follow_request"}
+        return "follow_request"
     
     def get_follow_request_from_info(self, notification:FollowNotification):
         """獲取發送追蹤請求的使用者基本資訊"""
