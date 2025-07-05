@@ -25,6 +25,8 @@ class Pet(models.Model):
         return f"{self.name or '寵物'} ({'狗' if self.is_dog else '貓'}, {self.life_stage})"
 
 class Feed(models.Model):
+    brand = models.CharField(max_length=100, null=True, blank=True)
+    name = models.CharField(max_length=100, null=True, blank=True)
     protein = models.FloatField(null=True, blank=True)
     fat = models.FloatField(null=True, blank=True)
     carbohydrates = models.FloatField(null=True, blank=True)

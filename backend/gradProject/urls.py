@@ -21,7 +21,7 @@ from drf_yasg.views import get_schema_view
 from django.urls import path, include
 from django.contrib import admin
 from drf_yasg import openapi
-from calculator.views import FeedListByUser, FeedCreateView, PetNutritionCalculator, PetListByUser, PetCreateView, PetUpdateView
+from calculator.views import FeedListByUser, FeedCreateView, FeedUpdateView, PetNutritionCalculator, PetListByUser, PetCreateView, PetUpdateView
 # Swagger
 from rest_framework import permissions, routers
 from drf_yasg.views import get_schema_view
@@ -70,5 +70,6 @@ urlpatterns = [
     path("api/pets/update/", PetUpdateView.as_view(), name="pet-update"),
     path("api/feeds/create/", FeedCreateView.as_view(), name="feed-create"),
     path("api/feeds/", FeedListByUser.as_view(), name="feed-list-by-user"),
+    path("api/feeds/update/", FeedUpdateView.as_view(), name="feed-update"),
     path('admin/', admin.site.urls),
 ]

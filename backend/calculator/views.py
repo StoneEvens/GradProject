@@ -41,6 +41,7 @@ class PetCreateView(APIView):
             is_dog=data.get("is_dog") in ['true', 'True', True],
             life_stage=data.get("life_stage"),
             weight=data.get("weight"),
+            length=data.get("length"),
             expect_adult_weight=data.get("expect_adult_weight"),
             litter_size=data.get("litter_size"),
             weeks_of_lactation=data.get("weeks_of_lactation"),
@@ -100,6 +101,7 @@ class FeedCreateView(APIView):
 
         feed = Feed.objects.create(
             keeper_id = user,
+            brand = data.get("brand"),
             protein = data.get("protein"),
             fat = data.get("fat"),
             carbohydrates = data.get("carbohydrates"),
@@ -109,7 +111,40 @@ class FeedCreateView(APIView):
             sodium = data.get("sodium")
         )
 
-        return Response({"message": "飼料建立成功", "feed_id": feed.id, "protein": feed.protein, "fat": feed.fat, "carbohydrates": feed.carbohydrates, "calcium": feed.calcium, "phosphorus": feed.phosphorus, "magnesium": feed.magnesium, "sodium": feed.sodium}, status=status.HTTP_201_CREATED)
+        return Response({"message": "飼料建立成功", "feed_id": feed.id, "brand":feed.brand, "protein": feed.protein, "fat": feed.fat, "carbohydrates": feed.carbohydrates, "calcium": feed.calcium, "phosphorus": feed.phosphorus, "magnesium": feed.magnesium, "sodium": feed.sodium}, status=status.HTTP_201_CREATED)
+
+class FeedUpdateView(APIView):
+    def post(self, request):
+        feed_id = request.data.get("feed_id")
+        if not feed_id:
+            return Response({"error": "請提供 feed_id"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            feed = Feed.objects.get(id=feed_id)
+        except Feed.DoesNotExist:
+            return Response({"error": "找不到該飼料"}, status=status.HTTP_404_NOT_FOUND)
+
+        # 取得每個欄位的值，若有傳入則更新
+        for field in ["brand", "name", "protein", "fat", "carbohydrates", "calcium", "phosphorus", "magnesium", "sodium"]:
+            value = request.data.get(field)
+            if value is not None:
+                setattr(feed, field, value)
+
+        feed.save()
+
+        return Response({
+            "message": "更新成功",
+            "feed_id": feed.id,
+            "brand": feed.brand,
+            "name": feed.name,
+            "protein": feed.protein,
+            "fat": feed.fat,
+            "carbohydrates": feed.carbohydrates,
+            "calcium": feed.calcium,
+            "phosphorus": feed.phosphorus,
+            "magnesium": feed.magnesium,
+            "sodium": feed.sodium
+        }, status=status.HTTP_200_OK)
 
 
 # 載入 OpenAI API 金鑰
@@ -409,10 +444,10 @@ class PetNutritionCalculator(APIView):
             response = client.chat.completions.create(
                 model="gpt-4o",
                 messages=[
-                    {"role": "system", "content": "你是一名專業的寵物營養師，會根據營養素建議值與健康報告提供餵食建議。"},
+                    {"role": "system", "content": "你是一名專業的寵物營養師，會用中文清楚、自然、口語化地說明寵物的營養分析與建議。請不要使用 LaTeX 公式或 Markdown 表格，直接用條列式或段落方式表達內容。"},
                     {"role": "user", "content": message}
                 ],
-                max_tokens=600,
+                max_tokens=1500,
                 temperature=0.7
             )
             return response.choices[0].message.content.strip()
