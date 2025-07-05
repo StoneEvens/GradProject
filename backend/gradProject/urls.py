@@ -16,10 +16,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path, re_path
+from django.conf import settings
+from django.conf.urls.static import static
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
-from django.urls import path, include
-from django.contrib import admin
 from drf_yasg import openapi
 from calculator.views import FeedListByUser, FeedCreateView, FeedUpdateView, PetNutritionCalculator, PetListByUser, PetCreateView, PetUpdateView
 # Swagger
@@ -47,6 +47,7 @@ schema_view = get_schema_view(
 api_v1_prefix = 'api/v1/'
 
 urlpatterns = [
+    # Django Admin
     path('admin/', admin.site.urls),
     
     # API 版本化路由
@@ -58,7 +59,6 @@ urlpatterns = [
     path(f'{api_v1_prefix}comments/', include('comments.urls')),
     path(f'{api_v1_prefix}media/', include('media.urls')),
     path(f'{api_v1_prefix}article_recommendations/', include('articleRecommendation.urls')),
-    path('api/feeds/', FeedListByUser.as_view(), name='feed-list'),
 
     # Swagger 文檔
     re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
