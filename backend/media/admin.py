@@ -4,15 +4,15 @@ from .models import Image, PetHeadshot, UserHeadshot
 # 圖片管理 - Firebase Storage 版本
 @admin.register(Image)
 class ImageAdmin(admin.ModelAdmin):
-    list_display = ('id', 'content_type', 'object_id', 'firebase_url_preview', 'sort_order', 'created_at')
-    list_filter = ('content_type', 'created_at', 'content_type_mime')
+    list_display = ('id', 'firebase_url_preview', 'sort_order', 'uploaded_at')
+    list_filter = ('uploaded_at', 'content_type_mime')
     search_fields = ('firebase_url', 'firebase_path', 'alt_text', 'original_filename')
-    readonly_fields = ('created_at', 'updated_at')
-    ordering = ('content_type', 'object_id', 'sort_order')
+    readonly_fields = ('uploaded_at', 'updated_at')
+    ordering = ('id', 'sort_order')
     
     fieldsets = (
         ('基本資訊', {
-            'fields': ('content_type', 'object_id', 'sort_order', 'alt_text')
+            'fields': ('id', 'sort_order', 'alt_text')
         }),
         ('Firebase Storage', {
             'fields': ('firebase_url', 'firebase_path')
@@ -21,7 +21,7 @@ class ImageAdmin(admin.ModelAdmin):
             'fields': ('original_filename', 'file_size', 'content_type_mime')
         }),
         ('時間戳記', {
-            'fields': ('created_at', 'updated_at'),
+            'fields': ('uploaded_at', 'updated_at'),
             'classes': ('collapse',)
         }),
     )

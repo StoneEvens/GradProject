@@ -1,8 +1,7 @@
 from django.contrib import admin
 from .models import (
-    Pet, PetGenericRelation, AbnormalPost, Symptom, PostSymptomsRelation,
-    Illness, IllnessArchive, ArchiveAbnormalPostRelation, ArchiveIllnessRelation,
-    ArchiveSymptomsRelation
+    Pet, AbnormalPost, Symptom, PostSymptomsRelation,
+    Illness, ForumContent, ArchiveAbnormalPostRelation, ArchiveIllnessRelation
 )
 
 # 寵物管理
@@ -11,14 +10,7 @@ class PetAdmin(admin.ModelAdmin):
     list_display = ('pet_name', 'pet_type', 'breed', 'owner', 'age', 'weight', 'pet_stage')
     list_filter = ('pet_type', 'pet_stage')
     search_fields = ('pet_name', 'pet_type', 'breed', 'owner__username')
-
-# 寵物通用關係管理
-@admin.register(PetGenericRelation)
-class PetGenericRelationAdmin(admin.ModelAdmin):
-    list_display = ('pet', 'content_type', 'object_id')
-    list_filter = ('content_type',)
-    search_fields = ('pet__pet_name',)
-
+    
 # 異常貼文管理
 @admin.register(AbnormalPost)
 class AbnormalPostAdmin(admin.ModelAdmin):
@@ -47,13 +39,11 @@ class IllnessAdmin(admin.ModelAdmin):
     search_fields = ('illness_name',)
 
 # 病程紀錄管理
-@admin.register(IllnessArchive)
+@admin.register(ForumContent)
 class IllnessArchiveAdmin(admin.ModelAdmin):
-    list_display = ('archive_title', 'pet', 'user', 'post_date', 'go_to_doctor', 'health_status', 'popularity')
-    list_filter = ('post_date', 'go_to_doctor', 'health_status')
+    list_display = ('archive_title', 'pet', 'go_to_doctor', 'health_status', 'content', 'postFrame')
+    list_filter = ('go_to_doctor', 'health_status')
     search_fields = ('archive_title', 'pet__pet_name', 'user__username', 'content')
-    readonly_fields = ('updated_at',)
-    date_hierarchy = 'post_date'
 
 # 病程紀錄和異常貼文關係管理
 @admin.register(ArchiveAbnormalPostRelation)
@@ -67,10 +57,3 @@ class ArchiveIllnessRelationAdmin(admin.ModelAdmin):
     list_display = ('archive', 'illness')
     list_filter = ('illness',)
     search_fields = ('archive__archive_title', 'illness__illness_name')
-
-# 病程紀錄和症狀關係管理
-@admin.register(ArchiveSymptomsRelation)
-class ArchiveSymptomsRelationAdmin(admin.ModelAdmin):
-    list_display = ('archive', 'symptom')
-    list_filter = ('symptom',)
-    search_fields = ('archive__archive_title', 'symptom__symptom_name')

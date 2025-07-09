@@ -1,19 +1,19 @@
 from django.contrib import admin
 from .models import (
     CustomUser, UserFollow, UserBlock, Achievement, UserAchievement, 
-    Notification, Plan
+    FollowNotification, Plan
 )
 
 # 自定義用戶管理
 @admin.register(CustomUser)
 class CustomUserAdmin(admin.ModelAdmin):
-    list_display = ('username', 'email', 'user_fullname', 'user_account', 'account_privacy', 'points', 'is_active')
+    list_display = ('id','username', 'email', 'user_fullname', 'user_account', 'points', 'is_active', 'account_privacy')
     search_fields = ('username', 'email', 'user_fullname', 'user_account')
-    list_filter = ('is_active', 'is_staff', 'account_privacy')
+    list_filter = ('is_active', 'is_staff')
     readonly_fields = ('date_joined', 'last_login')
     fieldsets = (
         ('基本信息', {'fields': ('username', 'email', 'password')}),
-        ('個人資料', {'fields': ('user_fullname', 'user_account', 'user_intro', 'account_privacy')}),
+        ('個人資料', {'fields': ('user_fullname', 'user_account', 'user_intro')}),
         ('系統狀態', {'fields': ('points', 'is_active', 'is_staff', 'is_superuser', 'date_joined', 'last_login')}),
     )
 
@@ -46,10 +46,10 @@ class UserAchievementAdmin(admin.ModelAdmin):
     readonly_fields = ('date_achieved',)
 
 # 通知管理
-@admin.register(Notification)
+@admin.register(FollowNotification)
 class NotificationAdmin(admin.ModelAdmin):
-    list_display = ('user', 'notification_type', 'content', 'date', 'is_read')
-    list_filter = ('notification_type', 'date', 'is_read')
+    list_display = ('user', 'content', 'date', 'is_read', 'follow_request_from')
+    list_filter = ('date', 'is_read')
     search_fields = ('user__username', 'content')
     readonly_fields = ('date',)
 

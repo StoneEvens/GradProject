@@ -25,6 +25,7 @@ urlpatterns = [
     path('check/account/', CheckUserAccountAPIView.as_view(), name='check-account'),
     path('check/email/', CheckEmailAPIView.as_view(), name='check-email'),
     path('check/password/', CheckPasswordAPIView.as_view(), name='check-password'),
+
     
     # 追蹤相關 API
     path('follow/<int:user_id>/', FollowAPIView.as_view(), name='follow-user'),

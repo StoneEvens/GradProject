@@ -10,12 +10,6 @@ class PetSerializer(serializers.ModelSerializer):
         model = Pet
         fields = '__all__'
 
-# === PetGenericRelation (寵物的通用貼文關聯) ===
-class PetGenericRelationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = PetGenericRelation
-        fields = '__all__'
-
 # === AbnormalPost (異常紀錄) ===
 class AbnormalPostSerializer(serializers.ModelSerializer):
     pet_name = serializers.CharField(source='pet.pet_name', read_only=True)
@@ -89,7 +83,7 @@ class IllnessArchiveSerializer(serializers.ModelSerializer):
     user_interaction = serializers.SerializerMethodField()
     
     class Meta:
-        model = IllnessArchive
+        model = ForumContent
         fields = [
             'id', 'pet', 'pet_name', 'user', 'user_name', 'archive_title',
             'post_date', 'content', 'popularity', 'go_to_doctor', 'health_status',
@@ -139,10 +133,4 @@ class ArchiveAbnormalPostRelationSerializer(serializers.ModelSerializer):
 class ArchiveIllnessRelationSerializer(serializers.ModelSerializer):
     class Meta:
         model = ArchiveIllnessRelation
-        fields = '__all__'
-
-# === ArchiveSymptomsRelation (病程紀錄和症狀的關聯) ===
-class ArchiveSymptomsRelationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ArchiveSymptomsRelation
         fields = '__all__'

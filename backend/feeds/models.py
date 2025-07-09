@@ -211,13 +211,15 @@ class UserFeed(models.Model):
         User,
         on_delete=models.CASCADE,
         related_name='feeds',
-        verbose_name='用戶'
+        verbose_name='用戶',
+        null=True
     )
     feed = models.ForeignKey(
         Feed,
         on_delete=models.CASCADE,
         related_name='users',
-        verbose_name='飼料'
+        verbose_name='飼料',
+        null=True
     )
     last_used = models.DateTimeField('最近使用時間', default=timezone.now)
 
@@ -236,7 +238,8 @@ class PetFeed(models.Model):
         Pet,
         on_delete=models.CASCADE,
         related_name='pet_feeds',
-        verbose_name='寵物'
+        verbose_name='寵物',
+        null=True
     )
     feed = models.ForeignKey(
         Feed,

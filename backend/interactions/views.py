@@ -4,10 +4,41 @@ from rest_framework import viewsets, permissions, status as drf_status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from comments.models import Comment
-from social.models import Post
-from pets.models import IllnessArchive
+from social.models import PostFrame
+from pets.models import ForumContent
 from .models import UserInteraction
 from .serializers import UserInteractionSerializer
+from social.models import PostFrame
+
+class UserInteractionView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def handleInteraction(self, user, postID, relation):
+        fromRelation = None
+        toRelation = relation
+
+        if relation == 'upvoted':
+            fromRelation = UserInteraction.get_user_interaction(user, postID, 'downvoted')
+        elif relation == 'downvoted':
+            fromRelation = UserInteraction.get_user_interaction(user, postID, 'upvoted')
+        
+        postFrame = PostFrame.get_postFrame(postID)
+        postFrameStatus = postFrame.handle_interaction(user, fromRelation, toRelation)
+
+        interactionStatus = UserInteraction.create_interaction(
+            user=user,
+            postID=postID,
+            relation=toRelation
+        )
+
+        if interactionStatus & postFrameStatus:
+            action_taken_message = f"成功{self._get_action_name(toRelation)}貼文。"
+            status_code = drf_status.HTTP_200_OK
+        else:
+            action_taken_message = f"無法{self._get_action_name(toRelation)}貼文。"
+            status_code = drf_status.HTTP_400_BAD_REQUEST
+        
+        return True, action_taken_message, status_code
 
 class BaseInteractionView(APIView):
     """
@@ -70,12 +101,12 @@ class PostInteractionView(BaseInteractionView):
     """
     處理貼文的互動操作 (點讚/踩/收藏/分享)
     """
-    model = Post
+    model = PostFrame
     allowed_relations = ['upvoted', 'downvoted', 'saved', 'shared']
 
 class IllnessArchiveInteractionView(BaseInteractionView):
     """
     處理疾病檔案的互動操作 (點讚/踩/收藏/分享)
     """
-    model = IllnessArchive  # 使用正確的疾病檔案模型
+    model = ForumContent  # 使用正確的疾病檔案模型
     allowed_relations = ['upvoted', 'downvoted', 'saved', 'shared']

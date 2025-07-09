@@ -53,7 +53,6 @@ INSTALLED_APPS = [
     "comments",
     "media",
     "articleRecommendation",
-    # "calculator",  # 已忽略 calculator app
 ]
 
 MIDDLEWARE = [
@@ -73,9 +72,6 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5174",
-]
 
 # REST Framework 設置
 REST_FRAMEWORK = {
@@ -83,7 +79,7 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.AllowAny',
+        'rest_framework.permissions.IsAuthenticated',
     ],
     'EXCEPTION_HANDLER': 'utils.exception_handler.custom_exception_handler',
     'DEFAULT_PAGINATION_CLASS': 'utils.pagination.StandardResultsSetPagination',
@@ -191,10 +187,6 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
-# Media files configuration (for file uploads)
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
@@ -203,7 +195,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Firebase Storage 配置
 FIREBASE_CREDENTIALS_PATH = os.path.join(BASE_DIR, 'config', 'petapp-c2e46-firebase-adminsdk-fbsvc-0ec3a87ef4.json')
-FIREBASE_STORAGE_BUCKET = 'petapp-c2e46.firebasestorage.app'
+FIREBASE_STORAGE_BUCKET = 'petapp-c2e46.appspot.com'
 
 # 日誌配置
 LOGGING = {
