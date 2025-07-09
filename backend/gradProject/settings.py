@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     "comments",
     "media",
     "articleRecommendation",
+    "calculator",
 ]
 
 MIDDLEWARE = [
