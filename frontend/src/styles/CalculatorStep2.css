@@ -1,0 +1,100 @@
+.calculator-title {
+  font-size: 2rem;
+  font-weight: bold;
+  text-align: center;
+  margin: 32px 0 24px 0;
+}
+
+.pet-select-label {
+  font-size: 1.1rem;
+  font-weight: bold;
+  margin-bottom: 12px;
+  margin-left: 14px;
+}
+
+.feed-select-section {
+  background: #FFCA9C;
+  border-radius: 18px;
+  padding: 8px 16px 24px 16px;
+  margin: 0px 10px 28px 10px;
+  min-height: 0;
+  position: relative;
+}
+
+.feed-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 90px);
+  grid-auto-rows: 90px;
+  gap: 16px;
+  justify-content: center; /* 水平置中 */
+  align-items: start;      /* 垂直靠上 */
+  margin-top: 12px;
+}
+
+.feed-item {
+  width: 90px;
+  height: 90px;
+  background: #fff;
+  border: 3px solid #fff;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: border 0.2s;
+  overflow: hidden;
+}
+
+.feed-item.selected {
+  border: 3px solid #F08651;
+}
+
+.feed-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.add-feed-btn {
+  background: #D9D9D9;
+  font-size: 0.8rem;
+  color: #333;
+  font-weight: bold;
+  border: 3px solid transparent;
+  border-radius: 10px;
+  padding: 8px 16px;
+  cursor: pointer;
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  transition: border 0.2s;
+}
+
+.add-feed-btn.selected {
+  border: 3px solid #F08651;
+}
+
+.step-btn-row {
+  display: flex;
+  justify-content: space-between;
+  margin: 32px 10px 0 10px;
+}
+
+.feed-info-section {
+  background: #FFCA9C;
+  border-radius: 18px;
+  padding: 24px 18px 18px 32px; /* 左側padding加大 */
+  margin: 0px 10px 32px 10px;
+}
+
+.feed-info-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 18px; /* 行距加大 */
+}
+
+.feed-info-label {
+  font-weight: bold;
+  margin-right: 8px;
+  min-width: 90px;
+}

@@ -27,15 +27,15 @@ class Pet(models.Model):
     def __str__(self):
         return f"{self.pet_name} ({self.pet_type})"
     
-    def get_pet(self, pet_id:str):
+    def get_pet(pet_id:str):
         return Pet.objects.filter(
             id=pet_id
         )
     
-    def get_pet(self, user: User):
+    def get_pet(user: User):
         return Pet.objects.filter(owner=user)
     
-    def create(self, owner, weight, pet_stage, age=None, pet_name=None, breed=None, pet_type=None, predicted_adult_weight=None):
+    def create(owner, weight, pet_stage, age=None, pet_name=None, breed=None, pet_type=None, predicted_adult_weight=None):
         Pet.create(
             owner=owner,
             weight=weight,
@@ -132,7 +132,7 @@ class ForumContent(models.Model):
     def __str__(self):
         return f"Archive: {self.archive_title} for {self.pet.pet_name}"
     
-    def get_content(user: CustomUser = None, hashtag: str = None, query:str = None):
+    def get_content(user: CustomUser = None, hashtag: str = None, query: str = None, pets: list[Pet] = None):
         if user:
             return ForumContent.objects.filter(postFrame__user=user).order_by('-post_date')[:50]
         
@@ -141,6 +141,9 @@ class ForumContent(models.Model):
         
         if query:
             return ForumContent.objects.filter(content__icontains=query)[:50]
+        
+        if pets:
+            return ForumContent.objects.filter(pet__in=pets).order_by('-postFrame__post_date')
         
         return ForumContent.objects.none()
 
@@ -186,3 +189,6 @@ class ArchiveIllnessRelation(models.Model):
 
     def __str__(self):
         return f"{self.archive.archive_title} - {self.illness.illness_name}"
+    
+    def get_illnesses(archives: list[ForumContent]):
+        return ArchiveIllnessRelation.objects.filter(archive__in=archives).values_list('illness__illness_name', flat=True)

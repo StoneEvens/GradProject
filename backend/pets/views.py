@@ -280,32 +280,47 @@ class UserPetsAPIView(APIView):
         user = request.user
         # 使用 prefetch_related 預加載相關數據，避免 N+1 查詢
         pets_queryset = Pet.objects.filter(owner=user).prefetch_related(
-            'headshot', # 預加載 PetHeadshot (OneToOneField)
+            'headshot',  # 預加載 PetHeadshot (OneToOneField)
             Prefetch(
-                'illness_archives', # Pet -> IllnessArchive (related_name)
-                queryset=ForumContent.objects.prefetch_related(
-                    'illnesses__illness' # IllnessArchive -> ArchiveIllnessRelation (related_name='illnesses') -> Illness
-                )
+            'illness_archives',  # Pet -> IllnessArchive (related_name)
+            queryset=ForumContent.objects.prefetch_related(
+                'illnesses__illness'  # IllnessArchive -> ArchiveIllnessRelation (related_name='illnesses') -> Illness
+            )
             )
         )
 
+        username = request.user
+
+        pets = Pet.get_pet(user=username)
+        archives = ForumContent.get_content(pets=pets)
+        illnesses = ArchiveIllnessRelation.get_illnesses(archives=archives)
+
+        # 你可以這樣獲取每隻寵物的所有疾病名稱
+        # 假設 Pet model 有一個 @property all_illness_names
+        # 否則你可以這樣取得:
+        # illness_names = set()
+        # for archive in pet_instance.illness_archives.all():
+        #     for rel in archive.illnesses.all():
+        #         illness_names.add(rel.illness.name)
+        # illness_names = list(illness_names)
+
         result = []
-        for pet_instance in pets_queryset:
+        for pet in pets:
             headshot_url_str = None
-            if hasattr(pet_instance, 'headshot') and pet_instance.headshot and hasattr(pet_instance.headshot, 'url'):
-                headshot_url_str = pet_instance.headshot.url # 使用 PetHeadshot 的 url 屬性
-            
+            if hasattr(pet, 'headshot') and pet.headshot and hasattr(pet.headshot, 'url'):
+                headshot_url_str = pet.headshot.url # 使用 PetHeadshot 的 url 屬性
+
             result.append({
-                "pet_id": pet_instance.id,
-                "pet_name": pet_instance.pet_name,
-                "pet_type": pet_instance.pet_type,
-                "weight": pet_instance.weight,
-                "height": pet_instance.height,
-                "age": pet_instance.age,
-                "breed": pet_instance.breed,
-                "pet_stage": pet_instance.pet_stage,
-                "predicted_adult_weight": pet_instance.predicted_adult_weight,
-                "illnesses": pet_instance.all_illness_names, # 使用新的屬性方法
+                "pet_id": pet.id,
+                "pet_name": pet.pet_name,
+                "pet_type": pet.pet_type,
+                "weight": pet.weight,
+                "height": pet.height,
+                "age": pet.age,
+                "breed": pet.breed,
+                "pet_stage": pet.pet_stage,
+                "predicted_adult_weight": pet.predicted_adult_weight,
+                "illnesses": illnesses, # 使用新的屬性方法
                 "headshot_url": headshot_url_str
             })
 
