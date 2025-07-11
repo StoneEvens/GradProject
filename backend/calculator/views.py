@@ -3,6 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from drf_yasg.utils import swagger_auto_schema
+from utils.firebase_service import FirebaseStorageService
 from drf_yasg import openapi
 from openai import OpenAI, APIError
 from dotenv import load_dotenv
@@ -27,15 +28,18 @@ class PetListByUser(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 class PetCreateView(APIView):
+    parser_classes = [FormParser, MultiPartParser]  # 新增解析 multipart/form-data 的支援
+
     def post(self, request):
         data = request.data
-        user_id = request.data.get("user_id")
+        user_id = data.get("user_id")
 
         try:
             user = User.objects.get(id=user_id)
         except User.DoesNotExist:
             return Response({"error": "找不到使用者"}, status=status.HTTP_400_BAD_REQUEST)
 
+        # 先建立寵物，暫時不包含 avatar
         pet = Pet.objects.create(
             name=data.get("name"),
             is_dog=data.get("is_dog") in ['true', 'True', True],
@@ -45,39 +49,70 @@ class PetCreateView(APIView):
             expect_adult_weight=data.get("expect_adult_weight"),
             litter_size=data.get("litter_size"),
             weeks_of_lactation=data.get("weeks_of_lactation"),
-            keeper_id=user,
-            pet_avatar=data.get("pet_avatar")
+            keeper_id=user
         )
 
-        return Response({"message": "寵物建立成功", "pet_id": pet.id}, status=status.HTTP_201_CREATED)
+        # 檢查是否有上傳圖片
+        # pet_avatar_file = request.FILES.get("pet_avatar")
+        # if pet_avatar_file:
+        #     success, msg, firebase_url, firebase_path = FirebaseStorageService.upload_pet_photo(
+        #         user_id=user.id,
+        #         pet_id=pet.id,
+        #         photo_file=pet_avatar_file,
+        #         photo_type='headshot'
+        #     )
+        #     if success:
+        #         pet.pet_avatar = firebase_url
+        #         pet.save()
+        #     else:
+        #         return Response({"error": f"圖片上傳失敗：{msg}"}, status=status.HTTP_400_BAD_REQUEST)
+        pet_avatar_file = request.FILES.get("pet_avatar")
+        if pet_avatar_file:
+            storage_service = FirebaseStorageService()
+            success, msg, firebase_url, firebase_path = storage_service.upload_pet_photo(
+                user_id=user.id,
+                pet_id=pet.id,
+                photo_file=pet_avatar_file,
+                photo_type='headshot'
+            )
+            if success:
+                pet.pet_avatar = firebase_url
+                pet.save()
+            else:
+                return Response({"error": f"圖片上傳失敗：{msg}"}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response({"message": "寵物建立成功", "pet_id": pet.id, "pet_avatar": pet.pet_avatar}, status=status.HTTP_201_CREATED)
 
 class PetUpdateView(APIView):
     def post(self, request):
         pet_id = request.data.get("pet_id")
-        weight = request.data.get("weight")
-        length = request.data.get("length")
-
         if not pet_id:
-            return Response({"error": "請提供 pet_id"}, status=400)
+            return Response({"error": "請提供 pet_id"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             pet = Pet.objects.get(id=pet_id)
         except Pet.DoesNotExist:
-            return Response({"error": "找不到該寵物"}, status=404)
+            return Response({"error": "找不到該寵物"}, status=status.HTTP_400_BAD_REQUEST)
 
-        if weight:
-            pet.weight = weight
-        if length:
-            pet.length = length
+        for field in ["is_dog", "pet_avatar", "life_stage", "weight", "length", "expect_adult_weight", "litter_size", "weeks_of_lactation"]:
+            value = request.data.get(field)
+            if value is not None:
+                setattr(pet, field, value)
 
         pet.save()
 
         return Response({
             "message": "更新成功",
             "pet_id": pet.id,
+            "pet_avatar": pet.pet_avatar,
+            "is_dog": pet.is_dog,
+            "new_life_stage": pet.life_stage,
             "new_weight": pet.weight,
             "new_length": pet.length,
-        }, status=200)
+            "new_expect_adult_weight": pet.expect_adult_weight,
+            "new_litter_size": pet.litter_size,
+            "new_weeks_of_lacation": pet.weeks_of_lactation
+        }, status=status.HTTP_200_OK)
 
 class FeedListByUser(APIView):
     def get(self, request):

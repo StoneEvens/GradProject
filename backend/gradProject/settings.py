@@ -53,7 +53,7 @@ INSTALLED_APPS = [
     "comments",
     "media",
     "articleRecommendation",
-    # "calculator",  # 已忽略 calculator app
+    "calculator",
 ]
 
 MIDDLEWARE = [
