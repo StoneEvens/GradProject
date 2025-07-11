@@ -110,10 +110,9 @@ class UserDetailSearchSerializer(serializers.ModelSerializer):
     
     def get_headshot(self, user: User):
         try:
-            image = UserHeadshot.get_headshot_url(user)
-
+            image_url = UserHeadshot.get_headshot_url(user)
             return {
-                'headshot': image.firebase_url
+                'headshot': image_url
             }
         except:
             return None
@@ -160,14 +159,8 @@ class PostTagPetSerializer(serializers.ModelSerializer):
     def get_headshot_url(self, obj):
         """獲取寵物頭像 URL"""
         try:
-            if hasattr(obj, 'headshot'):
-                headshot = obj.headshot
-                if headshot and hasattr(headshot, 'url'):
-                    return headshot.url
-                elif headshot and hasattr(headshot.img_url, 'url'):
-                    return headshot.img_url.url
-                elif headshot:
-                    return headshot.img_url
+            if hasattr(obj, 'headshot') and obj.headshot:
+                return obj.headshot.url  # 使用 property
         except Exception:
             pass
         return None

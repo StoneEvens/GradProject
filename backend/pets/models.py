@@ -23,6 +23,7 @@ class Pet(models.Model):
     pet_type = models.CharField(max_length=100)  
     predicted_adult_weight = models.FloatField(null=True, blank=True, help_text="預期成犬/成貓體重 (公斤)")
     weight = models.FloatField(null=True, blank=True, help_text="體重 (公斤)")
+    description = models.TextField(blank=True, null=True, help_text="寵物描述")
 
     def __str__(self):
         return f"{self.pet_name} ({self.pet_type})"
@@ -47,7 +48,7 @@ class Pet(models.Model):
             predicted_adult_weight=predicted_adult_weight
         )
 
-    def update(self, owner=None, weight=None, pet_stage=None, age=None, pet_name=None, breed=None, pet_type=None, predicted_adult_weight=None):
+    def update(self, owner=None, weight=None, pet_stage=None, age=None, pet_name=None, breed=None, pet_type=None, predicted_adult_weight=None, description=None):
         update_fields = []
 
         if owner:
@@ -81,6 +82,10 @@ class Pet(models.Model):
         if predicted_adult_weight:
             self.predicted_adult_weight = predicted_adult_weight
             update_fields.append("predicted_adult_weight")
+        
+        if description is not None:
+            self.description = description
+            update_fields.append("description")
 
         self.save(update_fields=update_fields)
 

@@ -28,6 +28,7 @@ class SuperImage(models.Model):
     class Meta:
         abstract = True
 
+    @property
     def url(self):
         return self.firebase_url
     
@@ -69,21 +70,34 @@ class Image(SuperImage):
 class PetHeadshot(SuperImage):
     pet = models.OneToOneField(Pet, on_delete=models.CASCADE, related_name='headshot')
     
-    def url(pet:Pet):
-        return PetHeadshot.objects.filter(pet=pet).first().firebase_url
+    @staticmethod
+    def get_pet_headshot_url(pet):
+        """獲取寵物頭像 URL"""
+        try:
+            headshot = PetHeadshot.objects.filter(pet=pet).first()
+            return headshot.firebase_url if headshot else None
+        except:
+            return None
 
 
 class UserHeadshot(SuperImage):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='headshot')
     
-    def get_headshot_url(user:CustomUser):
+    @staticmethod
+    def get_headshot_url(user):
+        """獲取用戶頭像 URL"""
         try:
-            return UserHeadshot.objects.filter(user=user).first().url()
-        except AttributeError:
+            headshot = UserHeadshot.objects.filter(user=user).first()
+            return headshot.firebase_url if headshot else ""
+        except:
             return ""
         
-    def get_headshot(user:CustomUser):
-        return UserHeadshot.objects.filter(user=user).first
+    @staticmethod
+    def get_headshot(user):
+        """獲取用戶頭像對象"""
+        return UserHeadshot.objects.filter(user=user).first()
         
-    def create(user:CustomUser, firebase_path:str, firebase_url:str):
+    @staticmethod
+    def create(user, firebase_path: str, firebase_url: str):
+        """創建用戶頭像記錄"""
         return UserHeadshot.objects.create(user=user, firebase_path=firebase_path, firebase_url=firebase_url)

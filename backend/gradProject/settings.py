@@ -196,7 +196,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Firebase Storage 配置
 FIREBASE_CREDENTIALS_PATH = os.path.join(BASE_DIR, 'config', 'petapp-c2e46-firebase-adminsdk-fbsvc-0ec3a87ef4.json')
-FIREBASE_STORAGE_BUCKET = 'petapp-c2e46.appspot.com'
+FIREBASE_STORAGE_BUCKET = 'petapp-c2e46.firebasestorage.app'
 
 # 日誌配置
 LOGGING = {

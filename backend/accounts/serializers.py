@@ -102,7 +102,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'points']
 
     def get_headshot_url(self, user:CustomUser):
-        return UserHeadshot.get_headshot_url(user=user)
+        return UserHeadshot.get_headshot_url(user)
 
 class UserSummarySerializer(serializers.Serializer):
     id = serializers.IntegerField()

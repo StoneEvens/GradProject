@@ -42,6 +42,7 @@ export const updatePet = async (petId, petData) => {
   if (petData.height) formData.append('height', petData.height);
   if (petData.pet_stage) formData.append('pet_stage', petData.pet_stage);
   if (petData.predicted_adult_weight) formData.append('predicted_adult_weight', petData.predicted_adult_weight);
+  if (petData.description !== undefined) formData.append('description', petData.description || '');
   
   // 添加寵物頭像
   if (petData.headshot) {

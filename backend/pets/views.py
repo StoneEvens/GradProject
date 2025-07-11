@@ -206,7 +206,7 @@ class UpdatePetAPIView(APIView):
                             old_headshot = updated_pet.headshot
                             # 可以選擇是否從 Firebase 刪除舊圖片
                             try:
-                                firebase_storage_service.delete_file(old_headshot.firebase_path)
+                                firebase_storage_service.delete_image(old_headshot.firebase_path)
                             except Exception as e:
                                 logger.warning(f"刪除舊頭像失敗: {str(e)}")
                             old_headshot.delete()
@@ -307,8 +307,8 @@ class UserPetsAPIView(APIView):
         result = []
         for pet in pets:
             headshot_url_str = None
-            if hasattr(pet, 'headshot') and pet.headshot and hasattr(pet.headshot, 'url'):
-                headshot_url_str = pet.headshot.url # 使用 PetHeadshot 的 url 屬性
+            if hasattr(pet, 'headshot') and pet.headshot:
+                headshot_url_str = pet.headshot.url # 使用 PetHeadshot 的 url 屬性（現在是 property）
 
             result.append({
                 "pet_id": pet.id,
@@ -320,6 +320,7 @@ class UserPetsAPIView(APIView):
                 "breed": pet.breed,
                 "pet_stage": pet.pet_stage,
                 "predicted_adult_weight": pet.predicted_adult_weight,
+                "description": pet.description,
                 "illnesses": illnesses, # 使用新的屬性方法
                 "headshot_url": headshot_url_str
             })

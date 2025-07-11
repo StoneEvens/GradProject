@@ -1,0 +1,2147 @@
+[
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "token_blacklist",
+    "model": "blacklistedtoken"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "token_blacklist",
+    "model": "outstandingtoken"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "admin",
+    "model": "logentry"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "auth",
+    "model": "permission"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "auth",
+    "model": "group"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "contenttypes",
+    "model": "contenttype"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "sessions",
+    "model": "session"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "accounts",
+    "model": "achievement"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "accounts",
+    "model": "missioncondition"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "accounts",
+    "model": "customuser"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "accounts",
+    "model": "follownotification"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "accounts",
+    "model": "mission"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "accounts",
+    "model": "plan"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "accounts",
+    "model": "usermission"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "accounts",
+    "model": "userconditionrecord"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "accounts",
+    "model": "userachievement"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "accounts",
+    "model": "userblock"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "accounts",
+    "model": "userfollow"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "pets",
+    "model": "archiveillnessrelation"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "pets",
+    "model": "forumcontent"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "pets",
+    "model": "illness"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "pets",
+    "model": "pet"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "pets",
+    "model": "postsymptomsrelation"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "pets",
+    "model": "symptom"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "pets",
+    "model": "abnormalpost"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "pets",
+    "model": "archiveabnormalpostrelation"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "social",
+    "model": "postframe"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "social",
+    "model": "posthashtag"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "social",
+    "model": "postpets"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "social",
+    "model": "solcontent"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "feeds",
+    "model": "feed"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "feeds",
+    "model": "userfeed"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "feeds",
+    "model": "petfeed"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "interactions",
+    "model": "userinteraction"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "comments",
+    "model": "comment"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "media",
+    "model": "image"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "media",
+    "model": "petheadshot"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "media",
+    "model": "userheadshot"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "calculator",
+    "model": "feed"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "calculator",
+    "model": "pet"
+  }
+},
+{
+  "model": "media.petheadshot",
+  "pk": 1,
+  "fields": {
+    "firebase_url": "https://storage.googleapis.com/petapp-c2e46.firebasestorage.app/pets/user_1/pet_1/headshot/8b5696c010bb41d9b6c5b2927fcc42df.jpg",
+    "firebase_path": "pets/user_1/pet_1/headshot/8b5696c010bb41d9b6c5b2927fcc42df.jpg",
+    "original_filename": null,
+    "file_size": null,
+    "content_type_mime": null,
+    "alt_text": "",
+    "uploaded_at": "2025-07-11T16:24:26.871Z",
+    "updated_at": "2025-07-11T16:24:26.871Z",
+    "pet": 1
+  }
+},
+{
+  "model": "media.petheadshot",
+  "pk": 2,
+  "fields": {
+    "firebase_url": "https://storage.googleapis.com/petapp-c2e46.firebasestorage.app/pets/user_1/pet_2/headshot/7e06a0e728b846eb8d4bd6b3f64b1aaf.jpg",
+    "firebase_path": "pets/user_1/pet_2/headshot/7e06a0e728b846eb8d4bd6b3f64b1aaf.jpg",
+    "original_filename": null,
+    "file_size": null,
+    "content_type_mime": null,
+    "alt_text": "",
+    "uploaded_at": "2025-07-11T16:31:47.317Z",
+    "updated_at": "2025-07-11T16:31:47.317Z",
+    "pet": 2
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add blacklisted token",
+    "content_type": [
+      "token_blacklist",
+      "blacklistedtoken"
+    ],
+    "codename": "add_blacklistedtoken"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change blacklisted token",
+    "content_type": [
+      "token_blacklist",
+      "blacklistedtoken"
+    ],
+    "codename": "change_blacklistedtoken"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete blacklisted token",
+    "content_type": [
+      "token_blacklist",
+      "blacklistedtoken"
+    ],
+    "codename": "delete_blacklistedtoken"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view blacklisted token",
+    "content_type": [
+      "token_blacklist",
+      "blacklistedtoken"
+    ],
+    "codename": "view_blacklistedtoken"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add outstanding token",
+    "content_type": [
+      "token_blacklist",
+      "outstandingtoken"
+    ],
+    "codename": "add_outstandingtoken"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change outstanding token",
+    "content_type": [
+      "token_blacklist",
+      "outstandingtoken"
+    ],
+    "codename": "change_outstandingtoken"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete outstanding token",
+    "content_type": [
+      "token_blacklist",
+      "outstandingtoken"
+    ],
+    "codename": "delete_outstandingtoken"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view outstanding token",
+    "content_type": [
+      "token_blacklist",
+      "outstandingtoken"
+    ],
+    "codename": "view_outstandingtoken"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add log entry",
+    "content_type": [
+      "admin",
+      "logentry"
+    ],
+    "codename": "add_logentry"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change log entry",
+    "content_type": [
+      "admin",
+      "logentry"
+    ],
+    "codename": "change_logentry"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete log entry",
+    "content_type": [
+      "admin",
+      "logentry"
+    ],
+    "codename": "delete_logentry"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view log entry",
+    "content_type": [
+      "admin",
+      "logentry"
+    ],
+    "codename": "view_logentry"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add permission",
+    "content_type": [
+      "auth",
+      "permission"
+    ],
+    "codename": "add_permission"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change permission",
+    "content_type": [
+      "auth",
+      "permission"
+    ],
+    "codename": "change_permission"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete permission",
+    "content_type": [
+      "auth",
+      "permission"
+    ],
+    "codename": "delete_permission"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view permission",
+    "content_type": [
+      "auth",
+      "permission"
+    ],
+    "codename": "view_permission"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add group",
+    "content_type": [
+      "auth",
+      "group"
+    ],
+    "codename": "add_group"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change group",
+    "content_type": [
+      "auth",
+      "group"
+    ],
+    "codename": "change_group"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete group",
+    "content_type": [
+      "auth",
+      "group"
+    ],
+    "codename": "delete_group"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view group",
+    "content_type": [
+      "auth",
+      "group"
+    ],
+    "codename": "view_group"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add content type",
+    "content_type": [
+      "contenttypes",
+      "contenttype"
+    ],
+    "codename": "add_contenttype"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change content type",
+    "content_type": [
+      "contenttypes",
+      "contenttype"
+    ],
+    "codename": "change_contenttype"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete content type",
+    "content_type": [
+      "contenttypes",
+      "contenttype"
+    ],
+    "codename": "delete_contenttype"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view content type",
+    "content_type": [
+      "contenttypes",
+      "contenttype"
+    ],
+    "codename": "view_contenttype"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add session",
+    "content_type": [
+      "sessions",
+      "session"
+    ],
+    "codename": "add_session"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change session",
+    "content_type": [
+      "sessions",
+      "session"
+    ],
+    "codename": "change_session"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete session",
+    "content_type": [
+      "sessions",
+      "session"
+    ],
+    "codename": "delete_session"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view session",
+    "content_type": [
+      "sessions",
+      "session"
+    ],
+    "codename": "view_session"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add achievement",
+    "content_type": [
+      "accounts",
+      "achievement"
+    ],
+    "codename": "add_achievement"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change achievement",
+    "content_type": [
+      "accounts",
+      "achievement"
+    ],
+    "codename": "change_achievement"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete achievement",
+    "content_type": [
+      "accounts",
+      "achievement"
+    ],
+    "codename": "delete_achievement"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view achievement",
+    "content_type": [
+      "accounts",
+      "achievement"
+    ],
+    "codename": "view_achievement"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add mission condition",
+    "content_type": [
+      "accounts",
+      "missioncondition"
+    ],
+    "codename": "add_missioncondition"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change mission condition",
+    "content_type": [
+      "accounts",
+      "missioncondition"
+    ],
+    "codename": "change_missioncondition"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete mission condition",
+    "content_type": [
+      "accounts",
+      "missioncondition"
+    ],
+    "codename": "delete_missioncondition"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view mission condition",
+    "content_type": [
+      "accounts",
+      "missioncondition"
+    ],
+    "codename": "view_missioncondition"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add user",
+    "content_type": [
+      "accounts",
+      "customuser"
+    ],
+    "codename": "add_customuser"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change user",
+    "content_type": [
+      "accounts",
+      "customuser"
+    ],
+    "codename": "change_customuser"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete user",
+    "content_type": [
+      "accounts",
+      "customuser"
+    ],
+    "codename": "delete_customuser"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view user",
+    "content_type": [
+      "accounts",
+      "customuser"
+    ],
+    "codename": "view_customuser"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add follow notification",
+    "content_type": [
+      "accounts",
+      "follownotification"
+    ],
+    "codename": "add_follownotification"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change follow notification",
+    "content_type": [
+      "accounts",
+      "follownotification"
+    ],
+    "codename": "change_follownotification"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete follow notification",
+    "content_type": [
+      "accounts",
+      "follownotification"
+    ],
+    "codename": "delete_follownotification"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view follow notification",
+    "content_type": [
+      "accounts",
+      "follownotification"
+    ],
+    "codename": "view_follownotification"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add mission",
+    "content_type": [
+      "accounts",
+      "mission"
+    ],
+    "codename": "add_mission"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change mission",
+    "content_type": [
+      "accounts",
+      "mission"
+    ],
+    "codename": "change_mission"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete mission",
+    "content_type": [
+      "accounts",
+      "mission"
+    ],
+    "codename": "delete_mission"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view mission",
+    "content_type": [
+      "accounts",
+      "mission"
+    ],
+    "codename": "view_mission"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add plan",
+    "content_type": [
+      "accounts",
+      "plan"
+    ],
+    "codename": "add_plan"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change plan",
+    "content_type": [
+      "accounts",
+      "plan"
+    ],
+    "codename": "change_plan"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete plan",
+    "content_type": [
+      "accounts",
+      "plan"
+    ],
+    "codename": "delete_plan"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view plan",
+    "content_type": [
+      "accounts",
+      "plan"
+    ],
+    "codename": "view_plan"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add user mission",
+    "content_type": [
+      "accounts",
+      "usermission"
+    ],
+    "codename": "add_usermission"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change user mission",
+    "content_type": [
+      "accounts",
+      "usermission"
+    ],
+    "codename": "change_usermission"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete user mission",
+    "content_type": [
+      "accounts",
+      "usermission"
+    ],
+    "codename": "delete_usermission"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view user mission",
+    "content_type": [
+      "accounts",
+      "usermission"
+    ],
+    "codename": "view_usermission"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add user condition record",
+    "content_type": [
+      "accounts",
+      "userconditionrecord"
+    ],
+    "codename": "add_userconditionrecord"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change user condition record",
+    "content_type": [
+      "accounts",
+      "userconditionrecord"
+    ],
+    "codename": "change_userconditionrecord"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete user condition record",
+    "content_type": [
+      "accounts",
+      "userconditionrecord"
+    ],
+    "codename": "delete_userconditionrecord"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view user condition record",
+    "content_type": [
+      "accounts",
+      "userconditionrecord"
+    ],
+    "codename": "view_userconditionrecord"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add user achievement",
+    "content_type": [
+      "accounts",
+      "userachievement"
+    ],
+    "codename": "add_userachievement"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change user achievement",
+    "content_type": [
+      "accounts",
+      "userachievement"
+    ],
+    "codename": "change_userachievement"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete user achievement",
+    "content_type": [
+      "accounts",
+      "userachievement"
+    ],
+    "codename": "delete_userachievement"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view user achievement",
+    "content_type": [
+      "accounts",
+      "userachievement"
+    ],
+    "codename": "view_userachievement"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add user block",
+    "content_type": [
+      "accounts",
+      "userblock"
+    ],
+    "codename": "add_userblock"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change user block",
+    "content_type": [
+      "accounts",
+      "userblock"
+    ],
+    "codename": "change_userblock"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete user block",
+    "content_type": [
+      "accounts",
+      "userblock"
+    ],
+    "codename": "delete_userblock"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view user block",
+    "content_type": [
+      "accounts",
+      "userblock"
+    ],
+    "codename": "view_userblock"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add user follow",
+    "content_type": [
+      "accounts",
+      "userfollow"
+    ],
+    "codename": "add_userfollow"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change user follow",
+    "content_type": [
+      "accounts",
+      "userfollow"
+    ],
+    "codename": "change_userfollow"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete user follow",
+    "content_type": [
+      "accounts",
+      "userfollow"
+    ],
+    "codename": "delete_userfollow"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view user follow",
+    "content_type": [
+      "accounts",
+      "userfollow"
+    ],
+    "codename": "view_userfollow"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add archive illness relation",
+    "content_type": [
+      "pets",
+      "archiveillnessrelation"
+    ],
+    "codename": "add_archiveillnessrelation"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change archive illness relation",
+    "content_type": [
+      "pets",
+      "archiveillnessrelation"
+    ],
+    "codename": "change_archiveillnessrelation"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete archive illness relation",
+    "content_type": [
+      "pets",
+      "archiveillnessrelation"
+    ],
+    "codename": "delete_archiveillnessrelation"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view archive illness relation",
+    "content_type": [
+      "pets",
+      "archiveillnessrelation"
+    ],
+    "codename": "view_archiveillnessrelation"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add forum content",
+    "content_type": [
+      "pets",
+      "forumcontent"
+    ],
+    "codename": "add_forumcontent"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change forum content",
+    "content_type": [
+      "pets",
+      "forumcontent"
+    ],
+    "codename": "change_forumcontent"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete forum content",
+    "content_type": [
+      "pets",
+      "forumcontent"
+    ],
+    "codename": "delete_forumcontent"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view forum content",
+    "content_type": [
+      "pets",
+      "forumcontent"
+    ],
+    "codename": "view_forumcontent"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add illness",
+    "content_type": [
+      "pets",
+      "illness"
+    ],
+    "codename": "add_illness"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change illness",
+    "content_type": [
+      "pets",
+      "illness"
+    ],
+    "codename": "change_illness"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete illness",
+    "content_type": [
+      "pets",
+      "illness"
+    ],
+    "codename": "delete_illness"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view illness",
+    "content_type": [
+      "pets",
+      "illness"
+    ],
+    "codename": "view_illness"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add pet",
+    "content_type": [
+      "pets",
+      "pet"
+    ],
+    "codename": "add_pet"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change pet",
+    "content_type": [
+      "pets",
+      "pet"
+    ],
+    "codename": "change_pet"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete pet",
+    "content_type": [
+      "pets",
+      "pet"
+    ],
+    "codename": "delete_pet"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view pet",
+    "content_type": [
+      "pets",
+      "pet"
+    ],
+    "codename": "view_pet"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add post symptoms relation",
+    "content_type": [
+      "pets",
+      "postsymptomsrelation"
+    ],
+    "codename": "add_postsymptomsrelation"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change post symptoms relation",
+    "content_type": [
+      "pets",
+      "postsymptomsrelation"
+    ],
+    "codename": "change_postsymptomsrelation"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete post symptoms relation",
+    "content_type": [
+      "pets",
+      "postsymptomsrelation"
+    ],
+    "codename": "delete_postsymptomsrelation"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view post symptoms relation",
+    "content_type": [
+      "pets",
+      "postsymptomsrelation"
+    ],
+    "codename": "view_postsymptomsrelation"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add symptom",
+    "content_type": [
+      "pets",
+      "symptom"
+    ],
+    "codename": "add_symptom"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change symptom",
+    "content_type": [
+      "pets",
+      "symptom"
+    ],
+    "codename": "change_symptom"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete symptom",
+    "content_type": [
+      "pets",
+      "symptom"
+    ],
+    "codename": "delete_symptom"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view symptom",
+    "content_type": [
+      "pets",
+      "symptom"
+    ],
+    "codename": "view_symptom"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add abnormal post",
+    "content_type": [
+      "pets",
+      "abnormalpost"
+    ],
+    "codename": "add_abnormalpost"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change abnormal post",
+    "content_type": [
+      "pets",
+      "abnormalpost"
+    ],
+    "codename": "change_abnormalpost"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete abnormal post",
+    "content_type": [
+      "pets",
+      "abnormalpost"
+    ],
+    "codename": "delete_abnormalpost"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view abnormal post",
+    "content_type": [
+      "pets",
+      "abnormalpost"
+    ],
+    "codename": "view_abnormalpost"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add archive abnormal post relation",
+    "content_type": [
+      "pets",
+      "archiveabnormalpostrelation"
+    ],
+    "codename": "add_archiveabnormalpostrelation"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change archive abnormal post relation",
+    "content_type": [
+      "pets",
+      "archiveabnormalpostrelation"
+    ],
+    "codename": "change_archiveabnormalpostrelation"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete archive abnormal post relation",
+    "content_type": [
+      "pets",
+      "archiveabnormalpostrelation"
+    ],
+    "codename": "delete_archiveabnormalpostrelation"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view archive abnormal post relation",
+    "content_type": [
+      "pets",
+      "archiveabnormalpostrelation"
+    ],
+    "codename": "view_archiveabnormalpostrelation"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add post frame",
+    "content_type": [
+      "social",
+      "postframe"
+    ],
+    "codename": "add_postframe"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change post frame",
+    "content_type": [
+      "social",
+      "postframe"
+    ],
+    "codename": "change_postframe"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete post frame",
+    "content_type": [
+      "social",
+      "postframe"
+    ],
+    "codename": "delete_postframe"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view post frame",
+    "content_type": [
+      "social",
+      "postframe"
+    ],
+    "codename": "view_postframe"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add post hashtag",
+    "content_type": [
+      "social",
+      "posthashtag"
+    ],
+    "codename": "add_posthashtag"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change post hashtag",
+    "content_type": [
+      "social",
+      "posthashtag"
+    ],
+    "codename": "change_posthashtag"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete post hashtag",
+    "content_type": [
+      "social",
+      "posthashtag"
+    ],
+    "codename": "delete_posthashtag"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view post hashtag",
+    "content_type": [
+      "social",
+      "posthashtag"
+    ],
+    "codename": "view_posthashtag"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add post pets",
+    "content_type": [
+      "social",
+      "postpets"
+    ],
+    "codename": "add_postpets"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change post pets",
+    "content_type": [
+      "social",
+      "postpets"
+    ],
+    "codename": "change_postpets"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete post pets",
+    "content_type": [
+      "social",
+      "postpets"
+    ],
+    "codename": "delete_postpets"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view post pets",
+    "content_type": [
+      "social",
+      "postpets"
+    ],
+    "codename": "view_postpets"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add so l content",
+    "content_type": [
+      "social",
+      "solcontent"
+    ],
+    "codename": "add_solcontent"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change so l content",
+    "content_type": [
+      "social",
+      "solcontent"
+    ],
+    "codename": "change_solcontent"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete so l content",
+    "content_type": [
+      "social",
+      "solcontent"
+    ],
+    "codename": "delete_solcontent"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view so l content",
+    "content_type": [
+      "social",
+      "solcontent"
+    ],
+    "codename": "view_solcontent"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add �}��",
+    "content_type": [
+      "feeds",
+      "feed"
+    ],
+    "codename": "add_feed"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change �}��",
+    "content_type": [
+      "feeds",
+      "feed"
+    ],
+    "codename": "change_feed"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete �}��",
+    "content_type": [
+      "feeds",
+      "feed"
+    ],
+    "codename": "delete_feed"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view �}��",
+    "content_type": [
+      "feeds",
+      "feed"
+    ],
+    "codename": "view_feed"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add �Τ�}��",
+    "content_type": [
+      "feeds",
+      "userfeed"
+    ],
+    "codename": "add_userfeed"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change �Τ�}��",
+    "content_type": [
+      "feeds",
+      "userfeed"
+    ],
+    "codename": "change_userfeed"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete �Τ�}��",
+    "content_type": [
+      "feeds",
+      "userfeed"
+    ],
+    "codename": "delete_userfeed"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view �Τ�}��",
+    "content_type": [
+      "feeds",
+      "userfeed"
+    ],
+    "codename": "view_userfeed"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add �d���}��",
+    "content_type": [
+      "feeds",
+      "petfeed"
+    ],
+    "codename": "add_petfeed"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change �d���}��",
+    "content_type": [
+      "feeds",
+      "petfeed"
+    ],
+    "codename": "change_petfeed"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete �d���}��",
+    "content_type": [
+      "feeds",
+      "petfeed"
+    ],
+    "codename": "delete_petfeed"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view �d���}��",
+    "content_type": [
+      "feeds",
+      "petfeed"
+    ],
+    "codename": "view_petfeed"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add user interaction",
+    "content_type": [
+      "interactions",
+      "userinteraction"
+    ],
+    "codename": "add_userinteraction"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change user interaction",
+    "content_type": [
+      "interactions",
+      "userinteraction"
+    ],
+    "codename": "change_userinteraction"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete user interaction",
+    "content_type": [
+      "interactions",
+      "userinteraction"
+    ],
+    "codename": "delete_userinteraction"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view user interaction",
+    "content_type": [
+      "interactions",
+      "userinteraction"
+    ],
+    "codename": "view_userinteraction"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add comment",
+    "content_type": [
+      "comments",
+      "comment"
+    ],
+    "codename": "add_comment"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change comment",
+    "content_type": [
+      "comments",
+      "comment"
+    ],
+    "codename": "change_comment"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete comment",
+    "content_type": [
+      "comments",
+      "comment"
+    ],
+    "codename": "delete_comment"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view comment",
+    "content_type": [
+      "comments",
+      "comment"
+    ],
+    "codename": "view_comment"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add image",
+    "content_type": [
+      "media",
+      "image"
+    ],
+    "codename": "add_image"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change image",
+    "content_type": [
+      "media",
+      "image"
+    ],
+    "codename": "change_image"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete image",
+    "content_type": [
+      "media",
+      "image"
+    ],
+    "codename": "delete_image"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view image",
+    "content_type": [
+      "media",
+      "image"
+    ],
+    "codename": "view_image"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add pet headshot",
+    "content_type": [
+      "media",
+      "petheadshot"
+    ],
+    "codename": "add_petheadshot"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change pet headshot",
+    "content_type": [
+      "media",
+      "petheadshot"
+    ],
+    "codename": "change_petheadshot"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete pet headshot",
+    "content_type": [
+      "media",
+      "petheadshot"
+    ],
+    "codename": "delete_petheadshot"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view pet headshot",
+    "content_type": [
+      "media",
+      "petheadshot"
+    ],
+    "codename": "view_petheadshot"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add user headshot",
+    "content_type": [
+      "media",
+      "userheadshot"
+    ],
+    "codename": "add_userheadshot"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change user headshot",
+    "content_type": [
+      "media",
+      "userheadshot"
+    ],
+    "codename": "change_userheadshot"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete user headshot",
+    "content_type": [
+      "media",
+      "userheadshot"
+    ],
+    "codename": "delete_userheadshot"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view user headshot",
+    "content_type": [
+      "media",
+      "userheadshot"
+    ],
+    "codename": "view_userheadshot"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add feed",
+    "content_type": [
+      "calculator",
+      "feed"
+    ],
+    "codename": "add_feed"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change feed",
+    "content_type": [
+      "calculator",
+      "feed"
+    ],
+    "codename": "change_feed"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete feed",
+    "content_type": [
+      "calculator",
+      "feed"
+    ],
+    "codename": "delete_feed"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view feed",
+    "content_type": [
+      "calculator",
+      "feed"
+    ],
+    "codename": "view_feed"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add pet",
+    "content_type": [
+      "calculator",
+      "pet"
+    ],
+    "codename": "add_pet"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change pet",
+    "content_type": [
+      "calculator",
+      "pet"
+    ],
+    "codename": "change_pet"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete pet",
+    "content_type": [
+      "calculator",
+      "pet"
+    ],
+    "codename": "delete_pet"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view pet",
+    "content_type": [
+      "calculator",
+      "pet"
+    ],
+    "codename": "view_pet"
+  }
+},
+{
+  "model": "accounts.customuser",
+  "fields": {
+    "password": "pbkdf2_sha256$1000000$64Zr3UiaF1hE3Rl9E2K3D6$0OZp9hsa2dBieDE88OBFUwMMb1lGV+BmBzVR8HBzE6w=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "leotest",
+    "first_name": "",
+    "last_name": "",
+    "email": "leo@gmail.com",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2025-07-11T13:48:45.487Z",
+    "points": 0,
+    "user_intro": "養了一隻貓跟一隻吉娃娃",
+    "user_fullname": "leo",
+    "user_account": "leotest",
+    "account_privacy": "private",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "pets.pet",
+  "pk": 1,
+  "fields": {
+    "age": 3,
+    "breed": "英國短毛貓",
+    "height": 20.0,
+    "owner": [
+      "leotest"
+    ],
+    "pet_name": "咪咪",
+    "pet_stage": "adult",
+    "pet_type": "cat",
+    "predicted_adult_weight": 20.0,
+    "weight": 20.0,
+    "description": "喜歡吃貓條"
+  }
+},
+{
+  "model": "pets.pet",
+  "pk": 2,
+  "fields": {
+    "age": 2,
+    "breed": "其他",
+    "height": 30.0,
+    "owner": [
+      "leotest"
+    ],
+    "pet_name": "小吉",
+    "pet_stage": "adult",
+    "pet_type": "dog",
+    "predicted_adult_weight": 30.0,
+    "weight": 30.0,
+    "description": "吉娃娃一隻"
+  }
+},
+{
+  "model": "media.userheadshot",
+  "pk": 1,
+  "fields": {
+    "firebase_url": "https://storage.googleapis.com/petapp-c2e46.firebasestorage.app/avatars/user_1/1d9714ba0a1a4dcba61f97f656475984.jpg",
+    "firebase_path": "avatars/user_1/1d9714ba0a1a4dcba61f97f656475984.jpg",
+    "original_filename": null,
+    "file_size": null,
+    "content_type_mime": null,
+    "alt_text": "",
+    "uploaded_at": "2025-07-11T16:30:48.185Z",
+    "updated_at": "2025-07-11T16:30:48.185Z",
+    "user": [
+      "leotest"
+    ]
+  }
+}
+]
