@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import styles from '../styles/SocialSearchResults.module.css';
 import ConfirmFollowModal from './ConfirmFollowModal';
 import { searchUsers, getUserFollowStatus, followUser, getUserFollowStatusBatch } from '../services/socialService';
+import { getUserProfile } from '../services/userService';
 
 const SocialSearchResults = ({ searchQuery, onUserClick }) => {
   const navigate = useNavigate();
@@ -14,6 +15,20 @@ const SocialSearchResults = ({ searchQuery, onUserClick }) => {
   const [followStates, setFollowStates] = useState({});
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
+
+  // 獲取當前用戶資訊
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      try {
+        const user = await getUserProfile();
+        setCurrentUser(user);
+      } catch (error) {
+        console.error('獲取當前用戶資訊失敗:', error);
+      }
+    };
+    fetchCurrentUser();
+  }, []);
 
   // 搜尋用戶數據
   useEffect(() => {
@@ -191,13 +206,22 @@ const SocialSearchResults = ({ searchQuery, onUserClick }) => {
 
   // 處理用戶點擊
   const handleUserClick = (user) => {
-    console.log('點擊用戶:', user);
     if (onUserClick) {
       onUserClick(user);
     } else {
-      // 預設行為：跳轉到用戶個人資料頁面
-      console.log('導航到:', `/user/${user.user_account}`);
-      navigate(`/user/${user.user_account}`);
+      // 判斷是否為當前用戶 - 同時比較 ID 和 user_account
+      const isCurrentUser = currentUser && (
+        user.id === currentUser.id || 
+        user.user_account === currentUser.user_account
+      );
+      
+      if (isCurrentUser) {
+        // 如果是當前用戶，導向自己的個人資料頁面
+        navigate('/user-profile');
+      } else {
+        // 預設行為：跳轉到其他用戶個人資料頁面
+        navigate(`/user/${user.user_account}`);
+      }
     }
   };
 
@@ -240,33 +264,39 @@ const SocialSearchResults = ({ searchQuery, onUserClick }) => {
             {users.length > 0 ? (
               users.map(user => {
                 const userFollowState = followStates[user.id];
+                const isCurrentUser = currentUser && (
+                  user.id === currentUser.id || 
+                  user.user_account === currentUser.user_account
+                );
                 
                 return (
-                  <div key={user.id} className={styles.userItem}>
+                  <div 
+                    key={user.id} 
+                    className={styles.userItem}
+                    onClick={() => handleUserClick(user)}
+                    style={{cursor: 'pointer'}}
+                  >
                     <img 
                       src={user.headshot_url || '/assets/icon/DefaultAvatar.jpg'} 
                       alt={user.user_fullname || user.user_account}
                       className={styles.userAvatar}
-                      onClick={() => handleUserClick(user)}
                       onError={handleImageError}
                     />
-                    <div 
-                      className={styles.userInfo}
-                      onClick={() => handleUserClick(user)}
-                      style={{cursor: 'pointer'}}
-                    >
+                    <div className={styles.userInfo}>
                       <div className={styles.username}>{user.user_account}</div>
                       <div className={styles.displayName}>{user.user_fullname}</div>
                     </div>
-                    <button
-                      className={getFollowButtonClass(userFollowState)}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleFollowButtonClick(user);
-                      }}
-                    >
-                      {getFollowButtonText(user, userFollowState)}
-                    </button>
+                    {!isCurrentUser && (
+                      <button
+                        className={getFollowButtonClass(userFollowState)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleFollowButtonClick(user);
+                        }}
+                      >
+                        {getFollowButtonText(user, userFollowState)}
+                      </button>
+                    )}
                   </div>
                 );
               })

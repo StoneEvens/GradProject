@@ -14,7 +14,7 @@ const BottomNavbar = () => {
     return [
       {
         label: '日常紀錄',
-        path: '/daily-record'
+        path: '/create-post'
       },
       {
         label: '異常紀錄',

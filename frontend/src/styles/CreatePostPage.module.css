@@ -1,0 +1,313 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #FFF2D9;
+}
+
+.content {
+  flex: 1;
+  padding: 30px;
+  padding-top: 80px;
+  padding-bottom: 90px;
+  max-width: 430px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.title {
+  font-size: 24px;
+  color: #89350c;
+  text-align: left;
+  margin-top: 30px;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+.divider {
+  width: 100%;
+  height: 1.5px;
+  background: #FFB370;
+  margin: 10px 0 25px 0;
+}
+
+/* 圖片上傳區域 */
+.imageSection {
+  background-color: #ffeed6;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 20px;
+  border: 2px solid #FFB370;
+}
+
+.noImageState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 117px;
+  margin-bottom: 8px;
+}
+
+.warningIcon {
+  width: 50px;
+  height: 50px;
+  margin-bottom: 10px;
+  opacity: 0.8;
+}
+
+.noImageText {
+  color: #89350c;
+  font-size: 16px;
+  font-weight: 500;
+  margin: 0;
+}
+
+.imagePreviewContainer {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  margin-bottom: 16px;
+  min-height: auto;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.imagePreviewContainer::-webkit-scrollbar {
+  display: none;
+}
+
+.imagePreview {
+  position: relative;
+  min-width: 208px;
+  width: 208px;
+  height: 117px;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #fff;
+  border: 2px solid #FFB370;
+  flex-shrink: 0;
+}
+
+.imagePreview img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background-color: #f5f5f5;
+}
+
+.removeImageBtn {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: #F08651;
+  color: white;
+  border: 2px solid white;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  font-weight: bold;
+  transition: background-color 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+}
+
+.removeImageBtn:hover {
+  background-color: #E07641;
+}
+
+.imageControls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.addImageBtn {
+  background-color: #FFB370;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.addImageBtn:hover {
+  background-color: #F08651;
+}
+
+.imageCounter {
+  color: #89350c;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.hiddenInput {
+  display: none;
+}
+
+/* 描述輸入區域 */
+.descriptionSection {
+  margin-bottom: 30px;
+}
+
+.descriptionInput {
+  width: 100%;
+  padding: 16px;
+  border: none;
+  border-radius: 16px;
+  font-size: 16px;
+  font-family: inherit;
+  resize: none;
+  background-color: #ffeed6;
+  border: 2px solid #FFB370;
+  color: #333;
+  box-sizing: border-box;
+  outline: none;
+  transition: border-color 0.2s ease;
+  min-height: 100px;
+}
+
+.descriptionInput:focus {
+  border-color: #F08651;
+}
+
+.descriptionInput::placeholder {
+  color: #999;
+  font-size: 16px;
+}
+
+/* 操作按鈕 */
+.actionButtons {
+  display: flex;
+  gap: 15px;
+  justify-content: space-between;
+}
+
+.cancelButton {
+  background-color: #ffce99;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 14px 28px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  flex: 1;
+  max-width: 150px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+}
+
+.cancelButton:hover {
+  background-color: #FFB370;
+}
+
+.nextButton {
+  background-color: #F08651;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 14px 28px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  flex: 1;
+  max-width: 150px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+}
+
+.nextButton:hover {
+  background-color: #E07641;
+}
+
+/* 響應式設計 */
+@media (max-width: 480px) {
+  .content {
+    padding: 15px;
+    padding-top: 75px;
+    padding-bottom: 85px;
+  }
+
+  .title {
+    font-size: 20px;
+    margin-bottom: 25px;
+  }
+
+  .imageSection {
+    padding: 15px;
+    margin-bottom: 15px;
+  }
+
+  .imagePreviewContainer {
+    gap: 8px;
+  }
+
+  .imagePreview {
+    min-width: 166px;
+    width: 166px;
+    height: 94px;
+  }
+
+  .descriptionInput {
+    padding: 14px;
+    font-size: 15px;
+    min-height: 80px;
+  }
+
+  .actionButtons {
+    gap: 12px;
+  }
+
+  .cancelButton,
+  .nextButton {
+    padding: 12px 20px;
+    font-size: 15px;
+    height: 45px;
+  }
+}
+
+@media (max-width: 360px) {
+  .content {
+    padding: 12px;
+    padding-top: 70px;
+    padding-bottom: 80px;
+  }
+
+  .imagePreviewContainer {
+    gap: 6px;
+  }
+
+  .imagePreview {
+    min-width: 146px;
+    width: 146px;
+    height: 82px;
+  }
+
+  .removeImageBtn {
+    width: 20px;
+    height: 20px;
+    font-size: 14px;
+    top: 4px;
+    right: 4px;
+  }
+} 

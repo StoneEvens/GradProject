@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import TopNavbar from '../components/TopNavbar';
 import BottomNavbar from '../components/BottomNavbar';
 import SocialSearchResults from '../components/SocialSearchResults';
+import { getUserProfile } from '../services/userService';
 import styles from '../styles/SocialPage.module.css';
 
 const SocialPage = () => {
@@ -12,6 +13,20 @@ const SocialPage = () => {
   
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearchResults, setShowSearchResults] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+
+  // 獲取當前用戶資訊
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      try {
+        const user = await getUserProfile();
+        setCurrentUser(user);
+      } catch (error) {
+        console.error('獲取當前用戶資訊失敗:', error);
+      }
+    };
+    fetchCurrentUser();
+  }, []);
 
   // 從URL參數初始化搜尋狀態
   useEffect(() => {
@@ -50,9 +65,24 @@ const SocialPage = () => {
   };
 
   const handleUserClick = (user) => {
-    // 處理用戶點擊事件（導向用戶資料頁面等）
-    console.log('點擊用戶:', user);
-    navigate(`/user/${user.user_account}`);
+    console.log('SocialPage handleUserClick - 點擊用戶:', user);
+    console.log('SocialPage handleUserClick - 當前用戶:', currentUser);
+    
+    // 判斷是否為當前用戶
+    const isCurrentUser = currentUser && (
+      user.id === currentUser.id || 
+      user.user_account === currentUser.user_account
+    );
+    
+    if (isCurrentUser) {
+      // 如果是當前用戶，導向自己的個人資料頁面
+      console.log('SocialPage - 導航到自己的個人資料頁面');
+      navigate('/user-profile');
+    } else {
+      // 預設行為：跳轉到其他用戶個人資料頁面
+      console.log('SocialPage - 導航到其他用戶個人資料頁面:', `/user/${user.user_account}`);
+      navigate(`/user/${user.user_account}`);
+    }
   };
 
   return (

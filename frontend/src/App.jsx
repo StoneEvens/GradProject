@@ -14,6 +14,7 @@ import NotificationPage from './pages/NotificationPage';
 import PetPage from './pages/PetPage';
 import AddPetPage from './pages/AddPetPage';
 import EditPetPage from './pages/EditPetPage';
+import CreatePostPage from './pages/CreatePostPage';
 import { isAuthenticated, refreshAccessToken } from './services/authService';
 
 const App = () => {
@@ -165,7 +166,11 @@ const App = () => {
           path="/pet/:petId/edit" 
           element={isUserAuthenticated ? <EditPetPage /> : <Navigate to="/" />} 
         />
-
+        {/* 創建貼文頁面：未登入導向HomePage */}
+        <Route 
+          path="/create-post" 
+          element={isUserAuthenticated ? <CreatePostPage /> : <Navigate to="/" />} 
+        />
         {/* 未定義路徑：根據登入狀態重定向 */}
         <Route 
           path="*" 
