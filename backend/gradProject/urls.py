@@ -46,6 +46,7 @@ urlpatterns = [
     path(f'{api_v1_prefix}social/', include('social.urls')),
     path(f'{api_v1_prefix}feeds/', include('feeds.urls')),
     path(f'{api_v1_prefix}interactions/', include('interactions.urls')),
+    path(f'{api_v1_prefix}calculator/', include('calculator.urls')),
     path(f'{api_v1_prefix}comments/', include('comments.urls')),
     path(f'{api_v1_prefix}media/', include('media.urls')),
     path(f'{api_v1_prefix}article_recommendations/', include('articleRecommendation.urls')),

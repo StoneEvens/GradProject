@@ -4,7 +4,12 @@ from django.conf import settings
 
 class Pet(models.Model):
     name = models.CharField(max_length=100, null=True, blank=True)
-    pet_avatar = models.ImageField(upload_to='pet_avatars/', null=True, blank=True)  # 頭貼
+    pet_avatar = models.URLField(
+        max_length=500,
+        null=True,
+        blank=True,
+        help_text="Firebase 上傳後的圖片 URL"
+    )
     is_dog = models.BooleanField(default=False)  # True=狗，False=貓
     life_stage = models.CharField(max_length=20)  # 'adult'、'puppy' 等
     weight = models.FloatField()
@@ -27,6 +32,12 @@ class Pet(models.Model):
 class Feed(models.Model):
     brand = models.CharField(max_length=100, null=True, blank=True)
     name = models.CharField(max_length=100, null=True, blank=True)
+    feed_image = models.URLField(
+    max_length=500,
+    null=True,
+    blank=True,
+    help_text="Firebase 上傳後的飼料圖片 URL"
+    )
     protein = models.FloatField(null=True, blank=True)
     fat = models.FloatField(null=True, blank=True)
     carbohydrates = models.FloatField(null=True, blank=True)
