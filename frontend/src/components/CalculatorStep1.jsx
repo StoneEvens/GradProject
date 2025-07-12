@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import './components/CalculatorStep1.css';
-import addPetIcon from '../assets/icon/CalculatorPage_AddPet.png';
-import defaultAvatar from '../assets/MockPicture/mockCat1.jpg';
+import '../styles/CalculatorStep1.css';
+import defaultAvatar from '../MockPicture/mockCat1.jpg';
 
 function CalculatorStep1({ onNext, pets: apiPets }) {
   const formattedPets = apiPets.map((pet) => ({
@@ -131,18 +130,6 @@ function CalculatorStep1({ onNext, pets: apiPets }) {
             />
           ))}
         </div>
-        {/* <button
-          className={`add-pet-btn-rect${isAdding ? ' selected' : ''}`}
-          type="button"
-          onClick={() => {
-            console.log('新增寵物模式：', true);
-            setIsAdding(true);
-            setNewPet({ name: '', species: '貓', weight: '', length: '', note: '' });
-          }}
-        >
-          <img src={addPetIcon} alt="新增寵物" style={{ width: '80px', height: '80px' }} />
-          <div>新增寵物</div>
-        </button> */}
       </div>
 
       <div className="pet-select-label">

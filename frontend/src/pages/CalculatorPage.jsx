@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import Header from '../components/Header';
+// import Header from '../components/Header';
 import BottomNavigationBar from '../components/BottomNavigationBar';
 import '../styles/CalculatorPage.css';
-import CalculatorStep1 from '../components/CalculatorStep1';
-import CalculatorStep2 from '../components/CalculatorStep2';
-import CalculatorStep3 from '../components/CalculatorStep3';
+// import CalculatorStep1 from '../components/CalculatorStep1';
+import CalculatorStep1 from '../components/CalculatorStep1.jsx';
+import CalculatorStep2 from '../components/CalculatorStep2.jsx';
+import CalculatorStep3 from '../components/CalculatorStep3.jsx';
 
 function CalculatorPage() {
   const [step, setStep] = useState(1);

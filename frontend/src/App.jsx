@@ -15,6 +15,7 @@ import PetPage from './pages/PetPage';
 import AddPetPage from './pages/AddPetPage';
 import EditPetPage from './pages/EditPetPage';
 import CreatePostPage from './pages/CreatePostPage';
+import CalculatorPage from './pages/CalculatorPage';
 import { isAuthenticated, refreshAccessToken } from './services/authService';
 
 const App = () => {
@@ -175,6 +176,10 @@ const App = () => {
         <Route 
           path="*" 
           element={isUserAuthenticated ? <Navigate to="/main" /> : <Navigate to="/" />} 
+        />
+        <Route 
+          path="/calculator" 
+          element={isUserAuthenticated ? <CalculatorPage /> : <Navigate to="/" />} 
         />
       </Routes>
     </BrowserRouter>

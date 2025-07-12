@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import TopNavbar from '../components/TopNavbar';
-import BottomNavbar from '../components/BottomNavbar';
+import BottomNavbar from '../components/BottomNavigationbar';
 import SocialSearchResults from '../components/SocialSearchResults';
 import { getUserProfile } from '../services/userService';
 import styles from '../styles/SocialPage.module.css';

@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import './components/CalculatorStep3.css';
-import mockFeed1 from '../assets/MockPicture/mockFeed1.png';
-import mockFeed2 from '../assets/MockPicture/mockFeed2.png';
-import mockFeed3 from '../assets/MockPicture/mockFeed3.png';
+import '../styles/CalculatorStep3.css';
+import mockFeed1 from '../MockPicture/mockFeed1.png';
+import mockFeed2 from '../MockPicture/mockFeed2.png';
+import mockFeed3 from '../MockPicture/mockFeed3.png';
 
 const mockFeeds = [
   { id: 1, name: '飼料1', img: mockFeed1 },

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import TopNavbar from '../components/TopNavbar';
-import BottomNavbar from '../components/BottomNavbar';
+import BottomNavbar from '../components/BottomNavigationbar';
 import Notification from '../components/Notification';
 import AccountSettings from '../components/AccountSettings';
 import { logout } from '../services/authService';

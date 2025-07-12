@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import styles from '../styles/MainPage.module.css';
 import TopNavbar from '../components/TopNavbar';
-import BottomNavbar from '../components/BottomNavBar';
+import BottomNavbar from '../components/BottomNavigationbar';
 import Calendar from '../components/Calendar';
 import DailySchedule from '../components/DailySchedule';
 import DailyMissions from '../components/DailyMissions';

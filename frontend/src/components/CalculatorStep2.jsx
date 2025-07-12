@@ -1,10 +1,10 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
-import './components/CalculatorStep2.css';
-import mockFeed1 from '../assets/MockPicture/mockFeed1.png';
-import mockFeed2 from '../assets/MockPicture/mockFeed2.png';
-import mockFeed3 from '../assets/MockPicture/mockFeed3.png';
+import '../styles/CalculatorStep2.css';
+import mockFeed1 from '../MockPicture/mockFeed1.png';
+import mockFeed2 from '../MockPicture/mockFeed2.png';
+import mockFeed3 from '../MockPicture/mockFeed3.png';
 
 function CalculatorStep2({ onNext, onPrev, selectedPet }) {
   const { user_id } = useParams();

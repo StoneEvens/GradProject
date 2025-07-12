@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styles from '../styles/NotificationPage.module.css';
 import TopNavbar from '../components/TopNavbar';
-import BottomNavbar from '../components/BottomNavBar';
+import BottomNavbar from '../components/BottomNavigationbar';
 import UnreadNotifications from '../components/UnreadNotifications';
 import PastNotifications from '../components/PastNotifications';
 import Notification from '../components/Notification';

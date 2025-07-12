@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import styles from '../styles/UserFollowConditionPage.module.css';
 import TopNavbar from '../components/TopNavbar';
-import BottomNavbar from '../components/BottomNavbar';
+import BottomNavbar from '../components/BottomNavigationbar';
 import Notification from '../components/Notification';
 import ConfirmFollowModal from '../components/ConfirmFollowModal';
 import ConfirmRemoveFollowerModal from '../components/ConfirmRemoveFollowerModal';

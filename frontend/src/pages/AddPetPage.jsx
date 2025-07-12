@@ -2,7 +2,7 @@ import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from '../styles/AddPetPage.module.css';
 import TopNavbar from '../components/TopNavbar';
-import BottomNavbar from '../components/BottomNavbar';
+import BottomNavbar from '../components/BottomNavigationbar';
 import Notification from '../components/Notification';
 import { NotificationProvider } from '../context/NotificationContext';
 import petService from '../services/petService';
