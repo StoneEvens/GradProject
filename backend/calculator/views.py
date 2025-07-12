@@ -14,10 +14,12 @@ import io
 from calculator.models import Pet, Feed
 from .serializers import PetSerializer, FeedSerializer
 from django.contrib.auth import get_user_model
+from rest_framework.permissions import AllowAny
 
 User = get_user_model()
 
 class PetListByUser(APIView):
+    permission_classes = [AllowAny]  
     def get(self, request):
         user_id = request.query_params.get("user_id")
         if not user_id:
@@ -28,6 +30,7 @@ class PetListByUser(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 class PetCreateView(APIView):
+    permission_classes = [AllowAny] 
     parser_classes = [FormParser, MultiPartParser]  # 新增解析 multipart/form-data 的支援
 
     def post(self, request):
@@ -84,6 +87,7 @@ class PetCreateView(APIView):
         return Response({"message": "寵物建立成功", "pet_id": pet.id, "pet_avatar": pet.pet_avatar}, status=status.HTTP_201_CREATED)
 
 class PetUpdateView(APIView):
+    permission_classes = [AllowAny] 
     def post(self, request):
         pet_id = request.data.get("pet_id")
         if not pet_id:
@@ -115,6 +119,7 @@ class PetUpdateView(APIView):
         }, status=status.HTTP_200_OK)
 
 class FeedListByUser(APIView):
+    permission_classes = [AllowAny] 
     def get(self, request):
         user_id = request.query_params.get("user_id")
         if not user_id:
@@ -125,6 +130,7 @@ class FeedListByUser(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 class FeedCreateView(APIView):
+    permission_classes = [AllowAny] 
     def post(self, request):
         data = request.data
         user_id = request.data.get("user_id")
@@ -149,6 +155,7 @@ class FeedCreateView(APIView):
         return Response({"message": "飼料建立成功", "feed_id": feed.id, "brand":feed.brand, "protein": feed.protein, "fat": feed.fat, "carbohydrates": feed.carbohydrates, "calcium": feed.calcium, "phosphorus": feed.phosphorus, "magnesium": feed.magnesium, "sodium": feed.sodium}, status=status.HTTP_201_CREATED)
 
 class FeedUpdateView(APIView):
+    permission_classes = [AllowAny] 
     def post(self, request):
         feed_id = request.data.get("feed_id")
         if not feed_id:
