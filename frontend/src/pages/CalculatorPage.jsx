@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-// import Header from '../components/Header';
-import BottomNavigationBar from '../components/BottomNavigationBar';
+import Header from '../components/Header.jsx';
+import BottomNavbar from '../components/BottomNavigationbar';
 import '../styles/CalculatorPage.css';
 // import CalculatorStep1 from '../components/CalculatorStep1';
 import CalculatorStep1 from '../components/CalculatorStep1.jsx';
@@ -61,7 +61,7 @@ function CalculatorPage() {
           </>
         )}
       </div>
-      <BottomNavigationBar />
+      <BottomNavbar />
     </div>
   );
 }
