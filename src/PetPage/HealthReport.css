@@ -1,0 +1,55 @@
+.hr-container {
+  font-family: 'Noto Sans TC', sans-serif;
+  background:#ffe7ca;
+  padding:100px 16px 80px;
+  min-height:100vh;
+  box-sizing:border-box; }
+
+.hr-title { 
+  text-align:center; 
+  font-size:22px; 
+  font-weight:700; 
+  margin-bottom:8px;
+  margin-top: 0; }
+
+.hr-select { 
+  background:#cfe8ff;
+  border:none;
+  border-radius:10px;
+  padding:6px 12px;
+  font-weight:700;
+  text-align: center;
+  display:block;
+  margin: 12px auto 16px; }
+
+.hr-table-wrapper { background:#ffd2a1;border-radius:12px;padding:6px;max-height:250px;overflow-y:auto;margin-bottom:20px; }
+.hr-table { width:100%; border-collapse:collapse; font-size:13px; }
+.hr-table th, .hr-table td { border:1px solid #999; padding:4px; text-align:left; }
+.hr-table tr:hover { background:#fff0e5; cursor:pointer; }
+
+.hr-upload-btn { display:block;margin:0 auto;padding:6px 30px;background:#a8d7a8;border:none;border-radius:10px;font-weight:700; }
+
+.hr-date-row { 
+  font-weight:bold; 
+  margin-bottom:20px; 
+  text-align:center; }
+
+.hr-section { background:#ffd2a1;border-radius:12px;padding:10px;margin-bottom:16px; }
+.hr-section-title { background:#cfe8ff;border-radius:8px;text-align:center;font-weight:700;padding:4px;margin-bottom:8px;font-size:14px; }
+
+.hr-field-row { display:flex; align-items:center; margin-bottom:6px; }
+.hr-field-label { 
+  width:90px;
+  font-size: 13px; }
+  
+.hr-field-input { flex:1; padding:4px 8px;border-radius:8px;border:none;background:#fff; }
+
+.hr-note { width:100%; height:120px;padding:8px;border-radius:8px;border:none; }
+
+/*.Buttons*/
+.btn { padding:6px 30px;border:none;border-radius:10px;font-weight:700;font-size:14px; }
+.btn.confirm { background:#f77c3b;color:#fff; display:block;margin:0 auto; }
+
+.hr-btn-col { display:flex; flex-direction:column; gap:12px; align-items:center; }
+.btn.edit { background:#9bb6c9;color:#000; }
+.btn.delete { background:#ff6c4f;color:#fff; }
