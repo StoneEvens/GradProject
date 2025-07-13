@@ -2,8 +2,11 @@ import React from 'react';
 import './CommunityPost.css';
 import Header from '../components/Header';
 import BottomNavigationBar from '../components/BottomNavigationBar';
+import { useNavigate } from 'react-router-dom';
 
 export default function CommunityPost() {
+  const navigate = useNavigate();
+  
   // 假資料，可日後用 props 或 API 替換
   const post = {
     title: '我的貓咪最近不太吃飯，該怎麼辦？',
@@ -16,9 +19,16 @@ export default function CommunityPost() {
     ]
   };
 
+  const handleGoBack = () => {
+    navigate(-1);
+  };
+
   return (
     <div className="community-post-page-container">
       <Header />
+      <button className="back-button" onClick={handleGoBack}>
+        ← 返回
+      </button>
       <div className="community-post-container">
         <h2 className="post-title">{post.title}</h2>
         <div className="post-meta">

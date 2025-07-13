@@ -81,8 +81,9 @@
 .pet-info-section {
   background: #FFCA9C;
   border-radius: 18px;
-  padding: 24px 18px 18px 18px;
+  padding: 24px 18px 32px 18px;
   margin: 0px 10px 32px 10px;
+  min-height: 250px;
 }
 
 .pet-info-row {
