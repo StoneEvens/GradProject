@@ -77,7 +77,10 @@ class IllnessSerializer(serializers.ModelSerializer):
 # === IllnessArchive (病程紀錄) ===
 class IllnessArchiveSerializer(serializers.ModelSerializer):
     pet_name = serializers.CharField(source='pet.pet_name', read_only=True)
+    user = serializers.CharField(source='postFrame.user')
     user_name = serializers.CharField(source='user.username', read_only=True)
+    post_date = serializers.DateTimeField(source='postFrame.created_at', read_only=True)
+    updated_at = serializers.DateTimeField(source='postFrame.updated_at', read_only=True)
     illnesses_data = serializers.SerializerMethodField()
     interaction_stats = serializers.SerializerMethodField()
     user_interaction = serializers.SerializerMethodField()
@@ -86,7 +89,7 @@ class IllnessArchiveSerializer(serializers.ModelSerializer):
         model = ForumContent
         fields = [
             'id', 'pet', 'pet_name', 'user', 'user_name', 'archive_title',
-            'post_date', 'content', 'popularity', 'go_to_doctor', 'health_status',
+            'post_date', 'content', 'go_to_doctor', 'health_status',
             'updated_at', 'illnesses_data', 'interaction_stats', 'user_interaction'
         ]
     
