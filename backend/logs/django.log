@@ -9632,3 +9632,4 @@ INFO 2025-07-12 13:02:34,428 basehttp 11204 2744 "GET /api/v1/accounts/me/ HTTP/
 INFO 2025-07-12 13:02:34,435 basehttp 11204 4708 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
 INFO 2025-07-12 13:02:34,447 basehttp 11204 17104 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
 INFO 2025-07-12 13:02:34,451 basehttp 11204 2744 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-13 11:58:09,610 autoreload 19928 9740 Watching for file changes with StatReloader

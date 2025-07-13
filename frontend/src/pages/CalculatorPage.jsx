@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import Header from '../components/Header.jsx';
+import TopNavbar from '../components/TopNavbar.jsx';
 import BottomNavbar from '../components/BottomNavigationbar';
 import '../styles/CalculatorPage.css';
 // import CalculatorStep1 from '../components/CalculatorStep1';
@@ -21,7 +21,7 @@ function CalculatorPage() {
   useEffect(() => {
     const fetchPets = async () => {
       try {
-        const response = await axios.get(`http://127.0.0.1:8000/api/pets/?user_id=${userId}`);
+        const response = await axios.get(`http://127.0.0.1:8000/api/v1/calculator/pets/?user_id=${userId}`);
         setPets(response.data);
       } catch (error) {
         console.error('載入寵物失敗：', error);
@@ -49,7 +49,7 @@ function CalculatorPage() {
 
   return (
     <div className="calculator-page-container">
-      <Header />
+      <TopNavbar />
       <div className="calculator-content">
         {loading ? (
           <div style={{ padding: '2rem', textAlign: 'center' }}>載入中...</div>
@@ -67,42 +67,3 @@ function CalculatorPage() {
 }
 
 export default CalculatorPage;
-
-
-
-// import React, { useState } from 'react';
-// import Header from '../components/Header';
-// import BottomNavigationBar from '../components/BottomNavigationBar';
-// import './components/CalculatorPage.css';
-// import CalculatorStep1 from './CalculatorStep1';
-// import CalculatorStep2 from './CalculatorStep2';
-// import CalculatorStep3 from './CalculatorStep3';
-
-// function CalculatorPage() {
-//   const [step, setStep] = useState(1);
-//   const [selectedFeed, setSelectedFeed] = useState(null);
-//   const [selectedPet, setSelectedPet] = useState(null);
-
-//   const handleStep1Next = (pet) => {
-//     setSelectedPet(pet);
-//     setStep(2);
-//   };
-//   const handleStep2Next = (feed) => {
-//     setSelectedFeed(feed);
-//     setStep(3);
-//   };
-
-//   return (
-//     <div className="calculator-page-container">
-//       <Header />
-//       <div className="calculator-content">
-//         {step === 1 && <CalculatorStep1 onNext={handleStep1Next} />}
-//         {step === 2 && <CalculatorStep2 onNext={handleStep2Next} onPrev={() => setStep(1)} />}
-//         {step === 3 && <CalculatorStep3 onPrev={() => setStep(2)} selectedFeed={selectedFeed} selectedPet={selectedPet} />}
-//       </div>
-//       <BottomNavigationBar />
-//     </div>
-//   );
-// }
-
-// export default CalculatorPage;
