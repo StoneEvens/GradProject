@@ -1,70 +1,50 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import axios from 'axios';
 import './components/CalculatorStep2.css';
 import mockFeed1 from '../assets/MockPicture/mockFeed1.png';
 import mockFeed2 from '../assets/MockPicture/mockFeed2.png';
 import mockFeed3 from '../assets/MockPicture/mockFeed3.png';
 
-const initialFeeds = [
-  {
-    id: 1, name: '飼料1', img: mockFeed1, brand: '品牌A', carb: 20, protein: 30, fat: 10, ca: 0.8, p: 0.6, mg: 50, na: 120,
-  },
-  {
-    id: 2, name: '飼料2', img: mockFeed2, brand: '品牌B', carb: 18, protein: 32, fat: 12, ca: 0.7, p: 0.5, mg: 40, na: 110,
-  },
-  {
-    id: 3, name: '飼料3', img: mockFeed3, brand: '品牌C', carb: 22, protein: 28, fat: 11, ca: 0.9, p: 0.7, mg: 60, na: 130,
-  },
-];
-
-function CalculatorStep2({ onNext, onPrev }) {
-  const [selectedFeed, setSelectedFeed] = useState(0);
-  const [feeds, setFeeds] = useState(initialFeeds);
+function CalculatorStep2({ onNext, onPrev, selectedPet }) {
+  const { user_id } = useParams();
   const fileInputRef = useRef();
-  const [feedInfo, setFeedInfo] = useState({
-    name: initialFeeds[0].name,
-    brand: initialFeeds[0].brand,
-    carb: initialFeeds[0].carb,
-    protein: initialFeeds[0].protein,
-    fat: initialFeeds[0].fat,
-    ca: initialFeeds[0].ca,
-    p: initialFeeds[0].p,
-    mg: initialFeeds[0].mg,
-    na: initialFeeds[0].na,
-  });
+  const [selectedFeed, setSelectedFeed] = useState(0);
+  const [feeds, setFeeds] = useState([]);
+  const [feedInfo, setFeedInfo] = useState({});
 
-  // 處理檔案上傳
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setFeeds(prev => [
-          ...prev,
-          {
-            id: Date.now(),
-            name: '自訂飼料',
-            img: event.target.result,
-          },
-        ]);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
+  useEffect(() => {
+    const uid = user_id || 2;
+    axios.get(`http://127.0.0.1:8000/api/feeds/?user_id=${uid}`)
+      .then(response => {
+        const apiFeeds = response.data.map((item, idx) => ({
+          id: item.id,
+          name: item.name || `API飼料${idx + 1}`,
+          brand: item.brand || '未知品牌',
+          img: [mockFeed1, mockFeed2, mockFeed3][idx % 3],
+          carb: item.carbohydrates,
+          protein: item.protein,
+          fat: item.fat,
+          ca: item.calcium,
+          p: item.phosphorus,
+          mg: item.magnesium,
+          na: item.sodium,
+        }));
+        setFeeds(apiFeeds);
+        // 預設選第一筆
+        if (apiFeeds.length > 0) {
+          setSelectedFeed(0);
+          handleSelectFeed(0, apiFeeds);
+        }
+      })
+      .catch(err => {
+        console.error('載入飼料資料失敗：', err);
+      });
+  }, [user_id]);
 
-  // 觸發 input[type=file]
-  const handleAddFeedClick = () => {
-    fileInputRef.current.value = '';
-    fileInputRef.current.click();
-  };
-
-  const handleFeedInfoChange = (field, value) => {
-    setFeedInfo(prev => ({ ...prev, [field]: value }));
-  };
-
-  // 點擊飼料時自動帶入成分
-  const handleSelectFeed = (idx) => {
+  const handleSelectFeed = (idx, source = feeds) => {
     setSelectedFeed(idx);
-    const feed = feeds[idx];
+    const feed = source[idx];
     setFeedInfo({
       name: feed.name || '',
       brand: feed.brand || '',
@@ -76,6 +56,85 @@ function CalculatorStep2({ onNext, onPrev }) {
       mg: feed.mg || '',
       na: feed.na || '',
     });
+  };
+
+  const handleFeedInfoChange = (field, value) => {
+    setFeedInfo(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const newFeed = {
+          id: Date.now(),
+          name: '自訂飼料',
+          brand: '',
+          img: event.target.result,
+          carb: 0,
+          protein: 0,
+          fat: 0,
+          ca: 0,
+          p: 0,
+          mg: 0,
+          na: 0,
+        };
+        setFeeds(prev => {
+          const updated = [...prev, newFeed];
+          setSelectedFeed(updated.length - 1);
+          handleSelectFeed(updated.length - 1, updated);
+          return updated;
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleAddFeedClick = () => {
+    fileInputRef.current.value = '';
+    fileInputRef.current.click();
+  };
+
+  const handleNext = async () => {
+    const feed = feeds[selectedFeed];
+
+    if (!feed || !selectedPet) {
+      alert("請先選擇飼料與寵物");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('pet_type', selectedPet.species === '狗' ? 'dog' : 'cat');
+    formData.append('life_stage', 'adult');
+    formData.append('weight', selectedPet.weight || '');
+    formData.append('expected_adult_weight', '');
+    formData.append('litter_size', '');
+    formData.append('weeks_of_lactation', '');
+    formData.append('protein', feed.protein || 0);
+    formData.append('fat', feed.fat || 0);
+    formData.append('carbohydrates', feed.carb || 0);
+    formData.append('calcium', feed.ca || 0);
+    formData.append('phosphorus', feed.p || 0);
+    formData.append('magnesium', feed.mg || 0);
+    formData.append('sodium', feed.na || 0);
+
+    try {
+      const res = await axios.post(
+        'http://127.0.0.1:8000/calculator/',
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+      console.log('計算成功：', res.data);
+      onNext(feed, res.data); // 把飼料和後端回傳的計算結果傳出去
+    } catch (err) {
+      console.error('計算失敗：', err.response?.data || err.message);
+      alert('送出失敗，請確認資料或稍後再試。');
+    }
   };
 
   return (
@@ -108,53 +167,32 @@ function CalculatorStep2({ onNext, onPrev }) {
       </div>
       <div className="pet-select-label">飼料資訊</div>
       <div className="feed-info-section">
-        <div className="feed-info-row">
-          <span className="feed-info-label">品名：</span>
-          <input className="pet-info-input" type="text" value={feedInfo.name} onChange={e => handleFeedInfoChange('name', e.target.value)} />
-        </div>
-        <div className="feed-info-row">
-          <span className="feed-info-label">品牌：</span>
-          <input className="pet-info-input" type="text" value={feedInfo.brand} onChange={e => handleFeedInfoChange('brand', e.target.value)} />
-        </div>
-        <div className="feed-info-row">
-          <span className="feed-info-label">碳水化合物：</span>
-          <input className="pet-info-input" type="number" value={feedInfo.carb} onChange={e => handleFeedInfoChange('carb', e.target.value)} />
-          <span className="feed-info-unit">g</span>
-        </div>
-        <div className="feed-info-row">
-          <span className="feed-info-label">蛋白質：</span>
-          <input className="pet-info-input" type="number" value={feedInfo.protein} onChange={e => handleFeedInfoChange('protein', e.target.value)} />
-          <span className="feed-info-unit">g</span>
-        </div>
-        <div className="feed-info-row">
-          <span className="feed-info-label">脂肪：</span>
-          <input className="pet-info-input" type="number" value={feedInfo.fat} onChange={e => handleFeedInfoChange('fat', e.target.value)} />
-          <span className="feed-info-unit">g</span>
-        </div>
-        <div className="feed-info-row">
-          <span className="feed-info-label">鈣：</span>
-          <input className="pet-info-input" type="number" value={feedInfo.ca} onChange={e => handleFeedInfoChange('ca', e.target.value)} />
-          <span className="feed-info-unit">g</span>
-        </div>
-        <div className="feed-info-row">
-          <span className="feed-info-label">磷：</span>
-          <input className="pet-info-input" type="number" value={feedInfo.p} onChange={e => handleFeedInfoChange('p', e.target.value)} />
-          <span className="feed-info-unit">g</span>
-        </div>
-        <div className="feed-info-row">
-          <span className="feed-info-label">鎂：</span>
-          <input className="pet-info-input" type="number" value={feedInfo.mg} onChange={e => handleFeedInfoChange('mg', e.target.value)} />
-          <span className="feed-info-unit">mg</span>
-        </div>
-        <div className="feed-info-row">
-          <span className="feed-info-label">鈉：</span>
-          <input className="pet-info-input" type="number" value={feedInfo.na} onChange={e => handleFeedInfoChange('na', e.target.value)} />
-          <span className="feed-info-unit">mg</span>
-        </div>
+        {[
+          ['品名', 'name', 'text'],
+          ['品牌', 'brand', 'text'],
+          ['碳水化合物', 'carb', 'number', 'g'],
+          ['蛋白質', 'protein', 'number', 'g'],
+          ['脂肪', 'fat', 'number', 'g'],
+          ['鈣', 'ca', 'number', 'g'],
+          ['磷', 'p', 'number', 'g'],
+          ['鎂', 'mg', 'number', 'mg'],
+          ['鈉', 'na', 'number', 'mg'],
+        ].map(([label, key, type, unit]) => (
+          <div className="feed-info-row" key={key}>
+            <span className="feed-info-label">{label}：</span>
+            <input
+              className="pet-info-input"
+              type={type}
+              value={feedInfo[key]}
+              onChange={e => handleFeedInfoChange(key, e.target.value)}
+            />
+            {unit && <span className="feed-info-unit">{unit}</span>}
+          </div>
+        ))}
       </div>
       <div className="step-btn-row">
         <button className="previous-step-btn" onClick={onPrev}>上一步</button>
-        <button className="next-step-btn" onClick={() => onNext(feeds[selectedFeed])}>下一步</button>
+        <button className="next-step-btn" onClick={handleNext}>下一步</button>
       </div>
     </>
   );
