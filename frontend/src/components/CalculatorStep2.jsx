@@ -21,8 +21,8 @@ function CalculatorStep2({ onNext, onPrev, selectedPet }) {
           id: item.id,
           name: item.name || `API飼料${idx + 1}`,
           brand: item.brand || '未知品牌',
-          img: [mockFeed1, mockFeed2, mockFeed3][idx % 3],
-          carb: item.carbohydrates,
+          img: item.front_image_url || [mockFeed1, mockFeed2, mockFeed3][idx % 3],
+          carb: item.carbohydrate,
           protein: item.protein,
           fat: item.fat,
           ca: item.calcium,
@@ -180,6 +180,41 @@ const handleFileChange = async (e) => {
       return;
     }
 
+    // Step 1: 更新 Feed 到後端
+    const updateFeedBeforeCalculation = async () => {
+      const updatePayload = {
+        feed_id: feed.id,
+        name: feedInfo.name,
+        brand: feedInfo.brand,
+        protein: parseFloat(feedInfo.protein) || 0,
+        fat: parseFloat(feedInfo.fat) || 0,
+        carbohydrate: parseFloat(feedInfo.carb) || 0,
+        calcium: parseFloat(feedInfo.ca) || 0,
+        phosphorus: parseFloat(feedInfo.p) || 0,
+        magnesium: parseFloat(feedInfo.mg) || 0,
+        sodium: parseFloat(feedInfo.na) || 0,
+      };
+      console.log(updatePayload)
+
+      try {
+        const res = await axios.post(
+          'http://127.0.0.1:8000/api/v1/calculator/feeds/update/',
+          updatePayload
+        );
+        console.log("飼料更新成功：", res.data);
+      } catch (err) {
+        console.error("飼料更新失敗：", err.response?.data || err.message);
+        alert("飼料更新失敗，請稍後再試。");
+        return false;
+      }
+
+      return true;
+    };
+
+    const updateSuccess = await updateFeedBeforeCalculation();
+    if (!updateSuccess) return;
+
+    // Step 2: 計算
     const formData = new FormData();
     formData.append('pet_type', selectedPet.species === '狗' ? 'dog' : 'cat');
     formData.append('life_stage', 'adult');
@@ -187,13 +222,13 @@ const handleFileChange = async (e) => {
     formData.append('expected_adult_weight', '');
     formData.append('litter_size', '');
     formData.append('weeks_of_lactation', '');
-    formData.append('protein', feed.protein || 0);
-    formData.append('fat', feed.fat || 0);
-    formData.append('carbohydrates', feed.carb || 0);
-    formData.append('calcium', feed.ca || 0);
-    formData.append('phosphorus', feed.p || 0);
-    formData.append('magnesium', feed.mg || 0);
-    formData.append('sodium', feed.na || 0);
+    formData.append('protein', feedInfo.protein || 0);
+    formData.append('fat', feedInfo.fat || 0);
+    formData.append('carbohydrates', feedInfo.carb || 0);
+    formData.append('calcium', feedInfo.ca || 0);
+    formData.append('phosphorus', feedInfo.p || 0);
+    formData.append('magnesium', feedInfo.mg || 0);
+    formData.append('sodium', feedInfo.na || 0);
 
     try {
       const res = await axios.post(
@@ -212,6 +247,7 @@ const handleFileChange = async (e) => {
       alert('送出失敗，請確認資料或稍後再試。');
     }
   };
+
 
   return (
     <>
