@@ -28,32 +28,3 @@ class Pet(models.Model):
 
     def __str__(self):
         return f"{self.name or '寵物'} ({'狗' if self.is_dog else '貓'}, {self.life_stage})"
-
-class Feed(models.Model):
-    brand = models.CharField(max_length=100, null=True, blank=True)
-    name = models.CharField(max_length=100, null=True, blank=True)
-    feed_image = models.URLField(
-    max_length=500,
-    null=True,
-    blank=True,
-    help_text="Firebase 上傳後的飼料圖片 URL"
-    )
-    protein = models.FloatField(null=True, blank=True)
-    fat = models.FloatField(null=True, blank=True)
-    carbohydrates = models.FloatField(null=True, blank=True)
-    calcium = models.FloatField(null=True, blank=True)
-    phosphorus = models.FloatField(null=True, blank=True)
-    magnesium = models.FloatField(null=True, blank=True)
-    sodium = models.FloatField(null=True, blank=True)
-
-    keeper_id = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name="calculator_feeds"
-    )
-
-    def __str__(self):
-        return "feed"
-    

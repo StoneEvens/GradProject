@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from calculator.models import Pet, Feed
+from calculator.models import Pet
 
 
 class PetSerializer(serializers.ModelSerializer):
@@ -10,8 +10,3 @@ class PetSerializer(serializers.ModelSerializer):
             'expect_adult_weight', 'litter_size', 'weeks_of_lactation',
             'pet_avatar'
         ]   
-
-class FeedSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Feed
-        fields = '__all__'
