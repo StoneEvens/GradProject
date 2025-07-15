@@ -1,4 +1,4 @@
-from rest_framework.parsers import FormParser, MultiPartParser
+from rest_framework.parsers import FormParser, MultiPartParser, JSONParser
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -120,7 +120,7 @@ class FeedListByUser(APIView):
 
 class FeedCreateView(APIView):
     permission_classes = [AllowAny]
-    parser_classes = [FormParser, MultiPartParser]
+    parser_classes = [JSONParser, FormParser, MultiPartParser]
 
     def post(self, request):
         data = request.data
@@ -131,26 +131,38 @@ class FeedCreateView(APIView):
         except User.DoesNotExist:
             return Response({"error": "找不到使用者"}, status=status.HTTP_400_BAD_REQUEST)
 
-        feed = Feed.objects.create(
-            user_id=user,
-            name=data.get("name"),
-            brand=data.get("brand"),
-            protein=data.get("protein", 0),
-            fat=data.get("fat", 0),
-            carbohydrate=data.get("carbohydrate", 0),
-            calcium=data.get("calcium", 0),
-            phosphorus=data.get("phosphorus", 0),
-            magnesium=data.get("magnesium", 0),
-            sodium=data.get("sodium", 0),
-            front_image_url=data.get("front_image_url"),
-            nutrition_image_url=data.get("nutrition_image_url"),
-        )
+        def parse_float(value):
+            try:
+                return float(value)
+            except (TypeError, ValueError):
+                return 0
 
-        return Response({
-            "message": "飼料建立成功",
-            "feed_id": feed.id,
-            "data": FeedSerializer(feed).data
-        }, status=status.HTTP_201_CREATED)
+        try:
+            feed = Feed.objects.create(
+                user=user,
+                name=data.get("name"),
+                brand=data.get("brand"),
+                protein=parse_float(data.get("protein")),
+                fat=parse_float(data.get("fat")),
+                carbohydrate=parse_float(data.get("carbohydrate")),
+                calcium=parse_float(data.get("calcium")),
+                phosphorus=parse_float(data.get("phosphorus")),
+                magnesium=parse_float(data.get("magnesium")),
+                sodium=parse_float(data.get("sodium")),
+                front_image_url=data.get("front_image_url"),
+                nutrition_image_url=data.get("nutrition_image_url"),
+            )
+
+            return Response({
+                "message": "飼料建立成功",
+                "feed_id": feed.id,
+                "data": FeedSerializer(feed).data
+            }, status=status.HTTP_201_CREATED)
+        
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            return Response({"error": f"建立 Feed 發生錯誤：{str(e)}"}, status=500)
 
 class FeedUpdateView(APIView):
     permission_classes = [AllowAny]
