@@ -6,7 +6,7 @@ class FeedSerializer(serializers.ModelSerializer):
         model = Feed
         fields = [
             "id",
-            "user_id",
+            "user",
             "name",
             "brand",
             "protein",

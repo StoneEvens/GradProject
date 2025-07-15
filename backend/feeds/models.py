@@ -4,12 +4,12 @@ from django.db import models
 from django.conf import settings
 
 class Feed(models.Model):
-    user_id = models.ForeignKey(
+    user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="feeds"
     )
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, null=True, blank=True)
     brand = models.CharField(max_length=100, null=True, blank=True)
     
     # 營養素

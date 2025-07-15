@@ -1,8 +1,8 @@
-# feeds/urls.py
 from django.urls import path
-from . import views  # 確保這行存在
+from .views import FeedOCRView
+from .views import FirebaseImageUploadView
 
 urlpatterns = [
-    # 這裡可以先暫時放個假路由做測試
-    path('test/', views.test_view, name='test'),
+    path('ocr/', FeedOCRView.as_view(), name='feed-ocr'),
+    path('firebase/upload/', FirebaseImageUploadView.as_view(), name='firebase-upload'),
 ]
