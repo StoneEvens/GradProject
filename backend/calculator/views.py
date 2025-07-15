@@ -166,9 +166,12 @@ class FeedCreateView(APIView):
 
 class FeedUpdateView(APIView):
     permission_classes = [AllowAny]
+    parser_classes = [JSONParser, FormParser, MultiPartParser]
 
     def post(self, request):
-        feed_id = request.data.get("feed_id")
+        data = request.data
+        feed_id = data.get("feed_id")
+
         if not feed_id:
             return Response({"error": "請提供 feed_id"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -177,22 +180,37 @@ class FeedUpdateView(APIView):
         except Feed.DoesNotExist:
             return Response({"error": "找不到該飼料"}, status=status.HTTP_404_NOT_FOUND)
 
-        # 更新欄位
-        for field in [
-            "name", "brand", "protein", "fat", "carbohydrate",
-            "calcium", "phosphorus", "magnesium", "sodium",
-            "front_image_url", "nutrition_image_url"
-        ]:
-            value = request.data.get(field)
-            if value is not None:
-                setattr(feed, field, value)
+        def parse_float(value):
+            try:
+                return float(value)
+            except (TypeError, ValueError):
+                return 0
 
-        feed.save()
+        try:
+            # 更新欄位
+            feed.name = data.get("name", feed.name)
+            feed.brand = data.get("brand", feed.brand)
+            feed.protein = parse_float(data.get("protein")) if "protein" in data else feed.protein
+            feed.fat = parse_float(data.get("fat")) if "fat" in data else feed.fat
+            feed.carbohydrate = parse_float(data.get("carbohydrate")) if "carbohydrate" in data else feed.carbohydrate
+            feed.calcium = parse_float(data.get("calcium")) if "calcium" in data else feed.calcium
+            feed.phosphorus = parse_float(data.get("phosphorus")) if "phosphorus" in data else feed.phosphorus
+            feed.magnesium = parse_float(data.get("magnesium")) if "magnesium" in data else feed.magnesium
+            feed.sodium = parse_float(data.get("sodium")) if "sodium" in data else feed.sodium
+            feed.front_image_url = data.get("front_image_url", feed.front_image_url)
+            feed.nutrition_image_url = data.get("nutrition_image_url", feed.nutrition_image_url)
 
-        return Response({
-            "message": "更新成功",
-            "data": FeedSerializer(feed).data
-        }, status=status.HTTP_200_OK)
+            feed.save()
+
+            return Response({
+                "message": "飼料更新成功",
+                "data": FeedSerializer(feed).data
+            }, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            return Response({"error": f"更新 Feed 發生錯誤：{str(e)}"}, status=500)
 
 # 載入 OpenAI API 金鑰
 load_dotenv()
