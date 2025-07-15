@@ -77,7 +77,7 @@ function CalculatorStep1({ onNext, pets: apiPets }) {
       };
 
       try {
-        const res = await axios.post('http://127.0.0.1:8000/api/pets/create/', payload);
+        const res = await axios.post('http://127.0.0.1:8000/api/v1/calculator/pets/create/', payload);
         alert('新增寵物成功！');
         const newPetWithId = { ...newPet, id: res.data.id || Date.now(), avatar: defaultAvatar };
         setPets((prev) => [...prev, newPetWithId]);

@@ -15,7 +15,7 @@ function CalculatorStep2({ onNext, onPrev, selectedPet }) {
 
   useEffect(() => {
     const uid = user_id || 2;
-    axios.get(`http://127.0.0.1:8000/api/feeds/?user_id=${uid}`)
+    axios.get(`http://127.0.0.1:8000/api/v1/calculator/feeds/?user_id=${uid}`)
       .then(response => {
         const apiFeeds = response.data.map((item, idx) => ({
           id: item.id,
