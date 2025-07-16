@@ -27,7 +27,10 @@ function CalculatorStep3({ onPrev, selectedFeed, selectedPet, calculationResult 
           <div className="ai-loading">AI 計算中...</div>
         ) : (
           <div className="result-bottom-box">
-            <div className="result-bottom-title">計算結果：</div>
+            <div className="result-bottom-title">
+              {selectedPet?.isTemporary && <span style={{ color: 'gray' }}>(臨時寵物)</span>}
+              計算結果：
+            </div>
             <div className="result-bottom-text">{calculationResult?.description || '無資料'}</div>
           </div>
         )}

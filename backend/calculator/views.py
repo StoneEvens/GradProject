@@ -276,7 +276,8 @@ def convert_ocr_to_health_data(ocr_result):
     return converted
 
 class PetNutritionCalculator(APIView):
-    parser_classes = [FormParser, MultiPartParser]
+    permission_classes = [AllowAny]
+    parser_classes = [JSONParser, FormParser, MultiPartParser]
 
     @swagger_auto_schema(
         operation_description="計算每日餵食量與營養素是否足夠（輸入每100g飼料的營養素含量）",

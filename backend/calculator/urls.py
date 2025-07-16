@@ -7,7 +7,7 @@ from calculator.views import (
 
 urlpatterns = [
     # Nutrition calculator
-    path('', PetNutritionCalculator.as_view(), name='calculator'),
+    path('calculation/', PetNutritionCalculator.as_view(), name='calculator'),
 
     # Pet-related endpoints
     path('pets/', PetListByUser.as_view(), name='pet-list-by-user'),
