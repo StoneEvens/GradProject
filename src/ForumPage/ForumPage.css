@@ -27,7 +27,7 @@
 .forum-post {
   background-color: #FDF6EC;
   border-radius: 10px;
-  padding: 20px;
+  padding: 12px;
   box-shadow: 0 2px 12px 0 #FFB370;
   width: 100%;
   box-sizing: border-box;
@@ -39,7 +39,8 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: 15px;
+  margin-bottom: 12px;
+  margin-top: 0;
 }
 
 .user-avatar {
@@ -47,53 +48,55 @@
   height: 40px;
   border-radius: 50%;
   object-fit: cover;
+  margin-top: 12px;
+  margin-left: 12px;
 }
 
 .user-id {
   font-weight: 600;
   color: #333;
-}
-
-.post-content {
-  display: flex;
-  gap: 20px;
-  align-items: flex-start;
-  width: 100%;
-}
-
-.post-main {
-  flex: 1 1 0%;
-  min-width: 0;
-  overflow-wrap: break-word;
+  margin-top: 12px;
+  margin-left: 12px;
 }
 
 .post-title {
   font-size: 1.2rem;
   font-weight: 600;
-  margin-bottom: 10px;
+  margin-bottom: 6px;
+  margin-left: 12px;
   color: #333;
+  margin-top: 0;
+}
+
+/*
+.forum-post-img {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-left: 12px;
+  margin-right: 0;
+  margin-top: 0;
+  display: block;
+}
+*/
+
+.post-content-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+  justify-content: space-between;
+  margin-left: 12px;
 }
 
 .post-text {
+  flex: 1;
   color: #666;
   line-height: 1.5;
-  margin-bottom: 15px;
-}
-
-.post-image {
-  flex-shrink: 0;
-  width: 120px;
-  height: 120px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.image-placeholder {
-  width: 100%;
-  height: 100%;
-  background-color: #ccc;
-  border-radius: 8px;
+  margin-bottom: 0;
+  margin-right: 0;
+  padding: 0;
+  overflow-wrap: break-word;
 }
 
 .post-footer {
@@ -114,8 +117,8 @@
   border-radius: 20px;
   transition: all 0.2s ease;
   position: absolute;
-  top: 20px;
-  right: 20px;
+  top: 12px;
+  right: 12px;
   z-index: 2;
 }
 
@@ -127,4 +130,88 @@
 
 .like-button:hover {
   background-color: #ffe0d0;
+}
+
+/* 互動按鈕區域（來自 CommunityPost.css） */
+.post-actions {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    margin: 16px 0;
+    padding: 12px 20px;
+    border-top: 1px solid #f0f0f0;
+    border-bottom: 1px solid #f0f0f0;
+    gap: 16px;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    flex-shrink: 0;
+}
+
+.action-button {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    background: none;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 14px;
+    color: #666;
+    flex: 1;
+    min-width: 0;
+    justify-content: center;
+    gap: 6px;
+    max-width: 120px;
+}
+
+.action-button:hover {
+    background-color: #f8f8f8;
+    transform: translateY(-1px);
+}
+
+.action-button:active {
+    transform: translateY(0);
+}
+
+.action-icon {
+    font-size: 22px;
+    margin-bottom: 0;
+}
+
+.action-text {
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 1;
+}
+
+.post-actions .like-button.liked {
+    color: #e74c3c;
+}
+
+.post-actions .like-button.liked .action-icon {
+    animation: heartBeat 0.3s ease;
+}
+
+.post-actions .like-button {
+    position: static !important;
+    top: auto !important;
+    right: auto !important;
+    z-index: auto !important;
+}
+
+@keyframes heartBeat {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+.comment-button:hover {
+    color: #3498db;
+}
+
+.share-button:hover {
+    color: #27ae60;
 }

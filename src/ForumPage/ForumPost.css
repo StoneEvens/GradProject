@@ -4,7 +4,10 @@
     padding-top: 80px; /* 預留Header高度 */
     padding-bottom: 80px; /* 預留底部導航高度 */
     box-sizing: border-box;
-    min-width: 400px;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .back-button {
@@ -20,6 +23,7 @@
     cursor: pointer;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     transition: background-color 0.2s;
+    align-self: flex-start;
 }
 
 .back-button:hover {
@@ -27,11 +31,18 @@
 }
 
 .forum-post-container {
-    background: white;
-    border-radius: 12px;
-    margin: 20px;
-    padding: 20px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    background-color: #FDF6EC;
+    border-radius: 10px;
+    padding: 12px;
+    box-shadow: 0 2px 12px 0 #FFB370;
+    width: 100%;
+    box-sizing: border-box;
+    max-width: calc(400px - 24px);
+    margin-top: 20px;
+    margin-bottom: 20px;
+    margin-left: 20px;
+    margin-right: 20px;
+    position: relative;
 }
 
 .post-header {
@@ -55,6 +66,7 @@
 
 .post-content {
     margin-bottom: 20px;
+    margin-left: 12px;
 }
 
 .post-title {
@@ -72,29 +84,13 @@
     margin-bottom: 16px;
 }
 
-.post-image {
-    margin: 16px 0;
-    text-align: center;
-}
-
-.image-placeholder {
-    width: 100%;
-    max-width: 400px;
-    height: 200px;
-    background: #f0f0f0;
+.forum-post-img {
+    width: 300px;
+    height: 300px;
+    object-fit: cover;
     border-radius: 8px;
-    display: inline-block;
-    position: relative;
-}
-
-.image-placeholder::after {
-    content: '📷 圖片';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: #999;
-    font-size: 16px;
+    display: block;
+    margin: 20px auto;
 }
 
 .post-actions {
@@ -106,8 +102,71 @@
     border-top: 1px solid #f0f0f0;
 }
 
-.like-button {
+.calendar-container,
+.symptom-calendar-container {
+    margin-left: auto !important;
+    margin-right: auto !important;
+    width: auto !important;
+    max-width: none;
+    box-sizing: border-box;
+    display: block;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 36px);
+    gap: 8px;
+    text-align: center;
+    justify-content: center;
+    justify-items: center;
+    margin-left: auto;
+    margin-right: auto;
+    width: max-content;
+}
+
+.section-box.calendar-section {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+.section-title {
+    font-size: 16px;
+    font-weight: bold;
+    text-align: center;
+    background-color: #d5e7ff;
+    border-radius: 16px;
+    padding: 6px 18px;
+    margin-bottom: 0;
+    width: 300px;
+    box-sizing: border-box;
+    position: relative;
     display: flex;
+    align-items: center;
+    margin-left: 12px;
+    margin-right: auto;
+}
+
+/* 互動按鈕區域（複製自 CommunityPost.css） */
+.post-actions {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    margin: 16px 0;
+    padding: 12px 20px;
+    border-top: 1px solid #f0f0f0;
+    border-bottom: 1px solid #f0f0f0;
+    gap: 16px;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    flex-shrink: 0;
+}
+
+.action-button {
+    display: flex;
+    flex-direction: row;
     align-items: center;
     background: none;
     border: none;
@@ -117,23 +176,58 @@
     transition: all 0.2s ease;
     font-size: 14px;
     color: #666;
+    flex: 1;
+    min-width: 0;
+    justify-content: center;
     gap: 6px;
+    max-width: 120px;
 }
 
-.like-button:hover {
+.action-button:hover {
     background-color: #f8f8f8;
     transform: translateY(-1px);
 }
 
-.like-button.liked {
+.action-button:active {
+    transform: translateY(0);
+}
+
+.action-icon {
+    font-size: 22px;
+    margin-bottom: 0;
+}
+
+.action-text {
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 1;
+}
+
+.post-actions .like-button.liked {
     color: #e74c3c;
 }
 
-.like-icon {
-    font-size: 20px;
+.post-actions .like-button.liked .action-icon {
+    animation: heartBeat 0.3s ease;
 }
 
-.like-count {
-    font-weight: 500;
-    font-size: 14px;
+.post-actions .like-button {
+    position: static !important;
+    top: auto !important;
+    right: auto !important;
+    z-index: auto !important;
+}
+
+@keyframes heartBeat {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+.comment-button:hover {
+    color: #3498db;
+}
+
+.share-button:hover {
+    color: #27ae60;
 }

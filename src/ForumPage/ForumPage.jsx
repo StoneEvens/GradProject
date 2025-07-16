@@ -5,7 +5,17 @@ import BottomNavigationBar from '../components/BottomNavigationBar';
 import mockProfile1 from '../assets/MockPicture/mockProfile1.png';
 import mockProfile2 from '../assets/MockPicture/mockProfile2.png';
 import mockProfile3 from '../assets/MockPicture/mockProfile3.png';
+import mockCat2 from '../assets/MockPicture/mockCat2.jpg';
+import mockDog2 from '../assets/MockPicture/mockDog2.jpg';
+import mockCat4 from '../assets/MockPicture/mockCat4.jpg';
+import mockDog3 from '../assets/MockPicture/mockDog3.jpg';
 import { useNavigate } from 'react-router-dom';
+
+const mockImages = [mockCat2, mockDog2, mockCat4, mockDog3];
+
+function getRandomImage() {
+  return mockImages[Math.floor(Math.random() * mockImages.length)];
+}
 
 const ForumPage = () => {
   const navigate = useNavigate();
@@ -18,6 +28,7 @@ const ForumPage = () => {
       content: '自從確診糖尿病以來，我們每天固定時間打胰島素、控制飲食，生活節奏也變得更有規律。雖然過程中經歷了不少起伏，但看到牠的精神慢慢變好，真的很感動',
       likes: 15,
       hasImage: true,
+      image: mockCat2,
       isLiked: false
     },
     {
@@ -38,6 +49,7 @@ const ForumPage = () => {
       content: '從確診那天開始，我們就決定陪著球球勇敢面對每一次化療、副作用，甚至情緒的低潮。一路上遇到了很多溫暖的醫生和朋友，也在治療中學會了更多和毛孩相處的珍貴時光。這裡記錄了治療進度、副作用處理心得，以及我們的小小勝利時刻。',
       likes: 42,
       hasImage: true,
+      image: mockCat4,
       isLiked: false
     },
     {
@@ -58,9 +70,13 @@ const ForumPage = () => {
       content: '薩摩耶的皮膚問題讓我們經歷了長期的抗戰：從掉毛、紅腫到不斷復發的皮膚炎。這篇記錄詳細整理了確診過程、使用的藥物種類、過敏原測試結果，以及最終找到適合方案的經驗。希望讓有相似困擾的飼主少走一點冤枉路！',
       likes: 13,
       hasImage: true,
+      image: mockDog3,
       isLiked: false
     }
   ]);
+
+  const [showShareMessage, setShowShareMessage] = useState(false);
+  const [shareText, setShareText] = useState('');
 
   // 預留未來串接後端 API 的區塊
   useEffect(() => {
@@ -87,6 +103,30 @@ const ForumPage = () => {
     navigate(`/forum-post/${postId}`);
   };
 
+  const handleShare = async (postId) => {
+    try {
+      const postUrl = `${window.location.origin}/forum-post/${postId}`;
+      await navigator.clipboard.writeText(postUrl);
+      setShareText('已複製貼文連結！');
+      setShowShareMessage(true);
+      setTimeout(() => setShowShareMessage(false), 3000);
+    } catch (err) {
+      const textArea = document.createElement('textarea');
+      textArea.value = `${window.location.origin}/forum-post/${postId}`;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      setShareText('已複製貼文連結！');
+      setShowShareMessage(true);
+      setTimeout(() => setShowShareMessage(false), 3000);
+    }
+  };
+
+  const handleComment = (postId) => {
+    navigate(`/forum-post/${postId}?showComment=true`);
+  };
+
   // 依據有無圖片決定內文顯示長度
   const getDisplayContent = (post) => {
     if (post.hasImage) {
@@ -101,30 +141,51 @@ const ForumPage = () => {
       <Header showSearchBar={false} />
       <div className="app-container">
         <div className="forum-page-content">
+          {showShareMessage && (
+            <div className="share-message">{shareText}</div>
+          )}
           {posts.map(post => (
             <div key={post.id} className="forum-post" onClick={() => handlePostClick(post.id)} style={{ cursor: 'pointer' }}>
               <div className="post-header">
                 <img src={post.avatar} alt="用戶頭像" className="user-avatar" />
                 <span className="user-id">{post.userId}</span>
+              </div>
+              <h3 className="post-title">{post.title}</h3>
+              <div className="post-content-row">
+                <p className="post-text">{getDisplayContent(post)}</p>
+                {/*
+                {post.hasImage && post.image && (
+                  <img 
+                    className="forum-post-img" 
+                    src={post.image} 
+                    alt="貼文圖片" 
+                  />
+                )}
+                */}
+              </div>
+              <div className="post-actions">
                 <button 
-                  className={`like-button ${post.isLiked ? 'liked' : ''}`}
-                  onClick={() => handleLike(post.id)}
+                  className={`action-button like-button ${post.isLiked ? 'liked' : ''}`}
+                  onClick={e => { e.stopPropagation(); handleLike(post.id); }}
                 >
-                  ❤️ {post.likes}
+                  <span className="action-icon">{post.isLiked ? '❤️' : '🤍'}</span>
+                  <span className="action-text">{post.likes}</span>
+                </button>
+                <button 
+                  className="action-button comment-button"
+                  onClick={e => { e.stopPropagation(); handleComment(post.id); }}
+                >
+                  <span className="action-icon">💬</span>
+                  <span className="action-text">留言</span>
+                </button>
+                <button 
+                  className="action-button share-button"
+                  onClick={e => { e.stopPropagation(); handleShare(post.id); }}
+                >
+                  <span className="action-icon">🔗</span>
+                  <span className="action-text">分享</span>
                 </button>
               </div>
-              <div className="post-content">
-                <div className="post-main">
-                  <h3 className="post-title">{post.title}</h3>
-                  <p className="post-text">{getDisplayContent(post)}</p>
-                </div>
-                {post.hasImage && (
-                  <div className="post-image">
-                    <div className="image-placeholder"></div>
-                  </div>
-                )}
-              </div>
-              <div className="post-footer"></div>
             </div>
           ))}
         </div>
