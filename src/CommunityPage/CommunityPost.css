@@ -54,8 +54,49 @@
     font-size: 16px;
 }
 
+.user-profile-button {
+    transition: opacity 0.2s ease;
+}
+
+.user-profile-button:hover {
+    opacity: 0.7;
+}
+
+/* 寵物識別按鈕 */
+.pet-identify-button {
+    position: absolute;
+    bottom: 13px;
+    left: 8px;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    z-index: 10;
+}
+
+.pet-identify-icon {
+    width: 24px;
+    height: 24px;
+}
+
+/* 寵物名稱彈窗 */
+.pet-name-popup {
+    position: absolute;
+    bottom: 48px;
+    left: 8px;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    z-index: 11;
+    white-space: nowrap;
+}
+
 .post-image {
     margin-bottom: 16px;
+    position: relative; /* 為寵物識別按鈕提供定位參考 */
 }
 
 .post-img-large {
@@ -76,4 +117,271 @@
     font-size: 14px;
     color: #666;
     text-align: right;
+    margin: 8px 0 16px 0; /* 調整上下間距 */
+}
+
+/* 互動按鈕區域 */
+.post-actions {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    margin: 16px 0;
+    padding: 12px 20px;
+    border-top: 1px solid #f0f0f0;
+    border-bottom: 1px solid #f0f0f0;
+    gap: 16px;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    flex-shrink: 0;
+}
+
+.action-button {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    background: none;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 14px;
+    color: #666;
+    flex: 1;
+    min-width: 0;
+    justify-content: center;
+    gap: 6px;
+    max-width: 120px;
+}
+
+.action-button:hover {
+    background-color: #f8f8f8;
+    transform: translateY(-1px);
+}
+
+.action-button:active {
+    transform: translateY(0);
+}
+
+.action-icon {
+    font-size: 22px;
+    margin-bottom: 0;
+}
+
+.action-text {
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 1;
+}
+
+/* 按讚按鈕特殊樣式 - 使用更特定的選擇器避免衝突 */
+.post-actions .like-button.liked {
+    color: #e74c3c;
+}
+
+.post-actions .like-button.liked .action-icon {
+    animation: heartBeat 0.3s ease;
+}
+
+/* 確保按讚按鈕不會被 ForumPage.css 的絕對定位影響 */
+.post-actions .like-button {
+    position: static !important;
+    top: auto !important;
+    right: auto !important;
+    z-index: auto !important;
+}
+
+@keyframes heartBeat {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+/* 留言按鈕特殊樣式 */
+.comment-button:hover {
+    color: #3498db;
+}
+
+/* 分享按鈕特殊樣式 */
+.share-button:hover {
+    color: #27ae60;
+}
+
+/* 留言輸入區域 */
+.comment-input-container {
+    margin-top: 16px;
+    padding: 16px;
+    background: #f8f9fa;
+    border-radius: 12px;
+    border: 1px solid #e9ecef;
+    animation: slideDown 0.3s ease-out;
+    overflow: hidden;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+        max-height: 0;
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+        max-height: 200px;
+    }
+}
+
+.comment-input-header {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+}
+
+.comment-user-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.comment-input-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.comment-textarea {
+    width: 100%;
+    min-height: 80px;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.comment-textarea:focus {
+    border-color: #f08651;
+}
+
+.comment-submit-button {
+    align-self: flex-end;
+    background: #ccc;
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    opacity: 0.6;
+}
+
+.comment-submit-button.active {
+    background: #f08651;
+    opacity: 1;
+}
+
+.comment-submit-button.active:hover {
+    background: #e07540;
+    transform: translateY(-1px);
+}
+
+.comment-submit-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* 留言列表 */
+.comments-section {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #f0f0f0;
+}
+
+.comments-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 16px;
+}
+
+.comment-item {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding: 12px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.comment-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.comment-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.comment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.comment-username {
+    font-weight: 600;
+    color: #333;
+    font-size: 14px;
+}
+
+.comment-date {
+    font-size: 12px;
+    color: #666;
+}
+
+.comment-text {
+    font-size: 14px;
+    line-height: 1.5;
+    color: #333;
+    word-wrap: break-word;
+}
+
+/* 分享成功提示訊息 */
+.share-message {
+    position: fixed;
+    top: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #27ae60;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 25px;
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
+    z-index: 1000;
+    animation: slideInDown 0.3s ease-out;
+}
+
+@keyframes slideInDown {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -20px);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
 }

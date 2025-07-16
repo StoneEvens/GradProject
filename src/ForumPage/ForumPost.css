@@ -1,0 +1,139 @@
+.forum-post-page-container {
+    min-height: 100vh;
+    background: #FFF2D9;
+    padding-top: 80px; /* 預留Header高度 */
+    padding-bottom: 80px; /* 預留底部導航高度 */
+    box-sizing: border-box;
+    min-width: 400px;
+}
+
+.back-button {
+    position: static;
+    display: block;
+    margin: 16px 0 0 20px; /* 上方間距與左側對齊 */
+    background: #f08651;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 14px;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.2s;
+}
+
+.back-button:hover {
+    background: #e07540;
+}
+
+.forum-post-container {
+    background: white;
+    border-radius: 12px;
+    margin: 20px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.post-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.post-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 12px;
+}
+
+.post-username {
+    font-weight: 600;
+    color: #333;
+    font-size: 16px;
+}
+
+.post-content {
+    margin-bottom: 20px;
+}
+
+.post-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 12px;
+    line-height: 1.4;
+}
+
+.post-text {
+    font-size: 16px;
+    line-height: 1.6;
+    color: #333;
+    margin-bottom: 16px;
+}
+
+.post-image {
+    margin: 16px 0;
+    text-align: center;
+}
+
+.image-placeholder {
+    width: 100%;
+    max-width: 400px;
+    height: 200px;
+    background: #f0f0f0;
+    border-radius: 8px;
+    display: inline-block;
+    position: relative;
+}
+
+.image-placeholder::after {
+    content: '📷 圖片';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #999;
+    font-size: 16px;
+}
+
+.post-actions {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid #f0f0f0;
+}
+
+.like-button {
+    display: flex;
+    align-items: center;
+    background: none;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 14px;
+    color: #666;
+    gap: 6px;
+}
+
+.like-button:hover {
+    background-color: #f8f8f8;
+    transform: translateY(-1px);
+}
+
+.like-button.liked {
+    color: #e74c3c;
+}
+
+.like-icon {
+    font-size: 20px;
+}
+
+.like-count {
+    font-weight: 500;
+    font-size: 14px;
+}

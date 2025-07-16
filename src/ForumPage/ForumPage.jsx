@@ -5,8 +5,10 @@ import BottomNavigationBar from '../components/BottomNavigationBar';
 import mockProfile1 from '../assets/MockPicture/mockProfile1.png';
 import mockProfile2 from '../assets/MockPicture/mockProfile2.png';
 import mockProfile3 from '../assets/MockPicture/mockProfile3.png';
+import { useNavigate } from 'react-router-dom';
 
 const ForumPage = () => {
+  const navigate = useNavigate();
   const [posts, setPosts] = useState([
     {
       id: 1,
@@ -81,6 +83,10 @@ const ForumPage = () => {
     }));
   };
 
+  const handlePostClick = (postId) => {
+    navigate(`/forum-post/${postId}`);
+  };
+
   // 依據有無圖片決定內文顯示長度
   const getDisplayContent = (post) => {
     if (post.hasImage) {
@@ -96,7 +102,7 @@ const ForumPage = () => {
       <div className="app-container">
         <div className="forum-page-content">
           {posts.map(post => (
-            <div key={post.id} className="forum-post">
+            <div key={post.id} className="forum-post" onClick={() => handlePostClick(post.id)} style={{ cursor: 'pointer' }}>
               <div className="post-header">
                 <img src={post.avatar} alt="用戶頭像" className="user-avatar" />
                 <span className="user-id">{post.userId}</span>

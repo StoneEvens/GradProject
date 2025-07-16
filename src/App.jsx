@@ -14,6 +14,7 @@ import ViewSymptomRecord from './ViewSymptomRecord/ViewSymptomRecord'
 import CreateCommunityPost from './CreateCommunityPost/CreateCommunityPost'
 import CreateForumPost from './CreateForumPost/CreateForumPost'
 import CommunityPost from './CommunityPage/CommunityPost'
+import ForumPost from './ForumPage/ForumPost'
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
         <Route path="/create-community-post" element={<CreateCommunityPost />} />
         <Route path="/create-forum-post" element={<CreateForumPost />} />
         <Route path="/community-post/:id" element={<CommunityPost />} />
+        <Route path="/forum-post/:id" element={<ForumPost />} />
       </Routes>
     </Router>
   )
