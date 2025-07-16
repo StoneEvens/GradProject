@@ -27,7 +27,7 @@ class PetListByUser(APIView):
         if not user_id:
             return Response({"error": "請提供 user_id"}, status=status.HTTP_400_BAD_REQUEST)
 
-        pets = Pet.objects.filter(keeper_id=user_id)
+        pets = Pet.objects.filter(owner=user_id)
         serializer = PetSerializer(pets, many=True, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -98,11 +98,10 @@ class PetUpdateView(APIView):
             "pet_id": pet.id,
             "pet_avatar": pet.pet_avatar,
             "is_dog": pet.is_dog,
-            "new_life_stage": pet.life_stage,
+            "new_life_stage": pet.pet_stage,
             "new_weight": pet.weight,
-            "new_length": pet.length,
-            "new_expect_adult_weight": pet.expect_adult_weight,
-            "new_litter_size": pet.litter_size,
+            "new_length": pet.height,
+            "new_expect_adult_weight": pet.predicted_adult_weight,
             "new_weeks_of_lacation": pet.weeks_of_lactation
         }, status=status.HTTP_200_OK)
 

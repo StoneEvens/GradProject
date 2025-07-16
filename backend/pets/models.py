@@ -24,6 +24,7 @@ class Pet(models.Model):
     pet_type = models.CharField(max_length=100)  
     predicted_adult_weight = models.FloatField(null=True, blank=True, help_text="預期成犬/成貓體重 (公斤)")
     weight = models.FloatField(null=True, blank=True, help_text="體重 (公斤)")
+    weeks_of_lactation = models.IntegerField(null=True, blank=True)
     description = models.TextField(blank=True, null=True, help_text="寵物描述")
 
     def __str__(self):

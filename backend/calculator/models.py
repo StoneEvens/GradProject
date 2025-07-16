@@ -11,14 +11,13 @@ class Pet(models.Model):
         help_text="Firebase 上傳後的圖片 URL"
     )
     is_dog = models.BooleanField(default=False)  # True=狗，False=貓
-    life_stage = models.CharField(max_length=20)  # 'adult'、'puppy' 等
+    pet_stage = models.CharField(max_length=20)  # 'adult'、'puppy' 等
     weight = models.FloatField()
-    length = models.FloatField(null=True, blank=True)
-    expect_adult_weight = models.FloatField(null=True, blank=True)
-    litter_size = models.IntegerField(null=True, blank=True)
+    height = models.FloatField(null=True, blank=True)
+    predicted_adult_weight = models.FloatField(null=True, blank=True)
     weeks_of_lactation = models.IntegerField(null=True, blank=True)
 
-    keeper_id = models.ForeignKey(
+    owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
@@ -27,4 +26,4 @@ class Pet(models.Model):
     )
 
     def __str__(self):
-        return f"{self.pet_name or '寵物'} ({'狗' if self.is_dog else '貓'}, {self.life_stage})"
+        return f"{self.pet_name or '寵物'} ({'狗' if self.is_dog else '貓'}, {self.pet_stage})"

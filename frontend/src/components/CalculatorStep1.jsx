@@ -6,10 +6,10 @@ import defaultAvatar from '../MockPicture/mockCat1.jpg';
 function CalculatorStep1({ onNext, pets: apiPets }) {
   const formattedPets = apiPets.map((pet) => ({
     id: pet.id,
-    name: pet.name,
+    pet_name: pet.pet_name,
     species: pet.is_dog ? '狗' : '貓',
     weight: pet.weight || '',
-    length: pet.length || '',
+    height: pet.height || '',
     note: '',
     avatar: pet.pet_avatar || defaultAvatar,
   }));
@@ -18,19 +18,19 @@ function CalculatorStep1({ onNext, pets: apiPets }) {
   const [pets, setPets] = useState(formattedPets);
   const [editInfo, setEditInfo] = useState({
     weight: pets[0]?.weight || '',
-    length: pets[0]?.length || '',
+    height: pets[0]?.height || '',
     note: pets[0]?.note || '',
   });
 
   const [isAdding, setIsAdding] = useState(false);
-  const [newPet, setNewPet] = useState({ name: '', species: '貓', weight: '', length: '', note: '' });
+  const [newPet, setNewPet] = useState({ pet_name: '', species: '貓', weight: '', height: '', note: '' });
   const [errorMsg, setErrorMsg] = useState('');
 
   const handleSelectPet = (idx) => {
     setSelectedPet(idx);
     setEditInfo({
       weight: pets[idx].weight,
-      length: pets[idx].length,
+      height: pets[idx].height,
       note: pets[idx].note,
     });
     setIsAdding(false);
@@ -45,13 +45,13 @@ function CalculatorStep1({ onNext, pets: apiPets }) {
 
   const validate = () => {
     if (isAdding) {
-      if (!newPet.name) return '請輸入名字！';
+      if (!newPet.pet_name) return '請輸入名字！';
       if (!newPet.weight) return '請輸入體重！';
-      if (!newPet.length) return '請輸入身長！';
+      if (!newPet.height) return '請輸入身高！';
     } else {
-      if (!pets[selectedPet].name) return '請輸入名字！';
+      if (!pets[selectedPet].pet_name) return '請輸入名字！';
       if (!editInfo.weight) return '請輸入體重！';
-      if (!editInfo.length) return '請輸入身長！';
+      if (!editInfo.height) return '請輸入身高！';
     }
     return '';
   };
@@ -68,10 +68,10 @@ function CalculatorStep1({ onNext, pets: apiPets }) {
     if (isAdding) {
       const tempPet = {
         id: Date.now(),
-        name: newPet.name,
+        pet_name: newPet.pet_name,
         species: newPet.species,
         weight: parseFloat(newPet.weight),
-        length: parseFloat(newPet.length),
+        height: parseFloat(newPet.height),
         avatar: defaultAvatar,
         isTemporary: true,
       };
@@ -81,7 +81,7 @@ function CalculatorStep1({ onNext, pets: apiPets }) {
       const updatePayload = {
         pet_id: pets[selectedPet].id,
         weight: parseFloat(editInfo.weight),
-        length: parseFloat(editInfo.length),
+        height: parseFloat(editInfo.height),
       };
 
       try {
@@ -110,7 +110,7 @@ function CalculatorStep1({ onNext, pets: apiPets }) {
             onChange={() => {
               const newMode = !isAdding;
               setIsAdding(newMode);
-              setNewPet({ name: '', species: '貓', weight: '', length: '', note: '' });
+              setNewPet({ pet_name: '', species: '貓', weight: '', height: '', note: '' });
               console.log('目前模式:', newMode ? '新增' : '選擇');
             }}
           />
@@ -127,7 +127,7 @@ function CalculatorStep1({ onNext, pets: apiPets }) {
             <img
               key={pet.id}
               src={pet.avatar}
-              alt={pet.name}
+              alt={pet.pet_name}
               className={`pet-avatar${selectedPet === idx && !isAdding ? ' selected' : ''}`}
               onClick={() => handleSelectPet(idx)}
             />
@@ -146,12 +146,12 @@ function CalculatorStep1({ onNext, pets: apiPets }) {
             <input
               className="pet-info-input"
               type="text"
-              value={newPet.name}
-              onChange={(e) => setNewPet({ ...newPet, name: e.target.value })}
+              value={newPet.pet_name}
+              onChange={(e) => setNewPet({ ...newPet, pet_name: e.target.value })}
               placeholder="請輸入名字"
             />
           ) : (
-            <span>{pets[selectedPet].name}</span>
+            <span>{pets[selectedPet].pet_name}</span>
           )}
         </div>
         <div className="pet-info-row">
@@ -190,21 +190,21 @@ function CalculatorStep1({ onNext, pets: apiPets }) {
           <span>公斤</span>
         </div>
         <div className="pet-info-row">
-          <span className="pet-info-label">身長：</span>
+          <span className="pet-info-label">身高：</span>
           {isAdding ? (
             <input
               className="pet-info-input"
               type="number"
-              value={newPet.length}
-              onChange={(e) => setNewPet({ ...newPet, length: e.target.value })}
+              value={newPet.height}
+              onChange={(e) => setNewPet({ ...newPet, height: e.target.value })}
               placeholder="公分"
             />
           ) : (
             <input
               className="pet-info-input"
               type="number"
-              value={editInfo.length}
-              onChange={(e) => handleInfoChange('length', e.target.value)}
+              value={editInfo.height}
+              onChange={(e) => handleInfoChange('height', e.target.value)}
             />
           )}
           <span>公分</span>
