@@ -18,6 +18,7 @@ class Pet(models.Model):
     breed = models.CharField(max_length=100, null=True, blank=True, help_text="品種")
     height = models.FloatField(null=True, blank=True, help_text="身高 (公分)")
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='pets', null=True)
+    is_dog = models.BooleanField(default=False)
     pet_name = models.CharField(max_length=100)
     pet_stage = models.CharField(max_length=20, choices=PET_STAGE_CHOICES, null=True, blank=True, help_text="年齡階段")
     pet_type = models.CharField(max_length=100)  
