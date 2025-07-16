@@ -66,28 +66,17 @@ function CalculatorStep1({ onNext, pets: apiPets }) {
     setErrorMsg('');
 
     if (isAdding) {
-      const payload = {
-        user_id: 2, // 未來從 router 傳入
+      const tempPet = {
+        id: Date.now(),
         name: newPet.name,
-        is_dog: newPet.species === '狗',
+        species: newPet.species,
         weight: parseFloat(newPet.weight),
         length: parseFloat(newPet.length),
-        life_stage: 'adult',
-        expect_adult_weight: 12,
+        avatar: defaultAvatar,
+        isTemporary: true,
       };
 
-      try {
-        const res = await axios.post('http://127.0.0.1:8000/api/v1/calculator/pets/create/', payload);
-        alert('新增寵物成功！');
-        const newPetWithId = { ...newPet, id: res.data.id || Date.now(), avatar: defaultAvatar };
-        setPets((prev) => [...prev, newPetWithId]);
-        setSelectedPet(pets.length);
-        setIsAdding(false);
-        onNext(newPetWithId);
-      } catch (error) {
-        console.error('新增寵物失敗：', error);
-        alert('新增寵物失敗，請稍後再試');
-      }
+      onNext(tempPet);
     } else {
       const updatePayload = {
         pet_id: pets[selectedPet].id,
@@ -128,7 +117,7 @@ function CalculatorStep1({ onNext, pets: apiPets }) {
           <span className="slider round"></span>
         </label>
         <span style={{ marginLeft: 12 }}>
-          {isAdding ? '新增寵物模式' : '選擇寵物模式'}
+          {isAdding ? '新增臨時寵物模式' : '選擇寵物模式'}
         </span>
       </div>
 
@@ -147,7 +136,7 @@ function CalculatorStep1({ onNext, pets: apiPets }) {
       </div>
 
       <div className="pet-select-label">
-        寵物資訊 {isAdding && <span style={{ color: 'gray' }}>（新增寵物中）</span>}
+        寵物資訊 {isAdding && <span style={{ color: 'gray' }}>（新增臨時寵物中）</span>}
       </div>
 
       <div className="pet-info-section">
