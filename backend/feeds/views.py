@@ -10,6 +10,8 @@ from google.cloud import vision
 from google.oauth2 import service_account
 from rest_framework.permissions import AllowAny
 from utils.firebase_service import FirebaseStorageService
+import os
+from django.conf import settings
 
 NUTRIENT_KEYWORDS = {
     'protein': ['protein', '蛋白', '粗蛋白'],
@@ -44,7 +46,7 @@ class FeedOCRView(APIView):
         ))}
     )
     def post(self, request, *args, **kwargs):
-        credentials_path = r"C:\Users\lxzhe\GradProject\backend\feeds\ai-project-454107-a1e8b881803e.json"
+        credentials_path = os.path.join(settings.BASE_DIR, 'feeds', 'ai-project-454107-a1e8b881803e.json')
 
         uploaded_image = request.FILES.get('image')
         if not uploaded_image:

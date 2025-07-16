@@ -1,12 +1,18 @@
 from rest_framework import serializers
-from calculator.models import Pet
+from pets.models import Pet
+from media.models import PetHeadshot
 
 
 class PetSerializer(serializers.ModelSerializer):
+    pet_avatar = serializers.SerializerMethodField()
+
     class Meta:
         model = Pet
         fields = [
-            'id', 'name', 'is_dog', 'life_stage', 'weight', 'length',
-            'expect_adult_weight', 'litter_size', 'weeks_of_lactation',
+            'id', 'pet_name', 'is_dog', 'pet_stage', 'weight', 'height',
+            'predicted_adult_weight', 'weeks_of_lactation',
             'pet_avatar'
-        ]   
+        ]
+
+    def get_pet_avatar(self, pet: Pet):
+        return PetHeadshot.get_pet_headshot_url(pet) if pet else None
