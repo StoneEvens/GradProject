@@ -81,7 +81,7 @@ function CalculatorStep1({ onNext, pets: apiPets }) {
         alert('新增寵物成功！');
         const newPetWithId = { ...newPet, id: res.data.id || Date.now(), avatar: defaultAvatar };
         setPets((prev) => [...prev, newPetWithId]);
-        setSelectedPet(pets.length); // 選擇剛新增的
+        setSelectedPet(pets.length);
         setIsAdding(false);
         onNext(newPetWithId);
       } catch (error) {
@@ -89,6 +89,20 @@ function CalculatorStep1({ onNext, pets: apiPets }) {
         alert('新增寵物失敗，請稍後再試');
       }
     } else {
+      const updatePayload = {
+        pet_id: pets[selectedPet].id,
+        weight: parseFloat(editInfo.weight),
+        length: parseFloat(editInfo.length),
+      };
+
+      try {
+        await axios.post('http://127.0.0.1:8000/api/v1/calculator/pets/update/', updatePayload);
+        console.log('寵物更新成功！');
+      } catch (err) {
+        console.error('寵物更新失敗：', err);
+        alert('更新寵物資料失敗，請稍後再試');
+      }
+
       onNext(pets[selectedPet]);
     }
   };
