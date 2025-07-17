@@ -3,11 +3,22 @@ import axios from 'axios';
 import '../styles/CalculatorStep1.css';
 import defaultAvatar from '../MockPicture/mockCat1.jpg';
 
+// Mapping between English and Chinese species
+const speciesMap = {
+  cat: '貓',
+  dog: '狗',
+};
+const speciesReverseMap = {
+  '貓': 'cat',
+  '狗': 'dog',
+};
+
 function CalculatorStep1({ onNext, pets: apiPets }) {
+  // Format pets: convert species from English to Chinese for display
   const formattedPets = apiPets.map((pet) => ({
     id: pet.id,
     pet_name: pet.pet_name,
-    species: pet.is_dog ? '狗' : '貓',
+    species: speciesMap[pet.pet_type] || pet.pet_type, // display Chinese
     weight: pet.weight || '',
     height: pet.height || '',
     note: '',
@@ -66,16 +77,19 @@ function CalculatorStep1({ onNext, pets: apiPets }) {
     setErrorMsg('');
 
     if (isAdding) {
+      // Convert species from Chinese to English before sending to backend
       const tempPet = {
         id: Date.now(),
         pet_name: newPet.pet_name,
-        species: newPet.species,
+        species: newPet.species, // for display
+        pet_type: speciesReverseMap[newPet.species], // for backend
         weight: parseFloat(newPet.weight),
         height: parseFloat(newPet.height),
         avatar: defaultAvatar,
         isTemporary: true,
       };
 
+      // Pass pet_type in English to backend
       onNext(tempPet);
     } else {
       const updatePayload = {
