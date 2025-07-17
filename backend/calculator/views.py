@@ -11,7 +11,7 @@ import os, math, json
 from pathlib import Path
 import io
 
-from calculator.models import Pet
+from pets.models import Pet
 from feeds.models import Feed
 from .serializers import PetSerializer
 from feeds.serializers import FeedSerializer
