@@ -1,4 +1,4 @@
-from rest_framework.parsers import FormParser, MultiPartParser
+from rest_framework.parsers import FormParser, MultiPartParser, JSONParser
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -11,8 +11,10 @@ import os, math, json
 from pathlib import Path
 import io
 
-from calculator.models import Pet, Feed
-from .serializers import PetSerializer, FeedSerializer
+from pets.models import Pet
+from feeds.models import Feed
+from .serializers import PetSerializer
+from feeds.serializers import FeedSerializer
 from django.contrib.auth import get_user_model
 from rest_framework.permissions import AllowAny
 
@@ -25,7 +27,7 @@ class PetListByUser(APIView):
         if not user_id:
             return Response({"error": "請提供 user_id"}, status=status.HTTP_400_BAD_REQUEST)
 
-        pets = Pet.objects.filter(keeper_id=user_id)
+        pets = Pet.objects.filter(owner=user_id)
         serializer = PetSerializer(pets, many=True, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -55,20 +57,6 @@ class PetCreateView(APIView):
             keeper_id=user
         )
 
-        # 檢查是否有上傳圖片
-        # pet_avatar_file = request.FILES.get("pet_avatar")
-        # if pet_avatar_file:
-        #     success, msg, firebase_url, firebase_path = FirebaseStorageService.upload_pet_photo(
-        #         user_id=user.id,
-        #         pet_id=pet.id,
-        #         photo_file=pet_avatar_file,
-        #         photo_type='headshot'
-        #     )
-        #     if success:
-        #         pet.pet_avatar = firebase_url
-        #         pet.save()
-        #     else:
-        #         return Response({"error": f"圖片上傳失敗：{msg}"}, status=status.HTTP_400_BAD_REQUEST)
         pet_avatar_file = request.FILES.get("pet_avatar")
         if pet_avatar_file:
             storage_service = FirebaseStorageService()
@@ -110,54 +98,79 @@ class PetUpdateView(APIView):
             "pet_id": pet.id,
             "pet_avatar": pet.pet_avatar,
             "is_dog": pet.is_dog,
-            "new_life_stage": pet.life_stage,
+            "new_life_stage": pet.pet_stage,
             "new_weight": pet.weight,
-            "new_length": pet.length,
-            "new_expect_adult_weight": pet.expect_adult_weight,
-            "new_litter_size": pet.litter_size,
+            "new_length": pet.height,
+            "new_expect_adult_weight": pet.predicted_adult_weight,
             "new_weeks_of_lacation": pet.weeks_of_lactation
         }, status=status.HTTP_200_OK)
 
 class FeedListByUser(APIView):
-    permission_classes = [AllowAny] 
+    permission_classes = [AllowAny]
+
     def get(self, request):
         user_id = request.query_params.get("user_id")
         if not user_id:
             return Response({"error": "請提供 user_id"}, status=status.HTTP_400_BAD_REQUEST)
 
-        feeds = Feed.objects.filter(keeper_id=user_id)
+        feeds = Feed.objects.filter(user_id=user_id)
         serializer = FeedSerializer(feeds, many=True, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 class FeedCreateView(APIView):
-    permission_classes = [AllowAny] 
+    permission_classes = [AllowAny]
+    parser_classes = [JSONParser, FormParser, MultiPartParser]
+
     def post(self, request):
         data = request.data
-        user_id = request.data.get("user_id")
+        user_id = data.get("user_id")
 
         try:
             user = User.objects.get(id=user_id)
         except User.DoesNotExist:
             return Response({"error": "找不到使用者"}, status=status.HTTP_400_BAD_REQUEST)
 
-        feed = Feed.objects.create(
-            keeper_id = user,
-            brand = data.get("brand"),
-            protein = data.get("protein"),
-            fat = data.get("fat"),
-            carbohydrates = data.get("carbohydrates"),
-            calcium = data.get("calcium"),
-            phosphorus = data.get("phosphorus"),
-            magnesium = data.get("magnesium"),
-            sodium = data.get("sodium")
-        )
+        def parse_float(value):
+            try:
+                return float(value)
+            except (TypeError, ValueError):
+                return 0
 
-        return Response({"message": "飼料建立成功", "feed_id": feed.id, "brand":feed.brand, "protein": feed.protein, "fat": feed.fat, "carbohydrates": feed.carbohydrates, "calcium": feed.calcium, "phosphorus": feed.phosphorus, "magnesium": feed.magnesium, "sodium": feed.sodium}, status=status.HTTP_201_CREATED)
+        try:
+            feed = Feed.objects.create(
+                user=user,
+                name=data.get("name"),
+                brand=data.get("brand"),
+                protein=parse_float(data.get("protein")),
+                fat=parse_float(data.get("fat")),
+                carbohydrate=parse_float(data.get("carbohydrate")),
+                calcium=parse_float(data.get("calcium")),
+                phosphorus=parse_float(data.get("phosphorus")),
+                magnesium=parse_float(data.get("magnesium")),
+                sodium=parse_float(data.get("sodium")),
+                front_image_url=data.get("front_image_url"),
+                nutrition_image_url=data.get("nutrition_image_url"),
+            )
+
+            return Response({
+                "message": "飼料建立成功",
+                "feed_id": feed.id,
+                "data": FeedSerializer(feed).data
+            }, status=status.HTTP_201_CREATED)
+        
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            return Response({"error": f"建立 Feed 發生錯誤：{str(e)}"}, status=500)
 
 class FeedUpdateView(APIView):
-    permission_classes = [AllowAny] 
+    permission_classes = [AllowAny]
+    parser_classes = [JSONParser, FormParser, MultiPartParser]
+
     def post(self, request):
-        feed_id = request.data.get("feed_id")
+        data = request.data
+        feed_id = data.get("feed_id")
+
         if not feed_id:
             return Response({"error": "請提供 feed_id"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -166,28 +179,37 @@ class FeedUpdateView(APIView):
         except Feed.DoesNotExist:
             return Response({"error": "找不到該飼料"}, status=status.HTTP_404_NOT_FOUND)
 
-        # 取得每個欄位的值，若有傳入則更新
-        for field in ["brand", "name", "protein", "fat", "carbohydrates", "calcium", "phosphorus", "magnesium", "sodium"]:
-            value = request.data.get(field)
-            if value is not None:
-                setattr(feed, field, value)
+        def parse_float(value):
+            try:
+                return float(value)
+            except (TypeError, ValueError):
+                return 0
 
-        feed.save()
+        try:
+            # 更新欄位
+            feed.name = data.get("name", feed.name)
+            feed.brand = data.get("brand", feed.brand)
+            feed.protein = parse_float(data.get("protein")) if "protein" in data else feed.protein
+            feed.fat = parse_float(data.get("fat")) if "fat" in data else feed.fat
+            feed.carbohydrate = parse_float(data.get("carbohydrate")) if "carbohydrate" in data else feed.carbohydrate
+            feed.calcium = parse_float(data.get("calcium")) if "calcium" in data else feed.calcium
+            feed.phosphorus = parse_float(data.get("phosphorus")) if "phosphorus" in data else feed.phosphorus
+            feed.magnesium = parse_float(data.get("magnesium")) if "magnesium" in data else feed.magnesium
+            feed.sodium = parse_float(data.get("sodium")) if "sodium" in data else feed.sodium
+            feed.front_image_url = data.get("front_image_url", feed.front_image_url)
+            feed.nutrition_image_url = data.get("nutrition_image_url", feed.nutrition_image_url)
 
-        return Response({
-            "message": "更新成功",
-            "feed_id": feed.id,
-            "brand": feed.brand,
-            "name": feed.name,
-            "protein": feed.protein,
-            "fat": feed.fat,
-            "carbohydrates": feed.carbohydrates,
-            "calcium": feed.calcium,
-            "phosphorus": feed.phosphorus,
-            "magnesium": feed.magnesium,
-            "sodium": feed.sodium
-        }, status=status.HTTP_200_OK)
+            feed.save()
 
+            return Response({
+                "message": "飼料更新成功",
+                "data": FeedSerializer(feed).data
+            }, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            return Response({"error": f"更新 Feed 發生錯誤：{str(e)}"}, status=500)
 
 # 載入 OpenAI API 金鑰
 load_dotenv()
@@ -253,7 +275,8 @@ def convert_ocr_to_health_data(ocr_result):
     return converted
 
 class PetNutritionCalculator(APIView):
-    parser_classes = [FormParser, MultiPartParser]
+    permission_classes = [AllowAny]
+    parser_classes = [JSONParser, FormParser, MultiPartParser]
 
     @swagger_auto_schema(
         operation_description="計算每日餵食量與營養素是否足夠（輸入每100g飼料的營養素含量）",

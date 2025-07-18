@@ -389,6 +389,28 @@ class FirebaseStorageService:
             logger.error(f"批量刪除貼文圖片時發生錯誤: {str(e)}")
             return False, f"批量刪除失敗: {str(e)}", results
 
+    def upload_feed_photo(self, user_id: int, feed_id: int, photo_file, photo_type: str) -> Tuple[bool, str, Optional[str], Optional[str]]:
+        """
+        上傳飼料照片
+
+        Parameters:
+        - user_id: 用戶 ID
+        - feed_id: 飼料 ID
+        - photo_file: 圖片檔案
+        - photo_type: 照片類型 ('front', 'nutrition')
+
+        Returns:
+        - tuple: (是否成功, 訊息, Firebase URL, Firebase 路徑)
+        """
+        folder = f"feeds/user_{user_id}/feed_{feed_id}/{photo_type}"
+        file_path = self.generate_file_path(folder, photo_file.name)
+        success, message, firebase_url = self.upload_image(photo_file, file_path)
+
+        if success:
+            return True, message, firebase_url, file_path
+        else:
+            return False, message, None, None
+
 
 # 全域服務實例
 firebase_storage_service = FirebaseStorageService()
