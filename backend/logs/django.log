@@ -9633,3 +9633,1714 @@ INFO 2025-07-12 13:02:34,435 basehttp 11204 4708 "GET /api/v1/accounts/plans/tod
 INFO 2025-07-12 13:02:34,447 basehttp 11204 17104 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
 INFO 2025-07-12 13:02:34,451 basehttp 11204 2744 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
 INFO 2025-07-13 11:58:09,610 autoreload 19928 9740 Watching for file changes with StatReloader
+INFO 2025-07-15 13:42:39,481 autoreload 3952 22556 Watching for file changes with StatReloader
+INFO 2025-07-15 13:42:51,801 basehttp 3952 4352 "OPTIONS /api/v1/accounts/token/refresh/ HTTP/1.1" 200 0
+INFO 2025-07-15 13:42:51,842 basehttp 3952 4352 "POST /api/v1/accounts/token/refresh/ HTTP/1.1" 200 548
+INFO 2025-07-15 13:42:51,910 basehttp 3952 4352 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-15 13:42:51,914 basehttp 3952 4352 "OPTIONS /api/v1/accounts/me/ HTTP/1.1" 200 0
+INFO 2025-07-15 13:42:51,917 basehttp 3952 4352 "OPTIONS /api/v1/accounts/me/ HTTP/1.1" 200 0
+INFO 2025-07-15 13:42:51,921 basehttp 3952 4352 "OPTIONS /api/v1/accounts/plans/today/ HTTP/1.1" 200 0
+INFO 2025-07-15 13:42:51,924 basehttp 3952 4352 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-15 13:42:51,927 basehttp 3952 4352 "OPTIONS /api/v1/accounts/plans/today/ HTTP/1.1" 200 0
+INFO 2025-07-15 13:42:51,949 basehttp 3952 4352 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 13:42:51,969 basehttp 3952 4352 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-15 13:42:52,098 basehttp 3952 22520 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 13:42:52,124 basehttp 3952 4352 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-15 13:42:55,706 basehttp 3952 7960 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-15 13:42:55,726 basehttp 3952 7960 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-15 13:42:55,752 basehttp 3952 12060 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 13:42:55,752 basehttp 3952 10736 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-15 13:42:55,787 basehttp 3952 7960 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 13:42:55,797 basehttp 3952 12060 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-15 13:43:26,338 basehttp 3952 12512 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 383
+INFO 2025-07-15 13:43:26,355 basehttp 3952 20232 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 383
+INFO 2025-07-15 13:43:26,648 basehttp 3952 13692 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 13:43:26,671 basehttp 3952 13692 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 13:54:27,013 autoreload 3952 22556 C:\Users\lxzhe\GradProject\backend\feeds\models.py changed, reloading.
+INFO 2025-07-15 13:54:30,664 autoreload 15128 22108 Watching for file changes with StatReloader
+INFO 2025-07-15 13:55:45,022 basehttp 15128 20308 "GET /swagger/ HTTP/1.1" 200 2217
+INFO 2025-07-15 13:55:45,088 basehttp 15128 20308 "GET /static/drf-yasg/style.css HTTP/1.1" 304 0
+INFO 2025-07-15 13:55:45,090 basehttp 15128 21984 "GET /static/drf-yasg/swagger-ui-dist/swagger-ui.css HTTP/1.1" 304 0
+INFO 2025-07-15 13:55:45,095 basehttp 15128 16528 "GET /static/drf-yasg/swagger-ui-dist/swagger-ui-bundle.js HTTP/1.1" 304 0
+INFO 2025-07-15 13:55:45,100 basehttp 15128 19900 "GET /static/drf-yasg/swagger-ui-dist/swagger-ui-standalone-preset.js HTTP/1.1" 304 0
+INFO 2025-07-15 13:55:45,101 basehttp 15128 20556 "GET /static/drf-yasg/insQ.min.js HTTP/1.1" 304 0
+INFO 2025-07-15 13:55:45,101 basehttp 15128 20308 "GET /static/drf-yasg/swagger-ui-init.js HTTP/1.1" 304 0
+INFO 2025-07-15 13:55:45,106 basehttp 15128 1284 "GET /static/drf-yasg/immutable.min.js HTTP/1.1" 304 0
+INFO 2025-07-15 13:55:45,273 basehttp 15128 1284 "GET /static/drf-yasg/swagger-ui-dist/favicon-32x32.png HTTP/1.1" 304 0
+INFO 2025-07-15 13:55:45,556 basehttp 15128 1284 "GET /swagger/?format=openapi HTTP/1.1" 200 38710
+WARNING 2025-07-15 13:59:45,598 basehttp 15128 10516 "POST /api/pets/create/ HTTP/1.1" 404 3605
+WARNING 2025-07-15 14:01:24,451 basehttp 15128 12132 "POST /pets/create/ HTTP/1.1" 404 3593
+WARNING 2025-07-15 14:02:28,943 basehttp 15128 20696 "POST /api/v1/pets/create/ HTTP/1.1" 401 68
+INFO 2025-07-15 14:03:02,382 autoreload 15128 22108 C:\Users\lxzhe\GradProject\backend\calculator\views.py changed, reloading.
+INFO 2025-07-15 14:03:05,303 autoreload 10284 22668 Watching for file changes with StatReloader
+WARNING 2025-07-15 14:03:09,109 basehttp 10284 22436 "POST /api/v1/pets/create/ HTTP/1.1" 401 68
+WARNING 2025-07-15 14:05:41,399 basehttp 10284 12236 "GET /api/v1/pets/?user_id=2 HTTP/1.1" 404 5328
+INFO 2025-07-15 14:05:57,818 basehttp 10284 12236 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 383
+INFO 2025-07-15 14:06:42,738 basehttp 10284 12236 "POST /api/v1/calculator/pets/create/ HTTP/1.1" 201 186
+INFO 2025-07-15 14:08:14,994 basehttp 10284 15796 "POST /api/v1/accounts/token/refresh/ HTTP/1.1" 200 548
+INFO 2025-07-15 14:08:15,026 basehttp 10284 15796 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 14:09:38,182 basehttp 10284 21592 "OPTIONS /api/pets/create/ HTTP/1.1" 200 0
+WARNING 2025-07-15 14:09:38,213 basehttp 10284 21592 "POST /api/pets/create/ HTTP/1.1" 404 3605
+WARNING 2025-07-15 14:10:08,086 basehttp 10284 21592 "POST /api/pets/create/ HTTP/1.1" 404 3605
+WARNING 2025-07-15 14:11:05,086 basehttp 10284 21592 "POST /api/pets/create/ HTTP/1.1" 404 3605
+WARNING 2025-07-15 14:11:23,034 basehttp 10284 21592 "POST /api/pets/create/ HTTP/1.1" 404 3605
+WARNING 2025-07-15 14:11:28,014 basehttp 10284 21592 "POST /api/pets/create/ HTTP/1.1" 404 3605
+INFO 2025-07-15 14:13:31,976 basehttp 10284 21592 "OPTIONS /api/v1/calculator/pets/create/ HTTP/1.1" 200 0
+ERROR 2025-07-15 14:13:32,004 basehttp 10284 21592 "POST /api/v1/calculator/pets/create/ HTTP/1.1" 500 1231
+WARNING 2025-07-15 14:15:36,318 basehttp 10284 21592 "GET /api/feeds/?user_id=2 HTTP/1.1" 404 3596
+WARNING 2025-07-15 14:15:36,336 basehttp 10284 23216 "GET /api/feeds/?user_id=2 HTTP/1.1" 404 3596
+INFO 2025-07-15 14:27:34,022 basehttp 10284 9392 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-15 14:27:34,035 basehttp 10284 16208 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-15 14:27:34,346 basehttp 10284 16220 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 14:27:34,364 basehttp 10284 16220 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+WARNING 2025-07-15 14:27:44,186 basehttp 10284 16208 "GET /api/v1/feeds/?user_id=2 HTTP/1.1" 404 4698
+WARNING 2025-07-15 14:27:44,216 basehttp 10284 9392 "GET /api/v1/feeds/?user_id=2 HTTP/1.1" 404 4698
+INFO 2025-07-15 14:33:25,212 basehttp 10284 21564 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-15 14:33:25,231 basehttp 10284 21564 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-15 14:33:25,262 basehttp 10284 7828 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 14:33:25,268 basehttp 10284 22324 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-15 14:33:25,278 basehttp 10284 21564 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 14:33:25,286 basehttp 10284 7828 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-15 14:33:27,698 basehttp 10284 16172 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-15 14:33:27,731 basehttp 10284 16172 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-15 14:33:27,745 basehttp 10284 7828 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 14:33:27,763 basehttp 10284 21564 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+WARNING 2025-07-15 14:33:29,618 basehttp 10284 16172 "GET /api/v1/calculator/feeds/ HTTP/1.1" 400 29
+WARNING 2025-07-15 14:33:29,624 basehttp 10284 22856 "GET /api/v1/calculator/feeds/ HTTP/1.1" 400 29
+INFO 2025-07-15 14:33:33,883 basehttp 10284 21564 "POST /api/v1/accounts/token/refresh/ HTTP/1.1" 200 548
+INFO 2025-07-15 14:33:33,916 basehttp 10284 21564 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 14:36:41,603 basehttp 10284 21564 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-15 14:36:41,607 basehttp 10284 7828 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-15 14:36:41,630 basehttp 10284 21564 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 14:36:41,632 basehttp 10284 7828 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-15 14:36:41,655 basehttp 10284 22324 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 14:36:41,658 basehttp 10284 21564 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-15 14:36:43,487 basehttp 10284 22856 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-15 14:36:43,493 basehttp 10284 21564 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 14:36:43,505 basehttp 10284 16172 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-15 14:36:43,516 basehttp 10284 22324 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 14:37:29,983 basehttp 10284 16172 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-15 14:37:30,013 basehttp 10284 16172 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-15 14:37:30,018 basehttp 10284 22324 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 14:37:30,036 basehttp 10284 21564 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 14:37:33,947 basehttp 10284 16172 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 2
+INFO 2025-07-15 14:37:33,962 basehttp 10284 22856 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 2
+INFO 2025-07-15 14:38:16,719 basehttp 10284 22856 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 2
+INFO 2025-07-15 14:38:16,738 basehttp 10284 16172 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 2
+INFO 2025-07-15 14:38:21,339 basehttp 10284 16172 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-15 14:38:21,354 basehttp 10284 21564 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 14:38:21,364 basehttp 10284 22856 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-15 14:38:21,388 basehttp 10284 22324 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 14:38:23,545 basehttp 10284 22856 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 2
+INFO 2025-07-15 14:38:23,558 basehttp 10284 16172 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 2
+INFO 2025-07-15 14:59:17,258 basehttp 10284 13488 "POST /api/v1/accounts/token/refresh/ HTTP/1.1" 200 548
+INFO 2025-07-15 14:59:17,295 basehttp 10284 13488 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 15:25:17,259 basehttp 10284 23164 "POST /api/v1/accounts/token/refresh/ HTTP/1.1" 200 548
+INFO 2025-07-15 15:25:17,303 basehttp 10284 23164 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 15:32:23,637 autoreload 10284 22668 C:\Users\lxzhe\GradProject\backend\calculator\views.py changed, reloading.
+INFO 2025-07-15 15:32:27,317 autoreload 22224 2168 Watching for file changes with StatReloader
+INFO 2025-07-15 15:51:17,248 basehttp 22224 13108 "OPTIONS /api/v1/accounts/token/refresh/ HTTP/1.1" 200 0
+INFO 2025-07-15 15:51:17,318 basehttp 22224 13108 "POST /api/v1/accounts/token/refresh/ HTTP/1.1" 200 548
+INFO 2025-07-15 15:51:17,330 basehttp 22224 13108 "OPTIONS /api/v1/accounts/me/ HTTP/1.1" 200 0
+INFO 2025-07-15 15:51:17,374 basehttp 22224 13108 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 16:11:39,618 basehttp 22224 22552 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-15 16:11:39,628 basehttp 22224 4728 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-15 16:11:40,382 basehttp 22224 9056 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 16:11:40,613 basehttp 22224 15076 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 16:16:39,922 basehttp 22224 15076 "POST /api/v1/accounts/token/refresh/ HTTP/1.1" 200 548
+INFO 2025-07-15 16:16:39,935 basehttp 22224 15076 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 16:42:17,239 basehttp 22224 19040 "POST /api/v1/accounts/token/refresh/ HTTP/1.1" 200 548
+INFO 2025-07-15 16:42:17,252 basehttp 22224 19040 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 17:08:17,245 basehttp 22224 9452 "POST /api/v1/accounts/token/refresh/ HTTP/1.1" 200 548
+INFO 2025-07-15 17:08:17,258 basehttp 22224 9452 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 17:34:17,250 basehttp 22224 12236 "POST /api/v1/accounts/token/refresh/ HTTP/1.1" 200 548
+INFO 2025-07-15 17:34:17,267 basehttp 22224 12236 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 18:00:17,239 basehttp 22224 22676 "OPTIONS /api/v1/accounts/token/refresh/ HTTP/1.1" 200 0
+INFO 2025-07-15 18:00:17,260 basehttp 22224 22676 "POST /api/v1/accounts/token/refresh/ HTTP/1.1" 200 548
+INFO 2025-07-15 18:00:17,274 basehttp 22224 22676 "OPTIONS /api/v1/accounts/me/ HTTP/1.1" 200 0
+INFO 2025-07-15 18:00:17,302 basehttp 22224 22676 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 18:26:17,252 basehttp 22224 22732 "POST /api/v1/accounts/token/refresh/ HTTP/1.1" 200 548
+INFO 2025-07-15 18:26:17,275 basehttp 22224 22732 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 18:33:41,105 autoreload 22224 2168 C:\Users\lxzhe\GradProject\backend\feeds\views.py changed, reloading.
+INFO 2025-07-15 18:33:44,743 autoreload 12532 18240 Watching for file changes with StatReloader
+INFO 2025-07-15 18:35:05,031 autoreload 12532 18240 C:\Users\lxzhe\GradProject\backend\feeds\views.py changed, reloading.
+INFO 2025-07-15 18:35:08,553 autoreload 5308 10828 Watching for file changes with StatReloader
+INFO 2025-07-15 18:36:12,605 autoreload 5308 10828 C:\Users\lxzhe\GradProject\backend\feeds\views.py changed, reloading.
+INFO 2025-07-15 18:36:15,166 autoreload 18276 18096 Watching for file changes with StatReloader
+INFO 2025-07-15 18:36:45,250 autoreload 18276 18096 C:\Users\lxzhe\GradProject\backend\feeds\views.py changed, reloading.
+INFO 2025-07-15 18:36:48,220 autoreload 21664 1552 Watching for file changes with StatReloader
+INFO 2025-07-15 18:38:08,820 autoreload 21664 1552 C:\Users\lxzhe\GradProject\backend\feeds\views.py changed, reloading.
+INFO 2025-07-15 18:38:12,026 autoreload 16448 11064 Watching for file changes with StatReloader
+INFO 2025-07-15 18:38:37,179 autoreload 16448 11064 C:\Users\lxzhe\GradProject\backend\feeds\views.py changed, reloading.
+INFO 2025-07-15 18:38:40,050 autoreload 16424 7684 Watching for file changes with StatReloader
+INFO 2025-07-15 18:39:15,389 autoreload 16424 7684 C:\Users\lxzhe\GradProject\backend\feeds\views.py changed, reloading.
+INFO 2025-07-15 18:39:18,172 autoreload 22160 2200 Watching for file changes with StatReloader
+INFO 2025-07-15 18:43:15,932 autoreload 9344 19424 Watching for file changes with StatReloader
+INFO 2025-07-15 18:48:48,151 autoreload 9344 19424 C:\Users\lxzhe\GradProject\backend\feeds\models.py changed, reloading.
+INFO 2025-07-15 18:48:50,931 autoreload 22048 17828 Watching for file changes with StatReloader
+INFO 2025-07-15 18:49:01,686 autoreload 22048 17828 C:\Users\lxzhe\GradProject\backend\feeds\models.py changed, reloading.
+INFO 2025-07-15 18:49:04,909 autoreload 18560 13360 Watching for file changes with StatReloader
+INFO 2025-07-15 18:49:17,340 autoreload 18560 13360 C:\Users\lxzhe\GradProject\backend\feeds\models.py changed, reloading.
+INFO 2025-07-15 18:49:20,377 autoreload 17180 23420 Watching for file changes with StatReloader
+INFO 2025-07-15 19:26:05,610 autoreload 17180 23420 C:\Users\lxzhe\GradProject\backend\feeds\views.py changed, reloading.
+INFO 2025-07-15 19:26:08,939 autoreload 22340 2940 Watching for file changes with StatReloader
+INFO 2025-07-15 19:26:47,692 autoreload 22340 2940 C:\Users\lxzhe\GradProject\backend\feeds\views.py changed, reloading.
+INFO 2025-07-15 19:26:51,230 autoreload 18716 15888 Watching for file changes with StatReloader
+INFO 2025-07-15 19:46:26,227 autoreload 18716 15888 C:\Users\lxzhe\GradProject\backend\feeds\models.py changed, reloading.
+INFO 2025-07-15 19:46:29,560 autoreload 22564 15200 Watching for file changes with StatReloader
+INFO 2025-07-15 20:02:32,335 autoreload 22564 15200 C:\Users\lxzhe\GradProject\backend\feeds\models.py changed, reloading.
+INFO 2025-07-15 20:02:35,939 autoreload 9664 16720 Watching for file changes with StatReloader
+INFO 2025-07-15 20:06:57,213 autoreload 9664 16720 C:\Users\lxzhe\GradProject\backend\feeds\models.py changed, reloading.
+INFO 2025-07-15 20:07:00,792 autoreload 22900 7992 Watching for file changes with StatReloader
+INFO 2025-07-15 21:08:23,379 autoreload 1520 8128 Watching for file changes with StatReloader
+INFO 2025-07-15 21:09:23,554 autoreload 1520 8128 C:\Users\lxzhe\GradProject\backend\feeds\models.py changed, reloading.
+INFO 2025-07-15 21:09:24,762 autoreload 19332 13536 Watching for file changes with StatReloader
+INFO 2025-07-15 21:09:37,574 autoreload 19332 13536 C:\Users\lxzhe\GradProject\backend\feeds\admin.py changed, reloading.
+INFO 2025-07-15 21:09:38,806 autoreload 8480 9540 Watching for file changes with StatReloader
+INFO 2025-07-15 22:01:43,100 autoreload 22840 12512 Watching for file changes with StatReloader
+WARNING 2025-07-15 22:01:49,091 basehttp 22840 10944 "GET / HTTP/1.1" 404 3538
+INFO 2025-07-15 22:01:53,617 basehttp 22840 10944 "GET /admin/ HTTP/1.1" 200 19972
+INFO 2025-07-15 22:01:55,722 basehttp 22840 10944 "GET /admin/ HTTP/1.1" 200 19972
+INFO 2025-07-15 22:01:59,655 basehttp 22840 10944 "GET /admin/feeds/feed/ HTTP/1.1" 200 17152
+INFO 2025-07-15 22:01:59,758 basehttp 22840 10944 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2025-07-15 22:02:04,485 basehttp 22840 10944 "GET /admin/calculator/pet/ HTTP/1.1" 200 18542
+INFO 2025-07-15 22:02:04,558 basehttp 22840 10944 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2025-07-15 22:02:17,267 basehttp 22840 15880 "OPTIONS /api/v1/accounts/token/refresh/ HTTP/1.1" 200 0
+INFO 2025-07-15 22:02:17,316 basehttp 22840 15880 "POST /api/v1/accounts/token/refresh/ HTTP/1.1" 200 548
+INFO 2025-07-15 22:02:17,524 basehttp 22840 15880 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-15 22:02:17,529 basehttp 22840 20064 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-15 22:02:17,532 basehttp 22840 15880 "OPTIONS /api/v1/accounts/me/ HTTP/1.1" 200 0
+INFO 2025-07-15 22:02:17,540 basehttp 22840 20064 "OPTIONS /api/v1/accounts/me/ HTTP/1.1" 200 0
+INFO 2025-07-15 22:02:17,540 basehttp 22840 15880 "OPTIONS /api/v1/accounts/plans/today/ HTTP/1.1" 200 0
+INFO 2025-07-15 22:02:17,550 basehttp 22840 15880 "OPTIONS /api/v1/accounts/plans/today/ HTTP/1.1" 200 0
+INFO 2025-07-15 22:02:17,570 basehttp 22840 20064 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 22:02:17,576 basehttp 22840 15880 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-15 22:02:17,590 basehttp 22840 20064 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 22:02:17,596 basehttp 22840 15880 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-15 22:02:18,316 basehttp 22840 10944 "GET /admin/ HTTP/1.1" 200 19972
+INFO 2025-07-15 22:02:21,114 basehttp 22840 10944 "GET /admin/accounts/customuser/ HTTP/1.1" 200 21755
+INFO 2025-07-15 22:02:21,224 basehttp 22840 10944 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2025-07-15 22:02:30,018 basehttp 22840 10944 "GET /admin/feeds/feed/ HTTP/1.1" 200 17152
+INFO 2025-07-15 22:02:30,133 basehttp 22840 10944 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2025-07-15 22:02:32,276 basehttp 22840 10944 "GET /admin/feeds/feed/add/ HTTP/1.1" 200 25890
+INFO 2025-07-15 22:02:32,359 basehttp 22840 10944 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2025-07-15 22:03:28,458 basehttp 22840 10944 "POST /admin/feeds/feed/add/ HTTP/1.1" 302 0
+INFO 2025-07-15 22:03:28,542 basehttp 22840 10944 "GET /admin/feeds/feed/ HTTP/1.1" 200 18480
+INFO 2025-07-15 22:03:28,696 basehttp 22840 10944 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2025-07-15 22:03:30,674 basehttp 22840 10944 "GET /admin/feeds/feed/1/change/ HTTP/1.1" 200 26134
+INFO 2025-07-15 22:03:30,783 basehttp 22840 10944 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2025-07-15 22:03:31,644 basehttp 22840 10944 "GET /admin/feeds/feed/ HTTP/1.1" 200 18289
+INFO 2025-07-15 22:04:00,080 basehttp 22840 18100 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 211
+INFO 2025-07-15 22:08:58,163 autoreload 9908 22552 Watching for file changes with StatReloader
+INFO 2025-07-15 22:09:09,163 basehttp 9908 19792 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-15 22:09:09,172 basehttp 9908 19792 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-15 22:09:09,260 basehttp 9908 10024 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 22:09:09,260 basehttp 9908 17700 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-15 22:09:09,316 basehttp 9908 19792 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 22:09:09,316 basehttp 9908 10024 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-15 22:09:09,939 basehttp 9908 22652 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-15 22:09:09,940 basehttp 9908 10024 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 22:09:09,971 basehttp 9908 22120 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-15 22:09:09,974 basehttp 9908 19792 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 22:09:21,637 basehttp 9908 22120 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 211
+INFO 2025-07-15 22:09:21,657 basehttp 9908 22652 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 211
+INFO 2025-07-15 22:10:10,511 basehttp 9908 14096 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 11819
+ERROR 2025-07-15 22:11:15,808 basehttp 9908 14096 "GET /api/v1/calculator/feeds/?user_id=$%7Buid%7D HTTP/1.1" 500 15175
+INFO 2025-07-15 22:11:15,905 basehttp 9908 20156 "GET /static/rest_framework/css/bootstrap-tweaks.css HTTP/1.1" 304 0
+INFO 2025-07-15 22:11:15,905 basehttp 9908 14096 "GET /static/rest_framework/css/bootstrap.min.css HTTP/1.1" 304 0
+INFO 2025-07-15 22:11:15,905 basehttp 9908 5340 "GET /static/rest_framework/css/prettify.css HTTP/1.1" 304 0
+INFO 2025-07-15 22:11:15,911 basehttp 9908 11648 "GET /static/rest_framework/css/default.css HTTP/1.1" 304 0
+INFO 2025-07-15 22:11:15,914 basehttp 9908 14096 "GET /static/rest_framework/js/bootstrap.min.js HTTP/1.1" 304 0
+INFO 2025-07-15 22:11:15,918 basehttp 9908 20156 "GET /static/rest_framework/js/csrf.js HTTP/1.1" 304 0
+INFO 2025-07-15 22:11:15,918 basehttp 9908 5340 "GET /static/rest_framework/js/prettify-min.js HTTP/1.1" 304 0
+INFO 2025-07-15 22:11:15,920 basehttp 9908 11852 "GET /static/rest_framework/js/jquery-3.7.1.min.js HTTP/1.1" 304 0
+INFO 2025-07-15 22:11:15,920 basehttp 9908 13580 "GET /static/rest_framework/js/ajax-form.js HTTP/1.1" 304 0
+INFO 2025-07-15 22:11:15,922 basehttp 9908 14096 "GET /static/rest_framework/js/load-ajax-form.js HTTP/1.1" 304 0
+INFO 2025-07-15 22:11:15,923 basehttp 9908 11648 "GET /static/rest_framework/js/default.js HTTP/1.1" 304 0
+INFO 2025-07-15 22:11:16,466 basehttp 9908 11648 "GET /static/rest_framework/img/grid.png HTTP/1.1" 304 0
+INFO 2025-07-15 22:11:21,647 basehttp 9908 11648 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 10776
+INFO 2025-07-15 22:19:03,083 basehttp 9908 22336 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-15 22:19:03,093 basehttp 9908 22336 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-15 22:19:03,400 basehttp 9908 14804 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 22:19:03,419 basehttp 9908 14804 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 22:19:06,112 basehttp 9908 22336 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 211
+INFO 2025-07-15 22:19:06,131 basehttp 9908 21696 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 211
+INFO 2025-07-15 22:20:29,645 basehttp 9908 14804 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-15 22:20:29,656 basehttp 9908 14804 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-15 22:20:29,687 basehttp 9908 14804 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 22:20:29,721 basehttp 9908 14804 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-15 22:20:29,742 basehttp 9908 14804 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 22:20:29,767 basehttp 9908 14804 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-15 22:20:33,848 basehttp 9908 14804 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-15 22:20:33,864 basehttp 9908 3548 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-15 22:20:33,906 basehttp 9908 14804 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 22:20:33,911 basehttp 9908 18944 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-15 22:20:33,932 basehttp 9908 14804 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-15 22:20:33,932 basehttp 9908 3548 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 22:20:34,904 basehttp 9908 21696 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-15 22:20:34,915 basehttp 9908 3548 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 22:20:34,943 basehttp 9908 22336 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-15 22:20:34,952 basehttp 9908 14804 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 22:20:41,424 basehttp 9908 22336 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 211
+INFO 2025-07-15 22:20:41,441 basehttp 9908 21696 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 211
+INFO 2025-07-15 22:21:02,067 basehttp 9908 21696 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-15 22:21:02,084 basehttp 9908 22336 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-15 22:21:02,089 basehttp 9908 14804 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 22:21:02,127 basehttp 9908 3548 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 22:21:04,316 basehttp 9908 22336 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 211
+INFO 2025-07-15 22:21:04,333 basehttp 9908 21696 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 211
+INFO 2025-07-15 22:23:07,976 basehttp 9908 21696 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 211
+INFO 2025-07-15 22:23:14,585 basehttp 9908 21696 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-15 22:23:14,597 basehttp 9908 3548 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 22:23:14,603 basehttp 9908 22336 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-15 22:23:14,609 basehttp 9908 14804 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 22:23:16,807 basehttp 9908 22336 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 211
+INFO 2025-07-15 22:23:16,826 basehttp 9908 21696 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 211
+INFO 2025-07-15 22:23:32,030 basehttp 9908 14804 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 22:23:32,030 basehttp 9908 21696 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-15 22:23:32,049 basehttp 9908 22336 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-15 22:23:32,058 basehttp 9908 3548 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 22:23:34,349 basehttp 9908 22336 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 211
+INFO 2025-07-15 22:23:34,356 basehttp 9908 21696 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 211
+INFO 2025-07-15 22:23:58,455 basehttp 9908 3548 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-15 22:23:58,461 basehttp 9908 14804 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-15 22:23:58,517 basehttp 9908 3548 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-15 22:23:58,517 basehttp 9908 14804 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 22:23:58,581 basehttp 9908 18944 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-15 22:23:58,588 basehttp 9908 3548 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 22:24:00,772 basehttp 9908 21696 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-15 22:24:00,787 basehttp 9908 3548 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 22:24:00,804 basehttp 9908 22336 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-15 22:24:00,827 basehttp 9908 18944 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 22:24:10,021 basehttp 9908 22336 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 211
+INFO 2025-07-15 22:24:10,037 basehttp 9908 21696 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 211
+INFO 2025-07-15 22:24:55,977 basehttp 9908 21696 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 211
+INFO 2025-07-15 22:24:59,937 basehttp 9908 21696 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-15 22:24:59,950 basehttp 9908 18944 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 22:24:59,952 basehttp 9908 22336 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-15 22:24:59,960 basehttp 9908 3548 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 22:25:04,597 basehttp 9908 22336 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 211
+INFO 2025-07-15 22:25:04,610 basehttp 9908 21696 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 211
+INFO 2025-07-15 22:27:59,945 basehttp 9908 3548 "POST /api/v1/accounts/token/refresh/ HTTP/1.1" 200 548
+INFO 2025-07-15 22:27:59,980 basehttp 9908 3548 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 22:33:10,622 basehttp 9908 9316 "GET /admin/ HTTP/1.1" 200 20249
+INFO 2025-07-15 22:37:40,193 autoreload 9908 22552 C:\Users\lxzhe\GradProject\backend\feeds\views.py changed, reloading.
+INFO 2025-07-15 22:37:43,853 autoreload 21592 19400 Watching for file changes with StatReloader
+INFO 2025-07-15 22:38:06,313 autoreload 21592 19400 C:\Users\lxzhe\GradProject\backend\feeds\urls.py changed, reloading.
+INFO 2025-07-15 22:38:09,370 autoreload 7916 2952 Watching for file changes with StatReloader
+INFO 2025-07-15 22:38:21,675 autoreload 7916 2952 C:\Users\lxzhe\GradProject\backend\feeds\models.py changed, reloading.
+INFO 2025-07-15 22:38:25,149 autoreload 16428 7148 Watching for file changes with StatReloader
+WARNING 2025-07-15 22:38:50,656 basehttp 16428 19116 "GET / HTTP/1.1" 404 3538
+INFO 2025-07-15 22:38:52,737 basehttp 16428 19116 "GET /swagger/ HTTP/1.1" 200 2217
+INFO 2025-07-15 22:38:53,709 basehttp 16428 19116 "GET /swagger/?format=openapi HTTP/1.1" 200 33958
+INFO 2025-07-15 22:44:47,052 autoreload 16428 7148 C:\Users\lxzhe\GradProject\backend\feeds\views.py changed, reloading.
+INFO 2025-07-15 22:44:50,923 autoreload 19772 21952 Watching for file changes with StatReloader
+WARNING 2025-07-15 22:45:05,328 basehttp 19772 17960 "POST /api/v1/feeds/ocr/ HTTP/1.1" 401 68
+INFO 2025-07-15 22:45:35,192 autoreload 19772 21952 C:\Users\lxzhe\GradProject\backend\feeds\views.py changed, reloading.
+INFO 2025-07-15 22:45:38,724 autoreload 21032 6408 Watching for file changes with StatReloader
+INFO 2025-07-15 22:45:48,199 autoreload 21032 6408 C:\Users\lxzhe\GradProject\backend\feeds\views.py changed, reloading.
+INFO 2025-07-15 22:45:51,347 autoreload 19332 4276 Watching for file changes with StatReloader
+ERROR 2025-07-15 22:45:57,761 basehttp 19332 21296 "POST /api/v1/feeds/ocr/ HTTP/1.1" 500 1525
+INFO 2025-07-15 22:46:12,542 basehttp 19332 21296 "GET /swagger/ HTTP/1.1" 200 2217
+INFO 2025-07-15 22:46:13,440 basehttp 19332 21296 "GET /swagger/?format=openapi HTTP/1.1" 200 33958
+ERROR 2025-07-15 22:46:31,450 basehttp 19332 21296 "POST /api/v1/feeds/ocr/ HTTP/1.1" 500 1525
+INFO 2025-07-15 22:48:03,576 autoreload 19332 4276 C:\Users\lxzhe\GradProject\backend\feeds\views.py changed, reloading.
+INFO 2025-07-15 22:48:06,387 autoreload 20352 2632 Watching for file changes with StatReloader
+ERROR 2025-07-15 22:48:13,235 basehttp 20352 18532 "POST /api/v1/feeds/ocr/ HTTP/1.1" 500 1383
+INFO 2025-07-15 22:48:47,591 autoreload 20352 2632 C:\Users\lxzhe\GradProject\backend\feeds\views.py changed, reloading.
+INFO 2025-07-15 22:48:51,288 autoreload 4280 23072 Watching for file changes with StatReloader
+ERROR 2025-07-15 22:48:59,282 basehttp 4280 19588 "POST /api/v1/feeds/ocr/ HTTP/1.1" 500 1900
+INFO 2025-07-15 22:51:08,320 autoreload 4280 23072 C:\Users\lxzhe\GradProject\backend\feeds\views.py changed, reloading.
+INFO 2025-07-15 22:51:11,949 autoreload 9380 8536 Watching for file changes with StatReloader
+ERROR 2025-07-15 22:51:16,538 basehttp 9380 16568 "POST /api/v1/feeds/ocr/ HTTP/1.1" 500 773
+ERROR 2025-07-15 22:51:24,320 basehttp 9380 16568 "POST /api/v1/feeds/ocr/ HTTP/1.1" 500 773
+INFO 2025-07-15 22:52:14,268 autoreload 9380 8536 C:\Users\lxzhe\GradProject\backend\feeds\views.py changed, reloading.
+INFO 2025-07-15 22:52:17,729 autoreload 7988 22768 Watching for file changes with StatReloader
+ERROR 2025-07-15 22:52:23,539 basehttp 7988 21964 "POST /api/v1/feeds/ocr/ HTTP/1.1" 500 1900
+INFO 2025-07-15 22:53:04,847 autoreload 7988 22768 C:\Users\lxzhe\GradProject\backend\feeds\views.py changed, reloading.
+INFO 2025-07-15 22:53:08,245 autoreload 4908 20864 Watching for file changes with StatReloader
+INFO 2025-07-15 22:53:15,035 basehttp 4908 22612 "POST /api/v1/feeds/ocr/ HTTP/1.1" 200 132
+INFO 2025-07-15 22:54:17,288 basehttp 4908 19088 "POST /api/v1/accounts/token/refresh/ HTTP/1.1" 200 548
+INFO 2025-07-15 22:54:17,313 basehttp 4908 19088 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 22:55:26,161 autoreload 4908 20864 C:\Users\lxzhe\GradProject\backend\feeds\views.py changed, reloading.
+INFO 2025-07-15 22:55:31,764 autoreload 13252 13528 Watching for file changes with StatReloader
+INFO 2025-07-15 22:56:19,270 basehttp 13252 8952 "POST /api/v1/feeds/ocr/ HTTP/1.1" 200 1193
+INFO 2025-07-15 23:02:49,805 basehttp 13252 2396 "GET /admin/feeds/feed/add/ HTTP/1.1" 200 25890
+INFO 2025-07-15 23:02:49,907 basehttp 13252 2396 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2025-07-15 23:02:53,033 basehttp 13252 2396 "GET /admin/feeds/feed/ HTTP/1.1" 200 18289
+INFO 2025-07-15 23:09:31,801 basehttp 13252 20036 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-15 23:09:31,823 basehttp 13252 1680 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-15 23:09:32,165 basehttp 13252 22020 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 23:09:32,179 basehttp 13252 22020 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 23:09:36,232 basehttp 13252 1680 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 211
+INFO 2025-07-15 23:09:36,250 basehttp 13252 20036 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 211
+INFO 2025-07-15 23:13:29,898 basehttp 13252 5232 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-15 23:13:29,923 basehttp 13252 9664 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-15 23:13:30,202 basehttp 13252 18440 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 23:13:30,226 basehttp 13252 18440 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 23:13:33,785 basehttp 13252 9664 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 211
+INFO 2025-07-15 23:13:33,802 basehttp 13252 5232 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 211
+INFO 2025-07-15 23:13:41,329 basehttp 13252 5232 "POST /api/v1/feeds/ocr/ HTTP/1.1" 200 1193
+WARNING 2025-07-15 23:13:41,372 basehttp 13252 5232 "POST /api/v1/firebase/upload/ HTTP/1.1" 404 3626
+INFO 2025-07-15 23:17:45,546 autoreload 13252 13528 C:\Users\lxzhe\GradProject\backend\feeds\urls.py changed, reloading.
+INFO 2025-07-15 23:17:51,033 autoreload 22796 14408 Watching for file changes with StatReloader
+INFO 2025-07-15 23:18:19,059 autoreload 22796 14408 C:\Users\lxzhe\GradProject\backend\feeds\urls.py changed, reloading.
+INFO 2025-07-15 23:18:21,675 autoreload 4832 22388 Watching for file changes with StatReloader
+INFO 2025-07-15 23:19:30,984 autoreload 4832 22388 C:\Users\lxzhe\GradProject\backend\feeds\urls.py changed, reloading.
+INFO 2025-07-15 23:19:34,454 autoreload 1300 23396 Watching for file changes with StatReloader
+INFO 2025-07-15 23:19:46,306 basehttp 1300 19876 "GET /swagger/ HTTP/1.1" 200 2217
+INFO 2025-07-15 23:19:46,365 basehttp 1300 19876 "GET /static/drf-yasg/style.css HTTP/1.1" 304 0
+INFO 2025-07-15 23:19:46,382 basehttp 1300 23004 "GET /static/drf-yasg/swagger-ui-dist/swagger-ui.css HTTP/1.1" 304 0
+INFO 2025-07-15 23:19:46,382 basehttp 1300 19876 "GET /static/drf-yasg/swagger-ui-dist/swagger-ui-bundle.js HTTP/1.1" 304 0
+INFO 2025-07-15 23:19:46,384 basehttp 1300 9984 "GET /static/drf-yasg/insQ.min.js HTTP/1.1" 304 0
+INFO 2025-07-15 23:19:46,391 basehttp 1300 8176 "GET /static/drf-yasg/swagger-ui-dist/swagger-ui-standalone-preset.js HTTP/1.1" 304 0
+INFO 2025-07-15 23:19:46,392 basehttp 1300 12236 "GET /static/drf-yasg/immutable.min.js HTTP/1.1" 304 0
+INFO 2025-07-15 23:19:46,394 basehttp 1300 22968 "GET /static/drf-yasg/swagger-ui-init.js HTTP/1.1" 304 0
+INFO 2025-07-15 23:19:47,162 basehttp 1300 22968 "GET /static/drf-yasg/swagger-ui-dist/favicon-32x32.png HTTP/1.1" 304 0
+INFO 2025-07-15 23:19:47,385 basehttp 1300 22968 "GET /swagger/?format=openapi HTTP/1.1" 200 34235
+INFO 2025-07-15 23:20:03,929 basehttp 1300 17256 "POST /api/v1/accounts/token/refresh/ HTTP/1.1" 200 548
+INFO 2025-07-15 23:20:04,043 basehttp 1300 17256 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 23:20:04,053 basehttp 1300 23524 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-15 23:20:04,060 basehttp 1300 17256 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 23:20:04,060 basehttp 1300 6052 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-15 23:20:06,019 basehttp 1300 6052 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 211
+INFO 2025-07-15 23:20:06,036 basehttp 1300 23524 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 211
+INFO 2025-07-15 23:20:11,154 basehttp 1300 23524 "POST /api/v1/feeds/ocr/ HTTP/1.1" 200 1193
+WARNING 2025-07-15 23:20:11,204 basehttp 1300 23524 "POST /api/v1/firebase/upload/ HTTP/1.1" 404 3626
+INFO 2025-07-15 23:20:55,435 basehttp 1300 23524 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-15 23:20:55,444 basehttp 1300 17256 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 23:20:55,452 basehttp 1300 6052 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-15 23:20:55,465 basehttp 1300 2568 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 23:20:57,202 basehttp 1300 6052 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 211
+INFO 2025-07-15 23:20:57,210 basehttp 1300 23524 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 211
+INFO 2025-07-15 23:21:02,395 basehttp 1300 23524 "POST /api/v1/feeds/ocr/ HTTP/1.1" 200 1193
+ERROR 2025-07-15 23:21:02,422 basehttp 1300 23524 "POST /api/v1/feeds/firebase/upload/ HTTP/1.1" 500 799
+INFO 2025-07-15 23:28:26,474 autoreload 1300 23396 C:\Users\lxzhe\GradProject\backend\utils\firebase_service.py changed, reloading.
+INFO 2025-07-15 23:28:31,950 autoreload 15928 22460 Watching for file changes with StatReloader
+INFO 2025-07-15 23:28:49,192 autoreload 15928 22460 C:\Users\lxzhe\GradProject\backend\feeds\views.py changed, reloading.
+INFO 2025-07-15 23:28:52,572 autoreload 21108 13780 Watching for file changes with StatReloader
+INFO 2025-07-15 23:29:02,222 basehttp 21108 22920 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-15 23:29:02,251 basehttp 21108 11736 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-15 23:29:02,307 basehttp 21108 21268 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 23:29:02,323 basehttp 21108 21268 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 23:29:04,453 basehttp 21108 11736 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 211
+INFO 2025-07-15 23:29:04,468 basehttp 21108 22920 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 211
+INFO 2025-07-15 23:29:08,678 basehttp 21108 22920 "POST /api/v1/feeds/ocr/ HTTP/1.1" 200 1193
+ERROR 2025-07-15 23:29:08,714 basehttp 21108 22920 "POST /api/v1/feeds/firebase/upload/ HTTP/1.1" 500 799
+INFO 2025-07-15 23:29:36,126 autoreload 21108 13780 C:\Users\lxzhe\GradProject\backend\feeds\views.py changed, reloading.
+INFO 2025-07-15 23:29:41,395 autoreload 20100 22280 Watching for file changes with StatReloader
+INFO 2025-07-15 23:30:03,231 autoreload 20100 22280 C:\Users\lxzhe\GradProject\backend\feeds\views.py changed, reloading.
+INFO 2025-07-15 23:30:06,666 autoreload 23396 20620 Watching for file changes with StatReloader
+INFO 2025-07-15 23:30:16,620 basehttp 23396 2040 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-15 23:30:16,637 basehttp 23396 12756 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-15 23:30:16,923 basehttp 23396 17244 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 23:30:16,942 basehttp 23396 17244 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 23:30:19,401 basehttp 23396 12756 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 211
+INFO 2025-07-15 23:30:19,413 basehttp 23396 2040 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 211
+INFO 2025-07-15 23:30:23,649 basehttp 23396 2040 "POST /api/v1/feeds/ocr/ HTTP/1.1" 200 1193
+ERROR 2025-07-15 23:30:23,677 basehttp 23396 2040 "POST /api/v1/feeds/firebase/upload/ HTTP/1.1" 500 787
+INFO 2025-07-15 23:31:27,474 autoreload 23396 20620 C:\Users\lxzhe\GradProject\backend\feeds\views.py changed, reloading.
+INFO 2025-07-15 23:31:32,921 autoreload 11100 23092 Watching for file changes with StatReloader
+INFO 2025-07-15 23:31:37,181 basehttp 11100 10088 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-15 23:31:37,192 basehttp 11100 10088 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-15 23:31:37,521 basehttp 11100 14788 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 23:31:37,540 basehttp 11100 14788 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 23:31:40,251 basehttp 11100 10088 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 211
+INFO 2025-07-15 23:31:40,263 basehttp 11100 22512 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 211
+INFO 2025-07-15 23:31:44,231 basehttp 11100 22512 "POST /api/v1/feeds/ocr/ HTTP/1.1" 200 1193
+ERROR 2025-07-15 23:31:44,262 basehttp 11100 22512 "POST /api/v1/feeds/firebase/upload/ HTTP/1.1" 500 819
+INFO 2025-07-15 23:33:45,815 autoreload 11100 23092 C:\Users\lxzhe\GradProject\backend\utils\firebase_service.py changed, reloading.
+INFO 2025-07-15 23:33:50,999 autoreload 14252 17276 Watching for file changes with StatReloader
+INFO 2025-07-15 23:33:59,254 autoreload 14252 17276 C:\Users\lxzhe\GradProject\backend\feeds\views.py changed, reloading.
+INFO 2025-07-15 23:34:02,553 autoreload 20520 10176 Watching for file changes with StatReloader
+INFO 2025-07-15 23:34:11,428 basehttp 20520 10840 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-15 23:34:11,437 basehttp 20520 22796 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-15 23:34:11,768 basehttp 20520 2700 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 23:34:11,783 basehttp 20520 2700 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 23:34:13,489 basehttp 20520 22796 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 211
+INFO 2025-07-15 23:34:13,489 basehttp 20520 10840 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 211
+INFO 2025-07-15 23:34:17,086 basehttp 20520 10840 "POST /api/v1/feeds/ocr/ HTTP/1.1" 200 1193
+ERROR 2025-07-15 23:34:17,105 basehttp 20520 10840 "POST /api/v1/feeds/firebase/upload/ HTTP/1.1" 500 879
+INFO 2025-07-15 23:36:10,722 autoreload 20520 10176 C:\Users\lxzhe\GradProject\backend\feeds\views.py changed, reloading.
+INFO 2025-07-15 23:36:15,543 autoreload 21704 19352 Watching for file changes with StatReloader
+INFO 2025-07-15 23:38:39,510 basehttp 21704 23220 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-15 23:38:39,535 basehttp 21704 23220 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-15 23:38:39,853 basehttp 21704 22972 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 23:38:39,879 basehttp 21704 22972 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 23:38:42,908 basehttp 21704 23220 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 211
+INFO 2025-07-15 23:38:42,917 basehttp 21704 22940 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 211
+INFO 2025-07-15 23:38:47,745 basehttp 21704 22940 "POST /api/v1/feeds/ocr/ HTTP/1.1" 200 1193
+ERROR 2025-07-15 23:38:47,782 basehttp 21704 22940 "POST /api/v1/feeds/firebase/upload/ HTTP/1.1" 500 676
+INFO 2025-07-15 23:40:53,404 basehttp 21704 22940 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-15 23:40:53,416 basehttp 21704 22972 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 23:40:53,419 basehttp 21704 23220 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-15 23:40:53,446 basehttp 21704 22972 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 23:40:55,304 basehttp 21704 23220 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 211
+INFO 2025-07-15 23:40:55,312 basehttp 21704 22940 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 211
+INFO 2025-07-15 23:40:59,404 basehttp 21704 22940 "POST /api/v1/feeds/ocr/ HTTP/1.1" 200 1193
+ERROR 2025-07-15 23:40:59,442 basehttp 21704 22940 "POST /api/v1/feeds/firebase/upload/ HTTP/1.1" 500 676
+INFO 2025-07-15 23:41:44,855 autoreload 21524 22388 Watching for file changes with StatReloader
+INFO 2025-07-15 23:41:53,931 basehttp 21524 2868 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-15 23:41:53,946 basehttp 21524 19220 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-15 23:41:54,239 basehttp 21524 14632 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 23:41:54,261 basehttp 21524 14632 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 23:41:55,522 basehttp 21524 19220 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 211
+INFO 2025-07-15 23:41:55,546 basehttp 21524 2868 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 211
+INFO 2025-07-15 23:41:59,186 basehttp 21524 2868 "POST /api/v1/feeds/ocr/ HTTP/1.1" 200 1193
+ERROR 2025-07-15 23:41:59,218 basehttp 21524 2868 "POST /api/v1/feeds/firebase/upload/ HTTP/1.1" 500 676
+INFO 2025-07-15 23:43:30,784 basehttp 21524 2868 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-15 23:43:30,805 basehttp 21524 14632 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 23:43:30,805 basehttp 21524 19220 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-15 23:43:30,821 basehttp 21524 14632 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 23:43:32,364 basehttp 21524 19220 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 211
+INFO 2025-07-15 23:43:32,375 basehttp 21524 2868 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 211
+INFO 2025-07-15 23:43:36,181 basehttp 21524 2868 "POST /api/v1/feeds/ocr/ HTTP/1.1" 200 1193
+INFO 2025-07-15 23:43:41,176 basehttp 21524 2868 "POST /api/v1/feeds/firebase/upload/ HTTP/1.1" 200 182
+INFO 2025-07-15 23:43:45,502 basehttp 21524 2868 "POST /api/v1/feeds/firebase/upload/ HTTP/1.1" 200 186
+INFO 2025-07-15 23:43:45,502 basehttp 21524 2868 "OPTIONS /api/v1/calculator/feeds/create HTTP/1.1" 200 0
+ERROR 2025-07-15 23:43:45,642 basehttp 21524 2868 "POST /api/v1/calculator/feeds/create HTTP/1.1" 500 81443
+INFO 2025-07-15 23:46:05,872 basehttp 21524 14632 "POST /api/v1/accounts/token/refresh/ HTTP/1.1" 200 548
+INFO 2025-07-15 23:46:05,909 basehttp 21524 14632 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 23:50:08,421 basehttp 21524 21948 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-15 23:50:08,435 basehttp 21524 14632 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 23:50:08,447 basehttp 21524 18688 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-15 23:50:08,458 basehttp 21524 14632 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 23:50:10,133 basehttp 21524 18688 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 211
+INFO 2025-07-15 23:50:10,144 basehttp 21524 21948 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 211
+INFO 2025-07-15 23:50:14,397 basehttp 21524 21948 "POST /api/v1/feeds/ocr/ HTTP/1.1" 200 1193
+INFO 2025-07-15 23:50:19,016 basehttp 21524 21948 "POST /api/v1/feeds/firebase/upload/ HTTP/1.1" 200 182
+INFO 2025-07-15 23:50:23,189 basehttp 21524 21948 "POST /api/v1/feeds/firebase/upload/ HTTP/1.1" 200 186
+ERROR 2025-07-15 23:50:23,300 basehttp 21524 21948 "POST /api/v1/calculator/feeds/create HTTP/1.1" 500 81443
+INFO 2025-07-15 23:54:15,994 autoreload 21524 22388 C:\Users\lxzhe\GradProject\backend\calculator\views.py changed, reloading.
+INFO 2025-07-15 23:54:21,630 autoreload 3496 20716 Watching for file changes with StatReloader
+INFO 2025-07-15 23:54:39,270 basehttp 3496 20008 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-15 23:54:39,279 basehttp 3496 19684 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-15 23:54:39,622 basehttp 3496 12676 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 23:54:39,641 basehttp 3496 12676 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 23:54:40,978 basehttp 3496 19684 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 211
+INFO 2025-07-15 23:54:40,987 basehttp 3496 20008 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 211
+INFO 2025-07-15 23:54:46,351 basehttp 3496 20008 "POST /api/v1/feeds/ocr/ HTTP/1.1" 200 1193
+INFO 2025-07-15 23:54:51,223 basehttp 3496 20008 "POST /api/v1/feeds/firebase/upload/ HTTP/1.1" 200 182
+INFO 2025-07-15 23:54:55,384 basehttp 3496 20008 "POST /api/v1/feeds/firebase/upload/ HTTP/1.1" 200 186
+ERROR 2025-07-15 23:54:55,463 basehttp 3496 20008 "POST /api/v1/calculator/feeds/create HTTP/1.1" 500 81443
+INFO 2025-07-15 23:56:44,483 basehttp 3496 3300 "GET /api/v1/calculator/feeds/create HTTP/1.1" 301 0
+WARNING 2025-07-15 23:56:44,759 basehttp 3496 22144 "GET /api/v1/calculator/feeds/create/ HTTP/1.1" 405 10735
+INFO 2025-07-15 23:57:20,813 basehttp 3496 19684 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-15 23:57:20,834 basehttp 3496 12676 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 23:57:20,850 basehttp 3496 19684 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-15 23:57:20,859 basehttp 3496 12676 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-15 23:57:22,429 basehttp 3496 19684 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 211
+INFO 2025-07-15 23:57:22,444 basehttp 3496 21460 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 211
+INFO 2025-07-15 23:57:26,721 basehttp 3496 21460 "POST /api/v1/feeds/ocr/ HTTP/1.1" 200 1193
+INFO 2025-07-15 23:57:29,388 basehttp 3496 21460 "POST /api/v1/feeds/firebase/upload/ HTTP/1.1" 200 182
+INFO 2025-07-15 23:57:33,728 basehttp 3496 21460 "POST /api/v1/feeds/firebase/upload/ HTTP/1.1" 200 186
+ERROR 2025-07-15 23:57:33,849 basehttp 3496 21460 "POST /api/v1/calculator/feeds/create HTTP/1.1" 500 81443
+INFO 2025-07-16 00:01:12,203 autoreload 3496 20716 C:\Users\lxzhe\GradProject\backend\calculator\views.py changed, reloading.
+INFO 2025-07-16 00:01:15,477 autoreload 22764 22344 Watching for file changes with StatReloader
+INFO 2025-07-16 00:04:26,305 autoreload 22764 22344 C:\Users\lxzhe\GradProject\backend\feeds\models.py changed, reloading.
+INFO 2025-07-16 00:04:27,853 autoreload 14736 11672 Watching for file changes with StatReloader
+INFO 2025-07-16 00:05:01,008 autoreload 14736 11672 C:\Users\lxzhe\GradProject\backend\feeds\serializers.py changed, reloading.
+INFO 2025-07-16 00:05:02,662 autoreload 3820 22440 Watching for file changes with StatReloader
+INFO 2025-07-16 00:05:38,340 autoreload 20720 16656 Watching for file changes with StatReloader
+INFO 2025-07-16 00:05:44,542 basehttp 20720 9756 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-16 00:05:44,547 basehttp 20720 324 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-16 00:05:44,844 basehttp 20720 4348 "OPTIONS /api/v1/accounts/me/ HTTP/1.1" 200 0
+INFO 2025-07-16 00:05:44,847 basehttp 20720 2940 "OPTIONS /api/v1/accounts/me/ HTTP/1.1" 200 0
+INFO 2025-07-16 00:05:44,860 basehttp 20720 4348 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 00:05:44,867 basehttp 20720 2940 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 00:05:46,627 basehttp 20720 324 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 208
+INFO 2025-07-16 00:05:46,627 basehttp 20720 9756 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 208
+INFO 2025-07-16 00:05:49,966 basehttp 20720 9756 "POST /api/v1/feeds/ocr/ HTTP/1.1" 200 1193
+INFO 2025-07-16 00:05:54,733 basehttp 20720 9756 "POST /api/v1/feeds/firebase/upload/ HTTP/1.1" 200 182
+INFO 2025-07-16 00:05:58,882 basehttp 20720 9756 "POST /api/v1/feeds/firebase/upload/ HTTP/1.1" 200 186
+ERROR 2025-07-16 00:05:58,934 basehttp 20720 9756 "POST /api/v1/calculator/feeds/create HTTP/1.1" 500 81443
+INFO 2025-07-16 00:07:49,629 basehttp 20720 324 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-16 00:07:49,638 basehttp 20720 2940 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 00:07:49,643 basehttp 20720 5752 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-16 00:07:49,672 basehttp 20720 4348 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 00:07:53,329 basehttp 20720 5752 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 208
+INFO 2025-07-16 00:07:53,335 basehttp 20720 324 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 208
+INFO 2025-07-16 00:07:59,571 basehttp 20720 324 "POST /api/v1/feeds/ocr/ HTTP/1.1" 200 1193
+INFO 2025-07-16 00:08:02,165 basehttp 20720 324 "POST /api/v1/feeds/firebase/upload/ HTTP/1.1" 200 182
+INFO 2025-07-16 00:08:06,285 basehttp 20720 324 "POST /api/v1/feeds/firebase/upload/ HTTP/1.1" 200 186
+ERROR 2025-07-16 00:08:06,352 basehttp 20720 324 "POST /api/v1/calculator/feeds/create HTTP/1.1" 500 81443
+INFO 2025-07-16 00:11:17,494 autoreload 20720 16656 C:\Users\lxzhe\GradProject\backend\feeds\models.py changed, reloading.
+INFO 2025-07-16 00:11:20,813 autoreload 21584 13504 Watching for file changes with StatReloader
+INFO 2025-07-16 00:11:49,839 basehttp 21584 21192 "OPTIONS /api/v1/accounts/token/refresh/ HTTP/1.1" 200 0
+INFO 2025-07-16 00:11:49,868 basehttp 21584 21192 "POST /api/v1/accounts/token/refresh/ HTTP/1.1" 200 548
+INFO 2025-07-16 00:11:49,885 basehttp 21584 21192 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 00:15:20,897 basehttp 21584 21104 "GET /admin/ HTTP/1.1" 200 20249
+INFO 2025-07-16 00:15:23,999 basehttp 21584 21104 "GET /admin/accounts/customuser/ HTTP/1.1" 200 21755
+INFO 2025-07-16 00:15:24,053 basehttp 21584 21104 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2025-07-16 00:17:54,627 autoreload 21584 13504 C:\Users\lxzhe\GradProject\backend\feeds\models.py changed, reloading.
+INFO 2025-07-16 00:17:56,096 autoreload 22920 20832 Watching for file changes with StatReloader
+INFO 2025-07-16 00:18:28,325 autoreload 21540 14428 Watching for file changes with StatReloader
+INFO 2025-07-16 00:18:38,745 basehttp 21540 21324 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-16 00:18:38,755 basehttp 21540 17580 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-16 00:18:39,078 basehttp 21540 23336 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 00:18:39,098 basehttp 21540 23336 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+ERROR 2025-07-16 00:18:41,164 basehttp 21540 17580 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 500 3006
+ERROR 2025-07-16 00:18:41,172 basehttp 21540 21324 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 500 3006
+INFO 2025-07-16 00:18:56,422 autoreload 21540 14428 C:\Users\lxzhe\GradProject\backend\feeds\models.py changed, reloading.
+INFO 2025-07-16 00:18:57,672 autoreload 19288 21180 Watching for file changes with StatReloader
+INFO 2025-07-16 00:19:17,725 autoreload 16720 21924 Watching for file changes with StatReloader
+INFO 2025-07-16 00:19:34,838 autoreload 16720 21924 C:\Users\lxzhe\GradProject\backend\feeds\models.py changed, reloading.
+INFO 2025-07-16 00:19:36,184 autoreload 9756 20896 Watching for file changes with StatReloader
+INFO 2025-07-16 00:19:40,784 basehttp 9756 15352 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-16 00:19:40,795 basehttp 9756 1660 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-16 00:19:41,084 basehttp 9756 15928 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 00:19:41,094 basehttp 9756 15928 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 00:19:42,987 basehttp 9756 1660 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 208
+INFO 2025-07-16 00:19:42,994 basehttp 9756 15352 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 208
+INFO 2025-07-16 00:24:17,319 basehttp 9756 15928 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-16 00:24:17,325 basehttp 9756 15928 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-16 00:24:17,337 basehttp 9756 15928 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 00:24:17,353 basehttp 9756 15928 "OPTIONS /api/v1/accounts/plans/today/ HTTP/1.1" 200 0
+INFO 2025-07-16 00:24:17,353 basehttp 9756 15928 "OPTIONS /api/v1/accounts/plans/today/ HTTP/1.1" 200 0
+INFO 2025-07-16 00:24:17,359 basehttp 9756 15928 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 00:24:17,374 basehttp 9756 15928 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-16 00:24:17,384 basehttp 9756 15928 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-16 00:24:18,627 basehttp 9756 15352 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-16 00:24:18,629 basehttp 9756 15928 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 00:24:18,640 basehttp 9756 1660 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-16 00:24:18,642 basehttp 9756 5360 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 00:24:34,058 basehttp 9756 1660 "OPTIONS /api/v1/calculator/pets/create/ HTTP/1.1" 200 0
+ERROR 2025-07-16 00:24:34,069 basehttp 9756 1660 "POST /api/v1/calculator/pets/create/ HTTP/1.1" 500 1231
+INFO 2025-07-16 00:26:54,665 autoreload 9756 20896 C:\Users\lxzhe\GradProject\backend\calculator\views.py changed, reloading.
+INFO 2025-07-16 00:26:56,030 autoreload 11488 6088 Watching for file changes with StatReloader
+ERROR 2025-07-16 00:27:03,383 basehttp 11488 18512 "POST /api/v1/calculator/pets/create/ HTTP/1.1" 500 1231
+INFO 2025-07-16 00:27:05,847 basehttp 11488 18512 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 208
+INFO 2025-07-16 00:27:05,847 basehttp 11488 4476 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 208
+INFO 2025-07-16 00:27:15,000 basehttp 11488 4476 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-16 00:27:15,012 basehttp 11488 18512 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-16 00:27:15,356 basehttp 11488 21992 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 00:27:15,364 basehttp 11488 21992 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 00:27:16,285 basehttp 11488 18512 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 208
+INFO 2025-07-16 00:27:16,294 basehttp 11488 4476 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 208
+INFO 2025-07-16 00:27:22,722 basehttp 11488 4476 "POST /api/v1/feeds/ocr/ HTTP/1.1" 200 1193
+INFO 2025-07-16 00:27:27,480 basehttp 11488 4476 "POST /api/v1/feeds/firebase/upload/ HTTP/1.1" 200 182
+WARNING 2025-07-16 00:27:28,943 basehttp 11488 18512 "POST /calculator/ HTTP/1.1" 404 3590
+INFO 2025-07-16 00:27:31,610 basehttp 11488 4476 "POST /api/v1/feeds/firebase/upload/ HTTP/1.1" 200 186
+ERROR 2025-07-16 00:27:31,653 basehttp 11488 4476 "POST /api/v1/calculator/feeds/create HTTP/1.1" 500 81443
+INFO 2025-07-16 00:28:08,641 autoreload 11488 6088 C:\Users\lxzhe\GradProject\backend\calculator\views.py changed, reloading.
+INFO 2025-07-16 00:28:12,060 autoreload 4832 15844 Watching for file changes with StatReloader
+INFO 2025-07-16 00:28:18,069 autoreload 4832 15844 C:\Users\lxzhe\GradProject\backend\calculator\views.py changed, reloading.
+INFO 2025-07-16 00:28:19,490 autoreload 13176 14736 Watching for file changes with StatReloader
+INFO 2025-07-16 00:28:39,050 basehttp 13176 21568 "POST /api/v1/feeds/ocr/ HTTP/1.1" 200 1193
+INFO 2025-07-16 00:28:43,761 basehttp 13176 21568 "POST /api/v1/feeds/firebase/upload/ HTTP/1.1" 200 182
+INFO 2025-07-16 00:28:49,371 basehttp 13176 21568 "POST /api/v1/feeds/firebase/upload/ HTTP/1.1" 200 186
+ERROR 2025-07-16 00:28:49,438 basehttp 13176 21568 "POST /api/v1/calculator/feeds/create HTTP/1.1" 500 81443
+INFO 2025-07-16 00:30:45,186 autoreload 13176 14736 C:\Users\lxzhe\GradProject\backend\calculator\views.py changed, reloading.
+INFO 2025-07-16 00:30:48,553 autoreload 4732 10396 Watching for file changes with StatReloader
+INFO 2025-07-16 00:30:55,770 autoreload 4732 10396 C:\Users\lxzhe\GradProject\backend\calculator\views.py changed, reloading.
+INFO 2025-07-16 00:30:57,097 autoreload 9984 22988 Watching for file changes with StatReloader
+INFO 2025-07-16 00:32:30,367 basehttp 9984 19892 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-16 00:32:30,376 basehttp 9984 19892 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-16 00:32:30,407 basehttp 9984 18600 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 00:32:30,411 basehttp 9984 17624 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-16 00:32:30,420 basehttp 9984 19892 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 00:32:30,423 basehttp 9984 18600 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-16 00:32:32,240 basehttp 9984 14868 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-16 00:32:32,246 basehttp 9984 18600 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 00:32:32,254 basehttp 9984 3800 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 687
+INFO 2025-07-16 00:32:32,259 basehttp 9984 19892 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 00:34:26,073 basehttp 9984 17320 "POST /api/v1/calculator/pets/create/ HTTP/1.1" 201 186
+INFO 2025-07-16 00:35:55,207 basehttp 9984 11736 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 991
+INFO 2025-07-16 00:35:55,220 basehttp 9984 11736 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 991
+INFO 2025-07-16 00:35:55,509 basehttp 9984 22624 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 00:35:55,522 basehttp 9984 22624 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 00:36:54,935 basehttp 9984 22624 "POST /api/v1/accounts/token/refresh/ HTTP/1.1" 200 548
+INFO 2025-07-16 00:36:54,997 basehttp 9984 22624 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 00:37:33,171 autoreload 9984 22988 C:\Users\lxzhe\GradProject\backend\calculator\views.py changed, reloading.
+INFO 2025-07-16 00:37:36,649 autoreload 14032 17288 Watching for file changes with StatReloader
+ERROR 2025-07-16 00:38:43,451 basehttp 14032 19404 "GET /api/v1/calculator/feeds/?user_id=$%7Buid%7D HTTP/1.1" 500 15175
+INFO 2025-07-16 00:43:28,949 basehttp 14032 15716 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 208
+INFO 2025-07-16 00:43:28,970 basehttp 14032 10224 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 208
+INFO 2025-07-16 00:43:35,076 basehttp 14032 10224 "POST /api/v1/feeds/ocr/ HTTP/1.1" 200 1193
+INFO 2025-07-16 00:43:40,163 basehttp 14032 10224 "POST /api/v1/feeds/firebase/upload/ HTTP/1.1" 200 182
+INFO 2025-07-16 00:43:44,482 basehttp 14032 10224 "POST /api/v1/feeds/firebase/upload/ HTTP/1.1" 200 186
+ERROR 2025-07-16 00:43:44,617 basehttp 14032 10224 "POST /api/v1/calculator/feeds/create HTTP/1.1" 500 81443
+INFO 2025-07-16 01:02:44,541 autoreload 14032 17288 C:\Users\lxzhe\GradProject\backend\calculator\views.py changed, reloading.
+INFO 2025-07-16 01:02:47,808 autoreload 19072 10648 Watching for file changes with StatReloader
+INFO 2025-07-16 01:03:16,534 basehttp 19072 22588 "POST /api/v1/accounts/token/refresh/ HTTP/1.1" 200 548
+INFO 2025-07-16 01:03:16,568 basehttp 19072 22008 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 991
+INFO 2025-07-16 01:03:16,585 basehttp 19072 22588 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 01:03:16,586 basehttp 19072 20936 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 991
+INFO 2025-07-16 01:03:16,596 basehttp 19072 22588 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 01:03:19,308 basehttp 19072 20936 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 208
+INFO 2025-07-16 01:03:19,312 basehttp 19072 22008 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 208
+INFO 2025-07-16 01:03:25,848 basehttp 19072 22008 "POST /api/v1/feeds/ocr/ HTTP/1.1" 200 1193
+INFO 2025-07-16 01:03:30,659 basehttp 19072 22008 "POST /api/v1/feeds/firebase/upload/ HTTP/1.1" 200 182
+INFO 2025-07-16 01:03:34,827 basehttp 19072 22008 "POST /api/v1/feeds/firebase/upload/ HTTP/1.1" 200 186
+ERROR 2025-07-16 01:03:34,894 basehttp 19072 22008 "POST /api/v1/calculator/feeds/create HTTP/1.1" 500 81443
+WARNING 2025-07-16 01:06:51,280 basehttp 19072 12848 "POST /api/v1/calculator/feeds/create%20 HTTP/1.1" 404 4898
+ERROR 2025-07-16 01:06:59,415 basehttp 19072 12848 "POST /api/v1/calculator/feeds/create HTTP/1.1" 500 81596
+INFO 2025-07-16 01:08:53,864 autoreload 19072 10648 C:\Users\lxzhe\GradProject\backend\calculator\views.py changed, reloading.
+INFO 2025-07-16 01:08:57,225 autoreload 15568 4384 Watching for file changes with StatReloader
+ERROR 2025-07-16 01:08:59,087 basehttp 15568 1900 "POST /api/v1/calculator/feeds/create HTTP/1.1" 500 81596
+INFO 2025-07-16 01:09:10,159 autoreload 15568 4384 C:\Users\lxzhe\GradProject\backend\calculator\views.py changed, reloading.
+INFO 2025-07-16 01:09:11,590 autoreload 10620 19068 Watching for file changes with StatReloader
+ERROR 2025-07-16 01:09:16,089 basehttp 10620 20156 "POST /api/v1/calculator/feeds/create HTTP/1.1" 500 81596
+ERROR 2025-07-16 01:11:47,966 basehttp 10620 16264 "POST /api/v1/calculator/feeds/create HTTP/1.1" 500 81596
+INFO 2025-07-16 01:15:26,772 autoreload 10620 19068 C:\Users\lxzhe\GradProject\backend\calculator\views.py changed, reloading.
+INFO 2025-07-16 01:15:28,064 autoreload 16076 23480 Watching for file changes with StatReloader
+ERROR 2025-07-16 01:24:13,990 basehttp 16076 23304 "POST /api/v1/calculator/feeds/create HTTP/1.1" 500 81908
+INFO 2025-07-16 01:26:04,493 basehttp 16076 8252 "POST /api/v1/calculator/feeds/create/ HTTP/1.1" 201 287
+INFO 2025-07-16 01:26:26,788 basehttp 16076 21668 "GET /admin/calculator/pet/ HTTP/1.1" 200 18762
+INFO 2025-07-16 01:26:26,841 basehttp 16076 21668 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2025-07-16 01:26:30,437 basehttp 16076 21668 "GET /admin/feeds/feed/ HTTP/1.1" 200 18492
+INFO 2025-07-16 01:26:30,483 basehttp 16076 21668 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2025-07-16 01:26:33,761 basehttp 16076 21668 "GET /admin/feeds/feed/2/change/ HTTP/1.1" 200 26330
+INFO 2025-07-16 01:26:33,813 basehttp 16076 21668 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2025-07-16 01:26:36,442 basehttp 16076 21668 "GET /admin/feeds/feed/2/delete/ HTTP/1.1" 200 17088
+INFO 2025-07-16 01:26:36,634 basehttp 16076 21668 "GET /static/admin/js/cancel.js HTTP/1.1" 200 884
+INFO 2025-07-16 01:26:37,798 basehttp 16076 21668 "POST /admin/feeds/feed/2/delete/ HTTP/1.1" 302 0
+INFO 2025-07-16 01:26:37,818 basehttp 16076 21668 "GET /admin/feeds/feed/ HTTP/1.1" 200 18441
+INFO 2025-07-16 01:26:37,871 basehttp 16076 21668 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2025-07-16 01:28:39,241 basehttp 16076 21872 "POST /api/v1/accounts/token/refresh/ HTTP/1.1" 200 548
+INFO 2025-07-16 01:28:39,281 basehttp 16076 21872 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 01:28:39,281 basehttp 16076 14208 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 991
+INFO 2025-07-16 01:28:39,292 basehttp 16076 21872 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 01:28:39,293 basehttp 16076 14208 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 991
+INFO 2025-07-16 01:28:45,200 basehttp 16076 14208 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 208
+INFO 2025-07-16 01:28:45,206 basehttp 16076 3416 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 208
+INFO 2025-07-16 01:28:52,143 basehttp 16076 3416 "POST /api/v1/feeds/ocr/ HTTP/1.1" 200 1193
+INFO 2025-07-16 01:28:56,906 basehttp 16076 3416 "POST /api/v1/feeds/firebase/upload/ HTTP/1.1" 200 182
+INFO 2025-07-16 01:29:04,918 basehttp 16076 3416 "POST /api/v1/feeds/firebase/upload/ HTTP/1.1" 200 186
+INFO 2025-07-16 01:29:04,927 basehttp 16076 3416 "OPTIONS /api/v1/calculator/feeds/create/ HTTP/1.1" 200 0
+ERROR 2025-07-16 01:29:04,942 basehttp 16076 3416 "POST /api/v1/calculator/feeds/create/ HTTP/1.1" 500 1232
+INFO 2025-07-16 01:31:01,334 autoreload 16076 23480 C:\Users\lxzhe\GradProject\backend\calculator\views.py changed, reloading.
+INFO 2025-07-16 01:31:04,840 autoreload 23200 11512 Watching for file changes with StatReloader
+INFO 2025-07-16 01:31:28,182 autoreload 23200 11512 C:\Users\lxzhe\GradProject\backend\calculator\views.py changed, reloading.
+INFO 2025-07-16 01:31:29,648 autoreload 8208 4056 Watching for file changes with StatReloader
+INFO 2025-07-16 01:31:41,693 basehttp 8208 12352 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 991
+INFO 2025-07-16 01:31:41,699 basehttp 8208 2580 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 991
+INFO 2025-07-16 01:31:42,004 basehttp 8208 8656 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 01:31:42,010 basehttp 8208 8656 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 01:31:46,594 basehttp 8208 2580 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 208
+INFO 2025-07-16 01:31:46,598 basehttp 8208 12352 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 208
+INFO 2025-07-16 01:31:51,004 basehttp 8208 12352 "POST /api/v1/feeds/ocr/ HTTP/1.1" 200 1193
+INFO 2025-07-16 01:31:55,929 basehttp 8208 12352 "POST /api/v1/feeds/firebase/upload/ HTTP/1.1" 200 182
+INFO 2025-07-16 01:32:00,205 basehttp 8208 12352 "POST /api/v1/feeds/firebase/upload/ HTTP/1.1" 200 186
+INFO 2025-07-16 01:32:00,220 basehttp 8208 12352 "POST /api/v1/calculator/feeds/create/ HTTP/1.1" 201 532
+INFO 2025-07-16 01:34:58,479 autoreload 22932 15868 Watching for file changes with StatReloader
+INFO 2025-07-16 01:35:06,946 basehttp 22932 22228 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 991
+INFO 2025-07-16 01:35:06,956 basehttp 22932 19364 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 991
+INFO 2025-07-16 01:35:07,250 basehttp 22932 20556 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 01:35:07,258 basehttp 22932 20556 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 01:35:09,352 basehttp 22932 19364 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 689
+INFO 2025-07-16 01:35:09,356 basehttp 22932 22228 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 689
+INFO 2025-07-16 01:35:18,051 basehttp 22932 7916 "GET /admin/feeds/feed/ HTTP/1.1" 200 18499
+INFO 2025-07-16 01:35:18,081 basehttp 22932 7916 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2025-07-16 01:35:24,952 basehttp 22932 7916 "GET /admin/feeds/feed/1/change/ HTTP/1.1" 200 26084
+INFO 2025-07-16 01:35:25,001 basehttp 22932 7916 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2025-07-16 01:35:27,271 basehttp 22932 7916 "GET /admin/feeds/feed/ HTTP/1.1" 200 18499
+INFO 2025-07-16 01:35:29,551 basehttp 22932 7916 "GET /admin/feeds/feed/1/change/ HTTP/1.1" 200 26084
+INFO 2025-07-16 01:35:29,602 basehttp 22932 7916 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2025-07-16 01:35:30,862 basehttp 22932 7916 "GET /admin/feeds/feed/1/delete/ HTTP/1.1" 200 17085
+INFO 2025-07-16 01:35:32,054 basehttp 22932 7916 "POST /admin/feeds/feed/1/delete/ HTTP/1.1" 302 0
+INFO 2025-07-16 01:35:32,081 basehttp 22932 7916 "GET /admin/feeds/feed/ HTTP/1.1" 200 18448
+INFO 2025-07-16 01:35:32,133 basehttp 22932 7916 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2025-07-16 01:35:40,321 basehttp 22932 22228 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 991
+INFO 2025-07-16 01:35:40,330 basehttp 22932 20556 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 01:35:40,343 basehttp 22932 14112 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 01:35:40,343 basehttp 22932 19364 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 991
+INFO 2025-07-16 01:35:41,749 basehttp 22932 19364 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 482
+INFO 2025-07-16 01:35:41,758 basehttp 22932 22228 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 482
+ERROR 2025-07-16 01:37:57,731 basehttp 22932 7916 "GET /api/v1/calculator/feeds/?user_id=$%7Buid%7D HTTP/1.1" 500 15175
+INFO 2025-07-16 01:38:02,475 basehttp 22932 7916 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 11407
+INFO 2025-07-16 01:38:23,862 basehttp 22932 22228 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 991
+INFO 2025-07-16 01:38:23,875 basehttp 22932 19364 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 991
+INFO 2025-07-16 01:38:23,877 basehttp 22932 14112 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 01:38:23,892 basehttp 22932 20556 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 01:38:26,266 basehttp 22932 19364 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 482
+INFO 2025-07-16 01:38:26,348 basehttp 22932 22228 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 482
+INFO 2025-07-16 01:39:17,289 basehttp 22932 20556 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-16 01:39:17,294 basehttp 22932 14112 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-16 01:39:17,304 basehttp 22932 20556 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 01:39:17,309 basehttp 22932 14112 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-16 01:39:17,334 basehttp 22932 20556 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 01:39:17,335 basehttp 22932 14112 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-16 01:39:19,981 basehttp 22932 22228 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 991
+INFO 2025-07-16 01:39:19,988 basehttp 22932 14112 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 01:39:19,994 basehttp 22932 19364 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 991
+INFO 2025-07-16 01:39:20,004 basehttp 22932 20556 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 01:39:22,195 basehttp 22932 19364 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 482
+INFO 2025-07-16 01:39:22,199 basehttp 22932 22228 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 482
+INFO 2025-07-16 01:41:46,133 autoreload 22932 15868 C:\Users\lxzhe\GradProject\backend\calculator\views.py changed, reloading.
+INFO 2025-07-16 01:41:47,646 autoreload 12100 18460 Watching for file changes with StatReloader
+INFO 2025-07-16 01:44:07,089 basehttp 12100 1944 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 991
+INFO 2025-07-16 01:44:07,095 basehttp 12100 21236 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 991
+INFO 2025-07-16 01:44:07,394 basehttp 12100 8648 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 01:44:07,401 basehttp 12100 8648 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 01:44:08,829 basehttp 12100 21236 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 482
+INFO 2025-07-16 01:44:08,835 basehttp 12100 1944 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 482
+INFO 2025-07-16 01:44:27,312 basehttp 12100 1944 "OPTIONS /api/v1/calculator/feeds/update/ HTTP/1.1" 200 0
+INFO 2025-07-16 01:44:27,328 basehttp 12100 1944 "POST /api/v1/calculator/feeds/update/ HTTP/1.1" 200 521
+WARNING 2025-07-16 01:44:27,345 basehttp 12100 1944 "POST /calculator/ HTTP/1.1" 404 3590
+INFO 2025-07-16 01:44:39,330 basehttp 12100 1944 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 991
+INFO 2025-07-16 01:44:39,336 basehttp 12100 8648 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 01:44:39,341 basehttp 12100 21236 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 991
+INFO 2025-07-16 01:44:39,352 basehttp 12100 19876 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 01:44:40,764 basehttp 12100 21236 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 483
+INFO 2025-07-16 01:44:40,769 basehttp 12100 1944 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 483
+INFO 2025-07-16 01:44:44,772 basehttp 12100 1944 "POST /api/v1/calculator/feeds/update/ HTTP/1.1" 200 520
+WARNING 2025-07-16 01:44:44,785 basehttp 12100 1944 "POST /calculator/ HTTP/1.1" 404 3590
+INFO 2025-07-16 01:44:46,631 basehttp 12100 1944 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 991
+INFO 2025-07-16 01:44:46,640 basehttp 12100 19876 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 01:44:46,643 basehttp 12100 21236 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 991
+INFO 2025-07-16 01:44:46,652 basehttp 12100 8648 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 01:44:47,603 basehttp 12100 21236 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 482
+INFO 2025-07-16 01:44:47,609 basehttp 12100 1944 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 482
+INFO 2025-07-16 01:45:08,188 basehttp 12100 1944 "POST /api/v1/calculator/feeds/update/ HTTP/1.1" 200 520
+WARNING 2025-07-16 01:45:08,198 basehttp 12100 1944 "POST /calculator/ HTTP/1.1" 404 3590
+INFO 2025-07-16 01:45:17,944 basehttp 12100 1944 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 991
+INFO 2025-07-16 01:45:17,948 basehttp 12100 8648 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 01:45:17,954 basehttp 12100 21236 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 991
+INFO 2025-07-16 01:45:17,963 basehttp 12100 19876 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 01:45:19,029 basehttp 12100 21236 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 482
+INFO 2025-07-16 01:45:19,034 basehttp 12100 1944 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 482
+INFO 2025-07-16 01:46:02,777 basehttp 12100 1944 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 991
+INFO 2025-07-16 01:46:02,780 basehttp 12100 19876 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 01:46:02,786 basehttp 12100 21236 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 991
+INFO 2025-07-16 01:46:02,793 basehttp 12100 8648 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 01:46:03,469 basehttp 12100 21236 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 482
+INFO 2025-07-16 01:46:03,473 basehttp 12100 1944 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 482
+INFO 2025-07-16 01:46:09,849 basehttp 12100 1944 "POST /api/v1/calculator/feeds/update/ HTTP/1.1" 200 521
+WARNING 2025-07-16 01:46:09,858 basehttp 12100 1944 "POST /calculator/ HTTP/1.1" 404 3590
+INFO 2025-07-16 01:46:39,668 basehttp 12100 1944 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 991
+INFO 2025-07-16 01:46:39,676 basehttp 12100 8648 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 01:46:39,681 basehttp 12100 21236 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 991
+INFO 2025-07-16 01:46:39,688 basehttp 12100 19876 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 01:46:40,713 basehttp 12100 21236 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 483
+INFO 2025-07-16 01:46:40,718 basehttp 12100 1944 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 483
+INFO 2025-07-16 01:46:46,264 basehttp 12100 1944 "POST /api/v1/calculator/feeds/update/ HTTP/1.1" 200 520
+WARNING 2025-07-16 01:46:46,272 basehttp 12100 1944 "POST /calculator/ HTTP/1.1" 404 3590
+INFO 2025-07-16 01:46:48,274 basehttp 12100 19876 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-16 01:46:48,276 basehttp 12100 8648 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-16 01:46:48,291 basehttp 12100 19876 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 01:46:48,295 basehttp 12100 8648 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-16 01:46:48,308 basehttp 12100 19876 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 01:46:48,315 basehttp 12100 8648 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-16 01:46:49,584 basehttp 12100 1944 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 991
+INFO 2025-07-16 01:46:49,590 basehttp 12100 8648 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 01:46:49,595 basehttp 12100 21236 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 991
+INFO 2025-07-16 01:46:49,601 basehttp 12100 19876 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 01:46:50,687 basehttp 12100 21236 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 482
+INFO 2025-07-16 01:46:50,690 basehttp 12100 1944 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 482
+INFO 2025-07-16 01:46:55,172 basehttp 12100 1944 "POST /api/v1/calculator/feeds/update/ HTTP/1.1" 200 522
+WARNING 2025-07-16 01:46:55,183 basehttp 12100 1944 "POST /calculator/ HTTP/1.1" 404 3590
+INFO 2025-07-16 01:46:56,944 basehttp 12100 19876 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-16 01:46:56,946 basehttp 12100 8648 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-16 01:46:56,960 basehttp 12100 19876 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 01:46:56,960 basehttp 12100 8648 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-16 01:46:56,975 basehttp 12100 6636 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 01:46:56,979 basehttp 12100 23192 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-16 01:46:58,559 basehttp 12100 1944 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 991
+INFO 2025-07-16 01:46:58,565 basehttp 12100 23192 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 01:46:58,570 basehttp 12100 21236 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 991
+INFO 2025-07-16 01:46:58,577 basehttp 12100 6636 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 01:46:59,871 basehttp 12100 21236 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 484
+INFO 2025-07-16 01:46:59,876 basehttp 12100 1944 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 484
+INFO 2025-07-16 01:47:49,417 basehttp 12100 1944 "POST /api/v1/calculator/feeds/update/ HTTP/1.1" 200 519
+WARNING 2025-07-16 01:47:49,426 basehttp 12100 1944 "POST /calculator/ HTTP/1.1" 404 3590
+INFO 2025-07-16 01:47:52,634 basehttp 12100 6636 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 01:47:52,648 basehttp 12100 1944 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 991
+INFO 2025-07-16 01:47:52,649 basehttp 12100 23192 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 01:47:52,656 basehttp 12100 21236 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 991
+INFO 2025-07-16 01:47:55,666 basehttp 12100 21236 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 481
+INFO 2025-07-16 01:47:55,670 basehttp 12100 1944 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 481
+INFO 2025-07-16 01:48:22,661 basehttp 12100 1944 "POST /api/v1/calculator/feeds/update/ HTTP/1.1" 200 519
+WARNING 2025-07-16 01:48:22,672 basehttp 12100 1944 "POST /calculator/ HTTP/1.1" 404 3590
+INFO 2025-07-16 01:50:18,515 basehttp 12100 1944 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 991
+INFO 2025-07-16 01:50:18,527 basehttp 12100 23192 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 01:50:18,527 basehttp 12100 21236 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 991
+INFO 2025-07-16 01:50:18,541 basehttp 12100 6636 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 01:50:19,764 basehttp 12100 21236 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 481
+INFO 2025-07-16 01:50:19,770 basehttp 12100 1944 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 481
+INFO 2025-07-16 01:50:36,557 basehttp 12100 19976 "GET /admin/feeds/feed/ HTTP/1.1" 200 18289
+INFO 2025-07-16 01:50:36,595 basehttp 12100 19976 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2025-07-16 01:50:39,587 basehttp 12100 19976 "GET /admin/feeds/feed/3/change/ HTTP/1.1" 200 27055
+INFO 2025-07-16 01:50:39,634 basehttp 12100 19976 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2025-07-16 01:50:41,002 basehttp 12100 19976 "GET /admin/feeds/feed/3/delete/ HTTP/1.1" 200 17085
+INFO 2025-07-16 01:50:42,052 basehttp 12100 19976 "POST /admin/feeds/feed/3/delete/ HTTP/1.1" 302 0
+INFO 2025-07-16 01:50:42,070 basehttp 12100 19976 "GET /admin/feeds/feed/ HTTP/1.1" 200 17303
+INFO 2025-07-16 01:50:42,115 basehttp 12100 19976 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2025-07-16 01:50:56,282 basehttp 12100 1944 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 991
+INFO 2025-07-16 01:50:56,291 basehttp 12100 21236 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 991
+INFO 2025-07-16 01:50:56,291 basehttp 12100 6636 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 01:50:56,303 basehttp 12100 23192 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 01:51:01,712 basehttp 12100 21236 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 2
+INFO 2025-07-16 01:51:01,717 basehttp 12100 1944 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 2
+INFO 2025-07-16 01:51:09,935 basehttp 12100 1944 "POST /api/v1/feeds/ocr/ HTTP/1.1" 200 1193
+INFO 2025-07-16 01:51:14,705 basehttp 12100 1944 "POST /api/v1/feeds/firebase/upload/ HTTP/1.1" 200 182
+INFO 2025-07-16 01:51:18,831 basehttp 12100 1944 "POST /api/v1/feeds/firebase/upload/ HTTP/1.1" 200 186
+INFO 2025-07-16 01:51:18,857 basehttp 12100 1944 "POST /api/v1/calculator/feeds/create/ HTTP/1.1" 201 532
+INFO 2025-07-16 01:52:29,711 basehttp 12100 1944 "POST /api/v1/calculator/feeds/update/ HTTP/1.1" 200 522
+WARNING 2025-07-16 01:52:29,722 basehttp 12100 1944 "POST /calculator/ HTTP/1.1" 404 3590
+INFO 2025-07-16 01:52:32,839 basehttp 12100 1944 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 991
+INFO 2025-07-16 01:52:32,849 basehttp 12100 23192 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 01:52:32,854 basehttp 12100 21236 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 991
+INFO 2025-07-16 01:52:32,870 basehttp 12100 6636 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 01:52:34,372 basehttp 12100 21236 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 484
+INFO 2025-07-16 01:52:34,376 basehttp 12100 1944 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 484
+INFO 2025-07-16 01:52:55,047 basehttp 12100 1944 "POST /api/v1/calculator/feeds/update/ HTTP/1.1" 200 522
+WARNING 2025-07-16 01:52:55,056 basehttp 12100 1944 "POST /calculator/ HTTP/1.1" 404 3590
+INFO 2025-07-16 01:52:56,950 basehttp 12100 1944 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 991
+INFO 2025-07-16 01:52:56,961 basehttp 12100 6636 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 01:52:56,965 basehttp 12100 21236 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 991
+INFO 2025-07-16 01:52:56,976 basehttp 12100 23192 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 01:52:59,294 basehttp 12100 21236 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 484
+INFO 2025-07-16 01:52:59,299 basehttp 12100 1944 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 484
+INFO 2025-07-16 01:55:27,938 autoreload 21864 12292 Watching for file changes with StatReloader
+INFO 2025-07-16 01:55:29,751 basehttp 21864 8156 "POST /api/v1/accounts/token/refresh/ HTTP/1.1" 200 548
+INFO 2025-07-16 01:55:29,784 basehttp 21864 17700 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 991
+INFO 2025-07-16 01:55:29,793 basehttp 21864 8156 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 01:55:29,799 basehttp 21864 17700 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 991
+INFO 2025-07-16 01:55:29,807 basehttp 21864 8156 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 02:02:49,104 basehttp 21864 14760 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 12520
+INFO 2025-07-16 02:07:59,209 basehttp 21864 19156 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 991
+INFO 2025-07-16 02:07:59,232 basehttp 21864 14920 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 991
+INFO 2025-07-16 02:07:59,513 basehttp 21864 22288 "OPTIONS /api/v1/accounts/me/ HTTP/1.1" 200 0
+INFO 2025-07-16 02:07:59,516 basehttp 21864 22212 "OPTIONS /api/v1/accounts/me/ HTTP/1.1" 200 0
+INFO 2025-07-16 02:07:59,521 basehttp 21864 22288 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 02:07:59,527 basehttp 21864 22212 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 02:08:03,628 basehttp 21864 14920 "OPTIONS /api/v1/calculator/pets/update/ HTTP/1.1" 200 0
+INFO 2025-07-16 02:08:03,638 basehttp 21864 14920 "POST /api/v1/calculator/pets/update/ HTTP/1.1" 200 335
+INFO 2025-07-16 02:08:03,658 basehttp 21864 14920 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 484
+INFO 2025-07-16 02:08:03,664 basehttp 21864 19156 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 484
+INFO 2025-07-16 02:08:10,769 basehttp 21864 22212 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-16 02:08:10,773 basehttp 21864 22288 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-16 02:08:10,795 basehttp 21864 22212 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 02:08:10,800 basehttp 21864 22288 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-16 02:08:10,808 basehttp 21864 18804 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 02:08:10,816 basehttp 21864 22212 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-16 02:08:11,785 basehttp 21864 19156 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 991
+INFO 2025-07-16 02:08:11,787 basehttp 21864 22212 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 02:08:11,795 basehttp 21864 14920 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 991
+INFO 2025-07-16 02:08:11,801 basehttp 21864 18804 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 02:08:15,019 basehttp 21864 14920 "POST /api/v1/calculator/pets/update/ HTTP/1.1" 200 335
+INFO 2025-07-16 02:08:15,038 basehttp 21864 14920 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 484
+INFO 2025-07-16 02:08:15,043 basehttp 21864 19156 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 484
+INFO 2025-07-16 02:08:16,951 basehttp 21864 18804 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-16 02:08:16,956 basehttp 21864 22288 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-16 02:08:16,967 basehttp 21864 22212 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 02:08:16,971 basehttp 21864 18804 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-16 02:08:16,984 basehttp 21864 22288 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 02:08:16,987 basehttp 21864 22212 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-16 02:08:18,162 basehttp 21864 19156 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 991
+INFO 2025-07-16 02:08:18,166 basehttp 21864 22212 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 02:08:18,171 basehttp 21864 14920 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 991
+INFO 2025-07-16 02:08:18,181 basehttp 21864 22288 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 02:08:52,272 autoreload 15744 11716 Watching for file changes with StatReloader
+INFO 2025-07-16 02:11:24,269 basehttp 15744 22816 "POST /api/v1/calculator/pets/update/ HTTP/1.1" 200 411
+INFO 2025-07-16 02:11:24,285 basehttp 15744 22816 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 484
+INFO 2025-07-16 02:11:24,291 basehttp 15744 3664 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 484
+INFO 2025-07-16 02:11:31,329 basehttp 15744 3664 "POST /api/v1/calculator/feeds/update/ HTTP/1.1" 200 522
+WARNING 2025-07-16 02:11:31,356 basehttp 15744 3664 "POST /calculator/ HTTP/1.1" 404 3590
+INFO 2025-07-16 02:13:29,131 autoreload 15744 11716 C:\Users\lxzhe\GradProject\backend\calculator\urls.py changed, reloading.
+INFO 2025-07-16 02:13:30,575 autoreload 1200 10432 Watching for file changes with StatReloader
+WARNING 2025-07-16 02:14:07,703 basehttp 1200 12352 "GET //api/v1/calculator/calculation/ HTTP/1.1" 401 8630
+INFO 2025-07-16 02:14:36,512 autoreload 1200 10432 C:\Users\lxzhe\GradProject\backend\calculator\views.py changed, reloading.
+INFO 2025-07-16 02:14:37,900 autoreload 2556 22928 Watching for file changes with StatReloader
+INFO 2025-07-16 02:15:29,723 basehttp 2556 5420 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 991
+INFO 2025-07-16 02:15:29,731 basehttp 2556 23460 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 991
+INFO 2025-07-16 02:15:30,024 basehttp 2556 20076 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 02:15:30,032 basehttp 2556 20076 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 02:15:31,062 basehttp 2556 23460 "POST /api/v1/calculator/pets/update/ HTTP/1.1" 200 411
+INFO 2025-07-16 02:15:31,077 basehttp 2556 23460 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 484
+INFO 2025-07-16 02:15:31,084 basehttp 2556 5420 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 484
+INFO 2025-07-16 02:15:32,818 basehttp 2556 5420 "POST /api/v1/calculator/feeds/update/ HTTP/1.1" 200 522
+INFO 2025-07-16 02:16:01,046 basehttp 2556 5420 "POST //api/v1/calculator/calculation/ HTTP/1.1" 200 2192
+INFO 2025-07-16 02:16:22,945 basehttp 2556 5420 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 484
+INFO 2025-07-16 02:16:22,950 basehttp 2556 23460 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 484
+INFO 2025-07-16 02:16:25,729 basehttp 2556 20076 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-16 02:16:25,731 basehttp 2556 20524 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-16 02:16:25,744 basehttp 2556 19300 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-16 02:16:25,751 basehttp 2556 20076 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 02:16:25,762 basehttp 2556 20524 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-16 02:16:25,768 basehttp 2556 19300 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 02:16:27,594 basehttp 2556 23460 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 991
+INFO 2025-07-16 02:16:27,601 basehttp 2556 19300 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 02:16:27,606 basehttp 2556 5420 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 991
+INFO 2025-07-16 02:16:27,611 basehttp 2556 20524 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 02:16:37,670 basehttp 2556 5420 "POST /api/v1/calculator/pets/update/ HTTP/1.1" 200 411
+INFO 2025-07-16 02:16:37,690 basehttp 2556 5420 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 484
+INFO 2025-07-16 02:16:37,696 basehttp 2556 23460 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 484
+INFO 2025-07-16 02:16:39,641 basehttp 2556 20524 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-16 02:16:39,647 basehttp 2556 1828 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-16 02:16:39,656 basehttp 2556 20076 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-16 02:16:39,663 basehttp 2556 19300 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 02:16:39,673 basehttp 2556 20524 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-16 02:16:39,677 basehttp 2556 20076 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 02:16:42,135 basehttp 2556 23460 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 991
+INFO 2025-07-16 02:16:42,143 basehttp 2556 20076 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 02:16:42,147 basehttp 2556 5420 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 991
+INFO 2025-07-16 02:16:42,154 basehttp 2556 20524 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 02:16:45,274 basehttp 2556 5420 "POST /api/v1/calculator/pets/update/ HTTP/1.1" 200 411
+INFO 2025-07-16 02:16:45,291 basehttp 2556 5420 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 484
+INFO 2025-07-16 02:16:45,295 basehttp 2556 23460 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 484
+INFO 2025-07-16 02:21:28,120 basehttp 2556 20524 "OPTIONS /api/v1/accounts/token/refresh/ HTTP/1.1" 200 0
+INFO 2025-07-16 02:21:28,127 basehttp 2556 20524 "POST /api/v1/accounts/token/refresh/ HTTP/1.1" 200 548
+INFO 2025-07-16 02:21:28,137 basehttp 2556 20524 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 02:22:55,409 basehttp 2556 21256 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 991
+INFO 2025-07-16 02:22:55,412 basehttp 2556 20524 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 02:22:55,425 basehttp 2556 20524 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 02:22:55,434 basehttp 2556 13812 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 991
+INFO 2025-07-16 02:22:56,727 basehttp 2556 20524 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-16 02:22:56,737 basehttp 2556 22900 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 02:22:56,742 basehttp 2556 22900 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-16 02:22:56,743 basehttp 2556 20524 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-16 02:22:56,758 basehttp 2556 22900 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 02:22:56,761 basehttp 2556 20524 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-16 02:22:58,141 basehttp 2556 13812 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 991
+INFO 2025-07-16 02:22:58,148 basehttp 2556 20524 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 02:22:58,151 basehttp 2556 21256 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 991
+INFO 2025-07-16 02:22:58,159 basehttp 2556 22900 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 02:23:13,536 basehttp 2556 21256 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 991
+INFO 2025-07-16 02:23:13,542 basehttp 2556 13812 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 991
+INFO 2025-07-16 02:23:13,557 basehttp 2556 22900 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 02:23:13,564 basehttp 2556 20524 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 02:23:25,906 basehttp 2556 13812 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 484
+INFO 2025-07-16 02:23:25,911 basehttp 2556 21256 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 484
+INFO 2025-07-16 02:23:28,780 basehttp 2556 21256 "POST /api/v1/calculator/feeds/update/ HTTP/1.1" 200 522
+INFO 2025-07-16 02:23:39,580 basehttp 2556 21256 "POST //api/v1/calculator/calculation/ HTTP/1.1" 200 2575
+INFO 2025-07-16 02:23:57,604 basehttp 2556 21256 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 484
+INFO 2025-07-16 02:23:57,609 basehttp 2556 13812 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 484
+INFO 2025-07-16 02:23:58,924 basehttp 2556 20524 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-16 02:23:58,928 basehttp 2556 20524 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-16 02:23:58,957 basehttp 2556 22900 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 02:23:58,971 basehttp 2556 20524 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-16 02:23:58,977 basehttp 2556 22900 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 02:23:58,983 basehttp 2556 20524 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-16 02:24:00,890 basehttp 2556 13812 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 991
+INFO 2025-07-16 02:24:00,895 basehttp 2556 21256 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 991
+INFO 2025-07-16 02:24:00,895 basehttp 2556 20524 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 02:24:00,908 basehttp 2556 22900 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-16 15:30:44,213 autoreload 19192 23144 Watching for file changes with StatReloader
+INFO 2025-07-16 15:31:02,390 autoreload 3500 22060 Watching for file changes with StatReloader
+INFO 2025-07-16 15:31:19,826 basehttp 3500 4992 "OPTIONS /api/v1/accounts/token/ HTTP/1.1" 200 0
+INFO 2025-07-16 15:31:20,447 basehttp 3500 4992 "POST /api/v1/accounts/token/ HTTP/1.1" 200 579
+INFO 2025-07-16 15:31:20,469 basehttp 3500 4992 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-16 15:31:20,469 basehttp 3500 18884 "OPTIONS /api/v1/accounts/me/ HTTP/1.1" 200 0
+INFO 2025-07-16 15:31:20,471 basehttp 3500 4992 "OPTIONS /api/v1/accounts/me/ HTTP/1.1" 200 0
+INFO 2025-07-16 15:31:20,471 basehttp 3500 18884 "OPTIONS /api/v1/accounts/plans/today/ HTTP/1.1" 200 0
+INFO 2025-07-16 15:31:20,473 basehttp 3500 4992 "OPTIONS /api/v1/accounts/plans/today/ HTTP/1.1" 200 0
+INFO 2025-07-16 15:31:20,473 basehttp 3500 18884 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-16 15:31:20,481 basehttp 3500 18884 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-16 15:31:20,485 basehttp 3500 18884 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-16 15:31:20,496 basehttp 3500 4992 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 15:31:20,501 basehttp 3500 18884 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 15:31:23,996 basehttp 3500 18884 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 15:31:24,002 basehttp 3500 4992 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+ERROR 2025-07-16 15:31:24,066 basehttp 3500 2320 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 500 64
+ERROR 2025-07-16 15:31:24,078 basehttp 3500 2320 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 500 64
+INFO 2025-07-16 15:31:32,696 basehttp 3500 4992 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-16 15:31:32,699 basehttp 3500 6396 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-16 15:31:32,705 basehttp 3500 4992 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-16 15:31:32,705 basehttp 3500 18884 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 15:31:32,714 basehttp 3500 4992 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 15:31:32,714 basehttp 3500 6396 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-16 15:31:36,415 basehttp 3500 4992 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 15:31:36,419 basehttp 3500 6396 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 15:31:36,421 basehttp 3500 6396 "OPTIONS /api/v1/accounts/user/2/summary/ HTTP/1.1" 200 0
+INFO 2025-07-16 15:31:36,426 basehttp 3500 4992 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 15:31:36,429 basehttp 3500 6396 "GET /api/v1/accounts/user/2/summary/ HTTP/1.1" 200 196
+INFO 2025-07-16 15:31:36,432 basehttp 3500 6396 "OPTIONS /api/v1/social/users/2/posts/preview/ HTTP/1.1" 200 0
+INFO 2025-07-16 15:31:36,433 basehttp 3500 18884 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 15:31:36,439 basehttp 3500 6396 "GET /api/v1/social/users/2/posts/preview/ HTTP/1.1" 200 57
+INFO 2025-07-16 15:31:36,440 basehttp 3500 18884 "GET /api/v1/accounts/user/2/summary/ HTTP/1.1" 200 196
+INFO 2025-07-16 15:31:36,441 basehttp 3500 6396 "OPTIONS /api/v1/pets/users/2/archives/ HTTP/1.1" 200 0
+INFO 2025-07-16 15:31:36,446 basehttp 3500 6396 "GET /api/v1/pets/users/2/archives/ HTTP/1.1" 200 347
+INFO 2025-07-16 15:31:36,448 basehttp 3500 18884 "GET /api/v1/social/users/2/posts/preview/ HTTP/1.1" 200 57
+INFO 2025-07-16 15:31:36,454 basehttp 3500 18884 "GET /api/v1/pets/users/2/archives/ HTTP/1.1" 200 347
+INFO 2025-07-16 15:31:38,012 basehttp 3500 18884 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 15:31:38,017 basehttp 3500 6396 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 15:31:38,021 basehttp 3500 18884 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 15:31:38,026 basehttp 3500 6396 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 15:31:39,234 basehttp 3500 6396 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-16 15:31:39,237 basehttp 3500 18884 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-16 15:31:39,242 basehttp 3500 6396 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 15:31:39,244 basehttp 3500 4992 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-16 15:31:39,248 basehttp 3500 18884 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 15:31:39,250 basehttp 3500 6396 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-16 15:31:41,431 basehttp 3500 6396 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 15:31:41,436 basehttp 3500 18884 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+ERROR 2025-07-16 15:31:41,445 basehttp 3500 2320 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 500 64
+ERROR 2025-07-16 15:31:41,456 basehttp 3500 22600 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 500 64
+INFO 2025-07-16 15:45:08,594 autoreload 23000 3508 Watching for file changes with StatReloader
+INFO 2025-07-16 15:45:11,327 basehttp 23000 18884 "GET /admin/calculator/pet/add/ HTTP/1.1" 200 31292
+INFO 2025-07-16 15:45:11,336 basehttp 23000 7396 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-16 15:45:11,417 basehttp 23000 18884 "GET /static/admin/css/forms.css HTTP/1.1" 200 8525
+INFO 2025-07-16 15:45:11,419 basehttp 23000 23332 "GET /static/admin/js/prepopulate_init.js HTTP/1.1" 200 586
+INFO 2025-07-16 15:45:11,423 basehttp 23000 18884 "GET /static/admin/img/icon-deletelink.svg HTTP/1.1" 200 392
+INFO 2025-07-16 15:45:11,423 basehttp 23000 7396 "GET /static/admin/css/widgets.css HTTP/1.1" 200 11991
+INFO 2025-07-16 15:45:11,429 basehttp 23000 18884 "GET /static/admin/img/icon-viewlink.svg HTTP/1.1" 200 581
+INFO 2025-07-16 15:45:11,431 basehttp 23000 7396 "GET /static/admin/js/change_form.js HTTP/1.1" 200 606
+INFO 2025-07-16 15:46:12,766 basehttp 23000 7396 "POST /admin/calculator/pet/add/ HTTP/1.1" 302 0
+INFO 2025-07-16 15:46:12,801 basehttp 23000 7396 "GET /admin/calculator/pet/ HTTP/1.1" 200 24809
+INFO 2025-07-16 15:46:12,811 basehttp 23000 7396 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-16 15:46:12,824 basehttp 23000 7396 "GET /static/admin/img/icon-yes.svg HTTP/1.1" 304 0
+ERROR 2025-07-16 15:46:56,977 basehttp 23000 16032 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 500 4249
+ERROR 2025-07-16 15:46:56,989 basehttp 23000 10312 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 500 4249
+INFO 2025-07-16 15:46:57,291 basehttp 23000 6508 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 15:46:57,296 basehttp 23000 6508 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 15:54:26,076 autoreload 23000 3508 C:\Users\Steven\GradProject\GradProject\backend\calculator\models.py changed, reloading.
+INFO 2025-07-16 15:54:26,862 autoreload 13732 7792 Watching for file changes with StatReloader
+INFO 2025-07-16 15:54:41,399 basehttp 13732 12724 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 15:54:41,401 basehttp 13732 5396 "GET /api/v1/pets/my-pets/ HTTP/1.1" 200 495
+INFO 2025-07-16 15:54:41,405 basehttp 13732 12724 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 15:54:41,419 basehttp 13732 5396 "GET /api/v1/pets/my-pets/ HTTP/1.1" 200 495
+INFO 2025-07-16 15:54:45,449 basehttp 13732 5396 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 15:54:45,454 basehttp 13732 12724 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+ERROR 2025-07-16 15:54:45,465 basehttp 13732 12696 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 500 64
+ERROR 2025-07-16 15:54:45,478 basehttp 13732 12696 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 500 64
+INFO 2025-07-16 15:55:08,712 autoreload 4344 1376 Watching for file changes with StatReloader
+INFO 2025-07-16 15:55:11,308 basehttp 4344 23524 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 178
+INFO 2025-07-16 15:55:11,311 basehttp 4344 23524 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 178
+INFO 2025-07-16 15:55:11,626 basehttp 4344 20116 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 15:55:11,632 basehttp 4344 20116 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 15:56:50,124 basehttp 4344 23524 "OPTIONS /api/v1/calculator/pets/update/ HTTP/1.1" 200 0
+INFO 2025-07-16 15:56:50,136 basehttp 4344 23524 "POST /api/v1/calculator/pets/update/ HTTP/1.1" 200 208
+INFO 2025-07-16 15:56:50,158 basehttp 4344 23524 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 2
+INFO 2025-07-16 15:56:50,161 basehttp 4344 23524 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 2
+INFO 2025-07-16 15:57:11,280 basehttp 4344 20116 "OPTIONS /api/v1/accounts/token/refresh/ HTTP/1.1" 200 0
+INFO 2025-07-16 15:57:11,283 basehttp 4344 20116 "POST /api/v1/accounts/token/refresh/ HTTP/1.1" 200 548
+INFO 2025-07-16 15:57:11,289 basehttp 4344 20116 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+ERROR 2025-07-16 16:00:36,747 basehttp 4344 23524 "POST /api/v1/feeds/ocr/ HTTP/1.1" 500 1781
+INFO 2025-07-16 16:05:49,819 autoreload 4344 1376 C:\Users\Steven\GradProject\GradProject\backend\feeds\views.py changed, reloading.
+INFO 2025-07-16 16:05:50,628 autoreload 17384 9924 Watching for file changes with StatReloader
+ERROR 2025-07-16 16:06:13,483 basehttp 17384 9992 "POST /api/v1/feeds/ocr/ HTTP/1.1" 500 1687
+INFO 2025-07-16 16:06:21,489 autoreload 17384 9924 C:\Users\Steven\GradProject\GradProject\backend\feeds\views.py changed, reloading.
+INFO 2025-07-16 16:06:22,292 autoreload 9944 2852 Watching for file changes with StatReloader
+ERROR 2025-07-16 16:06:27,855 basehttp 9944 10884 "POST /api/v1/feeds/ocr/ HTTP/1.1" 500 1681
+INFO 2025-07-16 16:07:50,150 autoreload 9944 2852 C:\Users\Steven\GradProject\GradProject\backend\feeds\views.py changed, reloading.
+INFO 2025-07-16 16:07:50,970 autoreload 10364 7420 Watching for file changes with StatReloader
+INFO 2025-07-16 16:07:57,383 basehttp 10364 16704 "POST /api/v1/feeds/ocr/ HTTP/1.1" 200 1267
+INFO 2025-07-16 16:07:57,921 basehttp 10364 16704 "POST /api/v1/feeds/firebase/upload/ HTTP/1.1" 200 183
+INFO 2025-07-16 16:07:58,192 basehttp 10364 16704 "POST /api/v1/feeds/firebase/upload/ HTTP/1.1" 200 186
+INFO 2025-07-16 16:07:58,199 basehttp 10364 16704 "OPTIONS /api/v1/calculator/feeds/create/ HTTP/1.1" 200 0
+INFO 2025-07-16 16:07:58,212 basehttp 10364 16704 "POST /api/v1/calculator/feeds/create/ HTTP/1.1" 201 533
+INFO 2025-07-16 16:08:16,315 basehttp 10364 16704 "OPTIONS /api/v1/calculator/feeds/update/ HTTP/1.1" 200 0
+INFO 2025-07-16 16:08:16,327 basehttp 10364 16704 "POST /api/v1/calculator/feeds/update/ HTTP/1.1" 200 521
+INFO 2025-07-16 16:08:21,322 basehttp 10364 372 "POST /api/v1/calculator/feeds/update/ HTTP/1.1" 200 521
+INFO 2025-07-16 16:08:27,917 basehttp 10364 16704 "POST //api/v1/calculator/calculation/ HTTP/1.1" 200 2539
+INFO 2025-07-16 16:08:29,700 basehttp 10364 372 "POST //api/v1/calculator/calculation/ HTTP/1.1" 200 2164
+INFO 2025-07-16 16:22:29,606 basehttp 10364 4628 "POST /api/v1/accounts/token/refresh/ HTTP/1.1" 200 548
+INFO 2025-07-16 16:22:29,614 basehttp 10364 4628 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 16:55:28,908 autoreload 2852 24140 Watching for file changes with StatReloader
+INFO 2025-07-16 16:55:29,862 basehttp 2852 10364 "POST /api/v1/accounts/token/refresh/ HTTP/1.1" 200 548
+INFO 2025-07-16 16:55:29,882 basehttp 2852 10364 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-16 16:55:29,883 basehttp 2852 10364 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-16 16:55:29,889 basehttp 2852 10364 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 16:55:29,893 basehttp 2852 10364 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-16 16:55:29,896 basehttp 2852 10364 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 16:55:29,899 basehttp 2852 10364 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-16 16:55:32,831 basehttp 2852 10364 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-16 16:55:32,834 basehttp 2852 3548 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-16 16:55:32,869 basehttp 2852 10364 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 16:55:32,869 basehttp 2852 6316 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-16 16:55:32,874 basehttp 2852 3548 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-16 16:55:32,874 basehttp 2852 6316 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 16:55:35,201 basehttp 2852 6316 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 16:55:35,205 basehttp 2852 10364 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 16:55:35,209 basehttp 2852 3548 "GET /api/v1/pets/my-pets/ HTTP/1.1" 200 495
+INFO 2025-07-16 16:55:35,214 basehttp 2852 10364 "GET /api/v1/pets/my-pets/ HTTP/1.1" 200 495
+INFO 2025-07-16 16:55:38,912 basehttp 2852 10364 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 16:55:38,914 basehttp 2852 3548 "GET /api/v1/pets/my-pets/ HTTP/1.1" 200 495
+INFO 2025-07-16 16:55:38,917 basehttp 2852 6316 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 16:55:38,921 basehttp 2852 10364 "GET /api/v1/pets/my-pets/ HTTP/1.1" 200 495
+INFO 2025-07-16 16:55:40,444 basehttp 2852 10364 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 16:55:40,446 basehttp 2852 6316 "GET /api/v1/pets/my-pets/ HTTP/1.1" 200 495
+INFO 2025-07-16 16:55:40,450 basehttp 2852 3548 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 16:55:40,453 basehttp 2852 10364 "GET /api/v1/pets/my-pets/ HTTP/1.1" 200 495
+INFO 2025-07-16 17:16:47,167 autoreload 2852 24140 C:\Users\Steven\GradProject\GradProject\backend\calculator\models.py changed, reloading.
+INFO 2025-07-16 17:16:47,995 autoreload 24064 21876 Watching for file changes with StatReloader
+INFO 2025-07-16 17:16:51,028 basehttp 24064 26924 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-16 17:16:51,031 basehttp 24064 26924 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-16 17:16:51,044 basehttp 24064 20224 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 17:16:51,046 basehttp 24064 21588 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-16 17:16:51,049 basehttp 24064 26924 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 17:16:51,051 basehttp 24064 20224 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-16 17:16:52,852 basehttp 24064 20224 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 17:16:52,857 basehttp 24064 26924 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+ERROR 2025-07-16 17:16:52,865 basehttp 24064 26860 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 500 64
+ERROR 2025-07-16 17:16:52,877 basehttp 24064 26860 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 500 64
+INFO 2025-07-16 17:17:27,557 autoreload 24064 21876 C:\Users\Steven\GradProject\GradProject\backend\calculator\models.py changed, reloading.
+INFO 2025-07-16 17:17:28,361 autoreload 12180 17144 Watching for file changes with StatReloader
+INFO 2025-07-16 17:17:43,440 autoreload 12180 17144 C:\Users\Steven\GradProject\GradProject\backend\calculator\serializers.py changed, reloading.
+INFO 2025-07-16 17:17:44,241 autoreload 27404 27760 Watching for file changes with StatReloader
+ERROR 2025-07-16 17:17:46,284 basehttp 27404 25424 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 500 64
+ERROR 2025-07-16 17:17:46,293 basehttp 27404 25424 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 500 64
+INFO 2025-07-16 17:17:46,586 basehttp 27404 27472 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 17:17:46,590 basehttp 27404 27472 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 17:17:53,257 basehttp 27404 27472 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-16 17:17:53,260 basehttp 27404 27472 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-16 17:17:53,265 basehttp 27404 26644 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 17:17:53,267 basehttp 27404 22288 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-16 17:17:53,272 basehttp 27404 27472 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 17:17:53,274 basehttp 27404 26644 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-16 17:17:55,534 basehttp 27404 26644 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 17:17:55,539 basehttp 27404 27472 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+ERROR 2025-07-16 17:17:55,543 basehttp 27404 25424 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 500 64
+ERROR 2025-07-16 17:17:55,555 basehttp 27404 2108 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 500 64
+INFO 2025-07-16 17:18:20,046 autoreload 27408 18348 Watching for file changes with StatReloader
+INFO 2025-07-16 17:22:35,718 basehttp 27408 24396 "POST /api/v1/accounts/token/refresh/ HTTP/1.1" 200 548
+INFO 2025-07-16 17:22:35,739 basehttp 27408 27280 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 182
+INFO 2025-07-16 17:22:35,739 basehttp 27408 24396 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 17:22:35,746 basehttp 27408 27280 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 182
+INFO 2025-07-16 17:22:35,749 basehttp 27408 24396 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 17:24:17,266 basehttp 27408 27280 "POST /api/v1/calculator/pets/update/ HTTP/1.1" 200 208
+INFO 2025-07-16 17:24:17,279 basehttp 27408 27280 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 483
+INFO 2025-07-16 17:24:17,283 basehttp 27408 27280 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 483
+INFO 2025-07-16 17:24:26,729 basehttp 27408 27280 "POST /api/v1/calculator/feeds/update/ HTTP/1.1" 200 533
+INFO 2025-07-16 17:24:27,191 basehttp 27408 27280 "POST //api/v1/calculator/calculation/ HTTP/1.1" 200 622
+INFO 2025-07-16 17:38:44,775 basehttp 27408 10772 "OPTIONS /api/v1/accounts/me/ HTTP/1.1" 200 0
+INFO 2025-07-16 17:38:44,778 basehttp 27408 10432 "OPTIONS /api/v1/accounts/me/ HTTP/1.1" 200 0
+INFO 2025-07-16 17:38:44,779 basehttp 27408 25592 "OPTIONS /api/v1/accounts/me/ HTTP/1.1" 200 0
+INFO 2025-07-16 17:38:44,779 basehttp 27408 22612 "OPTIONS /api/v1/accounts/me/ HTTP/1.1" 200 0
+INFO 2025-07-16 17:38:44,783 basehttp 27408 10772 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 17:38:44,788 basehttp 27408 22612 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 17:38:44,793 basehttp 27408 10772 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 17:38:44,797 basehttp 27408 22612 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 17:38:49,255 basehttp 27408 22612 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 17:38:49,258 basehttp 27408 10772 "GET /api/v1/pets/my-pets/ HTTP/1.1" 200 495
+INFO 2025-07-16 17:38:49,261 basehttp 27408 25592 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 17:38:49,265 basehttp 27408 22612 "GET /api/v1/pets/my-pets/ HTTP/1.1" 200 495
+INFO 2025-07-16 17:48:07,968 basehttp 27408 28132 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 182
+INFO 2025-07-16 17:48:07,972 basehttp 27408 28132 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 182
+INFO 2025-07-16 17:48:08,278 basehttp 27408 24180 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 17:48:08,283 basehttp 27408 24180 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 17:48:35,419 basehttp 27408 24180 "POST /api/v1/accounts/token/refresh/ HTTP/1.1" 200 548
+INFO 2025-07-16 17:48:35,427 basehttp 27408 24180 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 18:03:18,915 autoreload 27408 18348 C:\Users\Steven\GradProject\GradProject\backend\calculator\models.py changed, reloading.
+INFO 2025-07-16 18:03:19,737 autoreload 22996 27964 Watching for file changes with StatReloader
+INFO 2025-07-16 18:03:28,419 autoreload 22996 27964 C:\Users\Steven\GradProject\GradProject\backend\calculator\serializers.py changed, reloading.
+INFO 2025-07-16 18:03:29,275 autoreload 10268 21484 Watching for file changes with StatReloader
+INFO 2025-07-16 18:03:49,906 autoreload 10268 21484 C:\Users\Steven\GradProject\GradProject\backend\calculator\views.py changed, reloading.
+INFO 2025-07-16 18:03:50,701 autoreload 25680 25264 Watching for file changes with StatReloader
+INFO 2025-07-16 18:04:28,404 autoreload 25680 25264 C:\Users\Steven\GradProject\GradProject\backend\calculator\views.py changed, reloading.
+INFO 2025-07-16 18:04:29,195 autoreload 27372 27428 Watching for file changes with StatReloader
+INFO 2025-07-16 18:04:47,529 autoreload 27372 27428 C:\Users\Steven\GradProject\GradProject\backend\pets\models.py changed, reloading.
+INFO 2025-07-16 18:04:48,334 autoreload 26664 16860 Watching for file changes with StatReloader
+INFO 2025-07-16 18:04:51,656 autoreload 26664 16860 C:\Users\Steven\GradProject\GradProject\backend\calculator\models.py changed, reloading.
+INFO 2025-07-16 18:04:52,482 autoreload 27344 24712 Watching for file changes with StatReloader
+INFO 2025-07-16 18:05:02,291 autoreload 27344 24712 C:\Users\Steven\GradProject\GradProject\backend\calculator\serializers.py changed, reloading.
+INFO 2025-07-16 18:05:03,106 autoreload 28228 24700 Watching for file changes with StatReloader
+INFO 2025-07-16 18:05:21,247 autoreload 26164 25916 Watching for file changes with StatReloader
+INFO 2025-07-16 18:05:24,464 basehttp 26164 22004 "OPTIONS /api/v1/accounts/plans/today/ HTTP/1.1" 200 0
+INFO 2025-07-16 18:05:24,464 basehttp 26164 27988 "OPTIONS /api/v1/accounts/plans/today/ HTTP/1.1" 200 0
+INFO 2025-07-16 18:05:24,467 basehttp 26164 21200 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-16 18:05:24,467 basehttp 26164 22004 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-16 18:05:24,485 basehttp 26164 27988 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-16 18:05:24,486 basehttp 26164 28212 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 18:05:24,516 basehttp 26164 22004 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-16 18:05:24,517 basehttp 26164 27988 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 18:05:26,385 basehttp 26164 27452 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 167
+INFO 2025-07-16 18:05:26,389 basehttp 26164 27988 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 18:05:26,392 basehttp 26164 27452 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 167
+INFO 2025-07-16 18:05:26,394 basehttp 26164 22004 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 18:14:29,597 basehttp 26164 16704 "OPTIONS /api/v1/accounts/token/refresh/ HTTP/1.1" 200 0
+INFO 2025-07-16 18:14:29,601 basehttp 26164 16704 "POST /api/v1/accounts/token/refresh/ HTTP/1.1" 200 548
+INFO 2025-07-16 18:14:29,607 basehttp 26164 16704 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 18:15:09,498 autoreload 25240 16116 Watching for file changes with StatReloader
+INFO 2025-07-16 18:18:29,048 basehttp 25240 22548 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 167
+INFO 2025-07-16 18:18:29,051 basehttp 25240 22548 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 167
+INFO 2025-07-16 18:18:29,355 basehttp 25240 28512 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 18:18:29,358 basehttp 25240 28512 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 18:19:20,637 basehttp 25240 22548 "OPTIONS /api/v1/calculator/pets/update/ HTTP/1.1" 200 0
+ERROR 2025-07-16 18:19:20,653 basehttp 25240 22548 "POST /api/v1/calculator/pets/update/ HTTP/1.1" 500 795
+INFO 2025-07-16 18:19:24,095 basehttp 25240 22548 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 495
+INFO 2025-07-16 18:19:24,099 basehttp 25240 22140 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 495
+INFO 2025-07-16 18:19:29,568 basehttp 25240 28512 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-16 18:19:29,572 basehttp 25240 27572 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-16 18:19:29,577 basehttp 25240 9712 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 18:19:29,579 basehttp 25240 28512 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-16 18:19:29,584 basehttp 25240 27572 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 18:19:29,586 basehttp 25240 9712 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-16 18:19:30,731 basehttp 25240 22140 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 167
+INFO 2025-07-16 18:19:30,735 basehttp 25240 9712 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 18:19:30,737 basehttp 25240 22548 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 167
+INFO 2025-07-16 18:19:30,741 basehttp 25240 27572 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+ERROR 2025-07-16 18:19:33,203 basehttp 25240 22548 "POST /api/v1/calculator/pets/update/ HTTP/1.1" 500 795
+INFO 2025-07-16 18:19:35,065 basehttp 25240 22548 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 495
+INFO 2025-07-16 18:19:35,068 basehttp 25240 22140 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 495
+INFO 2025-07-16 18:19:58,061 autoreload 25240 16116 C:\Users\Steven\GradProject\GradProject\backend\calculator\views.py changed, reloading.
+INFO 2025-07-16 18:19:58,880 autoreload 26912 27912 Watching for file changes with StatReloader
+INFO 2025-07-16 18:20:02,560 basehttp 26912 14620 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-16 18:20:02,562 basehttp 26912 14620 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-16 18:20:02,575 basehttp 26912 10660 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 18:20:02,576 basehttp 26912 25244 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-16 18:20:02,582 basehttp 26912 14620 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 18:20:02,583 basehttp 26912 10660 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-16 18:20:03,992 basehttp 26912 16940 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 167
+INFO 2025-07-16 18:20:03,996 basehttp 26912 10660 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 18:20:03,998 basehttp 26912 16940 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 167
+INFO 2025-07-16 18:20:04,001 basehttp 26912 14620 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 18:20:05,400 basehttp 26912 16940 "POST /api/v1/calculator/pets/update/ HTTP/1.1" 200 189
+INFO 2025-07-16 18:20:05,415 basehttp 26912 16940 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 495
+INFO 2025-07-16 18:20:05,418 basehttp 26912 25504 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 495
+INFO 2025-07-16 18:20:09,619 basehttp 26912 25504 "OPTIONS /api/v1/calculator/feeds/update/ HTTP/1.1" 200 0
+INFO 2025-07-16 18:20:09,629 basehttp 26912 25504 "POST /api/v1/calculator/feeds/update/ HTTP/1.1" 200 533
+INFO 2025-07-16 18:20:48,509 basehttp 26912 25504 "POST //api/v1/calculator/calculation/ HTTP/1.1" 200 2202
+INFO 2025-07-16 18:21:09,191 basehttp 26912 14620 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 18:21:09,196 basehttp 26912 10660 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 18:21:09,200 basehttp 26912 14620 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 18:21:09,205 basehttp 26912 10660 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 18:21:15,632 basehttp 26912 14620 "OPTIONS /api/v1/pets/my-pets/ HTTP/1.1" 200 0
+INFO 2025-07-16 18:21:15,632 basehttp 26912 25244 "OPTIONS /api/v1/pets/my-pets/ HTTP/1.1" 200 0
+INFO 2025-07-16 18:21:15,637 basehttp 26912 10660 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 18:21:15,642 basehttp 26912 25244 "GET /api/v1/pets/my-pets/ HTTP/1.1" 200 495
+INFO 2025-07-16 18:21:15,645 basehttp 26912 14620 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 18:21:15,648 basehttp 26912 10660 "GET /api/v1/pets/my-pets/ HTTP/1.1" 200 495
+INFO 2025-07-16 18:21:20,293 basehttp 26912 10660 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 18:21:20,299 basehttp 26912 14620 "GET /api/v1/pets/my-pets/ HTTP/1.1" 200 495
+INFO 2025-07-16 18:21:20,299 basehttp 26912 25244 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 18:21:20,305 basehttp 26912 10660 "GET /api/v1/pets/my-pets/ HTTP/1.1" 200 495
+INFO 2025-07-16 18:21:25,645 basehttp 26912 10660 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 18:21:25,647 basehttp 26912 25244 "GET /api/v1/pets/my-pets/ HTTP/1.1" 200 495
+INFO 2025-07-16 18:21:25,651 basehttp 26912 14620 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 18:21:25,654 basehttp 26912 10660 "GET /api/v1/pets/my-pets/ HTTP/1.1" 200 495
+INFO 2025-07-16 18:40:29,292 basehttp 26912 27376 "POST /api/v1/accounts/token/refresh/ HTTP/1.1" 200 548
+INFO 2025-07-16 18:40:29,299 basehttp 26912 27376 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 19:06:29,607 basehttp 26912 28528 "POST /api/v1/accounts/token/refresh/ HTTP/1.1" 200 548
+INFO 2025-07-16 19:06:29,615 basehttp 26912 28528 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 19:32:29,266 basehttp 26912 25804 "POST /api/v1/accounts/token/refresh/ HTTP/1.1" 200 548
+INFO 2025-07-16 19:32:29,272 basehttp 26912 25804 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 19:47:32,304 autoreload 26912 27912 C:\Users\Steven\GradProject\GradProject\backend\calculator\models.py changed, reloading.
+INFO 2025-07-16 19:47:33,185 autoreload 24872 6632 Watching for file changes with StatReloader
+INFO 2025-07-16 19:49:06,684 autoreload 11984 25968 Watching for file changes with StatReloader
+INFO 2025-07-16 19:49:45,668 autoreload 11984 25968 C:\Users\Steven\GradProject\GradProject\backend\calculator\serializers.py changed, reloading.
+INFO 2025-07-16 19:49:46,453 autoreload 10496 24672 Watching for file changes with StatReloader
+INFO 2025-07-16 19:49:51,663 basehttp 10496 6572 "OPTIONS /api/v1/accounts/me/ HTTP/1.1" 200 0
+INFO 2025-07-16 19:49:51,664 basehttp 10496 3260 "OPTIONS /api/v1/accounts/me/ HTTP/1.1" 200 0
+INFO 2025-07-16 19:49:51,667 basehttp 10496 23848 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-16 19:49:51,668 basehttp 10496 3260 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-16 19:49:51,684 basehttp 10496 23664 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-16 19:49:51,685 basehttp 10496 6572 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 19:49:51,691 basehttp 10496 23664 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 19:49:51,691 basehttp 10496 3260 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-16 19:49:54,124 basehttp 10496 3260 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 19:49:54,128 basehttp 10496 23664 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+ERROR 2025-07-16 19:49:54,142 basehttp 10496 15008 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 500 4043
+ERROR 2025-07-16 19:49:54,150 basehttp 10496 20380 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 500 4043
+INFO 2025-07-16 19:50:32,135 autoreload 10496 24672 C:\Users\Steven\GradProject\GradProject\backend\calculator\views.py changed, reloading.
+INFO 2025-07-16 19:50:32,955 autoreload 26976 24588 Watching for file changes with StatReloader
+ERROR 2025-07-16 19:50:36,375 basehttp 26976 5304 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 500 4261
+ERROR 2025-07-16 19:50:36,383 basehttp 26976 2368 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 500 4261
+INFO 2025-07-16 19:50:36,671 basehttp 26976 26932 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 19:50:36,676 basehttp 26976 26932 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 19:51:01,129 autoreload 26976 24588 C:\Users\Steven\GradProject\GradProject\backend\calculator\serializers.py changed, reloading.
+INFO 2025-07-16 19:51:01,962 autoreload 14600 24796 Watching for file changes with StatReloader
+INFO 2025-07-16 19:51:05,856 basehttp 14600 24168 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 149
+INFO 2025-07-16 19:51:05,859 basehttp 14600 24168 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 149
+INFO 2025-07-16 19:51:06,160 basehttp 14600 21916 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 19:51:06,165 basehttp 14600 21916 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 19:54:59,536 autoreload 14600 24796 C:\Users\Steven\GradProject\GradProject\backend\calculator\serializers.py changed, reloading.
+INFO 2025-07-16 19:55:00,360 autoreload 21608 24144 Watching for file changes with StatReloader
+INFO 2025-07-16 19:55:22,605 autoreload 21608 24144 C:\Users\Steven\GradProject\GradProject\backend\calculator\serializers.py changed, reloading.
+INFO 2025-07-16 19:55:23,426 autoreload 24400 16556 Watching for file changes with StatReloader
+INFO 2025-07-16 19:55:28,740 basehttp 24400 26820 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-16 19:55:28,742 basehttp 24400 26820 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-16 19:55:28,753 basehttp 24400 25140 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 19:55:28,754 basehttp 24400 24376 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-16 19:55:28,759 basehttp 24400 26820 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 19:55:28,762 basehttp 24400 25140 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-16 19:55:30,710 basehttp 24400 25168 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 167
+INFO 2025-07-16 19:55:30,713 basehttp 24400 25140 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 19:55:30,715 basehttp 24400 25168 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 167
+INFO 2025-07-16 19:55:30,719 basehttp 24400 26820 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 19:55:34,120 basehttp 24400 25168 "POST /api/v1/calculator/pets/update/ HTTP/1.1" 200 189
+INFO 2025-07-16 19:55:34,136 basehttp 24400 25168 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 495
+INFO 2025-07-16 19:55:34,140 basehttp 24400 20068 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 495
+INFO 2025-07-16 19:55:54,177 basehttp 24400 26820 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 19:55:54,179 basehttp 24400 20068 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 167
+INFO 2025-07-16 19:55:54,183 basehttp 24400 25168 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 167
+INFO 2025-07-16 19:55:54,183 basehttp 24400 25140 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 19:55:55,781 basehttp 24400 25168 "POST /api/v1/calculator/pets/update/ HTTP/1.1" 200 189
+INFO 2025-07-16 19:55:55,792 basehttp 24400 25168 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 495
+INFO 2025-07-16 19:55:55,795 basehttp 24400 20068 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 495
+INFO 2025-07-16 19:56:03,347 basehttp 24400 20068 "POST /api/v1/feeds/ocr/ HTTP/1.1" 200 1267
+INFO 2025-07-16 19:56:03,834 basehttp 24400 20068 "POST /api/v1/feeds/firebase/upload/ HTTP/1.1" 200 183
+INFO 2025-07-16 19:56:04,089 basehttp 24400 20068 "POST /api/v1/feeds/firebase/upload/ HTTP/1.1" 200 186
+INFO 2025-07-16 19:56:04,091 basehttp 24400 20068 "OPTIONS /api/v1/calculator/feeds/create/ HTTP/1.1" 200 0
+INFO 2025-07-16 19:56:04,102 basehttp 24400 20068 "POST /api/v1/calculator/feeds/create/ HTTP/1.1" 201 533
+INFO 2025-07-16 19:56:15,476 basehttp 24400 20068 "POST /api/v1/calculator/feeds/update/ HTTP/1.1" 200 521
+INFO 2025-07-16 19:56:29,741 basehttp 24400 20068 "POST //api/v1/calculator/calculation/ HTTP/1.1" 200 2375
+INFO 2025-07-16 19:57:54,277 basehttp 24400 25140 "POST /api/v1/accounts/token/refresh/ HTTP/1.1" 200 548
+INFO 2025-07-16 19:57:54,284 basehttp 24400 25140 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 19:57:58,906 basehttp 24400 25140 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 19:57:58,910 basehttp 24400 26820 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 19:57:58,915 basehttp 24400 25140 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 19:57:58,919 basehttp 24400 26820 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 19:58:00,047 basehttp 24400 26820 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-16 19:58:00,050 basehttp 24400 24376 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-16 19:58:00,053 basehttp 24400 25140 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 19:58:00,056 basehttp 24400 26820 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-16 19:58:00,060 basehttp 24400 24376 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 19:58:00,061 basehttp 24400 25140 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-16 19:58:02,102 basehttp 24400 20068 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 167
+INFO 2025-07-16 19:58:02,106 basehttp 24400 25168 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 167
+INFO 2025-07-16 19:58:02,107 basehttp 24400 25140 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 19:58:02,111 basehttp 24400 24376 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 20:16:35,629 basehttp 24400 13248 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 20:16:35,634 basehttp 24400 13248 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 20:16:35,639 basehttp 24400 13248 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 20:16:35,643 basehttp 24400 13248 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 20:16:39,427 basehttp 24400 26420 "OPTIONS /api/v1/social/search/?q=te HTTP/1.1" 200 0
+INFO 2025-07-16 20:16:39,427 basehttp 24400 22264 "OPTIONS /api/v1/social/search/?q=te HTTP/1.1" 200 0
+INFO 2025-07-16 20:16:39,433 basehttp 24400 13248 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 20:16:39,440 basehttp 24400 26420 "GET /api/v1/social/search/?q=te HTTP/1.1" 200 201
+INFO 2025-07-16 20:16:39,440 basehttp 24400 22264 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 20:16:39,443 basehttp 24400 22264 "OPTIONS /api/v1/accounts/follow/status/batch/ HTTP/1.1" 200 0
+INFO 2025-07-16 20:16:39,449 basehttp 24400 22264 "POST /api/v1/accounts/follow/status/batch/ HTTP/1.1" 200 145
+INFO 2025-07-16 20:16:39,450 basehttp 24400 13248 "GET /api/v1/social/search/?q=te HTTP/1.1" 200 201
+INFO 2025-07-16 20:16:39,456 basehttp 24400 13248 "POST /api/v1/accounts/follow/status/batch/ HTTP/1.1" 200 145
+INFO 2025-07-16 20:16:42,259 basehttp 24400 22264 "OPTIONS /api/v1/social/search/?q=st HTTP/1.1" 200 0
+INFO 2025-07-16 20:16:42,259 basehttp 24400 26420 "OPTIONS /api/v1/social/search/?q=st HTTP/1.1" 200 0
+INFO 2025-07-16 20:16:42,264 basehttp 24400 13248 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 20:16:42,272 basehttp 24400 22264 "GET /api/v1/social/search/?q=st HTTP/1.1" 200 316
+INFO 2025-07-16 20:16:42,272 basehttp 24400 26420 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 20:16:42,280 basehttp 24400 26420 "POST /api/v1/accounts/follow/status/batch/ HTTP/1.1" 200 193
+INFO 2025-07-16 20:16:42,281 basehttp 24400 13248 "GET /api/v1/social/search/?q=st HTTP/1.1" 200 316
+INFO 2025-07-16 20:16:42,288 basehttp 24400 13248 "POST /api/v1/accounts/follow/status/batch/ HTTP/1.1" 200 193
+INFO 2025-07-16 20:16:43,964 basehttp 24400 13248 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-16 20:16:43,967 basehttp 24400 22264 "OPTIONS /api/v1/accounts/plans/today/ HTTP/1.1" 200 0
+INFO 2025-07-16 20:16:43,967 basehttp 24400 13248 "OPTIONS /api/v1/accounts/plans/today/ HTTP/1.1" 200 0
+INFO 2025-07-16 20:16:43,967 basehttp 24400 25776 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-16 20:16:43,972 basehttp 24400 26420 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 20:16:43,974 basehttp 24400 25776 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-16 20:16:43,979 basehttp 24400 13248 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 20:16:43,981 basehttp 24400 26420 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-16 20:17:44,476 basehttp 24400 26420 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 20:17:44,479 basehttp 24400 13248 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 20:17:44,481 basehttp 24400 13248 "OPTIONS /api/v1/accounts/user/2/summary/ HTTP/1.1" 200 0
+INFO 2025-07-16 20:17:44,484 basehttp 24400 26420 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 20:17:44,486 basehttp 24400 13248 "GET /api/v1/accounts/user/2/summary/ HTTP/1.1" 200 196
+INFO 2025-07-16 20:17:44,488 basehttp 24400 13248 "OPTIONS /api/v1/social/users/2/posts/preview/ HTTP/1.1" 200 0
+INFO 2025-07-16 20:17:44,489 basehttp 24400 25776 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 20:17:44,492 basehttp 24400 13248 "GET /api/v1/social/users/2/posts/preview/ HTTP/1.1" 200 57
+INFO 2025-07-16 20:17:44,494 basehttp 24400 25776 "GET /api/v1/accounts/user/2/summary/ HTTP/1.1" 200 196
+INFO 2025-07-16 20:17:44,494 basehttp 24400 13248 "OPTIONS /api/v1/pets/users/2/archives/ HTTP/1.1" 200 0
+INFO 2025-07-16 20:17:44,500 basehttp 24400 25776 "GET /api/v1/pets/users/2/archives/ HTTP/1.1" 200 347
+INFO 2025-07-16 20:17:44,501 basehttp 24400 13248 "GET /api/v1/social/users/2/posts/preview/ HTTP/1.1" 200 57
+INFO 2025-07-16 20:17:44,506 basehttp 24400 13248 "GET /api/v1/pets/users/2/archives/ HTTP/1.1" 200 347
+INFO 2025-07-16 20:17:46,447 basehttp 24400 13248 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 20:17:46,450 basehttp 24400 25776 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 20:17:46,453 basehttp 24400 13248 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 20:17:46,456 basehttp 24400 25776 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 20:17:47,226 basehttp 24400 25776 "OPTIONS /api/v1/accounts/logout/ HTTP/1.1" 200 0
+INFO 2025-07-16 20:17:47,235 basehttp 24400 25776 "POST /api/v1/accounts/logout/ HTTP/1.1" 200 55
+INFO 2025-07-16 20:17:58,156 basehttp 24400 25776 "OPTIONS /api/v1/accounts/check/account/ HTTP/1.1" 200 0
+INFO 2025-07-16 20:17:58,159 basehttp 24400 25776 "POST /api/v1/accounts/check/account/ HTTP/1.1" 200 82
+INFO 2025-07-16 20:18:02,999 basehttp 24400 25776 "POST /api/v1/accounts/check/account/ HTTP/1.1" 200 82
+INFO 2025-07-16 20:18:06,963 basehttp 24400 25776 "OPTIONS /api/v1/accounts/check/email/ HTTP/1.1" 200 0
+INFO 2025-07-16 20:18:06,965 basehttp 24400 25776 "POST /api/v1/accounts/check/email/ HTTP/1.1" 200 88
+INFO 2025-07-16 20:19:43,409 basehttp 24400 25776 "POST /api/v1/accounts/check/account/ HTTP/1.1" 200 82
+INFO 2025-07-16 20:19:44,303 basehttp 24400 25776 "POST /api/v1/accounts/check/email/ HTTP/1.1" 200 88
+INFO 2025-07-16 20:19:52,152 basehttp 24400 25776 "OPTIONS /api/v1/accounts/check/password/ HTTP/1.1" 200 0
+INFO 2025-07-16 20:19:52,153 basehttp 24400 25776 "POST /api/v1/accounts/check/password/ HTTP/1.1" 200 82
+INFO 2025-07-16 20:19:52,155 basehttp 24400 25776 "OPTIONS /api/v1/accounts/register/ HTTP/1.1" 200 0
+INFO 2025-07-16 20:19:52,555 basehttp 24400 25776 "POST /api/v1/accounts/register/ HTTP/1.1" 201 612
+INFO 2025-07-16 20:19:52,578 basehttp 24400 25776 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-16 20:19:52,582 basehttp 24400 26420 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-16 20:19:52,586 basehttp 24400 13248 "GET /api/v1/accounts/me/ HTTP/1.1" 200 237
+INFO 2025-07-16 20:19:52,586 basehttp 24400 25776 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-16 20:19:52,591 basehttp 24400 13248 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-16 20:19:52,593 basehttp 24400 26420 "GET /api/v1/accounts/me/ HTTP/1.1" 200 237
+INFO 2025-07-16 20:21:19,647 basehttp 24400 26420 "GET /api/v1/accounts/me/ HTTP/1.1" 200 237
+INFO 2025-07-16 20:21:19,651 basehttp 24400 13248 "GET /api/v1/accounts/me/ HTTP/1.1" 200 237
+INFO 2025-07-16 20:21:19,654 basehttp 24400 26420 "GET /api/v1/accounts/me/ HTTP/1.1" 200 237
+INFO 2025-07-16 20:21:19,658 basehttp 24400 13248 "GET /api/v1/accounts/me/ HTTP/1.1" 200 237
+INFO 2025-07-16 20:21:24,719 basehttp 24400 13248 "GET /api/v1/accounts/me/ HTTP/1.1" 200 237
+INFO 2025-07-16 20:21:24,723 basehttp 24400 26420 "GET /api/v1/accounts/me/ HTTP/1.1" 200 237
+INFO 2025-07-16 20:21:35,150 basehttp 24400 26420 "GET /api/v1/accounts/me/ HTTP/1.1" 200 237
+INFO 2025-07-16 20:21:35,154 basehttp 24400 13248 "GET /api/v1/accounts/me/ HTTP/1.1" 200 237
+INFO 2025-07-16 20:21:35,158 basehttp 24400 26420 "GET /api/v1/accounts/me/ HTTP/1.1" 200 237
+INFO 2025-07-16 20:21:35,161 basehttp 24400 13248 "GET /api/v1/accounts/me/ HTTP/1.1" 200 237
+INFO 2025-07-16 20:21:35,934 basehttp 24400 13248 "GET /api/v1/accounts/me/ HTTP/1.1" 200 237
+INFO 2025-07-16 20:21:35,937 basehttp 24400 26420 "GET /api/v1/accounts/me/ HTTP/1.1" 200 237
+INFO 2025-07-16 20:21:35,940 basehttp 24400 26420 "OPTIONS /api/v1/accounts/user/3/summary/ HTTP/1.1" 200 0
+INFO 2025-07-16 20:21:35,943 basehttp 24400 13248 "GET /api/v1/accounts/me/ HTTP/1.1" 200 237
+INFO 2025-07-16 20:21:35,946 basehttp 24400 26420 "GET /api/v1/accounts/user/3/summary/ HTTP/1.1" 200 185
+INFO 2025-07-16 20:21:35,949 basehttp 24400 26420 "OPTIONS /api/v1/social/users/3/posts/preview/ HTTP/1.1" 200 0
+INFO 2025-07-16 20:21:35,950 basehttp 24400 25776 "GET /api/v1/accounts/me/ HTTP/1.1" 200 237
+INFO 2025-07-16 20:21:35,954 basehttp 24400 26420 "GET /api/v1/social/users/3/posts/preview/ HTTP/1.1" 200 57
+INFO 2025-07-16 20:21:35,955 basehttp 24400 26420 "OPTIONS /api/v1/pets/users/3/archives/ HTTP/1.1" 200 0
+INFO 2025-07-16 20:21:35,956 basehttp 24400 25776 "GET /api/v1/accounts/user/3/summary/ HTTP/1.1" 200 185
+INFO 2025-07-16 20:21:35,959 basehttp 24400 26420 "GET /api/v1/pets/users/3/archives/ HTTP/1.1" 200 347
+INFO 2025-07-16 20:21:35,960 basehttp 24400 25776 "GET /api/v1/social/users/3/posts/preview/ HTTP/1.1" 200 57
+INFO 2025-07-16 20:21:35,966 basehttp 24400 25776 "GET /api/v1/pets/users/3/archives/ HTTP/1.1" 200 347
+INFO 2025-07-16 20:21:36,779 basehttp 24400 25776 "GET /api/v1/accounts/me/ HTTP/1.1" 200 237
+INFO 2025-07-16 20:21:36,783 basehttp 24400 26420 "GET /api/v1/accounts/me/ HTTP/1.1" 200 237
+INFO 2025-07-16 20:21:36,786 basehttp 24400 25776 "GET /api/v1/accounts/me/ HTTP/1.1" 200 237
+INFO 2025-07-16 20:21:36,790 basehttp 24400 26420 "GET /api/v1/accounts/me/ HTTP/1.1" 200 237
+INFO 2025-07-16 20:21:37,540 basehttp 24400 26420 "POST /api/v1/accounts/logout/ HTTP/1.1" 200 55
+INFO 2025-07-16 20:21:56,345 basehttp 24400 26420 "OPTIONS /api/v1/accounts/token/ HTTP/1.1" 200 0
+INFO 2025-07-16 20:21:56,745 basehttp 24400 26420 "POST /api/v1/accounts/token/ HTTP/1.1" 200 579
+INFO 2025-07-16 20:21:56,768 basehttp 24400 26420 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-16 20:21:56,770 basehttp 24400 25776 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-16 20:21:56,776 basehttp 24400 13248 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-16 20:21:56,776 basehttp 24400 26420 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 20:21:56,781 basehttp 24400 25776 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-16 20:21:56,782 basehttp 24400 13248 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 20:24:22,087 basehttp 24400 13248 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 20:24:22,092 basehttp 24400 25776 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 20:24:22,097 basehttp 24400 13248 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 20:24:22,100 basehttp 24400 25776 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 20:24:25,797 basehttp 24400 26420 "OPTIONS /api/v1/social/search/?q=steve HTTP/1.1" 200 0
+INFO 2025-07-16 20:24:25,797 basehttp 24400 13248 "OPTIONS /api/v1/social/search/?q=steve HTTP/1.1" 200 0
+INFO 2025-07-16 20:24:25,802 basehttp 24400 25776 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 20:24:25,809 basehttp 24400 26420 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 20:24:25,810 basehttp 24400 13248 "GET /api/v1/social/search/?q=steve HTTP/1.1" 200 306
+INFO 2025-07-16 20:24:25,818 basehttp 24400 13248 "POST /api/v1/accounts/follow/status/batch/ HTTP/1.1" 200 193
+INFO 2025-07-16 20:24:25,819 basehttp 24400 26420 "GET /api/v1/social/search/?q=steve HTTP/1.1" 200 306
+INFO 2025-07-16 20:24:25,825 basehttp 24400 26420 "POST /api/v1/accounts/follow/status/batch/ HTTP/1.1" 200 193
+INFO 2025-07-16 20:24:29,825 basehttp 24400 26420 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 20:24:29,830 basehttp 24400 13248 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 20:47:38,151 basehttp 24400 22632 "OPTIONS /api/v1/accounts/token/refresh/ HTTP/1.1" 200 0
+INFO 2025-07-16 20:47:38,162 basehttp 24400 22632 "POST /api/v1/accounts/token/refresh/ HTTP/1.1" 200 548
+INFO 2025-07-16 20:47:38,169 basehttp 24400 22632 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 21:13:29,575 basehttp 24400 12804 "POST /api/v1/accounts/token/refresh/ HTTP/1.1" 200 548
+INFO 2025-07-16 21:13:29,580 basehttp 24400 12804 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 21:39:29,574 basehttp 24400 27244 "POST /api/v1/accounts/token/refresh/ HTTP/1.1" 200 548
+INFO 2025-07-16 21:39:29,579 basehttp 24400 27244 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 22:05:29,574 basehttp 24400 3724 "POST /api/v1/accounts/token/refresh/ HTTP/1.1" 200 548
+INFO 2025-07-16 22:05:29,576 basehttp 24400 3724 "OPTIONS /api/v1/accounts/me/ HTTP/1.1" 200 0
+INFO 2025-07-16 22:05:29,579 basehttp 24400 3724 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 22:31:29,660 basehttp 24400 4028 "POST /api/v1/accounts/token/refresh/ HTTP/1.1" 200 548
+INFO 2025-07-16 22:31:29,664 basehttp 24400 4028 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-16 22:57:29,998 basehttp 24400 28156 "OPTIONS /api/v1/accounts/token/refresh/ HTTP/1.1" 200 0
+INFO 2025-07-16 22:57:30,001 basehttp 24400 28156 "POST /api/v1/accounts/token/refresh/ HTTP/1.1" 200 548
+INFO 2025-07-16 22:57:30,006 basehttp 24400 28156 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 17:21:53,727 autoreload 12532 16820 Watching for file changes with StatReloader
+INFO 2025-07-17 17:22:25,502 basehttp 12532 12940 "OPTIONS /api/v1/accounts/token/ HTTP/1.1" 200 0
+INFO 2025-07-17 17:22:26,181 basehttp 12532 12940 "POST /api/v1/accounts/token/ HTTP/1.1" 200 579
+INFO 2025-07-17 17:22:26,206 basehttp 12532 12940 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-17 17:22:26,206 basehttp 12532 12980 "OPTIONS /api/v1/accounts/me/ HTTP/1.1" 200 0
+INFO 2025-07-17 17:22:26,208 basehttp 12532 12980 "OPTIONS /api/v1/accounts/me/ HTTP/1.1" 200 0
+INFO 2025-07-17 17:22:26,209 basehttp 12532 12940 "OPTIONS /api/v1/accounts/plans/today/ HTTP/1.1" 200 0
+INFO 2025-07-17 17:22:26,210 basehttp 12532 12980 "OPTIONS /api/v1/accounts/plans/today/ HTTP/1.1" 200 0
+INFO 2025-07-17 17:22:26,210 basehttp 12532 12940 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-17 17:22:26,219 basehttp 12532 12980 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 17:22:26,219 basehttp 12532 12940 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-17 17:22:26,227 basehttp 12532 12980 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 17:22:26,227 basehttp 12532 12940 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-17 17:22:27,528 basehttp 12532 18232 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 152
+INFO 2025-07-17 17:22:27,529 basehttp 12532 12940 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 17:22:27,535 basehttp 12532 18232 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 152
+INFO 2025-07-17 17:22:27,535 basehttp 12532 12980 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 17:22:27,689 basehttp 12532 12980 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-17 17:22:27,691 basehttp 12532 12968 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-17 17:22:27,695 basehttp 12532 8200 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-17 17:22:27,695 basehttp 12532 12940 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 17:22:27,702 basehttp 12532 12968 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-17 17:22:27,703 basehttp 12532 8200 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 17:22:33,878 basehttp 12532 18232 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 152
+INFO 2025-07-17 17:22:33,882 basehttp 12532 8200 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 17:22:33,884 basehttp 12532 12732 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 152
+INFO 2025-07-17 17:22:33,887 basehttp 12532 12968 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 17:23:44,554 basehttp 12532 12940 "OPTIONS /api/v1/pets/my-pets/ HTTP/1.1" 200 0
+INFO 2025-07-17 17:23:44,554 basehttp 12532 8200 "OPTIONS /api/v1/pets/my-pets/ HTTP/1.1" 200 0
+INFO 2025-07-17 17:23:44,559 basehttp 12532 12968 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 17:23:44,564 basehttp 12532 8200 "GET /api/v1/pets/my-pets/ HTTP/1.1" 200 495
+INFO 2025-07-17 17:23:44,566 basehttp 12532 12940 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 17:23:44,569 basehttp 12532 12968 "GET /api/v1/pets/my-pets/ HTTP/1.1" 200 495
+INFO 2025-07-17 17:23:46,408 basehttp 12532 12968 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 17:23:46,413 basehttp 12532 12940 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 17:23:52,027 basehttp 12532 12940 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 17:23:52,029 basehttp 12532 12968 "GET /api/v1/pets/my-pets/ HTTP/1.1" 200 495
+INFO 2025-07-17 17:23:52,034 basehttp 12532 8200 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 17:23:52,037 basehttp 12532 12940 "GET /api/v1/pets/my-pets/ HTTP/1.1" 200 495
+INFO 2025-07-17 17:48:08,701 basehttp 12532 17724 "OPTIONS /api/v1/accounts/token/refresh/ HTTP/1.1" 200 0
+INFO 2025-07-17 17:48:08,711 basehttp 12532 17724 "POST /api/v1/accounts/token/refresh/ HTTP/1.1" 200 548
+INFO 2025-07-17 17:48:08,717 basehttp 12532 17724 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 21:28:22,589 basehttp 12532 24620 "OPTIONS /api/v1/accounts/token/refresh/ HTTP/1.1" 200 0
+INFO 2025-07-17 21:28:22,593 basehttp 12532 24620 "POST /api/v1/accounts/token/refresh/ HTTP/1.1" 200 548
+INFO 2025-07-17 21:28:22,596 basehttp 12532 24620 "OPTIONS /api/v1/accounts/me/ HTTP/1.1" 200 0
+INFO 2025-07-17 21:28:22,601 basehttp 12532 24620 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 21:28:30,028 basehttp 12532 2264 "OPTIONS /api/v1/pets/my-pets/ HTTP/1.1" 200 0
+INFO 2025-07-17 21:28:30,028 basehttp 12532 20468 "OPTIONS /api/v1/pets/my-pets/ HTTP/1.1" 200 0
+INFO 2025-07-17 21:28:30,035 basehttp 12532 3048 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 21:28:30,040 basehttp 12532 2264 "GET /api/v1/pets/my-pets/ HTTP/1.1" 200 495
+INFO 2025-07-17 21:28:30,044 basehttp 12532 20468 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 21:28:30,048 basehttp 12532 3048 "GET /api/v1/pets/my-pets/ HTTP/1.1" 200 495
+INFO 2025-07-17 21:32:59,543 basehttp 12532 26508 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 152
+INFO 2025-07-17 21:32:59,544 basehttp 12532 3048 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 21:32:59,550 basehttp 12532 20468 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 21:32:59,551 basehttp 12532 26508 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 152
+INFO 2025-07-17 21:33:39,416 autoreload 12532 16820 C:\Users\Steven\GradProject\GradProject\backend\calculator\serializers.py changed, reloading.
+INFO 2025-07-17 21:33:40,250 autoreload 6328 2292 Watching for file changes with StatReloader
+ERROR 2025-07-17 21:33:43,098 basehttp 6328 3488 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 500 3830
+ERROR 2025-07-17 21:33:43,106 basehttp 6328 3488 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 500 3830
+INFO 2025-07-17 21:33:43,387 basehttp 6328 27632 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 21:33:43,390 basehttp 6328 27632 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 21:35:13,007 autoreload 18268 4644 Watching for file changes with StatReloader
+ERROR 2025-07-17 21:35:27,137 basehttp 18268 24492 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 500 3830
+ERROR 2025-07-17 21:35:27,146 basehttp 18268 20696 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 500 3830
+INFO 2025-07-17 21:35:27,444 basehttp 18268 16820 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 21:35:27,473 basehttp 18268 16820 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 21:38:21,806 autoreload 18268 4644 C:\Users\Steven\GradProject\GradProject\backend\calculator\serializers.py changed, reloading.
+INFO 2025-07-17 21:38:22,608 autoreload 4340 6492 Watching for file changes with StatReloader
+ERROR 2025-07-17 21:38:24,943 basehttp 4340 15632 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 500 3830
+ERROR 2025-07-17 21:38:24,950 basehttp 4340 15632 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 500 3830
+INFO 2025-07-17 21:38:25,248 basehttp 4340 10176 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 21:38:25,252 basehttp 4340 10176 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 21:39:25,501 autoreload 4340 6492 C:\Users\Steven\GradProject\GradProject\backend\calculator\serializers.py changed, reloading.
+INFO 2025-07-17 21:39:26,287 autoreload 26504 18452 Watching for file changes with StatReloader
+ERROR 2025-07-17 21:39:29,104 basehttp 26504 24300 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 500 2803
+ERROR 2025-07-17 21:39:29,111 basehttp 26504 24300 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 500 2803
+INFO 2025-07-17 21:39:29,419 basehttp 26504 25708 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 21:39:29,424 basehttp 26504 25708 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 21:39:37,499 autoreload 26504 18452 C:\Users\Steven\GradProject\GradProject\backend\pets\models.py changed, reloading.
+INFO 2025-07-17 21:39:38,287 autoreload 26136 26096 Watching for file changes with StatReloader
+ERROR 2025-07-17 21:39:42,233 basehttp 26136 27124 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 500 2803
+ERROR 2025-07-17 21:39:42,239 basehttp 26136 27124 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 500 2803
+INFO 2025-07-17 21:39:42,531 basehttp 26136 23776 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 21:39:42,535 basehttp 26136 23776 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 21:40:36,889 autoreload 26136 26096 C:\Users\Steven\GradProject\GradProject\backend\calculator\serializers.py changed, reloading.
+INFO 2025-07-17 21:40:37,690 autoreload 6024 19784 Watching for file changes with StatReloader
+INFO 2025-07-17 21:40:53,639 autoreload 6024 19784 C:\Users\Steven\GradProject\GradProject\backend\calculator\views.py changed, reloading.
+INFO 2025-07-17 21:40:54,419 autoreload 5076 13748 Watching for file changes with StatReloader
+ERROR 2025-07-17 21:40:57,543 basehttp 5076 27428 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 500 795
+ERROR 2025-07-17 21:40:57,545 basehttp 5076 27428 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 500 795
+INFO 2025-07-17 21:40:57,875 basehttp 5076 9072 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 21:40:57,878 basehttp 5076 9072 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 21:41:17,728 autoreload 5076 13748 C:\Users\Steven\GradProject\GradProject\backend\calculator\views.py changed, reloading.
+INFO 2025-07-17 21:41:18,525 autoreload 6124 25756 Watching for file changes with StatReloader
+ERROR 2025-07-17 21:41:21,525 basehttp 6124 15308 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 500 2803
+ERROR 2025-07-17 21:41:21,532 basehttp 6124 15308 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 500 2803
+INFO 2025-07-17 21:41:21,825 basehttp 6124 10668 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 21:41:21,828 basehttp 6124 10668 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 21:41:41,552 autoreload 6124 25756 C:\Users\Steven\GradProject\GradProject\backend\calculator\serializers.py changed, reloading.
+INFO 2025-07-17 21:41:42,347 autoreload 15904 1700 Watching for file changes with StatReloader
+ERROR 2025-07-17 21:41:44,775 basehttp 15904 24484 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 500 2786
+ERROR 2025-07-17 21:41:44,782 basehttp 15904 24484 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 500 2786
+INFO 2025-07-17 21:41:45,076 basehttp 15904 5240 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 21:41:45,080 basehttp 15904 5240 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 21:42:34,459 autoreload 15904 1700 C:\Users\Steven\GradProject\GradProject\backend\pets\models.py changed, reloading.
+INFO 2025-07-17 21:42:35,279 autoreload 5960 3588 Watching for file changes with StatReloader
+ERROR 2025-07-17 21:42:37,656 basehttp 5960 10224 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 500 3850
+ERROR 2025-07-17 21:42:37,663 basehttp 5960 10224 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 500 3850
+INFO 2025-07-17 21:42:37,956 basehttp 5960 24980 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 21:42:37,959 basehttp 5960 24980 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 21:43:01,590 autoreload 5960 3588 C:\Users\Steven\GradProject\GradProject\backend\calculator\serializers.py changed, reloading.
+INFO 2025-07-17 21:43:02,390 autoreload 17740 16820 Watching for file changes with StatReloader
+INFO 2025-07-17 21:43:06,598 autoreload 17740 16820 C:\Users\Steven\GradProject\GradProject\backend\calculator\views.py changed, reloading.
+INFO 2025-07-17 21:43:07,373 autoreload 23036 23068 Watching for file changes with StatReloader
+ERROR 2025-07-17 21:43:09,718 basehttp 23036 19204 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 500 3830
+ERROR 2025-07-17 21:43:09,726 basehttp 23036 19204 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 500 3830
+INFO 2025-07-17 21:43:10,022 basehttp 23036 2092 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 21:43:10,026 basehttp 23036 2092 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 22:03:51,760 basehttp 23036 17296 "POST /api/v1/accounts/token/refresh/ HTTP/1.1" 200 548
+INFO 2025-07-17 22:03:51,777 basehttp 23036 17296 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 22:03:51,782 basehttp 23036 17296 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+ERROR 2025-07-17 22:03:51,787 basehttp 23036 1260 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 500 3830
+ERROR 2025-07-17 22:03:51,795 basehttp 23036 1260 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 500 3830
+INFO 2025-07-17 22:03:54,734 basehttp 23036 17296 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-17 22:03:54,735 basehttp 23036 1460 "OPTIONS /api/v1/accounts/plans/today/ HTTP/1.1" 200 0
+INFO 2025-07-17 22:03:54,737 basehttp 23036 1460 "OPTIONS /api/v1/accounts/plans/today/ HTTP/1.1" 200 0
+INFO 2025-07-17 22:03:54,737 basehttp 23036 17296 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-17 22:03:54,742 basehttp 23036 26000 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 22:03:54,745 basehttp 23036 1460 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-17 22:03:54,750 basehttp 23036 17296 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 22:03:54,751 basehttp 23036 26000 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-17 22:03:56,281 basehttp 23036 26000 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 22:03:56,284 basehttp 23036 17296 "GET /api/v1/pets/my-pets/ HTTP/1.1" 200 495
+INFO 2025-07-17 22:03:56,288 basehttp 23036 1460 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 22:03:56,291 basehttp 23036 26000 "GET /api/v1/pets/my-pets/ HTTP/1.1" 200 495
+INFO 2025-07-17 22:04:01,866 basehttp 23036 26000 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 22:04:01,872 basehttp 23036 1460 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+ERROR 2025-07-17 22:04:01,875 basehttp 23036 1260 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 500 3830
+ERROR 2025-07-17 22:04:01,886 basehttp 23036 20540 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 500 3830
+INFO 2025-07-17 22:05:34,802 basehttp 23036 24348 "GET /admin HTTP/1.1" 301 0
+INFO 2025-07-17 22:05:34,924 basehttp 23036 15968 "GET /admin/ HTTP/1.1" 200 27238
+INFO 2025-07-17 22:05:35,011 basehttp 23036 19388 "GET /static/admin/css/dashboard.css HTTP/1.1" 200 441
+INFO 2025-07-17 22:05:35,016 basehttp 23036 15968 "GET /static/admin/js/theme.js HTTP/1.1" 200 1653
+INFO 2025-07-17 22:05:35,021 basehttp 23036 19388 "GET /static/admin/js/nav_sidebar.js HTTP/1.1" 200 3063
+INFO 2025-07-17 22:05:35,027 basehttp 23036 15968 "GET /static/admin/img/icon-addlink.svg HTTP/1.1" 200 331
+INFO 2025-07-17 22:05:35,027 basehttp 23036 25112 "GET /static/admin/img/icon-changelink.svg HTTP/1.1" 200 380
+WARNING 2025-07-17 22:05:35,057 basehttp 23036 25112 "GET /favicon.ico HTTP/1.1" 404 4203
+INFO 2025-07-17 22:05:37,647 basehttp 23036 25112 "GET /admin/calculator/pet/ HTTP/1.1" 200 24599
+INFO 2025-07-17 22:05:37,671 basehttp 23036 25112 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-17 22:05:37,689 basehttp 23036 25112 "GET /static/admin/img/tooltag-add.svg HTTP/1.1" 200 331
+INFO 2025-07-17 22:05:45,559 basehttp 23036 25112 "GET /admin/pets/pet/ HTTP/1.1" 200 27586
+INFO 2025-07-17 22:05:45,565 basehttp 23036 15968 "GET /static/admin/img/search.svg HTTP/1.1" 304 0
+INFO 2025-07-17 22:05:45,567 basehttp 23036 25112 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-17 22:05:45,585 basehttp 23036 25112 "GET /static/admin/img/icon-viewlink.svg HTTP/1.1" 200 581
+INFO 2025-07-17 22:05:50,885 basehttp 23036 25112 "GET /admin/pets/pet/2/change/ HTTP/1.1" 200 33502
+INFO 2025-07-17 22:05:50,894 basehttp 23036 19388 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-07-17 22:05:50,899 basehttp 23036 15968 "GET /static/admin/js/prepopulate_init.js HTTP/1.1" 200 586
+INFO 2025-07-17 22:05:50,899 basehttp 23036 25112 "GET /static/admin/css/forms.css HTTP/1.1" 200 8525
+INFO 2025-07-17 22:05:50,907 basehttp 23036 25112 "GET /static/admin/css/widgets.css HTTP/1.1" 200 11991
+INFO 2025-07-17 22:05:50,908 basehttp 23036 15968 "GET /static/admin/js/change_form.js HTTP/1.1" 200 606
+INFO 2025-07-17 22:05:52,456 basehttp 23036 15968 "GET /admin/pets/pet/ HTTP/1.1" 200 27586
+INFO 2025-07-17 22:06:19,289 autoreload 23036 23068 C:\Users\Steven\GradProject\GradProject\backend\calculator\models.py changed, reloading.
+INFO 2025-07-17 22:06:22,355 autoreload 24144 21852 Watching for file changes with StatReloader
+INFO 2025-07-17 22:06:36,682 autoreload 24144 21852 C:\Users\Steven\GradProject\GradProject\backend\calculator\admin.py changed, reloading.
+INFO 2025-07-17 22:06:37,420 autoreload 14476 27640 Watching for file changes with StatReloader
+INFO 2025-07-17 22:06:40,839 autoreload 14476 27640 C:\Users\Steven\GradProject\GradProject\backend\calculator\admin.py changed, reloading.
+INFO 2025-07-17 22:06:41,592 autoreload 10296 11032 Watching for file changes with StatReloader
+INFO 2025-07-17 22:07:01,241 autoreload 10296 11032 C:\Users\Steven\GradProject\GradProject\backend\calculator\views.py changed, reloading.
+INFO 2025-07-17 22:07:02,033 autoreload 11668 27192 Watching for file changes with StatReloader
+INFO 2025-07-17 22:07:09,623 basehttp 11668 27420 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 333
+INFO 2025-07-17 22:07:09,627 basehttp 11668 27420 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 333
+INFO 2025-07-17 22:07:09,945 basehttp 11668 25584 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 22:07:09,949 basehttp 11668 25584 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 22:07:23,074 basehttp 11668 25584 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-17 22:07:23,077 basehttp 11668 23968 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-17 22:07:23,083 basehttp 11668 25584 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 22:07:23,084 basehttp 11668 14548 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-17 22:07:23,090 basehttp 11668 23968 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 22:07:23,091 basehttp 11668 25584 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-17 22:07:24,338 basehttp 11668 27420 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 333
+INFO 2025-07-17 22:07:24,340 basehttp 11668 25584 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 22:07:24,344 basehttp 11668 8636 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 333
+INFO 2025-07-17 22:07:24,346 basehttp 11668 23968 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 22:07:35,270 basehttp 11668 23968 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 22:07:35,275 basehttp 11668 14548 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 22:07:35,282 basehttp 11668 25584 "GET /api/v1/pets/my-pets/ HTTP/1.1" 200 495
+INFO 2025-07-17 22:07:35,288 basehttp 11668 14548 "GET /api/v1/pets/my-pets/ HTTP/1.1" 200 495
+INFO 2025-07-17 22:07:41,957 basehttp 11668 8636 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 333
+INFO 2025-07-17 22:07:41,959 basehttp 11668 14548 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 22:07:41,962 basehttp 11668 27420 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 333
+INFO 2025-07-17 22:07:41,965 basehttp 11668 25584 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 22:13:41,125 basehttp 11668 24176 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 22:13:41,127 basehttp 11668 8136 "GET /api/v1/pets/my-pets/ HTTP/1.1" 200 495
+INFO 2025-07-17 22:13:41,133 basehttp 11668 24176 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 22:13:41,135 basehttp 11668 8136 "GET /api/v1/pets/my-pets/ HTTP/1.1" 200 495
+INFO 2025-07-17 22:13:42,147 basehttp 11668 25932 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 333
+INFO 2025-07-17 22:13:42,148 basehttp 11668 8136 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 22:13:42,154 basehttp 11668 24176 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 22:13:42,155 basehttp 11668 25932 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 333
+INFO 2025-07-17 22:13:43,533 basehttp 11668 8136 "GET /api/v1/pets/my-pets/ HTTP/1.1" 200 495
+INFO 2025-07-17 22:13:43,538 basehttp 11668 13784 "GET /api/v1/pets/my-pets/ HTTP/1.1" 200 495
+INFO 2025-07-17 22:13:43,545 basehttp 11668 24176 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 22:13:43,550 basehttp 11668 13784 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 22:14:27,747 basehttp 11668 13784 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 22:14:27,752 basehttp 11668 24176 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 22:18:52,272 basehttp 11668 24176 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-17 22:18:52,274 basehttp 11668 24176 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-17 22:18:52,280 basehttp 11668 13784 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 22:18:52,281 basehttp 11668 24176 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-17 22:18:52,287 basehttp 11668 13784 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 22:18:52,288 basehttp 11668 24176 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-17 22:18:54,378 basehttp 11668 11028 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 333
+INFO 2025-07-17 22:18:54,378 basehttp 11668 24176 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 22:18:54,385 basehttp 11668 13784 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 22:18:54,386 basehttp 11668 11028 "GET /api/v1/calculator/pets/?user_id=2 HTTP/1.1" 200 333
+INFO 2025-07-17 22:19:15,221 basehttp 11668 11028 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 977
+INFO 2025-07-17 22:19:15,224 basehttp 11668 17064 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 977
+INFO 2025-07-17 22:19:39,930 basehttp 11668 17064 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 977
+INFO 2025-07-17 22:19:39,934 basehttp 11668 11028 "GET /api/v1/calculator/feeds/?user_id=2 HTTP/1.1" 200 977
+INFO 2025-07-17 22:19:43,766 basehttp 11668 11028 "OPTIONS /api/v1/calculator/feeds/update/ HTTP/1.1" 200 0
+INFO 2025-07-17 22:19:43,779 basehttp 11668 11028 "POST /api/v1/calculator/feeds/update/ HTTP/1.1" 200 533
+INFO 2025-07-17 22:20:00,743 basehttp 11668 11028 "POST //api/v1/calculator/calculation/ HTTP/1.1" 200 2089
+INFO 2025-07-17 22:20:08,055 basehttp 11668 13784 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 22:20:08,060 basehttp 11668 24176 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 22:20:08,064 basehttp 11668 13784 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 22:20:08,069 basehttp 11668 24176 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 22:20:09,303 basehttp 11668 24176 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 22:20:09,306 basehttp 11668 13784 "GET /api/v1/pets/my-pets/ HTTP/1.1" 200 495
+INFO 2025-07-17 22:20:09,314 basehttp 11668 24176 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
+INFO 2025-07-17 22:20:09,314 basehttp 11668 13784 "GET /api/v1/pets/my-pets/ HTTP/1.1" 200 495
