@@ -343,16 +343,15 @@ class CreatePostAPIView(APIView):
                                     firebase_url = image_data.get('firebase_url')
                                     
                                     if firebase_url:
-                                        ImageAnnotation.objects.create(
+                                        ImageAnnotation.create(
                                             firebase_url=firebase_url,
                                             x_position=float(annotation.get('x_position', 0)),
                                             y_position=float(annotation.get('y_position', 0)),
-                                            display_name=annotation.get('display_name', ''),
                                             target_type=annotation.get('target_type', 'user'),
                                             target_id=int(annotation.get('target_id', 0)),
                                             created_by=user
                                         )
-                                        logger.info(f"創建標註成功: {annotation.get('display_name')} 在圖片 {image_index}")
+                                        logger.info(f"創建標註成功: {annotation.get('target_type')}_{annotation.get('target_id')} 在圖片 {image_index}")
                                         
                                         # 如果標註的是寵物，建立 PostPets 關聯
                                         if annotation.get('target_type') == 'pet':
@@ -818,13 +817,12 @@ class ImageAnnotationListCreateAPIView(APIView):
             firebase_url = request.data.get('firebase_url')
             x_position = request.data.get('x_position')
             y_position = request.data.get('y_position')
-            display_name = request.data.get('display_name')
             target_type = request.data.get('target_type')
             target_id = request.data.get('target_id')
             
             # 驗證必填欄位
             if not all([firebase_url, x_position is not None, y_position is not None, 
-                       display_name, target_type, target_id]):
+                       target_type, target_id]):
                 return APIResponse(
                     message="缺少必要的標註資訊",
                     status=drf_status.HTTP_400_BAD_REQUEST
@@ -835,7 +833,6 @@ class ImageAnnotationListCreateAPIView(APIView):
                 firebase_url=firebase_url,
                 x_position=float(x_position),
                 y_position=float(y_position),
-                display_name=display_name,
                 target_type=target_type,
                 target_id=int(target_id),
                 created_by=request.user
@@ -901,12 +898,10 @@ class ImageAnnotationDetailAPIView(APIView):
         try:
             x_position = request.data.get('x_position')
             y_position = request.data.get('y_position')
-            display_name = request.data.get('display_name')
             
             success = annotation.update_annotation(
                 x_position=float(x_position) if x_position is not None else None,
-                y_position=float(y_position) if y_position is not None else None,
-                display_name=display_name
+                y_position=float(y_position) if y_position is not None else None
             )
             
             if success:

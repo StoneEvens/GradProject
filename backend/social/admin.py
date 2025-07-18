@@ -62,10 +62,10 @@ class PostPetsAdmin(admin.ModelAdmin):
 # 圖片標註管理
 @admin.register(ImageAnnotation)
 class ImageAnnotationAdmin(admin.ModelAdmin):
-    list_display = ('id', 'display_name', 'target_type', 'target_id', 'created_by', 'firebase_url_preview', 'created_at')
-    search_fields = ('display_name', 'created_by__username', 'firebase_url')
+    list_display = ('id', 'dynamic_name', 'target_type', 'target_id', 'created_by', 'firebase_url_preview', 'created_at')
+    search_fields = ('created_by__username', 'firebase_url')
     list_filter = ('target_type', 'created_at', 'created_by')
-    readonly_fields = ('created_at', 'updated_at')
+    readonly_fields = ('created_at', 'updated_at', 'dynamic_name')
     date_hierarchy = 'created_at'
     
     def firebase_url_preview(self, obj):

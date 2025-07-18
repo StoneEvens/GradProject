@@ -234,11 +234,6 @@ class ImageAnnotation(models.Model):
         help_text="標註點在圖片上的 Y 座標（百分比 0-100）"
     )
     
-    # 標註內容
-    display_name = models.CharField(
-        max_length=100,
-        help_text="標註顯示的名稱"
-    )
     
     # 標註目標類型和ID
     TARGET_CHOICES = [
@@ -274,11 +269,11 @@ class ImageAnnotation(models.Model):
         ]
 
     def __str__(self):
-        return f"標註: {self.display_name} 在 {self.firebase_url[:50]}..."
+        return f"標註: {self.dynamic_name} 在 {self.firebase_url[:50]}..."
 
     @staticmethod
     def create(firebase_url: str, x_position: float, y_position: float, 
-               display_name: str, target_type: str, target_id: int, created_by):
+               target_type: str, target_id: int, created_by):
         """
         創建新的圖片標註
         
@@ -286,7 +281,6 @@ class ImageAnnotation(models.Model):
         - firebase_url: 圖片的 Firebase URL
         - x_position: X 座標（百分比）
         - y_position: Y 座標（百分比）
-        - display_name: 顯示名稱
         - target_type: 目標類型（'user' 或 'pet'）
         - target_id: 目標 ID
         - created_by: 創建者用戶物件
@@ -298,11 +292,11 @@ class ImageAnnotation(models.Model):
             firebase_url=firebase_url,
             x_position=x_position,
             y_position=y_position,
-            display_name=display_name,
             target_type=target_type,
             target_id=target_id,
             created_by=created_by
         )
+        
         return annotation
 
     @staticmethod
@@ -368,14 +362,34 @@ class ImageAnnotation(models.Model):
                 return None
         return None
 
-    def update_annotation(self, x_position=None, y_position=None, display_name=None):
+    @property
+    def dynamic_name(self):
+        """
+        動態獲取標註目標的名稱
+        
+        Returns:
+        - str: 根據 target_type 和 target_id 動態獲取的名稱
+        """
+        target_object = self.get_target_object()
+        if target_object is None:
+            return f"{self.target_type}_{self.target_id}"  # 回退到類型_ID
+        
+        if self.target_type == 'user':
+            # 優先使用 username，如果沒有則使用 user_fullname
+            return target_object.username or target_object.user_fullname or f"用戶_{self.target_id}"
+        elif self.target_type == 'pet':
+            # 使用寵物名稱
+            return target_object.pet_name or f"寵物_{self.target_id}"
+        
+        return f"{self.target_type}_{self.target_id}"
+
+    def update_annotation(self, x_position=None, y_position=None):
         """
         更新標註資訊
         
         Parameters:
         - x_position: 新的 X 座標（可選）
         - y_position: 新的 Y 座標（可選）
-        - display_name: 新的顯示名稱（可選）
         
         Returns:
         - bool: 更新是否成功
@@ -389,10 +403,6 @@ class ImageAnnotation(models.Model):
         if y_position is not None:
             self.y_position = y_position
             update_fields.append('y_position')
-        
-        if display_name is not None:
-            self.display_name = display_name
-            update_fields.append('display_name')
         
         if update_fields:
             update_fields.append('updated_at')
