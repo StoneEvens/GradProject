@@ -166,7 +166,7 @@ class PostFrameSerializer(serializers.ModelSerializer):
                     'firebase_url': annotation.firebase_url,
                     'x_position': annotation.x_position,
                     'y_position': annotation.y_position,
-                    'display_name': annotation.display_name,
+                    'display_name': annotation.dynamic_name,
                     'target_type': annotation.target_type,
                     'target_id': annotation.target_id,
                     'created_by': {
@@ -323,7 +323,7 @@ class SolPostSerializer(serializers.ModelSerializer):
                     'firebase_url': annotation.firebase_url,
                     'x_position': annotation.x_position,
                     'y_position': annotation.y_position,
-                    'display_name': annotation.display_name,
+                    'display_name': annotation.dynamic_name,
                     'target_type': annotation.target_type,
                     'target_id': annotation.target_id,
                     'created_by': {
@@ -423,16 +423,17 @@ class PostTagPetSerializer(serializers.ModelSerializer):
 class ImageAnnotationSerializer(serializers.ModelSerializer):
     created_by_info = serializers.SerializerMethodField()
     target_info = serializers.SerializerMethodField()
+    dynamic_name = serializers.ReadOnlyField()
     
     class Meta:
         model = ImageAnnotation
         fields = [
             'id', 'firebase_url', 'x_position', 'y_position',
-            'display_name', 'target_type', 'target_id',
+            'dynamic_name', 'target_type', 'target_id',
             'created_by', 'created_by_info', 'target_info',
             'created_at', 'updated_at'
         ]
-        read_only_fields = ['id', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'dynamic_name', 'created_at', 'updated_at']
     
     def get_created_by_info(self, annotation):
         """獲取創建者基本資訊"""

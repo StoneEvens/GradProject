@@ -40,14 +40,14 @@ const PetSwitcher = ({
             <div className={styles.petAvatarWrapper}>
               <img
                 src={pet.avatarUrl || '/assets/icon/DefaultAvatar.jpg'}
-                alt={pet.name}
+                alt={pet.pet_name}
                 className={styles.petAvatar}
               />
               {currentPet?.id === pet.id && (
                 <div className={styles.activeIndicator}></div>
               )}
             </div>
-            <span className={styles.petName}>{pet.name}</span>
+            <span className={styles.petName}>{pet.pet_name}</span>
           </div>
         ))}
       </div>

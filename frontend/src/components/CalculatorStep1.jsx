@@ -14,23 +14,28 @@ const speciesReverseMap = {
 };
 
 function CalculatorStep1({ onNext, pets: apiPets }) {
+  // Check if apiPets is valid
+  if (!apiPets || !Array.isArray(apiPets) || apiPets.length === 0) {
+    return <div className="calculator-step1">沒有寵物資料，請先添加寵物</div>;
+  }
+
   // Format pets: convert species from English to Chinese for display
   const formattedPets = apiPets.map((pet) => ({
-    id: pet.id,
+    id: pet.pet_id,  // pets API 返回的是 pet_id 而不是 id
     pet_name: pet.pet_name,
     species: speciesMap[pet.pet_type] || pet.pet_type, // display Chinese
     weight: pet.weight || '',
     height: pet.height || '',
     note: '',
-    avatar: pet.pet_avatar || defaultAvatar,
+    avatar: pet.headshot_url || defaultAvatar,
   }));
 
   const [selectedPet, setSelectedPet] = useState(0);
   const [pets, setPets] = useState(formattedPets);
   const [editInfo, setEditInfo] = useState({
-    weight: pets[0]?.weight || '',
-    height: pets[0]?.height || '',
-    note: pets[0]?.note || '',
+    weight: formattedPets[0]?.weight || '',
+    height: formattedPets[0]?.height || '',
+    note: formattedPets[0]?.note || '',
   });
 
   const [isAdding, setIsAdding] = useState(false);
@@ -60,7 +65,7 @@ function CalculatorStep1({ onNext, pets: apiPets }) {
       if (!newPet.weight) return '請輸入體重！';
       if (!newPet.height) return '請輸入身高！';
     } else {
-      if (!pets[selectedPet].pet_name) return '請輸入名字！';
+      if (!pets[selectedPet]?.pet_name) return '請輸入名字！';
       if (!editInfo.weight) return '請輸入體重！';
       if (!editInfo.height) return '請輸入身高！';
     }
@@ -93,7 +98,7 @@ function CalculatorStep1({ onNext, pets: apiPets }) {
       onNext(tempPet);
     } else {
       const updatePayload = {
-        pet_id: pets[selectedPet].id,
+        pet_id: pets[selectedPet]?.id,
         weight: parseFloat(editInfo.weight),
         height: parseFloat(editInfo.height),
       };
@@ -139,7 +144,7 @@ function CalculatorStep1({ onNext, pets: apiPets }) {
         <div className="pet-avatar-grid">
           {pets.map((pet, idx) => (
             <img
-              key={pet.id}
+              key={`pet-${pet.id}`}
               src={pet.avatar}
               alt={pet.pet_name}
               className={`pet-avatar${selectedPet === idx && !isAdding ? ' selected' : ''}`}
@@ -165,7 +170,7 @@ function CalculatorStep1({ onNext, pets: apiPets }) {
               placeholder="請輸入名字"
             />
           ) : (
-            <span>{pets[selectedPet].pet_name}</span>
+            <span>{pets[selectedPet]?.pet_name || '未知'}</span>
           )}
         </div>
         <div className="pet-info-row">
@@ -180,7 +185,7 @@ function CalculatorStep1({ onNext, pets: apiPets }) {
               <option value="狗">狗</option>
             </select>
           ) : (
-            <span>{pets[selectedPet].species}</span>
+            <span>{pets[selectedPet]?.species || '未知'}</span>
           )}
         </div>
         <div className="pet-info-row">

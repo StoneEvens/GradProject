@@ -27,7 +27,7 @@ class PetListByUser(APIView):
         if not user_id:
             return Response({"error": "請提供 user_id"}, status=status.HTTP_400_BAD_REQUEST)
 
-        pets = Pet.objects.filter(owner=user_id)
+        pets = Pet.objects.filter(owner_id=user_id)
         serializer = PetSerializer(pets, many=True, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -45,16 +45,19 @@ class PetCreateView(APIView):
             return Response({"error": "找不到使用者"}, status=status.HTTP_400_BAD_REQUEST)
 
         # 先建立寵物，暫時不包含 avatar
+        # 將 is_dog 轉換為 pet_type
+        is_dog = data.get("is_dog") in ['true', 'True', True]
+        pet_type = 'dog' if is_dog else 'cat'
+        
         pet = Pet.objects.create(
             pet_name=data.get("pet_name"),
-            is_dog=data.get("is_dog") in ['true', 'True', True],
-            life_stage=data.get("life_stage"),
+            pet_type=pet_type,
+            pet_stage=data.get("life_stage"),
             weight=data.get("weight"),
-            length=data.get("length"),
-            expect_adult_weight=data.get("expect_adult_weight"),
-            litter_size=data.get("litter_size"),
+            height=data.get("length"),  # length -> height
+            predicted_adult_weight=data.get("expect_adult_weight"),
             weeks_of_lactation=data.get("weeks_of_lactation"),
-            keeper_id=user
+            owner=user  # keeper_id -> owner
         )
 
         pet_avatar_file = request.FILES.get("pet_avatar")
@@ -86,18 +89,34 @@ class PetUpdateView(APIView):
         except Pet.DoesNotExist:
             return Response({"error": "找不到該寵物"}, status=status.HTTP_400_BAD_REQUEST)
 
-        for field in ["is_dog", "pet_avatar", "life_stage", "weight", "length", "expect_adult_weight", "litter_size", "weeks_of_lactation"]:
-            value = request.data.get(field)
+        # 處理欄位名稱對應
+        field_mapping = {
+            "life_stage": "pet_stage",
+            "length": "height",
+            "expect_adult_weight": "predicted_adult_weight",
+            "is_dog": None,  # 需要特殊處理
+            "pet_avatar": "pet_avatar",
+            "weight": "weight",
+            "weeks_of_lactation": "weeks_of_lactation"
+        }
+        
+        for frontend_field, model_field in field_mapping.items():
+            value = request.data.get(frontend_field)
             if value is not None:
-                setattr(pet, field, value)
+                if frontend_field == "is_dog":
+                    # 將 is_dog 轉換為 pet_type
+                    is_dog = value in ['true', 'True', True]
+                    pet.pet_type = 'dog' if is_dog else 'cat'
+                elif model_field:
+                    setattr(pet, model_field, value)
 
         pet.save()
 
         return Response({
             "message": "更新成功",
             "pet_id": pet.id,
-            "pet_avatar": pet.pet_avatar,
-            "is_dog": pet.is_dog,
+            "pet_avatar": getattr(pet, 'pet_avatar', None),
+            "is_dog": pet.pet_type == 'dog',
             "new_life_stage": pet.pet_stage,
             "new_weight": pet.weight,
             "new_length": pet.height,

@@ -3,6 +3,7 @@ import axios from 'axios';
 import TopNavbar from '../components/TopNavbar.jsx';
 import BottomNavbar from '../components/BottomNavigationbar';
 import '../styles/CalculatorPage.css';
+import { getUserPets } from '../services/petService';
 // import CalculatorStep1 from '../components/CalculatorStep1';
 import CalculatorStep1 from '../components/CalculatorStep1.jsx';
 import CalculatorStep2 from '../components/CalculatorStep2.jsx';
@@ -15,23 +16,21 @@ function CalculatorPage() {
   const [pets, setPets] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // 這裡先寫死 user_id = 2，之後可以從 props 或 context 傳入
-  const userId = 2;
-
   useEffect(() => {
     const fetchPets = async () => {
       try {
-        const response = await axios.get(`http://127.0.0.1:8000/api/v1/calculator/pets/?user_id=${userId}`);
-        setPets(response.data);
+        const pets = await getUserPets();
+        setPets(pets || []);
       } catch (error) {
         console.error('載入寵物失敗：', error);
+        setPets([]);
       } finally {
         setLoading(false);
       }
     };
 
     fetchPets();
-  }, [userId]);
+  }, []);
 
   const handleStep1Next = (pet) => {
     setSelectedPet(pet);

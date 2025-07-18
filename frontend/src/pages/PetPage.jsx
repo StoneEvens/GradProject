@@ -41,7 +41,7 @@ const PetPage = () => {
         // 轉換後端資料格式為前端使用的格式
         const formattedPets = pets.map(pet => ({
           id: pet.pet_id,
-          name: pet.pet_name,
+          pet_name: pet.pet_name,
           age: pet.age,
           type: pet.pet_type,
           breed: pet.breed,
@@ -144,12 +144,12 @@ const PetPage = () => {
                 <div className={styles.avatarSection}>
                   <img 
                     src={currentPet.avatarUrl || '/assets/icon/DefaultAvatar.jpg'} 
-                    alt={currentPet.name} 
+                    alt={currentPet.pet_name} 
                     className={styles.avatar}
                   />
                 </div>
                 <div className={styles.petInfo}>
-                  <div className={styles.petName}>{currentPet.name}</div>
+                  <div className={styles.petName}>{currentPet.pet_name}</div>
                   <div className={styles.petBreed}>{currentPet.breed}</div>
                   <div className={styles.petDescription}>
                     {currentPet.description || currentPet.basicInfo || '這隻寵物很可愛，主人還沒有添加描述。'}
