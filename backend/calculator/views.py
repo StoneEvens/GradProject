@@ -16,7 +16,7 @@ from feeds.models import Feed
 from .serializers import PetSerializer
 from feeds.serializers import FeedSerializer
 from django.contrib.auth import get_user_model
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 
 User = get_user_model()
 
@@ -125,29 +125,20 @@ class PetUpdateView(APIView):
         }, status=status.HTTP_200_OK)
 
 class FeedListByUser(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        user_id = request.query_params.get("user_id")
-        if not user_id:
-            return Response({"error": "請提供 user_id"}, status=status.HTTP_400_BAD_REQUEST)
-
-        feeds = Feed.objects.filter(user_id=user_id)
+        feeds = Feed.objects.filter(user=request.user)
         serializer = FeedSerializer(feeds, many=True, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 class FeedCreateView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     parser_classes = [JSONParser, FormParser, MultiPartParser]
 
     def post(self, request):
         data = request.data
-        user_id = data.get("user_id")
-
-        try:
-            user = User.objects.get(id=user_id)
-        except User.DoesNotExist:
-            return Response({"error": "找不到使用者"}, status=status.HTTP_400_BAD_REQUEST)
+        user = request.user  # 使用認證的用戶
 
         def parse_float(value):
             try:

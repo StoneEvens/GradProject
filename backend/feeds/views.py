@@ -8,7 +8,7 @@ import re
 
 from google.cloud import vision
 from google.oauth2 import service_account
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from utils.firebase_service import FirebaseStorageService
 import os
 from django.conf import settings
@@ -98,21 +98,20 @@ class FeedOCRView(APIView):
         return result
     
 class FirebaseImageUploadView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     parser_classes = [MultiPartParser, FormParser]
 
     def post(self, request):
         file = request.FILES.get('file')
-        user_id = request.data.get('user_id')
         feed_id = request.data.get('feed_id')
         photo_type = request.data.get('photo_type')
 
-        if not file or not user_id or not feed_id or not photo_type:
+        if not file or not feed_id or not photo_type:
             return Response({"error": "缺少必要欄位"}, status=status.HTTP_400_BAD_REQUEST)
 
         firebase = FirebaseStorageService()
         success, msg, url, firebase_path = firebase.upload_feed_photo(
-            user_id=int(user_id),
+            user_id=request.user.id,
             feed_id=int(feed_id),
             photo_file=file,
             photo_type=photo_type

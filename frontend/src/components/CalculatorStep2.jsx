@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import axios from 'axios';
+import axios from '../utils/axios';
 import '../styles/CalculatorStep2.css';
 import mockFeed1 from '../MockPicture/mockFeed1.png';
 import mockFeed2 from '../MockPicture/mockFeed2.png';
@@ -11,11 +11,20 @@ function CalculatorStep2({ onNext, onPrev, selectedPet }) {
   const fileInputRef = useRef();
   const [selectedFeed, setSelectedFeed] = useState(0);
   const [feeds, setFeeds] = useState([]);
-  const [feedInfo, setFeedInfo] = useState({});
+  const [feedInfo, setFeedInfo] = useState({
+    name: '',
+    brand: '',
+    carb: '',
+    protein: '',
+    fat: '',
+    ca: '',
+    p: '',
+    mg: '',
+    na: ''
+  });
 
   useEffect(() => {
-    const uid = user_id || 2;
-    axios.get(`http://127.0.0.1:8000/api/v1/calculator/feeds/?user_id=${uid}`)
+    axios.get('/calculator/feeds/')
       .then(response => {
         const apiFeeds = response.data.map((item, idx) => ({
           id: item.id,
@@ -48,13 +57,13 @@ function CalculatorStep2({ onNext, onPrev, selectedPet }) {
     setFeedInfo({
       name: feed.name || '',
       brand: feed.brand || '',
-      carb: feed.carb || '',
-      protein: feed.protein || '',
-      fat: feed.fat || '',
-      ca: feed.ca || '',
-      p: feed.p || '',
-      mg: feed.mg || '',
-      na: feed.na || '',
+      carb: (feed.carb !== undefined && feed.carb !== null) ? feed.carb.toString() : '',
+      protein: (feed.protein !== undefined && feed.protein !== null) ? feed.protein.toString() : '',
+      fat: (feed.fat !== undefined && feed.fat !== null) ? feed.fat.toString() : '',
+      ca: (feed.ca !== undefined && feed.ca !== null) ? feed.ca.toString() : '',
+      p: (feed.p !== undefined && feed.p !== null) ? feed.p.toString() : '',
+      mg: (feed.mg !== undefined && feed.mg !== null) ? feed.mg.toString() : '',
+      na: (feed.na !== undefined && feed.na !== null) ? feed.na.toString() : '',
     });
   };
 
@@ -90,32 +99,37 @@ const handleFileChange = async (e) => {
     // Step 1: OCR
     const ocrForm = new FormData();
     ocrForm.append('image', nutritionImageFile);
-    const ocrRes = await axios.post('http://127.0.0.1:8000/api/v1/feeds/ocr/', ocrForm);
+    const ocrRes = await axios.post('/feeds/ocr/', ocrForm, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
     const nutrients = ocrRes.data.extracted_nutrients || {};
     console.log("OCR 結果：", nutrients);
 
     // Step 2: 上傳圖片
-    const uploadToFirebase = async (file, userId, feedId, photoType) => {
+    const uploadToFirebase = async (file, feedId, photoType) => {
       const form = new FormData();
       form.append('file', file);
-      form.append('user_id', userId);
       form.append('feed_id', feedId);
       form.append('photo_type', photoType);
-      const res = await axios.post('http://127.0.0.1:8000/api/v1/feeds/firebase/upload/', form);
+      const res = await axios.post('/feeds/firebase/upload/', form, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
       return res.data.download_url;
     };
 
-    const uid = user_id || 2;
     const tempFeedId = Date.now();  // 臨時唯一值
 
-    const frontImageUrl = await uploadToFirebase(frontImageFile, uid, tempFeedId, 'front');
-    const nutritionImageUrl = await uploadToFirebase(nutritionImageFile, uid, tempFeedId, 'nutrition');
+    const frontImageUrl = await uploadToFirebase(frontImageFile, tempFeedId, 'front');
+    const nutritionImageUrl = await uploadToFirebase(nutritionImageFile, tempFeedId, 'nutrition');
 
 
     // Step 3: 建立 Feed
     const parseNumber = (val) => typeof val === 'number' ? val : 0;
     const createFeedPayload = {
-      user_id: parseInt(user_id || 2),
       name: '自訂飼料',
       brand: '',
       protein: parseNumber(nutrients.protein),
@@ -132,7 +146,7 @@ const handleFileChange = async (e) => {
     console.log('Hi, im here.')
 
     const createFeedRes = await axios.post(
-      'http://127.0.0.1:8000/api/v1/calculator/feeds/create/',
+      '/calculator/feeds/create/',
       createFeedPayload
     );
     console.log("建立 Feed 回傳結果：", createFeedRes.data);
