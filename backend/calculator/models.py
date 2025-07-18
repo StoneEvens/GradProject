@@ -3,7 +3,7 @@ from django.conf import settings
 
 
 class Pet(models.Model):
-    name = models.CharField(max_length=100, null=True, blank=True)
+    pet_name = models.CharField(max_length=100, null=True, blank=True)
     pet_avatar = models.URLField(
         max_length=500,
         null=True,
@@ -27,7 +27,7 @@ class Pet(models.Model):
     )
 
     def __str__(self):
-        return f"{self.name or '寵物'} ({'狗' if self.is_dog else '貓'}, {self.life_stage})"
+        return f"{self.pet_name or '寵物'} ({'狗' if self.is_dog else '貓'}, {self.life_stage})"
 
 class Feed(models.Model):
     brand = models.CharField(max_length=100, null=True, blank=True)

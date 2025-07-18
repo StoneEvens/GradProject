@@ -1,5 +1,5 @@
 from rest_framework import generics, status as drf_status
-from .models import PostHashtag, PostFrame, SoLContent, PostPets
+from .models import PostHashtag, PostFrame, SoLContent, PostPets, ImageAnnotation
 from .serializers import *
 from rest_framework.permissions import IsAuthenticated
 from utils.api_response import APIResponse
@@ -17,64 +17,93 @@ from django.db import transaction
 from django.utils.text import slugify
 import json
 import re
+import logging
 
 User = get_user_model()
+logger = logging.getLogger(__name__)
 
 class DataHandler:
-    def parse_hashtags(self, content:str, tags:str):
-        implicit_tags = re.findall(r'#(\w+)', content)
-        explicit_tags = tags.split(',') if tags else []
-
-        hashtags = slugify(set(implicit_tags + explicit_tags))
-
-        return hashtags
+    """資料處理工具類"""
     
-    def parse_pets(self, pet_ids: str):
-        ids = str.split(pet_ids, ',')
-        pets = [Pet]
+    @staticmethod
+    def parse_hashtags(content: str, tags: str = None):
+        """解析標籤"""
+        logger.info(f"🏷️ 開始解析標籤 - content: '{content}', tags: '{tags}'")
+        
+        # 從內容中提取 hashtag（以 # 開頭的詞，支援中文）
+        # 使用 [\w\u4e00-\u9fff]+ 來匹配英文字母、數字和中文字符
+        implicit_tags = re.findall(r'#([\w\u4e00-\u9fff]+)', content)
+        logger.info(f"從內容提取的標籤: {implicit_tags}")
+        
+        # 處理明確傳入的標籤
+        explicit_tags = []
+        if tags:
+            logger.info(f"處理明確標籤字串: '{tags}'")
+            # 移除每個標籤可能的 # 前綴
+            tag_list = [tag.strip().lstrip('#') for tag in tags.split(',')]
+            explicit_tags = [tag for tag in tag_list if tag]
+            logger.info(f"處理後的明確標籤: {explicit_tags}")
+        
+        # 組合並去重標籤
+        all_tags = list(set(implicit_tags + explicit_tags))
+        final_tags = [tag.strip() for tag in all_tags if tag.strip()]
+        
+        logger.info(f"最終解析結果: {final_tags}")
+        return final_tags
+    
+    @staticmethod
+    def parse_pets(pet_ids: str = None):
+        """解析寵物ID列表"""
+        if not pet_ids:
+            return []
+            
+        try:
+            ids = [int(id.strip()) for id in pet_ids.split(',') if id.strip().isdigit()]
+            pets = Pet.objects.filter(id__in=ids)
+            return list(pets)
+        except (ValueError, AttributeError):
+            return []
 
-        for id in ids:
-            pet = Pet.get_pet(id)
-            pets.append(pet)
-
-        return pets
-# 
-#使用者社群首頁post預覽圖
+#----------用戶貼文預覽 API----------
 class UserPostsPreviewListAPIView(generics.ListAPIView):
+    """獲取用戶的貼文預覽列表"""
     permission_classes = [IsAuthenticated]
     serializer_class = PostPreviewSerializer
+    pagination_class = None  # 禁用分頁，因為我們已經限制了結果數量
+    
+    def get_queryset(self):
+        user_id = self.kwargs['pk']
+        try:
+            user = CustomUser.objects.get(id=user_id)
+            return PostFrame.objects.filter(user=user).order_by('-created_at')[:20]
+        except CustomUser.DoesNotExist:
+            return PostFrame.objects.none()
     
     def list(self, request, *args, **kwargs):
-        id = self.kwargs['pk']
-        user = CustomUser.get_user(id=id)
-        solContents = SoLContent.get_content(user=user)
+        queryset = self.filter_queryset(self.get_queryset())
         
-        # 如果使用分頁，處理分頁
-        page = self.paginate_queryset(solContents)
+        # 處理分頁
+        page = self.paginate_queryset(queryset)
         if page is not None:
-            # context={'request': request}  如果序列化器需要 request context
-            serializer = SolPostSerializer(page, many=True, context={'request': request})
-            
-            return APIResponse(
-                data=serializer.data,
-                message="Success"
-            )
+            serializer = self.get_serializer(page, many=True, context={'request': request})
+            return self.get_paginated_response(serializer.data)
         
         # 如果不使用分頁
-        serializer = SolPostSerializer(solContents, many=True, context={'request': request})
+        serializer = self.get_serializer(queryset, many=True, context={'request': request})
         
         return APIResponse(
             data=serializer.data,
             message="獲取用戶貼文預覽成功"
         )
 
-# === 搜尋 API ===
+#----------搜尋 API----------
 class SearchAPIView(APIView):
+    """搜尋 API - 支援用戶和標籤搜尋"""
     permission_classes = [IsAuthenticated]
     
     @log_queries
     def get(self, request):
-        query = request.query_params.get('q', '')
+        query = request.query_params.get('q', '').strip()
         
         if not query or len(query) < 2:
             return APIResponse(
@@ -89,9 +118,11 @@ class SearchAPIView(APIView):
         if query.startswith('#'):
             tag_query = query[1:]  # 去除#符號
             
-            hashtags = PostHashtag.get_hashtags(query=tag_query)
-            postFrameList = PostHashtag.get_postFrame(hashtags.values_list('postFrame_id', flat=True))
-            solContents = SoLContent.get_content(postFrameList=postFrameList)
+            hashtags = PostHashtag.objects.filter(tag__icontains=tag_query)
+            postFrame_ids = hashtags.values_list('postFrame_id', flat=True)
+            solContents = SoLContent.objects.filter(
+                postFrame_id__in=postFrame_ids
+            ).order_by('-postFrame__created_at')[:50]
 
             post_serializer = SolPostSerializer(solContents, many=True, context={'request': request})
             
@@ -103,8 +134,12 @@ class SearchAPIView(APIView):
                 message="根據Hashtag搜尋結果"
             )
         else:
-            # 先嘗試查找用戶
-            users = CustomUser.search_users(query)
+            # 搜尋用戶
+            users = CustomUser.objects.filter(
+                Q(username__icontains=query) | 
+                Q(user_fullname__icontains=query) |
+                Q(user_account__icontains=query)
+            )[:10]
             
             if users.exists():
                 # 序列化找到的用戶
@@ -112,8 +147,9 @@ class SearchAPIView(APIView):
                 
                 # 獲取這些用戶的貼文
                 user_ids = list(users.values_list('id', flat=True))
-                postFrameList = PostFrame.get_postFrames(userList=user_ids)
-                solContents = SoLContent.get_content(postFrameList=postFrameList)
+                solContents = SoLContent.objects.filter(
+                    postFrame__user_id__in=user_ids
+                ).order_by('-postFrame__created_at')[:30]
 
                 post_serializer = SolPostSerializer(solContents, many=True, context={'request': request})
                 
@@ -126,9 +162,9 @@ class SearchAPIView(APIView):
                 )
             else:
                 # 若找不到用戶，則從貼文內容中搜尋
-                contents = SoLContent.get_content(query=query)
-                postFrameList = PostFrame.get_postFrames(idList=contents.values_list('postFrame_id', flat=True))
-                solContents = SoLContent.get_content(postFrameList=postFrameList)
+                solContents = SoLContent.objects.filter(
+                    content_text__icontains=query
+                ).order_by('-postFrame__created_at')[:50]
 
                 post_serializer = SolPostSerializer(solContents, many=True, context={'request': request})
                 
@@ -140,13 +176,14 @@ class SearchAPIView(APIView):
                     message="根據貼文內容搜尋結果"
                 )
 
-# === 搜尋建議 API ===
+#----------搜尋建議 API----------
 class SearchSuggestionAPIView(APIView):
+    """搜尋建議 API"""
     permission_classes = [IsAuthenticated]
     
     @log_queries
     def get(self, request):
-        query = request.query_params.get('q', '')
+        query = request.query_params.get('q', '').strip()
         
         if not query or len(query) < 2:
             return APIResponse(
@@ -159,16 +196,22 @@ class SearchSuggestionAPIView(APIView):
         # 如果以#開頭，建議Hashtags
         if query.startswith('#'):
             tag_query = query[1:]  # 去除#符號
-            hashtags = PostHashtag.get_hashtags(query=tag_query)
+            hashtags = PostHashtag.objects.filter(
+                tag__icontains=tag_query
+            ).distinct()[:5]
             
-            for tag in hashtags:
+            for hashtag in hashtags:
                 suggestions.append({
                     'type': 'hashtag',
-                    'value': f'#{tag}'
+                    'value': f'#{hashtag.tag}'
                 })
         else:
             # 建議用戶
-            users = CustomUser.search_users(query)  # 限制最多5個建議
+            users = CustomUser.objects.filter(
+                Q(username__icontains=query) | 
+                Q(user_fullname__icontains=query) |
+                Q(user_account__icontains=query)
+            )[:5]
             
             for user in users:
                 suggestions.append({
@@ -178,12 +221,14 @@ class SearchSuggestionAPIView(APIView):
                 
             # 如果建議不足5個，添加部分hashtag建議
             if len(suggestions) < 5:
-                hashtags = PostHashtag.get_hashtags(query=query, count=5-len(suggestions))
+                hashtags = PostHashtag.objects.filter(
+                    tag__icontains=query
+                ).distinct()[:5-len(suggestions)]
                 
-                for tag in hashtags:
+                for hashtag in hashtags:
                     suggestions.append({
                         'type': 'hashtag',
-                        'value': f'#{tag}'
+                        'value': f'#{hashtag.tag}'
                     })
         
         serializer = SearchSuggestionSerializer(suggestions, many=True)
@@ -192,57 +237,157 @@ class SearchSuggestionAPIView(APIView):
             message="搜尋建議"
         )
 
-# === 建立貼文 API ===
+#----------建立貼文 API----------
 class CreatePostAPIView(APIView):
+    """建立新貼文"""
     permission_classes = [IsAuthenticated]
     
     @transaction.atomic
     def post(self, request, *args, **kwargs):
         try:
-            user: CustomUser = request.user
-            content = request.data.get('content')
+            user = request.user
+            content = request.data.get('content', '').strip()
+            location = request.data.get('location', '').strip() or None
             uploaded_image_files = request.FILES.getlist('images')
-            hashtag_data = request.data.get('hashtags')
-            pet_ids = request.data.get('pet_ids')
+            hashtag_data = request.data.get('hashtags', '')
+            pet_ids = request.data.get('pet_ids', '')
+            annotations_data = request.data.get('annotations', '')
             
-            #Create PostFrame
-            postFrame = PostFrame.create(user=user)
+            hashtags = DataHandler.parse_hashtags(content, hashtag_data)
+            
+            # 驗證必填欄位
+            if not content:
+                return APIResponse(
+                    message="貼文內容不能為空",
+                    status=drf_status.HTTP_400_BAD_REQUEST,
+                )
+            
+            # 創建 PostFrame
+            postFrame = PostFrame.objects.create(user=user)
 
-            #Create SoLContent
-            solContent = SoLContent.create(
+            # 創建 SoLContent
+            solContent = SoLContent.objects.create(
                 postFrame=postFrame,
-                content_text=content
+                content_text=content,
+                location=location
             )
 
-            #Create Post Hashtag References
-            hashtags = DataHandler().parse_hashtags(content, hashtag_data)
+            # 創建標籤關聯
+            logger.info(f"準備創建標籤，解析得到的標籤: {hashtags}")
             for tag in hashtags:
-                PostHashtag.create(postFrame=postFrame, tag=tag)
+                if tag:  # 確保標籤不為空
+                    # 不使用 slugify，直接使用原始標籤以支援中文
+                    created_hashtag = PostHashtag.objects.create(
+                        postFrame=postFrame,
+                        tag=tag.strip()  # 只移除前後空白，保留中文字符
+                    )
+                    logger.info(f"成功創建標籤: '{tag}' -> 資料庫中的值: '{created_hashtag.tag}'")
             
-            #Create Post Pet References
-            pets = DataHandler.parse_pets(pet_ids=pet_ids)
+            # 驗證標籤是否正確存儲
+            saved_hashtags = PostHashtag.objects.filter(postFrame=postFrame)
+            logger.info(f"資料庫中實際存儲的標籤: {[h.tag for h in saved_hashtags]}")
+            
+            # 創建寵物標記關聯
+            pets = DataHandler.parse_pets(pet_ids)
+            tagged_pet_ids = set()  # 用於追蹤已經標記的寵物，避免重複
+            
             for pet in pets:
-                PostPets.create(postFrame=postFrame, pet=pet) 
+                # 確認寵物屬於當前用戶
+                if pet.owner == user:
+                    PostPets.objects.create(
+                        postFrame=postFrame,
+                        pet=pet
+                    )
+                    tagged_pet_ids.add(pet.id)
             
-            # 處理圖片上傳 (使用 ImageService 風格)
+            # 處理圖片上傳
             if uploaded_image_files:
-                # from utils.image_service import ImageService # 確保 ImageService 已導入
-                # from django.contrib.contenttypes.models import ContentType
-                # post_content_type = ContentType.objects.get_for_model(Post)
-                for index, image_file_obj in enumerate(uploaded_image_files):
-                    try:
-                        ImageService.save_image(
-                            image_file=image_file_obj,
-                            owner=user, # 使用當前用戶作為擁有者
-                            content_object=post, # 直接傳遞 Post 實例
-                            image_type='post_image', # 定義一個合適的圖片類型
-                            sort_order=index,
-                            alt_text=f"{user.username} 的貼文圖片 {index+1}"
-                        )
-                    except Exception as img_e:
-                        # logger.error(f"保存貼文圖片時出錯: {str(img_e)}", exc_info=True)
-                        # 根據需求決定是否中止，或僅記錄錯誤並繼續
-                        pass
+                try:
+                    from utils.firebase_service import firebase_storage_service
+                    from utils.image_service import ImageService
+                    
+                    # 使用批量上傳方法
+                    success, message, uploaded_images = firebase_storage_service.upload_post_images_batch(
+                        user_id=user.id,
+                        post_id=postFrame.id,
+                        image_files=uploaded_image_files
+                    )
+                    
+                    # 保存成功上傳的圖片到資料庫
+                    for image_data in uploaded_images:
+                        try:
+                            ImageService.save_post_image(
+                                image_data=image_data,
+                                post_frame_id=postFrame.id,
+                                user_id=user.id
+                            )
+                        except Exception as save_error:
+                            logger.error(f"保存圖片記錄失敗: {str(save_error)}")
+                    
+                    # 處理圖片標註
+                    if annotations_data and uploaded_images:
+                        try:
+                            import json
+                            if isinstance(annotations_data, str):
+                                annotations = json.loads(annotations_data)
+                            else:
+                                annotations = annotations_data
+                            
+                            # 為每個標註創建記錄
+                            for annotation in annotations:
+                                image_index = annotation.get('image_index', 0)
+                                
+                                # 檢查圖片索引是否有效
+                                if image_index < len(uploaded_images):
+                                    image_data = uploaded_images[image_index]
+                                    firebase_url = image_data.get('firebase_url')
+                                    
+                                    if firebase_url:
+                                        ImageAnnotation.objects.create(
+                                            firebase_url=firebase_url,
+                                            x_position=float(annotation.get('x_position', 0)),
+                                            y_position=float(annotation.get('y_position', 0)),
+                                            display_name=annotation.get('display_name', ''),
+                                            target_type=annotation.get('target_type', 'user'),
+                                            target_id=int(annotation.get('target_id', 0)),
+                                            created_by=user
+                                        )
+                                        logger.info(f"創建標註成功: {annotation.get('display_name')} 在圖片 {image_index}")
+                                        
+                                        # 如果標註的是寵物，建立 PostPets 關聯
+                                        if annotation.get('target_type') == 'pet':
+                                            target_pet_id = int(annotation.get('target_id', 0))
+                                            
+                                            # 檢查是否已經標記過這個寵物
+                                            if target_pet_id not in tagged_pet_ids:
+                                                try:
+                                                    # 獲取寵物並確認屬於當前用戶
+                                                    pet = Pet.objects.get(id=target_pet_id, owner=user)
+                                                    PostPets.objects.create(
+                                                        postFrame=postFrame,
+                                                        pet=pet
+                                                    )
+                                                    tagged_pet_ids.add(target_pet_id)
+                                                    logger.info(f"通過標註建立寵物關聯: {pet.pet_name} (ID: {target_pet_id})")
+                                                except Pet.DoesNotExist:
+                                                    logger.warning(f"標註的寵物 ID {target_pet_id} 不存在或不屬於當前用戶")
+                                                except Exception as pet_error:
+                                                    logger.error(f"建立寵物關聯失敗: {str(pet_error)}")
+                                else:
+                                    logger.warning(f"標註的圖片索引 {image_index} 超出範圍")
+                                    
+                        except Exception as annotation_error:
+                            logger.error(f"處理圖片標註時出錯: {str(annotation_error)}")
+                            # 標註創建失敗不影響貼文創建
+                    
+                    if not success:
+                        logger.warning(f"部分圖片上傳失敗: {message}")
+                    else:
+                        logger.info(f"所有圖片上傳成功: {message}")
+                            
+                except Exception as img_e:
+                    logger.error(f"處理圖片上傳時出錯: {str(img_e)}")
+                    # 圖片上傳失敗不影響貼文創建
             
             # 返回創建成功的貼文
             serializer = PostFrameSerializer(postFrame, context={'request': request})
@@ -254,45 +399,145 @@ class CreatePostAPIView(APIView):
             )
             
         except Exception as e:
-            print(f"創建貼文時出錯: {str(e)}")  # 使用 print 代替 logger
+            logger.error(f"創建貼文時出錯: {str(e)}", exc_info=True)
             return APIResponse(
-                message="創建貼文失敗",
+                message=f"創建貼文失敗: {str(e)}",
                 status=drf_status.HTTP_400_BAD_REQUEST,
             )
 
-# === 貼文詳情 API ===
+#----------貼文詳情 API----------
 class PostDetailAPIView(generics.RetrieveAPIView):
+    """獲取貼文詳情"""
     permission_classes = [IsAuthenticated]
     queryset = PostFrame.objects.all()
+    serializer_class = PostFrameSerializer
     
     def retrieve(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
-            serializer = self.get_serializer(instance)
+            serializer = self.get_serializer(instance, context={'request': request})
             return APIResponse(
                 data=serializer.data,
                 message="獲取貼文詳情成功"
             )
-        except Exception as e:
+        except PostFrame.DoesNotExist:
             return APIResponse(
                 status=drf_status.HTTP_404_NOT_FOUND,
-                message=f"獲取貼文詳情失敗: {str(e)}",
-                errors={"detail": str(e)}
+                message="找不到指定的貼文"
+            )
+        except Exception as e:
+            logger.error(f"獲取貼文詳情失敗: {str(e)}")
+            return APIResponse(
+                status=drf_status.HTTP_500_INTERNAL_SERVER_ERROR,
+                message=f"獲取貼文詳情失敗: {str(e)}"
             )
 
-# === 貼文標記寵物選擇 API ===
+#----------貼文刪除 API----------
+class DeletePostAPIView(APIView):
+    """刪除貼文及其相關資料"""
+    permission_classes = [IsAuthenticated]
+    
+    @transaction.atomic
+    def delete(self, request, pk):
+        try:
+            # 獲取貼文
+            try:
+                postFrame = PostFrame.objects.get(id=pk)
+            except PostFrame.DoesNotExist:
+                return APIResponse(
+                    status=drf_status.HTTP_404_NOT_FOUND,
+                    message="找不到指定的貼文"
+                )
+            
+            # 檢查權限：只有作者可以刪除
+            if postFrame.user != request.user:
+                return APIResponse(
+                    status=drf_status.HTTP_403_FORBIDDEN,
+                    message="您沒有權限刪除此貼文"
+                )
+            
+            # 刪除貼文圖片（包含 Firebase Storage）
+            from utils.image_service import ImageService
+            try:
+                deleted_count, failed_paths = ImageService.delete_post_images(
+                    post_frame_id=postFrame.id,
+                    delete_from_firebase=True
+                )
+                
+                if failed_paths:
+                    logger.warning(f"部分圖片從 Firebase 刪除失敗: {failed_paths}")
+                
+                logger.info(f"貼文圖片刪除完成: {deleted_count} 張")
+                
+            except Exception as img_error:
+                logger.error(f"刪除貼文圖片時出錯: {str(img_error)}")
+                # 繼續刪除貼文，即使圖片刪除失敗
+            
+            # 刪除圖片標註
+            try:
+                from media.models import Image
+                image_urls = Image.objects.filter(
+                    postFrame=postFrame
+                ).values_list('firebase_url', flat=True)
+                
+                if image_urls:
+                    deleted_annotations = ImageAnnotation.objects.filter(
+                        firebase_url__in=image_urls
+                    ).delete()
+                    logger.info(f"刪除圖片標註: {deleted_annotations[0]} 個")
+                    
+            except Exception as annotation_error:
+                logger.error(f"刪除圖片標註時出錯: {str(annotation_error)}")
+            
+            # 刪除貼文相關資料
+            try:
+                # 刪除標籤
+                PostHashtag.objects.filter(postFrame=postFrame).delete()
+                
+                # 刪除寵物標記
+                PostPets.objects.filter(postFrame=postFrame).delete()
+                
+                # 刪除內容
+                SoLContent.objects.filter(postFrame=postFrame).delete()
+                
+                # 刪除互動記錄
+                from interactions.models import UserInteraction
+                UserInteraction.objects.filter(postFrame=postFrame).delete()
+                
+                logger.info(f"貼文相關資料刪除完成: post_id={postFrame.id}")
+                
+            except Exception as data_error:
+                logger.error(f"刪除貼文相關資料時出錯: {str(data_error)}")
+                # 繼續刪除主貼文
+            
+            # 最後刪除 PostFrame
+            post_id = postFrame.id
+            postFrame.delete()
+            
+            logger.info(f"貼文刪除成功: post_id={post_id}")
+            
+            return APIResponse(
+                message="貼文刪除成功",
+                status=drf_status.HTTP_200_OK
+            )
+            
+        except Exception as e:
+            logger.error(f"刪除貼文時發生錯誤: {str(e)}", exc_info=True)
+            return APIResponse(
+                message=f"刪除貼文失敗: {str(e)}",
+                status=drf_status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+#----------貼文標記寵物選擇 API----------
 class PostTagPetsAPIView(APIView):
+    """獲取當前用戶的寵物列表，用於貼文標記"""
     permission_classes = [IsAuthenticated]
     
     @log_queries
     def get(self, request):
-        """
-        獲取當前用戶的寵物列表，用於貼文標記寵物的選擇
-        僅返回必要的資訊：pet_id, pet_name, headshot_url
-        """
         try:
             # 獲取當前用戶的所有寵物
-            user_pets = Pet.objects.filter(owner=request.user)
+            user_pets = Pet.objects.filter(owner=request.user).order_by('pet_name')
             
             # 使用序列化器處理資料
             serializer = PostTagPetSerializer(user_pets, many=True)
@@ -303,27 +548,33 @@ class PostTagPetsAPIView(APIView):
             )
         
         except Exception as e:
+            logger.error(f"獲取寵物列表失敗: {str(e)}")
             return APIResponse(
                 status=drf_status.HTTP_400_BAD_REQUEST,
-                message=f"獲取寵物列表失敗: {str(e)}",
-                errors={"detail": str(e)}
+                message=f"獲取寵物列表失敗: {str(e)}"
             )
 
-# === 用戶貼文列表 API ===
+#----------用戶貼文列表 API----------
 class UserPostListAPIView(generics.ListAPIView):
+    """獲取指定用戶的貼文列表"""
     permission_classes = [IsAuthenticated]
+    serializer_class = SolPostSerializer
     
     @log_queries
     def get_queryset(self):
         user_id = self.kwargs.get('pk')
         
-        # 檢查用戶是否存在
-        user = CustomUser.get_user(user_id)
-        
-        # 按創建時間降序獲取該用戶的所有貼文
-        posts = SoLContent.get_content(user=user)
-
-        return SolPostSerializer(posts, many=True)
+        try:
+            # 檢查用戶是否存在
+            user = CustomUser.objects.get(id=user_id)
+            
+            # 獲取該用戶的所有貼文內容
+            return SoLContent.objects.filter(
+                postFrame__user=user
+            ).select_related('postFrame').order_by('-postFrame__created_at')
+            
+        except CustomUser.DoesNotExist:
+            return SoLContent.objects.none()
     
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
@@ -331,13 +582,376 @@ class UserPostListAPIView(generics.ListAPIView):
         # 處理分頁
         page = self.paginate_queryset(queryset)
         if page is not None:
-            serializer = self.get_serializer(page, many=True)
+            serializer = self.get_serializer(page, many=True, context={'request': request})
             return self.get_paginated_response(serializer.data)
         
         # 如果不使用分頁
-        serializer = self.get_serializer(queryset, many=True)
+        serializer = self.get_serializer(queryset, many=True, context={'request': request})
         
         return APIResponse(
             data=serializer.data,
             message="獲取用戶貼文列表成功"
         )
+
+#----------全局貼文列表 API----------
+class PostListAPIView(generics.ListAPIView):
+    """獲取全局貼文列表"""
+    permission_classes = [IsAuthenticated]
+    serializer_class = PostFrameSerializer
+    
+    @log_queries
+    def get_queryset(self):
+        # 獲取所有公開用戶的貼文，按創建時間倒序排列
+        return PostFrame.objects.select_related('user').prefetch_related(
+            'contents', 'hashtags', 'tagged_pets'
+        ).order_by('-created_at')
+    
+    def list(self, request, *args, **kwargs):
+        try:
+            queryset = self.filter_queryset(self.get_queryset())
+            
+            # 獲取分頁參數
+            page_size = min(int(request.query_params.get('limit', 10)), 50)  # 最大50個
+            offset = int(request.query_params.get('offset', 0))
+            
+            # 手動分頁
+            total_count = queryset.count()
+            posts = queryset[offset:offset + page_size]
+            has_more = offset + page_size < total_count
+            
+            # 序列化數據
+            serializer = self.get_serializer(posts, many=True, context={'request': request})
+            
+            return APIResponse(
+                data={
+                    'posts': serializer.data,
+                    'has_more': has_more,
+                    'total_count': total_count,
+                    'offset': offset,
+                    'limit': page_size
+                },
+                message="獲取貼文列表成功"
+            )
+            
+        except ValueError as e:
+            return APIResponse(
+                message="分頁參數錯誤",
+                status=drf_status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            logger.error(f"獲取貼文列表失敗: {str(e)}", exc_info=True)
+            return APIResponse(
+                message="獲取貼文列表失敗",
+                status=drf_status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+#----------圖片標註權限檢查 API----------
+class CheckAnnotationPermissionAPIView(APIView):
+    """
+    檢查圖片標註權限的 API
+    
+    檢查被標註的使用者是否：
+    1. 存在
+    2. 帳號為公開 OR 當前使用者已追蹤該使用者且已確認
+    """
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request, user_account):
+        """
+        檢查是否可以標註指定使用者
+        
+        Parameters:
+        - user_account: 被標註使用者的帳號
+        
+        Returns:
+        - bool: can_annotate - 是否可以標註
+        - str: reason - 不能標註的原因（如果不能標註）
+        - dict: user_info - 使用者基本資訊（如果可以標註）
+        """
+        try:
+            # 檢查被標註的使用者是否存在
+            try:
+                target_user = CustomUser.objects.get(user_account=user_account)
+            except CustomUser.DoesNotExist:
+                return APIResponse(
+                    data={
+                        'can_annotate': False,
+                        'reason': '使用者不存在',
+                        'user_info': None
+                    },
+                    message='使用者不存在',
+                    status=drf_status.HTTP_404_NOT_FOUND
+                )
+            
+            # 不能標註自己
+            if target_user == request.user:
+                return APIResponse(
+                    data={
+                        'can_annotate': False,
+                        'reason': '不能標註自己',
+                        'user_info': None
+                    },
+                    message='不能標註自己',
+                    status=drf_status.HTTP_400_BAD_REQUEST
+                )
+            
+            # 檢查帳號隱私設定
+            if target_user.account_privacy == 'public':
+                # 公開帳號，可以標註
+                user_info = self._get_user_basic_info(target_user)
+                return APIResponse(
+                    data={
+                        'can_annotate': True,
+                        'reason': None,
+                        'user_info': user_info
+                    },
+                    message='可以標註此使用者',
+                    status=drf_status.HTTP_200_OK
+                )
+            
+            # 私人帳號，檢查追蹤關係
+            from accounts.models import UserFollow
+            
+            try:
+                follow_relation = UserFollow.objects.get(
+                    user=request.user,
+                    follows=target_user,
+                    confirm_or_not=True  # 必須已確認
+                )
+                
+                # 有追蹤且已確認，可以標註
+                user_info = self._get_user_basic_info(target_user)
+                return APIResponse(
+                    data={
+                        'can_annotate': True,
+                        'reason': None,
+                        'user_info': user_info
+                    },
+                    message='可以標註此使用者',
+                    status=drf_status.HTTP_200_OK
+                )
+                
+            except UserFollow.DoesNotExist:
+                # 沒有追蹤關係或未確認
+                return APIResponse(
+                    data={
+                        'can_annotate': False,
+                        'reason': '此為私人帳號且您未追蹤該使用者',
+                        'user_info': None
+                    },
+                    message='此為私人帳號且您未追蹤該使用者',
+                    status=drf_status.HTTP_403_FORBIDDEN
+                )
+        
+        except Exception as e:
+            logger.error(f"檢查標註權限時發生錯誤: {str(e)}")
+            return APIResponse(
+                data={
+                    'can_annotate': False,
+                    'reason': f'檢查權限時發生錯誤: {str(e)}',
+                    'user_info': None
+                },
+                message=f'檢查權限失敗: {str(e)}',
+                code=drf_status.HTTP_500_INTERNAL_SERVER_ERROR,
+                status=drf_status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+    def _get_user_basic_info(self, user):
+        """
+        獲取使用者基本資訊
+        
+        Parameters:
+        - user: CustomUser 物件
+        
+        Returns:
+        - dict: 使用者基本資訊
+        """
+        headshot_url = None
+        try:
+            if hasattr(user, 'headshot') and user.headshot:
+                headshot_url = user.headshot.firebase_url
+        except:
+            headshot_url = None
+        
+        return {
+            'id': user.id,
+            'username': user.username,
+            'user_account': user.user_account,
+            'user_fullname': user.user_fullname,
+            'headshot_url': headshot_url,
+            'account_privacy': user.account_privacy
+        }
+
+#----------圖片標註管理 API----------
+class ImageAnnotationListCreateAPIView(APIView):
+    """圖片標註列表和創建 API"""
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        """獲取圖片標註列表"""
+        firebase_url = request.query_params.get('firebase_url')
+        
+        if not firebase_url:
+            return APIResponse(
+                message="請提供圖片 URL",
+                status=drf_status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            annotations = ImageAnnotation.get_annotations_by_image(firebase_url)
+            serializer = ImageAnnotationSerializer(annotations, many=True)
+            
+            return APIResponse(
+                data=serializer.data,
+                message="獲取圖片標註成功"
+            )
+        except Exception as e:
+            logger.error(f"獲取圖片標註失敗: {str(e)}")
+            return APIResponse(
+                message=f"獲取圖片標註失敗: {str(e)}",
+                status=drf_status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+    def post(self, request):
+        """創建新的圖片標註"""
+        try:
+            firebase_url = request.data.get('firebase_url')
+            x_position = request.data.get('x_position')
+            y_position = request.data.get('y_position')
+            display_name = request.data.get('display_name')
+            target_type = request.data.get('target_type')
+            target_id = request.data.get('target_id')
+            
+            # 驗證必填欄位
+            if not all([firebase_url, x_position is not None, y_position is not None, 
+                       display_name, target_type, target_id]):
+                return APIResponse(
+                    message="缺少必要的標註資訊",
+                    status=drf_status.HTTP_400_BAD_REQUEST
+                )
+            
+            # 創建標註
+            annotation = ImageAnnotation.create(
+                firebase_url=firebase_url,
+                x_position=float(x_position),
+                y_position=float(y_position),
+                display_name=display_name,
+                target_type=target_type,
+                target_id=int(target_id),
+                created_by=request.user
+            )
+            
+            serializer = ImageAnnotationSerializer(annotation)
+            
+            return APIResponse(
+                data=serializer.data,
+                message="標註創建成功",
+                status=drf_status.HTTP_201_CREATED
+            )
+            
+        except Exception as e:
+            logger.error(f"創建圖片標註失敗: {str(e)}")
+            return APIResponse(
+                message=f"創建標註失敗: {str(e)}",
+                status=drf_status.HTTP_400_BAD_REQUEST
+            )
+
+class ImageAnnotationDetailAPIView(APIView):
+    """圖片標註詳情、更新和刪除 API"""
+    permission_classes = [IsAuthenticated]
+    
+    def get_object(self, annotation_id):
+        """獲取標註物件"""
+        try:
+            return ImageAnnotation.objects.get(id=annotation_id)
+        except ImageAnnotation.DoesNotExist:
+            return None
+    
+    def get(self, request, annotation_id):
+        """獲取標註詳情"""
+        annotation = self.get_object(annotation_id)
+        if not annotation:
+            return APIResponse(
+                message="找不到指定的標註",
+                status=drf_status.HTTP_404_NOT_FOUND
+            )
+        
+        serializer = ImageAnnotationSerializer(annotation)
+        return APIResponse(
+            data=serializer.data,
+            message="獲取標註詳情成功"
+        )
+    
+    def put(self, request, annotation_id):
+        """更新標註"""
+        annotation = self.get_object(annotation_id)
+        if not annotation:
+            return APIResponse(
+                message="找不到指定的標註",
+                status=drf_status.HTTP_404_NOT_FOUND
+            )
+        
+        # 檢查權限：只有創建者可以更新
+        if annotation.created_by != request.user:
+            return APIResponse(
+                message="您沒有權限修改此標註",
+                status=drf_status.HTTP_403_FORBIDDEN
+            )
+        
+        try:
+            x_position = request.data.get('x_position')
+            y_position = request.data.get('y_position')
+            display_name = request.data.get('display_name')
+            
+            success = annotation.update_annotation(
+                x_position=float(x_position) if x_position is not None else None,
+                y_position=float(y_position) if y_position is not None else None,
+                display_name=display_name
+            )
+            
+            if success:
+                serializer = ImageAnnotationSerializer(annotation)
+                return APIResponse(
+                    data=serializer.data,
+                    message="標註更新成功"
+                )
+            else:
+                return APIResponse(
+                    message="沒有需要更新的內容",
+                    status=drf_status.HTTP_400_BAD_REQUEST
+                )
+                
+        except Exception as e:
+            logger.error(f"更新標註失敗: {str(e)}")
+            return APIResponse(
+                message=f"更新標註失敗: {str(e)}",
+                status=drf_status.HTTP_400_BAD_REQUEST
+            )
+    
+    def delete(self, request, annotation_id):
+        """刪除標註"""
+        annotation = self.get_object(annotation_id)
+        if not annotation:
+            return APIResponse(
+                message="找不到指定的標註",
+                status=drf_status.HTTP_404_NOT_FOUND
+            )
+        
+        # 檢查權限：只有創建者可以刪除
+        if annotation.created_by != request.user:
+            return APIResponse(
+                message="您沒有權限刪除此標註",
+                status=drf_status.HTTP_403_FORBIDDEN
+            )
+        
+        try:
+            annotation.delete()
+            return APIResponse(
+                message="標註刪除成功"
+            )
+        except Exception as e:
+            logger.error(f"刪除標註失敗: {str(e)}")
+            return APIResponse(
+                message=f"刪除標註失敗: {str(e)}",
+                status=drf_status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

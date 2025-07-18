@@ -16,13 +16,36 @@
   box-sizing: border-box;
 }
 
+.titleSection {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 30px;
+  margin-bottom: 10px;
+}
+
 .title {
   font-size: 24px;
   color: #89350c;
   text-align: left;
-  margin-top: 30px;
-  margin-bottom: 10px;
+  margin: 0;
   font-weight: bold;
+}
+
+.draftIndicator {
+  font-size: 12px;
+  color: #4CAF50;
+  background-color: #E8F5E8;
+  padding: 4px 8px;
+  border-radius: 12px;
+  animation: fadeInOut 3s ease-in-out;
+}
+
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: translateY(-10px); }
+  20% { opacity: 1; transform: translateY(0); }
+  80% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-10px); }
 }
 
 .divider {
@@ -100,6 +123,15 @@
   background-color: #f5f5f5;
 }
 
+.clickableImage {
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.clickableImage:hover {
+  opacity: 0.8;
+}
+
 .removeImageBtn {
   position: absolute;
   top: 5px;
@@ -124,6 +156,25 @@
 
 .removeImageBtn:hover {
   background-color: #E07641;
+}
+
+.annotationIndicator {
+  position: absolute;
+  bottom: 5px;
+  left: 5px;
+  background-color: #F08651;
+  color: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: bold;
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  z-index: 1;
 }
 
 .imageControls {
@@ -160,7 +211,7 @@
 
 /* 描述輸入區域 */
 .descriptionSection {
-  margin-bottom: 30px;
+  margin-bottom: 20px;
 }
 
 .descriptionInput {
@@ -187,6 +238,174 @@
 .descriptionInput::placeholder {
   color: #999;
   font-size: 16px;
+}
+
+/* 地點輸入區域 */
+.locationSection {
+  margin-bottom: 20px;
+}
+
+.locationInput {
+  width: 100%;
+  padding: 16px;
+  border: none;
+  border-radius: 16px;
+  font-size: 16px;
+  font-family: inherit;
+  background-color: #ffeed6;
+  border: 2px solid #FFB370;
+  color: #333;
+  box-sizing: border-box;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.locationInput:focus {
+  border-color: #F08651;
+}
+
+.locationInput::placeholder {
+  color: #999;
+  font-size: 16px;
+}
+
+/* Hashtag 區域 */
+.hashtagSection {
+  background-color: #ffeed6;
+  border-radius: 16px;
+  padding: 15px 20px;
+  margin-bottom: 30px;
+  border: 2px solid #FFB370;
+}
+
+.hashtagPreviewContainer {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  margin-bottom: 15px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 5px 0;
+}
+
+.hashtagPreviewContainer::-webkit-scrollbar {
+  display: none;
+}
+
+.hashtagPreview {
+  position: relative;
+  background-color: #FFb370;
+  color: #fff;
+  border-radius: 8px;
+  padding: 8px 28px 8px 12px;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  max-width: 150px;
+}
+
+.hashtagText {
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.removeHashtagBtn {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: #F08651;
+  color: white;
+  font-size: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  font-weight: bold;
+  border: 0px;
+  z-index: 1;
+}
+
+.removeHashtagBtn:hover {
+  background-color: #E07641;
+}
+
+.hashtagInputSection {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.hashtagInputContainer {
+  display: flex;
+  align-items: center;
+  background-color: white;
+  border: 2px solid #FFB370;
+  border-radius: 8px;
+  padding: 0 12px;
+  flex: 1;
+  height: 40px;
+}
+
+.hashtagInputContainer:focus-within {
+  border-color: #F08651;
+}
+
+.hashSymbol {
+  color: #F08651;
+  font-size: 16px;
+  font-weight: bold;
+  margin-right: 5px;
+}
+
+.hashtagInput {
+  border: none;
+  outline: none;
+  font-size: 16px;
+  font-family: inherit;
+  background-color: transparent;
+  color: #333;
+  flex: 1;
+  padding: 0;
+}
+
+.hashtagInput::placeholder {
+  color: #999;
+  font-size: 16px;
+}
+
+.addHashtagBtn {
+  background-color: #FFB370;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  height: 40px;
+  flex-shrink: 0;
+}
+
+.addHashtagBtn:hover {
+  background-color: #F08651;
+}
+
+.hashtagCounter {
+  color: #89350c;
+  font-size: 14px;
+  font-weight: 500;
 }
 
 /* 操作按鈕 */
@@ -248,9 +467,18 @@
     padding-bottom: 85px;
   }
 
+  .titleSection {
+    margin-top: 25px;
+    margin-bottom: 20px;
+  }
+
   .title {
     font-size: 20px;
-    margin-bottom: 25px;
+  }
+
+  .draftIndicator {
+    font-size: 11px;
+    padding: 3px 6px;
   }
 
   .imageSection {
@@ -272,6 +500,55 @@
     padding: 14px;
     font-size: 15px;
     min-height: 80px;
+  }
+
+  .hashtagSection {
+    padding: 15px;
+    margin-bottom: 20px;
+  }
+
+  .sectionTitle {
+    font-size: 16px;
+    margin-bottom: 12px;
+  }
+
+  .hashtagPreviewContainer {
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+
+  .hashtagPreview {
+    padding: 6px 24px 6px 10px;
+    max-width: 120px;
+  }
+
+  .hashtagText {
+    font-size: 13px;
+  }
+
+  .removeHashtagBtn {
+    width: 18px;
+    height: 18px;
+    font-size: 11px;
+  }
+
+  .hashtagInputContainer {
+    height: 36px;
+    padding: 0 10px;
+  }
+
+  .hashtagInput {
+    font-size: 15px;
+  }
+
+  .addHashtagBtn {
+    padding: 8px 14px;
+    font-size: 13px;
+    height: 36px;
+  }
+
+  .hashtagCounter {
+    font-size: 13px;
   }
 
   .actionButtons {
@@ -309,5 +586,43 @@
     font-size: 14px;
     top: 4px;
     right: 4px;
+  }
+
+  .hashtagSection {
+    padding: 12px;
+  }
+
+  .hashtagPreviewContainer {
+    gap: 5px;
+  }
+
+  .hashtagPreview {
+    padding: 5px 22px 5px 8px;
+    max-width: 100px;
+  }
+
+  .hashtagText {
+    font-size: 12px;
+  }
+
+  .removeHashtagBtn {
+    width: 16px;
+    height: 16px;
+    font-size: 10px;
+  }
+
+  .hashtagInputContainer {
+    height: 34px;
+    padding: 0 8px;
+  }
+
+  .hashtagInput {
+    font-size: 14px;
+  }
+
+  .addHashtagBtn {
+    padding: 6px 12px;
+    font-size: 12px;
+    height: 34px;
   }
 } 

@@ -13,6 +13,18 @@
   overflow-y: auto;
 }
 
+/* 貼文區域樣式 */
+.postsSection {
+  width: 100%;
+  max-width: 430px;
+  margin: 0 auto;
+}
+
+.postList {
+  width: 100%;
+}
+
+/* 原有的 placeholder 樣式（保留用於搜尋頁面） */
 .placeholder {
   text-align: center;
   margin-top: 50px;
@@ -34,4 +46,23 @@
   font-size: 0.9rem;
   color: #aaa;
   margin-top: 8px;
+}
+
+
+
+/* 響應式設計 */
+@media (max-width: 480px) {
+  .content {
+    padding: 15px 10px;
+  }
+  
+  .postsSection {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 360px) {
+  .content {
+    padding: 10px 8px;
+  }
 } 

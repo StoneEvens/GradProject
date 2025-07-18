@@ -246,6 +246,149 @@ class FirebaseStorageService:
         else:
             return False, message, None, None
 
+    def upload_post_image(self, user_id: int, post_id: int, image_file, sort_order: int = 0) -> Tuple[bool, str, Optional[str], Optional[str]]:
+        """
+        上傳貼文圖片
+        
+        Parameters:
+        - user_id: 用戶 ID
+        - post_id: 貼文 ID  
+        - image_file: 圖片檔案
+        - sort_order: 圖片排序順序
+        
+        Returns:
+        - tuple: (是否成功, 訊息, Firebase URL, Firebase 路徑)
+        """
+        try:
+            # 生成貼文圖片的檔案路徑
+            file_extension = image_file.name.split('.')[-1].lower() if '.' in image_file.name else 'jpg'
+            unique_filename = f"post_{post_id}_{sort_order}_{uuid.uuid4().hex}.{file_extension}"
+            file_path = f"posts/user_{user_id}/{unique_filename}"
+            
+            success, message, firebase_url = self.upload_image(image_file, file_path)
+            
+            if success:
+                logger.info(f"貼文圖片上傳成功: post_id={post_id}, path={file_path}")
+                return True, message, firebase_url, file_path
+            else:
+                logger.error(f"貼文圖片上傳失敗: post_id={post_id}, error={message}")
+                return False, message, None, None
+                
+        except Exception as e:
+            logger.error(f"上傳貼文圖片時發生錯誤: {str(e)}")
+            return False, f"上傳貼文圖片失敗: {str(e)}", None, None
+
+    def upload_post_images_batch(self, user_id: int, post_id: int, image_files: list) -> Tuple[bool, str, list]:
+        """
+        批量上傳貼文圖片
+        
+        Parameters:
+        - user_id: 用戶 ID
+        - post_id: 貼文 ID
+        - image_files: 圖片檔案列表
+        
+        Returns:
+        - tuple: (是否全部成功, 訊息, 成功上傳的圖片資訊列表)
+        """
+        uploaded_images = []
+        failed_count = 0
+        
+        try:
+            for index, image_file in enumerate(image_files):
+                success, message, firebase_url, firebase_path = self.upload_post_image(
+                    user_id=user_id,
+                    post_id=post_id, 
+                    image_file=image_file,
+                    sort_order=index
+                )
+                
+                if success:
+                    uploaded_images.append({
+                        'firebase_url': firebase_url,
+                        'firebase_path': firebase_path,
+                        'sort_order': index,
+                        'original_filename': getattr(image_file, 'name', f'image_{index}'),
+                        'file_size': getattr(image_file, 'size', None),
+                        'content_type': getattr(image_file, 'content_type', None)
+                    })
+                else:
+                    failed_count += 1
+                    logger.error(f"圖片 {index} 上傳失敗: {message}")
+            
+            total_files = len(image_files)
+            success_count = len(uploaded_images)
+            
+            if failed_count == 0:
+                return True, f"所有 {total_files} 張圖片上傳成功", uploaded_images
+            elif success_count > 0:
+                return False, f"{success_count}/{total_files} 張圖片上傳成功，{failed_count} 張失敗", uploaded_images
+            else:
+                return False, f"所有 {total_files} 張圖片上傳失敗", uploaded_images
+                
+        except Exception as e:
+            logger.error(f"批量上傳貼文圖片時發生錯誤: {str(e)}")
+            return False, f"批量上傳失敗: {str(e)}", uploaded_images
+
+    def delete_post_image(self, firebase_path: str) -> Tuple[bool, str]:
+        """
+        刪除貼文圖片
+        
+        Parameters:
+        - firebase_path: Firebase Storage 檔案路徑
+        
+        Returns:
+        - tuple: (是否成功, 訊息)
+        """
+        try:
+            success, message = self.delete_image(firebase_path)
+            if success:
+                logger.info(f"貼文圖片刪除成功: {firebase_path}")
+            else:
+                logger.error(f"貼文圖片刪除失敗: {firebase_path}, error={message}")
+            return success, message
+        except Exception as e:
+            logger.error(f"刪除貼文圖片時發生錯誤: {str(e)}")
+            return False, f"刪除貼文圖片失敗: {str(e)}"
+
+    def delete_post_images_batch(self, firebase_paths: list) -> Tuple[bool, str, dict]:
+        """
+        批量刪除貼文圖片
+        
+        Parameters:
+        - firebase_paths: Firebase Storage 檔案路徑列表
+        
+        Returns:
+        - tuple: (是否全部成功, 訊息, 詳細結果)
+        """
+        results = {
+            'success': [],
+            'failed': [],
+            'total': len(firebase_paths)
+        }
+        
+        try:
+            for path in firebase_paths:
+                if path:  # 確保路徑不為空
+                    success, message = self.delete_post_image(path)
+                    if success:
+                        results['success'].append(path)
+                    else:
+                        results['failed'].append({'path': path, 'error': message})
+            
+            success_count = len(results['success'])
+            failed_count = len(results['failed'])
+            
+            if failed_count == 0:
+                return True, f"所有 {success_count} 張圖片刪除成功", results
+            elif success_count > 0:
+                return False, f"{success_count}/{results['total']} 張圖片刪除成功，{failed_count} 張失敗", results
+            else:
+                return False, f"所有 {results['total']} 張圖片刪除失敗", results
+                
+        except Exception as e:
+            logger.error(f"批量刪除貼文圖片時發生錯誤: {str(e)}")
+            return False, f"批量刪除失敗: {str(e)}", results
+
 
 # 全域服務實例
 firebase_storage_service = FirebaseStorageService()
@@ -277,4 +420,36 @@ def cleanup_old_headshot(old_firebase_path: str, logger=None) -> bool:
     except Exception as delete_error:
         if logger:
             logger.error(f"刪除舊頭像檔案時發生錯誤: {str(delete_error)}")
+        return False
+
+def cleanup_post_images(firebase_paths: list, logger=None) -> bool:
+    """
+    清理貼文圖片檔案的輔助函數
+    
+    Parameters:
+    - firebase_paths: Firebase Storage 路徑列表
+    - logger: 日誌記錄器 (可選)
+    
+    Returns:
+    - bool: 是否全部成功刪除
+    """
+    if not firebase_paths:
+        return True
+    
+    try:
+        success, message, results = firebase_storage_service.delete_post_images_batch(firebase_paths)
+        
+        if logger:
+            if success:
+                logger.info(f"成功刪除所有貼文圖片: {len(firebase_paths)} 張")
+            else:
+                logger.warning(f"部分貼文圖片刪除失敗: {message}")
+                for failed_item in results.get('failed', []):
+                    logger.error(f"刪除失敗: {failed_item['path']} - {failed_item['error']}")
+        
+        return success
+        
+    except Exception as delete_error:
+        if logger:
+            logger.error(f"清理貼文圖片時發生錯誤: {str(delete_error)}")
         return False 

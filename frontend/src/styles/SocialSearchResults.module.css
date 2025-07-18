@@ -175,10 +175,18 @@
 /* 無結果狀態 */
 .noResults {
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   padding: 40px 20px;
   text-align: center;
+}
+
+.noResultsIcon {
+  width: 100px;
+  height: 100px;
+  margin-bottom: 16px;
+  opacity: 0.6;
 }
 
 .noResults p {

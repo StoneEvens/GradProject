@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from '../styles/SocialSearchResults.module.css';
 import ConfirmFollowModal from './ConfirmFollowModal';
+import PostPreviewList from './PostPreviewList';
 import { searchUsers, getUserFollowStatus, followUser, getUserFollowStatusBatch } from '../services/socialService';
 import { getUserProfile } from '../services/userService';
 
@@ -10,6 +11,7 @@ const SocialSearchResults = ({ searchQuery, onUserClick }) => {
   const [activeTab, setActiveTab] = useState('accounts');
   const [users, setUsers] = useState([]);
   const [posts, setPosts] = useState([]);
+  const [hashtagPosts, setHashtagPosts] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [followStates, setFollowStates] = useState({});
@@ -37,6 +39,7 @@ const SocialSearchResults = ({ searchQuery, onUserClick }) => {
     } else {
       setUsers([]);
       setPosts([]);
+      setHashtagPosts([]);
       setError(null);
     }
   }, [searchQuery]);
@@ -50,23 +53,36 @@ const SocialSearchResults = ({ searchQuery, onUserClick }) => {
       const result = await searchUsers(query);
       
       if (result.success) {
-        setUsers(result.data.users || []);
-        setPosts(result.data.posts || []);
-        
-        // 獲取所有用戶的追蹤狀態
-        if (result.data.users && result.data.users.length > 0) {
-          await loadFollowStates(result.data.users);
+        // 判斷是否為標籤搜尋
+        if (query.startsWith('#')) {
+          // 標籤搜尋：只有貼文結果
+          setUsers([]);
+          setPosts([]);
+          setHashtagPosts(result.data.posts || []);
+          setActiveTab('tags'); // 自動切換到標籤頁面
+        } else {
+          // 一般搜尋：用戶和貼文結果
+          setUsers(result.data.users || []);
+          setPosts(result.data.posts || []);
+          setHashtagPosts([]);
+          
+          // 獲取所有用戶的追蹤狀態
+          if (result.data.users && result.data.users.length > 0) {
+            await loadFollowStates(result.data.users);
+          }
         }
       } else {
         setError(result.error || '搜尋失敗');
         setUsers([]);
         setPosts([]);
+        setHashtagPosts([]);
       }
     } catch (error) {
       console.error('搜尋錯誤:', error);
       setError('搜尋時發生錯誤');
       setUsers([]);
       setPosts([]);
+      setHashtagPosts([]);
     } finally {
       setIsLoading(false);
     }
@@ -302,6 +318,11 @@ const SocialSearchResults = ({ searchQuery, onUserClick }) => {
               })
             ) : (
               <div className={styles.noResults}>
+                <img 
+                  src="/assets/icon/SearchNoResult.png" 
+                  alt="找不到結果" 
+                  className={styles.noResultsIcon}
+                />
                 <p>找不到符合的用戶</p>
               </div>
             )}
@@ -309,46 +330,28 @@ const SocialSearchResults = ({ searchQuery, onUserClick }) => {
         )}
 
         {!isLoading && !error && activeTab === 'posts' && (
-          <div className={styles.postList}>
-            {posts.length > 0 ? (
-              posts.map(post => (
-                <div key={post.id} className={styles.postItem}>
-                  <div className={styles.postHeader}>
-                    <img 
-                      src={post.user?.headshot_url || '/assets/icon/DefaultAvatar.jpg'} 
-                      alt={post.user?.user_fullname}
-                      className={styles.postUserAvatar}
-                      onError={handleImageError}
-                    />
-                    <div className={styles.postUserInfo}>
-                      <div className={styles.postUsername}>{post.user?.user_account}</div>
-                      <div className={styles.postDate}>
-                        {new Date(post.created_at).toLocaleDateString('zh-TW')}
-                      </div>
-                    </div>
-                  </div>
-                  <div className={styles.postContent}>{post.content}</div>
-                  {post.first_image_url && (
-                    <img 
-                      src={post.first_image_url} 
-                      alt="貼文圖片"
-                      className={styles.postImage}
-                      onError={(e) => {
-                        e.target.style.display = 'none';
-                      }}
-                    />
-                  )}
-                </div>
-              ))
-            ) : (
-              <div className={styles.noResults}>
-                <p>找不到符合的貼文</p>
-              </div>
-            )}
-          </div>
+          <PostPreviewList
+            posts={posts}
+            loading={isLoading}
+            error={error}
+            emptyMessage="找不到符合的貼文"
+            isSearchResult={true}
+            style={{ padding: '16px' }}
+          />
         )}
 
-        {!isLoading && !error && (activeTab === 'tags' || activeTab === 'forums') && (
+        {!isLoading && !error && activeTab === 'tags' && (
+          <PostPreviewList
+            posts={hashtagPosts}
+            loading={isLoading}
+            error={error}
+            emptyMessage={searchQuery?.startsWith('#') ? `找不到標籤 "${searchQuery}" 的相關貼文` : '找不到符合的標籤'}
+            isSearchResult={true}
+            style={{ padding: '16px' }}
+          />
+        )}
+
+        {!isLoading && !error && activeTab === 'forums' && (
           <div className={styles.comingSoon}>
             <p>此功能正在開發中...</p>
           </div>

@@ -8,6 +8,7 @@ import MainPage from './pages/MainPage';
 import UserProfilePage from './pages/UserProfilePage';
 import OtherUserProfilePage from './pages/OtherUserProfilePage';
 import UserFollowConditionPage from './pages/UserFollowConditionPage';
+import UserPostsPage from './pages/UserPostsPage';
 import SocialPage from './pages/SocialPage';
 import SettingsPage from './pages/SettingsPage';
 import NotificationPage from './pages/NotificationPage';
@@ -15,6 +16,8 @@ import PetPage from './pages/PetPage';
 import AddPetPage from './pages/AddPetPage';
 import EditPetPage from './pages/EditPetPage';
 import CreatePostPage from './pages/CreatePostPage';
+import PostPreviewPage from './pages/PostPreviewPage';
+import SearchPostsPage from './pages/SearchPostsPage';
 import CalculatorPage from './pages/CalculatorPage';
 import { isAuthenticated, refreshAccessToken } from './services/authService';
 
@@ -132,6 +135,15 @@ const App = () => {
           path="/user/:userAccount/follow/:type" 
           element={isUserAuthenticated ? <UserFollowConditionPage /> : <Navigate to="/" />} 
         />
+        {/* 用戶貼文列表頁面：未登入導向HomePage */}
+        <Route 
+          path="/user-posts" 
+          element={isUserAuthenticated ? <UserPostsPage /> : <Navigate to="/" />} 
+        />
+        <Route 
+          path="/user/:userAccount/posts" 
+          element={isUserAuthenticated ? <UserPostsPage /> : <Navigate to="/" />} 
+        />
         {/* 社群頁面：未登入導向HomePage */}
         <Route 
           path="/social" 
@@ -141,6 +153,11 @@ const App = () => {
         <Route 
           path="/social/search" 
           element={isUserAuthenticated ? <SocialPage /> : <Navigate to="/" />} 
+        />
+        {/* 搜尋貼文頁面：未登入導向HomePage */}
+        <Route 
+          path="/search-posts" 
+          element={isUserAuthenticated ? <SearchPostsPage /> : <Navigate to="/" />} 
         />
         {/* 設定頁面：未登入導向HomePage */}
         <Route 
@@ -171,6 +188,11 @@ const App = () => {
         <Route 
           path="/create-post" 
           element={isUserAuthenticated ? <CreatePostPage /> : <Navigate to="/" />} 
+        />
+        {/* 貼文預覽頁面：未登入導向HomePage */}
+        <Route 
+          path="/create-post-preview" 
+          element={isUserAuthenticated ? <PostPreviewPage /> : <Navigate to="/" />} 
         />
         {/* 未定義路徑：根據登入狀態重定向 */}
         <Route 

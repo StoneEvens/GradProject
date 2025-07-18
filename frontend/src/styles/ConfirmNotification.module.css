@@ -1,0 +1,101 @@
+/* 確認通知樣式 - 基於 Notification 樣式 */
+.confirmNotification {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #ffeed6;
+  padding: 12px 24px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 90%;
+  max-width: 350px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 1100;
+  opacity: 1;
+  animation: slideDown 0.3s ease-out;
+}
+
+.confirmNotification.fadeOut {
+  animation: fadeOut 0.3s ease-out forwards;
+}
+
+.message {
+  color: #f1501d;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: left;
+  line-height: 1.4;
+  flex-grow: 1;
+  margin-right: 12px;
+  white-space: pre-line;
+}
+
+.buttonContainer {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* 按鈕樣式參考 UnreadNotification */
+.cancelButton,
+.confirmButton {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 50px;
+}
+
+.cancelButton {
+  background: #ffb370;
+  color: #333;
+}
+
+.cancelButton:hover {
+  background: #ffca8c;
+  color: #333;
+}
+
+.confirmButton {
+  background: #f08651;
+  color: white;
+}
+
+.confirmButton:hover {
+  background: #e07045;
+}
+
+/* 動畫效果參考 Notification */
+@keyframes slideDown {
+  from {
+    transform: translate(-50%, -100%);
+    opacity: 0;
+  }
+  to {
+    transform: translate(-50%, 0);
+    opacity: 0.8;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    transform: translate(-50%, 0);
+    opacity: 0.8;
+  }
+  to {
+    transform: translate(-50%, -20px);
+    opacity: 0;
+  }
+}
+
+@media (min-width: 768px) {
+  .confirmNotification {
+    max-width: 400px;
+  }
+}

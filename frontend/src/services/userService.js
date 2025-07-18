@@ -71,31 +71,75 @@ export const getUserSummary = async (userAccountOrId) => {
 
 // 取得用戶日常貼文預覽
 export const getUserPostsPreview = async (userAccountOrId) => {
-  // 如果是數字，直接使用ID；如果是字串，需要轉換
-  if (typeof userAccountOrId === 'string' && isNaN(userAccountOrId)) {
-    // 是user_account，需要先獲得用戶資料
-    const userProfile = await getOtherUserProfile(userAccountOrId);
-    const res = await axios.get(`/social/users/${userProfile.id}/posts/preview/`);
-    return res.data.data;
-  } else {
-    // 是userId，直接調用
-    const res = await axios.get(`/social/users/${userAccountOrId}/posts/preview/`);
-    return res.data.data;
+  try {
+    let res;
+    
+    // 如果是數字，直接使用ID；如果是字串，需要轉換
+    if (typeof userAccountOrId === 'string' && isNaN(userAccountOrId)) {
+      // 是user_account，需要先獲得用戶資料
+      const userProfile = await getOtherUserProfile(userAccountOrId);
+      res = await axios.get(`/social/users/${userProfile.id}/posts/preview/`);
+    } else {
+      // 是userId，直接調用
+      res = await axios.get(`/social/users/${userAccountOrId}/posts/preview/`);
+    }
+    
+    // 處理分頁格式的響應
+    const responseData = res.data.data;
+    
+    // 如果有results字段，說明是分頁格式
+    if (responseData && typeof responseData === 'object' && responseData.results) {
+      return responseData.results;
+    }
+    
+    // 如果是直接的陣列格式
+    if (Array.isArray(responseData)) {
+      return responseData;
+    }
+    
+    // 其他情況返回空陣列
+    return [];
+    
+  } catch (error) {
+    console.error('getUserPostsPreview 發生錯誤:', error);
+    throw error;
   }
 };
 
 // 取得用戶病程紀錄
 export const getUserArchives = async (userAccountOrId) => {
-  // 如果是數字，直接使用ID；如果是字串，需要轉換
-  if (typeof userAccountOrId === 'string' && isNaN(userAccountOrId)) {
-    // 是user_account，需要先獲得用戶資料
-    const userProfile = await getOtherUserProfile(userAccountOrId);
-    const res = await axios.get(`/pets/users/${userProfile.id}/archives/`);
-    return res.data.data;
-  } else {
-    // 是userId，直接調用
-    const res = await axios.get(`/pets/users/${userAccountOrId}/archives/`);
-    return res.data.data;
+  try {
+    let res;
+    
+    // 如果是數字，直接使用ID；如果是字串，需要轉換
+    if (typeof userAccountOrId === 'string' && isNaN(userAccountOrId)) {
+      // 是user_account，需要先獲得用戶資料
+      const userProfile = await getOtherUserProfile(userAccountOrId);
+      res = await axios.get(`/pets/users/${userProfile.id}/archives/`);
+    } else {
+      // 是userId，直接調用
+      res = await axios.get(`/pets/users/${userAccountOrId}/archives/`);
+    }
+    
+    // 處理分頁格式的響應
+    const responseData = res.data.data;
+    
+    // 如果有results字段，說明是分頁格式
+    if (responseData && typeof responseData === 'object' && responseData.results) {
+      return responseData.results;
+    }
+    
+    // 如果是直接的陣列格式
+    if (Array.isArray(responseData)) {
+      return responseData;
+    }
+    
+    // 其他情況返回空陣列
+    return [];
+    
+  } catch (error) {
+    console.error('getUserArchives 發生錯誤:', error);
+    throw error;
   }
 };
 

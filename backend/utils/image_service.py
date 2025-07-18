@@ -472,4 +472,313 @@ class ImageService:
                 ).order_by('sort_order'),
                 to_attr=attr_name
             )
-        ) 
+        )
+
+    # === PostFrame 專用方法 ===
+    
+    @staticmethod
+    def get_post_images(post_frame_id, use_cache=True):
+        """
+        獲取貼文的所有圖片 - Firebase Storage 版本
+        
+        Parameters:
+        - post_frame_id: PostFrame ID
+        - use_cache: 是否使用緩存
+        
+        Returns:
+        - QuerySet: 圖片查詢集
+        """
+        from media.models import Image
+        
+        if use_cache:
+            # 嘗試從緩存獲取
+            cache_key = ImageService.get_cache_key('postframe', post_frame_id, 'all')
+            cached_images = cache.get(cache_key)
+            if cached_images is not None:
+                return cached_images
+        
+        # 直接使用 postFrame 外鍵查詢
+        images = Image.objects.filter(postFrame_id=post_frame_id).order_by('sort_order')
+        
+        if use_cache:
+            # 緩存圖片查詢集（轉換為列表以便緩存）
+            cached_images = list(images)
+            cache.set(cache_key, cached_images, ImageService.DEFAULT_CACHE_TIMEOUT)
+            return cached_images
+            
+        return images
+    
+    @staticmethod
+    def get_post_first_image(post_frame_id, use_cache=True):
+        """
+        獲取貼文的第一張圖片
+        
+        Parameters:
+        - post_frame_id: PostFrame ID
+        - use_cache: 是否使用緩存
+        
+        Returns:
+        - Image: 圖片對象或 None
+        """
+        from media.models import Image
+        
+        if use_cache:
+            # 嘗試從緩存獲取
+            cache_key = ImageService.get_cache_key('postframe', post_frame_id, 'first')
+            cached_image = cache.get(cache_key)
+            if cached_image is not None:
+                return cached_image
+        
+        image = Image.objects.filter(postFrame_id=post_frame_id).order_by('sort_order').first()
+        
+        if use_cache and image:
+            # 緩存第一張圖片
+            cache.set(cache_key, image, ImageService.DEFAULT_CACHE_TIMEOUT)
+            
+        return image
+    
+    @staticmethod
+    def get_post_first_image_url(post_frame_id, use_cache=True):
+        """
+        獲取貼文的第一張圖片URL
+        
+        Parameters:
+        - post_frame_id: PostFrame ID
+        - use_cache: 是否使用緩存
+        
+        Returns:
+        - str: 圖片URL或 None
+        """
+        if use_cache:
+            # 嘗試從緩存獲取URL
+            cache_key = ImageService.get_cache_key('postframe', post_frame_id, 'first_url')
+            cached_url = cache.get(cache_key)
+            if cached_url is not None:
+                return cached_url
+        
+        image = ImageService.get_post_first_image(post_frame_id, use_cache=False)
+        image_url = image.firebase_url if image else None
+        
+        if use_cache and image_url:
+            # 緩存URL
+            cache_key = ImageService.get_cache_key('postframe', post_frame_id, 'first_url')
+            cache.set(cache_key, image_url, ImageService.DEFAULT_CACHE_TIMEOUT)
+            
+        return image_url
+    
+    @staticmethod
+    def preload_post_images(post_frames, use_cache=True, limit=None):
+        """
+        預加載多個貼文的圖片
+        
+        Parameters:
+        - post_frames: PostFrame 對象列表或查詢集
+        - use_cache: 是否使用緩存
+        - limit: 每個貼文最多加載的圖片數量 (可選)
+        
+        Returns:
+        - dict: 以 PostFrame ID 為鍵，圖片列表為值的字典
+        """
+        from media.models import Image
+        
+        if not post_frames:
+            return {}
+            
+        # 獲取所有 PostFrame ID
+        if hasattr(post_frames, 'values_list'):
+            # 如果是查詢集
+            post_frame_ids = list(post_frames.values_list('id', flat=True))
+        else:
+            # 如果是對象列表
+            post_frame_ids = [pf.id for pf in post_frames if hasattr(pf, 'id')]
+            
+        if not post_frame_ids:
+            return {}
+        
+        # 檢查緩存
+        cached_image_maps = {}
+        uncached_post_ids = []
+        
+        if use_cache:
+            for post_id in post_frame_ids:
+                cache_key = ImageService.get_cache_key('postframe', post_id, f'limit_{limit}' if limit else 'all')
+                cached_images = cache.get(cache_key)
+                
+                if cached_images is not None:
+                    cached_image_maps[post_id] = cached_images
+                else:
+                    uncached_post_ids.append(post_id)
+        else:
+            uncached_post_ids = post_frame_ids
+        
+        # 查詢未緩存的圖片
+        image_map = defaultdict(list)
+        
+        if uncached_post_ids:
+            images_queryset = Image.objects.filter(
+                postFrame_id__in=uncached_post_ids
+            ).order_by('postFrame_id', 'sort_order')
+            
+            # 如果有限制數量
+            if limit is not None:
+                counter = defaultdict(int)
+                filtered_images = []
+                
+                for image in images_queryset:
+                    if counter[image.postFrame_id] < limit:
+                        filtered_images.append(image)
+                        counter[image.postFrame_id] += 1
+                        
+                images = filtered_images
+            else:
+                images = list(images_queryset)
+            
+            # 將圖片按 PostFrame ID 分組
+            for image in images:
+                image_map[image.postFrame_id].append(image)
+            
+            # 緩存結果
+            if use_cache:
+                for post_id, post_images in image_map.items():
+                    cache_key = ImageService.get_cache_key('postframe', post_id, f'limit_{limit}' if limit else 'all')
+                    cache.set(cache_key, post_images, ImageService.DEFAULT_CACHE_TIMEOUT)
+        
+        # 合併緩存和查詢結果
+        result_map = dict(image_map)
+        for post_id, cached_images in cached_image_maps.items():
+            result_map[post_id] = cached_images
+            
+        return result_map
+    
+    @staticmethod
+    def preload_post_first_images(post_frames, use_cache=True):
+        """
+        預加載多個貼文的第一張圖片
+        
+        Parameters:
+        - post_frames: PostFrame 對象列表或查詢集
+        - use_cache: 是否使用緩存
+        
+        Returns:
+        - dict: 以 PostFrame ID 為鍵，第一張圖片為值的字典
+        """
+        image_map = ImageService.preload_post_images(post_frames, use_cache=use_cache, limit=1)
+        
+        # 將列表轉換為單個元素
+        first_image_map = {}
+        for post_id, images in image_map.items():
+            if images:
+                first_image_map[post_id] = images[0]
+                
+        return first_image_map
+    
+    @staticmethod
+    def invalidate_post_image_cache(post_frame_id):
+        """
+        使指定貼文的圖片緩存失效
+        
+        Parameters:
+        - post_frame_id: PostFrame ID
+        """
+        # 刪除所有相關緩存
+        cache_keys = [
+            ImageService.get_cache_key('postframe', post_frame_id, 'all'),
+            ImageService.get_cache_key('postframe', post_frame_id, 'first'),
+            ImageService.get_cache_key('postframe', post_frame_id, 'first_url'),
+        ]
+        
+        # 刪除有限制數量的緩存（假設最多10張圖片）
+        for i in range(1, 11):
+            cache_keys.append(ImageService.get_cache_key('postframe', post_frame_id, f'limit_{i}'))
+        
+        for cache_key in cache_keys:
+            cache.delete(cache_key)
+    
+    @staticmethod
+    def save_post_image(image_data, post_frame_id, user_id):
+        """
+        保存貼文圖片到資料庫
+        
+        Parameters:
+        - image_data: 圖片資料字典（包含 firebase_url, firebase_path 等）
+        - post_frame_id: PostFrame ID
+        - user_id: 用戶 ID
+        
+        Returns:
+        - Image: 創建的圖片對象
+        """
+        from media.models import Image
+        
+        try:
+            image = Image.objects.create(
+                postFrame_id=post_frame_id,
+                firebase_url=image_data['firebase_url'],
+                firebase_path=image_data['firebase_path'],
+                sort_order=image_data.get('sort_order', 0),
+                original_filename=image_data.get('original_filename'),
+                file_size=image_data.get('file_size'),
+                content_type_mime=image_data.get('content_type'),
+                alt_text=image_data.get('alt_text', f"用戶 {user_id} 的貼文圖片")
+            )
+            
+            # 使緩存失效
+            ImageService.invalidate_post_image_cache(post_frame_id)
+            
+            logger.info(f"貼文圖片保存成功: post_frame_id={post_frame_id}, image_id={image.id}")
+            return image
+            
+        except Exception as e:
+            logger.error(f"保存貼文圖片失敗: {str(e)}")
+            raise
+    
+    @staticmethod
+    def delete_post_images(post_frame_id, delete_from_firebase=True):
+        """
+        刪除貼文的所有圖片
+        
+        Parameters:
+        - post_frame_id: PostFrame ID
+        - delete_from_firebase: 是否同時從 Firebase Storage 刪除
+        
+        Returns:
+        - tuple: (成功刪除的數量, 失敗的Firebase路徑列表)
+        """
+        from media.models import Image
+        from utils.firebase_service import firebase_storage_service
+        
+        try:
+            # 獲取所有圖片
+            images = Image.objects.filter(postFrame_id=post_frame_id)
+            
+            if not images.exists():
+                return 0, []
+            
+            firebase_paths = []
+            deleted_count = 0
+            failed_paths = []
+            
+            # 收集 Firebase 路徑
+            for image in images:
+                if image.firebase_path:
+                    firebase_paths.append(image.firebase_path)
+            
+            # 從資料庫刪除
+            deleted_count = images.count()
+            images.delete()
+            
+            # 從 Firebase Storage 刪除
+            if delete_from_firebase and firebase_paths:
+                success, message, results = firebase_storage_service.delete_post_images_batch(firebase_paths)
+                if not success:
+                    failed_paths = [item['path'] for item in results.get('failed', [])]
+                    logger.warning(f"部分Firebase圖片刪除失敗: {message}")
+            
+            # 使緩存失效
+            ImageService.invalidate_post_image_cache(post_frame_id)
+            
+            logger.info(f"貼文圖片刪除完成: post_frame_id={post_frame_id}, deleted={deleted_count}")
+            return deleted_count, failed_paths
+            
+        except Exception as e:
+            logger.error(f"刪除貼文圖片失敗: {str(e)}")
+            raise 

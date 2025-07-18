@@ -116,14 +116,21 @@ class SoLContent(models.Model):
         related_name='contents'
     )
     content_text = models.TextField(help_text="存儲具體內容文本")
+    location = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text="貼文地點位置"
+    )
 
     def __str__(self):
         return f"Content for Post {self.postFrame.id}"
     
-    def create(postFrame: PostFrame, content_text: str):
+    def create(postFrame: PostFrame, content_text: str, location: str = None):
         content = SoLContent.objects.create(
             postFrame=postFrame,
-            content_text=content_text
+            content_text=content_text,
+            location=location
         )
         return content
     
@@ -156,19 +163,19 @@ class PostHashtag(models.Model):
     tag = models.CharField(max_length=50)
 
     def __str__(self):
-        return f"#{self.tag} for Post {self.post.id}"
+        return f"#{self.tag} for Post {self.postFrame.id}"
     
     def create(postFrame: PostFrame, tag: str):
-        tag = slugify(tag)
+        # 直接使用原始標籤，不進行 slugify 轉換以保留中文字符
         hashtag = PostHashtag.objects.create(
             postFrame=postFrame,
-            tag=tag
+            tag=tag.strip()  # 只移除前後空白
         )
         return hashtag
 
     def get_hashtags(postFrame: PostFrame = None, query: str = None, count: int = None) -> QuerySet:
 
-        if PostFrame is not None:
+        if postFrame is not None:
             return PostHashtag.objects.filter(postFrame=postFrame)
         
         if query is not None and count is not None:
@@ -207,3 +214,189 @@ class PostPets(models.Model):
     
     def get_pets(postFrame:PostFrame):
         return PostPets.objects.filter(postFrame=postFrame)
+
+#----------圖片標註----------
+class ImageAnnotation(models.Model):
+    """
+    圖片標註模型 - 用於在圖片上標記用戶或寵物的位置
+    """
+    # 圖片關聯 - 使用 firebase_url 作為外鍵
+    firebase_url = models.URLField(
+        max_length=500, 
+        help_text="關聯的圖片 Firebase URL"
+    )
+    
+    # 標註位置座標（百分比）
+    x_position = models.FloatField(
+        help_text="標註點在圖片上的 X 座標（百分比 0-100）"
+    )
+    y_position = models.FloatField(
+        help_text="標註點在圖片上的 Y 座標（百分比 0-100）"
+    )
+    
+    # 標註內容
+    display_name = models.CharField(
+        max_length=100,
+        help_text="標註顯示的名稱"
+    )
+    
+    # 標註目標類型和ID
+    TARGET_CHOICES = [
+        ('user', '用戶'),
+        ('pet', '寵物'),
+    ]
+    target_type = models.CharField(
+        max_length=10,
+        choices=TARGET_CHOICES,
+        help_text="標註目標類型"
+    )
+    target_id = models.PositiveIntegerField(
+        help_text="標註目標的 ID（用戶 ID 或寵物 ID）"
+    )
+    
+    # 創建者
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='created_annotations',
+        help_text="創建此標註的用戶"
+    )
+    
+    # 時間戳
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['created_at']
+        indexes = [
+            models.Index(fields=['firebase_url']),
+            models.Index(fields=['target_type', 'target_id']),
+        ]
+
+    def __str__(self):
+        return f"標註: {self.display_name} 在 {self.firebase_url[:50]}..."
+
+    @staticmethod
+    def create(firebase_url: str, x_position: float, y_position: float, 
+               display_name: str, target_type: str, target_id: int, created_by):
+        """
+        創建新的圖片標註
+        
+        Parameters:
+        - firebase_url: 圖片的 Firebase URL
+        - x_position: X 座標（百分比）
+        - y_position: Y 座標（百分比）
+        - display_name: 顯示名稱
+        - target_type: 目標類型（'user' 或 'pet'）
+        - target_id: 目標 ID
+        - created_by: 創建者用戶物件
+        
+        Returns:
+        - ImageAnnotation: 創建的標註物件
+        """
+        annotation = ImageAnnotation.objects.create(
+            firebase_url=firebase_url,
+            x_position=x_position,
+            y_position=y_position,
+            display_name=display_name,
+            target_type=target_type,
+            target_id=target_id,
+            created_by=created_by
+        )
+        return annotation
+
+    @staticmethod
+    def get_annotations_by_image(firebase_url: str):
+        """
+        根據圖片 URL 獲取所有標註
+        
+        Parameters:
+        - firebase_url: 圖片的 Firebase URL
+        
+        Returns:
+        - QuerySet: 該圖片的所有標註
+        """
+        return ImageAnnotation.objects.filter(firebase_url=firebase_url).order_by('created_at')
+
+    @staticmethod
+    def get_annotations_by_user(user):
+        """
+        獲取指定用戶創建的所有標註
+        
+        Parameters:
+        - user: 用戶物件
+        
+        Returns:
+        - QuerySet: 用戶創建的所有標註
+        """
+        return ImageAnnotation.objects.filter(created_by=user).order_by('-created_at')
+
+    @staticmethod
+    def get_annotations_by_target(target_type: str, target_id: int):
+        """
+        獲取標註特定目標的所有標註
+        
+        Parameters:
+        - target_type: 目標類型（'user' 或 'pet'）
+        - target_id: 目標 ID
+        
+        Returns:
+        - QuerySet: 標註該目標的所有標註
+        """
+        return ImageAnnotation.objects.filter(
+            target_type=target_type,
+            target_id=target_id
+        ).order_by('-created_at')
+
+    def get_target_object(self):
+        """
+        獲取標註的目標物件
+        
+        Returns:
+        - object: 根據 target_type 返回對應的用戶或寵物物件
+        """
+        if self.target_type == 'user':
+            from accounts.models import CustomUser
+            try:
+                return CustomUser.objects.get(id=self.target_id)
+            except CustomUser.DoesNotExist:
+                return None
+        elif self.target_type == 'pet':
+            try:
+                return Pet.objects.get(id=self.target_id)
+            except Pet.DoesNotExist:
+                return None
+        return None
+
+    def update_annotation(self, x_position=None, y_position=None, display_name=None):
+        """
+        更新標註資訊
+        
+        Parameters:
+        - x_position: 新的 X 座標（可選）
+        - y_position: 新的 Y 座標（可選）
+        - display_name: 新的顯示名稱（可選）
+        
+        Returns:
+        - bool: 更新是否成功
+        """
+        update_fields = []
+        
+        if x_position is not None:
+            self.x_position = x_position
+            update_fields.append('x_position')
+        
+        if y_position is not None:
+            self.y_position = y_position
+            update_fields.append('y_position')
+        
+        if display_name is not None:
+            self.display_name = display_name
+            update_fields.append('display_name')
+        
+        if update_fields:
+            update_fields.append('updated_at')
+            self.save(update_fields=update_fields)
+            return True
+        
+        return False

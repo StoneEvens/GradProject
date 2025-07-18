@@ -1,0 +1,333 @@
+/* PostList 組件樣式 */
+.container {
+  width: 100%;
+  max-width: 430px;
+  margin: 0 auto;
+  padding: 0 15px;
+  box-sizing: border-box;
+}
+
+.postList {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* 載入狀態 */
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: #89350c;
+}
+
+.loading p {
+  margin-top: 15px;
+  font-size: 16px;
+  color: #666;
+}
+
+/* 載入更多狀態 */
+.loadingMore {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 20px;
+  color: #89350c;
+}
+
+.loadingMore p {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #666;
+}
+
+/* 載入動畫 */
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #F08651;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.loadingMore .spinner {
+  width: 30px;
+  height: 30px;
+  border-width: 2px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 錯誤狀態 */
+.error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.error p {
+  color: #c62828;
+  font-size: 16px;
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+.retryButton {
+  background-color: #F08651;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.retryButton:hover {
+  background-color: #E07641;
+}
+
+/* 空狀態 */
+.empty {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.emptyIcon {
+  width: 100px;
+  height: 100px;
+  margin-bottom: 16px;
+  opacity: 0.6;
+}
+
+.empty p {
+  color: #888;
+  font-size: 16px;
+  margin: 0;
+}
+
+/* 沒有更多內容提示 */
+.noMore {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 30px 20px;
+  text-align: center;
+}
+
+.noMore p {
+  color: #999;
+  font-size: 14px;
+  margin: 0;
+  position: relative;
+}
+
+.noMore p::before,
+.noMore p::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 50px;
+  height: 1px;
+  background-color: #ddd;
+}
+
+.noMore p::before {
+  left: -60px;
+}
+
+.noMore p::after {
+  right: -60px;
+}
+
+/* 響應式設計 */
+@media (max-width: 480px) {
+  .container {
+    padding: 0 10px;
+  }
+
+  .loading,
+  .error,
+  .empty {
+    padding: 50px 15px;
+  }
+
+  .loading p,
+  .error p,
+  .empty p {
+    font-size: 15px;
+  }
+
+  .emptyIcon {
+    width: 100px;
+    height: 100px;
+  }
+
+  .spinner {
+    width: 35px;
+    height: 35px;
+  }
+
+  .loadingMore .spinner {
+    width: 25px;
+    height: 25px;
+  }
+
+  .retryButton {
+    padding: 10px 20px;
+    font-size: 13px;
+  }
+
+  .noMore p::before,
+  .noMore p::after {
+    width: 30px;
+  }
+
+  .noMore p::before {
+    left: -40px;
+  }
+
+  .noMore p::after {
+    right: -40px;
+  }
+}
+
+@media (max-width: 360px) {
+  .container {
+    padding: 0 8px;
+  }
+
+  .loading,
+  .error,
+  .empty {
+    padding: 40px 10px;
+  }
+
+  .loading p,
+  .error p,
+  .empty p {
+    font-size: 14px;
+  }
+
+  .emptyIcon {
+    width: 100px;
+    height: 100px;
+  }
+
+  .spinner {
+    width: 30px;
+    height: 30px;
+    border-width: 2px;
+  }
+
+  .loadingMore .spinner {
+    width: 20px;
+    height: 20px;
+  }
+
+  .loadingMore {
+    padding: 20px 15px;
+  }
+
+  .loadingMore p {
+    font-size: 13px;
+  }
+
+  .noMore {
+    padding: 25px 15px;
+  }
+
+  .noMore p {
+    font-size: 13px;
+  }
+
+  .noMore p::before,
+  .noMore p::after {
+    width: 25px;
+  }
+
+  .noMore p::before {
+    left: -35px;
+  }
+
+  .noMore p::after {
+    right: -35px;
+  }
+}
+
+/* 淡入動畫 */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.postList {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* 平滑滾動 */
+.container {
+  scroll-behavior: smooth;
+}
+
+/* 載入狀態的背景效果 */
+.loading::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    45deg,
+    transparent,
+    rgba(240, 134, 81, 0.05),
+    transparent
+  );
+  animation: shimmer 2s infinite;
+  pointer-events: none;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* 高亮動畫 */
+@keyframes highlight {
+  0% {
+    background-color: transparent;
+  }
+  50% {
+    background-color: rgba(255, 200, 0, 0.3);
+  }
+  100% {
+    background-color: transparent;
+  }
+} 

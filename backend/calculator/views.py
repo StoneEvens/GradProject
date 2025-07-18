@@ -44,7 +44,7 @@ class PetCreateView(APIView):
 
         # 先建立寵物，暫時不包含 avatar
         pet = Pet.objects.create(
-            name=data.get("name"),
+            pet_name=data.get("pet_name"),
             is_dog=data.get("is_dog") in ['true', 'True', True],
             life_stage=data.get("life_stage"),
             weight=data.get("weight"),

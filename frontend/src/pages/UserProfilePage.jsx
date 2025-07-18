@@ -5,6 +5,7 @@ import TopNavbar from '../components/TopNavbar';
 import BottomNavbar from '../components/BottomNavigationbar';
 import Notification from '../components/Notification';
 import EditProfileModal from '../components/EditProfileModal';
+import PostPreviewList from '../components/PostPreviewList';
 import { NotificationProvider } from '../context/NotificationContext';
 import { getUserProfile, getUserPostsPreview, getUserArchives, getUserSummary, updateUserProfile } from '../services/userService';
 
@@ -47,7 +48,7 @@ const UserProfilePage = () => {
             posts = [];
           }
         } catch (postsErr) {
-          console.warn('取得貼文預覽失敗:', postsErr);
+          console.error('取得貼文預覽失敗:', postsErr);
           posts = [];
         }
         
@@ -182,19 +183,13 @@ const UserProfilePage = () => {
 
               {/* tab 內容區塊 */}
               {activeTab === 'community' ? (
-                <div className={styles.photoGrid}>
-                  {postsPreview.length === 0 ? (
-                    <div style={{gridColumn: '1/4', textAlign: 'center', color: '#aaa'}}>尚未發布任何日常貼文</div>
-                  ) : postsPreview.map((post, idx) => (
-                    <div key={post.id} className={styles.photoCell}>
-                      {post.first_image_url ? (
-                        <img src={post.first_image_url} alt={`post-${idx}`} className={styles.catPhoto} />
-                      ) : (
-                        <div style={{color:'#bbb',fontSize:'0.9rem',textAlign:'center',padding:'8px'}}>無圖片</div>
-                      )}
-                    </div>
-                  ))}
-                </div>
+                <PostPreviewList
+                  posts={postsPreview}
+                  loading={loading}
+                  error={null}
+                  emptyMessage="尚未發布任何日常貼文"
+                  userId={user.id}
+                />
               ) : (
                 <div className={styles.photoGrid}>
                   {archives.length === 0 ? (

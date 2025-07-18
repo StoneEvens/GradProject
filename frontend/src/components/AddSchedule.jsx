@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import styles from '../styles/AddSchedule.module.css';
 import { formatDate } from '../services/scheduleService';
+import ConfirmNotification from './ConfirmNotification';
 
 const AddSchedule = ({ onClose, onSave, initialData, onDelete, onMarkCompleted, selectedDate }) => {
   // 是否為編輯模式
@@ -8,6 +9,7 @@ const AddSchedule = ({ onClose, onSave, initialData, onDelete, onMarkCompleted, 
   
   // 狀態設置
   const [title, setTitle] = useState(initialData?.title || '');
+  const [showConfirmNotification, setShowConfirmNotification] = useState(false);
   const [description, setDescription] = useState(initialData?.description || '');
   
   // 開始時間相關狀態
@@ -126,10 +128,19 @@ const AddSchedule = ({ onClose, onSave, initialData, onDelete, onMarkCompleted, 
 
   // 處理刪除
   const handleDelete = () => {
-    if (window.confirm('確定要刪除此行程嗎？')) {
-      onDelete(initialData.id);
-      onClose();
-    }
+    setShowConfirmNotification(true);
+  };
+
+  // 確認刪除
+  const handleConfirmDelete = () => {
+    onDelete(initialData.id);
+    onClose();
+    setShowConfirmNotification(false);
+  };
+
+  // 取消刪除
+  const handleCancelDelete = () => {
+    setShowConfirmNotification(false);
   };
 
   // 處理完成狀態
@@ -314,6 +325,14 @@ const AddSchedule = ({ onClose, onSave, initialData, onDelete, onMarkCompleted, 
           </button>
         </div>
       </div>
+      
+      {showConfirmNotification && (
+        <ConfirmNotification 
+          message="確定要刪除此行程嗎？"
+          onConfirm={handleConfirmDelete}
+          onCancel={handleCancelDelete}
+        />
+      )}
     </div>
   );
 };

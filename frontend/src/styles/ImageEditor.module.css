@@ -1,0 +1,480 @@
+/* Modal 遮罩 */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1001;
+  padding: 20px;
+}
+
+/* Modal 容器 */
+.modalContainer {
+  background-color: #FFca9c;
+  border-radius: 15px;
+  width: 100%;
+  max-width: 350px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Modal 標題 */
+.modalHeader {
+  background-color: #FFca9c;
+  color: #333;
+  padding: 15px 20px;
+  border-bottom: 1px solid #ffeed6;
+  text-align: center;
+}
+
+.modalHeader h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+/* Modal 內容 */
+.modalBody {
+  background-color: #FFca9c;
+  padding: 15px 20px;
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* 按鈕列 */
+.buttonBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-top: 1px solid #ffeed6;
+}
+
+.leftButtons {
+  display: flex;
+  gap: 10px;
+}
+
+.rightButtons {
+  display: flex;
+  gap: 10px;
+}
+
+.toolButton {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  background-color: #ffeed6;
+  color: #333;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 60px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toolButton:hover {
+  background-color: #ffdbaa;
+}
+
+.toolButton.active {
+  background-color: #ffb370;
+  color: #fff;
+}
+
+/* 圖片容器 */
+.imageContainer {
+  position: relative;
+  width: 100%;
+  max-height: 300px;
+  border-radius: 10px;
+  overflow: hidden;
+  background-color: #ffeed6;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.editImage {
+  width: 100%;
+  height: auto;
+  max-height: 300px;
+  object-fit: contain;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* 標註圖示 */
+.annotationIcon {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  z-index: 15;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s;
+}
+
+.annotationIcon:hover {
+  transform: scale(1.1);
+}
+
+.annotationIconImage {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
+
+/* 標註點 */
+.annotationPoint {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  cursor: pointer;
+  padding: 5px;
+  margin: -5px;
+}
+
+.annotationDot {
+  width: 12px;
+  height: 12px;
+  background-color: #F08651;
+  border: 2px solid white;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 0.2s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.annotationDot:hover {
+  transform: scale(1.2);
+}
+
+.newDot {
+  background-color: #ff6b6b;
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+.annotationLabel {
+  position: absolute;
+  top: -35px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.2s;
+  pointer-events: none;
+}
+
+.annotationPoint:hover .annotationLabel {
+  opacity: 1;
+}
+
+/* 編輯面板 */
+.editPanel {
+  background-color: #ffeed6;
+  border-radius: 10px;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.inputRow {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.inputGroup label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  margin-left: 4px;
+}
+
+.typeSelector {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 120px;
+}
+
+.typeSelector label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  margin-left: 4px;
+}
+
+.typeSelect {
+  width: 100%;
+  padding: 10px 12px;
+  border: none;
+  border-radius: 8px;
+  background-color: white;
+  font-size: 14px;
+  color: #333;
+  box-sizing: border-box;
+  outline: none;
+  transition: box-shadow 0.2s ease;
+}
+
+.typeSelect:focus {
+  box-shadow: 0 0 0 2px #F08651;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 10px 12px;
+  border: none;
+  border-radius: 8px;
+  background-color: white;
+  font-size: 14px;
+  color: #333;
+  box-sizing: border-box;
+  outline: none;
+  transition: box-shadow 0.2s ease;
+}
+
+.searchInput:focus {
+  box-shadow: 0 0 0 2px #F08651;
+}
+
+.editActions {
+  display: flex;
+  gap: 8px;
+}
+
+.editCancelButton {
+  flex: 1;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  background-color: #ccc;
+  color: #666;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.editCancelButton:hover {
+  background-color: #bbb;
+}
+
+.deleteButton {
+  flex: 1;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  background-color: #ff6b6b;
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.deleteButton:hover {
+  opacity: 0.9;
+}
+
+.confirmButton {
+  flex: 1;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  background-color: #F08651;
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.confirmButton:hover {
+  opacity: 0.9;
+}
+
+/* 提示文字 */
+.hintText {
+  text-align: center;
+  color: #666;
+  font-size: 12px;
+  font-style: italic;
+  padding: 10px;
+  background-color: #ffeed6;
+  border-radius: 8px;
+}
+
+/* 按鈕樣式 */
+.cancelButton {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  background-color: #ffb370;
+  font-size: 14px;
+  font-weight: 500;
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  min-width: 60px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cancelButton:hover {
+  background-color: #faab66;
+}
+
+.saveButton {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  background-color: #F08651;
+  font-size: 14px;
+  font-weight: 500;
+  color: #fff;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  min-width: 60px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.saveButton:hover {
+  opacity: 0.9;
+}
+
+/* 響應式設計 */
+@media (max-width: 480px) {
+  .modalContainer {
+    max-width: 320px;
+    margin: 0 15px;
+  }
+  
+  .modalHeader {
+    padding: 12px 15px;
+  }
+  
+  .modalHeader h2 {
+    font-size: 16px;
+  }
+  
+  .modalBody {
+    padding: 12px 15px;
+    gap: 12px;
+  }
+  
+  .imageContainer {
+    max-height: 250px;
+  }
+  
+  .editPanel {
+    padding: 12px;
+    gap: 12px;
+  }
+  
+  .inputRow {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .typeSelector {
+    min-width: auto;
+  }
+  
+  .searchInput,
+  .typeSelect {
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+  
+  .editActions button {
+    padding: 6px 10px;
+    font-size: 13px;
+  }
+  
+  .buttonBar {
+    padding: 8px 0;
+  }
+  
+  .leftButtons,
+  .rightButtons {
+    gap: 8px;
+  }
+  
+  .toolButton {
+    padding: 6px 12px;
+    font-size: 13px;
+    min-width: 50px;
+    height: 32px;
+  }
+  
+  .cancelButton,
+  .saveButton {
+    padding: 6px 12px;
+    font-size: 13px;
+    min-width: 50px;
+    height: 32px;
+  }
+  
+  .hintText {
+    font-size: 12px;
+    padding: 8px;
+  }
+} 

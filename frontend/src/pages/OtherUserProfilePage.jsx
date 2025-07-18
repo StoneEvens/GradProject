@@ -5,6 +5,7 @@ import TopNavbar from '../components/TopNavbar';
 import BottomNavbar from '../components/BottomNavigationbar';
 import Notification from '../components/Notification';
 import ConfirmFollowModal from '../components/ConfirmFollowModal';
+import PostPreviewList from '../components/PostPreviewList';
 import { NotificationProvider } from '../context/NotificationContext';
 import { getOtherUserProfile, getUserPostsPreview, getUserArchives, getUserSummary } from '../services/userService';
 import { getUserFollowStatus, followUser } from '../services/socialService';
@@ -280,24 +281,23 @@ const OtherUserProfilePage = () => {
 
               {/* tab 內容區塊 */}
               {activeTab === 'community' ? (
-                <div className={styles.photoGrid}>
-                  {user.account_privacy === 'private' && !canViewContent ? (
+                user.account_privacy === 'private' && !canViewContent ? (
+                  <div className={styles.photoGrid}>
                     <div style={{gridColumn: '1/4', textAlign: 'center', color: '#666', padding: '40px 20px'}}>
                       <div style={{fontSize: '1.1rem', marginBottom: '8px'}}>此帳號為私人帳號</div>
                       <div style={{fontSize: '0.9rem', color: '#999'}}>追蹤以查看他的貼文</div>
                     </div>
-                  ) : postsPreview.length === 0 ? (
-                    <div style={{gridColumn: '1/4', textAlign: 'center', color: '#aaa'}}>尚未發布任何日常貼文</div>
-                  ) : postsPreview.map((post, idx) => (
-                    <div key={post.id} className={styles.photoCell}>
-                      {post.first_image_url ? (
-                        <img src={post.first_image_url} alt={`post-${idx}`} className={styles.catPhoto} />
-                      ) : (
-                        <div style={{color:'#bbb',fontSize:'0.9rem',textAlign:'center',padding:'8px'}}>無圖片</div>
-                      )}
-                    </div>
-                  ))}
-                </div>
+                  </div>
+                ) : (
+                  <PostPreviewList
+                    posts={postsPreview}
+                    loading={loading}
+                    error={null}
+                    emptyMessage="尚未發布任何日常貼文"
+                    userId={user?.id}
+                    userAccount={user?.user_account}
+                  />
+                )
               ) : (
                 <div className={styles.photoGrid}>
                   {user.account_privacy === 'private' && !canViewContent ? (
