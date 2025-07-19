@@ -950,3 +950,63 @@ class ImageAnnotationDetailAPIView(APIView):
                 message=f"刪除標註失敗: {str(e)}",
                 status=drf_status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+#----------寵物相關貼文列表 API----------
+class PetRelatedPostsAPIView(APIView):
+    """獲取指定寵物的相關貼文列表"""
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request, pet_id):
+        try:
+            # 檢查寵物是否存在且用戶有權限查看
+            try:
+                pet = Pet.objects.get(id=pet_id)
+            except Pet.DoesNotExist:
+                return APIResponse(
+                    message="找不到指定的寵物",
+                    status=drf_status.HTTP_404_NOT_FOUND
+                )
+            
+            # 檢查權限：只有寵物主人可以查看
+            if pet.owner != request.user:
+                return APIResponse(
+                    message="您沒有權限查看此寵物的相關貼文",
+                    status=drf_status.HTTP_403_FORBIDDEN
+                )
+            
+            # 獲取排序參數
+            sort_option = request.GET.get('sort', 'post_date_desc')
+            
+            # 通過 PostPets 模型獲取包含該寵物的所有貼文
+            pet_posts = PostPets.objects.filter(pet=pet).select_related('postFrame')
+            
+            # 提取 PostFrame 對象
+            post_frames = [pet_post.postFrame for pet_post in pet_posts]
+            
+            # 根據排序選項排序
+            if sort_option == 'post_date_desc':
+                post_frames.sort(key=lambda x: x.created_at, reverse=True)
+            elif sort_option == 'post_date_asc':
+                post_frames.sort(key=lambda x: x.created_at, reverse=False)
+            else:
+                # 預設按發布日期降序
+                post_frames.sort(key=lambda x: x.created_at, reverse=True)
+            
+            # 序列化貼文數據
+            serializer = PostFrameSerializer(
+                post_frames, 
+                many=True, 
+                context={'request': request}
+            )
+            
+            return APIResponse(
+                data={"posts": serializer.data},
+                message="獲取寵物相關貼文成功"
+            )
+            
+        except Exception as e:
+            logger.error(f"獲取寵物相關貼文失敗: {str(e)}")
+            return APIResponse(
+                message=f"獲取寵物相關貼文失敗: {str(e)}",
+                status=drf_status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
