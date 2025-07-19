@@ -602,6 +602,39 @@ class SocialService {
   }
 
   /**
+   * 獲取寵物相關的貼文列表
+   * @param {number} petId - 寵物ID
+   * @param {Object} params - 查詢參數
+   * @param {string} params.sort - 排序方式
+   * @returns {Promise} 寵物相關貼文列表
+   */
+  async getPetRelatedPosts(petId, params = {}) {
+    try {
+      const queryParams = new URLSearchParams();
+      if (params.sort) queryParams.append('sort', params.sort);
+      
+      const url = `/social/pets/${petId}/posts/` + (queryParams.toString() ? `?${queryParams.toString()}` : '');
+      const response = await authAxios.get(url);
+
+      const result = response.data;
+      if (result.success) {
+        return {
+          success: true,
+          data: result.data || result,
+          message: result.message || '獲取寵物相關貼文成功'
+        };
+      }
+    } catch (error) {
+      console.error('獲取寵物相關貼文錯誤:', error);
+      return {
+        success: false,
+        error: error.response?.data?.message || error.message || '獲取寵物相關貼文失敗',
+        data: { posts: [], has_more: false }
+      };
+    }
+  }
+
+  /**
    * 獲取用戶收藏的貼文列表
    * @param {Object} params - 查詢參數
    * @param {string} params.sort - 排序方式
@@ -674,5 +707,6 @@ export const togglePostLike = socialService.togglePostLike.bind(socialService);
 export const togglePostSave = socialService.togglePostSave.bind(socialService);
 export const getUserLikedPosts = socialService.getUserLikedPosts.bind(socialService);
 export const getUserSavedPosts = socialService.getUserSavedPosts.bind(socialService);
+export const getPetRelatedPosts = socialService.getPetRelatedPosts.bind(socialService);
 
 export default socialService; 

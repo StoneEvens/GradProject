@@ -12,6 +12,8 @@ const PostPreviewList = ({
   isSearchResult = false,
   isLikedPosts = false,
   isSavedPosts = false,
+  isPetRelatedPosts = false,
+  petId = null,
   style = {}
 }) => {
   const navigate = useNavigate();
@@ -41,6 +43,14 @@ const PostPreviewList = ({
       navigate(`/saved-posts-list`, { 
         state: { 
           savedPosts: posts,
+          targetPostId: postId
+        } 
+      });
+    } else if (isPetRelatedPosts) {
+      // 如果是寵物相關貼文，導航到寵物相關貼文列表頁面
+      navigate(`/pet/${petId}/posts-list`, { 
+        state: { 
+          relatedPosts: posts,
           targetPostId: postId
         } 
       });

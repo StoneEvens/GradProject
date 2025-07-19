@@ -3,7 +3,7 @@ from .views import (
     UserPostsPreviewListAPIView, SearchAPIView, SearchSuggestionAPIView, 
     CreatePostAPIView, PostDetailAPIView, DeletePostAPIView, PostTagPetsAPIView, UserPostListAPIView, PostListAPIView,
     CheckAnnotationPermissionAPIView, ImageAnnotationListCreateAPIView, 
-    ImageAnnotationDetailAPIView
+    ImageAnnotationDetailAPIView, PetRelatedPostsAPIView
 )
 
 urlpatterns = [
@@ -28,4 +28,7 @@ urlpatterns = [
     path('annotation/check-permission/<str:user_account>/', CheckAnnotationPermissionAPIView.as_view(), name='check-annotation-permission'),
     path('annotations/', ImageAnnotationListCreateAPIView.as_view(), name='annotation-list-create'),
     path('annotations/<int:annotation_id>/', ImageAnnotationDetailAPIView.as_view(), name='annotation-detail'),
+    
+    # 寵物相關貼文
+    path('pets/<int:pet_id>/posts/', PetRelatedPostsAPIView.as_view(), name='pet-related-posts'),
 ]

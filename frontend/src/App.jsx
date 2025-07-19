@@ -22,6 +22,8 @@ import LikedPostsPage from './pages/LikedPostsPage';
 import LikedPostsListPage from './pages/LikedPostsListPage';
 import SavedPostsPage from './pages/SavedPostsPage';
 import SavedPostsListPage from './pages/SavedPostsListPage';
+import PetRelatedPostsPage from './pages/PetRelatedPostsPage';
+import PetRelatedPostsListPage from './pages/PetRelatedPostsListPage';
 import CalculatorPage from './pages/CalculatorPage';
 import { isAuthenticated, refreshAccessToken } from './services/authService';
 
@@ -187,6 +189,16 @@ const App = () => {
         <Route 
           path="/saved-posts-list" 
           element={isUserAuthenticated ? <SavedPostsListPage /> : <Navigate to="/" />} 
+        />
+        {/* 寵物相關貼文頁面：未登入導向HomePage */}
+        <Route 
+          path="/pet/:petId/posts" 
+          element={isUserAuthenticated ? <PetRelatedPostsPage /> : <Navigate to="/" />} 
+        />
+        {/* 寵物相關貼文列表頁面：未登入導向HomePage */}
+        <Route 
+          path="/pet/:petId/posts-list" 
+          element={isUserAuthenticated ? <PetRelatedPostsListPage /> : <Navigate to="/" />} 
         />
         {/* 通知頁面：未登入導向HomePage */}
         <Route 

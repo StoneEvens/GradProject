@@ -104,6 +104,15 @@ const PetPage = () => {
     }
   };
 
+  // 查看相關貼文
+  const handleRelatedPostsClick = () => {
+    if (currentPet) {
+      navigate(`/pet/${currentPet.id}/posts`);
+    } else {
+      showNotification('請先選擇一隻寵物');
+    }
+  };
+
   // 重新獲取寵物資料
   const refreshPets = () => {
     fetchPets();
@@ -187,7 +196,7 @@ const PetPage = () => {
                       <img src="/assets/icon/PetpageEditButton.png" alt="編輯資料" className={styles.functionIcon} />
                       <span className={styles.functionLabel}>編輯資料</span>
                     </div>
-                    <div className={styles.functionCell} onClick={() => handleFunctionClick('相關貼文')}>
+                    <div className={styles.functionCell} onClick={() => handleRelatedPostsClick()}>
                       <img src="/assets/icon/PetpagePastPostButton.png" alt="相關貼文" className={styles.functionIcon} />
                       <span className={styles.functionLabel}>相關貼文</span>
                     </div>

@@ -84,14 +84,20 @@ class PostFrameSerializer(serializers.ModelSerializer):
 
     def get_tagged_pets(self, postFrame: PostFrame):
         pets_relations = PostPets.objects.filter(postFrame=postFrame).select_related('pet')
-        return [
-            {
-                'id': relation.pet.id,
-                'pet_name': relation.pet.pet_name,
-                'pet_type': getattr(relation.pet, 'pet_type', 'unknown')
-            } 
-            for relation in pets_relations
-        ]
+        pets_data = []
+        for relation in pets_relations:
+            pet = relation.pet
+            headshot_url = None
+            if hasattr(pet, 'headshot') and pet.headshot:
+                headshot_url = pet.headshot.url
+            
+            pets_data.append({
+                'id': pet.id,
+                'pet_name': pet.pet_name,
+                'pet_type': getattr(pet, 'pet_type', 'unknown'),
+                'headshot_url': headshot_url
+            })
+        return pets_data
     
     def get_images(self, postFrame: PostFrame):
         """獲取貼文的所有圖片"""
@@ -244,14 +250,20 @@ class SolPostSerializer(serializers.ModelSerializer):
 
     def get_tagged_pets(self, solContent: SoLContent):
         pets_relations = PostPets.objects.filter(postFrame=solContent.postFrame).select_related('pet')
-        return [
-            {
-                'id': relation.pet.id,
-                'pet_name': relation.pet.pet_name,
-                'pet_type': getattr(relation.pet, 'pet_type', 'unknown')
-            } 
-            for relation in pets_relations
-        ]
+        pets_data = []
+        for relation in pets_relations:
+            pet = relation.pet
+            headshot_url = None
+            if hasattr(pet, 'headshot') and pet.headshot:
+                headshot_url = pet.headshot.url
+            
+            pets_data.append({
+                'id': pet.id,
+                'pet_name': pet.pet_name,
+                'pet_type': getattr(pet, 'pet_type', 'unknown'),
+                'headshot_url': headshot_url
+            })
+        return pets_data
     
     def get_images(self, solContent: SoLContent):
         """獲取貼文的所有圖片"""
