@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Annotation from './Annotation';
 import styles from '../styles/Post.module.css';
+import { togglePostLike, togglePostSave } from '../services/socialService';
 
 const Post = ({ 
   postData,
@@ -29,9 +30,9 @@ const Post = ({
       const userInteraction = postData.user_interaction || {};
       const interactionStats = postData.interaction_stats || {};
       
-      setIsLiked(userInteraction.is_upvoted || postData.is_liked || false);
+      setIsLiked(userInteraction.is_liked || postData.is_liked || false);
       setIsSaved(userInteraction.is_saved || postData.is_saved || false);
-      setLikeCount(interactionStats.upvotes || postData.like_count || 0);
+      setLikeCount(interactionStats.likes || postData.like_count || 0);
       setCommentCount(postData.comment_count || 0);
       setCurrentImageIndex(0);
       setShowAnnotationDots(false);
@@ -129,12 +130,22 @@ const Post = ({
   };
 
   // 處理按讚
-  const handleLike = () => {
+  const handleLike = async () => {
     if (!isInteractive) return;
     
     const newIsLiked = !isLiked;
     setIsLiked(newIsLiked);
     setLikeCount(prev => newIsLiked ? prev + 1 : prev - 1);
+    
+    // 調用 API
+    const result = await togglePostLike(postData.id, isLiked);
+    
+    if (!result.success) {
+      // 如果 API 失敗，還原狀態
+      setIsLiked(!newIsLiked);
+      setLikeCount(prev => newIsLiked ? prev - 1 : prev + 1);
+      console.error('按讚失敗:', result.error);
+    }
     
     if (onLike) {
       onLike(postData.id, newIsLiked);
@@ -154,11 +165,20 @@ const Post = ({
   };
 
   // 處理收藏
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!isInteractive) return;
     
     const newIsSaved = !isSaved;
     setIsSaved(newIsSaved);
+    
+    // 呼叫 API
+    const result = await togglePostSave(postData.id, isSaved);
+    
+    if (!result.success) {
+      // 如果失敗，還原狀態
+      setIsSaved(!newIsSaved);
+      console.error('收藏操作失敗:', result.error);
+    }
     
     if (onSave) {
       onSave(postData.id, newIsSaved);
@@ -332,7 +352,11 @@ const Post = ({
             className={`${styles.likeButton} ${isLiked ? styles.liked : ''}`}
             onClick={handleLike}
           >
-            <img src="/assets/icon/PostHeart.png" alt="按讚" className={styles.interactionIcon} />
+            <img 
+              src={isLiked ? "/assets/icon/PostLiked.png" : "/assets/icon/PostHeart.png"} 
+              alt="按讚" 
+              className={styles.interactionIcon} 
+            />
             <span>{likeCount}</span>
           </button>
           <button className={styles.commentButton} onClick={handleComment}>
@@ -343,7 +367,11 @@ const Post = ({
             className={`${styles.saveButton} ${isSaved ? styles.saved : ''}`}
             onClick={handleSave}
           >
-            <img src="/assets/icon/PostSave.png" alt="收藏" className={styles.interactionIcon} />
+            <img 
+              src={isSaved ? "/assets/icon/PostSaved.png" : "/assets/icon/PostSave.png"} 
+              alt="收藏" 
+              className={styles.interactionIcon} 
+            />
           </button>
         </div>
       )}

@@ -494,6 +494,164 @@ class SocialService {
       };
     }
   }
+
+  /**
+   * 對貼文進行互動（按讚/取消按讚）
+   * @param {number} postId - 貼文ID
+   * @param {boolean} isLiked - 目前是否已按讚
+   * @returns {Promise} 操作結果
+   */
+  async togglePostLike(postId, isLiked) {
+    try {
+      const response = await authAxios.post(`/interactions/posts/${postId}/interaction/`, {
+        relation: 'liked'  // 發送 'liked' 來切換按讚狀態
+      });
+
+      const result = response.data;
+      return {
+        success: true,
+        data: result.data,
+        message: result.detail || '操作成功'
+      };
+    } catch (error) {
+      console.error('貼文互動錯誤:', error);
+      return {
+        success: false,
+        error: error.response?.data?.detail || error.message || '操作失敗'
+      };
+    }
+  }
+
+  /**
+   * 切換貼文收藏狀態
+   * @param {number} postId - 貼文ID
+   * @param {boolean} isSaved - 目前是否已收藏
+   * @returns {Promise} 操作結果
+   */
+  async togglePostSave(postId, isSaved) {
+    try {
+      const response = await authAxios.post(`/interactions/posts/${postId}/interaction/`, {
+        relation: 'saved'  // 發送 'saved' 來切換收藏狀態
+      });
+
+      const result = response.data;
+      return {
+        success: true,
+        data: result.data,
+        message: result.detail || '操作成功'
+      };
+    } catch (error) {
+      console.error('貼文收藏錯誤:', error);
+      return {
+        success: false,
+        error: error.response?.data?.detail || error.message || '操作失敗'
+      };
+    }
+  }
+
+  /**
+   * 獲取用戶按讚的貼文列表
+   * @param {Object} params - 查詢參數
+   * @param {string} params.sort - 排序方式
+   * @param {number} params.page - 頁數
+   * @param {number} params.limit - 每頁數量
+   * @returns {Promise} 按讚貼文列表
+   */
+  async getUserLikedPosts(params = {}) {
+    try {
+      const queryParams = new URLSearchParams({
+        sort: params.sort || 'post_date_desc',
+        page: params.page || 1,
+        limit: params.limit || 10,
+        ...params
+      });
+
+      const response = await authAxios.get(`/interactions/user/liked-posts/?${queryParams}`);
+      const result = response.data;
+      
+      console.log('獲取按讚貼文 API 回應:', result);
+      
+      // 處理分頁回應
+      if (result.results) {
+        return {
+          success: true,
+          data: {
+            posts: result.results,
+            count: result.count,
+            next: result.next,
+            previous: result.previous,
+            has_more: !!result.next
+          },
+          message: '獲取按讚貼文成功'
+        };
+      } else {
+        return {
+          success: true,
+          data: result.data || result,
+          message: result.message || '獲取按讚貼文成功'
+        };
+      }
+    } catch (error) {
+      console.error('獲取按讚貼文錯誤:', error);
+      return {
+        success: false,
+        error: error.response?.data?.message || error.message || '獲取按讚貼文失敗',
+        data: { posts: [], has_more: false }
+      };
+    }
+  }
+
+  /**
+   * 獲取用戶收藏的貼文列表
+   * @param {Object} params - 查詢參數
+   * @param {string} params.sort - 排序方式
+   * @param {number} params.page - 頁數
+   * @param {number} params.limit - 每頁數量
+   * @returns {Promise} 收藏貼文列表
+   */
+  async getUserSavedPosts(params = {}) {
+    try {
+      const queryParams = new URLSearchParams({
+        sort: params.sort || 'post_date_desc',
+        page: params.page || 1,
+        limit: params.limit || 10,
+        ...params
+      });
+
+      const response = await authAxios.get(`/interactions/user/saved-posts/?${queryParams}`);
+      const result = response.data;
+      
+      console.log('獲取收藏貼文 API 回應:', result);
+      
+      // 處理分頁回應
+      if (result.results) {
+        return {
+          success: true,
+          data: {
+            posts: result.results,
+            count: result.count,
+            next: result.next,
+            previous: result.previous,
+            has_more: !!result.next
+          },
+          message: '獲取收藏貼文成功'
+        };
+      } else {
+        return {
+          success: true,
+          data: result.data || result,
+          message: result.message || '獲取收藏貼文成功'
+        };
+      }
+    } catch (error) {
+      console.error('獲取收藏貼文錯誤:', error);
+      return {
+        success: false,
+        error: error.response?.data?.message || error.message || '獲取收藏貼文失敗',
+        data: { posts: [], has_more: false }
+      };
+    }
+  }
 }
 
 // 創建單例實例
@@ -512,5 +670,9 @@ export const checkAnnotationPermission = socialService.checkAnnotationPermission
 export const createPost = socialService.createPost.bind(socialService);
 export const getPosts = socialService.getPosts.bind(socialService);
 export const getUserPosts = socialService.getUserPosts.bind(socialService);
+export const togglePostLike = socialService.togglePostLike.bind(socialService);
+export const togglePostSave = socialService.togglePostSave.bind(socialService);
+export const getUserLikedPosts = socialService.getUserLikedPosts.bind(socialService);
+export const getUserSavedPosts = socialService.getUserSavedPosts.bind(socialService);
 
 export default socialService; 

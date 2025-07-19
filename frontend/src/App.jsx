@@ -18,6 +18,10 @@ import EditPetPage from './pages/EditPetPage';
 import CreatePostPage from './pages/CreatePostPage';
 import PostPreviewPage from './pages/PostPreviewPage';
 import SearchPostsPage from './pages/SearchPostsPage';
+import LikedPostsPage from './pages/LikedPostsPage';
+import LikedPostsListPage from './pages/LikedPostsListPage';
+import SavedPostsPage from './pages/SavedPostsPage';
+import SavedPostsListPage from './pages/SavedPostsListPage';
 import CalculatorPage from './pages/CalculatorPage';
 import { isAuthenticated, refreshAccessToken } from './services/authService';
 
@@ -163,6 +167,26 @@ const App = () => {
         <Route 
           path="/settings" 
           element={isUserAuthenticated ? <SettingsPage /> : <Navigate to="/" />} 
+        />
+        {/* 按讚貼文頁面：未登入導向HomePage */}
+        <Route 
+          path="/liked-posts" 
+          element={isUserAuthenticated ? <LikedPostsPage /> : <Navigate to="/" />} 
+        />
+        {/* 按讚貼文列表頁面：未登入導向HomePage */}
+        <Route 
+          path="/liked-posts-list" 
+          element={isUserAuthenticated ? <LikedPostsListPage /> : <Navigate to="/" />} 
+        />
+        {/* 收藏貼文頁面：未登入導向HomePage */}
+        <Route 
+          path="/saved-posts" 
+          element={isUserAuthenticated ? <SavedPostsPage /> : <Navigate to="/" />} 
+        />
+        {/* 收藏貼文列表頁面：未登入導向HomePage */}
+        <Route 
+          path="/saved-posts-list" 
+          element={isUserAuthenticated ? <SavedPostsListPage /> : <Navigate to="/" />} 
         />
         {/* 通知頁面：未登入導向HomePage */}
         <Route 

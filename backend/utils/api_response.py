@@ -101,4 +101,44 @@ class APIResponse(Response):
             headers=headers,
             exception=exception,
             content_type=content_type
-        ) 
+        )
+
+
+def create_response(
+    success=True,
+    message="操作成功",
+    data=None,
+    error_code=None,
+    status_code=None,
+    **kwargs
+):
+    """
+    創建標準化的 API 響應字典
+    
+    Parameters:
+    - success: 操作是否成功
+    - message: 響應消息
+    - data: 響應數據
+    - error_code: 錯誤碼
+    - status_code: HTTP 狀態碼
+    - kwargs: 其他額外字段
+    
+    Returns:
+    - dict: 標準化的響應字典
+    """
+    response_data = {
+        "success": success,
+        "message": message,
+    }
+    
+    if data is not None:
+        response_data["data"] = data
+    
+    if error_code is not None:
+        response_data["error_code"] = error_code
+    
+    # 添加其他字段
+    for key, value in kwargs.items():
+        response_data[key] = value
+    
+    return response_data 

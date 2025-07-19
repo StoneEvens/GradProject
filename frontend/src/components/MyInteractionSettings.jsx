@@ -1,0 +1,70 @@
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import styles from '../styles/MyInteractionSettings.module.css';
+
+const MyInteractionSettings = () => {
+  const [isExpanded, setIsExpanded] = useState(true);
+  const navigate = useNavigate();
+
+  const handleToggleExpand = () => {
+    setIsExpanded(!isExpanded);
+  };
+
+  const handleLikedPostsClick = () => {
+    // 導航到按讚的貼文頁面
+    navigate('/liked-posts');
+  };
+
+  const handleSavedPostsClick = () => {
+    // 導航到收藏的貼文頁面
+    navigate('/saved-posts');
+  };
+
+  return (
+    <div className={styles.myInteractionContainer}>
+      {/* 我的互動標題列 */}
+      <div className={styles.interactionHeader} onClick={handleToggleExpand}>
+        <div className={styles.headerLeft}>
+          <img 
+            src="/assets/icon/SettingIcon.png" 
+            alt="我的互動圖示" 
+            className={styles.pawIcon}
+          />
+          <span className={styles.interactionText}>我的互動</span>
+        </div>
+        <div className={styles.headerRight}>
+          <span className={`${styles.arrowIcon} ${isExpanded ? styles.expanded : styles.collapsed}`}>
+            ▼
+          </span>
+        </div>
+      </div>
+
+      {/* 摺疊內容 */}
+      {isExpanded && (
+        <div className={styles.interactionContent}>
+          {/* 按讚的貼文 */}
+          <div className={styles.interactionItem} onClick={handleLikedPostsClick}>
+            <div className={styles.itemLeft}>
+              <span className={styles.itemText}>按讚的貼文</span>
+            </div>
+            <div className={styles.itemRight}>
+              <span className={styles.chevronIcon}>❯</span>
+            </div>
+          </div>
+
+          {/* 收藏的貼文 */}
+          <div className={styles.interactionItem} onClick={handleSavedPostsClick}>
+            <div className={styles.itemLeft}>
+              <span className={styles.itemText}>收藏的貼文</span>
+            </div>
+            <div className={styles.itemRight}>
+              <span className={styles.chevronIcon}>❯</span>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default MyInteractionSettings;

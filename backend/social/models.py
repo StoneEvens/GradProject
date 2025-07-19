@@ -16,6 +16,7 @@ if TYPE_CHECKING:
 class PostFrame(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     downvotes = models.IntegerField(default=0, help_text="點踩數")
+    likes = models.IntegerField(default=0, help_text="按讚數")
     saves = models.IntegerField(default=0, help_text="收藏數")
     shares = models.IntegerField(default=0, help_text="分享數")
     upvotes = models.IntegerField(default=0, help_text="點讚數")
@@ -57,7 +58,11 @@ class PostFrame(models.Model):
         ops = 0
 
         if fromRelation is not None:
-            if fromRelation == 'upvoted':
+            if fromRelation == 'liked':
+                self.likes = max(0, self.likes - 1)
+                update_fields.append('likes')
+                ops += 1
+            elif fromRelation == 'upvoted':
                 self.upvotes = max(0, self.upvotes - 1)
                 update_fields.append('upvotes')
                 ops += 1
@@ -75,7 +80,11 @@ class PostFrame(models.Model):
                 ops += 1
         
         if toRelation is not None:
-            if toRelation == 'upvoted':
+            if toRelation == 'liked':
+                self.likes = max(0, self.likes + 1)
+                update_fields.append('likes')
+                ops += 1
+            elif toRelation == 'upvoted':
                 self.upvotes = max(0, self.upvotes + 1)
                 update_fields.append('upvotes')
                 ops += 1
@@ -104,8 +113,84 @@ class PostFrame(models.Model):
             self.upvotes,
             self.downvotes,
             self.saves,
-            self.shares
+            self.shares,
+            self.likes
         ]
+
+    def handle_interaction(self, user, relation, allowed_relations):
+        """
+        處理用戶對貼文的互動
+        用於 interactions app 的 view
+        """
+        from interactions.models import UserInteraction
+        
+        if relation not in allowed_relations:
+            return False, f"不支援的互動類型: {relation}", 400
+        
+        try:
+            # 檢查是否已經有相同的互動
+            existing_interaction = UserInteraction.objects.filter(
+                user=user,
+                postFrame=self,
+                relation=relation
+            ).first()
+            
+            if existing_interaction:
+                # 如果已經有相同互動，則移除它
+                existing_interaction.delete()
+                
+                # 更新計數
+                if relation == 'liked':
+                    self.likes = max(0, self.likes - 1)
+                elif relation == 'upvoted':
+                    self.upvotes = max(0, self.upvotes - 1)
+                elif relation == 'downvoted':
+                    self.downvotes = max(0, self.downvotes - 1)
+                elif relation == 'saved':
+                    self.saves = max(0, self.saves - 1)
+                elif relation == 'shared':
+                    self.shares = max(0, self.shares - 1)
+                
+                self.save()
+                action_name = self._get_action_name(relation)
+                return True, f"已取消{action_name}", 200
+            else:
+                # 創建新的互動
+                UserInteraction.objects.create(
+                    user=user,
+                    postFrame=self,
+                    relation=relation
+                )
+                
+                # 更新計數
+                if relation == 'liked':
+                    self.likes += 1
+                elif relation == 'upvoted':
+                    self.upvotes += 1
+                elif relation == 'downvoted':
+                    self.downvotes += 1
+                elif relation == 'saved':
+                    self.saves += 1
+                elif relation == 'shared':
+                    self.shares += 1
+                
+                self.save()
+                action_name = self._get_action_name(relation)
+                return True, f"成功{action_name}", 200
+                
+        except Exception as e:
+            return False, f"操作失敗: {str(e)}", 500
+    
+    def _get_action_name(self, relation):
+        """獲取互動類型的中文名稱"""
+        action_names = {
+            'liked': '按讚',
+            'upvoted': '點讚',
+            'downvoted': '踩',
+            'saved': '收藏',
+            'shared': '分享'
+        }
+        return action_names.get(relation, relation)
 
 #----------貼文內容----------
 #SoL (Slice of Life) 貼文內容
