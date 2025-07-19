@@ -10,6 +10,8 @@ const PostPreviewList = ({
   userId = null,
   userAccount = null,
   isSearchResult = false,
+  isLikedPosts = false,
+  isSavedPosts = false,
   style = {}
 }) => {
   const navigate = useNavigate();
@@ -23,6 +25,22 @@ const PostPreviewList = ({
       navigate(`/search-posts`, { 
         state: { 
           searchPosts: posts,
+          targetPostId: postId
+        } 
+      });
+    } else if (isLikedPosts) {
+      // 如果是按讚貼文，導航到按讚貼文列表頁面
+      navigate(`/liked-posts-list`, { 
+        state: { 
+          likedPosts: posts,
+          targetPostId: postId
+        } 
+      });
+    } else if (isSavedPosts) {
+      // 如果是收藏貼文，導航到收藏貼文列表頁面
+      navigate(`/saved-posts-list`, { 
+        state: { 
+          savedPosts: posts,
           targetPostId: postId
         } 
       });

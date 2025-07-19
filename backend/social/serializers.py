@@ -119,6 +119,7 @@ class PostFrameSerializer(serializers.ModelSerializer):
             'downvotes': stats[1],
             'saves': stats[2],
             'shares': stats[3],
+            'likes': stats[4],
             'total_score': stats[0] - stats[1]
         }
 
@@ -126,6 +127,7 @@ class PostFrameSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         if not request or not request.user.is_authenticated:
             return {
+                'is_liked': False,
                 'is_upvoted': False,
                 'is_downvoted': False,
                 'is_saved': False,
@@ -135,6 +137,7 @@ class PostFrameSerializer(serializers.ModelSerializer):
         user = CustomUser.objects.filter(username=request.user.username).first()
         if not user:
             return {
+                'is_liked': False,
                 'is_upvoted': False,
                 'is_downvoted': False,
                 'is_saved': False,
@@ -144,6 +147,7 @@ class PostFrameSerializer(serializers.ModelSerializer):
         records = UserInteraction.objects.filter(user=user, postFrame=postFrame)
 
         return {
+            'is_liked': records.filter(relation='liked').exists(),
             'is_upvoted': records.filter(relation='upvoted').exists(),
             'is_downvoted': records.filter(relation='downvoted').exists(),
             'is_saved': records.filter(relation='saved').exists(),
@@ -275,6 +279,7 @@ class SolPostSerializer(serializers.ModelSerializer):
             'downvotes': stats[1],
             'saves': stats[2],
             'shares': stats[3],
+            'likes': stats[4],
             'total_score': stats[0] - stats[1]
         }
 
@@ -282,6 +287,7 @@ class SolPostSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         if not request or not request.user.is_authenticated:
             return {
+                'is_liked': False,
                 'is_upvoted': False,
                 'is_downvoted': False,
                 'is_saved': False,
@@ -291,6 +297,7 @@ class SolPostSerializer(serializers.ModelSerializer):
         user = CustomUser.objects.filter(username=request.user.username).first()
         if not user:
             return {
+                'is_liked': False,
                 'is_upvoted': False,
                 'is_downvoted': False,
                 'is_saved': False,
@@ -300,6 +307,7 @@ class SolPostSerializer(serializers.ModelSerializer):
         records = UserInteraction.objects.filter(user=user, postFrame=solContent.postFrame)
 
         return {
+            'is_liked': records.filter(relation='liked').exists(),
             'is_upvoted': records.filter(relation='upvoted').exists(),
             'is_downvoted': records.filter(relation='downvoted').exists(),
             'is_saved': records.filter(relation='saved').exists(),
@@ -364,10 +372,12 @@ class PostPreviewSerializer(serializers.ModelSerializer):
     first_image_url = serializers.SerializerMethodField()
     content_preview = serializers.SerializerMethodField()
     user_info = serializers.SerializerMethodField()
+    interaction_stats = serializers.SerializerMethodField()
+    user_interaction = serializers.SerializerMethodField()
 
     class Meta:
         model = PostFrame
-        fields = ['id', 'created_at', 'first_image_url', 'content_preview', 'user_info']
+        fields = ['id', 'created_at', 'first_image_url', 'content_preview', 'user_info', 'interaction_stats', 'user_interaction']
 
     def get_first_image_url(self, postFrame: PostFrame):
         """獲取第一張圖片URL"""
@@ -395,6 +405,50 @@ class PostPreviewSerializer(serializers.ModelSerializer):
             'id': user.id,
             'username': user.username,
             'user_account': getattr(user, 'user_account', ''),
+        }
+    
+    def get_interaction_stats(self, postFrame: PostFrame):
+        """獲取互動統計"""
+        stats = postFrame.get_interaction_stats()
+        return {
+            'upvotes': stats[0],
+            'downvotes': stats[1],
+            'saves': stats[2],
+            'shares': stats[3],
+            'likes': stats[4],
+            'total_score': stats[0] - stats[1]
+        }
+    
+    def get_user_interaction(self, postFrame: PostFrame):
+        """獲取用戶互動狀態"""
+        request = self.context.get('request')
+        if not request or not request.user.is_authenticated:
+            return {
+                'is_liked': False,
+                'is_upvoted': False,
+                'is_downvoted': False,
+                'is_saved': False,
+                'is_shared': False
+            }
+
+        user = CustomUser.objects.filter(username=request.user.username).first()
+        if not user:
+            return {
+                'is_liked': False,
+                'is_upvoted': False,
+                'is_downvoted': False,
+                'is_saved': False,
+                'is_shared': False
+            }
+
+        records = UserInteraction.objects.filter(user=user, postFrame=postFrame)
+
+        return {
+            'is_liked': records.filter(relation='liked').exists(),
+            'is_upvoted': records.filter(relation='upvoted').exists(),
+            'is_downvoted': records.filter(relation='downvoted').exists(),
+            'is_saved': records.filter(relation='saved').exists(),
+            'is_shared': records.filter(relation='shared').exists()
         }
 
 # === 搜尋關鍵字建議序列化器 ===

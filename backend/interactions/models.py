@@ -1,7 +1,5 @@
 from django.db import models
 from django.conf import settings
-from django.contrib.contenttypes.fields import GenericForeignKey
-from django.contrib.contenttypes.models import ContentType
 from accounts.models import CustomUser
 from social.models import PostFrame
 
@@ -31,17 +29,19 @@ class UserInteraction(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ('user', 'relation')
+        unique_together = ('user', 'postFrame', 'relation')
 
     def __str__(self):
-        return f"{self.user.username} {self.relation} {self.content_type} {self.object_id}"
+        return f"{self.user.username} {self.relation} {self.postFrame.id if self.postFrame else 'None'}"
     
+    @staticmethod
     def check_user_interaction(user: CustomUser, postFrame: PostFrame):
         return UserInteraction.objects.filter(
             user=user,
             postFrame = postFrame
         )
     
+    @staticmethod
     def get_user_interaction(user: CustomUser, postFrame: PostFrame, relation:str):
         return UserInteraction.objects.filter(
             user=user,
@@ -52,12 +52,12 @@ class UserInteraction(models.Model):
     def delete_interaction(self, interaction):
         interaction.delete()
 
-    def create_interaction(user, postID, relation):
+    @staticmethod
+    def create_interaction(user, postFrame, relation):
         try:
-            UserInteraction.object.create(
+            UserInteraction.objects.create(
                 user=user,
-                content_type=PostFrame,
-                object_id=postID,
+                postFrame=postFrame,
                 relation=relation
             )
             return True

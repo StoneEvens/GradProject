@@ -4,6 +4,7 @@ import TopNavbar from '../components/TopNavbar';
 import BottomNavbar from '../components/BottomNavigationbar';
 import Notification from '../components/Notification';
 import AccountSettings from '../components/AccountSettings';
+import MyInteractionSettings from '../components/MyInteractionSettings';
 import { logout } from '../services/authService';
 import { getUserProfile, updateAccountPrivacy } from '../services/userService';
 import styles from '../styles/SettingsPage.module.css';
@@ -93,6 +94,9 @@ const SettingsPage = () => {
             onPrivacyToggle={handlePrivacyToggle}
             isPrivacyPublic={isPrivacyPublic}
           />
+
+          {/* 我的互動設定組件 */}
+          <MyInteractionSettings />
         </div>
 
         {/* 登出按鈕 */}

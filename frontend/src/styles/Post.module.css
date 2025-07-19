@@ -189,10 +189,6 @@
   color: #e74c3c;
 }
 
-.likeButton.liked .interactionIcon {
-  filter: hue-rotate(320deg) saturate(2);
-}
-
 /* 收藏狀態 */
 .saveButton.saved {
   color: #f39c12;

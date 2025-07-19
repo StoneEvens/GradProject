@@ -1,0 +1,108 @@
+/* LikedPostsListPage 樣式 */
+.container {
+  min-height: 100vh;
+  background-color: #FFF2D9;
+  display: flex;
+  flex-direction: column;
+}
+
+.content {
+  flex: 1;
+  padding: 0 20px 80px 20px;
+  max-width: 600px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* 標題列 */
+.header {
+  display: flex;
+  align-items: center;
+  padding: 20px 0 15px 0;
+  gap: 10px;
+}
+
+.backButton {
+  background: none;
+  border: none;
+  font-size: 1.4rem;
+  color: #89350c;
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s ease;
+  transform: rotate(180deg);
+  font-weight: bold;
+  margin-top: 3px;
+}
+
+.backButton:hover {
+  background-color: rgba(255, 179, 112, 0.2);
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #89350c;
+  margin: 0;
+}
+
+/* 分隔線 */
+.divider {
+  width: 100%;
+  height: 2px;
+  background-color: #FFB370;
+  margin-bottom: 20px;
+}
+
+/* 貼文容器 */
+.postsContainer {
+  flex: 1;
+}
+
+/* 手機版優化 */
+@media (max-width: 480px) {
+  .content {
+    padding: 0 15px 80px 15px;
+  }
+  
+  .header {
+    padding: 15px 0 12px 0;
+  }
+  
+  .title {
+    font-size: 1.3rem;
+  }
+  
+  .backButton {
+    font-size: 1.8rem;
+    width: 28px;
+    height: 28px;
+  }
+}
+
+/* 小屏手機優化 */
+@media (max-width: 360px) {
+  .content {
+    padding: 0 12px 80px 12px;
+  }
+  
+  .header {
+    padding: 12px 0 10px 0;
+  }
+  
+  .title {
+    font-size: 1.2rem;
+  }
+  
+  .backButton {
+    font-size: 1.6rem;
+    width: 26px;
+    height: 26px;
+  }
+}

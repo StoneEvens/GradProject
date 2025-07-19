@@ -1,15 +1,16 @@
-.accountSettingsContainer {
-  margin-bottom: 10px;
+/* MyInteractionSettings 組件樣式 */
+.myInteractionContainer {
+  margin-bottom: 20px;
 }
 
-/* 帳號標題列 */
-.accountHeader {
+/* 我的互動標題列 */
+.interactionHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
   background: transparent;
   border-radius: 12px;
-  padding: 16px 0 0 0;
+  padding: 0px 0 0 0;
   cursor: pointer;
   min-height: 60px;
   margin-bottom: 2px;
@@ -27,7 +28,7 @@
   object-fit: contain;
 }
 
-.accountText {
+.interactionText {
   font-size: 1.1rem;
   font-weight: 600;
   color: #333;
@@ -53,7 +54,7 @@
 }
 
 /* 摺疊內容區域 */
-.settingsContent {
+.interactionContent {
   background: transparent;
   border-radius: 0 0 12px 12px;
   padding: 0;
@@ -62,96 +63,52 @@
   padding-top: 8px;
 }
 
-.settingItem {
+.interactionItem {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 0;
+  padding: 12px 10px 12px 0px;
   min-height: 50px;
   background: transparent;
-}
-
-.settingLeft {
-  display: flex;
-  align-items: center;
-}
-
-.settingTextContainer {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.settingText {
-  font-size: 1rem;
-  font-weight: 500;
-  color: #333;
-}
-
-.settingRight {
-  display: flex;
-  align-items: center;
-}
-
-/* 切換開關 */
-.toggleContainer {
-  display: flex;
-  align-items: flex-end;
-  gap: 12px;
-}
-
-.toggle {
-  --toggle-bg: #ccc;
-  --toggle-x: 2px;
-  width: 50px;
-  height: 24px;
-  border-radius: 12px;
-  position: relative;
   cursor: pointer;
-  background-color: var(--toggle-bg);
-  transition: background-color 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: background-color 0.2s ease;
+  border-radius: 8px;
 }
 
-.toggleOn {
-  --toggle-bg: #FFB370;
-  --toggle-x: 26px;
+.interactionItem:hover {
+  background-color: rgba(255, 179, 112, 0.1);
 }
 
-.toggleOff {
-  --toggle-bg: #ccc;
-  --toggle-x: 2px;
+.itemLeft {
+  display: flex;
+  align-items: center;
 }
 
-
-
-.toggleSlider {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: #fff;
-  position: absolute;
-  top: 2px;
-  left: 0;
-  transform: translateX(var(--toggle-x));
-  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.toggleLabel {
+.itemText {
   font-size: 1rem;
   font-weight: 500;
   color: #333;
-  min-width: 35px;
+}
+
+.itemRight {
+  display: flex;
+  align-items: center;
+}
+
+.chevronIcon {
+  color: #FFB370;
+  font-size: 1.1rem;
+  font-weight: bold;
 }
 
 /* 手機版優化 */
 @media (max-width: 480px) {
-  .accountHeader {
+  .interactionHeader {
     padding: 14px 0 0 0;
     min-height: 55px;
   }
   
-  .accountText {
+  .interactionText {
     font-size: 1rem;
   }
   
@@ -160,40 +117,35 @@
     height: 28px;
   }
   
-  .settingItem {
+  .interactionItem {
     padding: 10px 0;
     min-height: 45px;
   }
   
-  .settingText {
+  .itemText {
     font-size: 0.95rem;
   }
   
-  .settingDescription {
+  .chevronIcon {
     font-size: 0.8rem;
-  }
-  
-  .toggleLabel {
-    font-size: 0.9rem;
-    min-width: 55px;
   }
 }
 
 /* 小屏手機優化 */
 @media (max-width: 360px) {
-  .accountHeader {
+  .interactionHeader {
     padding: 12px 0 0 0;
   }
   
-  .settingItem {
+  .interactionItem {
     padding: 8px 0;
   }
   
-  .settingText {
+  .itemText {
     font-size: 0.9rem;
   }
   
-  .settingDescription {
+  .chevronIcon {
     font-size: 0.75rem;
   }
-} 
+}

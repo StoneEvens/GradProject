@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Post from './Post';
 import Notification from './Notification';
 import { getUserPosts } from '../services/socialService';
@@ -21,6 +21,7 @@ const PostList = ({
   // 新增 user 相關 props
   userId = null,
   targetPostId = null,
+  targetPostIndex = null,
   fetchUserPosts = false,
   ...props
 }) => {
@@ -33,6 +34,10 @@ const PostList = ({
   const [userError, setUserError] = useState(null);
   const [userHasMore, setUserHasMore] = useState(true);
   const [page, setPage] = useState(0);
+
+  // 貼文元素的引用
+  const postRefs = useRef({});
+  const containerRef = useRef(null);
 
   // 顯示通知
   const showNotification = (message) => {
@@ -129,19 +134,35 @@ const PostList = ({
     const currentPosts = fetchUserPosts ? userPosts : posts;
     console.log('PostList - 滾動到指定貼文:', {
       targetPostId,
+      targetPostIndex,
       fetchUserPosts,
       currentPostsLength: currentPosts.length,
       currentPosts: currentPosts.map(p => p.id || p.post_id)
     });
     
-    if (targetPostId && currentPosts.length > 0) {
-      // 延遲執行，確保DOM已更新
-      setTimeout(() => {
-        const postElement = document.querySelector(`[data-post-id="${targetPostId}"]`);
-        console.log('PostList - 查找貼文元素:', {
-          targetPostId,
-          postElement,
-          allDataPostIds: Array.from(document.querySelectorAll('[data-post-id]')).map(el => el.getAttribute('data-post-id'))
+    // 優先使用 targetPostIndex，如果沒有則使用 targetPostId
+    if (currentPosts.length > 0) {
+      let targetIndex = -1;
+      
+      if (targetPostIndex !== null && targetPostIndex >= 0 && targetPostIndex < currentPosts.length) {
+        targetIndex = targetPostIndex;
+      } else if (targetPostId) {
+        targetIndex = currentPosts.findIndex(post => 
+          (post.id || post.post_id) === targetPostId
+        );
+      }
+      
+      if (targetIndex >= 0) {
+        // 延遲執行，確保DOM已更新
+        setTimeout(() => {
+          const postElement = postRefs.current[targetIndex] || 
+                            document.querySelector(`[data-post-id="${currentPosts[targetIndex].id || currentPosts[targetIndex].post_id}"]`);
+          
+          console.log('PostList - 查找貼文元素:', {
+            targetIndex,
+            targetPostId: currentPosts[targetIndex]?.id || currentPosts[targetIndex]?.post_id,
+            postElement,
+            allDataPostIds: Array.from(document.querySelectorAll('[data-post-id]')).map(el => el.getAttribute('data-post-id'))
         });
         
         if (postElement) {
@@ -153,9 +174,10 @@ const PostList = ({
           postElement.style.animation = 'highlight 2s ease-in-out';
           console.log('PostList - 滾動和高亮完成');
         }
-      }, 500);
+        }, 500);
+      }
     }
-  }, [targetPostId, userPosts, posts, fetchUserPosts]);
+  }, [targetPostId, targetPostIndex, userPosts, posts, fetchUserPosts]);
 
   // 處理無限滾動
   const handleScroll = useCallback(() => {
@@ -244,7 +266,7 @@ const PostList = ({
           )
         );
       }
-      showNotification(isSaved ? '已收藏' : '已取消收藏');
+      // 收藏操作不顯示通知
     } catch (error) {
       console.error('收藏操作失敗:', error);
       showNotification('操作失敗，請稍後再試');
@@ -327,9 +349,13 @@ const PostList = ({
         <Notification message={notification} onClose={hideNotification} />
       )}
       
-      <div className={styles.postList}>
+      <div className={styles.postList} ref={containerRef}>
         {currentPosts.map((post, index) => (
-          <div key={post.id || post.post_id || index} data-post-id={post.id || post.post_id}>
+          <div 
+            key={post.id || post.post_id || index} 
+            data-post-id={post.id || post.post_id}
+            ref={el => postRefs.current[index] = el}
+          >
             <Post
               postData={post}
               onLike={handleLike}
