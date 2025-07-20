@@ -417,6 +417,35 @@ class SocialService {
   }
 
   /**
+   * 獲取單一貼文詳情
+   * @param {number} postId - 貼文ID
+   * @returns {Promise} 貼文詳情
+   */
+  async getPost(postId) {
+    try {
+      const response = await authAxios.get(`/social/posts/${postId}/`);
+      const result = response.data;
+      
+      if (result.success) {
+        return {
+          success: true,
+          data: result.data,
+          message: result.message
+        };
+      } else {
+        throw new Error(result.message || '獲取貼文詳情失敗');
+      }
+    } catch (error) {
+      console.error('獲取貼文詳情錯誤:', error);
+      return {
+        success: false,
+        error: error.response?.data?.message || error.message || '獲取貼文詳情失敗',
+        data: null
+      };
+    }
+  }
+
+  /**
    * 獲取貼文列表
    * @param {Object} params - 查詢參數
    * @param {number} params.offset - 偏移量
@@ -451,6 +480,97 @@ class SocialService {
         success: false,
         error: error.message,
         data: { posts: [], has_more: false }
+      };
+    }
+  }
+
+  /**
+   * 更新現有貼文
+   * @param {number} postId - 貼文ID
+   * @param {Object} postData - 更新的貼文資料
+   * @param {string} postData.content - 貼文內容
+   * @param {string} postData.location - 位置資訊
+   * @param {string} postData.hashtags - 標籤（逗號分隔）
+   * @returns {Promise} 更新結果
+   */
+  async updatePost(postId, postData, isFormData = false) {
+    try {
+      console.log('更新貼文 API 調用:', { postId, isFormData, hasFiles: isFormData && postData instanceof FormData });
+
+      let requestData;
+      let headers = {};
+
+      if (isFormData && postData instanceof FormData) {
+        // 使用 FormData（用於文件上傳）
+        requestData = postData;
+        // 不設置 Content-Type，讓瀏覽器自動設置 multipart/form-data
+      } else {
+        // 使用 JSON（普通更新）
+        requestData = {
+          content: postData.content || '',
+          location: postData.location || '',
+          hashtags: postData.hashtags || '',
+        };
+        headers['Content-Type'] = 'application/json';
+      }
+
+      const response = await authAxios.put(`/social/posts/${postId}/update/`, requestData, {
+        headers: headers,
+        timeout: 30000, // 30秒超時
+      });
+
+      const result = response.data;
+      
+      console.log('更新貼文 API 回應:', result);
+      
+      if (result.success || response.status === 200) {
+        return {
+          success: true,
+          data: result.data,
+          message: result.message || '貼文更新成功'
+        };
+      } else {
+        throw new Error(result.message || '貼文更新失敗');
+      }
+    } catch (error) {
+      console.error('更新貼文錯誤:', error);
+      
+      if (error.response) {
+        const { status, data } = error.response;
+        
+        // 特殊處理某些錯誤狀態碼
+        let errorMessage = data?.message || error.message;
+        if (status === 403) {
+          errorMessage = '您沒有權限編輯此貼文';
+        } else if (status === 404) {
+          errorMessage = '找不到指定的貼文';
+        } else if (status === 400) {
+          errorMessage = data?.message || '請求資料格式錯誤';
+        } else if (status === 500) {
+          errorMessage = '伺服器錯誤，請稍後再試';
+        }
+        
+        return {
+          success: false,
+          error: errorMessage,
+          data: data?.data || null,
+          status: status
+        };
+      }
+      
+      // 處理網路錯誤
+      if (error.code === 'NETWORK_ERROR') {
+        return {
+          success: false,
+          error: '網路連線錯誤，請檢查網路連線',
+          data: null
+        };
+      }
+      
+      return {
+        success: false,
+        error: error.message || '更新貼文失敗，請稍後再試',
+        data: null
       };
     }
   }
@@ -498,10 +618,9 @@ class SocialService {
   /**
    * 對貼文進行互動（按讚/取消按讚）
    * @param {number} postId - 貼文ID
-   * @param {boolean} isLiked - 目前是否已按讚
    * @returns {Promise} 操作結果
    */
-  async togglePostLike(postId, isLiked) {
+  async togglePostLike(postId) {
     try {
       const response = await authAxios.post(`/interactions/posts/${postId}/interaction/`, {
         relation: 'liked'  // 發送 'liked' 來切換按讚狀態
@@ -525,13 +644,19 @@ class SocialService {
   /**
    * 切換貼文收藏狀態
    * @param {number} postId - 貼文ID
-   * @param {boolean} isSaved - 目前是否已收藏
    * @returns {Promise} 操作結果
    */
-  async togglePostSave(postId, isSaved) {
+  async togglePostSave(postId) {
     try {
+      console.log('togglePostSave API 調用:', { postId });
+      
       const response = await authAxios.post(`/interactions/posts/${postId}/interaction/`, {
         relation: 'saved'  // 發送 'saved' 來切換收藏狀態
+      });
+
+      console.log('togglePostSave API 響應:', {
+        status: response.status,
+        data: response.data
       });
 
       const result = response.data;
@@ -542,6 +667,11 @@ class SocialService {
       };
     } catch (error) {
       console.error('貼文收藏錯誤:', error);
+      console.error('錯誤詳情:', {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message
+      });
       return {
         success: false,
         error: error.response?.data?.detail || error.message || '操作失敗'
@@ -685,6 +815,206 @@ class SocialService {
       };
     }
   }
+
+  /**
+   * 刪除貼文中的圖片
+   * @param {number} postId - 貼文 ID
+   * @param {number} imageId - 圖片 ID
+   * @returns {Promise} 刪除結果
+   */
+  async deletePostImage(postId, imageId) {
+    try {
+      console.log('刪除貼文圖片 API 調用:', { postId, imageId });
+
+      const response = await authAxios.delete(`/media/posts/${postId}/images/${imageId}/`, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        timeout: 30000,
+      });
+
+      const result = response.data;
+      
+      console.log('刪除貼文圖片 API 回應:', result);
+      
+      if (result.success || response.status === 200) {
+        return {
+          success: true,
+          data: result.data || {},
+          message: result.message || '圖片刪除成功'
+        };
+      } else {
+        throw new Error(result.message || '刪除圖片失敗');
+      }
+      
+    } catch (error) {
+      console.error('刪除貼文圖片錯誤:', error);
+      return {
+        success: false,
+        error: error.response?.data?.message || error.message || '刪除圖片失敗'
+      };
+    }
+  }
+
+  /**
+   * 重新排序貼文圖片
+   * @param {number} postId - 貼文 ID
+   * @param {Array} imageOrders - 圖片排序陣列 [{"image_id": 1, "sort_order": 0}, ...]
+   * @returns {Promise} 排序結果
+   */
+  async reorderPostImages(postId, imageOrders) {
+    try {
+      console.log('重新排序貼文圖片 API 調用:', { postId, imageOrders });
+
+      const response = await authAxios.put(`/media/posts/${postId}/images/reorder/`, {
+        image_orders: imageOrders
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        timeout: 30000,
+      });
+
+      const result = response.data;
+      
+      console.log('重新排序貼文圖片 API 回應:', result);
+      
+      if (result.success || response.status === 200) {
+        return {
+          success: true,
+          data: result.data || {},
+          message: result.message || '圖片排序更新成功'
+        };
+      } else {
+        throw new Error(result.message || '重新排序圖片失敗');
+      }
+      
+    } catch (error) {
+      console.error('重新排序貼文圖片錯誤:', error);
+      return {
+        success: false,
+        error: error.response?.data?.message || error.message || '重新排序圖片失敗'
+      };
+    }
+  }
+
+  /**
+   * 創建圖片標註
+   * @param {Object} annotationData - 標註資料
+   * @returns {Promise} 創建結果
+   */
+  async createAnnotation(annotationData) {
+    try {
+      console.log('創建標註 API 調用:', annotationData);
+
+      const response = await authAxios.post('/social/annotations/', annotationData, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        timeout: 30000,
+      });
+
+      const result = response.data;
+      
+      console.log('創建標註 API 回應:', result);
+      
+      if (result.success || response.status === 200) {
+        return {
+          success: true,
+          data: result.data || {},
+          message: result.message || '標註創建成功'
+        };
+      } else {
+        throw new Error(result.message || '創建標註失敗');
+      }
+      
+    } catch (error) {
+      console.error('創建標註錯誤:', error);
+      return {
+        success: false,
+        error: error.response?.data?.message || error.message || '創建標註失敗'
+      };
+    }
+  }
+
+  /**
+   * 更新圖片標註
+   * @param {number} annotationId - 標註 ID
+   * @param {Object} updateData - 更新資料
+   * @returns {Promise} 更新結果
+   */
+  async updateAnnotation(annotationId, updateData) {
+    try {
+      console.log('更新標註 API 調用:', { annotationId, updateData });
+
+      const response = await authAxios.put(`/social/annotations/${annotationId}/`, updateData, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        timeout: 30000,
+      });
+
+      const result = response.data;
+      
+      console.log('更新標註 API 回應:', result);
+      
+      if (result.success || response.status === 200) {
+        return {
+          success: true,
+          data: result.data || {},
+          message: result.message || '標註更新成功'
+        };
+      } else {
+        throw new Error(result.message || '更新標註失敗');
+      }
+      
+    } catch (error) {
+      console.error('更新標註錯誤:', error);
+      return {
+        success: false,
+        error: error.response?.data?.message || error.message || '更新標註失敗'
+      };
+    }
+  }
+
+  /**
+   * 刪除圖片標註
+   * @param {number} annotationId - 標註 ID
+   * @returns {Promise} 刪除結果
+   */
+  async deleteAnnotation(annotationId) {
+    try {
+      console.log('刪除標註 API 調用:', annotationId);
+
+      const response = await authAxios.delete(`/social/annotations/${annotationId}/`, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        timeout: 30000,
+      });
+
+      const result = response.data;
+      
+      console.log('刪除標註 API 回應:', result);
+      
+      if (result.success || response.status === 200) {
+        return {
+          success: true,
+          data: result.data || {},
+          message: result.message || '標註刪除成功'
+        };
+      } else {
+        throw new Error(result.message || '刪除標註失敗');
+      }
+      
+    } catch (error) {
+      console.error('刪除標註錯誤:', error);
+      return {
+        success: false,
+        error: error.response?.data?.message || error.message || '刪除標註失敗'
+      };
+    }
+  }
 }
 
 // 創建單例實例
@@ -701,6 +1031,8 @@ export const getFollowersList = socialService.getFollowersList.bind(socialServic
 export const removeFollower = socialService.removeFollower.bind(socialService);
 export const checkAnnotationPermission = socialService.checkAnnotationPermission.bind(socialService);
 export const createPost = socialService.createPost.bind(socialService);
+export const updatePost = socialService.updatePost.bind(socialService);
+export const getPost = socialService.getPost.bind(socialService);
 export const getPosts = socialService.getPosts.bind(socialService);
 export const getUserPosts = socialService.getUserPosts.bind(socialService);
 export const togglePostLike = socialService.togglePostLike.bind(socialService);
@@ -708,5 +1040,10 @@ export const togglePostSave = socialService.togglePostSave.bind(socialService);
 export const getUserLikedPosts = socialService.getUserLikedPosts.bind(socialService);
 export const getUserSavedPosts = socialService.getUserSavedPosts.bind(socialService);
 export const getPetRelatedPosts = socialService.getPetRelatedPosts.bind(socialService);
+export const deletePostImage = socialService.deletePostImage.bind(socialService);
+export const reorderPostImages = socialService.reorderPostImages.bind(socialService);
+export const createAnnotation = socialService.createAnnotation.bind(socialService);
+export const updateAnnotation = socialService.updateAnnotation.bind(socialService);
+export const deleteAnnotation = socialService.deleteAnnotation.bind(socialService);
 
 export default socialService; 

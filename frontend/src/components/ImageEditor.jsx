@@ -26,12 +26,11 @@
  */
 import React, { useState, useRef, useEffect } from 'react';
 import styles from '../styles/ImageEditor.module.css';
-import Notification from './Notification';
 import Annotation from './Annotation';
 import { getUserPets } from '../services/petService';
 import { checkAnnotationPermission } from '../services/socialService';
 
-const ImageEditor = ({ image, isOpen, onClose, onSave }) => {
+const ImageEditor = ({ image, isOpen, onClose, onSave, mode = 'create' }) => {
   const [annotations, setAnnotations] = useState([]);
   const [showAnnotations, setShowAnnotations] = useState(false);
   const [showAnnotationDots, setShowAnnotationDots] = useState(false);
@@ -40,11 +39,26 @@ const ImageEditor = ({ image, isOpen, onClose, onSave }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [annotationType, setAnnotationType] = useState('user'); // 'user' or 'pet'
   const [selectedPet, setSelectedPet] = useState('');
-  const [notification, setNotification] = useState('');
   const [userPets, setUserPets] = useState([]);
   const [isLoadingPets, setIsLoadingPets] = useState(false);
   const imageRef = useRef(null);
   const modalRef = useRef(null);
+
+  // Debug logging
+  useEffect(() => {
+    if (image) {
+      const imageUrl = image.dataUrl || image.preview || image.url || image.firebase_url;
+      console.log('ImageEditor received image:', {
+        id: image.id,
+        dataUrl: image.dataUrl ? 'present' : 'missing',
+        preview: image.preview ? 'present' : 'missing',
+        url: image.url ? 'present' : 'missing',
+        firebase_url: image.firebase_url ? 'present' : 'missing',
+        actualUrl: imageUrl,
+        annotations: image.annotations
+      });
+    }
+  }, [image]);
 
   // 標註資料的 localStorage 鍵名
   const ANNOTATIONS_KEY = 'imageAnnotations';
@@ -54,7 +68,7 @@ const ImageEditor = ({ image, isOpen, onClose, onSave }) => {
     if (image?.id) {
       loadAnnotations();
     }
-  }, [image?.id]);
+  }, [image?.id, image?.annotations]);
 
   // 載入用戶寵物資料
   useEffect(() => {
@@ -83,19 +97,33 @@ const ImageEditor = ({ image, isOpen, onClose, onSave }) => {
     };
   };
 
-  // 從 localStorage 載入標註資料
+  // 載入標註資料
   const loadAnnotations = () => {
     try {
-      const savedAnnotations = localStorage.getItem(ANNOTATIONS_KEY);
-      if (savedAnnotations) {
-        const allAnnotations = JSON.parse(savedAnnotations);
-        const imageAnnotations = allAnnotations[image.id] || [];
-        // 轉換格式並設置標註
-        const convertedAnnotations = imageAnnotations.map(convertLegacyAnnotation);
-        setAnnotations(convertedAnnotations);
+      if (mode === 'edit') {
+        // edit 模式：從後端傳入的資料載入標註
+        if (image?.annotations && image.annotations.length > 0) {
+          const convertedAnnotations = image.annotations.map(convertLegacyAnnotation);
+          setAnnotations(convertedAnnotations);
+        } else {
+          setAnnotations([]);
+        }
+      } else {
+        // create 模式：從 localStorage 載入標註
+        const savedAnnotations = localStorage.getItem(ANNOTATIONS_KEY);
+        if (savedAnnotations) {
+          const allAnnotations = JSON.parse(savedAnnotations);
+          const imageAnnotations = allAnnotations[image.id] || [];
+          // 轉換格式並設置標註
+          const convertedAnnotations = imageAnnotations.map(convertLegacyAnnotation);
+          setAnnotations(convertedAnnotations);
+        } else {
+          setAnnotations([]);
+        }
       }
     } catch (error) {
       console.error('載入標註資料失敗:', error);
+      setAnnotations([]);
     }
   };
 
@@ -125,7 +153,6 @@ const ImageEditor = ({ image, isOpen, onClose, onSave }) => {
       setUserPets(pets);
     } catch (error) {
       console.error('載入寵物資料失敗:', error);
-      showNotification('載入寵物資料失敗');
     } finally {
       setIsLoadingPets(false);
     }
@@ -140,18 +167,7 @@ const ImageEditor = ({ image, isOpen, onClose, onSave }) => {
       localStorage.setItem(ANNOTATIONS_KEY, JSON.stringify(allAnnotations));
     } catch (error) {
       console.error('保存標註資料失敗:', error);
-      showNotification('保存標註失敗');
     }
-  };
-
-  // 顯示通知
-  const showNotification = (message) => {
-    setNotification(message);
-  };
-
-  // 隱藏通知
-  const hideNotification = () => {
-    setNotification('');
   };
 
   // 處理圖片點擊 - 新增標註
@@ -199,7 +215,6 @@ const ImageEditor = ({ image, isOpen, onClose, onSave }) => {
     
     if (annotationType === 'user') {
       if (!searchQuery.trim()) {
-        showNotification('請輸入使用者名稱');
         return;
       }
       
@@ -207,28 +222,23 @@ const ImageEditor = ({ image, isOpen, onClose, onSave }) => {
       try {
         const result = await checkAnnotationPermission(searchQuery.trim());
         if (!result.success || !result.data.can_annotate) {
-          showNotification(result.data.reason || '無法標註此使用者');
           return;
         }
         displayName = result.data.user_info.user_fullname || result.data.user_info.user_account;
         targetId = result.data.user_info.user_account;
       } catch (error) {
-        showNotification('驗證使用者失敗');
         return;
       }
     } else {
       if (!selectedPet) {
-        showNotification('請選擇寵物');
         return;
       }
       if (isLoadingPets) {
-        showNotification('寵物資料載入中，請稍後');
         return;
       }
       const pet = userPets.find(p => String(p.pet_id) === String(selectedPet));
       if (!pet) {
         console.error('找不到寵物 (新增):', selectedPet, 'userPets:', userPets.map(p => ({ pet_id: p.pet_id, name: p.pet_name, type: typeof p.pet_id })));
-        showNotification('找不到選擇的寵物，請重新選擇');
         return;
       }
       displayName = pet.pet_name;
@@ -251,7 +261,6 @@ const ImageEditor = ({ image, isOpen, onClose, onSave }) => {
     setSearchQuery('');
     setAnnotationType('user');
     setSelectedPet('');
-    showNotification('標註新增成功');
   };
 
   // 更新標註
@@ -261,7 +270,6 @@ const ImageEditor = ({ image, isOpen, onClose, onSave }) => {
     
     if (annotationType === 'user') {
       if (!searchQuery.trim()) {
-        showNotification('請輸入使用者名稱');
         return;
       }
       
@@ -269,28 +277,23 @@ const ImageEditor = ({ image, isOpen, onClose, onSave }) => {
       try {
         const result = await checkAnnotationPermission(searchQuery.trim());
         if (!result.success || !result.data.can_annotate) {
-          showNotification(result.data.reason || '無法標註此使用者');
           return;
         }
         displayName = result.data.user_info.user_fullname || result.data.user_info.user_account;
         targetId = result.data.user_info.user_account;
       } catch (error) {
-        showNotification('驗證使用者失敗');
         return;
       }
     } else {
       if (!selectedPet) {
-        showNotification('請選擇寵物');
         return;
       }
       if (isLoadingPets) {
-        showNotification('寵物資料載入中，請稍後');
         return;
       }
       const pet = userPets.find(p => String(p.pet_id) === String(selectedPet));
       if (!pet) {
         console.error('找不到寵物 (更新):', selectedPet, 'userPets:', userPets.map(p => ({ pet_id: p.pet_id, name: p.pet_name, type: typeof p.pet_id })));
-        showNotification('找不到選擇的寵物，請重新選擇');
         return;
       }
       displayName = pet.pet_name;
@@ -310,7 +313,6 @@ const ImageEditor = ({ image, isOpen, onClose, onSave }) => {
     setSearchQuery('');
     setAnnotationType('user');
     setSelectedPet('');
-    showNotification('標註更新成功');
   };
 
   // 刪除標註
@@ -324,7 +326,6 @@ const ImageEditor = ({ image, isOpen, onClose, onSave }) => {
     
     setEditingAnnotation(null);
     setSearchQuery('');
-    showNotification('標註已刪除');
   };
 
   // 取消編輯
@@ -353,7 +354,12 @@ const ImageEditor = ({ image, isOpen, onClose, onSave }) => {
 
   // 處理保存並關閉
   const handleSaveAndClose = () => {
-    onSave && onSave(annotations);
+    // 傳回完整的圖片物件，包含更新後的 annotations
+    const updatedImage = {
+      ...image,
+      annotations: annotations
+    };
+    onSave && onSave(updatedImage);
     onClose();
   };
 
@@ -366,15 +372,16 @@ const ImageEditor = ({ image, isOpen, onClose, onSave }) => {
 
   if (!isOpen || !image) return null;
 
+  // Get the image source
+  const imageSrc = image.dataUrl || image.preview || image.url || image.firebase_url;
+  
+  if (!imageSrc) {
+    console.error('No valid image source found in ImageEditor');
+    return null;
+  }
+
   return (
     <div className={styles.modalOverlay}>
-      {notification && (
-        <Notification
-          message={notification}
-          onClose={hideNotification}
-        />
-      )}
-      
       <div ref={modalRef} className={styles.modalContainer}>
         <div className={styles.modalHeader}>
           <h2>編輯圖片</h2>
@@ -385,10 +392,21 @@ const ImageEditor = ({ image, isOpen, onClose, onSave }) => {
           <div className={styles.imageContainer}>
             <img
               ref={imageRef}
-              src={image.dataUrl || image.preview}
+              src={imageSrc}
               alt="編輯圖片"
               className={styles.editImage}
               onClick={handleImageClick}
+              onError={(e) => {
+                console.error('Failed to load image in ImageEditor:', {
+                  attemptedSrc: e.target.src,
+                  imageObject: image
+                });
+                // Set a fallback image
+                e.target.src = '/assets/icon/DefaultAvatar.jpg';
+              }}
+              onLoad={() => {
+                console.log('Image loaded successfully in ImageEditor with src:', imageSrc);
+              }}
             />
 
             {/* 標註圖示 - 左下角 */}
