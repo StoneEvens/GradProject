@@ -76,54 +76,23 @@ const LikedPostsListPage = () => {
     setNotification('');
   };
 
-  const handleLike = async (postId, newIsLiked) => {
-    // 按讚後更新本地狀態
-    setPosts(prevPosts => 
-      prevPosts.map(post => 
-        post.id === postId 
-          ? { 
-              ...post, 
-              user_interaction: { 
-                ...post.user_interaction, 
-                is_liked: newIsLiked 
-              },
-              interaction_stats: {
-                ...post.interaction_stats,
-                likes: newIsLiked 
-                  ? (post.interaction_stats?.likes || 0) + 1 
-                  : Math.max(0, (post.interaction_stats?.likes || 0) - 1)
-              }
-            }
-          : post
-      )
-    );
+  const handleLike = (postId, newIsLiked) => {
+    console.log('LikedPostsListPage 收到按讚通知:', { postId, newIsLiked });
+    // Post 組件已經處理了所有邏輯
+    // 如果用戶取消按讚，從按讚列表中移除這個貼文並通知用戶
+    if (!newIsLiked) {
+      setPosts(prevPosts => prevPosts.filter(post => post.id !== postId));
+      showNotification('已從按讚列表移除');
+    }
   };
 
   const handleComment = (postId) => {
     showNotification('評論功能開發中');
   };
 
-  const handleSave = async (postId, newIsSaved) => {
-    // 收藏後更新本地狀態
-    setPosts(prevPosts => 
-      prevPosts.map(post => 
-        post.id === postId 
-          ? { 
-              ...post, 
-              user_interaction: { 
-                ...post.user_interaction, 
-                is_saved: newIsSaved 
-              },
-              interaction_stats: {
-                ...post.interaction_stats,
-                saves: newIsSaved 
-                  ? (post.interaction_stats?.saves || 0) + 1 
-                  : Math.max(0, (post.interaction_stats?.saves || 0) - 1)
-              }
-            }
-          : post
-      )
-    );
+  const handleSave = (postId, newIsSaved) => {
+    console.log('LikedPostsListPage 收到收藏通知:', { postId, newIsSaved });
+    // Post 組件已經處理了所有邏輯，收藏操作不顯示通知
   };
 
   return (

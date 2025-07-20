@@ -84,6 +84,18 @@ const SocialPage = () => {
     }
   }, [showSearchResults]);
 
+  // 監聽貼文更新
+  useEffect(() => {
+    if (location.state?.postUpdated) {
+      console.log('檢測到貼文更新，重新載入貼文列表');
+      // 清除更新標記並重新載入
+      window.history.replaceState({}, document.title);
+      if (!showSearchResults) {
+        loadPosts(0, false);
+      }
+    }
+  }, [location.state, showSearchResults]);
+
   // 從URL參數和location state初始化搜尋狀態
   useEffect(() => {
     const queryFromUrl = searchParams.get('q') || searchParams.get('query') || '';
@@ -158,31 +170,11 @@ const SocialPage = () => {
     }
   };
 
-  // 處理按讚
-  const handleLike = async (postId, isLiked) => {
-    try {
-      console.log('按讚操作:', { postId, isLiked });
-      
-      // 更新本地狀態
-      setPosts(prevPosts => 
-        prevPosts.map(post => 
-          post.id === postId 
-            ? { 
-                ...post, 
-                is_liked: isLiked,
-                like_count: isLiked ? (post.like_count || 0) + 1 : Math.max(0, (post.like_count || 0) - 1)
-              }
-            : post
-        )
-      );
-
-      // TODO: 調用後端 API 進行按讚操作
-      // await socialService.likePost(postId, isLiked);
-      
-    } catch (error) {
-      console.error('按讚失敗:', error);
-      throw error; // 重新拋出錯誤讓 PostList 處理
-    }
+  // 處理按讚 - 可選的回調，用於統計或其他需求
+  const handleLike = (postId, isLiked) => {
+    console.log('SocialPage 收到按讚更新通知:', { postId, isLiked });
+    // Post 組件已經處理了所有邏輯，這裡只做記錄或其他非關鍵操作
+    // 不需要更新 posts 狀態，因為 Post 組件會自己管理狀態
   };
 
   // 處理留言
@@ -208,27 +200,11 @@ const SocialPage = () => {
     console.log('SocialPage handleHashtagClick - 更新URL參數完成');
   };
 
-  // 處理收藏
-  const handleSave = async (postId, isSaved) => {
-    try {
-      console.log('收藏操作:', { postId, isSaved });
-      
-      // 更新本地狀態
-      setPosts(prevPosts => 
-        prevPosts.map(post => 
-          post.id === postId 
-            ? { ...post, is_saved: isSaved }
-            : post
-        )
-      );
-
-      // TODO: 調用後端 API 進行收藏操作
-      // await socialService.savePost(postId, isSaved);
-      
-    } catch (error) {
-      console.error('收藏失敗:', error);
-      throw error; // 重新拋出錯誤讓 PostList 處理
-    }
+  // 處理收藏 - 可選的回調，用於統計或其他需求
+  const handleSave = (postId, isSaved) => {
+    console.log('SocialPage 收到收藏更新通知:', { postId, isSaved });
+    // Post 組件已經處理了所有邏輯，這裡只做記錄或其他非關鍵操作
+    // 不需要更新 posts 狀態，因為 Post 組件會自己管理狀態
   };
 
   // 處理貼文中的用戶點擊

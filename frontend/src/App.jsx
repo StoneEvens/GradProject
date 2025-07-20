@@ -17,6 +17,7 @@ import AddPetPage from './pages/AddPetPage';
 import EditPetPage from './pages/EditPetPage';
 import CreatePostPage from './pages/CreatePostPage';
 import PostPreviewPage from './pages/PostPreviewPage';
+import EditPostPage from './pages/EditPostPage';
 import SearchPostsPage from './pages/SearchPostsPage';
 import LikedPostsPage from './pages/LikedPostsPage';
 import LikedPostsListPage from './pages/LikedPostsListPage';
@@ -229,6 +230,11 @@ const App = () => {
         <Route 
           path="/create-post-preview" 
           element={isUserAuthenticated ? <PostPreviewPage /> : <Navigate to="/" />} 
+        />
+        {/* 編輯貼文頁面：未登入導向HomePage */}
+        <Route 
+          path="/post/:postId/edit" 
+          element={isUserAuthenticated ? <EditPostPage /> : <Navigate to="/" />} 
         />
         {/* 未定義路徑：根據登入狀態重定向 */}
         <Route 

@@ -142,30 +142,11 @@ const PostExample = () => {
     loadPosts();
   }, []);
 
-  // 處理按讚
-  const handleLike = async (postId, isLiked) => {
-    console.log('按讚操作:', { postId, isLiked });
-    
-    // 更新本地狀態
-    setPosts(prevPosts => 
-      prevPosts.map(post => 
-        post.id === postId 
-          ? { 
-              ...post, 
-              is_liked: isLiked,
-              like_count: isLiked ? post.like_count + 1 : post.like_count - 1
-            }
-          : post
-      )
-    );
-
-    // 這裡可以調用 API
-    // try {
-    //   await socialService.likePost(postId, isLiked);
-    // } catch (error) {
-    //   console.error('按讚失敗:', error);
-    //   throw error; // 重新拋出錯誤讓 PostList 處理
-    // }
+  // 處理按讚 - 範例頁面的通知回調
+  const handleLike = (postId, isLiked) => {
+    console.log('PostExample 收到按讚通知:', { postId, isLiked });
+    // Post 組件已經處理了所有邏輯
+    // 這裡只是示範如何接收通知
   };
 
   // 處理留言
@@ -175,26 +156,11 @@ const PostExample = () => {
     navigate(`/post/${postId}`);
   };
 
-  // 處理收藏
-  const handleSave = async (postId, isSaved) => {
-    console.log('收藏操作:', { postId, isSaved });
-    
-    // 更新本地狀態
-    setPosts(prevPosts => 
-      prevPosts.map(post => 
-        post.id === postId 
-          ? { ...post, is_saved: isSaved }
-          : post
-      )
-    );
-
-    // 這裡可以調用 API
-    // try {
-    //   await socialService.savePost(postId, isSaved);
-    // } catch (error) {
-    //   console.error('收藏失敗:', error);
-    //   throw error;
-    // }
+  // 處理收藏 - 範例頁面的通知回調
+  const handleSave = (postId, isSaved) => {
+    console.log('PostExample 收到收藏通知:', { postId, isSaved });
+    // Post 組件已經處理了所有邏輯
+    // 這裡只是示範如何接收通知
   };
 
   // 處理用戶點擊

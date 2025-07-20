@@ -278,7 +278,7 @@ class FirebaseStorageService:
             logger.error(f"上傳貼文圖片時發生錯誤: {str(e)}")
             return False, f"上傳貼文圖片失敗: {str(e)}", None, None
 
-    def upload_post_images_batch(self, user_id: int, post_id: int, image_files: list) -> Tuple[bool, str, list]:
+    def upload_post_images_batch(self, user_id: int, post_id: int, image_files: list, start_sort_order: int = 0) -> Tuple[bool, str, list]:
         """
         批量上傳貼文圖片
         
@@ -286,6 +286,7 @@ class FirebaseStorageService:
         - user_id: 用戶 ID
         - post_id: 貼文 ID
         - image_files: 圖片檔案列表
+        - start_sort_order: 起始排序順序
         
         Returns:
         - tuple: (是否全部成功, 訊息, 成功上傳的圖片資訊列表)
@@ -299,14 +300,14 @@ class FirebaseStorageService:
                     user_id=user_id,
                     post_id=post_id, 
                     image_file=image_file,
-                    sort_order=index
+                    sort_order=start_sort_order + index
                 )
                 
                 if success:
                     uploaded_images.append({
                         'firebase_url': firebase_url,
                         'firebase_path': firebase_path,
-                        'sort_order': index,
+                        'sort_order': start_sort_order + index,
                         'original_filename': getattr(image_file, 'name', f'image_{index}'),
                         'file_size': getattr(image_file, 'size', None),
                         'content_type': getattr(image_file, 'content_type', None)

@@ -86,54 +86,18 @@ const PetRelatedPostsListPage = () => {
     setNotification('');
   };
 
-  const handleLike = async (postId, newIsLiked) => {
-    // 按讚後更新本地狀態
-    setPosts(prevPosts => 
-      prevPosts.map(post => 
-        post.id === postId 
-          ? { 
-              ...post, 
-              user_interaction: { 
-                ...post.user_interaction, 
-                is_liked: newIsLiked 
-              },
-              interaction_stats: {
-                ...post.interaction_stats,
-                likes: newIsLiked 
-                  ? (post.interaction_stats?.likes || 0) + 1 
-                  : Math.max(0, (post.interaction_stats?.likes || 0) - 1)
-              }
-            }
-          : post
-      )
-    );
+  const handleLike = (postId, newIsLiked) => {
+    console.log('PetRelatedPostsListPage 收到按讚通知:', { postId, newIsLiked });
+    // Post 組件已經處理了所有邏輯，按讚操作不顯示通知
   };
 
   const handleComment = (postId) => {
     showNotification('評論功能開發中');
   };
 
-  const handleSave = async (postId, newIsSaved) => {
-    // 收藏後更新本地狀態
-    setPosts(prevPosts => 
-      prevPosts.map(post => 
-        post.id === postId 
-          ? { 
-              ...post, 
-              user_interaction: { 
-                ...post.user_interaction, 
-                is_saved: newIsSaved 
-              },
-              interaction_stats: {
-                ...post.interaction_stats,
-                saves: newIsSaved 
-                  ? (post.interaction_stats?.saves || 0) + 1 
-                  : Math.max(0, (post.interaction_stats?.saves || 0) - 1)
-              }
-            }
-          : post
-      )
-    );
+  const handleSave = (postId, newIsSaved) => {
+    console.log('PetRelatedPostsListPage 收到收藏通知:', { postId, newIsSaved });
+    // Post 組件已經處理了所有邏輯，收藏操作不顯示通知
   };
 
   return (

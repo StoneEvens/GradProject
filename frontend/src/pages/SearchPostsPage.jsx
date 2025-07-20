@@ -51,29 +51,11 @@ const SearchPostsPage = () => {
     setNotification('');
   };
 
-  // 處理按讚
-  const handleLike = async (postId, isLiked) => {
-    try {
-      // 更新本地狀態
-      setPosts(prevPosts => 
-        prevPosts.map(post => 
-          post.id === postId 
-            ? { 
-                ...post, 
-                is_liked: isLiked,
-                like_count: isLiked ? (post.like_count || 0) + 1 : Math.max(0, (post.like_count || 0) - 1)
-              }
-            : post
-        )
-      );
-
-      // TODO: 調用後端 API 進行按讚操作
-      // await socialService.likePost(postId, isLiked);
-      
-    } catch (error) {
-      console.error('按讚失敗:', error);
-      showNotification('按讚失敗，請稍後再試');
-    }
+  // 處理按讚 - 可選的通知回調
+  const handleLike = (postId, isLiked) => {
+    console.log('SearchPostsPage 收到按讚通知:', { postId, isLiked });
+    // Post 組件已經處理了所有邏輯，這裡可以做額外的處理
+    // 例如：顯示通知、統計等
   };
 
   // 處理留言
@@ -83,26 +65,10 @@ const SearchPostsPage = () => {
     // navigate(`/post/${postId}`);
   };
 
-  // 處理收藏
-  const handleSave = async (postId, isSaved) => {
-    try {
-      // 更新本地狀態
-      setPosts(prevPosts => 
-        prevPosts.map(post => 
-          post.id === postId 
-            ? { ...post, is_saved: isSaved }
-            : post
-        )
-      );
-
-      // TODO: 調用後端 API 進行收藏操作
-      // await socialService.savePost(postId, isSaved);
-      showNotification(isSaved ? '已收藏' : '已取消收藏');
-      
-    } catch (error) {
-      console.error('收藏失敗:', error);
-      showNotification('操作失敗，請稍後再試');
-    }
+  // 處理收藏 - 可選的通知回調
+  const handleSave = (postId, isSaved) => {
+    console.log('SearchPostsPage 收到收藏通知:', { postId, isSaved });
+    // Post 組件已經處理了所有邏輯，收藏操作不顯示通知
   };
 
   // 處理用戶點擊

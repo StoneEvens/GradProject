@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Annotation from './Annotation';
+import ConfirmNotification from './ConfirmNotification';
 import styles from '../styles/Post.module.css';
 import { togglePostLike, togglePostSave } from '../services/socialService';
+import { getUserProfile } from '../services/userService';
 
 const Post = ({ 
   postData,
@@ -22,6 +24,24 @@ const Post = ({
   const [isSaved, setIsSaved] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const [commentCount, setCommentCount] = useState(0);
+  const [showMoreMenu, setShowMoreMenu] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const moreMenuRef = useRef(null);
+
+  // 獲取當前用戶資訊
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      try {
+        const userProfile = await getUserProfile();
+        setCurrentUser(userProfile);
+      } catch (error) {
+        console.error('獲取用戶資料失敗:', error);
+      }
+    };
+    
+    fetchCurrentUser();
+  }, []);
 
   // 初始化互動狀態
   useEffect(() => {
@@ -30,10 +50,24 @@ const Post = ({
       const userInteraction = postData.user_interaction || {};
       const interactionStats = postData.interaction_stats || {};
       
-      setIsLiked(userInteraction.is_liked || postData.is_liked || false);
-      setIsSaved(userInteraction.is_saved || postData.is_saved || false);
-      setLikeCount(interactionStats.likes || postData.like_count || 0);
-      setCommentCount(postData.comment_count || 0);
+      // 優先使用 user_interaction 中的狀態，因為它更準確
+      const newIsLiked = userInteraction.is_liked ?? postData.is_liked ?? false;
+      const newIsSaved = userInteraction.is_saved ?? postData.is_saved ?? false;
+      const newLikeCount = interactionStats.likes ?? postData.like_count ?? 0;
+      const newCommentCount = postData.comment_count ?? 0;
+      
+      console.log('Post 初始化狀態:', {
+        postId: postData.id,
+        newIsLiked,
+        newIsSaved,
+        userInteraction,
+        postData_is_saved: postData.is_saved
+      });
+      
+      setIsLiked(newIsLiked);
+      setIsSaved(newIsSaved);
+      setLikeCount(newLikeCount);
+      setCommentCount(newCommentCount);
       setCurrentImageIndex(0);
       setShowAnnotationDots(false);
     }
@@ -56,6 +90,20 @@ const Post = ({
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [postData?.images]);
+
+  // 點擊外部關閉選單
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (moreMenuRef.current && !moreMenuRef.current.contains(event.target)) {
+        setShowMoreMenu(false);
+      }
+    };
+
+    if (showMoreMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [showMoreMenu]);
 
   // 處理圖片載入錯誤
   const handleImageError = (e) => {
@@ -129,26 +177,49 @@ const Post = ({
     }
   };
 
-  // 處理按讚
+  // 處理按讚 - Post 組件完全自主處理
   const handleLike = async () => {
     if (!isInteractive) return;
     
+    const originalIsLiked = isLiked;
+    const originalLikeCount = likeCount;
     const newIsLiked = !isLiked;
+    const newLikeCount = newIsLiked ? likeCount + 1 : Math.max(0, likeCount - 1);
+    
+    console.log('Post 按讚操作:', {
+      postId: postData.id,
+      從: originalIsLiked ? '已按讚' : '未按讚',
+      到: newIsLiked ? '已按讚' : '未按讚',
+      讚數變化: `${originalLikeCount} → ${newLikeCount}`
+    });
+    
+    // 樂觀更新 UI - 立即反映用戶操作
     setIsLiked(newIsLiked);
-    setLikeCount(prev => newIsLiked ? prev + 1 : prev - 1);
+    setLikeCount(newLikeCount);
     
-    // 調用 API
-    const result = await togglePostLike(postData.id, isLiked);
-    
-    if (!result.success) {
-      // 如果 API 失敗，還原狀態
-      setIsLiked(!newIsLiked);
-      setLikeCount(prev => newIsLiked ? prev - 1 : prev + 1);
-      console.error('按讚失敗:', result.error);
-    }
-    
-    if (onLike) {
-      onLike(postData.id, newIsLiked);
+    try {
+      // 調用 API 切換按讚狀態
+      const result = await togglePostLike(postData.id);
+      
+      if (!result.success) {
+        // API 失敗，還原 UI 狀態
+        setIsLiked(originalIsLiked);
+        setLikeCount(originalLikeCount);
+        console.error('按讚操作失敗:', result.error);
+        return;
+      }
+      
+      console.log('按讚操作成功:', result.message);
+      
+      // 可選：通知父組件（用於統計等目的）
+      if (onLike) {
+        onLike(postData.id, newIsLiked);
+      }
+    } catch (error) {
+      // 網路錯誤，還原 UI 狀態
+      console.error('按讚 API 調用異常:', error);
+      setIsLiked(originalIsLiked);
+      setLikeCount(originalLikeCount);
     }
   };
 
@@ -164,24 +235,45 @@ const Post = ({
     }
   };
 
-  // 處理收藏
+  // 處理收藏 - Post 組件完全自主處理
   const handleSave = async () => {
     if (!isInteractive) return;
     
+    const originalIsSaved = isSaved;
     const newIsSaved = !isSaved;
+    
+    console.log('Post 收藏操作:', {
+      postId: postData.id,
+      從: originalIsSaved ? '已收藏' : '未收藏',
+      到: newIsSaved ? '已收藏' : '未收藏'
+    });
+    
+    // 樂觀更新 UI - 立即反映用戶操作
     setIsSaved(newIsSaved);
     
-    // 呼叫 API
-    const result = await togglePostSave(postData.id, isSaved);
-    
-    if (!result.success) {
-      // 如果失敗，還原狀態
-      setIsSaved(!newIsSaved);
-      console.error('收藏操作失敗:', result.error);
-    }
-    
-    if (onSave) {
-      onSave(postData.id, newIsSaved);
+    try {
+      // 調用 API 切換收藏狀態
+      const result = await togglePostSave(postData.id);
+      
+      if (!result.success) {
+        // API 失敗，還原 UI 狀態
+        setIsSaved(originalIsSaved);
+        console.error('收藏操作失敗:', result.error);
+        // 可以在這裡顯示錯誤提示給用戶
+        return;
+      }
+      
+      console.log('收藏操作成功:', result.message);
+      
+      // 可選：通知父組件（用於統計等目的）
+      if (onSave) {
+        onSave(postData.id, newIsSaved);
+      }
+    } catch (error) {
+      // 網路錯誤，還原 UI 狀態
+      console.error('收藏 API 調用異常:', error);
+      setIsSaved(originalIsSaved);
+      // 可以在這裡顯示網路錯誤提示給用戶
     }
   };
 
@@ -207,6 +299,88 @@ const Post = ({
         navigate(`/social?q=${encodeURIComponent('#' + tagText)}`);
       }
     }
+  };
+
+  // 處理更多選項點擊
+  const handleMoreOptions = () => {
+    setShowMoreMenu(!showMoreMenu);
+  };
+
+  // 檢查是否為貼文作者
+  const isPostAuthor = () => {
+    if (!currentUser || !postData) return false;
+    const postUser = postData.user_info || postData.user || {};
+    
+    // 多種方式比較用戶身份
+    const isMatch = 
+      (currentUser.user_account && postUser.user_account && currentUser.user_account === postUser.user_account) ||
+      (currentUser.username && postUser.username && currentUser.username === postUser.username) ||
+      (currentUser.id && postUser.id && currentUser.id === postUser.id) ||
+      (currentUser.user_id && postUser.user_id && currentUser.user_id === postUser.user_id);
+    
+    // 調試資訊
+    console.log('檢查貼文作者:', {
+      currentUser,
+      postUser,
+      isMatch
+    });
+    
+    return isMatch;
+  };
+
+  // 處理編輯貼文
+  const handleEditPost = () => {
+    setShowMoreMenu(false);
+    // 導航到編輯頁面，傳遞貼文資料（包含標註）
+    navigate(`/post/${postData.id}/edit`, {
+      state: {
+        postData: {
+          id: postData.id,
+          images: postData.images || [],
+          description: postData.content?.content_text || postData.description || '',
+          hashtags: postData.hashtags || [],
+          location: postData.content?.location || postData.location || '',
+          annotations: postData.annotations || []
+        }
+      }
+    });
+  };
+
+  // 處理刪除貼文
+  const handleDeletePost = () => {
+    setShowMoreMenu(false);
+    setShowDeleteConfirm(true);
+  };
+
+  // 確認刪除貼文
+  const confirmDeletePost = () => {
+    setShowDeleteConfirm(false);
+    console.log('刪除貼文功能開發中');
+    // 未來可以調用刪除 API
+  };
+
+  // 取消刪除貼文
+  const cancelDeletePost = () => {
+    setShowDeleteConfirm(false);
+  };
+
+  // 處理複製連結
+  const handleCopyLink = () => {
+    setShowMoreMenu(false);
+    const postUrl = `${window.location.origin}/post/${postData.id}`;
+    navigator.clipboard.writeText(postUrl).then(() => {
+      console.log('貼文連結已複製到剪貼板');
+      // 可以顯示成功提示
+    }).catch(() => {
+      console.log('複製失敗');
+    });
+  };
+
+  // 處理檢舉貼文
+  const handleReportPost = () => {
+    setShowMoreMenu(false);
+    console.log('檢舉貼文功能開發中');
+    // 未來可以開啟檢舉表單
   };
 
   // 截取描述文字
@@ -268,6 +442,39 @@ const Post = ({
               {formatTimeDisplay(postData.created_at)}
             </span>
           </div>
+        </div>
+        <div className={styles.moreOptionsContainer} ref={moreMenuRef}>
+          <button className={styles.moreOptionsButton} onClick={handleMoreOptions}>
+            <img 
+              src="/assets/icon/PostMoreInfo.png" 
+              alt="更多選項" 
+              className={styles.moreOptionsIcon}
+            />
+          </button>
+          
+          {showMoreMenu && (
+            <div className={styles.moreOptionsMenu}>
+              {isPostAuthor() ? (
+                <>
+                  <button className={styles.menuItem} onClick={handleEditPost}>
+                    編輯貼文
+                  </button>
+                  <button className={styles.menuItem} onClick={handleDeletePost}>
+                    刪除貼文
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button className={styles.menuItem} onClick={handleCopyLink}>
+                    複製連結
+                  </button>
+                  <button className={styles.menuItem} onClick={handleReportPost}>
+                    檢舉貼文
+                  </button>
+                </>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
@@ -401,6 +608,15 @@ const Post = ({
             </span>
           ))}
         </div>
+      )}
+
+      {/* 刪除確認對話框 */}
+      {showDeleteConfirm && (
+        <ConfirmNotification
+          message="確定要刪除這篇貼文嗎？"
+          onConfirm={confirmDeletePost}
+          onCancel={cancelDeletePost}
+        />
       )}
     </div>
   );

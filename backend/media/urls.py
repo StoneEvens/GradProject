@@ -4,7 +4,9 @@ from .views import (
     ImageUploadAPIView,
     UserAvatarUploadAPIView,
     PetPhotoUploadAPIView,
-    ImageDeleteAPIView
+    ImageDeleteAPIView,
+    PostImageDeleteAPIView,
+    PostImageReorderAPIView
 )
 
 # 媒體 API 路由 - Firebase Storage 版本
@@ -12,6 +14,10 @@ urlpatterns = [
     # 圖片列表和管理
     path('images/', ImageListAPIView.as_view(), name='image-list'),
     path('images/<int:image_id>/', ImageDeleteAPIView.as_view(), name='image-delete'),
+    
+    # 貼文圖片操作
+    path('posts/<int:post_id>/images/<int:image_id>/', PostImageDeleteAPIView.as_view(), name='post-image-delete'),
+    path('posts/<int:post_id>/images/reorder/', PostImageReorderAPIView.as_view(), name='post-image-reorder'),
     
     # 通用圖片上傳
     path('upload/', ImageUploadAPIView.as_view(), name='image-upload'),

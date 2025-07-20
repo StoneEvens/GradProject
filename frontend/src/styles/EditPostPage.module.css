@@ -1,0 +1,943 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #FFF2D9;
+}
+
+.content {
+  flex: 1;
+  padding: 30px;
+  padding-top: 80px;
+  padding-bottom: 90px;
+  max-width: 430px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50vh;
+  font-size: 18px;
+  color: #89350c;
+}
+
+.title {
+  font-size: 24px;
+  color: #89350c;
+  text-align: left;
+  margin-top: 30px;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+.divider {
+  width: 100%;
+  height: 1.5px;
+  background: #FFB370;
+  margin: 10px 0 25px 0;
+}
+
+/* 貼文卡片 */
+.postCard {
+  background-color: #FFF6ea;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 30px;
+  border: 2px solid #FFB370;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 用戶資訊區域 */
+.userInfo {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.userAvatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #FFB370;
+  margin-right: 12px;
+}
+
+.userDetails {
+  flex: 1;
+}
+
+.userName {
+  font-size: 16px;
+  font-weight: bold;
+  color: #89350c;
+  margin: 0 0 5px 0;
+}
+
+.locationButton {
+  background-color: transparent;
+  border: none;
+  color: #666;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
+
+.locationButton:hover {
+  color: #89350c;
+}
+
+/* 圖片區域 */
+.imageSection {
+  width: 100%;
+  margin-bottom: 15px;
+}
+
+/* 圖片預覽容器 */
+.imagePreviewContainer {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  margin-top: 12px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 5px 4px 5px 12px;
+}
+
+.imagePreviewContainer::-webkit-scrollbar {
+  display: none;
+}
+
+/* 圖片預覽項目 */
+.imagePreview {
+  position: relative;
+  min-width: 60px;
+  width: 60px;
+  height: 60px;
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+  cursor: pointer;
+  background: #fff6ea;
+  box-shadow: 0 4px 12px rgba(255, 140, 26, 0.15);
+  border: 2px solid rgba(255, 179, 112, 0.2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.imagePreview::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 100%);
+  border-radius: 6px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 1;
+}
+
+.imagePreview:hover {
+  background: #f5eed8;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(255, 140, 26, 0.25), 
+              0 4px 8px rgba(255, 140, 26, 0.15);
+  border-color: #FFB370;
+}
+
+.imagePreview:hover::before {
+  opacity: 1;
+}
+
+.imagePreview:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(255, 140, 26, 0.2);
+}
+
+/* 拖動時的樣式 */
+.imagePreview.dragOver {
+  border: 2px solid #F08651;
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(240, 134, 81, 0.3);
+}
+
+/* 圖片刪除按鈕 */
+.removeImageBtn {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background-color: #F08651;
+  color: white;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  font-weight: bold;
+  border: 0px;
+  z-index: 3;
+  transition: all 0.2s ease;
+}
+
+.removeImageBtn:hover {
+  background-color: #E07641;
+  transform: scale(1.1);
+}
+
+/* 新增圖片按鈕 */
+.addImageButton {
+  position: relative;
+  min-width: 60px;
+  width: 60px;
+  height: 60px;
+  background: #fff6ea;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(255, 140, 26, 0.15), 
+              0 2px 4px rgba(255, 140, 26, 0.1);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 8px;
+  border: 2px solid rgba(255, 179, 112, 0.2);
+  flex-shrink: 0;
+}
+
+.addImageButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 100%);
+  border-radius: 6px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.addImageButton:hover {
+  background: #f5eed8;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(255, 140, 26, 0.25), 
+              0 4px 8px rgba(255, 140, 26, 0.15);
+  border-color: #FFB370;
+}
+
+.addImageButton:hover::before {
+  opacity: 1;
+}
+
+.addImageButton:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(255, 140, 26, 0.2);
+}
+
+.addImageIcon {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  margin-bottom: 2px;
+  transition: transform 0.3s ease;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+}
+
+.addImageButton:hover .addImageIcon {
+  transform: scale(1.1);
+}
+
+.addImageLabel {
+  font-size: 0.55rem;
+  font-weight: 700;
+  color: #8B4513;
+  text-align: center;
+  line-height: 1.2;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+  transition: color 0.3s ease;
+}
+
+.addImageButton:hover .addImageLabel {
+  color: #6B3410;
+}
+
+.previewImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: relative;
+  z-index: 2;
+}
+
+/* 標註指示器（用於縮圖預覽） */
+.annotationIndicator {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  background-color: #F08651;
+  color: white;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: bold;
+  border: 1px solid white;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+}
+
+.imageCarousel {
+  width: 100%;
+  cursor: pointer;
+  user-select: none;
+}
+
+.mainImageContainer {
+  position: relative;
+  width: 100%;
+  height: 280px;
+  border-radius: 12px;
+  overflow: hidden;
+  background-color: #f5f5f5;
+  cursor: pointer;
+}
+
+.postImage {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background-color: #f5f5f5;
+}
+
+.editHint {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+.mainImageContainer:hover .editHint {
+  opacity: 1;
+}
+
+/* 標註圖示 */
+.annotationIcon {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  z-index: 4;
+  cursor: pointer;
+  width: 28px;
+  height: 28px;
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s;
+}
+
+.annotationIcon:hover {
+  transform: scale(1.1);
+}
+
+.annotationIconImage {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
+
+/* 圖片指示器 */
+.imageIndicator {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: rgba(0, 0, 0, 0.6);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: bold;
+  z-index: 2;
+}
+
+/* 描述文字編輯區 */
+.descriptionSection {
+  margin-top: 30px;
+  margin-bottom: 30px;
+  position: relative;
+}
+
+.descriptionInput {
+  width: 100%;
+  min-height: 100px;
+  padding: 12px;
+  border: 2px solid #FFB370;
+  border-radius: 12px;
+  font-size: 15px;
+  line-height: 1.4;
+  resize: vertical;
+  font-family: inherit;
+  transition: border-color 0.2s;
+  background-color: #FFF6ea;
+  color: #333;
+}
+
+.descriptionInput:focus {
+  outline: none;
+  border-color: #F08651;
+  background-color: white;
+}
+
+.charCount {
+  position: absolute;
+  bottom: -22px;
+  right: 0;
+  font-size: 12px;
+  color: #89350c;
+  opacity: 0.7;
+}
+
+/* Hashtag 區域 */
+.hashtagSection {
+  background-color: #ffeed6;
+  border-radius: 16px;
+  padding: 15px 20px;
+  margin-bottom: 30px;
+  border: 2px solid #FFB370;
+}
+
+.hashtagPreviewContainer {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  margin-bottom: 15px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 5px 0;
+}
+
+.hashtagPreviewContainer::-webkit-scrollbar {
+  display: none;
+}
+
+.hashtagPreview {
+  position: relative;
+  background-color: #FFb370;
+  color: #fff;
+  border-radius: 8px;
+  padding: 8px 28px 8px 12px;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  max-width: 150px;
+}
+
+.hashtagText {
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.removeHashtagBtn {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: #F08651;
+  color: white;
+  font-size: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  font-weight: bold;
+  border: 0px;
+  z-index: 1;
+}
+
+.removeHashtagBtn:hover {
+  background-color: #E07641;
+}
+
+.hashtagInputSection {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.hashtagInputContainer {
+  display: flex;
+  align-items: center;
+  background-color: white;
+  border: 2px solid #FFB370;
+  border-radius: 8px;
+  padding: 0 12px;
+  flex: 1;
+  height: 40px;
+}
+
+.hashtagInputContainer:focus-within {
+  border-color: #F08651;
+}
+
+.hashSymbol {
+  color: #F08651;
+  font-size: 16px;
+  font-weight: bold;
+  margin-right: 5px;
+}
+
+.hashtagInput {
+  border: none;
+  outline: none;
+  font-size: 16px;
+  font-family: inherit;
+  background-color: transparent;
+  color: #333;
+  flex: 1;
+  padding: 0;
+}
+
+.hashtagInput::placeholder {
+  color: #999;
+  font-size: 16px;
+}
+
+.addHashtagBtn {
+  background-color: #FFB370;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  height: 40px;
+  flex-shrink: 0;
+}
+
+.addHashtagBtn:hover {
+  background-color: #F08651;
+}
+
+.hashtagCounter {
+  color: #89350c;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+
+/* 操作按鈕 */
+.actionButtons {
+  display: flex;
+  gap: 15px;
+  justify-content: space-between;
+}
+
+.cancelButton {
+  background-color: #ffce99;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 14px 28px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  flex: 1;
+  max-width: 150px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+}
+
+.cancelButton:hover {
+  background-color: #FFB370;
+}
+
+
+.updateButton {
+  background-color: #F08651;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 14px 28px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  flex: 1;
+  max-width: 150px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+}
+
+.updateButton:hover {
+  background-color: #E07641;
+}
+
+.updateButton:disabled,
+.updateButton.updating {
+  background-color: #ccc;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* 位置選擇 Modal */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.locationModal {
+  background-color: white;
+  border-radius: 16px;
+  padding: 20px;
+  max-width: 320px;
+  width: 90%;
+  max-height: 60vh;
+  overflow-y: auto;
+  margin: 20px;
+}
+
+.modalTitle {
+  font-size: 18px;
+  font-weight: bold;
+  color: #89350c;
+  margin: 0 0 15px 0;
+  text-align: center;
+}
+
+.locationList {
+  max-height: 300px;
+  overflow-y: auto;
+  margin-bottom: 15px;
+}
+
+.locationOption {
+  width: 100%;
+  padding: 12px 15px;
+  background-color: transparent;
+  border: none;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 16px;
+  color: #333;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 0.2s ease;
+}
+
+.locationOption:hover {
+  background-color: #FFF2D9;
+}
+
+.locationOption:last-child {
+  border-bottom: none;
+}
+
+.locationOption.selected {
+  background-color: #FFE8D3;
+  color: #89350c;
+  font-weight: bold;
+}
+
+.modalCloseButton {
+  width: 100%;
+  background-color: #ffce99;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.modalCloseButton:hover {
+  background-color: #FFB370;
+}
+
+/* 響應式設計 */
+@media (max-width: 480px) {
+  .content {
+    padding: 15px;
+    padding-top: 75px;
+    padding-bottom: 85px;
+  }
+
+  .title {
+    font-size: 20px;
+    margin-bottom: 25px;
+  }
+
+  .postCard {
+    padding: 15px;
+    margin-bottom: 20px;
+  }
+
+  .userAvatar {
+    width: 45px;
+    height: 45px;
+  }
+
+  .userName {
+    font-size: 15px;
+  }
+
+  .mainImageContainer {
+    height: 240px;
+  }
+
+  .descriptionInput {
+    font-size: 14px;
+  }
+
+  .actionButtons {
+    gap: 12px;
+  }
+
+  .cancelButton,
+  .updateButton {
+    padding: 12px 20px;
+    font-size: 15px;
+    height: 45px;
+  }
+
+  .locationModal {
+    max-width: 280px;
+    padding: 15px;
+  }
+
+  .modalTitle {
+    font-size: 16px;
+  }
+
+  .locationOption {
+    padding: 10px 12px;
+    font-size: 15px;
+  }
+  
+  .hashtagSection {
+    padding: 15px;
+    margin-bottom: 20px;
+  }
+
+  .hashtagPreviewContainer {
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+
+  .hashtagPreview {
+    padding: 6px 24px 6px 10px;
+    max-width: 120px;
+  }
+
+  .hashtagText {
+    font-size: 13px;
+  }
+
+  .removeHashtagBtn {
+    width: 18px;
+    height: 18px;
+    font-size: 11px;
+  }
+
+  .hashtagInputContainer {
+    height: 36px;
+    padding: 0 10px;
+  }
+
+  .hashtagInput {
+    font-size: 15px;
+  }
+
+  .addHashtagBtn {
+    padding: 8px 14px;
+    font-size: 13px;
+    height: 36px;
+  }
+
+  .hashtagCounter {
+    font-size: 13px;
+  }
+  
+  .imagePreviewContainer {
+    gap: 6px;
+    margin-top: 10px;
+  }
+
+  .imagePreview {
+    min-width: 50px;
+    width: 50px;
+    height: 50px;
+  }
+
+  .addImageButton {
+    min-width: 50px;
+    width: 50px;
+    height: 50px;
+    padding: 6px;
+  }
+
+  .addImageIcon {
+    width: 16px;
+    height: 16px;
+    margin-bottom: 1px;
+  }
+
+  .addImageLabel {
+    font-size: 0.55rem;
+  }
+
+  .removeImageBtn {
+    width: 14px;
+    height: 14px;
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 360px) {
+  .content {
+    padding: 12px;
+    padding-top: 70px;
+    padding-bottom: 80px;
+  }
+
+  .postCard {
+    padding: 12px;
+  }
+
+  .userAvatar {
+    width: 40px;
+    height: 40px;
+  }
+
+  .mainImageContainer {
+    height: 200px;
+  }
+
+  .descriptionInput {
+    font-size: 13px;
+  }
+  
+  .hashtagSection {
+    padding: 12px;
+  }
+
+  .hashtagPreviewContainer {
+    gap: 5px;
+  }
+
+  .hashtagPreview {
+    padding: 5px 22px 5px 8px;
+    max-width: 100px;
+  }
+
+  .hashtagText {
+    font-size: 12px;
+  }
+
+  .removeHashtagBtn {
+    width: 16px;
+    height: 16px;
+    font-size: 10px;
+  }
+
+  .hashtagInputContainer {
+    height: 34px;
+    padding: 0 8px;
+  }
+
+  .hashtagInput {
+    font-size: 14px;
+  }
+
+  .addHashtagBtn {
+    padding: 6px 12px;
+    font-size: 12px;
+    height: 34px;
+  }
+  
+  .imagePreviewContainer {
+    gap: 4px;
+    margin-top: 8px;
+  }
+
+  .imagePreview {
+    min-width: 45px;
+    width: 45px;
+    height: 45px;
+  }
+
+  .addImageButton {
+    min-width: 45px;
+    width: 45px;
+    height: 45px;
+    padding: 4px;
+  }
+
+  .addImageIcon {
+    width: 14px;
+    height: 14px;
+    margin-bottom: 1px;
+  }
+
+  .addImageLabel {
+    font-size: 0.5rem;
+  }
+
+  .removeImageBtn {
+    width: 12px;
+    height: 12px;
+    font-size: 9px;
+  }
+
+}

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import Post from './Post';
 import Notification from './Notification';
 import { getUserPosts } from '../services/socialService';
@@ -25,6 +26,7 @@ const PostList = ({
   fetchUserPosts = false,
   ...props
 }) => {
+  const location = useLocation();
   const [notification, setNotification] = useState('');
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   
@@ -129,6 +131,15 @@ const PostList = ({
     }
   }, [fetchUserPosts, userId, loadUserPosts]);
 
+  // 監聽貼文更新
+  useEffect(() => {
+    if (location.state?.postUpdated && fetchUserPosts && userId) {
+      console.log('PostList 檢測到貼文更新，重新載入用戶貼文');
+      // 重新載入用戶貼文
+      loadUserPosts(0, false);
+    }
+  }, [location.state, fetchUserPosts, userId, loadUserPosts]);
+
   // 滾動到指定貼文
   useEffect(() => {
     const currentPosts = fetchUserPosts ? userPosts : posts;
@@ -218,29 +229,12 @@ const PostList = ({
     }
   }, [handleScroll, fetchUserPosts, userHasMore, hasMore, onLoadMore]);
 
-  // 處理按讚
-  const handleLike = async (postId, isLiked) => {
-    try {
-      if (onLike) {
-        await onLike(postId, isLiked);
-      } else if (fetchUserPosts) {
-        // 更新用戶貼文的本地狀態
-        setUserPosts(prevPosts => 
-          prevPosts.map(post => 
-            post.id === postId 
-              ? { 
-                  ...post, 
-                  is_liked: isLiked,
-                  like_count: isLiked ? (post.like_count || 0) + 1 : Math.max(0, (post.like_count || 0) - 1)
-                }
-              : post
-          )
-        );
-      }
-      // 可以在這裡添加成功的回饋
-    } catch (error) {
-      console.error('按讚失敗:', error);
-      showNotification('按讚失敗，請稍後再試');
+  // 處理按讚 - 可選的通知回調
+  const handleLike = (postId, isLiked) => {
+    console.log('PostList 收到按讚通知:', { postId, isLiked });
+    // Post 組件已經處理了所有邏輯，這裡只做可選的處理
+    if (onLike) {
+      onLike(postId, isLiked);
     }
   };
 
@@ -251,25 +245,12 @@ const PostList = ({
     }
   };
 
-  // 處理收藏
-  const handleSave = async (postId, isSaved) => {
-    try {
-      if (onSave) {
-        await onSave(postId, isSaved);
-      } else if (fetchUserPosts) {
-        // 更新用戶貼文的本地狀態
-        setUserPosts(prevPosts => 
-          prevPosts.map(post => 
-            post.id === postId 
-              ? { ...post, is_saved: isSaved }
-              : post
-          )
-        );
-      }
-      // 收藏操作不顯示通知
-    } catch (error) {
-      console.error('收藏操作失敗:', error);
-      showNotification('操作失敗，請稍後再試');
+  // 處理收藏 - 可選的通知回調
+  const handleSave = (postId, isSaved) => {
+    console.log('PostList 收到收藏通知:', { postId, isSaved });
+    // Post 組件已經處理了所有邏輯，這裡只做可選的處理
+    if (onSave) {
+      onSave(postId, isSaved);
     }
   };
 

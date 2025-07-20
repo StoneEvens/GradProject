@@ -9,12 +9,13 @@ from django.contrib.contenttypes.models import ContentType
 from media.models import Image, PetHeadshot
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from django.db.models import Q, QuerySet
+from django.db.models import Q, QuerySet, Max
 from django.contrib.auth import get_user_model
 from pets.models import Pet
 from accounts.models import CustomUser
 from django.db import transaction
 from django.utils.text import slugify
+from django.utils import timezone
 import json
 import re
 import logging
@@ -1009,4 +1010,138 @@ class PetRelatedPostsAPIView(APIView):
             return APIResponse(
                 message=f"獲取寵物相關貼文失敗: {str(e)}",
                 status=drf_status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+#----------更新貼文 API----------
+class UpdatePostAPIView(APIView):
+    """更新現有貼文"""
+    permission_classes = [IsAuthenticated]
+    
+    @transaction.atomic
+    def put(self, request, pk):
+        try:
+            # 獲取貼文
+            try:
+                postFrame = PostFrame.objects.get(id=pk)
+            except PostFrame.DoesNotExist:
+                return APIResponse(
+                    status=drf_status.HTTP_404_NOT_FOUND,
+                    message="找不到指定的貼文"
+                )
+            
+            # 檢查權限：只有作者可以編輯
+            if postFrame.user != request.user:
+                return APIResponse(
+                    status=drf_status.HTTP_403_FORBIDDEN,
+                    message="您沒有權限編輯此貼文"
+                )
+            
+            user = request.user
+            content = request.data.get('content', '').strip()
+            location = request.data.get('location', '').strip() or None
+            hashtag_data = request.data.get('hashtags', '')
+            
+            # 處理新增圖片
+            uploaded_image_files = request.FILES.getlist('images')
+            
+            # 驗證必填欄位
+            if not content:
+                return APIResponse(
+                    message="貼文內容不能為空",
+                    status=drf_status.HTTP_400_BAD_REQUEST,
+                )
+            
+            # 更新 SoLContent
+            try:
+                solContent = SoLContent.objects.get(postFrame=postFrame)
+                solContent.content_text = content
+                solContent.location = location
+                solContent.save()
+            except SoLContent.DoesNotExist:
+                # 如果沒有內容，創建新的
+                solContent = SoLContent.objects.create(
+                    postFrame=postFrame,
+                    content_text=content,
+                    location=location
+                )
+            
+            # 處理標籤更新
+            hashtags = DataHandler.parse_hashtags(content, hashtag_data)
+            
+            # 刪除舊標籤
+            PostHashtag.objects.filter(postFrame=postFrame).delete()
+            
+            # 創建新標籤
+            logger.info(f"準備更新標籤，解析得到的標籤: {hashtags}")
+            for tag in hashtags:
+                if tag:  # 確保標籤不為空
+                    created_hashtag = PostHashtag.objects.create(
+                        postFrame=postFrame,
+                        tag=tag.strip()
+                    )
+                    logger.info(f"成功更新標籤: '{tag}' -> 資料庫中的值: '{created_hashtag.tag}'")
+            
+            # 驗證標籤是否正確存儲
+            saved_hashtags = PostHashtag.objects.filter(postFrame=postFrame)
+            logger.info(f"資料庫中實際存儲的標籤: {[h.tag for h in saved_hashtags]}")
+            
+            # 處理新增圖片上傳
+            if uploaded_image_files:
+                from utils.firebase_service import firebase_storage_service
+                from utils.image_service import ImageService
+                
+                logger.info(f"開始上傳 {len(uploaded_image_files)} 張圖片到貼文 {postFrame.id}")
+                
+                # 獲取當前圖片的最大排序值
+                from media.models import Image
+                current_max_sort_order = Image.objects.filter(
+                    postFrame=postFrame
+                ).aggregate(Max('sort_order'))['sort_order__max'] or -1
+                
+                # 批量上傳圖片到 Firebase
+                success, message, uploaded_images = firebase_storage_service.upload_post_images_batch(
+                    user_id=user.id,
+                    post_id=postFrame.id,
+                    image_files=uploaded_image_files,
+                    start_sort_order=current_max_sort_order + 1
+                )
+                
+                if success:
+                    # 將圖片資訊保存到資料庫
+                    for image_data in uploaded_images:
+                        try:
+                            ImageService.save_post_image(
+                                image_data=image_data,
+                                post_frame_id=postFrame.id,
+                                user_id=user.id
+                            )
+                            logger.info(f"成功保存圖片到資料庫: {image_data.get('firebase_url', 'Unknown')}")
+                        except Exception as img_save_error:
+                            logger.error(f"保存圖片到資料庫失敗: {str(img_save_error)}")
+                    
+                    # 清除圖片快取
+                    ImageService.invalidate_post_image_cache(postFrame.id)
+                    logger.info(f"成功上傳並保存 {len(uploaded_images)} 張圖片")
+                else:
+                    logger.error(f"圖片上傳失敗: {message}")
+                    raise Exception(f"圖片上傳失敗: {message}")
+            
+            # 更新 PostFrame 的 updated_at 時間
+            postFrame.updated_at = timezone.now()
+            postFrame.save(update_fields=['updated_at'])
+            
+            # 返回更新後的貼文
+            serializer = PostFrameSerializer(postFrame, context={'request': request})
+            
+            return APIResponse(
+                data=serializer.data,
+                message="貼文更新成功",
+                status=drf_status.HTTP_200_OK,
+            )
+            
+        except Exception as e:
+            logger.error(f"更新貼文時出錯: {str(e)}", exc_info=True)
+            return APIResponse(
+                message=f"更新貼文失敗: {str(e)}",
+                status=drf_status.HTTP_400_BAD_REQUEST,
             )
