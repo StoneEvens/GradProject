@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import TopNavbar from '../components/TopNavbar';
 import BottomNavbar from '../components/BottomNavigationbar';
@@ -125,18 +125,16 @@ const EditPostPage = () => {
   useEffect(() => {
     const handleBeforeUnload = (e) => {
       if (hasUnsavedChanges()) {
-        // 正確的方式：只設置 returnValue，不調用 preventDefault
-        const confirmationMessage = '確定要離開編輯頁面嗎？未保存的修改將會遺失。';
-        e.returnValue = confirmationMessage;
-        return confirmationMessage;
+        e.preventDefault();
+        e.returnValue = '';
       }
     };
 
-    // 添加事件監聽器時指定 passive: false
-    window.addEventListener('beforeunload', handleBeforeUnload, { passive: false });
+    // 監聽瀏覽器的 beforeunload 事件
+    window.addEventListener('beforeunload', handleBeforeUnload);
 
     return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload, { passive: false });
+      window.removeEventListener('beforeunload', handleBeforeUnload);
     };
   }, [pendingChanges, postData, originalPostData, selectedLocation, hashtags]);
 
@@ -249,13 +247,29 @@ const EditPostPage = () => {
       return [];
     }
     
-    const currentImageUrl = postData.images?.[imageIndex]?.firebase_url;
+    const currentImage = postData.images?.[imageIndex];
+    const currentImageUrl = currentImage?.firebase_url;
+    const currentImageId = currentImage?.id;
     
-    // 過濾出屬於當前圖片的標註（使用與 Post 組件相同的雙重匹配邏輯）
-    const filtered = postData.annotations.filter(annotation => 
-      annotation.image_index === imageIndex || 
-      annotation.firebase_url === currentImageUrl
-    );
+    // 過濾出屬於當前圖片的標註（支持新增圖片和原始圖片）
+    const filtered = postData.annotations.filter(annotation => {
+      // 匹配 image_index
+      if (annotation.image_index === imageIndex) {
+        return true;
+      }
+      
+      // 匹配 firebase_url（原始圖片）
+      if (currentImageUrl && annotation.firebase_url === currentImageUrl) {
+        return true;
+      }
+      
+      // 匹配 temp_image_id（新增圖片）
+      if (currentImage?.isNew && annotation.temp_image_id === currentImageId) {
+        return true;
+      }
+      
+      return false;
+    });
     
     return filtered;
   };
@@ -451,37 +465,55 @@ const EditPostPage = () => {
       setPostData(prevData => {
         const updatedAnnotations = [...(prevData.annotations || [])];
         
-        // 移除該圖片的舊標註
-        const filteredAnnotations = updatedAnnotations.filter(
-          annotation => annotation.firebase_url !== currentImage.firebase_url
-        );
-        
-        // 添加新標註
-        const imageAnnotations = newAnnotations.map(annotation => ({
-          ...annotation,
-          firebase_url: currentImage.firebase_url,
-          image_index: editingImageIndex
-        }));
-        
-        return {
-          ...prevData,
-          annotations: [...filteredAnnotations, ...imageAnnotations]
-        };
+        if (currentImage.isNew) {
+          // 對於新增的圖片，移除該圖片的舊標註（使用臨時 ID）
+          const filteredAnnotations = updatedAnnotations.filter(
+            annotation => annotation.temp_image_id !== currentImage.id
+          );
+          
+          // 添加新標註（使用臨時標識）
+          const imageAnnotations = newAnnotations.map(annotation => ({
+            ...annotation,
+            temp_image_id: currentImage.id, // 使用臨時圖片 ID
+            image_index: editingImageIndex
+          }));
+          
+          return {
+            ...prevData,
+            annotations: [...filteredAnnotations, ...imageAnnotations]
+          };
+        } else {
+          // 對於原始圖片，使用 firebase_url
+          const filteredAnnotations = updatedAnnotations.filter(
+            annotation => annotation.firebase_url !== currentImage.firebase_url
+          );
+          
+          // 添加新標註
+          const imageAnnotations = newAnnotations.map(annotation => ({
+            ...annotation,
+            firebase_url: currentImage.firebase_url,
+            image_index: editingImageIndex
+          }));
+          
+          return {
+            ...prevData,
+            annotations: [...filteredAnnotations, ...imageAnnotations]
+          };
+        }
       });
       
       // 檢查是否有新增或修改標註（不包括純刪除）
-      const hasAddedOrModifiedAnnotations = newAnnotations.some(annotation => 
-        !annotation.id || // 新增的標註
-        originalPostData.annotations?.some(orig => 
-          orig.firebase_url === currentImage.firebase_url && 
-          orig.id === annotation.id && 
-          (orig.x_position !== annotation.x_position || orig.y_position !== annotation.y_position)
-        ) // 修改的標註
-      );
-      
-      if (hasAddedOrModifiedAnnotations) {
-        showNotification('標註變更將在更新貼文時保存');
-      }
+      const hasAddedOrModifiedAnnotations = newAnnotations.some(annotation => {
+        if (currentImage.isNew) {
+          return true; // 新圖片上的所有標註都是新增的
+        }
+        return !annotation.id || // 新增的標註
+          originalPostData.annotations?.some(orig => 
+            orig.firebase_url === currentImage.firebase_url && 
+            orig.id === annotation.id && 
+            (orig.x_position !== annotation.x_position || orig.y_position !== annotation.y_position)
+          ); // 修改的標註
+      });
     }
     setShowImageEditor(false);
     setEditingImageIndex(null);
@@ -525,17 +557,58 @@ const EditPostPage = () => {
       return;
     }
 
-    const updatedImages = [...postData.images];
-    const draggedImage = updatedImages[draggedIndex];
+    const oldImages = [...postData.images];
+    const draggedImage = oldImages[draggedIndex];
     
     // 移除拖動的圖片
+    const updatedImages = [...oldImages];
     updatedImages.splice(draggedIndex, 1);
     
     // 在新位置插入圖片
     updatedImages.splice(dropIndex, 0, draggedImage);
     
     // 更新前端狀態
-    setPostData(prev => ({ ...prev, images: updatedImages }));
+    setPostData(prev => {
+      // 同時更新標註的 image_index
+      const updatedAnnotations = prev.annotations ? prev.annotations.map(annotation => {
+        // 找到標註原本屬於的圖片
+        const originalImageIndex = oldImages.findIndex(img => {
+          // 檢查各種匹配條件
+          if (annotation.image_index !== undefined && annotation.image_index < oldImages.length) {
+            return oldImages[annotation.image_index].id === img.id;
+          }
+          if (annotation.firebase_url && img.firebase_url) {
+            return annotation.firebase_url === img.firebase_url;
+          }
+          if (annotation.temp_image_id && img.isNew && img.id) {
+            return annotation.temp_image_id === img.id;
+          }
+          return false;
+        });
+        
+        if (originalImageIndex !== -1) {
+          // 找到這張圖片在新順序中的位置
+          const originalImage = oldImages[originalImageIndex];
+          const newImageIndex = updatedImages.findIndex(img => img.id === originalImage.id);
+          
+          if (newImageIndex !== -1) {
+            // 更新標註的 image_index
+            return {
+              ...annotation,
+              image_index: newImageIndex
+            };
+          }
+        }
+        
+        return annotation;
+      }) : [];
+      
+      return {
+        ...prev,
+        images: updatedImages,
+        annotations: updatedAnnotations
+      };
+    });
     
     // 記錄圖片順序變更
     const imageOrders = updatedImages.map((image, index) => ({
@@ -543,10 +616,27 @@ const EditPostPage = () => {
       sort_order: index
     }));
     
-    setPendingChanges(prev => ({
-      ...prev,
-      imageOrderChanges: imageOrders
-    }));
+    // 更新標註關聯：由於圖片順序改變，需要重新映射標註
+    setPendingChanges(prev => {
+      const newAnnotationChanges = { ...prev.annotationChanges };
+      
+      // 創建新的標註映射
+      updatedImages.forEach((image, newIndex) => {
+        const oldIndex = oldImages.findIndex(oldImg => oldImg.id === image.id);
+        
+        // 如果這張圖片的標註已經被修改過
+        if (prev.annotationChanges[image.id]) {
+          // 保持相同的標註數據，因為標註是綁定到圖片ID的，不是位置
+          // 這裡不需要特別處理，因為標註已經正確關聯到圖片ID
+        }
+      });
+      
+      return {
+        ...prev,
+        imageOrderChanges: imageOrders,
+        annotationChanges: newAnnotationChanges
+      };
+    });
     
     // 如果當前顯示的圖片被移動，更新當前索引
     if (currentImageIndex === draggedIndex) {
@@ -560,7 +650,6 @@ const EditPostPage = () => {
     // 重置拖動狀態
     setDraggedIndex(null);
     setDragOverIndex(null);
-    showNotification('圖片順序將在更新貼文時保存');
   };
 
   // 處理刪除圖片（僅前端預覽，不立即刪除後端）
@@ -614,9 +703,6 @@ const EditPostPage = () => {
     // 重置刪除狀態
     setDeleteImageIndex(null);
     setShowDeleteConfirm(false);
-    if (!imageToDelete.isNew) {
-      showNotification('圖片將在更新貼文時刪除');
-    }
   };
 
   // 取消刪除
@@ -694,7 +780,8 @@ const EditPostPage = () => {
             id: Date.now() + Math.random(), // 臨時 ID
             dataUrl: event.target.result,
             file: file, // 保存文件對象用於上傳
-            isNew: true // 標記為新圖片
+            isNew: true, // 標記為新圖片
+            annotations: [] // 初始化空標註陣列
           };
 
           // 添加到圖片列表
@@ -733,8 +820,15 @@ const EditPostPage = () => {
   };
 
   // 處理新增圖片的標註
-  const handleNewImageAnnotations = async (updatedPostData, newImages) => {
+  const handleNewImageAnnotations = async (updatedPostData, newImages, newImageMapping = {}) => {
     const { createAnnotation } = await import('../services/socialService');
+    
+    console.log('處理新增圖片標註:', {
+      pendingChanges: pendingChanges.annotationChanges,
+      newImages: newImages.map(img => ({ id: img.id, isNew: img.isNew })),
+      newImageMapping,
+      updatedPostData: updatedPostData
+    });
     
     try {
       // 檢查新增圖片是否有標註需要處理
@@ -742,43 +836,114 @@ const EditPostPage = () => {
         // 查找新增圖片
         const localImage = postData.images.find(img => img.id && img.id.toString() === imageId && img.isNew);
         
+        console.log('檢查圖片:', { imageId, localImage, annotations });
+        
         if (!localImage || !annotations || annotations.length === 0) {
           continue;
         }
         
-        // 找到對應的服務器圖片
-        const newImageIndex = newImages.indexOf(localImage);
-        if (newImageIndex === -1) continue;
+        // 從映射中獲取圖片信息
+        const mappingInfo = newImageMapping[imageId];
+        if (!mappingInfo) {
+          console.log('找不到圖片映射信息');
+          continue;
+        }
         
         // 從更新後的貼文資料中找到對應的圖片
         const allImages = updatedPostData.images || [];
-        const originalImageCount = originalPostData.images.length;
-        const serverImage = allImages.find(img => 
-          img.sort_order >= originalImageCount && 
-          allImages.indexOf(img) - originalImageCount === newImageIndex
+        
+        console.log('尋找服務器圖片:', {
+          mappingInfo,
+          allImagesLength: allImages.length,
+          allImages: allImages.map(img => ({ 
+            sort_order: img.sort_order, 
+            firebase_url: img.firebase_url 
+          }))
+        });
+        
+        // 找出所有新上傳的圖片（它們沒有在原始圖片中）
+        const originalImageIds = originalPostData.images.map(img => img.id);
+        const newServerImages = allImages.filter(img => 
+          !originalImageIds.includes(img.id)
         );
         
+        console.log('新上傳的服務器圖片:', {
+          originalImageIds,
+          newServerImages: newServerImages.map(img => ({
+            id: img.id,
+            sort_order: img.sort_order,
+            firebase_url: img.firebase_url
+          }))
+        });
+        
+        // 根據上傳順序找到對應的服務器圖片
+        const serverImage = newServerImages[mappingInfo.uploadIndex];
+        
+        console.log('找到的服務器圖片:', {
+          uploadIndex: mappingInfo.uploadIndex,
+          serverImage
+        });
+        
         if (!serverImage || !serverImage.firebase_url) {
+          console.log('找不到服務器圖片或沒有 firebase_url');
           continue;
         }
         
         // 為這個圖片創建標註
         for (const annotation of annotations) {
-          if (!annotation.id) { // 只處理新標註
-            const createResult = await createAnnotation({
-              firebase_url: serverImage.firebase_url,
-              x_position: annotation.x_position,
-              y_position: annotation.y_position,
-              target_type: annotation.target_type,
-              target_id: annotation.target_id
-            });
+          // 對於新圖片，所有標註都是新的，需要創建
+          console.log('創建標註:', {
+            firebase_url: serverImage.firebase_url,
+            annotation
+          });
+          
+          const createResult = await createAnnotation({
+            firebase_url: serverImage.firebase_url,
+            x_position: annotation.x_position,
+            y_position: annotation.y_position,
+            display_name: annotation.display_name,
+            target_type: annotation.target_type,
+            target_id: annotation.target_id
+          });
+          
+          console.log('創建標註結果:', createResult);
+          
+          if (!createResult.success) {
+            console.error(`為新圖片創建標註失敗: ${createResult.error}`);
+          } else {
+            console.log('成功為新圖片創建標註');
             
-            if (!createResult.success) {
-              console.error(`為新圖片創建標註失敗: ${createResult.error}`);
+            // 更新前端標註資料，將臨時標註替換為真實標註
+            if (createResult.data) {
+              setPostData(prevData => {
+                const updatedAnnotations = [...(prevData.annotations || [])];
+                
+                // 找到並替換對應的臨時標註
+                const annotationIndex = updatedAnnotations.findIndex(ann => 
+                  ann.temp_image_id === localImage.id &&
+                  ann.x_position === annotation.x_position &&
+                  ann.y_position === annotation.y_position
+                );
+                
+                if (annotationIndex !== -1) {
+                  // 替換為真實標註資料
+                  updatedAnnotations[annotationIndex] = {
+                    ...createResult.data,
+                    image_index: mappingInfo.actualIndex
+                  };
+                }
+                
+                return {
+                  ...prevData,
+                  annotations: updatedAnnotations
+                };
+              });
             }
           }
         }
       }
+      
+      console.log('處理新增圖片標註完成');
     } catch (error) {
       console.error('處理新增圖片標註失敗:', error);
     }
@@ -821,11 +986,37 @@ const EditPostPage = () => {
         }
       }
       
-      // 2. 處理圖片排序
+      // 2. 處理圖片排序（只處理已存在的圖片）
       if (pendingChanges.imageOrderChanges) {
-        const reorderResult = await reorderPostImages(postId, pendingChanges.imageOrderChanges);
-        if (!reorderResult.success) {
-          throw new Error(`更新圖片順序失敗: ${reorderResult.error}`);
+        // 過濾掉新增的圖片，只保留已存在的圖片
+        const existingImageOrders = [];
+        let existingImageIndex = 0;
+        
+        pendingChanges.imageOrderChanges.forEach(order => {
+          // 檢查是否為原始圖片（不是新增的）
+          const isOriginalImage = originalPostData.images.some(img => img.id === order.image_id);
+          // 檢查是否不在刪除列表中
+          const isNotDeleted = !pendingChanges.deletedImageIds.includes(order.image_id);
+          
+          if (isOriginalImage && isNotDeleted) {
+            existingImageOrders.push({
+              image_id: order.image_id,
+              sort_order: existingImageIndex // 使用連續的索引
+            });
+            existingImageIndex++;
+          }
+        });
+        
+        console.log('圖片排序:', {
+          original: pendingChanges.imageOrderChanges,
+          filtered: existingImageOrders
+        });
+        
+        if (existingImageOrders.length > 0) {
+          const reorderResult = await reorderPostImages(postId, existingImageOrders);
+          if (!reorderResult.success) {
+            throw new Error(`更新圖片順序失敗: ${reorderResult.error}`);
+          }
         }
       }
       
@@ -940,18 +1131,78 @@ const EditPostPage = () => {
           tag.tag || tag.text || (typeof tag === 'string' ? tag : '')
         ).join(','));
         
-        // 添加新圖片文件
-        newImages.forEach(image => {
+        // 添加新圖片文件，並記錄它們的臨時ID和實際順序
+        const newImageMapping = {};
+        newImages.forEach((image, index) => {
           formData.append('images', image.file);
+          // 記錄臨時ID和在 postData.images 中的實際位置
+          const actualIndex = postData.images.findIndex(img => img.id === image.id);
+          newImageMapping[image.id] = {
+            uploadIndex: index,  // 上傳順序
+            actualIndex: actualIndex,  // 在所有圖片中的實際位置
+            tempId: image.id
+          };
         });
         
+        console.log('新圖片映射:', newImageMapping);
         
         const result = await updatePost(postId, formData, true); // 第三個參數表示使用 FormData
         
         if (result.success) {
           // 圖片上傳成功後，處理新增圖片的標註
           if (result.data) {
-            await handleNewImageAnnotations(result.data, newImages);
+            await handleNewImageAnnotations(result.data, newImages, newImageMapping);
+          }
+          
+          // 5. 如果有新圖片上傳且有圖片排序變更，需要重新排序所有圖片以確保順序正確
+          if (result.data && result.data.images && pendingChanges.imageOrderChanges && newImages.length > 0) {
+            // 獲取上傳後的所有圖片
+            const allImagesAfterUpload = result.data.images;
+            
+            // 創建最終的圖片順序，基於前端的 postData.images 順序
+            const finalImageOrders = [];
+            let sortOrderIndex = 0;
+            
+            postData.images.forEach((frontendImage, index) => {
+              // 找到對應的後端圖片
+              let backendImage = null;
+              
+              if (frontendImage.isNew) {
+                // 新圖片：根據上傳順序找到對應的後端圖片
+                const mapping = newImageMapping[frontendImage.id];
+                if (mapping) {
+                  // 找到所有新上傳的圖片（通常是 sort_order 最大的那些）
+                  const allImagesSorted = allImagesAfterUpload.sort((a, b) => b.sort_order - a.sort_order);
+                  const uploadedImages = allImagesSorted.slice(0, newImages.length);
+                  // 按照上傳時的順序重新排序
+                  uploadedImages.sort((a, b) => a.sort_order - b.sort_order);
+                  backendImage = uploadedImages[mapping.uploadIndex];
+                }
+              } else {
+                // 原有圖片：通過 ID 直接匹配
+                backendImage = allImagesAfterUpload.find(img => img.id === frontendImage.id);
+              }
+              
+              if (backendImage && backendImage.id) {
+                finalImageOrders.push({
+                  image_id: backendImage.id,
+                  sort_order: sortOrderIndex
+                });
+                sortOrderIndex++;
+              }
+            });
+            
+            console.log('最終圖片排序:', finalImageOrders);
+            
+            // 執行最終排序
+            if (finalImageOrders.length > 0) {
+              const finalReorderResult = await reorderPostImages(postId, finalImageOrders);
+              if (!finalReorderResult.success) {
+                console.error('最終圖片排序失敗:', finalReorderResult.error);
+              } else {
+                console.log('最終圖片排序成功');
+              }
+            }
           }
           
           // 清除待處理的變更

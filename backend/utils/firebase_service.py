@@ -175,12 +175,6 @@ class FirebaseStorageService:
                 logger.warning(f"圖片不存在: {file_path}")
                 return True, "圖片不存在，視為已刪除"
             
-            
-            
-            # 暫時返回模擬結果
-            logger.info(f"模擬圖片刪除: {file_path}")
-            return True, "圖片刪除成功（模擬）"
-            
         except Exception as e:
             logger.error(f"圖片刪除失敗: {str(e)}")
             return False, f"圖片刪除失敗: {str(e)}"

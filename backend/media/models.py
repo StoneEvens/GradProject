@@ -7,6 +7,9 @@ from social.models import PostFrame
 from accounts.models import CustomUser
 
 from utils.firebase_service import cleanup_old_headshot
+import logging
+
+logger = logging.getLogger(__name__)
 
 class SuperImage(models.Model):
     #Storage Details
@@ -38,15 +41,28 @@ class SuperImage(models.Model):
 
         self.save(firebase_path, firebase_url)
 
-    def delete(self):
-        image_url = self.firebase_path
-
-        try:
-            cleanup_old_headshot(image_url)
-        except TypeError:
-            return
+    def delete(self, *args, **kwargs):
+        # 獲取 Firebase 路徑
+        firebase_path = self.firebase_path
         
-        self.delete()
+        # 如果有 Firebase 路徑，嘗試從 Firebase Storage 刪除
+        if firebase_path:
+            try:
+                # 檢查是否是貼文圖片（子類 Image）
+                if hasattr(self, 'postFrame'):
+                    # 這是貼文圖片，使用相應的刪除方法
+                    from utils.firebase_service import firebase_storage_service
+                    success, message = firebase_storage_service.delete_post_image(firebase_path)
+                    if not success:
+                        logger.warning(f"從 Firebase Storage 刪除貼文圖片失敗: {message}")
+                else:
+                    # 這是其他類型的圖片（如頭像），使用 cleanup_old_headshot
+                    cleanup_old_headshot(firebase_path)
+            except Exception as e:
+                logger.error(f"刪除 Firebase 圖片時發生錯誤: {str(e)}")
+        
+        # 從資料庫刪除記錄
+        super().delete(*args, **kwargs)
 
 class Image(SuperImage):
     postFrame = models.ForeignKey(PostFrame, on_delete=models.CASCADE, related_name='images', null=True)
