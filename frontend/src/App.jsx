@@ -16,6 +16,8 @@ import PetPage from './pages/PetPage';
 import AddPetPage from './pages/AddPetPage';
 import EditPetPage from './pages/EditPetPage';
 import CreatePostPage from './pages/CreatePostPage';
+import CreateAbnormalPostPage from './pages/CreateAbnormalPostPage';
+import EditAbnormalPostPage from './pages/EditAbnormalPostPage';
 import PostPreviewPage from './pages/PostPreviewPage';
 import EditPostPage from './pages/EditPostPage';
 import SearchPostsPage from './pages/SearchPostsPage';
@@ -25,6 +27,8 @@ import SavedPostsPage from './pages/SavedPostsPage';
 import SavedPostsListPage from './pages/SavedPostsListPage';
 import PetRelatedPostsPage from './pages/PetRelatedPostsPage';
 import PetRelatedPostsListPage from './pages/PetRelatedPostsListPage';
+import PetAbnormalPostsPage from './pages/PetAbnormalPostsPage';
+import AbnormalPostDetailPage from './pages/AbnormalPostDetailPage';
 import CalculatorPage from './pages/CalculatorPage';
 import { isAuthenticated, refreshAccessToken } from './services/authService';
 
@@ -221,10 +225,30 @@ const App = () => {
           path="/pet/:petId/edit" 
           element={isUserAuthenticated ? <EditPetPage /> : <Navigate to="/" />} 
         />
+        {/* 寵物異常貼文列表頁面：未登入導向HomePage */}
+        <Route 
+          path="/pet/:petId/abnormal-posts" 
+          element={isUserAuthenticated ? <PetAbnormalPostsPage /> : <Navigate to="/" />} 
+        />
+        {/* 異常貼文詳細頁面：未登入導向HomePage */}
+        <Route 
+          path="/pet/:petId/abnormal-post/:postId" 
+          element={isUserAuthenticated ? <AbnormalPostDetailPage /> : <Navigate to="/" />} 
+        />
+        {/* 編輯異常記錄頁面：未登入導向HomePage */}
+        <Route 
+          path="/pet/:petId/abnormal-post/:postId/edit" 
+          element={isUserAuthenticated ? <EditAbnormalPostPage /> : <Navigate to="/" />} 
+        />
         {/* 創建貼文頁面：未登入導向HomePage */}
         <Route 
           path="/create-post" 
           element={isUserAuthenticated ? <CreatePostPage /> : <Navigate to="/" />} 
+        />
+        {/* 創建異常記錄頁面：未登入導向HomePage */}
+        <Route 
+          path="/create-abnormal-post" 
+          element={isUserAuthenticated ? <CreateAbnormalPostPage /> : <Navigate to="/" />} 
         />
         {/* 貼文預覽頁面：未登入導向HomePage */}
         <Route 

@@ -822,11 +822,17 @@ class SocialService {
    * @param {number} imageId - 圖片 ID
    * @returns {Promise} 刪除結果
    */
-  async deletePostImage(postId, imageId) {
+  async deletePostImage(postId, imageId, allowDeleteLast = false) {
     try {
-      console.log('刪除貼文圖片 API 調用:', { postId, imageId });
+      console.log('刪除貼文圖片 API 調用:', { postId, imageId, allowDeleteLast });
 
-      const response = await authAxios.delete(`/media/posts/${postId}/images/${imageId}/`, {
+      // 構建URL，如果允許刪除最後一張圖片則添加查詢參數
+      let url = `/media/posts/${postId}/images/${imageId}/`;
+      if (allowDeleteLast) {
+        url += '?allow_delete_last=true';
+      }
+
+      const response = await authAxios.delete(url, {
         headers: {
           'Content-Type': 'application/json',
         },
