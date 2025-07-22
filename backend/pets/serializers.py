@@ -19,8 +19,8 @@ class AbnormalPostSerializer(serializers.ModelSerializer):
     class Meta:
         model = AbnormalPost
         fields = ['id', 'pet', 'pet_name', 'user', 'content', 'weight', 
-                 'body_temperature', 'water_amount', 'created_at', 
-                 'updated_at', 'symptoms', 'images']
+                 'body_temperature', 'water_amount', 'is_emergency', 'record_date',
+                 'created_at', 'updated_at', 'symptoms', 'images']
     
     def get_symptoms(self, obj):
         """獲取異常記錄關聯的所有症狀"""
@@ -52,6 +52,20 @@ class AbnormalPostSerializer(serializers.ModelSerializer):
                 'alt_text': image.alt_text
             })
         return images_data
+
+# === AbnormalPostPreview (異常紀錄預覽) ===
+class AbnormalPostPreviewSerializer(serializers.ModelSerializer):
+    """異常記錄預覽序列化器 - 只返回基本信息用於列表顯示"""
+    symptoms = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = AbnormalPost
+        fields = ['id', 'record_date', 'is_emergency', 'symptoms']
+    
+    def get_symptoms(self, obj):
+        """獲取異常記錄關聯的所有症狀名稱"""
+        # 使用預載的關係，避免額外查詢
+        return [relation.symptom.symptom_name for relation in obj.symptoms.all()]
 
 # === Symptom (症狀) ===
 class SymptomSerializer(serializers.ModelSerializer):

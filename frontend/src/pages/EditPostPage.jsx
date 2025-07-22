@@ -14,6 +14,44 @@ const EditPostPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { postId } = useParams();
+  
+  // localStorage 清理函數
+  const clearAllCachedData = () => {
+    try {
+      const ANNOTATIONS_KEY = 'imageAnnotations';
+      const DRAFT_KEY = 'createPostDraft';
+      const ABNORMAL_DRAFT_KEY = 'createAbnormalPostDraft';
+      const EDIT_DRAFT_KEY = `editPostDraft_${postId}`;
+      
+      // 清除主要的緩存資料
+      localStorage.removeItem(ANNOTATIONS_KEY);
+      localStorage.removeItem(DRAFT_KEY);
+      localStorage.removeItem(ABNORMAL_DRAFT_KEY);
+      localStorage.removeItem(EDIT_DRAFT_KEY);
+      
+      // 清除所有可能的草稿和標註相關資料
+      const keysToRemove = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && (
+          key.includes('postDraft') || 
+          key.includes('imageAnnotations') || 
+          key.includes('annotationTemp') ||
+          key.includes(`editPost_${postId}`)
+        )) {
+          keysToRemove.push(key);
+        }
+      }
+      
+      keysToRemove.forEach(key => {
+        localStorage.removeItem(key);
+      });
+      
+      console.log('✅ EditPostPage localStorage 清理完成');
+    } catch (error) {
+      console.error('❌ EditPostPage localStorage 清理失敗:', error);
+    }
+  };
   const [user, setUser] = useState(null);
   const [selectedLocation, setSelectedLocation] = useState('');
   const [showLocationModal, setShowLocationModal] = useState(false);
@@ -969,17 +1007,18 @@ const EditPostPage = () => {
       // 1. 先處理圖片刪除
       if (pendingChanges.deletedImageIds.length > 0) {
         // 檢查刪除後是否還有圖片（包含新增的圖片）
-        const originalImageCount = originalPostData.images.length;
-        const deletedImageCount = pendingChanges.deletedImageIds.length;
-        const newImagesCount = postData.images.filter(img => img.isNew).length;
-        const finalImageCount = originalImageCount - deletedImageCount + newImagesCount;
+        // 直接檢查當前 postData.images 的總數，這已經反映了所有用戶操作
+        const finalImageCount = postData.images.length;
         
         if (finalImageCount < 1) {
           throw new Error('貼文至少需要保留一張圖片');
         }
         
+        // 檢查是否有新圖片，如果有則允許刪除最後的原始圖片
+        const hasNewImages = postData.images.some(img => img.isNew);
+        
         for (const imageId of pendingChanges.deletedImageIds) {
-          const deleteResult = await deletePostImage(postId, imageId);
+          const deleteResult = await deletePostImage(postId, imageId, hasNewImages);
           if (!deleteResult.success) {
             throw new Error(`刪除圖片失敗: ${deleteResult.error}`);
           }
@@ -1247,6 +1286,9 @@ const EditPostPage = () => {
             annotationChanges: {},
             hasContentChanges: false
           });
+          
+          // 清理 localStorage 中的相關資料
+          clearAllCachedData();
           
           showNotification('貼文更新成功！');
           setTimeout(() => {

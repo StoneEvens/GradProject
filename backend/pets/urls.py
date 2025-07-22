@@ -11,4 +11,8 @@ urlpatterns = [
     path('symptoms/', SymptomListAPIView.as_view(), name='symptom-list'),
     path('my-abnormal-posts/', UserAbnormalPostListAPIView.as_view(), name='user-abnormal-posts'),
     path('<int:pet_id>/abnormal-posts/', PetAbnormalPostsAPIView.as_view(), name='pet-abnormal-posts'),
+    path('<int:pet_id>/abnormal-posts/preview/', PetAbnormalPostsPreviewAPIView.as_view(), name='pet-abnormal-posts-preview'),
+    path('<int:pet_id>/abnormal-post/<int:post_id>/', AbnormalPostDetailAPIView.as_view(), name='abnormal-post-detail'),
+    path('<int:pet_id>/abnormal-post/<int:post_id>/update/', UpdateAbnormalPostAPIView.as_view(), name='update-abnormal-post'),
+    path('<int:pet_id>/abnormal-post/<int:post_id>/delete/', DeleteAbnormalPostAPIView.as_view(), name='delete-abnormal-post'),
 ]

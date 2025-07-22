@@ -96,14 +96,16 @@ class Pet(models.Model):
 
 # 異常貼文
 class AbnormalPost(models.Model):
-    body_temperature = models.FloatField()
-    content = models.TextField()
+    body_temperature = models.FloatField(null=True, blank=True)  # 允許空值
+    content = models.TextField(blank=True, default='')  # 允許空描述
     created_at = models.DateTimeField(auto_now_add=True)
     pet = models.ForeignKey('Pet', on_delete=models.CASCADE, related_name='abnormal_posts', null=True)
     updated_at = models.DateTimeField(auto_now=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='abnormal_posts', null=True)
-    water_amount = models.IntegerField()
-    weight = models.FloatField()
+    water_amount = models.IntegerField(null=True, blank=True)  # 允許空值
+    weight = models.FloatField(null=True, blank=True)  # 允許空值
+    is_emergency = models.BooleanField(default=False)  # 新增：是否為就醫記錄
+    record_date = models.DateTimeField(null=True, blank=True)  # 新增：記錄日期
 
     def __str__(self):
         return f"AbnormalPost {self.id} for Pet {self.pet.pet_name}"

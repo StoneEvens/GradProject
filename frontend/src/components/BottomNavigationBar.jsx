@@ -18,7 +18,7 @@ const BottomNavbar = () => {
       },
       {
         label: '異常紀錄',
-        path: '/symptom-record'
+        path: '/create-abnormal-post'
       }
     ];
   }

@@ -1,0 +1,281 @@
+.filterContainer {
+  background: #FFF6EA;
+  padding: 12px;
+  margin: 12px 0;
+  border-radius: 8px;
+}
+
+/* 篩選類型選擇行 */
+.filterTypeRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.filterLabel {
+  color: #89350c;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.filterTypeSelect {
+  background: #FFF;
+  border: 1px solid #FFB370;
+  border-radius: 4px;
+  padding: 4px 8px;
+  color: #89350c;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  outline: none;
+  min-width: 70px;
+}
+
+.filterTypeSelect:focus {
+  border-color: #FF8C42;
+}
+
+/* 症狀篩選區域 */
+.symptomFilterSection {
+  background: #FFF;
+  border: 1px solid #FFB370;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+/* 已選擇的症狀容器 */
+.selectedSymptomsContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+.selectedSymptom {
+  display: flex;
+  align-items: center;
+  background: #FFB370;
+  color: #FFF;
+  border-radius: 8px;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.symptomText {
+  margin-right: 6px;
+}
+
+.removeSymptomBtn {
+  background: none;
+  border: none;
+  color: #FFF;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  padding: 0;
+  margin: 0;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.removeSymptomBtn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.symptomTabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.symptomTab {
+  background: #FFB370;
+  color: #FFF;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.symptomTab.active {
+  background: #FF8C42;
+}
+
+.symptomTab:hover {
+  background: #FF8C42;
+}
+
+.symptomSelectRow {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.symptomSelect {
+  flex: 1;
+  background: #FFF;
+  border: 1px solid #FFB370;
+  border-radius: 6px;
+  padding: 8px 12px;
+  color: #89350c;
+  font-size: 12px;
+  cursor: pointer;
+  outline: none;
+}
+
+.symptomSelect:focus {
+  border-color: #FF8C42;
+}
+
+.addButton {
+  background: #FFB370;
+  color: #FFF;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.addButton:hover:not(:disabled) {
+  background: #FF8C42;
+}
+
+.addButton:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+/* 日期篩選區域 */
+.dateFilterSection {
+  background: #FFF;
+  border: 1px solid #FFB370;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+.dateRangeRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dateInput {
+  flex: 1;
+  background: #FFF;
+  border: 1px solid #FFB370;
+  border-radius: 6px;
+  padding: 8px 12px;
+  color: #89350c;
+  font-size: 12px;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 120px;
+}
+
+.dateInput:hover {
+  border-color: #FF8C42;
+}
+
+.dateSeparator {
+  color: #89350c;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* 操作按鈕 */
+.actionButtons {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.resetButton {
+  background: #FFF;
+  color: #89350c;
+  border: 1px solid #FFB370;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.resetButton:hover {
+  background: #FFF9F0;
+  border-color: #FF8C42;
+}
+
+.filterButton {
+  background: #FFB370;
+  color: #FFF;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.filterButton:hover {
+  background: #FF8C42;
+}
+
+/* 響應式設計 */
+@media (max-width: 480px) {
+  .symptomTabs {
+    flex-wrap: wrap;
+  }
+  
+  .symptomSelectRow {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  
+  .addButton {
+    width: 100%;
+  }
+  
+  .dateRangeRow {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .dateInput {
+    min-width: auto;
+    width: 100%;
+  }
+  
+  .dateSeparator {
+    align-self: center;
+  }
+  
+  .actionButtons {
+    flex-direction: column;
+  }
+  
+  .resetButton,
+  .filterButton {
+    width: 100%;
+  }
+}

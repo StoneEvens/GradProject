@@ -69,10 +69,114 @@ export const getPetAbnormalPosts = async (petId) => {
   return res.data.data;
 };
 
+// 取得寵物的異常貼文預覽
+export const getPetAbnormalPostsPreview = async (petId) => {
+  const res = await axios.get(`/pets/${petId}/abnormal-posts/preview/`);
+  return res.data.data;
+};
+
+// 取得特定異常貼文詳情
+export const getAbnormalPostDetail = async (petId, postId) => {
+  const res = await axios.get(`/pets/${petId}/abnormal-post/${postId}/`);
+  return res.data.data;
+};
+
 // 取得寵物的疾病檔案
 export const getPetIllnessArchives = async (petId) => {
   const res = await axios.get(`/pets/${petId}/illness-archives/`);
   return res.data.data;
+};
+
+// 獲取所有症狀列表
+export const getSymptoms = async () => {
+  try {
+    const res = await axios.get('/pets/symptoms/');
+    return res.data.data;
+  } catch (error) {
+    console.error('獲取症狀列表失敗:', error);
+    throw error;
+  }
+};
+
+// 創建異常記錄
+export const createAbnormalPost = async (postData) => {
+  try {
+    const res = await axios.post('/pets/abnormal-posts/create/', postData, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    return res.data.data;
+  } catch (error) {
+    console.error('創建異常記錄失敗:', {
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      message: error.message
+    });
+    throw error;
+  }
+};
+
+// 更新異常記錄
+export const updateAbnormalPost = async (petId, postId, postData) => {
+  try {
+    const res = await axios.put(`/pets/${petId}/abnormal-post/${postId}/update/`, postData, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    return res.data.data;
+  } catch (error) {
+    console.error('更新異常記錄失敗:', {
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      message: error.message
+    });
+    throw error;
+  }
+};
+
+// 刪除異常記錄
+export const deleteAbnormalPost = async (petId, postId) => {
+  try {
+    const res = await axios.delete(`/pets/${petId}/abnormal-post/${postId}/delete/`);
+    return res.data;
+  } catch (error) {
+    console.error('刪除異常記錄失敗:', {
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      message: error.message
+    });
+    throw error;
+  }
+};
+
+// 檢查指定日期是否已有異常記錄
+export const checkAbnormalPostExists = async (petId, date) => {
+  try {
+    const formattedDate = date.toISOString().split('T')[0]; // YYYY-MM-DD 格式
+    const res = await axios.get(`/pets/${petId}/abnormal-posts/`, {
+      params: {
+        date: formattedDate,
+        check_exists: true
+      }
+    });
+    
+    // 檢查該日期是否已有記錄
+    const posts = res.data.data || [];
+    const existingPost = posts.find(post => {
+      const postDate = new Date(post.record_date).toISOString().split('T')[0];
+      return postDate === formattedDate;
+    });
+    
+    return !!existingPost; // 返回 boolean
+  } catch (error) {
+    console.error('檢查異常記錄存在失敗:', error);
+    return false; // 發生錯誤時假設沒有記錄
+  }
 };
 
 export default {
@@ -81,5 +185,12 @@ export default {
   updatePet,
   deletePet,
   getPetAbnormalPosts,
-  getPetIllnessArchives
+  getPetAbnormalPostsPreview,
+  getAbnormalPostDetail,
+  getPetIllnessArchives,
+  getSymptoms,
+  createAbnormalPost,
+  updateAbnormalPost,
+  deleteAbnormalPost,
+  checkAbnormalPostExists
 }; 
