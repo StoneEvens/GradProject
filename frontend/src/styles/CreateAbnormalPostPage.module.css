@@ -1,0 +1,858 @@
+/* 基本容器 */
+.container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #FFF2D9;
+}
+
+.content {
+  flex: 1;
+  padding: 30px;
+  padding-top: 80px;
+  padding-bottom: 90px;
+  max-width: 430px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* 標題區域 */
+.titleSection {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 30px;
+  margin-bottom: 10px;
+  position: relative;
+}
+
+.title {
+  font-size: 24px;
+  color: #89350c;
+  text-align: left;
+  margin: 0;
+  font-weight: bold;
+}
+
+.draftIndicator {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: #4CAF50;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.divider {
+  width: 100%;
+  height: 1.5px;
+  background: #FFB370;
+  margin: 10px 0 25px 0;
+}
+
+/* 通用區域樣式 */
+.section {
+  margin-bottom: 20px;
+}
+
+.sectionLabel {
+  display: block;
+  font-size: 16px;
+  color: #89350c;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+/* 寵物選擇區域 - 類似 PetSwitcher */
+.petSwitcher {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding: 8px 0;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE 10+ */
+}
+
+.petSwitcher::-webkit-scrollbar {
+  display: none; /* WebKit */
+}
+
+.petItem {
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 4px;
+  border-radius: 50%;
+}
+
+.petAvatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #E0E0E0;
+  background: #fff;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.petItem:hover .petAvatar {
+  border-color: #FFB370;
+  opacity: 0.8;
+}
+
+/* 選中狀態的寵物 */
+.activePet .petAvatar {
+  border-color: #FFB370;
+  border-width: 4px;
+  box-shadow: 0 4px 12px rgba(255, 179, 112, 0.4);
+}
+
+/* 載入狀態 */
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  font-size: 16px;
+  color: #89350c;
+}
+
+/* 日期選擇區域 */
+.dateRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.dateSection {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.dateLabel {
+  font-size: 16px;
+  color: #89350c;
+  font-weight: bold;
+  margin: 0;
+}
+
+.dateButton {
+  background-color: #FFB370;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 16px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dateButton.active,
+.dateButton:hover {
+  background-color: #F08651;
+}
+
+.emergencyCheckbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+}
+
+.checkbox {
+  width: 20px;
+  height: 20px;
+  accent-color: #FFB370;
+  cursor: pointer;
+}
+
+.checkboxLabel {
+  font-size: 16px;
+  color: #89350c;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* 症狀選擇區域 */
+.symptomSection {
+  background-color: #ffeed6;
+  border-radius: 16px;
+  padding: 15px 20px;
+  border: 2px solid #FFB370;
+}
+
+/* 已選擇症狀顯示區域 */
+.selectedSymptomsContainer {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  margin-bottom: 15px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 5px 0;
+}
+
+.selectedSymptomsContainer::-webkit-scrollbar {
+  display: none;
+}
+
+/* 個別已選症狀樣式 */
+.selectedSymptom {
+  position: relative;
+  background-color: #FFB370;
+  color: #fff;
+  border-radius: 8px;
+  padding: 8px 28px 8px 12px;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  max-width: 150px;
+}
+
+.symptomText {
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.removeSymptomBtn {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: #F08651;
+  color: white;
+  font-size: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  font-weight: bold;
+  border: none;
+  z-index: 1;
+  transition: background-color 0.2s ease;
+}
+
+.removeSymptomBtn:hover {
+  background-color: #E07641;
+}
+
+/* 症狀輸入區域 */
+.symptomInputSection {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.symptomSelectContainer {
+  display: flex;
+  align-items: center;
+  background-color: white;
+  border: 2px solid #FFB370;
+  border-radius: 8px;
+  flex: 1;
+  height: 40px;
+}
+
+.symptomSelectContainer:focus-within {
+  border-color: #F08651;
+}
+
+.symptomSelect {
+  width: 100%;
+  padding: 0 12px;
+  border: none;
+  background-color: transparent;
+  font-size: 14px;
+  color: #89350c;
+  cursor: pointer;
+  outline: none;
+  height: 100%;
+}
+
+.symptomSelect option {
+  background-color: white;
+  color: #89350c;
+}
+
+.addSymptomBtn {
+  background-color: #F08651;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  white-space: nowrap;
+  height: 40px;
+  transition: background-color 0.2s ease;
+}
+
+.addSymptomBtn:hover {
+  background-color: #E07641;
+}
+
+/* 症狀計數器 */
+.symptomCounter {
+  color: #89350c;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* 身體數值記錄區域 */
+.bodyStatsContainer {
+  background-color: #ffeed6;
+  border-radius: 16px;
+  padding: 16px;
+  border: 2px solid #FFB370;
+}
+
+.statRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.statRow:last-child {
+  margin-bottom: 0;
+}
+
+.statLabel {
+  font-size: 14px;
+  color: #89350c;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.statInputWrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.statInput {
+  width: 100px;
+  padding: 6px 10px;
+  border: 2px solid #FFB370;
+  border-radius: 8px;
+  background-color: white;
+  font-size: 14px;
+  text-align: center;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.statInput:focus {
+  border-color: #F08651;
+}
+
+.statUnit {
+  font-size: 14px;
+  color: #89350c;
+  font-weight: 500;
+  min-width: 30px;
+}
+
+/* 圖片上傳區域 */
+.imageSection {
+  background-color: #ffeed6;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 20px;
+  border: 2px solid #FFB370;
+}
+
+.noImageState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 117px;
+  margin-bottom: 16px;
+}
+
+.warningIcon {
+  width: 50px;
+  height: 50px;
+  margin-bottom: 10px;
+  opacity: 0.8;
+}
+
+.noImageText {
+  color: #89350c;
+  font-size: 16px;
+  font-weight: 500;
+  margin: 0;
+}
+
+.imagePreviewContainer {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  margin-bottom: 16px;
+  min-height: auto;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.imagePreviewContainer::-webkit-scrollbar {
+  display: none;
+}
+
+.imagePreview {
+  position: relative;
+  min-width: 208px;
+  width: 208px;
+  height: 117px;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #fff;
+  border: 2px solid #FFB370;
+  flex-shrink: 0;
+}
+
+.imagePreview img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background-color: #f5f5f5;
+}
+
+.removeImageBtn {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: #F08651;
+  color: white;
+  border: 2px solid white;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  font-weight: bold;
+  transition: background-color 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+}
+
+.removeImageBtn:hover {
+  background-color: #E07641;
+}
+
+.imageControls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.addImageBtn {
+  background-color: #FFB370;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.addImageBtn:hover {
+  background-color: #F08651;
+}
+
+.imageCounter {
+  color: #89350c;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.hiddenInput {
+  display: none;
+}
+
+/* 描述輸入區域 */
+.descriptionSection {
+  margin-bottom: 30px;
+}
+
+.descriptionInput {
+  width: 100%;
+  padding: 16px;
+  border: none;
+  border-radius: 16px;
+  font-size: 16px;
+  font-family: inherit;
+  resize: none;
+  background-color: #ffeed6;
+  border: 2px solid #FFB370;
+  color: #333;
+  box-sizing: border-box;
+  outline: none;
+  transition: border-color 0.2s ease;
+  min-height: 120px;
+}
+
+.descriptionInput:focus {
+  border-color: #F08651;
+}
+
+.descriptionInput::placeholder {
+  color: #999;
+  font-size: 16px;
+}
+
+/* 操作按鈕 */
+.actionButtons {
+  display: flex;
+  gap: 15px;
+  justify-content: space-between;
+  margin-top: 30px;
+}
+
+.cancelButton {
+  background-color: #ffce99;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 14px 28px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  flex: 1;
+  max-width: 150px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+}
+
+.cancelButton:hover {
+  background-color: #FFB370;
+}
+
+.createButton {
+  background-color: #F08651;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 14px 28px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  flex: 1;
+  max-width: 150px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+}
+
+.createButton:hover {
+  background-color: #E07641;
+}
+
+
+/* 響應式設計 */
+@media (max-width: 480px) {
+  .content {
+    padding: 15px;
+    padding-top: 75px;
+    padding-bottom: 85px;
+  }
+
+  .titleSection {
+    margin-top: 25px;
+    margin-bottom: 15px;
+  }
+
+  .title {
+    font-size: 20px;
+  }
+
+  .section {
+    margin-bottom: 18px;
+  }
+
+  .sectionLabel {
+    font-size: 15px;
+    margin-bottom: 8px;
+  }
+
+  .petSwitcher {
+    gap: 12px;
+  }
+
+  .petAvatar {
+    width: 50px;
+    height: 50px;
+    border-width: 3px;
+  }
+
+  .activePet .petAvatar {
+    border-width: 3px;
+  }
+
+  .symptomSection,
+  .bodyStatsContainer,
+  .imageSection {
+    padding: 14px;
+    margin-bottom: 18px;
+  }
+
+  .symptomInputSection {
+    gap: 8px;
+  }
+
+  .symptomSelectContainer {
+    height: 36px;
+  }
+
+  .symptomSelect {
+    font-size: 13px;
+    padding: 0 10px;
+  }
+
+  .addSymptomBtn {
+    padding: 8px 16px;
+    font-size: 13px;
+    height: 36px;
+  }
+
+  .selectedSymptom {
+    padding: 6px 24px 6px 10px;
+  }
+
+  .symptomText {
+    font-size: 13px;
+  }
+
+  .removeSymptomBtn {
+    width: 10px;
+    height: 10px;
+    font-size: 7px;
+  }
+
+  .dateSection {
+    gap: 8px;
+  }
+
+  .dateLabel {
+    font-size: 15px;
+  }
+
+  .dateButton {
+    padding: 5px 12px;
+    font-size: 13px;
+    height: 28px;
+  }
+
+  .emergencyCheckbox {
+    height: 28px;
+  }
+
+  .checkbox {
+    width: 18px;
+    height: 18px;
+  }
+
+  .checkboxLabel {
+    font-size: 15px;
+  }
+
+  .statInput {
+    width: 80px;
+    padding: 5px 8px;
+    font-size: 13px;
+  }
+
+  .statLabel,
+  .statUnit {
+    font-size: 13px;
+  }
+
+  .imagePreview {
+    min-width: 166px;
+    width: 166px;
+    height: 94px;
+  }
+
+  .descriptionInput {
+    padding: 14px;
+    font-size: 15px;
+    min-height: 100px;
+  }
+
+  .actionButtons {
+    gap: 12px;
+    margin-top: 25px;
+  }
+
+  .cancelButton,
+  .createButton {
+    padding: 12px 20px;
+    font-size: 15px;
+    height: 45px;
+  }
+}
+
+@media (max-width: 360px) {
+  .content {
+    padding: 12px;
+    padding-top: 70px;
+    padding-bottom: 80px;
+  }
+
+  .petSwitcher {
+    gap: 10px;
+  }
+
+  .petAvatar {
+    width: 45px;
+    height: 45px;
+    border-width: 2px;
+  }
+
+  .activePet .petAvatar {
+    border-width: 3px;
+  }
+
+  .selectedPet,
+  .addPetButton {
+    width: 45px;
+    height: 45px;
+  }
+
+  .petSelection {
+    gap: 10px;
+  }
+
+  .imagePreview {
+    min-width: 146px;
+    width: 146px;
+    height: 82px;
+  }
+
+  .removeImageBtn {
+    width: 20px;
+    height: 20px;
+    font-size: 14px;
+    top: 4px;
+    right: 4px;
+  }
+
+  .dateRow {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .dateSection {
+    gap: 6px;
+  }
+
+  .dateLabel {
+    font-size: 14px;
+  }
+
+  .dateButton {
+    padding: 4px 10px;
+    font-size: 12px;
+    height: 26px;
+  }
+
+  .emergencyCheckbox {
+    height: 26px;
+  }
+
+  .checkbox {
+    width: 16px;
+    height: 16px;
+  }
+
+  .checkboxLabel {
+    font-size: 14px;
+  }
+
+  .symptomSection,
+  .bodyStatsContainer,
+  .imageSection {
+    padding: 12px;
+  }
+
+  .symptomInputSection {
+    gap: 6px;
+    flex-direction: column;
+  }
+
+  .symptomSelectContainer {
+    height: 32px;
+  }
+
+  .symptomSelect {
+    font-size: 12px;
+    padding: 0 8px;
+  }
+
+  .addSymptomBtn {
+    padding: 6px 12px;
+    font-size: 12px;
+    height: 32px;
+    width: 100%;
+  }
+
+  .selectedSymptom {
+    padding: 5px 20px 5px 8px;
+  }
+
+  .symptomText {
+    font-size: 12px;
+  }
+
+  .removeSymptomBtn {
+    width: 8px;
+    height: 8px;
+    font-size: 6px;
+    top: 3px;
+    right: 3px;
+  }
+
+  .statInput {
+    width: 70px;
+  }
+}

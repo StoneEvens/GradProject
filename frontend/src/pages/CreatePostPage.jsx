@@ -481,32 +481,18 @@ const CreatePostPage = () => {
   };
 
   // 取消按鈕
-  const handleCancel = () => {
+  const handleCancel = async () => {
     const hasContent = selectedImages.length > 0 || description.trim() || hashtags.length > 0;
     
     if (hasContent) {
-      showConfirmDialog(
-        '您有未完成的內容，是否要保留草稿？\n\n點擊「確定」保留草稿，點擊「取消」返回編輯',
-        () => {
-          // 用戶選擇保留草稿，詢問是否清除草稿
-          showConfirmDialog(
-            '要保留草稿嗎？\n\n點擊「確定」保留草稿以便下次繼續編輯\n點擊「取消」清除草稿',
-            () => {
-              // 用戶選擇保留草稿
-              navigate(-1);
-            },
-            () => {
-              // 用戶選擇清除草稿
-              clearDraft();
-              navigate(-1);
-            }
-          );
-        }
-      );
-    } else {
-      // 沒有內容，直接返回
-      navigate(-1);
+      // 直接保存草稿並返回
+      try {
+        await saveDraft();
+      } catch (error) {
+        console.error('保存草稿失敗:', error);
+      }
     }
+    navigate(-1);
   };
 
   // 下一步按鈕

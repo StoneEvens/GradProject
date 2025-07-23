@@ -65,8 +65,13 @@ class SuperImage(models.Model):
         super().delete(*args, **kwargs)
 
 class Image(SuperImage):
-    postFrame = models.ForeignKey(PostFrame, on_delete=models.CASCADE, related_name='images', null=True)
+    postFrame = models.ForeignKey(PostFrame, on_delete=models.CASCADE, related_name='images', null=True, blank=True)
     sort_order = models.IntegerField(default=0)
+    
+    # 添加 GenericForeignKey 支援以關聯其他模型（如 AbnormalPost）
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True, blank=True)
+    object_id = models.PositiveIntegerField(null=True, blank=True)
+    content_object = GenericForeignKey('content_type', 'object_id')
 
     class Meta:
         ordering = ['id', 'sort_order']
