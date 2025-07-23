@@ -189,13 +189,16 @@ class PostImageDeleteAPIView(APIView):
                     status=drf_status.HTTP_404_NOT_FOUND
                 )
             
-            # 檢查是否是最後一張圖片
-            remaining_images_count = Image.objects.filter(postFrame=post).count()
-            if remaining_images_count <= 1:
-                return APIResponse(
-                    message="貼文至少需要保留一張圖片",
-                    status=drf_status.HTTP_400_BAD_REQUEST
-                )
+            # 檢查是否是最後一張圖片 - 允許前端通過 allow_delete_last 參數跳過此檢查
+            allow_delete_last = request.query_params.get('allow_delete_last', 'false').lower() == 'true'
+            
+            if not allow_delete_last:
+                remaining_images_count = Image.objects.filter(postFrame=post).count()
+                if remaining_images_count <= 1:
+                    return APIResponse(
+                        message="貼文至少需要保留一張圖片",
+                        status=drf_status.HTTP_400_BAD_REQUEST
+                    )
             
             # 獲取被刪除圖片的排序位置
             deleted_sort_order = image.sort_order

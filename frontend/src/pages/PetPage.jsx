@@ -118,6 +118,16 @@ const PetPage = () => {
     fetchPets();
   };
 
+  // 處理異常記錄點擊 - 查看異常記錄列表
+  const handleAbnormalPostClick = () => {
+    if (currentPet) {
+      // TODO: 導航到異常記錄列表頁面
+      navigate(`/pet/${currentPet.id}/abnormal-posts`);
+    } else {
+      showNotification('請先選擇一隻寵物');
+    }
+  };
+
   return (
     <NotificationProvider>
       <div className={styles.container}>
@@ -217,9 +227,9 @@ const PetPage = () => {
                       <img src="/assets/icon/PetpageIllnessArchiveButton.png" alt="疾病檔案" className={styles.functionIcon} />
                       <span className={styles.functionLabel}>疾病檔案</span>
                     </div>
-                    <div className={styles.functionCell} onClick={() => handleFunctionClick('異常貼文')}>
-                      <img src="/assets/icon/PetpagePetAbnormalPostButton.png" alt="異常貼文" className={styles.functionIcon} />
-                      <span className={styles.functionLabel}>異常貼文</span>
+                    <div className={styles.functionCell} onClick={handleAbnormalPostClick}>
+                      <img src="/assets/icon/PetpagePetAbnormalPostButton.png" alt="異常紀錄" className={styles.functionIcon} />
+                      <span className={styles.functionLabel}>異常紀錄</span>
                     </div>
                     <div className={styles.functionCell} onClick={() => handleFunctionClick('統計資料')}>
                       <img src="/assets/icon/PetpageStatisticsButton.png" alt="統計資料" className={styles.functionIcon} />

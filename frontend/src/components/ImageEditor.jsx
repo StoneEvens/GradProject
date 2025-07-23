@@ -77,6 +77,33 @@ const ImageEditor = ({ image, isOpen, onClose, onSave, mode = 'create' }) => {
     }
   }, [isOpen]);
 
+  // 組件卸載時的清理邏輯
+  useEffect(() => {
+    return () => {
+      // 清理當前圖片的暫存annotation資料
+      if (image?.id && mode === 'create') {
+        try {
+          const savedAnnotations = localStorage.getItem(ANNOTATIONS_KEY);
+          if (savedAnnotations) {
+            const allAnnotations = JSON.parse(savedAnnotations);
+            // 如果沒有annotations或annotations為空，則清除該圖片的記錄
+            if (!annotations || annotations.length === 0) {
+              delete allAnnotations[image.id];
+              if (Object.keys(allAnnotations).length === 0) {
+                // 如果沒有任何圖片的annotations，清除整個key
+                localStorage.removeItem(ANNOTATIONS_KEY);
+              } else {
+                localStorage.setItem(ANNOTATIONS_KEY, JSON.stringify(allAnnotations));
+              }
+            }
+          }
+        } catch (error) {
+          console.error('ImageEditor清理localStorage時出錯:', error);
+        }
+      }
+    };
+  }, [image?.id, annotations, mode]);
+
   // 轉換舊格式標註資料為新格式
   const convertLegacyAnnotation = (annotation) => {
     if (annotation.x_position !== undefined) {

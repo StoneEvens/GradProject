@@ -1,0 +1,378 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #FFF2D9;
+}
+
+.content {
+  flex: 1;
+  padding: 30px;
+  padding-top: 80px;
+  padding-bottom: 90px;
+  max-width: 430px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+  color: #89350c;
+  font-size: 16px;
+}
+
+/* 標題列 */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 20px 0 8px 0;
+  gap: 15px;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+.titleSection {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  flex: 1;
+}
+
+.petAvatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #FFB370;
+}
+
+.title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #89350c;
+  margin: 0;
+  white-space: nowrap;
+}
+
+/* 分隔線 */
+.divider {
+  width: 100%;
+  height: 2px;
+  background-color: #FFB370;
+  margin-bottom: 20px;
+}
+
+/* 篩選結果資訊 */
+.resultInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  margin-bottom: 4px;
+  background: transparent;
+}
+
+.resultLabel {
+  font-size: 16px;
+  font-weight: bold;
+  color: #89350c;
+}
+
+.resultCount {
+  font-size: 14px;
+  color: #89350c;
+  opacity: 0.8;
+}
+
+/* 排序下拉選單 */
+.sortSelect {
+  background-color: #FFB370;
+  border: none;
+  border-radius: 5px;
+  padding: 4px 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #fff;
+  cursor: pointer;
+  outline: none;
+  min-width: 110px;
+  transition: all 0.2s ease;
+}
+
+.sortSelect option {
+  background-color: #FFF6ea;
+  color: #89350c;
+  font-weight: 500;
+}
+
+/* 貼文列表 */
+.postList {
+  margin-bottom: 20px;
+}
+
+/* 異常記錄預覽項目 */
+.postPreviewItem {
+  display: flex;
+  align-items: center;
+  background: #FFF6EA;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid #FFE5C4;
+}
+
+.postPreviewItem:hover {
+  background: #FFF2D9;
+  border-color: #FFB370;
+}
+
+.previewIcon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+
+.previewIcon img {
+  width: 32px;
+  height: 32px;
+}
+
+.previewContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.previewDateRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 2px;
+}
+
+.previewDate {
+  font-size: 14px;
+  font-weight: bold;
+  color: #89350c;
+}
+
+.previewInfo {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.previewLabel {
+  font-size: 12px;
+  color: #89350c;
+  font-weight: 500;
+}
+
+.previewSymptoms {
+  font-size: 12px;
+  color: #89350c;
+  font-weight: 400;
+}
+
+.emergencyLabel {
+  display: inline-block;
+  padding: 2px 6px;
+  background: #FF8C42;
+  color: #FFF;
+  font-size: 10px;
+  font-weight: bold;
+  border-radius: 4px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.previewArrow {
+  font-size: 16px;
+  color: #FFB370;
+  margin-left: 8px;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.postPreviewItem:hover .previewArrow {
+  color: #FF8C42;
+  transform: translateX(2px);
+}
+
+/* 保留原有的完整項目樣式作為備用 */
+.postItem {
+  display: flex;
+  align-items: center;
+  background: #FFF;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.postItem:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.postIcon {
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffeed6;
+  border-radius: 16px;
+  margin-right: 20px;
+  border: 2px solid #FFB370;
+}
+
+.postIcon img {
+  width: 36px;
+  height: 36px;
+}
+
+.postContent {
+  flex: 1;
+}
+
+.postHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.postDate {
+  font-size: 18px;
+  font-weight: bold;
+  color: #89350c;
+}
+
+.emergencyTag {
+  display: inline-block;
+  padding: 4px 10px;
+  background: #FF6B6B;
+  color: #FFF;
+  font-size: 12px;
+  font-weight: bold;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(255, 107, 107, 0.3);
+}
+
+.postSymptoms {
+  font-size: 15px;
+  color: #89350c;
+  opacity: 0.85;
+  font-weight: 500;
+}
+
+.postArrow {
+  font-size: 24px;
+  color: #FFB370;
+  opacity: 0.7;
+  transition: all 0.3s ease;
+}
+
+.postItem:hover .postArrow {
+  opacity: 1;
+  transform: translateX(4px);
+}
+
+/* 空狀態 */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.emptyIcon {
+  width: 100px;
+  height: 100px;
+  margin-bottom: 16px;
+  opacity: 0.6;
+}
+
+.emptyState p {
+  color: #888;
+  font-size: 16px;
+  margin: 0;
+}
+
+/* 手機版優化 */
+@media (max-width: 480px) {
+  .content {
+    padding: 0 15px 80px 15px;
+  }
+  
+  .header {
+    padding: 15px 0 12px 0;
+    gap: 10px;
+  }
+  
+  .title {
+    font-size: 1.3rem;
+  }
+  
+  .resultInfo {
+    padding: 12px 16px;
+  }
+  
+  .postItem {
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+  
+  .postIcon {
+    width: 48px;
+    height: 48px;
+    margin-right: 16px;
+  }
+  
+  .postIcon img {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .postDate {
+    font-size: 16px;
+  }
+  
+  .postSymptoms {
+    font-size: 14px;
+  }
+  
+  .postArrow {
+    font-size: 20px;
+  }
+  
+  .emptyState {
+    padding: 50px 15px;
+  }
+  
+  .emptyState p {
+    font-size: 15px;
+  }
+  
+  .emptyIcon {
+    width: 100px;
+    height: 100px;
+  }
+}
