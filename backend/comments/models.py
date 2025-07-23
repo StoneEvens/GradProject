@@ -3,6 +3,7 @@ from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from media.models import Image
+from social.models import PostFrame
 
 class Comment(models.Model):
     user = models.ForeignKey(
@@ -10,9 +11,12 @@ class Comment(models.Model):
         on_delete=models.CASCADE,
         related_name='comments'
     )
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    object_id = models.PositiveIntegerField()
-    content_object = GenericForeignKey('content_type', 'object_id')
+
+    postFrame = models.ForeignKey(
+        PostFrame,
+        on_delete=models.CASCADE,
+        related_name='comments'
+    )
 
     post_date = models.DateTimeField(auto_now_add=True)
     content = models.TextField()
@@ -25,18 +29,20 @@ class Comment(models.Model):
         on_delete=models.CASCADE,
         related_name='replies'
     )
-    depth = models.IntegerField(default=0)
-
-    mentioned_user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        null=True,
-        blank=True,
-        on_delete=models.SET_NULL,
-        related_name='mentioned_in_comments'
-    )
 
     def __str__(self):
         return f"Comment by {self.user.username} on {self.content_type} {self.object_id}"
+    
+    def get_comments(postFrame: PostFrame):
+        return Comment.objects.filter(postFrame=postFrame, parent=None).order_by('-popularity', '-post_date')
+    
+    def get_replies(parent_comment_id):
+        return Comment.objects.filter(parent_id=parent_comment_id).order_by('-popularity', '-post_date')
+    
+    def update_comment(self, content):
+        self.content = content
+        self.save()
+        return self
 
     def soft_delete(self):
         """軟刪除評論：清空內容，重置熱度，並刪除關聯圖片。"""
