@@ -11344,3 +11344,9 @@ INFO 2025-07-17 22:20:09,303 basehttp 11668 24176 "GET /api/v1/accounts/me/ HTTP
 INFO 2025-07-17 22:20:09,306 basehttp 11668 13784 "GET /api/v1/pets/my-pets/ HTTP/1.1" 200 495
 INFO 2025-07-17 22:20:09,314 basehttp 11668 24176 "GET /api/v1/accounts/me/ HTTP/1.1" 200 255
 INFO 2025-07-17 22:20:09,314 basehttp 11668 13784 "GET /api/v1/pets/my-pets/ HTTP/1.1" 200 495
+INFO 2025-07-24 13:58:08,872 autoreload 1576 13408 Watching for file changes with StatReloader
+INFO 2025-07-24 13:59:13,538 autoreload 1576 13408 C:\Users\Steven\GradProject\backend\comments\admin.py changed, reloading.
+INFO 2025-07-24 13:59:14,950 autoreload 18192 8328 Watching for file changes with StatReloader
+INFO 2025-07-24 13:59:28,454 autoreload 18192 8328 C:\Users\Steven\GradProject\backend\comments\admin.py changed, reloading.
+INFO 2025-07-24 13:59:29,843 autoreload 21580 5064 Watching for file changes with StatReloader
+INFO 2025-07-24 14:00:38,260 autoreload 19440 5152 Watching for file changes with StatReloader
