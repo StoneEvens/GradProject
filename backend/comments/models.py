@@ -14,6 +14,8 @@ class Comment(models.Model):
 
     postFrame = models.ForeignKey(
         PostFrame,
+        null=True,
+        blank=True,
         on_delete=models.CASCADE,
         related_name='comments'
     )
