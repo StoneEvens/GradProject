@@ -33,7 +33,7 @@ class Comment(models.Model):
     )
 
     def __str__(self):
-        return f"Comment by {self.user.username} on {self.content_type} {self.object_id}"
+        return f"Comment by {self.user.username} on {self.parent}"
     
     def get_comments(postFrame: PostFrame):
         return Comment.objects.filter(postFrame=postFrame, parent=None).order_by('-popularity', '-post_date')

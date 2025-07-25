@@ -14,6 +14,7 @@ class CommentPagination(PageNumberPagination):
     max_page_size = 100
 
 class PostCommentsView(generics.ListCreateAPIView):
+    serializer_class = CommentSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     pagination_class = CommentPagination
     
@@ -22,22 +23,17 @@ class PostCommentsView(generics.ListCreateAPIView):
         postFrame = PostFrame.get_postFrames(postID=post_id)
         comments = Comment.get_comments(postFrame)
 
-        serializer = CommentSerializer(comments, many=True)
-        
-        return Response(
-            serializer.data,
-            status=drf_status.HTTP_200_OK
-        )
+        return comments
     
-    def perform_create(self):
+    def perform_create(self, serializer):
         post_id = self.kwargs.get('post_id')
         postFrame = get_object_or_404(PostFrame, id=post_id)
         
         # 建立頂層評論 (depth=0, parent=None)
-        CommentSerializer.save(
+        serializer.save(
             user=self.request.user,
             postFrame=postFrame,
-            content = self.request.data.get('content', ''),
+            content=self.request.data.get('content', ''),
             parent=None
         )
 
