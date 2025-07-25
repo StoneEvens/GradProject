@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import ReactDOM from 'react-dom';
 import { useLocation } from 'react-router-dom';
 import Post from './Post';
 import Notification from './Notification';
 import { getUserPosts } from '../services/socialService';
 import styles from '../styles/PostList.module.css';
+import PostComments from './PostComments';
 
 const PostList = ({ 
   posts = [],
@@ -29,6 +31,8 @@ const PostList = ({
   const location = useLocation();
   const [notification, setNotification] = useState('');
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [postID, setPostID] = useState(null);
   
   // 用戶貼文相關狀態
   const [userPosts, setUserPosts] = useState([]);
@@ -239,11 +243,16 @@ const PostList = ({
   };
 
   // 處理留言
-  const handleComment = (postId) => {
-    if (onComment) {
-      onComment(postId);
-    }
+  const handleComment = (postID) => {
+    setIsOpen(true);
+    setPostID(postID);
+  }
+
+  const handleClose = () => {
+    setIsOpen(false);
+    setPostID(null);
   };
+
 
   // 處理收藏 - 可選的通知回調
   const handleSave = (postId, isSaved) => {
@@ -340,12 +349,16 @@ const PostList = ({
             <Post
               postData={post}
               onLike={handleLike}
-              onComment={handleComment}
+              onComment={() => handleComment(post.id || post.post_id)}
               onSave={handleSave}
               onUserClick={handleUserClick}
               onHashtagClick={onHashtagClick}
               isInteractive={true}
               showFullDescription={true}
+            />
+            <PostComments
+              comments={post.comments || []}
+              isOpen={true}
             />
           </div>
         ))}
@@ -365,6 +378,14 @@ const PostList = ({
           <p>- 沒有更多貼文了 -</p>
         </div>
       )}
+
+      <PostComments
+        isOpen={isOpen}
+        postID={postID}
+        handleClose={handleClose}
+      >
+      </PostComments>
+
     </div>
   );
 };
