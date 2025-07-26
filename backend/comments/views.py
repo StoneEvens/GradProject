@@ -95,18 +95,13 @@ class CommentReplyView(generics.ListCreateAPIView):
         comment = get_object_or_404(Comment, id=comment_id)
         
         # 獲取所有直接回覆(深度+1)
-        replies = Comment.get_replies(parent_comment_id=comment.id)
-        serializer = CommentReplySerializer(replies, many=True)
-
-        return Response(
-            serializer.data,
-            status=drf_status.HTTP_200_OK
-        )
+        replies = Comment.get_replies(comment)
+        return replies
     
     def perform_create(self, serializer):
         comment_id = self.kwargs.get('comment_id')
         comment = get_object_or_404(Comment, id=comment_id)
-        
+
         # 建立回覆，繼承父評論的content_type和object_id
         serializer.save(
             user=self.request.user,
