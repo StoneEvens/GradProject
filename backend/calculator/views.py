@@ -14,6 +14,8 @@ import io
 from pets.models import Pet
 from feeds.models import Feed
 from .serializers import PetSerializer
+from ocrapp.models import HealthReport
+from ocrapp.views import convert_ocr_to_health_data
 from feeds.serializers import FeedSerializer
 from django.contrib.auth import get_user_model
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -226,63 +228,6 @@ load_dotenv()
 api_key = os.getenv('OPENAI_API_KEY')
 client = OpenAI(api_key=api_key)
 
-def convert_ocr_to_health_data(ocr_result):
-    FIELD_CHINESE_TO_ENGLISH = {
-        "白血球計數": "WBC",
-        "紅血球計數": "RBC",
-        "血紅蛋白": "HGB",
-        "血比容": "PCV",
-        "平均紅血球體積": "MCV",
-        "平均紅血球血紅蛋白量": "MCH",
-        "平均紅血球血紅蛋白濃度": "MCHC",
-        "紅血球分布寬度": "RDW",
-        "嗜中性球計數": "Neutrophils",
-        "淋巴球計數": "Lymphocytes",
-        "單核球計數": "Monocytes",
-        "嗜酸性球計數": "Eosinophils",
-        "嗜鹼性球計數": "Basophils",
-        "血小板計數": "Platelet",
-        "網狀紅血球計數": "Reticulocytes",
-        "白蛋白": "Albumin",
-        "球蛋白": "Globulin",
-        "總蛋白": "Total Protein",
-        "丙氨酸轉氨酶": "ALT",
-        "天門冬酸轉氨酶": "AST",
-        "鹼性磷酸酶": "ALP",
-        "血中尿素氮": "BUN",
-        "肌酸酐": "Creatinine",
-        "葡萄糖": "Glucose",
-        "磷": "Phosphorus",
-        "尿比重": "USG",
-        "尿液酸鹼值": "Urine pH",
-        "尿中紅血球": "Urine RBC",
-        "尿中白血球": "Urine WBC",
-        "尿蛋白／肌酐比值": "UPC",
-        "總甲狀腺素": "T4",
-        "胰臟特異性脂酶": "Pancreatic Lipase",
-        "C-反應蛋白": "CRP",
-        "血清淀粉樣蛋白A": "Serum Amyloid A"
-    }
-
-    converted = []
-    for chinese_field, value_unit in ocr_result.items():
-        if value_unit is None:
-            continue
-        english_field = FIELD_CHINESE_TO_ENGLISH.get(chinese_field)
-        if not english_field:
-            continue
-
-        value_str = value_unit.get("result", "").replace(",", "")
-        try:
-            value = float(value_str)
-        except ValueError:
-            continue
-
-        converted.append({
-            "英文名稱": english_field,
-            "檢查結果": value
-        })
-    return converted
 
 class PetNutritionCalculator(APIView):
     permission_classes = [AllowAny]
@@ -310,6 +255,7 @@ class PetNutritionCalculator(APIView):
     )
     def post(self, request):
         data = request.data
+        pet_id = data.get('pet_id')
         pet_type = data.get('pet_type')
         life_stage = data.get('life_stage')
         weight = float(data.get('weight'))
@@ -335,37 +281,30 @@ class PetNutritionCalculator(APIView):
         # 建議攝取營養素
         recommended = self.calculate_recommended_nutrients(pet_type, daily_ME)
 
-        # 上傳健康報告
         # health_report_raw = request.FILES.get('health_report')
-        # health_data = json.load(health_report_raw) if health_report_raw else {}
-        # 讀取 OCR 結果 JSON
-        # health_report_raw = request.FILES.get('health_report')
-        # health_data = {}
-
-        # if health_report_raw:
-        #     raw_json = json.load(health_report_raw)
-
-        #     # 判斷是否來自 OCR
-        #     if 'extracted_results' in raw_json:
-        #         ocr_result = raw_json['extracted_results']
-        #         health_data = convert_ocr_to_health_data(ocr_result)
-        #     else:
-        #         health_data = raw_json
-        health_report_raw = request.FILES.get('health_report')
         health_data = []
 
-        if health_report_raw:
-            try:
-                # raw_json = json.load(health_report_raw)
-                raw_json = json.load(io.TextIOWrapper(health_report_raw, encoding='utf-8'))
+        # if health_report_raw:
+        #     try:
+        #         # raw_json = json.load(health_report_raw)
+        #         raw_json = json.load(io.TextIOWrapper(health_report_raw, encoding='utf-8'))
+        #         if 'extracted_results' in raw_json:
+        #             ocr_result = raw_json['extracted_results']
+        #             health_data = convert_ocr_to_health_data(ocr_result)
+        #         else:
+        #             health_data = raw_json
+        #     except json.JSONDecodeError:
+        #         return Response({'error': '健康報告 JSON 格式錯誤。'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if pet_id:
+            latest_report = HealthReport.objects.filter(pet_id=pet_id).order_by('-created_at').first()
+            if latest_report:
+                raw_json = latest_report.data
                 if 'extracted_results' in raw_json:
                     ocr_result = raw_json['extracted_results']
                     health_data = convert_ocr_to_health_data(ocr_result)
                 else:
                     health_data = raw_json
-            except json.JSONDecodeError:
-                return Response({'error': '健康報告 JSON 格式錯誤。'}, status=status.HTTP_400_BAD_REQUEST)
-
 
 
 
@@ -472,20 +411,6 @@ class PetNutritionCalculator(APIView):
 
         return result
 
-
-    # def find_abnormal_values(self, pet_type, stage, report, reference):
-    #     result = {}
-    #     stage_key = "幼年" if stage in ["puppy", "kitten"] else "成犬" if pet_type == "dog" else "成貓"
-    #     ref_ranges = reference.get(pet_type, {}).get(stage_key, {})
-
-    #     for key, value in report.items():
-    #         if key in ref_ranges:
-    #             low, high = ref_ranges[key]["min"], ref_ranges[key]["max"]
-    #             if value < low:
-    #                 result[key] = "低於標準"
-    #             elif value > high:
-    #                 result[key] = "高於標準"
-    #     return result
 
     def adjust_recommendation_by_health(self, rec, abnormalities):
         rec = rec.copy()
