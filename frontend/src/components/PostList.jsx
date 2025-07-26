@@ -31,7 +31,7 @@ const PostList = ({
   const location = useLocation();
   const [notification, setNotification] = useState('');
   const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [isOpen, setIsOpen] = useState(false);
+  const [openComments, setIsOpen] = useState(false);
   const [postID, setPostID] = useState(null);
   
   // 用戶貼文相關狀態
@@ -358,7 +358,6 @@ const PostList = ({
             />
             <PostComments
               comments={post.comments || []}
-              isOpen={true}
             />
           </div>
         ))}
@@ -379,12 +378,10 @@ const PostList = ({
         </div>
       )}
 
-      <PostComments
-        isOpen={isOpen}
+      {openComments ? <PostComments
         postID={postID}
         handleClose={handleClose}
-      >
-      </PostComments>
+      /> : null}
 
     </div>
   );

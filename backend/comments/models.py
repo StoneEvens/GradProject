@@ -33,14 +33,14 @@ class Comment(models.Model):
     )
 
     def __str__(self):
-        return f"Comment by {self.user.username} on {self.parent}"
+        return f"Comment {self.id} by {self.user.username}"
     
     def get_comments(postFrame: PostFrame):
         return Comment.objects.filter(postFrame=postFrame, parent=None).order_by('-popularity', '-post_date')
     
-    def get_replies(parent_comment_id):
-        return Comment.objects.filter(parent_id=parent_comment_id).order_by('-popularity', '-post_date')
-    
+    def get_replies(parent):
+        return Comment.objects.filter(parent=parent).order_by('-popularity', '-post_date')
+
     def update_comment(self, content):
         self.content = content
         self.save()
