@@ -179,7 +179,10 @@ const PostComments = ({user, postID, previewComments, handleClose}) => {
                 <div className="comment-block">
                   <div className="comment-header">
                     <strong>{comment.user.username}</strong>
-                    <span className="comment-date">{new Date(comment.post_date).toLocaleDateString()}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                      <span className="comment-date">{new Date(comment.post_date).toLocaleDateString()}</span>
+                      <button className="like-button" onClick={() => console.log(comment.isAuthor ? 'Edit button clicked' : 'Like button clicked')}>{comment.isAuthor ? 'Edit' : 'Like'}</button>
+                    </div>
                   </div>
                   <p className="comment-text">{comment.content}</p>
                   <div className="comment-actions">
@@ -218,7 +221,10 @@ const PostComments = ({user, postID, previewComments, handleClose}) => {
         <div key={comment.id} className="comment-block">
         <div className="comment-header">
           <strong>{comment.user.username}</strong>
-          <span className="comment-date">{new Date(comment.post_date).toLocaleDateString()}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+            <span className="comment-date">{new Date(comment.post_date).toLocaleDateString()}</span>
+            <button className="like-button" onClick={() => console.log(comment.isAuthor ? 'Edit button clicked' : 'Like button clicked')}>{comment.isAuthor ? 'Edit' : 'Like'}</button>
+          </div>
         </div>
         <p className="comment-text">{comment.content}</p>
         </div>

@@ -89,6 +89,7 @@
 .comment-header {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   margin-bottom: 5px;
 }
 
@@ -97,7 +98,7 @@
   color: #333;
 }
 
-.show-replies-button, .reply-button {
+.like-button, .show-replies-button, .reply-button {
   background-color: #ffeed6;
   border: none;
   border-radius: 8px;
@@ -105,23 +106,22 @@
   font-size: 14px;
   cursor: pointer;
   transition: background-color 0.2s;
+  color: #333;
 }
 
-.show-replies-button:hover, .reply-button:hover {
+.like-button:hover, .show-replies-button:hover, .reply-button:hover {
   background-color: #ffdbaa;
 }
 
 .comment-actions {
   display: flex;
   justify-content: space-between;
-  margin-top: 8px; /* Add some space between the comment text and buttons */
+  margin-top: 8px;
+  gap: 5px;
 }
 
-.show-replies-button {
-  background-color: #F08651;
-  color: white;
+.show-replies-button, .reply-button {
   flex: 1;
-  margin-right: 5px;
   text-align: center;
 }
 
@@ -181,6 +181,15 @@
 
 .closeButton:hover {
   color: #F08651;
+}
+
+.like-button {
+  background-color: #F08651;
+  color: white;
+}
+
+.like-button:hover {
+  background-color: #de7745;
 }
 
 /* Responsive Design */

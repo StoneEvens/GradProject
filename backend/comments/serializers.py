@@ -16,12 +16,13 @@ class ImageSerializer(serializers.ModelSerializer):
 class CommentReplySerializer(serializers.ModelSerializer):
     user = UserBasicSerializer(read_only=True)
     images = serializers.SerializerMethodField()
+    isAuthor = serializers.SerializerMethodField()
     
     class Meta:
         model = Comment
         fields = [
             'id', 'user', 'content', 'post_date', 'popularity', 
-            'parent', 'images'
+            'parent', 'images', 'isAuthor'
         ]
     
     def get_images(self, obj):
@@ -36,16 +37,24 @@ class CommentReplySerializer(serializers.ModelSerializer):
             object_id=obj.id
         ).order_by('sort_order')
         return ImageSerializer(images, many=True).data
+    
+    def get_isAuthor(self, obj):
+        """檢查當前用戶是否為評論作者"""
+        request = self.context.get('request')
+        if request and hasattr(request, 'user'):
+            return obj.user == request.user
+        return False
 
 class CommentSerializer(serializers.ModelSerializer):
     user = UserBasicSerializer(read_only=True)
     images = serializers.SerializerMethodField()
+    isAuthor = serializers.SerializerMethodField()
     
     class Meta:
         model = Comment
         fields = [
             'id', 'user', 'content', 'post_date', 'popularity', 
-            'parent', 'images'
+            'parent', 'images', 'isAuthor'
         ]
         read_only_fields = ['id', 'post_date', 'popularity']
     
@@ -61,3 +70,10 @@ class CommentSerializer(serializers.ModelSerializer):
             object_id=obj.id
         ).order_by('sort_order')
         return ImageSerializer(images, many=True).data
+    
+    def get_isAuthor(self, obj):
+        """檢查當前用戶是否為評論作者"""
+        request = self.context.get('request')
+        if request and hasattr(request, 'user'):
+            return obj.user == request.user
+        return False
