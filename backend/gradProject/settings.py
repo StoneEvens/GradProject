@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     "media",
     "articleRecommendation",
     "calculator",
+    "ocrapp",
 ]
 
 MIDDLEWARE = [
