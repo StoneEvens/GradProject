@@ -393,7 +393,7 @@ const RegisterPage = () => {
         )}
         <div className={styles.canvasArea}>
           <Canvas className={styles.animationContainer} camera={{ position: [0, 0, 1], fov: 45 }}>
-            <Environment preset="apartment" intensity={0.0015} />
+            {/* <Environment preset="apartment" intensity={0.0015} /> */}
             <ambientLight intensity={0.6} />
             <directionalLight position={[5, 5, 5]} intensity={1} />
             <RegisterPageAnimation />
