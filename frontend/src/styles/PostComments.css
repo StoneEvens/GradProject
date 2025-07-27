@@ -192,6 +192,49 @@
   background-color: #de7745;
 }
 
+/* Header Info Container */
+.comment-header-info {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* Edit Container */
+.edit-container {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+}
+
+/* Edit Textarea */
+.edit-textarea {
+  flex: 1;
+  min-height: 80px;
+  resize: none;
+}
+
+/* Button Group */
+.button-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+/* Reply Container */
+.reply-container {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+  margin-top: 10px;
+}
+
+/* Reply Textarea */
+.reply-textarea {
+  flex: 1;
+  min-height: 80px;
+  resize: none;
+}
+
 /* Responsive Design */
 @media (max-width: 480px) {
   .modalContainer {
