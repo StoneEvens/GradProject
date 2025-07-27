@@ -361,8 +361,7 @@ export default function Home() {
             }}
           >
             <color attach="background" args={['#ffca9c']} />
-            
-            <Environment preset="apartment" intensity={0.0015} />
+            <Environment files="/assets/textures/indoor_office_2k.exr" background={false} intensity={2} />
             <ambientLight intensity={0.00001} color="#fff5e6" />
             <directionalLight
               position={[0, 50, 0]}
