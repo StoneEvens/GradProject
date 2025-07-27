@@ -11,9 +11,16 @@ const PostComments = ({user, postID, previewComments, handleClose}) => {
     const [isCommenting, setIsCommenting] = useState(false);
     const [replyingCommentID, setReplyingCommentID] = useState(null);
     const [replies, setReplies] = useState({});
+    const [editingCommentID, setEditingCommentID] = useState(null);
+    const [editText, setEditText] = useState('');
+    const [replyText, setReplyText] = useState('');
 
     const handleCommentChange = (event) => {
         setCommentText(event.target.value);
+    };
+
+    const handleReplyChange = (event) => {
+        setReplyText(event.target.value);
     };
 
     const submitComment = async () => {
@@ -27,8 +34,8 @@ const PostComments = ({user, postID, previewComments, handleClose}) => {
     };
 
     const submitReply = async () => {
-        if (commentText.trim()) {
-            const newReply = await createReply(postID, user, commentText, replyingCommentID);
+        if (replyText.trim()) {
+            const newReply = await createReply(postID, user, replyText, replyingCommentID);
             if (newReply) {
                 setComments((prevComments) =>
                     prevComments.map((comment) =>
@@ -42,7 +49,7 @@ const PostComments = ({user, postID, previewComments, handleClose}) => {
                     ...prev,
                     [replyingCommentID]: [...(prev[replyingCommentID] || []), newReply]
                 }));
-                setCommentText('');
+                setReplyText('');
                 setReplyingCommentID(null);
                 setIsCommenting(false);
             }
@@ -65,10 +72,8 @@ const PostComments = ({user, postID, previewComments, handleClose}) => {
         }
     };
 
-    const fetchReplies = async (commentID, curCommentID) => {
+    const fetchReplies = async (commentID) => {
       if (!commentID) return [];
-
-      if (commentID != curCommentID) return [];
 
       try {
         const response = await axios.get(`/comments/comments/${commentID}/replies/`, {
@@ -120,14 +125,87 @@ const PostComments = ({user, postID, previewComments, handleClose}) => {
         }
     };
 
-    const updateReply = async (commentID) => {
+    const updateComment = async (commentID, updatedContent) => {
+      try {
+      const response = await axios.put(`/comments/comments/${commentID}/`, {
+        content: updatedContent,
+      }, {
+        headers: {
+        'Content-Type': 'application/json',
+        },
+      });
+
+      // Update the comment in the state
+      if (postID) {
+        setComments((prevComments) =>
+          prevComments.map((comment) =>
+          comment.id === commentID ? { ...comment, content: updatedContent } : comment
+          )
+        );
+      }
+
+      // Update the comment in the previewComments if available
+      if (previewComments) {
+        previewComments.forEach((comment) => {
+          if (comment.id === commentID) {
+            comment.content = updatedContent;
+          }
+        });
+      }
+
+      // Leave edit mode
+      setEditingCommentID(null);
+      setEditText('');
+
+      return response.data;
+      } catch (error) {
+      console.error('Error updating comment:', error);
+      return null;
+      }
+    };
+
+    const deleteComment = async (commentID) => {
+      try {
+        await axios.delete(`/comments/comments/${commentID}/`, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        setEditingCommentID(null);
+        setEditText('');
+
+        if (postID) {
+          setComments((prevComments) =>
+          prevComments.map((comment) =>
+          comment.id === commentID ? { ...comment, content: "[此評論已刪除]" } : comment
+          )
+        );
+        }
+
+        if (previewComments) {
+          previewComments.forEach((comment) => {
+            if (comment.id === commentID) {
+              comment.content = "[此評論已刪除]";
+            }
+          });
+        }
+
+
+      } catch (error) {
+        console.error('Error deleting comment:', error);
+      }
+    };
+
+    const displayReply = async (commentID) => {
         if (clickedCommentID === commentID) {
             setClickedCommentID(null);
+            setReplies([]);
         } else {
             setClickedCommentID(commentID);
             // Fetch replies when showing them
             if (!replies[commentID]) {
-                const fetchedReplies = await fetchReplies(commentID, commentID);
+                const fetchedReplies = await fetchReplies(commentID);
                 setReplies(prev => ({
                     ...prev,
                     [commentID]: fetchedReplies
@@ -136,14 +214,40 @@ const PostComments = ({user, postID, previewComments, handleClose}) => {
         }
     };
 
-    const toggleIsCommenting = (commentID) => {
+    const toggleIsCommenting = async (commentID) => {
         if (isCommenting) {
             setIsCommenting(false);
             setReplyingCommentID(null);
         } else {
             setIsCommenting(true);
             setReplyingCommentID(commentID);
+            setClickedCommentID(commentID);
+            // Fetch replies when showing them
+            if (!replies[commentID]) {
+                const fetchedReplies = await fetchReplies(commentID);
+                setReplies(prev => ({
+                    ...prev,
+                    [commentID]: fetchedReplies
+                }));
+            }
         }
+    };
+
+    const startEditing = (comment) => {
+        if (editingCommentID === comment.id) {
+            // If already editing this comment, stop editing
+            setEditingCommentID(null);
+            setEditText('');
+        } else {
+            // Start editing this comment
+            setEditingCommentID(comment.id);
+            setEditText(comment.content);
+            console.log('Editing comment:', comment.id);
+        }
+    };
+
+    const handleEditChange = (event) => {
+        setEditText(event.target.value);
     };
 
     //使用React生成的function要在這邊使用
@@ -181,14 +285,50 @@ const PostComments = ({user, postID, previewComments, handleClose}) => {
                     <strong>{comment.user.username}</strong>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
                       <span className="comment-date">{new Date(comment.post_date).toLocaleDateString()}</span>
-                      <button className="like-button" onClick={() => console.log(comment.isAuthor ? 'Edit button clicked' : 'Like button clicked')}>{comment.isAuthor ? 'Edit' : 'Like'}</button>
+                      {comment.content !== "[此評論已刪除]" && (
+                        <button className="like-button" onClick={() => comment.isAuthor ? startEditing(comment) : console.log('Like button clicked')}>
+                          {comment.isAuthor ? (editingCommentID === comment.id ? 'Cancel' : 'Edit') : 'Like'}
+                        </button>
+                      )}
                     </div>
                   </div>
-                  <p className="comment-text">{comment.content}</p>
+                  {editingCommentID === comment.id ? (
+                    <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-end' }}>
+                      <textarea
+                        placeholder='Edit your comment...'
+                        className="comment-input"
+                        value={editText}
+                        onChange={handleEditChange}
+                        style={{ flex: 1, minHeight: '80px', resize: 'none' }}
+                      />
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                        <button className="submit-comment-button" onClick={() => deleteComment(comment.id)}>Delete</button>
+                        <button className="submit-comment-button" onClick={() => updateComment(comment.id, editText)}>Save</button>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="comment-text">{comment.content}</p>
+                  )}
                   <div className="comment-actions">
-                    <button className='show-replies-button' onClick={() => updateReply(comment.id)}>{clickedCommentID === comment.id ? 'Hide Replies' : 'Show Replies'}</button>
+                    <button className='show-replies-button' onClick={() => displayReply(comment.id)}>{clickedCommentID === comment.id ? 'Hide Replies' : 'Show Replies'}</button>
                     <button className="reply-button" onClick={() => toggleIsCommenting(comment.id)}>{replyingCommentID === comment.id ? 'Cancel Reply' : 'Reply'}</button>
                   </div>
+
+                  {replyingCommentID === comment.id && isCommenting ? (
+                    <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-end', marginTop: '10px' }}>
+                      <textarea
+                        placeholder='Write your reply...'
+                        className="comment-input"
+                        value={replyText}
+                        onChange={handleReplyChange}
+                        style={{ flex: 1, minHeight: '80px', resize: 'none' }}
+                      />
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                        <button className="submit-comment-button" onClick={submitReply}>Reply</button>
+                      </div>
+                    </div>
+                  ) : null}
+
                   {clickedCommentID === comment.id ? <PostComments
                     previewComments={replies[comment.id] || []}
                   /> : null}
@@ -200,13 +340,13 @@ const PostComments = ({user, postID, previewComments, handleClose}) => {
         <div className="modalFooter">
           <div className="new-comment">
             <textarea
-              placeholder={isCommenting ? 'Write your reply...' : 'Write a comment...'}
+              placeholder='Write a comment...'
               className="comment-input"
               value={commentText}
               onChange={handleCommentChange}
             ></textarea>
-            <button className="submit-comment-button" onClick={isCommenting ? submitReply : submitComment}>
-              {isCommenting ? 'Reply' : 'Comment'}
+            <button className="submit-comment-button" onClick={submitComment}>
+              Comment
             </button>
           </div>
         </div>
@@ -223,10 +363,30 @@ const PostComments = ({user, postID, previewComments, handleClose}) => {
           <strong>{comment.user.username}</strong>
           <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
             <span className="comment-date">{new Date(comment.post_date).toLocaleDateString()}</span>
-            <button className="like-button" onClick={() => console.log(comment.isAuthor ? 'Edit button clicked' : 'Like button clicked')}>{comment.isAuthor ? 'Edit' : 'Like'}</button>
+            {comment.content !== "[此評論已刪除]" && (
+              <button className="like-button" onClick={() => comment.isAuthor ? startEditing(comment) : console.log('Like button clicked')}>
+                {comment.isAuthor ? (editingCommentID === comment.id ? 'Cancel' : 'Edit') : 'Like'}
+              </button>
+            )}
           </div>
         </div>
-        <p className="comment-text">{comment.content}</p>
+        {editingCommentID === comment.id ? (
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-end' }}>
+            <textarea
+              placeholder='Edit your comment...'
+              className="comment-input"
+              value={editText}
+              onChange={handleEditChange}
+              style={{ flex: 1, minHeight: '80px', resize: 'none' }}
+            />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+              <button className="submit-comment-button" onClick={() => deleteComment(comment.id)}>Delete</button>
+              <button className="submit-comment-button" onClick={() => updateComment(comment.id, editText)}>Save</button>
+            </div>
+          </div>
+        ) : (
+          <p className="comment-text">{comment.content}</p>
+        )}
         </div>
       ))
       )}
