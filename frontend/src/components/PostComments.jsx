@@ -269,62 +269,60 @@ const PostComments = ({user, postID, previewComments, handleClose}) => {
     <div className="modalOverlay" onClick={() => handleClose()}>
       <div className="modalContainer" onClick={(e) => e.stopPropagation()}>
         <div className="modalHeader">
-          <h2>Comments for Post {postID}</h2>
+          <h2>留言區</h2>
           <button className="closeButton" onClick={() => handleClose()}>×</button>
         </div>
         <div className="modalBody">
           <div className={`comments-container ${comments.length === 0 ? 'empty' : ''}`}>
             {comments.length === 0 ? (
               <div className='comment-block'>
-                <p>No comments available.</p>
+                <p>目前沒有任何留言</p>
               </div>
             ) : (
               comments.map((comment) => (
                 <div className="comment-block">
                   <div className="comment-header">
                     <strong>{comment.user.username}</strong>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                    <div className="comment-header-info">
                       <span className="comment-date">{new Date(comment.post_date).toLocaleDateString()}</span>
                       {comment.content !== "[此評論已刪除]" && (
                         <button className="like-button" onClick={() => comment.isAuthor ? startEditing(comment) : console.log('Like button clicked')}>
-                          {comment.isAuthor ? (editingCommentID === comment.id ? 'Cancel' : 'Edit') : 'Like'}
+                          {comment.isAuthor ? (editingCommentID === comment.id ? '取消' : '編輯') : '點讚'}
                         </button>
                       )}
                     </div>
                   </div>
                   {editingCommentID === comment.id ? (
-                    <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-end' }}>
+                    <div className="edit-container">
                       <textarea
-                        placeholder='Edit your comment...'
-                        className="comment-input"
+                        placeholder='編輯留言...'
+                        className="comment-input edit-textarea"
                         value={editText}
                         onChange={handleEditChange}
-                        style={{ flex: 1, minHeight: '80px', resize: 'none' }}
                       />
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                        <button className="submit-comment-button" onClick={() => deleteComment(comment.id)}>Delete</button>
-                        <button className="submit-comment-button" onClick={() => updateComment(comment.id, editText)}>Save</button>
+                      <div className="button-group">
+                        <button className="submit-comment-button" onClick={() => deleteComment(comment.id)}>刪除</button>
+                        <button className="submit-comment-button" onClick={() => updateComment(comment.id, editText)}>儲存</button>
                       </div>
                     </div>
                   ) : (
                     <p className="comment-text">{comment.content}</p>
                   )}
                   <div className="comment-actions">
-                    <button className='show-replies-button' onClick={() => displayReply(comment.id)}>{clickedCommentID === comment.id ? 'Hide Replies' : 'Show Replies'}</button>
-                    <button className="reply-button" onClick={() => toggleIsCommenting(comment.id)}>{replyingCommentID === comment.id ? 'Cancel Reply' : 'Reply'}</button>
+                    <button className='show-replies-button' onClick={() => displayReply(comment.id)}>{clickedCommentID === comment.id ? '隱藏回覆' : '顯示回覆'}</button>
+                    <button className="reply-button" onClick={() => toggleIsCommenting(comment.id)}>{replyingCommentID === comment.id ? '取消回覆' : '回覆'}</button>
                   </div>
 
                   {replyingCommentID === comment.id && isCommenting ? (
-                    <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-end', marginTop: '10px' }}>
+                    <div className="reply-container">
                       <textarea
-                        placeholder='Write your reply...'
-                        className="comment-input"
+                        placeholder='撰寫回復...'
+                        className="comment-input reply-textarea"
                         value={replyText}
                         onChange={handleReplyChange}
-                        style={{ flex: 1, minHeight: '80px', resize: 'none' }}
                       />
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                        <button className="submit-comment-button" onClick={submitReply}>Reply</button>
+                      <div className="button-group">
+                        <button className="submit-comment-button" onClick={submitReply}>回覆</button>
                       </div>
                     </div>
                   ) : null}
@@ -340,13 +338,13 @@ const PostComments = ({user, postID, previewComments, handleClose}) => {
         <div className="modalFooter">
           <div className="new-comment">
             <textarea
-              placeholder='Write a comment...'
+              placeholder='撰寫留言...'
               className="comment-input"
               value={commentText}
               onChange={handleCommentChange}
             ></textarea>
             <button className="submit-comment-button" onClick={submitComment}>
-              Comment
+              送出留言
             </button>
           </div>
         </div>
@@ -355,33 +353,32 @@ const PostComments = ({user, postID, previewComments, handleClose}) => {
   ) : (
     <div className="comments-container">
       {!previewComments || previewComments.length === 0 ? (
-      <p>No comments available.</p>
+      <p>目前沒有任何內容</p>
       ) : (
       previewComments.map((comment) => (
         <div key={comment.id} className="comment-block">
         <div className="comment-header">
           <strong>{comment.user.username}</strong>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+          <div className="comment-header-info">
             <span className="comment-date">{new Date(comment.post_date).toLocaleDateString()}</span>
             {comment.content !== "[此評論已刪除]" && (
               <button className="like-button" onClick={() => comment.isAuthor ? startEditing(comment) : console.log('Like button clicked')}>
-                {comment.isAuthor ? (editingCommentID === comment.id ? 'Cancel' : 'Edit') : 'Like'}
+                {comment.isAuthor ? (editingCommentID === comment.id ? '取消' : '編輯') : '點讚'}
               </button>
             )}
           </div>
         </div>
         {editingCommentID === comment.id ? (
-          <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-end' }}>
+          <div className="edit-container">
             <textarea
-              placeholder='Edit your comment...'
-              className="comment-input"
+              placeholder='編輯留言...'
+              className="comment-input edit-textarea"
               value={editText}
               onChange={handleEditChange}
-              style={{ flex: 1, minHeight: '80px', resize: 'none' }}
             />
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-              <button className="submit-comment-button" onClick={() => deleteComment(comment.id)}>Delete</button>
-              <button className="submit-comment-button" onClick={() => updateComment(comment.id, editText)}>Save</button>
+            <div className="button-group">
+              <button className="submit-comment-button" onClick={() => deleteComment(comment.id)}>刪除</button>
+              <button className="submit-comment-button" onClick={() => updateComment(comment.id, editText)}>儲存</button>
             </div>
           </div>
         ) : (
