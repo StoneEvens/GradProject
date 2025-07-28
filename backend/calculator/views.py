@@ -32,7 +32,6 @@ class PetListByUser(APIView):
         pets = Pet.objects.filter(owner_id=user_id)
         serializer = PetSerializer(pets, many=True, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
-
 class PetCreateView(APIView):
     permission_classes = [AllowAny] 
     parser_classes = [FormParser, MultiPartParser]  # 新增解析 multipart/form-data 的支援
@@ -78,7 +77,6 @@ class PetCreateView(APIView):
                 return Response({"error": f"圖片上傳失敗：{msg}"}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response({"message": "寵物建立成功", "pet_id": pet.id, "pet_avatar": pet.pet_avatar}, status=status.HTTP_201_CREATED)
-
 class PetUpdateView(APIView):
     permission_classes = [AllowAny] 
     def post(self, request):
@@ -125,7 +123,6 @@ class PetUpdateView(APIView):
             "new_expect_adult_weight": pet.predicted_adult_weight,
             "new_weeks_of_lacation": pet.weeks_of_lactation
         }, status=status.HTTP_200_OK)
-
 class FeedListByUser(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -133,7 +130,6 @@ class FeedListByUser(APIView):
         feeds = Feed.objects.filter(user=request.user)
         serializer = FeedSerializer(feeds, many=True, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
-
 class FeedCreateView(APIView):
     permission_classes = [IsAuthenticated]
     parser_classes = [JSONParser, FormParser, MultiPartParser]
@@ -174,7 +170,6 @@ class FeedCreateView(APIView):
             import traceback
             traceback.print_exc()
             return Response({"error": f"建立 Feed 發生錯誤：{str(e)}"}, status=500)
-
 class FeedUpdateView(APIView):
     permission_classes = [AllowAny]
     parser_classes = [JSONParser, FormParser, MultiPartParser]
@@ -222,6 +217,8 @@ class FeedUpdateView(APIView):
             import traceback
             traceback.print_exc()
             return Response({"error": f"更新 Feed 發生錯誤：{str(e)}"}, status=500)
+
+
 
 # 載入 OpenAI API 金鑰
 load_dotenv()

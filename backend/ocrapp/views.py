@@ -10,6 +10,7 @@ from pets.models import Pet
 
 from google.cloud import vision
 from google.oauth2 import service_account
+from rest_framework.permissions import AllowAny, IsAuthenticated
 
 FIELD_ALIASES = {
     "白血球計數": ["白血球", "白血球 (WBC)", "白血球計數"],
@@ -49,6 +50,7 @@ FIELD_ALIASES = {
 }
 
 class OCRUploadView(APIView):
+    permission_classes = [AllowAny]
     parser_classes = (MultiPartParser, FormParser)
 
     @swagger_auto_schema(
