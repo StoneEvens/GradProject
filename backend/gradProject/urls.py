@@ -50,6 +50,7 @@ urlpatterns = [
     path(f'{api_v1_prefix}comments/', include('comments.urls')),
     path(f'{api_v1_prefix}media/', include('media.urls')),
     path(f'{api_v1_prefix}article_recommendations/', include('articleRecommendation.urls')),
+    path(f'{api_v1_prefix}ocr/', include('ocrapp.urls')),
 
     # Swagger 文檔
     re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
