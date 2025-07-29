@@ -1,7 +1,7 @@
 from django.db import models
 from django.conf import settings
 from accounts.models import CustomUser
-from social.models import PostFrame
+from social.models import Interactables
 
 # === 使用者互動記錄 (like/save/upvote/downvote) ===
 class UserInteraction(models.Model):
@@ -18,8 +18,8 @@ class UserInteraction(models.Model):
         related_name='user_interaction'
     )
 
-    postFrame = models.ForeignKey(
-        PostFrame,
+    interactables = models.ForeignKey(
+        Interactables,
         on_delete=models.CASCADE,
         related_name='post_interaction',
         null=True
@@ -29,37 +29,44 @@ class UserInteraction(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ('user', 'postFrame', 'relation')
+        unique_together = ('user', 'interactables', 'relation')
 
     def __str__(self):
-        return f"{self.user.username} {self.relation} {self.postFrame.id if self.postFrame else 'None'}"
-    
+        return f"{self.user.username} {self.relation} {self.interactables.id if self.interactables else 'None'} {self.interactables}"
+
     @staticmethod
-    def check_user_interaction(user: CustomUser, postFrame: PostFrame):
+    def check_user_interaction(user: CustomUser, interactables: Interactables):
         return UserInteraction.objects.filter(
             user=user,
-            postFrame = postFrame
+            interactables=interactables
         )
     
     @staticmethod
-    def get_user_interaction(user: CustomUser, postFrame: PostFrame, relation:str):
+    def get_user_interactions(user: CustomUser, relation:str, interactables: Interactables = None):
+        if interactables is None:
+            return UserInteraction.objects.filter(
+                user=user,
+                relation=relation
+            )
+
         return UserInteraction.objects.filter(
             user=user,
-            postFrame = postFrame,
+            interactables=interactables,
             relation=relation
         ).first()
     
-    def delete_interaction(self, interaction):
-        interaction.delete()
+    def delete_interaction(self):
+        self.delete()
 
     @staticmethod
-    def create_interaction(user, postFrame, relation):
+    def create_interaction(user, interactables: Interactables, relation):
         try:
             UserInteraction.objects.create(
                 user=user,
-                postFrame=postFrame,
+                interactables=interactables,
                 relation=relation
             )
             return True
         except Exception as e:
+            print(f"Error creating interaction: {e}")
             return False

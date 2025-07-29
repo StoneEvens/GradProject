@@ -356,9 +356,6 @@ const PostList = ({
               isInteractive={true}
               showFullDescription={true}
             />
-            <PostComments
-              comments={post.comments || []}
-            />
           </div>
         ))}
       </div>
