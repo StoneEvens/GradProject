@@ -17,12 +17,13 @@ class CommentReplySerializer(serializers.ModelSerializer):
     user = UserBasicSerializer(read_only=True)
     images = serializers.SerializerMethodField()
     isAuthor = serializers.SerializerMethodField()
+    isLiked = serializers.SerializerMethodField()
     
     class Meta:
         model = Comment
         fields = [
-            'id', 'user', 'content', 'post_date', 'popularity', 
-            'parent', 'images', 'isAuthor'
+            'id', 'user', 'content', 'created_at', 'popularity', 
+            'parent', 'images', 'isAuthor', 'isLiked'
         ]
     
     def get_images(self, obj):
@@ -44,20 +45,34 @@ class CommentReplySerializer(serializers.ModelSerializer):
         if request and hasattr(request, 'user'):
             return obj.user == request.user
         return False
+    
+    def get_isLiked(self, obj):
+        """檢查當前用戶是否點讚了此評論"""
+        request = self.context.get('request')
+        if request and hasattr(request, 'user'):
+            user = request.user
+            interaction = UserInteraction.get_user_interactions(
+                user=user,
+                relation='liked',
+                interactables=obj
+            )
+            return interaction is not None
+        return False
 
 class CommentSerializer(serializers.ModelSerializer):
     user = UserBasicSerializer(read_only=True)
     images = serializers.SerializerMethodField()
     isAuthor = serializers.SerializerMethodField()
+    isLiked = serializers.SerializerMethodField()
     
     class Meta:
         model = Comment
         fields = [
-            'id', 'user', 'content', 'post_date', 'popularity', 
-            'parent', 'images', 'isAuthor'
+            'id', 'user', 'content', 'created_at', 'popularity', 
+            'parent', 'images', 'isAuthor', 'isLiked'
         ]
-        read_only_fields = ['id', 'post_date', 'popularity']
-    
+        read_only_fields = ['id', 'created_at', 'popularity']
+
     def get_images(self, obj):
         """獲取評論關聯的圖片"""
         # 如果是已刪除評論，不返回圖片
@@ -70,6 +85,19 @@ class CommentSerializer(serializers.ModelSerializer):
             object_id=obj.id
         ).order_by('sort_order')
         return ImageSerializer(images, many=True).data
+    
+    def get_isLiked(self, obj):
+        """檢查當前用戶是否點讚了此評論"""
+        request = self.context.get('request')
+        if request and hasattr(request, 'user'):
+            user = request.user
+            interaction = UserInteraction.get_user_interactions(
+                user=user,
+                relation='liked',
+                interactables=obj
+            )
+            return interaction is not None
+        return False
     
     def get_isAuthor(self, obj):
         """檢查當前用戶是否為評論作者"""
