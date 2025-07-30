@@ -255,3 +255,61 @@ def convert_ocr_to_health_data(ocr_result):
             "檢查結果": value
         })
     return converted
+
+class HealthReportDetailView(APIView):
+    permission_classes = [AllowAny]
+
+    @swagger_auto_schema(
+        operation_description="更新指定健康報告",
+        manual_parameters=[
+            openapi.Parameter('check_date', openapi.IN_FORM, type=openapi.TYPE_STRING, required=False, description='檢查日期 (YYYY-MM-DD)'),
+            openapi.Parameter('check_type', openapi.IN_FORM, type=openapi.TYPE_STRING, required=False, description='檢查類型 (cbc/biochemistry/urinalysis/other)'),
+            openapi.Parameter('check_location', openapi.IN_FORM, type=openapi.TYPE_STRING, required=False, description='檢查地點'),
+            openapi.Parameter('notes', openapi.IN_FORM, type=openapi.TYPE_STRING, required=False, description='備註'),
+            openapi.Parameter('data', openapi.IN_FORM, type=openapi.TYPE_STRING, required=False, description='健康數據 (JSON)')
+        ],
+        responses={200: "更新成功", 404: "找不到報告", 400: "參數錯誤"}
+    )
+    def put(self, request, report_id):
+        try:
+            report = HealthReport.objects.get(id=report_id)
+        except HealthReport.DoesNotExist:
+            return Response({'error': '找不到健康報告'}, status=status.HTTP_404_NOT_FOUND)
+
+        # 更新欄位（有傳才更新）
+        check_date_str = request.data.get('check_date')
+        if check_date_str:
+            try:
+                report.check_date = datetime.strptime(check_date_str, "%Y-%m-%d")
+            except ValueError:
+                return Response({'error': '日期格式錯誤，應為 YYYY-MM-DD'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if 'check_type' in request.data:
+            report.check_type = request.data.get('check_type') or None
+
+        if 'check_location' in request.data:
+            report.check_location = request.data.get('check_location') or ""
+
+        if 'notes' in request.data:
+            report.notes = request.data.get('notes') or ""
+
+        if 'data' in request.data:
+            try:
+                report.data = json.loads(request.data.get('data'))
+            except json.JSONDecodeError:
+                return Response({'error': 'data 必須為有效的 JSON'}, status=status.HTTP_400_BAD_REQUEST)
+
+        report.save()
+        return Response({'message': '更新成功'}, status=status.HTTP_200_OK)
+
+    @swagger_auto_schema(
+        operation_description="刪除指定健康報告",
+        responses={204: "刪除成功", 404: "找不到報告"}
+    )
+    def delete(self, request, report_id):
+        try:
+            report = HealthReport.objects.get(id=report_id)
+            report.delete()
+            return Response({'message': '刪除成功'}, status=status.HTTP_204_NO_CONTENT)
+        except HealthReport.DoesNotExist:
+            return Response({'error': '找不到健康報告'}, status=status.HTTP_404_NOT_FOUND)
