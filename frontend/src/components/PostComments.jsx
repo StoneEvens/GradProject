@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import axios from '../utils/axios';
 import '../styles/PostComments.css';
+import { useNavigate } from 'react-router-dom';
 import { checkUserAccount } from '../services/userService';
 import EditIcon from '../../public/assets/icon/PetpageEditButton.png';
 import HeartIcon from '../../public/assets/icon/PostHeart.png';
@@ -17,8 +18,10 @@ import HeartFilledIcon from '../../public/assets/icon/PostLiked.png';
 //若要更改PostComments的PreviewComments內容時，請使用setLocalPreviewComments([新的comments陣列])
 //第一層就是留言區，有回覆按鈕可以回覆的就是第一層，提供postID就會自動抓取貼文留言
 //第二層和貼文留言預覽是同一個系統，需要提供完整的留言/回覆陣列，被動顯示，不會自動抓取
+//不論是日常發文或是論壇發文又或是留言全部都是Interactables，所以以上三種的ID不會撞到，只要在以上類別的前端底下照上述給入PostID即可
 
 const PostComments = ({user, postID, previewComments, handleClose}) => {
+    const navigate = useNavigate();
     //React自動幫忙生成的function
     const [comments, setComments] = useState([]);
     const [localPreviewComments, setLocalPreviewComments] = useState(previewComments || []);
@@ -71,6 +74,10 @@ const PostComments = ({user, postID, previewComments, handleClose}) => {
 
     const removeImage = (imageId) => {
       setSelectedImages(prev => prev.filter(img => img.id !== imageId));
+    };
+
+    const handleUserClick = (userInfo) => {
+      navigate(`/user/${userInfo.user_account}`);
     };
 
     const submitComment = async () => {
@@ -385,7 +392,7 @@ const PostComments = ({user, postID, previewComments, handleClose}) => {
               comments.map((comment) => (
                 <div className="comment-block">
                   <div className="comment-header">
-                    <strong>{comment.user.username}</strong>
+                    <strong onClick={() => handleUserClick(comment.user)}>{comment.user.username}</strong>
                     <div className="comment-header-info">
                       <span className="comment-date">{new Date(comment.created_at).toLocaleDateString()}</span>
                       {comment.content !== "[此評論已刪除]" && (
@@ -481,7 +488,7 @@ const PostComments = ({user, postID, previewComments, handleClose}) => {
       localPreviewComments.map((comment) => (
         <div key={comment.id} className="comment-block">
         <div className="comment-header">
-          <strong>{comment.user.username}</strong>
+          <strong onClick={() => handleUserClick(comment.user)}>{comment.user.username}</strong>
           <div className="comment-header-info">
             <span className="comment-date">{new Date(comment.created_at).toLocaleDateString()}</span>
             {comment.content !== "[此評論已刪除]" && (
