@@ -118,7 +118,7 @@
   color: black;
   border: none;
   border-radius: 14px;
-  padding: 8px;
+  padding: 6px;
   text-align: center;
   font-weight: bold;
   display: flex;
@@ -141,10 +141,18 @@
   margin-bottom: 1rem;
 }
 
+.section-title-with-nav {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 0.5rem;
+}
+
 .section-title {
-  width: fit-content;
-  margin: 0 auto 0.5rem auto;
-  padding: 6px 16px;  
+  display: inline-block;      /* ✅ 確保寬度只包住內容 */
+  padding: 6px 16px;
+  margin: 0 auto 0.5rem auto; /* ✅ 保持置中 */
   background-color: #BBDFFF;
   color: black;
   font-weight: bold;
@@ -159,33 +167,181 @@
 
 .food-items {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 10px;
   overflow-x: auto;
   padding: 8px;
 }
 
-.food-add {
-  width: 24px;
-  height: 55px;
+.food-card {
+  width: 80px;
+  height: 80px;
   background-color: white;
+  border-radius: 12px;
+  border: 1px solid #ccc;
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+.food-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.food-card.add-card {
+  flex-direction: column;
+  justify-content: center;
+  height: auto;
+  padding: 4px;
+  background-color: transparent;
   border: none;
-  border-radius: 10px;
-  font-size: 24px;               /* ✅ 讓 + 號變大 */
-  color: #FF9C3F;
-  display: flex;                 /* ✅ 加這三行讓內容置中 */
+}
+
+.food-add {
+  display: block;
+  margin: 6px auto 0 auto; /* 上間距+水平置中 */
+  background-color: #FFA76A;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.modal-content {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  width: 90%;
+  max-width: 320px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.modal-content h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  text-align: center;
+}
+
+.modal-content label {
+  font-size: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.modal-buttons button {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  background-color: #ffa76a;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.modal-buttons button:first-child {
+  background-color: #ccc;
+  color: black;
+}
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 1000;
+  display: flex;
   justify-content: center;
   align-items: center;
 }
 
-.food-card img {
-  width: 80px;
-  height: 80px;
-  object-fit: cover;
-  border-radius: 8px;
-  border: 1px solid #ccc;
+/* === Modal 本體 === */
+.modal-content {
+  background: white;
+  padding: 24px;
+  border-radius: 12px;
+  max-width: 320px;
+  width: 90%;
+  z-index: 1001;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
-.weight-section {
-  margin-top: 1rem;
+.modal-content h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: bold;
+  text-align: center;
+}
+
+/* === Modal 按鈕 === */
+.modal-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.modal-actions .btn {
+  flex: 1;
+  padding: 8px 0;
+  font-weight: bold;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+}
+
+.modal-actions .cancel {
+  background: #eee;
+  color: #000;
+}
+
+.modal-actions .confirm {
+  background: #ff914d;
+  color: #fff;
+}
+
+.nutrition-box {
+  display: flex;
+  justify-content: center;
+}
+
+.calc-btn {
+  padding: 10px 16px;
+  background-color: #99da99;
+  color:#ffffff;
+  border-radius: 10px;
+  font-size: 12px;
+  border: none;
+  cursor: pointer;
 }

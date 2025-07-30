@@ -21,42 +21,43 @@ const CATEGORIES = {
 };
 
 const HealthReport = () => {
-  /* 當前頁：list | upload | view */
   const [page, setPage] = useState('list');
-  const [reports, setReports] = useState([]);              // 所有報告
-  const [current, setCurrent] = useState(null);           // 正在查看的報告
+  const [reports, setReports] = useState([]);
+  const [current, setCurrent] = useState(null);
+  const [filterCat, setFilterCat] = useState('ALL'); // 新增：篩選類別
 
-  // ➜ 進入上傳頁
   const toUpload = () => {
     setCurrent({ date: '', cat: 'CBC', values: {}, note: '', file: null });
     setPage('upload');
   };
 
-  // ➜ 確認上傳
   const confirmUpload = () => {
     setReports([...reports, { ...current, id: Date.now() }]);
     setPage('list');
   };
 
-  // ➜ 查看頁
   const viewReport = (rep) => {
     setCurrent(rep);
     setPage('view');
   };
 
-  // ➜ 刪除
   const deleteReport = (id) => {
     setReports(reports.filter((r) => r.id !== id));
     setPage('list');
   };
 
-  /* ────── Render 區 ────── */
   return (
     <>
       <Header />
       <div className="hr-container">
         {page === 'list' && (
-          <ListPage reports={reports} onUpload={toUpload} onRowClick={viewReport} />
+          <ListPage
+            reports={reports}
+            onUpload={toUpload}
+            onRowClick={viewReport}
+            filterCat={filterCat}
+            setFilterCat={setFilterCat}
+          />
         )}
         {page === 'upload' && (
           <UploadPage
@@ -80,37 +81,57 @@ const HealthReport = () => {
 };
 
 /* ────────────────────────────────────────────────  列表頁  */
-const ListPage = ({ reports, onUpload, onRowClick }) => (
-  <>
-    <h1 className="hr-title">健康報告</h1>
-    <select className="hr-select" disabled value="血液檢查報告" /> {/* 目前僅示範一類，可拓展 */}
+const ListPage = ({ reports, onUpload, onRowClick, filterCat, setFilterCat }) => {
+  const filteredReports = filterCat === 'ALL'
+    ? reports
+    : reports.filter((r) => r.cat === filterCat);
 
-    <div className="hr-table-wrapper">
-      <table className="hr-table">
-        <thead>
-          <tr>
-            <th>檢查日期</th>
-            <th>上傳日期</th>
-            <th>檢查地點</th>
-            <th>備註</th>
-          </tr>
-        </thead>
-        <tbody>
-          {reports.map((r) => (
-            <tr key={r.id} onClick={() => onRowClick(r)}>
-              <td>{r.date}</td>
-              <td>{new Date(r.id).toLocaleDateString()}</td>
-              <td>獸醫醫院</td>
-              <td>{r.note.slice(0, 5)}...</td>
+  return (
+    <>
+      <h1 className="hr-title">健康報告</h1>
+
+      <select
+        className="hr-select"
+        value={filterCat}
+        onChange={(e) => setFilterCat(e.target.value)}
+      >
+        <option value="ALL">全部報告</option>
+        {Object.entries(CATEGORIES).map(([key, obj]) => (
+          <option value={key} key={key}>{obj.label}</option>
+        ))}
+      </select>
+
+      <div className="hr-table-wrapper">
+        <table className="hr-table">
+          <thead>
+            <tr>
+              <th>檢查日期</th>
+              <th>上傳日期</th>
+              <th>檢查地點</th>
+              <th>備註</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody>
+            {filteredReports.length === 0 ? (
+              <tr><td colSpan="4">目前無此類型的報告</td></tr>
+            ) : (
+              filteredReports.map((r) => (
+                <tr key={r.id} onClick={() => onRowClick(r)}>
+                  <td>{r.date}</td>
+                  <td>{new Date(r.id).toLocaleDateString()}</td>
+                  <td>獸醫醫院</td>
+                  <td>{r.note.slice(0, 5)}...</td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
 
-    <button className="hr-upload-btn" onClick={onUpload}>上傳</button>
-  </>
-);
+      <button className="hr-upload-btn" onClick={onUpload}>上傳</button>
+    </>
+  );
+};
 
 /* ────────────────────────────────────────────────  上傳頁  */
 const UploadPage = ({ draft, setDraft, onCancel, onConfirm }) => {
@@ -163,6 +184,7 @@ const UploadPage = ({ draft, setDraft, onCancel, onConfirm }) => {
       </div>
 
       <div className="hr-btn-row">
+        <button className="btn cancel" onClick={onCancel}>取消</button>
         <button className="btn confirm" onClick={onConfirm}>確認</button>
       </div>
     </>
@@ -191,13 +213,13 @@ const ViewPage = ({ data, onBack, onDelete }) => {
       </div>
 
       <div className="hr-section">
-        <div className="hr-section-title">檔案上傳</div>
+        <div className="hr-section-title">檔案閱覽</div>
         <textarea className="hr-note" readOnly value={note} />
       </div>
 
-      <div className="hr-btn-col">
-        <button className="btn edit" onClick={onBack}>修改</button>
+      <div className="hr-btn-row">
         <button className="btn delete" onClick={onDelete}>刪除</button>
+        <button className="btn edit" onClick={onBack}>確認</button>
       </div>
     </>
   );

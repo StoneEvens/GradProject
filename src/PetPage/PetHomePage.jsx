@@ -1,86 +1,101 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './PetHomePage.css';
 import '../components/Header.css';
 import '../components/BottomNavigationBar.css';
 import Header from '../components/Header';
 import BottomNavigationBar from '../components/BottomNavigationBar';
-import { Line } from 'react-chartjs-2';
-import {
-  Chart as ChartJS,
-  LineElement,
-  PointElement,
-  LinearScale,
-  CategoryScale,
-  Tooltip,
-} from 'chart.js';
-
-ChartJS.register(LineElement, PointElement, LinearScale, CategoryScale, Tooltip);
 
 const PetHomePage = () => {
-  const weightData = {
-    labels: ['5/1', '5/7', '5/14', '5/21'],
-    datasets: [
-      {
-        label: '體重 (kg)',
-        data: [5.2, 5.3, 5.4, 5.5],
-        borderColor: 'black',
-        backgroundColor: 'lightgray',
-        tension: 0.3,
-      },
-    ],
+  const [showAddFoodModal, setShowAddFoodModal] = useState(false);
+  const [selectedDateIndex, setSelectedDateIndex] = useState(0);
+  const nutritionResults = [
+    '點擊我去使用計算機',
+    '2024/12/01 的計算結果',
+    '2024/12/05 的計算結果',
+  ];
+
+  const handleNext = () => {
+    setSelectedDateIndex((prev) => Math.min(prev + 1, nutritionResults.length - 1));
+  };
+
+  const handlePrev = () => {
+    setSelectedDateIndex((prev) => Math.max(prev - 1, 0));
   };
 
   return (
     <>
       <Header />
       <div className="pet-home">
+        {/* 🐾 基本資料 */}
         <section className="pet-profile">
           <div className="pet-photo">
             <div className="circle"></div>
-            <button className="add-photo">＋</button>
           </div>
           <div className="pet-info">
             <div className="pet-name">胖胖</div>
             <div className="pet-desc">我五歲了！我喜歡吃貓條！</div>
             <button className="edit-button">編輯</button>
           </div>
-          <div className="pet-switcher">
-            <div className="pet-icons">● ● ●</div>
-          </div>
         </section>
 
+        {/* 📌 快捷鍵 */}
         <section className="section-box">
           <div className="section-title">常用快捷鍵</div>
           <div className="quick-links">
-            <button className="quick-btn">
-              <img src="/history.png" alt="病程紀錄" />病程紀錄</button>
-            <button className="quick-btn">
-              <img src="user.png" alt="飼主帳號" />飼主帳號</button>
-            <button className="quick-btn">
-              <img src="/problem.png" alt="異常紀錄" />異常紀錄</button>
-            <button className="quick-btn">
-              <img src="/report.png" alt="健康報告" />健康報告</button>
+            <button className="quick-btn"><img src="/history.png" alt="病程" />病程紀錄</button>
+            <button className="quick-btn"><img src="user.png" alt="飼主帳號" />飼主帳號</button>
+            <button className="quick-btn"><img src="/problem.png" alt="異常" />異常紀錄</button>
+            <button className="quick-btn"><img src="/report.png" alt="報告" />健康報告</button>
           </div>
         </section>
 
+        {/* 🍽 飼料食用中 */}
         <section className="section-box">
           <div className="section-title">飼料食用中</div>
           <div className="food-items">
-            <button className="food-add">
-              +
-            </button>
-            <div className="food-card" title="卡比主食罐：$85 / 成分：雞肉、南瓜">
+            <div className="food-card">
               <img src="/food.jpg" alt="food1" />
             </div>
-            <div className="food-card" title="CIAO肉泥條：$25 / 成分：鮪魚、雞肉精華">
-              <img src="/food.jpg" alt="food1" />
+            <div className="food-card">
+              <img src="/food.jpg" alt="food2" />
             </div>
           </div>
-        </section>
+          <button className="food-add" onClick={() => setShowAddFoodModal(true)}>新增</button>
 
+        {showAddFoodModal && (
+        <div className="modal-overlay" onClick={() => setShowAddModal(false)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <h3>新增飼料</h3>
+            <label>
+              飼料名稱：
+              <input type="text" placeholder="請輸入飼料名稱" />
+            </label>
+            <label>
+              包裝圖片：
+              <input type="file" />
+            </label>
+            <label>
+              上傳成分表：
+              <input type="file" />
+            </label>
+            <div className="modal-actions">
+              <button className="btn cancel" onClick={() => setShowAddModal(false)}>取消</button>
+              <button className="btn confirm">儲存</button>
+            </div>
+          </div>
+        </div>
+      )}
+      </section>
+
+        {/* 📊 營養計算機 */}
         <section className="section-box">
-          <div className="section-title">體重變化曲線</div>
-          <Line data={weightData} />
+          <div className="section-title-with-nav">
+          <div className="section-title">營養計算機</div>
+          
+        </div>
+          <div className="nutrition-box">
+            <button className="calc-btn" onClick={() => alert('導向營養計算機頁面')}>{nutritionResults[selectedDateIndex]}</button>
+          </div>
         </section>
       </div>
       <BottomNavigationBar />
