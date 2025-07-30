@@ -14,8 +14,11 @@
 # ]
 
 from django.urls import path
-from .views import OCRUploadView
+from .views import OCRUploadView, HealthReportUploadView, HealthReportListView, HealthReportDetailView
 
 urlpatterns = [
-    path('upload/', OCRUploadView.as_view(), name='ocr-upload'),
+    path('report/upload/', OCRUploadView.as_view(), name='ocr-only'),
+    path('upload/', HealthReportUploadView.as_view(), name='report-save'),
+    path('health-reports/', HealthReportListView.as_view()),
+    path('health-reports/<int:report_id>/', HealthReportDetailView.as_view()),  # 修改 & 刪除
 ]
