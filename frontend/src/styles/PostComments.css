@@ -97,6 +97,14 @@
 
 .comment-header strong {
   font-size: 14px;
+  cursor: pointer;
+  color: #333;
+  transition: color 0.2s;
+}
+
+.comment-header strong:hover {
+  color: #F08651;
+  text-decoration: underline;
 }
 
 .comment-text {
