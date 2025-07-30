@@ -320,8 +320,11 @@ const UploadPage = ({ draft, setDraft, onConfirm }) => {
 };
 
 const ViewPage = ({ data, onBack, onDelete }) => {
-  const { id, cat, date, values, note, check_location } = data;
+  const { id, cat, date, values: initialValues, note: initialNote, check_location: initialLocation } = data;
 
+  const [values, setValues] = useState(initialValues || {});
+  const [note, setNote] = useState(initialNote || '');
+  const [checkLocation, setCheckLocation] = useState(initialLocation || '');
   const [showAll, setShowAll] = useState(false);
 
   const defaultFields = ['紅血球計數', '白血球計數', '血紅蛋白'];
@@ -334,12 +337,16 @@ const ViewPage = ({ data, onBack, onDelete }) => {
     setShowAll((prev) => !prev);
   };
 
+  const handleInputChange = (key, newValue) => {
+    setValues((prev) => ({ ...prev, [key]: newValue }));
+  };
+
   const handleEdit = async () => {
     try {
       const payload = {
         check_date: date,
         check_type: cat.toLowerCase(),
-        check_location: check_location || '',
+        check_location: checkLocation || '',
         notes: note || '',
         data: JSON.stringify(values),
       };
@@ -369,38 +376,38 @@ const ViewPage = ({ data, onBack, onDelete }) => {
     }
   };
 
-  const renderValue = (val) => {
-    if (val === null || val === undefined) return '-';
-    if (typeof val === 'object') {
-      return `${val?.result || ''} ${val?.unit || ''}`.trim() || '-';
-    }
-    return val;
-  };
+  const renderEditableField = (label, value, key) => (
+    <div className="hr-field-row" key={key}>
+      <span className="hr-field-label">{label}：</span>
+      <input
+        className="hr-field-input"
+        value={typeof value === 'object' ? `${value?.result || ''} ${value?.unit || ''}` : value || ''}
+        onChange={(e) => handleInputChange(key, e.target.value)}
+      />
+    </div>
+  );
 
   return (
     <>
-      <h1 className="hr-title">察看健康報告</h1>
+      <h1 className="hr-title">編輯健康報告</h1>
       <div className="hr-date-row">檢查類型：{cat}</div>
       <div className="hr-date-row">檢查時間： {date}</div>
-      <div className="hr-date-row">檢查地點： {check_location || '未提供'}</div>
+      <div className="hr-date-row">
+        檢查地點：
+        <input
+          className="hr-field-input"
+          value={checkLocation}
+          onChange={(e) => setCheckLocation(e.target.value)}
+        />
+      </div>
 
       <div className="hr-section">
         <div className="hr-section-title">數值記錄</div>
 
-        {defaultFields.map((f) => (
-          <div className="hr-field-row" key={f}>
-            <span className="hr-field-label">{f}：</span>
-            <span>{renderValue(values[f])}</span>
-          </div>
-        ))}
+        {defaultFields.map((f) => renderEditableField(f, values[f], f))}
 
         {showAll &&
-          extraFields.map(({ key, val }) => (
-            <div className="hr-field-row" key={key}>
-              <span className="hr-field-label">{key}：</span>
-              <span>{renderValue(val)}</span>
-            </div>
-          ))}
+          extraFields.map(({ key, val }) => renderEditableField(key, val, key))}
 
         {extraFields.length > 0 && (
           <div className="hr-toggle-row" style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '8px' }}>
@@ -422,12 +429,17 @@ const ViewPage = ({ data, onBack, onDelete }) => {
 
       <div className="hr-section">
         <div className="hr-section-title">備註</div>
-        <textarea className="hr-note" readOnly value={note} />
+        <textarea
+          className="hr-note"
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+        />
       </div>
 
-      <div className="hr-btn-col">
+      <div className="hr-btn-row" style={{ display: 'flex', justifyContent: 'space-between', gap: '10px', marginTop: '16px' }}>
         <button className="btn edit" onClick={handleEdit}>修改</button>
         <button className="btn delete" onClick={handleDelete}>刪除</button>
+        <button className="btn cancel" onClick={onBack}>取消</button>
       </div>
     </>
   );
