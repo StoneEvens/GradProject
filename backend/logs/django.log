@@ -15428,3 +15428,23 @@ INFO 2025-07-30 18:52:17,300 basehttp 22212 24328 "GET /api/v1/ocr/health-report
 INFO 2025-07-30 18:52:17,315 basehttp 22212 9412 "GET /api/v1/ocr/health-reports/ HTTP/1.1" 200 1096
 INFO 2025-07-30 18:52:48,363 autoreload 22212 25216 C:\Users\lxzhe\GradProject\backend\ocrapp\views.py changed, reloading.
 INFO 2025-07-30 18:52:52,016 autoreload 21248 12780 Watching for file changes with StatReloader
+INFO 2025-07-30 18:54:38,489 basehttp 21248 19612 "OPTIONS /api/v1/accounts/plans/today/ HTTP/1.1" 200 0
+INFO 2025-07-30 18:54:38,489 basehttp 21248 12212 "OPTIONS /api/v1/accounts/me/ HTTP/1.1" 200 0
+INFO 2025-07-30 18:54:38,490 basehttp 21248 23644 "OPTIONS /api/v1/accounts/me/ HTTP/1.1" 200 0
+INFO 2025-07-30 18:54:38,490 basehttp 21248 18652 "OPTIONS /api/v1/accounts/plans/today/ HTTP/1.1" 200 0
+INFO 2025-07-30 18:54:38,497 basehttp 21248 8848 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-30 18:54:38,497 basehttp 21248 18652 "GET /api/v1/article_recommendations/ HTTP/1.1" 200 971
+INFO 2025-07-30 18:54:38,524 basehttp 21248 23644 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-30 18:54:38,524 basehttp 21248 12212 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-30 18:54:38,541 basehttp 21248 8848 "GET /api/v1/accounts/plans/today/ HTTP/1.1" 200 62
+INFO 2025-07-30 18:54:38,541 basehttp 21248 18652 "GET /api/v1/accounts/me/ HTTP/1.1" 200 242
+INFO 2025-07-30 18:54:44,510 basehttp 21248 7412 "GET /api/v1/ocr/health-reports/ HTTP/1.1" 200 1096
+INFO 2025-07-30 18:54:44,525 basehttp 21248 7412 "GET /api/v1/ocr/health-reports/ HTTP/1.1" 200 1096
+INFO 2025-07-30 18:54:52,907 basehttp 21248 7412 "GET /api/v1/ocr/health-reports/ HTTP/1.1" 200 1096
+INFO 2025-07-30 18:54:52,914 basehttp 21248 15236 "GET /api/v1/ocr/health-reports/ HTTP/1.1" 200 1096
+INFO 2025-07-30 18:54:56,679 basehttp 21248 15236 "GET /api/v1/ocr/health-reports/ HTTP/1.1" 200 1096
+INFO 2025-07-30 18:54:56,687 basehttp 21248 7412 "GET /api/v1/ocr/health-reports/ HTTP/1.1" 200 1096
+INFO 2025-07-30 18:59:16,066 autoreload 21248 12780 C:\Users\lxzhe\GradProject\backend\ocrapp\views.py changed, reloading.
+INFO 2025-07-30 18:59:17,920 autoreload 9924 18332 Watching for file changes with StatReloader
+INFO 2025-07-30 18:59:33,330 autoreload 9924 18332 C:\Users\lxzhe\GradProject\backend\ocrapp\urls.py changed, reloading.
+INFO 2025-07-30 18:59:35,042 autoreload 6792 8724 Watching for file changes with StatReloader

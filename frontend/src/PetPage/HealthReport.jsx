@@ -39,6 +39,7 @@ const HealthReport = () => {
   const viewReport = (rep) => {
     // setCurrent(rep);
     setCurrent({
+      id: rep.id,
       cat: convertCheckType(rep.check_type),
       date: rep.check_date,
       values: rep.data || {},
@@ -319,23 +320,104 @@ const UploadPage = ({ draft, setDraft, onConfirm }) => {
 };
 
 const ViewPage = ({ data, onBack, onDelete }) => {
-  const { cat, date, values, note } = data;
-  const fields = CATEGORIES[cat].fields;
+  const { id, cat, date, values, note, check_location } = data;
+
+  const [showAll, setShowAll] = useState(false);
+
+  const defaultFields = ['紅血球計數', '白血球計數', '血紅蛋白'];
+
+  const extraFields = Object.entries(values || {})
+    .filter(([key, val]) => !defaultFields.includes(key) && val !== null)
+    .map(([key, val]) => ({ key, val }));
+
+  const handleToggle = () => {
+    setShowAll((prev) => !prev);
+  };
+
+  const handleEdit = async () => {
+    try {
+      const payload = {
+        check_date: date,
+        check_type: cat.toLowerCase(),
+        check_location: check_location || '',
+        notes: note || '',
+        data: JSON.stringify(values),
+      };
+
+      await axios.put(`http://127.0.0.1:8000/api/v1/ocr/health-reports/${id}/`, payload, {
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      alert('更新成功');
+      onBack();
+    } catch (err) {
+      console.error('更新失敗', err);
+      alert('更新失敗，請檢查伺服器或資料格式');
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!window.confirm('確定要刪除此健康報告嗎？')) return;
+
+    try {
+      await axios.delete(`http://127.0.0.1:8000/api/v1/ocr/health-reports/${id}/`);
+      alert('刪除成功');
+      onDelete(id);
+    } catch (err) {
+      console.error('刪除失敗', err);
+      alert('刪除失敗，請稍後再試');
+    }
+  };
+
+  const renderValue = (val) => {
+    if (val === null || val === undefined) return '-';
+    if (typeof val === 'object') {
+      return `${val?.result || ''} ${val?.unit || ''}`.trim() || '-';
+    }
+    return val;
+  };
 
   return (
     <>
       <h1 className="hr-title">察看健康報告</h1>
-      <div className="hr-date-row">{CATEGORIES[cat].label}</div>
+      <div className="hr-date-row">檢查類型：{cat}</div>
       <div className="hr-date-row">檢查時間： {date}</div>
+      <div className="hr-date-row">檢查地點： {check_location || '未提供'}</div>
 
       <div className="hr-section">
         <div className="hr-section-title">數值記錄</div>
-        {fields.map((f) => (
+
+        {defaultFields.map((f) => (
           <div className="hr-field-row" key={f}>
             <span className="hr-field-label">{f}：</span>
-            <span>{values[f]}</span>
+            <span>{renderValue(values[f])}</span>
           </div>
         ))}
+
+        {showAll &&
+          extraFields.map(({ key, val }) => (
+            <div className="hr-field-row" key={key}>
+              <span className="hr-field-label">{key}：</span>
+              <span>{renderValue(val)}</span>
+            </div>
+          ))}
+
+        {extraFields.length > 0 && (
+          <div className="hr-toggle-row" style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '8px' }}>
+            <button
+              onClick={handleToggle}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#333',
+                fontSize: '14px',
+                cursor: 'pointer',
+              }}
+            >
+              {showAll ? '▲ 查看部分' : '▼ 查看全部'}
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="hr-section">
@@ -344,8 +426,8 @@ const ViewPage = ({ data, onBack, onDelete }) => {
       </div>
 
       <div className="hr-btn-col">
-        <button className="btn edit" onClick={onBack}>修改</button>
-        <button className="btn delete" onClick={onDelete}>刪除</button>
+        <button className="btn edit" onClick={handleEdit}>修改</button>
+        <button className="btn delete" onClick={handleDelete}>刪除</button>
       </div>
     </>
   );
