@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import TopNavbar from '../components/TopNavbar.jsx';
-import BottomNavbar from '../components/BottomNavigationbar';
+import BottomNavbar from '../components/BottomNavigationBar.jsx';
 import '../styles/CalculatorPage.css';
 import { getUserPets } from '../services/petService';
 // import CalculatorStep1 from '../components/CalculatorStep1';
