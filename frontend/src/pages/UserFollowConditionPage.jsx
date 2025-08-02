@@ -327,6 +327,11 @@ const UserFollowConditionPage = () => {
                 ) : (
                   getCurrentUserList().map((user) => {
                     const userFollowState = followStates[user.id];
+                    const isCurrentUser = currentUser && (
+                      currentUser.user_account === user.user_account ||
+                      currentUser.id === user.id
+                    );
+                    
                     return (
                       <div key={user.id} className={styles.userItem}>
                         <img
@@ -340,12 +345,15 @@ const UserFollowConditionPage = () => {
                           <div className={styles.username}>{user.user_account}</div>
                           <div className={styles.displayName}>{user.user_fullname}</div>
                         </div>
-                        <button
-                          className={getFollowButtonClass(userFollowState)}
-                          onClick={() => handleButtonClick(user)}
-                        >
-                          {getButtonText(user, userFollowState)}
-                        </button>
+                        {/* 如果是當前用戶自己，不顯示按鈕 */}
+                        {!isCurrentUser && (
+                          <button
+                            className={getFollowButtonClass(userFollowState)}
+                            onClick={() => handleButtonClick(user)}
+                          >
+                            {getButtonText(user, userFollowState)}
+                          </button>
+                        )}
                       </div>
                     );
                   })
