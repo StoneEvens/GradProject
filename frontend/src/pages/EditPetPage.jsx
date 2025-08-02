@@ -6,6 +6,7 @@ import BottomNavbar from '../components/BottomNavigationbar';
 import Notification from '../components/Notification';
 import { NotificationProvider } from '../context/NotificationContext';
 import petService from '../services/petService';
+import { handleImageSelection, revokeImagePreview, createProgressCallback } from '../utils/imageUtils';
 
 const EditPetPage = () => {
   const navigate = useNavigate();
@@ -103,28 +104,35 @@ const EditPetPage = () => {
     }));
   };
 
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    if (file.size > 5 * 1024 * 1024) {
-      showNotification('圖片大小不能超過 5MB');
-      return;
+  const handleImageUpload = async (e) => {
+    // 清理舊的預覽URL
+    if (imagePreview && imagePreview.startsWith('blob:')) {
+      revokeImagePreview(imagePreview);
     }
 
-    if (!file.type.startsWith('image/')) {
-      showNotification('請選擇圖片檔案');
-      return;
-    }
+    try {
+      const result = await handleImageSelection(e, {
+        compress: true,
+        compressOptions: {
+          maxWidth: 800,
+          maxHeight: 800,
+          quality: 0.8
+        },
+        validationOptions: {
+          maxSize: 10 * 1024 * 1024 // 10MB for original file
+        }
+      });
 
-    setSelectedImage(file);
-    
-    // 創建預覽URL
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setImagePreview(reader.result);
-    };
-    reader.readAsDataURL(file);
+      if (result.success) {
+        setSelectedImage(result.processedFile);
+        setImagePreview(result.previewUrl);
+      } else {
+        showNotification(result.error);
+      }
+    } catch (error) {
+      console.error('圖片處理失敗:', error);
+      showNotification('圖片處理失敗，請重試');
+    }
   };
 
   const handleSubmit = async () => {

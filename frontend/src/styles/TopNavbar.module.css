@@ -60,13 +60,23 @@
   height: 32px;
   border-radius: 50%;
   cursor: pointer;
-  transition: transform 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.3s ease;
   object-fit: cover;
   border: 2px solid #ffffff;
+  /* 防閃爍：預設最小尺寸並保持位置 */
+  min-width: 32px;
+  min-height: 32px;
+  /* 防止圖片加載時的布局偏移 */
+  flex-shrink: 0;
 }
 
 .userHeadshot:hover {
   transform: scale(1.1);
+}
+
+.userHeadshot.loading {
+  opacity: 0.7;
+  pointer-events: none;
 }
 
 /* 搜尋框樣式 - 在grid中央列 */

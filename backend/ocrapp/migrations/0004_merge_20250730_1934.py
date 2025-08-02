@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('ocrapp', '0002_initial'),
+        ('ocrapp', '0002_healthreport_check_date_healthreport_check_location_and_more'),
         ('ocrapp', '0003_alter_healthreport_check_type_and_more'),
     ]
 

@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('feeds', '0008_remove_userfeed_custom_calcium_and_more'),
-        ('pets', '0007_abnormalpost_is_emergency_abnormalpost_record_date_and_more'),
+        ('pets', '0002_initial'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 

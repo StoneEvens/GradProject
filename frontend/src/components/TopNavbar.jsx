@@ -3,14 +3,14 @@ import styles from '../styles/TopNavbar.module.css';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Notification from './Notification';
 import { NotificationProvider } from '../context/NotificationContext';
-import { getUserProfile } from '../services/userService';
+import { useUser } from '../context/UserContext';
 
 const TopNavbar = ({ onSearchSubmit, onSearchChange, initialSearchValue }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [notification, setNotification] = useState('');
-  const [userHeadshot, setUserHeadshot] = useState('/assets/icon/DefaultAvatar.jpg');
   const [searchQuery, setSearchQuery] = useState('');
+  const { userHeadshot, imageLoading } = useUser();
 
   // 當初始搜尋值改變時更新搜尋框
   useEffect(() => {
@@ -19,39 +19,6 @@ const TopNavbar = ({ onSearchSubmit, onSearchChange, initialSearchValue }) => {
     }
   }, [initialSearchValue]);
 
-  // 獲取用戶頭像
-  useEffect(() => {
-    const fetchUserHeadshot = async () => {
-      try {
-        const userData = await getUserProfile();
-        if (userData.headshot_url) {
-          setUserHeadshot(userData.headshot_url);
-        }
-      } catch (error) {
-        console.error('獲取用戶頭像失敗:', error);
-        // 如果 API 失敗，保持預設頭像
-      }
-    };
-
-    // 只在用戶已登入時獲取頭像
-    const token = localStorage.getItem('accessToken');
-    if (token) {
-      fetchUserHeadshot();
-    }
-
-    // 監聽認證狀態變化
-    const handleAuthChange = () => {
-      const newToken = localStorage.getItem('accessToken');
-      if (newToken) {
-        fetchUserHeadshot();
-      } else {
-        setUserHeadshot('/assets/icon/DefaultAvatar.jpg');
-      }
-    };
-
-    window.addEventListener('auth-change', handleAuthChange);
-    return () => window.removeEventListener('auth-change', handleAuthChange);
-  }, []);
 
   const handleNotification = () => {
     navigate('/notifications');
@@ -139,7 +106,7 @@ const TopNavbar = ({ onSearchSubmit, onSearchChange, initialSearchValue }) => {
           <img 
             src={userHeadshot} 
             alt="用戶頭像"
-            className={styles.userHeadshot}
+            className={`${styles.userHeadshot} ${imageLoading ? styles.loading : ''}`}
             onClick={() => navigate('/user-profile')}
           />
         </div>

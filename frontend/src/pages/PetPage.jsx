@@ -195,7 +195,7 @@ const PetPage = () => {
                   <img src="/assets/icon/PetpagePetAbnormalPostButton.png" alt="異常紀錄" className={styles.functionIcon} />
                   <span className={styles.functionLabel}>異常紀錄</span>
                 </div>
-                <div className={styles.functionCell} onClick={() => handleFunctionClick('健康報告')}>
+                <div className={styles.functionCell} onClick={() => navigate('/healthreport/upload')}>
                   <img src="/assets/icon/PetpageHealthReportButton.png" alt="健康報告" className={styles.functionIcon} />
                   <span className={styles.functionLabel}>健康報告</span>
                 </div>

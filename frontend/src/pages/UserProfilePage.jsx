@@ -112,6 +112,11 @@ const UserProfilePage = () => {
       // 如果更新了頭像，在URL後面加上時間戳避免快取問題
       if (updatedUser.headshot_url && updateData.image) {
         updatedUser.headshot_url = `${updatedUser.headshot_url}?t=${Date.now()}`;
+        
+        // 觸發全局頭像更新事件
+        window.dispatchEvent(new CustomEvent('avatar-updated', {
+          detail: { headshot_url: updatedUser.headshot_url }
+        }));
       }
       
       setUser(updatedUser);
