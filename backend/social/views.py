@@ -410,12 +410,12 @@ class PostDetailAPIView(generics.RetrieveAPIView):
     """獲取貼文詳情"""
     permission_classes = [IsAuthenticated]
     queryset = PostFrame.objects.all()
-    serializer_class = PostFrameSerializer
+    serializer_class = SolPostSerializer
     
     def retrieve(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
-            serializer = self.get_serializer(instance, context={'request': request})
+            serializer = SolPostSerializer(instance, context={'request': request})
             return APIResponse(
                 data=serializer.data,
                 message="獲取貼文詳情成功"
@@ -502,7 +502,7 @@ class DeletePostAPIView(APIView):
                 
                 # 刪除互動記錄
                 from interactions.models import UserInteraction
-                UserInteraction.objects.filter(postFrame=postFrame).delete()
+                UserInteraction.objects.filter(interactables=postFrame).delete()
                 
                 logger.info(f"貼文相關資料刪除完成: post_id={postFrame.id}")
                 

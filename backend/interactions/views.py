@@ -4,13 +4,17 @@ from django.db.models import Q
 from rest_framework import viewsets, permissions, status as drf_status
 from rest_framework.views import APIView
 from rest_framework.response import Response
+import logging
+import traceback
+
+logger = logging.getLogger('django')
 from comments.models import Comment
-from social.models import PostFrame
+from social.models import PostFrame, Interactables, SoLContent
 from pets.models import ForumContent
 from accounts.models import CustomUser
 from .models import UserInteraction
 from .serializers import UserInteractionSerializer
-from social.serializers import PostFrameSerializer
+from social.serializers import SolPostSerializer
 from utils.api_response import create_response
 
 class UserInteractionView(APIView):
@@ -21,16 +25,16 @@ class UserInteractionView(APIView):
         toRelation = relation
 
         if relation == 'upvoted':
-            fromRelation = UserInteraction.get_user_interaction(user, postID, 'downvoted')
+            fromRelation = UserInteraction.get_user_interactions(user, postID, 'downvoted')
         elif relation == 'downvoted':
-            fromRelation = UserInteraction.get_user_interaction(user, postID, 'upvoted')
+            fromRelation = UserInteraction.get_user_interactions(user, postID, 'upvoted')
         
-        postFrame = PostFrame.get_postFrame(postID)
+        postFrame = PostFrame.get_postFrames(postID)
         postFrameStatus = postFrame.handle_interaction(user, fromRelation, toRelation)
 
         interactionStatus = UserInteraction.create_interaction(
             user=user,
-            postID=postID,
+            interactables=postFrame,
             relation=toRelation
         )
 
@@ -55,7 +59,7 @@ class BaseInteractionView(APIView):
         """
         通過調用目標物件的 handle_interaction 方法來添加或移除互動。
         """
-        target_object = get_object_or_404(self.model, id=object_id)
+        target_object = get_object_or_404(Interactables, id=object_id)
         relation = request.data.get('relation')
 
         if not relation:
@@ -72,17 +76,51 @@ class BaseInteractionView(APIView):
         
         # allowed_relations 應該在子視圖中根據模型具體定義
         # 例如 PostInteractionView.allowed_relations = ['upvoted', 'downvoted', 'saved', 'shared']
-        success, message, response_status_code = target_object.handle_interaction(
-            request.user,
-            relation,
-            self.allowed_relations 
-        )
+        #success, message, response_status_code = target_object.handle_interaction(
+        #    request.user,
+        #    relation,
+        #    self.allowed_relations 
+        #)
+        fromRelation = UserInteraction.get_user_interactions(request.user, relation, target_object)
+        toRelation = UserInteraction.get_user_interactions(request.user, relation, target_object)
 
-        if not success:
-            return Response({"detail": message}, status=response_status_code)
-        
-        return Response({"detail": message}, status=response_status_code)
-    
+        #if relation == 'liked':
+            #fromRelation = UserInteraction.get_user_interactions(request.user, target_object.id, 'downvoted')
+
+        try:
+            success = False
+
+            if toRelation:
+                toRelation.delete_interaction()
+
+                success = target_object.handle_interaction(
+                fromRelation=relation,
+                toRelation=None
+                )
+            else:
+                UserInteraction.create_interaction(
+                    user=request.user,
+                    interactables=target_object,
+                    relation=relation
+                )
+
+                success = target_object.handle_interaction(
+                fromRelation=None,
+                toRelation=relation
+                )
+
+            if not success:
+                return Response({"Status": success}, status=drf_status.HTTP_400_BAD_REQUEST)
+
+            return Response({"Status": success}, status=drf_status.HTTP_200_OK)
+        except Exception as e:
+            logger.error(f"Error creating interaction: {str(e)}")
+            print(traceback.format_exc())
+            return Response(
+                {"detail": "無法處理互動。"},
+                status=drf_status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
     def _get_action_name(self, relation):
         """獲取互動類型的中文名稱"""
         action_names = {
@@ -127,30 +165,40 @@ class UserLikedPostsView(APIView):
             user = request.user
             sort_option = request.GET.get('sort', 'post_date_desc')
             
-            # 獲取用戶所有按讚的互動記錄
-            liked_interactions = UserInteraction.objects.filter(
-                user=user,
-                relation='liked'
-            ).select_related('postFrame')
-            
+            # 獲取用戶所有按讚的貼文記錄
+            liked_interactions = (
+                UserInteraction.objects.filter(
+                    user=user,
+                    relation='liked',
+                    interactables__isnull=False,
+                )
+                .filter(interactables__in=PostFrame.objects.all())
+                .select_related('interactables')
+            )
+
             # 根據排序選項排序
             if sort_option == 'post_date_desc':
-                liked_interactions = liked_interactions.order_by('-postFrame__created_at')
+                liked_interactions = liked_interactions.order_by('-interactables__created_at')
             elif sort_option == 'post_date_asc':
-                liked_interactions = liked_interactions.order_by('postFrame__created_at')
+                liked_interactions = liked_interactions.order_by('interactables__created_at')
             elif sort_option == 'like_date_desc':
                 liked_interactions = liked_interactions.order_by('-created_at')
             elif sort_option == 'like_date_asc':
                 liked_interactions = liked_interactions.order_by('created_at')
             else:
-                liked_interactions = liked_interactions.order_by('-postFrame__created_at')
+                liked_interactions = liked_interactions.order_by('-interactables__created_at')
             
             # 提取貼文物件
-            post_frames = [interaction.postFrame for interaction in liked_interactions]
-            
+            post_frames = [
+                interaction.interactables.postframe 
+                for interaction in liked_interactions
+            ]
+
+            solContent = SoLContent.get_content(postFrameList=post_frames)
+
             # 序列化貼文數據
-            serializer = PostFrameSerializer(
-                post_frames, 
+            serializer = SolPostSerializer(
+                solContent, 
                 many=True, 
                 context={'request': request}
             )
@@ -160,7 +208,7 @@ class UserLikedPostsView(APIView):
             for i, post_data in enumerate(serialized_data):
                 # 找到對應的按讚記錄
                 interaction = next(
-                    (inter for inter in liked_interactions if inter.postFrame.id == post_data['id']),
+                    (inter for inter in liked_interactions if inter.interactables.id == post_data['post_id']),
                     None
                 )
                 if interaction:
@@ -176,12 +224,18 @@ class UserLikedPostsView(APIView):
             )
             
         except Exception as e:
+            error_traceback = traceback.format_exc()
+            logger.error(f"Error in UserLikedPostsView: {str(e)}")
+            logger.error(f"Traceback: {error_traceback}")
             return Response(
                 create_response(
                     success=False,
                     message="獲取按讚貼文失敗",
                     error_code="FETCH_LIKED_POSTS_ERROR",
-                    data={"error": str(e)}
+                    data={
+                        "error": str(e),
+                        "traceback": error_traceback
+                    }
                 ),
                 status=drf_status.HTTP_500_INTERNAL_SERVER_ERROR
             )
@@ -198,44 +252,54 @@ class UserSavedPostsView(APIView):
             user = request.user
             sort_option = request.GET.get('sort', 'post_date_desc')
             
-            # 獲取用戶所有收藏的互動記錄
-            saved_interactions = UserInteraction.objects.filter(
-                user=user,
-                relation='saved'
-            ).select_related('postFrame')
+            # 獲取用戶所有收藏的貼文記錄
+            saved_interactions = (
+                UserInteraction.objects.filter(
+                    user=user,
+                    relation='saved',
+                    interactables__isnull=False,
+                )
+                .filter(interactables__in=PostFrame.objects.all())
+                .select_related('interactables')
+            )
             
             # 根據排序選項排序
             if sort_option == 'post_date_desc':
-                saved_interactions = saved_interactions.order_by('-postFrame__created_at')
+                saved_interactions = saved_interactions.order_by('-interactables__created_at')
             elif sort_option == 'post_date_asc':
-                saved_interactions = saved_interactions.order_by('postFrame__created_at')
+                saved_interactions = saved_interactions.order_by('interactables__created_at')
             elif sort_option == 'save_date_desc':
                 saved_interactions = saved_interactions.order_by('-created_at')
             elif sort_option == 'save_date_asc':
                 saved_interactions = saved_interactions.order_by('created_at')
             else:
-                saved_interactions = saved_interactions.order_by('-postFrame__created_at')
+                saved_interactions = saved_interactions.order_by('-interactables__created_at')
             
             # 提取貼文物件
-            post_frames = [interaction.postFrame for interaction in saved_interactions]
-            
+            post_frames = [
+                interaction.interactables.postframe 
+                for interaction in saved_interactions
+            ]
+
+            solContent = SoLContent.get_content(postFrameList=post_frames)
+
             # 序列化貼文數據
-            serializer = PostFrameSerializer(
-                post_frames, 
+            serializer = SolPostSerializer(
+                solContent, 
                 many=True, 
                 context={'request': request}
             )
             
-            # 為每個貼文添加收藏日期
+            # 為每個貼文添加按讚日期
             serialized_data = serializer.data
             for i, post_data in enumerate(serialized_data):
-                # 找到對應的收藏記錄
+                # 找到對應的按讚記錄
                 interaction = next(
-                    (inter for inter in saved_interactions if inter.postFrame.id == post_data['id']),
+                    (inter for inter in saved_interactions if inter.interactables.id == post_data['post_id']),
                     None
                 )
                 if interaction:
-                    post_data['saved_at'] = interaction.created_at
+                    post_data['liked_at'] = interaction.created_at
             
             return Response(
                 create_response(
@@ -247,12 +311,18 @@ class UserSavedPostsView(APIView):
             )
             
         except Exception as e:
+            error_traceback = traceback.format_exc()
+            logger.error(f"Error in UserSavedPostsView: {str(e)}")
+            logger.error(f"Traceback: {error_traceback}")
             return Response(
                 create_response(
                     success=False,
                     message="獲取收藏貼文失敗",
                     error_code="FETCH_SAVED_POSTS_ERROR",
-                    data={"error": str(e)}
+                    data={
+                        "error": str(e),
+                        "traceback": error_traceback
+                    }
                 ),
                 status=drf_status.HTTP_500_INTERNAL_SERVER_ERROR
             )

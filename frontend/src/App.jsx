@@ -36,6 +36,7 @@ import MarkedFeedsPage from './pages/MarkedFeedsPage';
 import AllFeedsPage from './pages/AllFeedsPage';
 import FeedSearchResultPage from './pages/FeedSearchResultPage';
 import { isAuthenticated, refreshAccessToken } from './services/authService';
+import HealthReport from './PetPage/HealthReport';
 
 const App = () => {
   const [isUserAuthenticated, setIsUserAuthenticated] = useState(false);
@@ -270,6 +271,7 @@ const App = () => {
           path="*" 
           element={isUserAuthenticated ? <Navigate to="/main" /> : <Navigate to="/" />} 
         />
+        {/* 計算機頁面：未登入導向HomePage */}
         <Route 
           path="/calculator" 
           element={isUserAuthenticated ? <CalculatorPage /> : <Navigate to="/" />} 
@@ -298,6 +300,11 @@ const App = () => {
         <Route 
           path="/feeds/search" 
           element={isUserAuthenticated ? <FeedSearchResultPage /> : <Navigate to="/" />} 
+        />
+        {/* 計算機頁面：未登入導向HomePage */}
+        <Route 
+          path="/healthreport/upload" 
+          element={isUserAuthenticated ? <HealthReport /> : <Navigate to="/" />} 
         />
       </Routes>
     </BrowserRouter>
