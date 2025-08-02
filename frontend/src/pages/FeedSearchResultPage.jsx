@@ -5,17 +5,21 @@ import BottomNavbar from '../components/BottomNavigationbar';
 import { NotificationProvider } from '../context/NotificationContext';
 import FeedReviewConfirmModal from '../components/FeedReviewConfirmModal';
 import FeedReviewModal from '../components/FeedReviewModal';
+import NotificationComponent from '../components/Notification';
 import axios from '../utils/axios';
 import styles from '../styles/FeedSearchResultPage.module.css';
+import { useUser } from '../context/UserContext';
 
 const FeedSearchResultPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { userData } = useUser();
   const [loading, setLoading] = useState(true);
   const [searchResults, setSearchResults] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [message, setMessage] = useState('');
   const [totalCount, setTotalCount] = useState(0);
+  const [notification, setNotification] = useState('');
   
   // Modal 狀態
   const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -57,6 +61,7 @@ const FeedSearchResultPage = () => {
         isVerified: item.is_verified,
         reviewCount: item.review_count,
         created_by: item.created_by,
+        created_by_id: item.created_by_id,
         created_at: item.created_at,
         lastUsedAt: item.created_at
       }));
@@ -88,11 +93,11 @@ const FeedSearchResultPage = () => {
     try {
       // 如果飼料未驗證且用戶想要標記，需要先檢查是否可以使用此飼料
       if (!feed.isVerified && !feed.isMarked) {
-        // 檢查使用者是否已審核過此飼料或提交過錯誤回報
-        const reviewCheckResponse = await axios.get(`/feeds/${feed.id}/check-review/`);
+        // 檢查是否為飼料創建者本人
+        const isCreator = userData && feed.created_by_id === userData.id;
         
-        if (reviewCheckResponse.data.can_use_feed) {
-          // 如果可以使用（已審核過或已回報錯誤），直接標記而不顯示審核 modal
+        if (isCreator) {
+          // 如果是創建者本人，直接標記而不需要審核
           const response = await axios.post('/feeds/mark/', {
             feed_id: feed.id
           });
@@ -102,12 +107,30 @@ const FeedSearchResultPage = () => {
           if (currentQuery) {
             performSearch(currentQuery);
           }
+          setNotification('飼料已加入精選');
           return;
         } else {
-          // 如果無法使用，顯示確認 modal
-          setSelectedFeed(feed);
-          setShowConfirmModal(true);
-          return;
+          // 如果不是創建者，檢查使用者是否已審核過此飼料或提交過錯誤回報
+          const reviewCheckResponse = await axios.get(`/feeds/${feed.id}/check-review/`);
+          
+          if (reviewCheckResponse.data.can_use_feed) {
+            // 如果可以使用（已審核過或已回報錯誤），直接標記而不顯示審核 modal
+            const response = await axios.post('/feeds/mark/', {
+              feed_id: feed.id
+            });
+            
+            // 重新執行搜尋以更新結果
+            const currentQuery = searchParams.get('q') || '';
+            if (currentQuery) {
+              performSearch(currentQuery);
+            }
+            return;
+          } else {
+            // 如果無法使用，顯示確認 modal
+            setSelectedFeed(feed);
+            setShowConfirmModal(true);
+            return;
+          }
         }
       }
       
@@ -285,6 +308,13 @@ const FeedSearchResultPage = () => {
           onConfirm={handleReviewConfirm}
           onReportError={handleReportError}
         />
+        
+        {notification && (
+          <NotificationComponent 
+            message={notification} 
+            onClose={() => setNotification('')} 
+          />
+        )}
       </div>
     </NotificationProvider>
   );
