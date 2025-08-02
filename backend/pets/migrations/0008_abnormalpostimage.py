@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('pets', '0007_abnormalpost_is_emergency_abnormalpost_record_date_and_more'),
+        ('pets', '0002_initial'),
     ]
 
     operations = [

@@ -6,10 +6,8 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    initial = True
-
     dependencies = [
-        ('ocrapp', '0001_initial'),
+        ('ocrapp', '0004_merge_20250730_1934'),
         ('pets', '0001_initial'),
     ]
 

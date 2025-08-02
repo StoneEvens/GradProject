@@ -3,9 +3,10 @@ import axios from '../utils/axios';
 import '../styles/PostComments.css';
 import { useNavigate } from 'react-router-dom';
 import { checkUserAccount } from '../services/userService';
-import EditIcon from '../../public/assets/icon/PetpageEditButton.png';
-import HeartIcon from '../../public/assets/icon/PostHeart.png';
-import HeartFilledIcon from '../../public/assets/icon/PostLiked.png';
+// Use public assets directly in src attributes
+const EditIcon = '/assets/icon/PetpageEditButton.png';
+const HeartIcon = '/assets/icon/PostHeart.png';
+const HeartFilledIcon = '/assets/icon/PostLiked.png';
 
 //使用方法
 //留言系統我整個是做在一起的，包含貼文留言預覽的兩個留言、留言區的留言、回覆
