@@ -13,9 +13,14 @@ logger = logging.getLogger(__name__)
 
 # 用戶基本信息序列化器（用於評論等顯示）
 class UserBasicSerializer(serializers.ModelSerializer):
+    headshot_url = serializers.SerializerMethodField()
+    
     class Meta:
         model = CustomUser
-        fields = ['username', 'user_account']
+        fields = ['username', 'user_account', 'headshot_url']
+    
+    def get_headshot_url(self, user):
+        return UserHeadshot.get_headshot_url(user)
 
 # 自定義 TokenObtainPairSerializer 以包含用戶資料
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):

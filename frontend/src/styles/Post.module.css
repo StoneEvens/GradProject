@@ -1,16 +1,9 @@
 /* Post 組件樣式 */
 .postCard {
   background-color: #FFF6ea;
-  border-radius: 16px;
+  border-radius: 8px;
   padding: 16px;
   margin-bottom: 15px;
-  border: 2px solid #FFB370;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  transition: box-shadow 0.2s ease;
-}
-
-.postCard:hover {
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
 }
 
 /* 用戶資訊區域 */

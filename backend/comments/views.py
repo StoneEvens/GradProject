@@ -7,6 +7,11 @@ from rest_framework.pagination import PageNumberPagination
 from social.models import PostFrame
 from .models import Comment
 from .serializers import CommentSerializer, CommentReplySerializer
+from utils.firebase_service import firebase_storage_service
+from media.models import CommentImage
+import logging
+
+logger = logging.getLogger(__name__)
 
 class CommentPagination(PageNumberPagination):
     page_size = 20
@@ -29,20 +34,59 @@ class PostCommentsView(generics.ListCreateAPIView):
         post_id = self.kwargs.get('post_id')
         postFrame = get_object_or_404(PostFrame, id=post_id)
         
+        # 取得內容和圖片
+        content = self.request.data.get('content', '').strip()
+        images = self.request.FILES.getlist('images')
+        
+        # 檢查是否至少有內容或圖片
+        if not content and not images:
+            return Response(
+                {"detail": "留言內容或圖片至少需要提供一項"},
+                status=drf_status.HTTP_400_BAD_REQUEST
+            )
+        
         # 建立頂層評論 (depth=0, parent=None)
-        serializer.save(
+        comment = serializer.save(
             user=self.request.user,
             postFrame=postFrame,
-            content=self.request.data.get('content', ''),
+            content=content,
             parent=None
         )
 
-        postFrame.add_comment()  # 更新評論數量
+        # 處理圖片上傳
+        if images:
+            try:
+                # 使用批量上傳方法
+                success, message, uploaded_images = firebase_storage_service.upload_comment_images_batch(
+                    user_id=self.request.user.id,
+                    comment_id=comment.id,
+                    image_files=images
+                )
+                
+                if success:
+                    # 為每張成功上傳的圖片創建 CommentImage 記錄
+                    for image_info in uploaded_images:
+                        CommentImage.objects.create(
+                            content_object=comment,
+                            firebase_url=image_info['firebase_url'],
+                            firebase_path=image_info['firebase_path'],
+                            sort_order=image_info['sort_order'],
+                            original_filename=image_info['original_filename'],
+                            file_size=image_info['file_size'],
+                            content_type_mime=image_info['content_type']
+                        )
+                    logger.info(f"留言 {comment.id} 的 {len(uploaded_images)} 張圖片上傳成功")
+                else:
+                    logger.warning(f"留言 {comment.id} 圖片上傳部分失敗: {message}")
+                    
+            except Exception as e:
+                logger.error(f"留言 {comment.id} 圖片處理失敗: {str(e)}")
 
-        return Response(
-            {"detail": "評論已成功建立"},
-            status=drf_status.HTTP_201_CREATED
-        )
+        # 留言數現在由序列化器動態計算，不需要手動維護
+        
+        # 返回創建的留言數據
+        serializer_data = CommentSerializer(comment, context={'request': self.request}).data
+        return Response(serializer_data, status=drf_status.HTTP_201_CREATED)
 
 class CommentDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = CommentSerializer
@@ -102,12 +146,58 @@ class CommentReplyView(generics.ListCreateAPIView):
     
     def perform_create(self, serializer):
         comment_id = self.kwargs.get('comment_id')
-        comment = get_object_or_404(Comment, id=comment_id)
+        parent_comment = get_object_or_404(Comment, id=comment_id)
+
+        # 取得內容和圖片
+        content = self.request.data.get('content', '').strip()
+        images = self.request.FILES.getlist('images')
+        
+        # 檢查是否至少有內容或圖片
+        if not content and not images:
+            return Response(
+                {"detail": "回覆內容或圖片至少需要提供一項"},
+                status=drf_status.HTTP_400_BAD_REQUEST
+            )
 
         # 建立回覆，繼承父評論的content_type和object_id
-        serializer.save(
+        reply_comment = serializer.save(
             user=self.request.user,
-            postFrame=comment.postFrame,
-            content=self.request.data.get('content', ''),
-            parent=comment
+            postFrame=parent_comment.postFrame,
+            content=content,
+            parent=parent_comment
         )
+
+        # 處理圖片上傳
+        if images:
+            try:
+                # 使用批量上傳方法
+                success, message, uploaded_images = firebase_storage_service.upload_comment_images_batch(
+                    user_id=self.request.user.id,
+                    comment_id=reply_comment.id,
+                    image_files=images
+                )
+                
+                if success:
+                    # 為每張成功上傳的圖片創建 CommentImage 記錄
+                    for image_info in uploaded_images:
+                        CommentImage.objects.create(
+                            content_object=reply_comment,
+                            firebase_url=image_info['firebase_url'],
+                            firebase_path=image_info['firebase_path'],
+                            sort_order=image_info['sort_order'],
+                            original_filename=image_info['original_filename'],
+                            file_size=image_info['file_size'],
+                            content_type_mime=image_info['content_type']
+                        )
+                    logger.info(f"回覆 {reply_comment.id} 的 {len(uploaded_images)} 張圖片上傳成功")
+                else:
+                    logger.warning(f"回覆 {reply_comment.id} 圖片上傳部分失敗: {message}")
+                    
+            except Exception as e:
+                logger.error(f"回覆 {reply_comment.id} 圖片處理失敗: {str(e)}")
+        
+        # 留言數現在由序列化器動態計算，不需要手動維護
+        
+        # 返回創建的回覆數據
+        serializer_data = CommentReplySerializer(reply_comment, context={'request': self.request}).data
+        return Response(serializer_data, status=drf_status.HTTP_201_CREATED)

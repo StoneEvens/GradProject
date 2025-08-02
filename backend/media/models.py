@@ -335,3 +335,73 @@ class FeedImage(SuperImage):
             result[image.image_type] = image
             
         return result
+
+
+# 評論圖片
+class CommentImage(SuperImage):
+    """
+    評論圖片模型
+    專門用於儲存評論的圖片，支援 Django ContentType 框架
+    """
+    from django.contrib.contenttypes.models import ContentType
+    from django.contrib.contenttypes.fields import GenericForeignKey
+    
+    # GenericForeignKey 支援
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey('content_type', 'object_id')
+    
+    sort_order = models.IntegerField(
+        default=0,
+        help_text="圖片排序順序"
+    )
+    
+    class Meta:
+        ordering = ['content_type', 'object_id', 'sort_order']
+        indexes = [
+            models.Index(fields=['content_type', 'object_id', 'sort_order']),
+        ]
+        verbose_name = '評論圖片'
+        verbose_name_plural = '評論圖片'
+    
+    def __str__(self):
+        return f"CommentImage {self.id} for {self.content_type.name} {self.object_id}"
+    
+    def save(self, *args, **kwargs):
+        """覆寫 save 方法以自動生成 alt_text"""
+        if not self.alt_text:
+            self.alt_text = f"評論圖片 {self.sort_order + 1}"
+        super().save(*args, **kwargs)
+    
+    @classmethod
+    def create_for_comment(cls, comment, firebase_url, firebase_path, 
+                          sort_order=0, original_filename='', content_type='image/jpeg', file_size=None):
+        """
+        為評論創建圖片記錄
+        
+        Parameters:
+        - comment: Comment 實例
+        - firebase_url: Firebase Storage URL
+        - firebase_path: Firebase Storage 路徑
+        - sort_order: 排序順序
+        - original_filename: 原始檔案名稱
+        - content_type: MIME 類型
+        - file_size: 檔案大小
+        
+        Returns:
+        - CommentImage 實例
+        """
+        from django.contrib.contenttypes.models import ContentType
+        comment_type = ContentType.objects.get_for_model(comment)
+        
+        return cls.objects.create(
+            content_type=comment_type,
+            object_id=comment.id,
+            firebase_url=firebase_url,
+            firebase_path=firebase_path,
+            sort_order=sort_order,
+            original_filename=original_filename,
+            content_type_mime=content_type,
+            file_size=file_size,
+            alt_text=f"評論圖片 {sort_order + 1}"
+        )
