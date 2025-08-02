@@ -131,22 +131,41 @@ class FirebaseStorageService:
             
             # 建立 blob 物件
             blob = self.bucket.blob(file_path)
+            logger.info(f"Created blob for path: {file_path}")
+            logger.info(f"Bucket name: {self.bucket.name}")
             
             # 設定檔案內容類型
             if hasattr(image_file, 'content_type') and image_file.content_type:
                 blob.content_type = image_file.content_type
+                logger.info(f"Set content type: {image_file.content_type}")
+            else:
+                logger.info("No content type available")
             
             # 上傳檔案
+            logger.info(f"開始上傳檔案到: {file_path}")
             if isinstance(image_file, (InMemoryUploadedFile, TemporaryUploadedFile)):
+                logger.info(f"上傳檔案類型: {type(image_file)}, 大小: {image_file.size}")
                 blob.upload_from_file(image_file.file)
             else:
+                logger.info(f"上傳檔案類型: {type(image_file)}")
                 blob.upload_from_file(image_file)
             
+            logger.info("檔案上傳到 Firebase Storage 完成")
+            
+            # 檢查檔案是否真的存在
+            if blob.exists():
+                logger.info("確認檔案存在於 Firebase Storage")
+            else:
+                logger.error("檔案上傳後不存在於 Firebase Storage")
+                return False, "檔案上傳後不存在於 Firebase Storage", None
+            
             # 設定公開存取權限
+            logger.info("設定公開存取權限")
             blob.make_public()
             
             # 獲取公開 URL
             firebase_url = blob.public_url
+            logger.info(f"獲取公開 URL: {firebase_url}")
             
             logger.info(f"圖片上傳成功: {file_path}")
             return True, "圖片上傳成功", firebase_url
@@ -384,27 +403,37 @@ class FirebaseStorageService:
             logger.error(f"批量刪除貼文圖片時發生錯誤: {str(e)}")
             return False, f"批量刪除失敗: {str(e)}", results
 
-    def upload_feed_photo(self, user_id: int, feed_id: int, photo_file, photo_type: str) -> Tuple[bool, str, Optional[str], Optional[str]]:
+    def upload_feed_photo(self, feed_id: int, photo_file, photo_type: str, pet_type: str = 'cat') -> Tuple[bool, str, Optional[str], Optional[str]]:
         """
-        上傳飼料照片
+        上傳飼料照片到共用飼料資料庫
 
         Parameters:
-        - user_id: 用戶 ID
-        - feed_id: 飼料 ID
+        - feed_id: 飼料 ID（共用）
         - photo_file: 圖片檔案
         - photo_type: 照片類型 ('front', 'nutrition')
+        - pet_type: 寵物類型 ('cat', 'dog')
 
         Returns:
         - tuple: (是否成功, 訊息, Firebase URL, Firebase 路徑)
         """
-        folder = f"feeds/user_{user_id}/feed_{feed_id}/{photo_type}"
-        file_path = self.generate_file_path(folder, photo_file.name)
-        success, message, firebase_url = self.upload_image(photo_file, file_path)
-
-        if success:
-            return True, message, firebase_url, file_path
-        else:
-            return False, message, None, None
+        try:
+            # 直接生成路徑，像 upload_abnormal_record_image 一樣
+            file_extension = photo_file.name.split('.')[-1].lower() if '.' in photo_file.name else 'jpg'
+            unique_filename = f"feed_{photo_type}_{uuid.uuid4().hex}.{file_extension}"
+            file_path = f"feeds/shared/{pet_type}/feed_{feed_id}/{photo_type}/{unique_filename}"
+            
+            success, message, firebase_url = self.upload_image(photo_file, file_path)
+            
+            if success:
+                logger.info(f"飼料圖片上傳成功: feed_id={feed_id}, path={file_path}")
+                return True, message, firebase_url, file_path
+            else:
+                logger.error(f"飼料圖片上傳失敗: feed_id={feed_id}, error={message}")
+                return False, message, None, None
+                
+        except Exception as e:
+            logger.error(f"飼料圖片上傳異常: feed_id={feed_id}, error={str(e)}")
+            return False, f"飼料圖片上傳異常: {str(e)}", None, None
 
     def upload_abnormal_record_image(self, user_id: int, pet_id: int, image_file, sort_order: int = 0) -> Tuple[bool, str, Optional[str], Optional[str]]:
         """

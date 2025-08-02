@@ -1,0 +1,500 @@
+/* 標題區域 */
+.titleSection {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 30px;
+  margin-bottom: 5px;
+  position: relative;
+}
+
+.title {
+  font-size: 24px;
+  color: #89350c;
+  text-align: left;
+  margin: 0;
+  font-weight: bold;
+}
+
+.historyButton {
+  background: none;
+  border: none;
+  color: #89350c;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: opacity 0.2s ease;
+}
+
+.historyButton:hover {
+  opacity: 0.7;
+}
+
+.historyButton::before {
+  content: '';
+  background-image: url('/assets/icon/HistoryRecordIcon.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  width: 24px;
+  height: 24px;
+  display: inline-block;
+}
+
+.stepLabel {
+  font-size: 18px;
+  color: #89350c;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.divider {
+  width: 100%;
+  height: 1.5px;
+  background: #FFB370;
+  margin: 10px 0 25px 0;
+}
+
+/* 通用區域樣式 */
+.section {
+  margin-bottom: 20px;
+}
+
+.sectionLabel {
+  display: block;
+  font-size: 16px;
+  color: #89350c;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+/* 結果顯示區域 */
+.resultSection {
+  background-color: #ffeed6;
+  border-radius: 16px;
+  padding: 30px;
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #FFB370;
+}
+
+/* AI 載入狀態 */
+.aiLoading {
+  font-size: 18px;
+  color: #F08651;
+  text-align: center;
+  font-weight: bold;
+}
+
+/* 結果容器 */
+.resultContent {
+  width: 100%;
+}
+
+.resultBox {
+  background-color: #FFE3C1;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.resultTitle {
+  font-size: 16px;
+  color: #89350c;
+  font-weight: bold;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.temporaryPetHint {
+  color: #89350c;
+  opacity: 0.7;
+  font-size: 14px;
+}
+
+.resultText {
+  color: #89350c;
+  font-size: 15px;
+  line-height: 1.8;
+  white-space: pre-wrap;
+}
+
+/* 格式化結果顯示 */
+.formattedResult {
+  color: #89350c;
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.paragraph {
+  margin-bottom: 16px;
+  line-height: 1.8;
+}
+
+.listSection {
+  margin-bottom: 20px;
+}
+
+.sectionTitle {
+  font-weight: bold;
+  color: #89350c;
+  margin-bottom: 12px;
+  font-size: 16px;
+  border-bottom: 2px solid #FFB370;
+  padding-bottom: 4px;
+}
+
+.listItem {
+  margin: 8px 0;
+  padding-left: 16px;
+  position: relative;
+  line-height: 1.6;
+}
+
+.listItem:before {
+  content: '•';
+  color: #F08651;
+  font-weight: bold;
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+/* 營養資訊特殊樣式 */
+.nutritionInfo {
+  margin: 12px 0;
+  padding: 12px 16px;
+  background-color: rgba(240, 134, 81, 0.1);
+  border-left: 4px solid #F08651;
+  border-radius: 0 8px 8px 0;
+  font-weight: 500;
+  color: #89350c;
+  line-height: 1.6;
+}
+
+/* 操作按鈕 */
+.actionButtons {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 30px;
+  gap: 16px;
+}
+
+.prevButton {
+  background-color: #ffce99;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 14px 40px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+}
+
+.prevButton:hover {
+  background-color: #FFB370;
+}
+
+.completeButton {
+  background-color: #F08651;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 14px 40px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  min-width: 100px;
+}
+
+.completeButton:hover:not(:disabled) {
+  background-color: #e57843;
+  transform: translateY(-1px);
+}
+
+.completeButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.savedButton {
+  background-color: #4caf50;
+  color: white;
+}
+
+.savedButton:hover {
+  background-color: #4caf50;
+  transform: none;
+}
+
+/* 響應式設計 */
+@media (max-width: 480px) {
+  .titleSection {
+    margin-top: 25px;
+    margin-bottom: 15px;
+  }
+
+  .title {
+    font-size: 20px;
+  }
+
+  .stepLabel {
+    font-size: 16px;
+    margin-bottom: 16px;
+  }
+
+  .section {
+    margin-bottom: 18px;
+  }
+
+  .sectionLabel {
+    font-size: 15px;
+    margin-bottom: 8px;
+  }
+
+  .resultSection {
+    padding: 20px;
+    min-height: 150px;
+  }
+
+  .resultBox {
+    padding: 16px;
+  }
+
+  .resultTitle {
+    font-size: 15px;
+    margin-bottom: 10px;
+  }
+
+  .resultText {
+    font-size: 14px;
+    line-height: 1.7;
+  }
+  
+  .formattedResult {
+    font-size: 14px;
+  }
+  
+  .paragraph {
+    margin-bottom: 14px;
+  }
+  
+  .sectionTitle {
+    font-size: 15px;
+    margin-bottom: 10px;
+  }
+  
+  .listItem {
+    margin: 6px 0;
+    padding-left: 14px;
+    font-size: 14px;
+  }
+  
+  .nutritionInfo {
+    margin: 10px 0;
+    padding: 10px 14px;
+    font-size: 14px;
+  }
+
+  .aiLoading {
+    font-size: 16px;
+  }
+
+  .actionButtons {
+    margin-top: 25px;
+    gap: 12px;
+  }
+
+  .prevButton {
+    padding: 12px 30px;
+    font-size: 15px;
+    height: 45px;
+  }
+  
+  .completeButton {
+    padding: 12px 30px;
+    font-size: 15px;
+    height: 45px;
+    min-width: 80px;
+  }
+}
+
+@media (max-width: 360px) {
+  .resultSection {
+    padding: 16px;
+  }
+
+  .resultBox {
+    padding: 14px;
+  }
+
+  .resultTitle {
+    font-size: 14px;
+  }
+
+  .resultText {
+    font-size: 13px;
+  }
+  
+  .formattedResult {
+    font-size: 13px;
+  }
+  
+  .paragraph {
+    margin-bottom: 12px;
+  }
+  
+  .sectionTitle {
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+  
+  .listItem {
+    margin: 5px 0;
+    padding-left: 12px;
+    font-size: 13px;
+  }
+  
+  .nutritionInfo {
+    margin: 8px 0;
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+
+  .temporaryPetHint {
+    font-size: 12px;
+  }
+}
+
+/* 計算中狀態 */
+.loadingContainer {
+  text-align: center;
+  width: 100%;
+}
+
+.loadingSpinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #FFE3C1;
+  border-top: 4px solid #F08651;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 20px auto;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.aiLoading {
+  font-size: 18px;
+  color: #F08651;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.loadingSubtext {
+  font-size: 14px;
+  color: #89350c;
+  opacity: 0.7;
+}
+
+/* 錯誤狀態 */
+.errorContainer {
+  text-align: center;
+  width: 100%;
+}
+
+.errorIcon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.errorTitle {
+  font-size: 20px;
+  color: #d32f2f;
+  font-weight: bold;
+  margin-bottom: 12px;
+}
+
+.errorMessage {
+  font-size: 16px;
+  color: #89350c;
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+.retryButton {
+  background-color: #F08651;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.retryButton:hover {
+  background-color: #e57843;
+}
+
+/* 手機版調整 */
+@media (max-width: 480px) {
+  .loadingSpinner {
+    width: 32px;
+    height: 32px;
+    margin-bottom: 16px;
+  }
+  
+  .aiLoading {
+    font-size: 16px;
+  }
+  
+  .loadingSubtext {
+    font-size: 13px;
+  }
+  
+  .errorIcon {
+    font-size: 40px;
+    margin-bottom: 12px;
+  }
+  
+  .errorTitle {
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
+  
+  .errorMessage {
+    font-size: 14px;
+    margin-bottom: 16px;
+  }
+  
+  .retryButton {
+    padding: 10px 20px;
+    font-size: 13px;
+  }
+}

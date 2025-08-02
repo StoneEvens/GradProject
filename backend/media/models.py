@@ -1,6 +1,4 @@
 from django.db import models
-from django.contrib.contenttypes.fields import GenericForeignKey
-from django.contrib.contenttypes.models import ContentType
 from gradProject import settings
 from pets.models import Pet
 from social.models import PostFrame
@@ -67,11 +65,6 @@ class SuperImage(models.Model):
 class Image(SuperImage):
     postFrame = models.ForeignKey(PostFrame, on_delete=models.CASCADE, related_name='images', null=True, blank=True)
     sort_order = models.IntegerField(default=0)
-    
-    # 添加 GenericForeignKey 支援以關聯其他模型（如 AbnormalPost）
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True, blank=True)
-    object_id = models.PositiveIntegerField(null=True, blank=True)
-    content_object = GenericForeignKey('content_type', 'object_id')
 
     class Meta:
         ordering = ['id', 'sort_order']
@@ -122,3 +115,223 @@ class UserHeadshot(SuperImage):
     def create(user, firebase_path: str, firebase_url: str):
         """創建用戶頭像記錄"""
         return UserHeadshot.objects.create(user=user, firebase_path=firebase_path, firebase_url=firebase_url)
+
+
+# 異常貼文圖片
+class AbnormalPostImage(SuperImage):
+    """
+    異常貼文圖片模型
+    專門用於儲存異常記錄的圖片
+    """
+    abnormal_post = models.ForeignKey(
+        'pets.AbnormalPost', 
+        on_delete=models.CASCADE, 
+        related_name='abnormal_images',
+        help_text="關聯的異常貼文"
+    )
+    sort_order = models.IntegerField(
+        default=0,
+        help_text="圖片排序順序"
+    )
+    
+    class Meta:
+        ordering = ['abnormal_post', 'sort_order']
+        indexes = [
+            models.Index(fields=['abnormal_post', 'sort_order']),
+        ]
+        verbose_name = '異常貼文圖片'
+        verbose_name_plural = '異常貼文圖片'
+    
+    def __str__(self):
+        return f"AbnormalPostImage {self.id} for Post {self.abnormal_post.id}"
+    
+    def save(self, *args, **kwargs):
+        """覆寫 save 方法以自動生成 alt_text"""
+        if not self.alt_text and self.abnormal_post:
+            self.alt_text = f"寵物 {self.abnormal_post.pet.pet_name} 的異常記錄圖片"
+        super().save(*args, **kwargs)
+    
+    @classmethod
+    def create_from_upload(cls, abnormal_post, firebase_url, firebase_path, 
+                          sort_order=0, original_filename='', content_type='image/jpeg', file_size=None):
+        """
+        從上傳結果創建圖片記錄
+        
+        Parameters:
+        - abnormal_post: AbnormalPost 實例
+        - firebase_url: Firebase Storage URL
+        - firebase_path: Firebase Storage 路徑
+        - sort_order: 排序順序
+        - original_filename: 原始檔案名稱
+        - content_type: MIME 類型
+        - file_size: 檔案大小
+        
+        Returns:
+        - AbnormalPostImage 實例
+        """
+        return cls.objects.create(
+            abnormal_post=abnormal_post,
+            firebase_url=firebase_url,
+            firebase_path=firebase_path,
+            sort_order=sort_order,
+            original_filename=original_filename,
+            content_type_mime=content_type,
+            file_size=file_size,
+            alt_text=f"寵物 {abnormal_post.pet.pet_name} 的異常記錄圖片 {sort_order + 1}"
+        )
+    
+    @classmethod
+    def bulk_delete_with_firebase(cls, image_ids):
+        """
+        批量刪除圖片記錄並從 Firebase 刪除檔案
+        
+        Parameters:
+        - image_ids: 圖片 ID 列表
+        
+        Returns:
+        - tuple: (成功數量, 失敗數量, 錯誤詳情)
+        """
+        from utils.firebase_service import firebase_storage_service
+        
+        images = cls.objects.filter(id__in=image_ids)
+        success_count = 0
+        failed_count = 0
+        errors = []
+        
+        for image in images:
+            try:
+                # 從 Firebase 刪除
+                if image.firebase_path:
+                    delete_success, delete_message = firebase_storage_service.delete_image(image.firebase_path)
+                    if not delete_success:
+                        errors.append({
+                            'image_id': image.id,
+                            'error': delete_message
+                        })
+                        failed_count += 1
+                        continue
+                
+                # 從資料庫刪除
+                image.delete()
+                success_count += 1
+                
+            except Exception as e:
+                errors.append({
+                    'image_id': image.id,
+                    'error': str(e)
+                })
+                failed_count += 1
+        
+        return success_count, failed_count, errors
+
+
+# 飼料圖片
+class FeedImage(SuperImage):
+    """
+    飼料圖片模型
+    專門用於儲存飼料的正面和營養標籤圖片
+    """
+    IMAGE_TYPE_CHOICES = [
+        ('front', '正面圖片'),
+        ('nutrition', '營養標籤圖片'),
+    ]
+    
+    feed = models.ForeignKey(
+        'feeds.Feed',
+        on_delete=models.CASCADE,
+        related_name='feed_images',
+        help_text="關聯的飼料"
+    )
+    image_type = models.CharField(
+        max_length=20,
+        choices=IMAGE_TYPE_CHOICES,
+        help_text="圖片類型"
+    )
+    
+    class Meta:
+        ordering = ['feed', 'image_type']
+        indexes = [
+            models.Index(fields=['feed', 'image_type']),
+        ]
+        # 確保每個飼料的每種圖片類型只有一張
+        unique_together = ['feed', 'image_type']
+        verbose_name = '飼料圖片'
+        verbose_name_plural = '飼料圖片'
+    
+    def __str__(self):
+        return f"FeedImage {self.get_image_type_display()} for Feed {self.feed.id}"
+    
+    def save(self, *args, **kwargs):
+        """覆寫 save 方法以自動生成 alt_text"""
+        if not self.alt_text and self.feed:
+            image_type_display = self.get_image_type_display()
+            self.alt_text = f"{self.feed.brand} {self.feed.name} - {image_type_display}"
+        super().save(*args, **kwargs)
+    
+    @classmethod
+    def create_or_update(cls, feed, image_type, firebase_url, firebase_path, 
+                        original_filename='', content_type='image/jpeg', file_size=None):
+        """
+        創建或更新飼料圖片記錄
+        
+        Parameters:
+        - feed: Feed 實例
+        - image_type: 圖片類型 ('front' 或 'nutrition')
+        - firebase_url: Firebase Storage URL
+        - firebase_path: Firebase Storage 路徑
+        - original_filename: 原始檔案名稱
+        - content_type: MIME 類型
+        - file_size: 檔案大小
+        
+        Returns:
+        - FeedImage 實例
+        """
+        # 刪除舊圖片（如果存在）
+        old_image = cls.objects.filter(feed=feed, image_type=image_type).first()
+        if old_image and old_image.firebase_path:
+            try:
+                from utils.firebase_service import firebase_storage_service
+                delete_success, delete_msg = firebase_storage_service.delete_image(old_image.firebase_path)
+                if not delete_success:
+                    import logging
+                    logger = logging.getLogger(__name__)
+                    logger.warning(f"刪除舊飼料圖片失敗: {delete_msg}")
+            except Exception as e:
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.warning(f"刪除舊飼料圖片時發生異常: {str(e)}")
+        
+        # 創建或更新圖片記錄
+        feed_image, created = cls.objects.update_or_create(
+            feed=feed,
+            image_type=image_type,
+            defaults={
+                'firebase_url': firebase_url,
+                'firebase_path': firebase_path,
+                'original_filename': original_filename,
+                'content_type_mime': content_type,
+                'file_size': file_size,
+                'alt_text': f"{feed.brand} {feed.name} - {'正面圖片' if image_type == 'front' else '營養標籤圖片'}"
+            }
+        )
+        
+        return feed_image
+    
+    @classmethod
+    def get_feed_images(cls, feed):
+        """
+        獲取飼料的所有圖片
+        
+        Parameters:
+        - feed: Feed 實例
+        
+        Returns:
+        - dict: {'front': FeedImage or None, 'nutrition': FeedImage or None}
+        """
+        images = cls.objects.filter(feed=feed)
+        result = {'front': None, 'nutrition': None}
+        
+        for image in images:
+            result[image.image_type] = image
+            
+        return result

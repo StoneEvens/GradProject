@@ -1,8 +1,6 @@
 from rest_framework import serializers
 from .models import *
-from media.models import Image
 from interactions.serializers import InteractionStatusSerializer
-from django.contrib.contenttypes.models import ContentType
 
 # === Pet (寵物基本資料) ===
 class PetSerializer(serializers.ModelSerializer):
@@ -34,13 +32,8 @@ class AbnormalPostSerializer(serializers.ModelSerializer):
         return symptoms_data
     
     def get_images(self, obj):
-        """獲取異常記錄關聯的所有圖片 - Firebase Storage 版本"""
-        from django.contrib.contenttypes.models import ContentType
-        content_type = ContentType.objects.get_for_model(AbnormalPost)
-        images = Image.objects.filter(
-            content_type=content_type,
-            object_id=obj.id
-        ).order_by('sort_order')
+        """獲取異常記錄關聯的所有圖片 - 使用 AbnormalPostImage 模型"""
+        images = obj.abnormal_images.all().order_by('sort_order')
         
         images_data = []
         for image in images:

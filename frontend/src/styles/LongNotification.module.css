@@ -1,0 +1,85 @@
+.longNotification {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #ffeed6;
+  border-radius: 8px;
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 10000;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    transform: translate(-50%, -100%);
+    opacity: 0;
+  }
+  to {
+    transform: translate(-50%, 0);
+    opacity: 0.8;
+  }
+}
+
+.fadeOut {
+  animation: fadeOut 0.3s ease-out forwards;
+}
+
+@keyframes fadeOut {
+  from {
+    transform: translate(-50%, 0);
+    opacity: 0.8;
+  }
+  to {
+    transform: translate(-50%, -20px);
+    opacity: 0;
+  }
+}
+
+.message {
+  color: #f1501d;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: left;
+  flex-grow: 1;
+  margin-right: 12px;
+  line-height: 1.5;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  color: #f1501d;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.8;
+  transition: opacity 0.2s;
+  flex-shrink: 0;
+}
+
+.closeButton:hover {
+  opacity: 1;
+}
+
+/* 手機版適配 */
+@media (max-width: 480px) {
+  .longNotification {
+    width: calc(100% - 40px);
+    max-width: none;
+    font-size: 13px;
+  }
+  
+  .message {
+    font-size: 13px;
+  }
+}

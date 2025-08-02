@@ -1,0 +1,342 @@
+/* Modal 遮罩 */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1001;
+  padding: 20px;
+}
+
+/* Modal 容器 */
+.modalContainer {
+  background-color: #FFca9c;
+  border-radius: 15px;
+  width: 380px;
+  height: 600px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  animation: slideIn 0.3s ease-out;
+  display: flex;
+  flex-direction: column;
+}
+
+@keyframes slideIn {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Modal 標題 */
+.modalHeader {
+  background-color: #FFca9c;
+  color: #333;
+  padding: 16px 20px;
+  text-align: center;
+  border-bottom: 1px solid #ffeed6;
+  flex-shrink: 0;
+}
+
+.modalHeader h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #89350c;
+}
+
+/* Modal 內容 */
+.modalBody {
+  background-color: #FFca9c;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* 載入狀態 */
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  color: #89350c;
+  font-size: 16px;
+}
+
+/* 空狀態 */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.emptyIcon {
+  width: 80px;
+  height: 80px;
+  margin-bottom: 12px;
+  opacity: 0.6;
+}
+
+.emptyState p {
+  color: #89350c;
+  opacity: 0.7;
+  font-size: 15px;
+  margin: 0;
+}
+
+/* 紀錄列表 */
+.recordList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* 返回按鈕 */
+.backButton {
+  background: none;
+  border: none;
+  color: #89350c;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  transition: color 0.2s ease;
+}
+
+.backButton:hover {
+  color: #F08651;
+}
+
+/* 詳細內容 */
+.recordDetail {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.detailSection {
+  background: #FFF6EA;
+  border-radius: 8px;
+  padding: 16px;
+  border: 1px solid #FFE5C4;
+}
+
+.detailSectionTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: #89350c;
+  margin: 0 0 12px 0;
+  border-bottom: 1px solid #FFE5C4;
+  padding-bottom: 8px;
+}
+
+.detailInfoGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.detailInfoItem {
+  display: flex;
+  align-items: flex-start;
+  font-size: 14px;
+}
+
+.detailLabel {
+  color: #89350c;
+  opacity: 0.8;
+  min-width: 100px;
+  font-weight: 500;
+}
+
+.detailValue {
+  color: #89350c;
+  font-weight: 600;
+  word-break: break-word;
+}
+
+/* 結果區塊 */
+.resultBox {
+  background: #FFEED6;
+  border-radius: 6px;
+  padding: 12px;
+  margin-top: 8px;
+  border: 1px solid #FFB370;
+}
+
+.resultBoxTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: #89350c;
+  margin: 0 0 8px 0;
+}
+
+/* 營養素網格 */
+.nutrientGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.nutrientItem {
+  display: flex;
+  align-items: center;
+  font-size: 13px;
+}
+
+.nutrientName {
+  color: #89350c;
+  opacity: 0.8;
+  margin-right: 6px;
+  min-width: 50px;
+}
+
+.nutrientValue {
+  color: #89350c;
+  font-weight: 600;
+}
+
+/* 描述文字 */
+.description {
+  color: #89350c;
+  line-height: 1.6;
+  font-size: 13px;
+  white-space: pre-wrap;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+/* Modal 底部 */
+.modalFooter {
+  background-color: #FFca9c;
+  padding: 20px;
+  display: flex;
+  gap: 10px;
+  border-top: 1px solid #ffeed6;
+  flex-shrink: 0;
+}
+
+.clearButton {
+  flex: 1;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  background-color: #FFCDD2;
+  font-size: 16px;
+  font-weight: 500;
+  color: #D32F2F;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.clearButton:hover {
+  background-color: #FFBBC4;
+}
+
+.clearButton:disabled {
+  background-color: #F5F5F5;
+  color: #BDBDBD;
+  cursor: not-allowed;
+}
+
+.closeButton {
+  flex: 1;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  background-color: #F08651;
+  font-size: 16px;
+  font-weight: 500;
+  color: #fff;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.closeButton:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+/* 滾動條樣式 */
+.modalBody::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modalBody::-webkit-scrollbar-track {
+  background: rgba(255, 179, 112, 0.2);
+  border-radius: 3px;
+}
+
+.modalBody::-webkit-scrollbar-thumb {
+  background: #FFB370;
+  border-radius: 3px;
+}
+
+.modalBody::-webkit-scrollbar-thumb:hover {
+  background: #FF9C4A;
+}
+
+/* 手機版優化 */
+@media (max-width: 480px) {
+  .modalContainer {
+    width: calc(100vw - 40px);
+    height: calc(100vh - 100px);
+    max-height: 600px;
+  }
+  
+  .modalHeader h2 {
+    font-size: 16px;
+  }
+  
+  .clearButton,
+  .closeButton {
+    padding: 8px 16px;
+    font-size: 14px;
+  }
+  
+  .backButton {
+    font-size: 14px;
+  }
+  
+  .detailSection {
+    padding: 12px;
+  }
+  
+  .detailSectionTitle {
+    font-size: 15px;
+  }
+  
+  .detailInfoItem {
+    font-size: 13px;
+  }
+  
+  .detailLabel {
+    min-width: 80px;
+  }
+  
+  .nutrientGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .description {
+    font-size: 12px;
+    max-height: 120px;
+  }
+}

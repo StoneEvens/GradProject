@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from datetime import date
 from .models import *
 from .serializers import *
-from media.models import * 
+from media.models import AbnormalPostImage 
 from rest_framework import generics
 from utils.api_response import APIResponse
 from django.db.models import Prefetch
@@ -561,20 +561,15 @@ class CreateAbnormalPostAPIView(APIView):
                             )
                             
                             if success:
-                                # 使用 GenericForeignKey 創建 Image 記錄關聯異常記錄
-                                from media.models import Image
-                                from django.contrib.contenttypes.models import ContentType
-                                
-                                content_type_obj = ContentType.objects.get_for_model(AbnormalPost)
-                                Image.objects.create(
-                                    content_type=content_type_obj,
-                                    object_id=abnormal_post.id,
+                                # 使用新的 AbnormalPostImage 模型創建圖片記錄
+                                AbnormalPostImage.create_from_upload(
+                                    abnormal_post=abnormal_post,
                                     firebase_url=firebase_url,
                                     firebase_path=firebase_path,
                                     sort_order=index,
                                     original_filename=file_name,
-                                    content_type_mime=content_type,
-                                    alt_text=f"寵物 {pet.pet_name} 的異常記錄圖片 {index+1}"
+                                    content_type=content_type,
+                                    file_size=len(image_data)
                                 )
                                 logger.info(f"異常記錄圖片 {index+1} 上傳成功: {firebase_url}")
                             else:
@@ -973,13 +968,10 @@ class UpdateAbnormalPostAPIView(APIView):
             import requests
             from django.core.files.uploadedfile import InMemoryUploadedFile
             from utils.firebase_service import firebase_storage_service
-            from media.models import Image
-            from django.contrib.contenttypes.models import ContentType
             
             # 獲取現有圖片
-            existing_images = list(Image.objects.filter(
-                content_type=ContentType.objects.get_for_model(AbnormalPost),
-                object_id=abnormal_post.id
+            existing_images = list(AbnormalPostImage.objects.filter(
+                abnormal_post=abnormal_post
             ))
             
             # 處理圖片操作
@@ -1117,19 +1109,16 @@ class UpdateAbnormalPostAPIView(APIView):
                                 )
                                 
                                 if success:
-                                    # 創建 Image 記錄關聯異常記錄
-                                    content_type_obj = ContentType.objects.get_for_model(AbnormalPost)
-                                    Image.objects.create(
-                                        content_type=content_type_obj,
-                                        object_id=abnormal_post.id,
+                                    # 使用新的 AbnormalPostImage 模型創建圖片記錄
+                                    AbnormalPostImage.create_from_upload(
+                                        abnormal_post=abnormal_post,
                                         firebase_url=firebase_url,
                                         firebase_path=firebase_path,
                                         sort_order=index,
                                         original_filename=file_name,
-                                        content_type_mime=content_type,
-                                        alt_text=f"寵物 {target_pet.pet_name} 的異常記錄圖片 {index+1}"
+                                        content_type=content_type,
+                                        file_size=len(image_data)
                                     )
-                                    pass
                                     
                             except Exception as img_error:
                                 pass
@@ -1198,14 +1187,11 @@ class DeleteAbnormalPostAPIView(APIView):
                 )
             
             # 導入必要的模組
-            from media.models import Image
-            from django.contrib.contenttypes.models import ContentType
             from utils.firebase_service import firebase_storage_service
             
             # 刪除關聯的圖片
-            existing_images = list(Image.objects.filter(
-                content_type=ContentType.objects.get_for_model(AbnormalPost),
-                object_id=abnormal_post.id
+            existing_images = list(AbnormalPostImage.objects.filter(
+                abnormal_post=abnormal_post
             ))
             
             # 從 Firebase Storage 和資料庫中刪除圖片

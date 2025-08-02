@@ -1,0 +1,50 @@
+/* 基本容器 */
+.container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #FFF2D9;
+}
+
+.content {
+  flex: 1;
+  padding: 30px;
+  padding-top: 80px;
+  padding-bottom: 90px;
+  max-width: 430px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* 載入狀態 */
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  font-size: 16px;
+  color: #89350c;
+}
+
+/* 步驟內容容器 */
+.stepContent {
+  width: 100%;
+}
+
+/* 響應式設計 */
+@media (max-width: 480px) {
+  .content {
+    padding: 15px;
+    padding-top: 75px;
+    padding-bottom: 85px;
+  }
+}
+
+@media (max-width: 360px) {
+  .content {
+    padding: 12px;
+    padding-top: 70px;
+    padding-bottom: 80px;
+  }
+}

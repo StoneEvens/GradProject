@@ -10,7 +10,6 @@ import { getUserPets } from '../services/petService';
 
 const PetPage = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('social');
   const [notification, setNotification] = useState('');
   const [currentPet, setCurrentPet] = useState(null);
   const [allPets, setAllPets] = useState([]);
@@ -74,11 +73,6 @@ const PetPage = () => {
   useEffect(() => {
     fetchPets();
   }, []);
-
-  // 切換分頁
-  const handleTabChange = (tab) => {
-    setActiveTab(tab);
-  };
 
   // 切換寵物
   const handlePetSwitch = (pet) => {
@@ -176,84 +170,35 @@ const PetPage = () => {
                 </div>
               </div>
 
-              {/* 分頁切換 */}
-              <div className={styles.tabs}>
-                <button
-                  className={`${styles.tab} ${activeTab === 'social' ? styles.active : ''}`}
-                  onClick={() => handleTabChange('social')}
-                >
-                  社交
-                </button>
-                <button
-                  className={`${styles.tab} ${activeTab === 'health' ? styles.active : ''}`}
-                  onClick={() => handleTabChange('health')}
-                >
-                  健康
-                </button>
-                <button
-                  className={`${styles.tab} ${activeTab === 'daily' ? styles.active : ''}`}
-                  onClick={() => handleTabChange('daily')}
-                >
-                  日常
-                </button>
-              </div>
+              {/* 分隔線 */}
+              <div className={styles.divider}></div>
 
-              {/* 功能按鈕區域 */}
+              {/* 功能按鈕區域 - 統一顯示所有功能 */}
               <div className={styles.functionGrid}>
-                {activeTab === 'social' && (
-                  <>
-                    <div className={styles.functionCell} onClick={handleEditPet}>
-                      <img src="/assets/icon/PetpageEditButton.png" alt="編輯資料" className={styles.functionIcon} />
-                      <span className={styles.functionLabel}>編輯資料</span>
-                    </div>
-                    <div className={styles.functionCell} onClick={() => handleRelatedPostsClick()}>
-                      <img src="/assets/icon/PetpagePastPostButton.png" alt="相關貼文" className={styles.functionIcon} />
-                      <span className={styles.functionLabel}>相關貼文</span>
-                    </div>
-                    <div className={styles.functionCell} onClick={() => handleFunctionClick('寵物社群')}>
-                      <img src="/assets/icon/PetpagePetFriendsButton.png" alt="寵物社群" className={styles.functionIcon} />
-                      <span className={styles.functionLabel}>寵物社群</span>
-                    </div>
-                  </>
-                )}
-                
-                {activeTab === 'health' && (
-                  <>
-                    <div className={styles.functionCell} onClick={() => handleFunctionClick('健康報告')}>
-                      <img src="/assets/icon/PetpageHealthReportButton.png" alt="健康報告" className={styles.functionIcon} />
-                      <span className={styles.functionLabel}>健康報告</span>
-                    </div>
-                    <div className={styles.functionCell} onClick={() => handleFunctionClick('疾病檔案')}>
-                      <img src="/assets/icon/PetpageIllnessArchiveButton.png" alt="疾病檔案" className={styles.functionIcon} />
-                      <span className={styles.functionLabel}>疾病檔案</span>
-                    </div>
-                    <div className={styles.functionCell} onClick={handleAbnormalPostClick}>
-                      <img src="/assets/icon/PetpagePetAbnormalPostButton.png" alt="異常紀錄" className={styles.functionIcon} />
-                      <span className={styles.functionLabel}>異常紀錄</span>
-                    </div>
-                    <div className={styles.functionCell} onClick={() => handleFunctionClick('統計資料')}>
-                      <img src="/assets/icon/PetpageStatisticsButton.png" alt="統計資料" className={styles.functionIcon} />
-                      <span className={styles.functionLabel}>統計資料</span>
-                    </div>
-                  </>
-                )}
-
-                {activeTab === 'daily' && (
-                  <>
-                    <div className={styles.functionCell} onClick={() => handleFunctionClick('日程安排')}>
-                      <img src="/assets/icon/PetpageScheduleButton.png" alt="日程安排" className={styles.functionIcon} />
-                      <span className={styles.functionLabel}>日程安排</span>
-                    </div>
-                    <div className={styles.functionCell} onClick={() => handleFunctionClick('常用飼料')}>
-                      <img src="/assets/icon/PetpageFeedButton.png" alt="常用飼料" className={styles.functionIcon} />
-                      <span className={styles.functionLabel}>常用飼料</span>
-                    </div>
-                    <div className={styles.functionCell} onClick={() => handleFunctionClick('購物記錄')}>
-                      <img src="/assets/icon/PetpageShoppingRecordsButton.png" alt="購物記錄" className={styles.functionIcon} />
-                      <span className={styles.functionLabel}>購物記錄</span>
-                    </div>
-                  </>
-                )}
+                <div className={styles.functionCell} onClick={handleEditPet}>
+                  <img src="/assets/icon/PetpageEditButton.png" alt="編輯資料" className={styles.functionIcon} />
+                  <span className={styles.functionLabel}>編輯資料</span>
+                </div>
+                <div className={styles.functionCell} onClick={() => handleRelatedPostsClick()}>
+                  <img src="/assets/icon/PetpagePastPostButton.png" alt="相關貼文" className={styles.functionIcon} />
+                  <span className={styles.functionLabel}>相關貼文</span>
+                </div>
+                <div className={styles.functionCell} onClick={() => navigate('/feeds')}>
+                  <img src="/assets/icon/PetpageFeedButton.png" alt="飼料專區" className={styles.functionIcon} />
+                  <span className={styles.functionLabel}>飼料專區</span>
+                </div>
+                <div className={styles.functionCell} onClick={() => handleFunctionClick('疾病檔案')}>
+                  <img src="/assets/icon/PetpageIllnessArchiveButton.png" alt="疾病檔案" className={styles.functionIcon} />
+                  <span className={styles.functionLabel}>疾病檔案</span>
+                </div>
+                <div className={styles.functionCell} onClick={handleAbnormalPostClick}>
+                  <img src="/assets/icon/PetpagePetAbnormalPostButton.png" alt="異常紀錄" className={styles.functionIcon} />
+                  <span className={styles.functionLabel}>異常紀錄</span>
+                </div>
+                <div className={styles.functionCell} onClick={() => handleFunctionClick('健康報告')}>
+                  <img src="/assets/icon/PetpageHealthReportButton.png" alt="健康報告" className={styles.functionIcon} />
+                  <span className={styles.functionLabel}>健康報告</span>
+                </div>
               </div>
 
               {/* 新的切換寵物組件 */}

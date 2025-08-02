@@ -1,16 +1,34 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import axios from '../utils/axios';
-import '../styles/CalculatorStep2.css';
+import styles from '../styles/CalculatorStep2.module.css';
+import CreateFeedModal from './CreateFeedModal';
+import HistoryRecordModal from './HistoryRecordModal';
+import NotificationComponent from './Notification';
+import FeedSelectModal from './FeedSelectModal';
+import FeedReviewConfirmModal from './FeedReviewConfirmModal';
+import FeedReviewModal from './FeedReviewModal';
 import mockFeed1 from '../MockPicture/mockFeed1.png';
 import mockFeed2 from '../MockPicture/mockFeed2.png';
 import mockFeed3 from '../MockPicture/mockFeed3.png';
 
 function CalculatorStep2({ onNext, onPrev, selectedPet }) {
   const { user_id } = useParams();
-  const fileInputRef = useRef();
+  const navigate = useNavigate();
   const [selectedFeed, setSelectedFeed] = useState(0);
   const [feeds, setFeeds] = useState([]);
+  const [showCreateFeedModal, setShowCreateFeedModal] = useState(false);
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const [showFeedSelectModal, setShowFeedSelectModal] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [pendingFeedForReview, setPendingFeedForReview] = useState(null);
+  const [notification, setNotification] = useState('');
+  
+  // 過去紀錄按鈕點擊事件
+  const handleHistoryClick = () => {
+    setShowHistoryModal(true);
+  };
   const [feedInfo, setFeedInfo] = useState({
     name: '',
     brand: '',
@@ -24,32 +42,21 @@ function CalculatorStep2({ onNext, onPrev, selectedPet }) {
   });
 
   useEffect(() => {
-    axios.get('/calculator/feeds/')
-      .then(response => {
-        const apiFeeds = response.data.map((item, idx) => ({
-          id: item.id,
-          name: item.name || `API飼料${idx + 1}`,
-          brand: item.brand || '未知品牌',
-          img: item.front_image_url || [mockFeed1, mockFeed2, mockFeed3][idx % 3],
-          carb: item.carbohydrate,
-          protein: item.protein,
-          fat: item.fat,
-          ca: item.calcium,
-          p: item.phosphorus,
-          mg: item.magnesium,
-          na: item.sodium,
-        }));
-        setFeeds(apiFeeds);
-        // 預設選第一筆
-        if (apiFeeds.length > 0) {
-          setSelectedFeed(0);
-          handleSelectFeed(0, apiFeeds);
-        }
-      })
-      .catch(err => {
-        console.error('載入飼料資料失敗：', err);
-      });
-  }, [user_id]);
+    // 初始化時不載入任何飼料，用戶需要主動選擇或新增
+    setFeeds([]);
+    setSelectedFeed(-1);
+    setFeedInfo({
+      name: '',
+      brand: '',
+      carb: '',
+      protein: '',
+      fat: '',
+      ca: '',
+      p: '',
+      mg: '',
+      na: ''
+    });
+  }, [user_id, selectedPet]);
 
   const handleSelectFeed = (idx, source = feeds) => {
     setSelectedFeed(idx);
@@ -71,182 +78,443 @@ function CalculatorStep2({ onNext, onPrev, selectedPet }) {
     setFeedInfo(prev => ({ ...prev, [field]: value }));
   };
 
-const handleFileChange = async (e) => {
-  const files = Array.from(e.target.files);
-  if (files.length < 2) {
-    alert("請選擇主圖與營養標各一張，檔名需包含 front 與 nutrition");
-    return;
-  }
+  // 顯示新增飼料 modal
+  const handleShowCreateFeedModal = () => {
+    setShowCreateFeedModal(true);
+  };
 
-  let frontImageFile = null;
-  let nutritionImageFile = null;
+  // 關閉新增飼料 modal
+  const handleCloseCreateFeedModal = () => {
+    setShowCreateFeedModal(false);
+  };
 
-  files.forEach(file => {
-    const name = file.name.toLowerCase();
-    if (name.includes("front")) {
-      frontImageFile = file;
-    } else if (name.includes("nutrition")) {
-      nutritionImageFile = file;
+  // 處理審核確認 modal 的確定按鈕
+  const handleConfirmModalConfirm = () => {
+    setShowConfirmModal(false);
+    setShowReviewModal(true);
+  };
+
+  // 處理審核確認 modal 的取消按鈕
+  const handleConfirmModalClose = () => {
+    setShowConfirmModal(false);
+    setPendingFeedForReview(null);
+  };
+
+  // 處理審核 modal 的關閉
+  const handleReviewModalClose = () => {
+    setShowReviewModal(false);
+    setPendingFeedForReview(null);
+  };
+
+  // 處理審核確認
+  const handleReviewConfirm = async (feed) => {
+    try {
+      // 調用審核 API
+      const response = await axios.post(`/feeds/${feed.id}/review/`);
+      
+      setNotification('審核完成，飼料已加入計算');
+      
+      // 審核完成後，將飼料加入到列表中
+      const reviewedFeed = {
+        ...feed,
+        is_verified: true,
+        review_count: (feed.review_count || 0) + 1
+      };
+      
+      const newFeeds = [...feeds, reviewedFeed];
+      setFeeds(newFeeds);
+      const newIndex = newFeeds.length - 1;
+      setSelectedFeed(newIndex);
+      handleSelectFeed(newIndex, newFeeds);
+      
+    } catch (error) {
+      console.error('審核失敗:', error);
+      throw error; // 讓 modal 組件處理錯誤
     }
-  });
+  };
 
-  if (!frontImageFile || !nutritionImageFile) {
-    alert("找不到包含 front 或 nutrition 的檔名，請重新命名並重新選取圖片。");
-    return;
-  }
+  // 處理錯誤回報
+  const handleReportError = async (errorData) => {
+    try {
+      // 調用錯誤回報 API
+      const response = await axios.post('/feeds/error-report/', errorData);
+      setNotification('已回報錯誤，感謝您的反饋');
+      
+    } catch (error) {
+      console.error('錯誤回報失敗:', error);
+      throw error; // 讓 modal 組件處理錯誤
+    }
+  };
 
-  try {
-    // Step 1: OCR
-    const ocrForm = new FormData();
-    ocrForm.append('image', nutritionImageFile);
-    const ocrRes = await axios.post('/feeds/ocr/', ocrForm, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    });
-    const nutrients = ocrRes.data.extracted_nutrients || {};
-    console.log("OCR 結果：", nutrients);
+  // 處理從 FeedSelectModal 選擇的飼料
+  const handleFeedSelect = (selectedFeedData) => {
+    // 將選擇的飼料加入到飼料列表中（如果不存在的話）
+    const existingIndex = feeds.findIndex(feed => feed.id === selectedFeedData.id);
+    
+    if (existingIndex !== -1) {
+      // 如果飼料已存在，直接選擇它
+      setSelectedFeed(existingIndex);
+      handleSelectFeed(existingIndex);
+    } else {
+      // 如果飼料不存在，添加到列表並選擇它
+      const newFeeds = [...feeds, selectedFeedData];
+      setFeeds(newFeeds);
+      const newIndex = newFeeds.length - 1;
+      setSelectedFeed(newIndex);
+      handleSelectFeed(newIndex, newFeeds);
+    }
+    
+    setNotification(`已選擇飼料：${selectedFeedData.brand} - ${selectedFeedData.name}`);
+  };
 
-    // Step 2: 上傳圖片
-    const uploadToFirebase = async (file, feedId, photoType) => {
-      const form = new FormData();
-      form.append('file', file);
-      form.append('feed_id', feedId);
-      form.append('photo_type', photoType);
-      const res = await axios.post('/feeds/firebase/upload/', form, {
+  // 處理新增飼料
+  const handleCreateFeed = async ({ frontImage, nutritionImage, petType, feedName, feedBrand, feedPrice }) => {
+    try {
+      // Step 1: OCR
+      const ocrForm = new FormData();
+      ocrForm.append('image', nutritionImage);
+      const ocrRes = await axios.post('/feeds/ocr/', ocrForm, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       });
-      return res.data.download_url;
-    };
+      const nutrients = ocrRes.data.extracted_nutrients || {};
+      console.log("OCR 結果：", nutrients);
 
-    const tempFeedId = Date.now();  // 臨時唯一值
+      // 將圖片轉換為 base64，參考 abnormal post 的做法
+      const convertToBase64 = (file) => {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.readAsDataURL(file);
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = error => reject(error);
+        });
+      };
 
-    const frontImageUrl = await uploadToFirebase(frontImageFile, tempFeedId, 'front');
-    const nutritionImageUrl = await uploadToFirebase(nutritionImageFile, tempFeedId, 'nutrition');
+      // 轉換圖片為 base64
+      const frontImageBase64 = frontImage ? await convertToBase64(frontImage) : null;
+      const nutritionImageBase64 = nutritionImage ? await convertToBase64(nutritionImage) : null;
 
+      // Step 2: 建立 Feed（包含自動比對邏輯和圖片數據）
+      const parseNumber = (val) => typeof val === 'number' ? val : 0;
+      const createFeedPayload = {
+        name: feedName || '自訂飼料',
+        brand: feedBrand || '未知品牌',
+        pet_type: petType, // 傳送寵物類型
+        pet_id: selectedPet?.id, // 傳送寵物 ID
+        protein: parseNumber(nutrients.protein),
+        fat: parseNumber(nutrients.fat),
+        carbohydrate: parseNumber(nutrients.carbohydrate),
+        calcium: parseNumber(nutrients.calcium),
+        phosphorus: parseNumber(nutrients.phosphorus),
+        magnesium: parseNumber(nutrients.magnesium),
+        sodium: parseNumber(nutrients.sodium),
+        price: feedPrice,
+        front_image: frontImageBase64,
+        nutrition_image: nutritionImageBase64
+      };
 
-    // Step 3: 建立 Feed
-    const parseNumber = (val) => typeof val === 'number' ? val : 0;
-    const createFeedPayload = {
-      name: '自訂飼料',
-      brand: '',
-      protein: parseNumber(nutrients.protein),
-      fat: parseNumber(nutrients.fat),
-      carbohydrate: parseNumber(nutrients.carbohydrate),
-      calcium: parseNumber(nutrients.calcium),
-      phosphorus: parseNumber(nutrients.phosphorus),
-      magnesium: parseNumber(nutrients.magnesium),
-      sodium: parseNumber(nutrients.sodium),
-      front_image_url: frontImageUrl,
-      nutrition_image_url: nutritionImageUrl,
-    };
-    console.log(createFeedPayload)
-    console.log('Hi, im here.')
+      const createFeedRes = await axios.post(
+        '/feeds/create/',
+        createFeedPayload
+      );
+      
+      const responseData = createFeedRes.data;
+      const feedData = responseData.data;
+      const feedId = responseData.feed_id || responseData.data?.id;
 
-    const createFeedRes = await axios.post(
-      '/calculator/feeds/create/',
-      createFeedPayload
-    );
-    console.log("建立 Feed 回傳結果：", createFeedRes.data);
-    const createdFeed = createFeedRes.data.data;
-    console.log("成功建立 Feed：", createdFeed);
+      // 圖片現在在 Feed 創建時已經處理，不需要分離的上傳步驟
 
-    const newFeed = {
-      id: createdFeed.id,
-      name: createdFeed.name,
-      brand: createdFeed.brand,
-      img: frontImageUrl,
-      carb: createdFeed.carbohydrate,
-      protein: createdFeed.protein,
-      fat: createdFeed.fat,
-      ca: createdFeed.calcium,
-      p: createdFeed.phosphorus,
-      mg: createdFeed.magnesium,
-      na: createdFeed.sodium,
-    };
+      // 根據是否為現有飼料來處理
+      if (responseData.is_existing) {
+        // 如果是現有飼料，先獲取飼料詳情
+        const petType = selectedPet.species === '狗' ? 'dog' : 'cat';
+        const feedDetailRes = await axios.get(`/feeds/shared/?pet_type=${petType}`);
+        const feedDetailData = feedDetailRes.data.data || feedDetailRes.data;
+        const matchedFeed = feedDetailData.find(feed => feed.id === feedId);
+        
+        if (matchedFeed && !matchedFeed.is_verified) {
+          // 如果匹配到的是審核中飼料，檢查是否可以使用
+          try {
+            const reviewCheckResponse = await axios.get(`/feeds/${feedId}/check-review/`);
+            
+            if (reviewCheckResponse.data.can_use_feed) {
+              // 如果可以使用（已審核過或已回報錯誤），直接添加到列表
+              const existingFeed = {
+                id: matchedFeed.id,
+                name: matchedFeed.name || feedName || '自訂飼料',
+                brand: matchedFeed.brand || feedBrand || '未知品牌',
+                img: matchedFeed.front_image_url || [mockFeed1, mockFeed2, mockFeed3][0],
+                carb: matchedFeed.carbohydrate ?? 0,
+                protein: matchedFeed.protein ?? 0,
+                fat: matchedFeed.fat ?? 0,
+                ca: matchedFeed.calcium ?? 0,
+                p: matchedFeed.phosphorus ?? 0,
+                mg: matchedFeed.magnesium ?? 0,
+                na: matchedFeed.sodium ?? 0,
+                price: matchedFeed.price,
+                review_count: matchedFeed.review_count ?? 0,
+                is_verified: matchedFeed.is_verified ?? false,
+                pet_type: matchedFeed.pet_type,
+              };
+              
+              const newFeeds = [...feeds, existingFeed];
+              setFeeds(newFeeds);
+              const newIndex = newFeeds.length - 1;
+              setSelectedFeed(newIndex);
+              handleSelectFeed(newIndex, newFeeds);
+              setNotification(responseData.message);
+            } else {
+              // 如果未審核過，顯示確認 modal
+              const feedForReview = {
+                id: matchedFeed.id,
+                name: matchedFeed.name || feedName || '自訂飼料',
+                brand: matchedFeed.brand || feedBrand || '未知品牌',
+                frontImage: matchedFeed.front_image_url,
+                protein: matchedFeed.protein ?? 0,
+                fat: matchedFeed.fat ?? 0,
+                carbohydrate: matchedFeed.carbohydrate ?? 0,
+                calcium: matchedFeed.calcium ?? 0,
+                phosphorus: matchedFeed.phosphorus ?? 0,
+                magnesium: matchedFeed.magnesium ?? 0,
+                sodium: matchedFeed.sodium ?? 0,
+                price: matchedFeed.price,
+                isVerified: matchedFeed.is_verified ?? false,
+                reviewCount: matchedFeed.review_count ?? 0,
+                pet_type: matchedFeed.pet_type,
+                created_by_name: matchedFeed.created_by_name,
+                created_at: matchedFeed.created_at,
+              };
+              
+              setPendingFeedForReview(feedForReview);
+              setShowConfirmModal(true);
+              return; // 等待用戶審核決定
+            }
+          } catch (reviewCheckError) {
+            console.error('檢查審核狀態失敗:', reviewCheckError);
+            setNotification('檢查飼料狀態失敗，請稍後再試');
+          }
+        } else {
+          // 已驗證的飼料，直接添加
+          const existingFeed = {
+            id: matchedFeed.id,
+            name: matchedFeed.name || feedName || '自訂飼料',
+            brand: matchedFeed.brand || feedBrand || '未知品牌',
+            img: matchedFeed.front_image_url || [mockFeed1, mockFeed2, mockFeed3][0],
+            carb: matchedFeed.carbohydrate ?? 0,
+            protein: matchedFeed.protein ?? 0,
+            fat: matchedFeed.fat ?? 0,
+            ca: matchedFeed.calcium ?? 0,
+            p: matchedFeed.phosphorus ?? 0,
+            mg: matchedFeed.magnesium ?? 0,
+            na: matchedFeed.sodium ?? 0,
+            price: matchedFeed.price,
+            review_count: matchedFeed.review_count ?? 0,
+            is_verified: matchedFeed.is_verified ?? false,
+            pet_type: matchedFeed.pet_type,
+          };
+          
+          const newFeeds = [...feeds, existingFeed];
+          setFeeds(newFeeds);
+          const newIndex = newFeeds.length - 1;
+          setSelectedFeed(newIndex);
+          handleSelectFeed(newIndex, newFeeds);
+          setNotification(responseData.message);
+        }
+      } else {
+        // 如果是新飼料，需要獲取完整資料後加入列表
+        const feedDetailRes = await axios.get(`/feeds/shared/?pet_type=${petType}`);
+        const feedDetailData = feedDetailRes.data.data || feedDetailRes.data;
+        const createdFeed = feedDetailData.find(feed => feed.id === feedId);
+        
+        const newFeed = {
+          id: feedId,
+          name: createdFeed?.name || feedName || '自訂飼料',
+          brand: createdFeed?.brand || feedBrand || '未知品牌',
+          img: createdFeed?.front_image_url || (frontImageBase64 ? frontImageBase64 : mockFeed1),
+          carb: createdFeed?.carbohydrate || parseNumber(nutrients.carbohydrate),
+          protein: createdFeed?.protein || parseNumber(nutrients.protein),
+          fat: createdFeed?.fat || parseNumber(nutrients.fat),
+          ca: createdFeed?.calcium || parseNumber(nutrients.calcium),
+          p: createdFeed?.phosphorus || parseNumber(nutrients.phosphorus),
+          mg: createdFeed?.magnesium || parseNumber(nutrients.magnesium),
+          na: createdFeed?.sodium || parseNumber(nutrients.sodium),
+          price: createdFeed?.price || feedPrice,
+          pet_type: petType
+        };
+        
+        setFeeds(prev => {
+          const updated = [...prev, newFeed];
+          setSelectedFeed(updated.length - 1);
+          handleSelectFeed(updated.length - 1, updated);
+          return updated;
+        });
+        setNotification(responseData.message); // "新飼料建立成功"
+      }
 
-    setFeeds(prev => {
-      const updated = [...prev, newFeed];
-      setSelectedFeed(updated.length - 1);
-      handleSelectFeed(updated.length - 1, updated);
-      return updated;
-    });
-
-  } catch (error) {
-    console.error("建立自訂飼料失敗：", error);
-    alert("建立飼料失敗，請稍後再試");
-  }
-};
-
-
-  const handleAddFeedClick = () => {
-    fileInputRef.current.value = '';
-    fileInputRef.current.click();
+    } catch (error) {
+      console.error("建立自訂飼料失敗：", error);
+      
+      // 提供更詳細的錯誤訊息
+      let errorMessage = '建立飼料失敗，請稍後再試';
+      if (error.response?.data?.error) {
+        errorMessage = error.response.data.error;
+      } else if (error.response?.status === 400) {
+        errorMessage = '請檢查上傳的圖片和資料是否正確';
+      } else if (error.response?.status === 401) {
+        errorMessage = '請重新登入後再試';
+      } else if (error.message.includes('Firebase')) {
+        errorMessage = '圖片上傳失敗，請檢查網路連線';
+      }
+      
+      console.error('詳細錯誤資訊:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status
+      });
+      
+      setNotification(errorMessage);
+      throw error;
+    }
   };
 
-  const handleNext = async () => {
-    const feed = feeds[selectedFeed];
 
-    if (!feed || !selectedPet) {
-      alert("請先選擇飼料與寵物");
+
+  const handleNext = async () => {
+    if (!selectedPet) {
+      setNotification("請先選擇寵物");
       return;
     }
 
-    // Step 1: 更新 Feed 到後端
-    const updateFeedBeforeCalculation = async () => {
-      const updatePayload = {
-        feed_id: feed.id,
-        name: feedInfo.name,
-        brand: feedInfo.brand,
-        protein: parseFloat(feedInfo.protein) || 0,
-        fat: parseFloat(feedInfo.fat) || 0,
-        carbohydrate: parseFloat(feedInfo.carb) || 0,
-        calcium: parseFloat(feedInfo.ca) || 0,
-        phosphorus: parseFloat(feedInfo.p) || 0,
-        magnesium: parseFloat(feedInfo.mg) || 0,
-        sodium: parseFloat(feedInfo.na) || 0,
-      };
-      console.log(updatePayload)
+    if (feeds.length === 0) {
+      setNotification(`目前沒有可用的${selectedPet.species}飼料，請先新增飼料`);
+      return;
+    }
 
-      try {
-        const res = await axios.post(
-          'http://127.0.0.1:8000/api/v1/calculator/feeds/update/',
-          updatePayload
-        );
-        console.log("飼料更新成功：", res.data);
-      } catch (err) {
-        console.error("飼料更新失敗：", err.response?.data || err.message);
-        alert("飼料更新失敗，請稍後再試。");
+    const feed = feeds[selectedFeed];
+    if (!feed) {
+      setNotification("請先選擇飼料");
+      return;
+    }
+
+    // Step 1: 簡單驗證輸入資料格式（共用颼料不需要後端驗證）
+    const validateInputData = () => {
+      const requiredFields = {
+        '飼料名稱': feedInfo.name,
+        '品牌': feedInfo.brand,
+        '蛋白質': feedInfo.protein,
+        '脂肪': feedInfo.fat,
+        '碳水化合物': feedInfo.carb,
+        '鈣': feedInfo.ca,
+        '磷': feedInfo.p,
+        '鏁': feedInfo.mg,
+        '鈉': feedInfo.na
+      };
+      
+      const emptyFields = [];
+      for (const [fieldName, value] of Object.entries(requiredFields)) {
+        if (!value || value.toString().trim() === '') {
+          emptyFields.push(fieldName);
+        }
+      }
+      
+      if (emptyFields.length > 0) {
+        setNotification(`請填寫以下必填欄位： ${emptyFields.join(', ')}`);
         return false;
       }
-
+      
+      // 檢查數值是否為正數
+      const numericFields = {
+        '蛋白質': feedInfo.protein,
+        '脂肪': feedInfo.fat,
+        '碳水化合物': feedInfo.carb,
+        '鈣': feedInfo.ca,
+        '磷': feedInfo.p,
+        '鏁': feedInfo.mg,
+        '鈉': feedInfo.na
+      };
+      
+      const invalidFields = [];
+      for (const [fieldName, value] of Object.entries(numericFields)) {
+        const numValue = parseFloat(value);
+        if (isNaN(numValue) || numValue < 0) {
+          invalidFields.push(fieldName);
+        }
+      }
+      
+      if (invalidFields.length > 0) {
+        setNotification(`以下欄位必須為非負數值： ${invalidFields.join(', ')}`);
+        return false;
+      }
+      
       return true;
     };
 
-    const updateSuccess = await updateFeedBeforeCalculation();
-    if (!updateSuccess) return;
+    const validationSuccess = validateInputData();
+    if (!validationSuccess) return;
 
-    // Step 2: 計算
-    const formData = new FormData();
-    formData.append('pet_type', selectedPet.species === '狗' ? 'dog' : 'cat');
-    formData.append('life_stage', 'adult');
-    formData.append('weight', selectedPet.weight || '');
-    formData.append('expected_adult_weight', '');
-    formData.append('litter_size', '');
-    formData.append('weeks_of_lactation', '');
-    formData.append('protein', feedInfo.protein || 0);
-    formData.append('fat', feedInfo.fat || 0);
-    formData.append('carbohydrates', feedInfo.carb || 0);
-    formData.append('calcium', feedInfo.ca || 0);
-    formData.append('phosphorus', feedInfo.p || 0);
-    formData.append('magnesium', feedInfo.mg || 0);
-    formData.append('sodium', feedInfo.na || 0);
+    // 立即進入第三步，傳遞飼料資訊和計算狀態
+    onNext(feed, { isCalculating: true });
 
+    // 在背景中執行計算
+    performCalculation(feed);
+  };
+
+  const performCalculation = async (feed) => {
     try {
+      // Step 1: 確保 UserFeed 關係存在（用於使用次數統計）
+      try {
+        await axios.post('/feeds/add-to-user/', {
+          feed_id: feed.id,
+          pet_id: selectedPet?.id
+        });
+        console.log('確保 UserFeed 關係已建立');
+      } catch (addError) {
+        console.warn('建立 UserFeed 關係失敗，但不影響計算：', addError);
+      }
+
+    // Step 2: 計算前檢查必要參數
+      // Step 2: 計算前檢查必要參數
+      if (!selectedPet?.weight) {
+        // 顯示通知並通知第三步顯示錯誤
+        setNotification('寵物體重為必填欄位，請回上一步編輯寵物資訊');
+        onNext(feed, { 
+          isCalculating: false, 
+          error: '寵物體重為必填欄位，請回上一步編輯寵物資訊' 
+        });
+        return;
+      }
+
+      // 處理數值參數，確保不為空值
+      const safeFloat = (value, defaultValue = 0) => {
+        const num = parseFloat(value);
+        return isNaN(num) ? defaultValue : num;
+      };
+
+      const formData = new FormData();
+      formData.append('pet_id', selectedPet?.id || '');
+      formData.append('pet_type', selectedPet.species === '狗' ? 'dog' : 'cat');
+      formData.append('life_stage', selectedPet.lifestage || 'adult');
+      formData.append('weight', safeFloat(selectedPet.weight));
+      formData.append('expected_adult_weight', safeFloat(selectedPet.expected_adult_weight));
+      formData.append('litter_size', safeFloat(selectedPet.litter_size));
+      formData.append('weeks_of_lactation', safeFloat(selectedPet.weeks_of_lactation));
+      formData.append('protein', safeFloat(feedInfo.protein));
+      formData.append('fat', safeFloat(feedInfo.fat));
+      formData.append('carbohydrates', safeFloat(feedInfo.carb));
+      formData.append('calcium', safeFloat(feedInfo.ca));
+      formData.append('phosphorus', safeFloat(feedInfo.p));
+      formData.append('magnesium', safeFloat(feedInfo.mg));
+      formData.append('sodium', safeFloat(feedInfo.na));
+      
+      console.log('發送到後端的資料:');
+      for (let [key, value] of formData.entries()) {
+        console.log(`${key}: ${value}`);
+      }
+
+      // Step 3: 執行計算
       const res = await axios.post(
-        'http://127.0.0.1:8000//api/v1/calculator/calculation/',
+        '/calculator/calculation/',
         formData,
         {
           headers: {
@@ -255,45 +523,117 @@ const handleFileChange = async (e) => {
         }
       );
       console.log('計算成功：', res.data);
-      onNext(feed, res.data); // 把飼料和後端回傳的計算結果傳出去
+      
+      // 計算成功後更新飼料使用次數
+      try {
+        await axios.post('/calculator/feeds/usage/', {
+          feed_id: feed.id,
+          pet_id: selectedPet?.id
+        });
+        console.log('飼料使用次數已更新');
+      } catch (usageError) {
+        console.warn('更新使用次數失敗，但不影響主要功能：', usageError);
+      }
+      
+      // 通知第三步計算完成
+      onNext(feed, {
+        isCalculating: false,
+        calculationResult: res.data
+      });
     } catch (err) {
       console.error('計算失敗：', err.response?.data || err.message);
-      alert('送出失敗，請確認資料或稍後再試。');
+      console.error('完整錯誤資訊:', {
+        status: err.response?.status,
+        statusText: err.response?.statusText,
+        data: err.response?.data,
+        message: err.message
+      });
+      
+      let errorMessage = '計算失敗';
+      if (err.response?.data?.error) {
+        errorMessage = err.response.data.error;
+      } else if (err.response?.status === 400) {
+        errorMessage = '資料格式錯誤，請檢查輸入資料';
+      } else if (err.response?.status === 404) {
+        errorMessage = 'API 路徑不存在，請聯繫管理員';
+      } else if (err.response?.status === 500) {
+        errorMessage = '伺服器內部錯誤，請稍後再試';
+      }
+      
+      // 通知第三步顯示錯誤
+      onNext(feed, {
+        isCalculating: false,
+        error: errorMessage
+      });
     }
   };
 
-
   return (
     <>
-      <div className="calculator-title">營養計算機</div>
-      <div className="pet-select-label">Step 2.<br />請選擇一款飼料</div>
-      <div className="feed-select-section">
-        <div className="feed-grid">
-          {feeds.map((feed, idx) => (
-            <div
-              key={feed.id}
-              className={`feed-item${selectedFeed === idx ? ' selected' : ''}`}
-              onClick={() => handleSelectFeed(idx)}
-            >
-              <img src={feed.img} alt={feed.name} />
-            </div>
-          ))}
-          <button className="add-feed-btn" type="button" onClick={handleAddFeedClick}>
-            新增飼料
-          </button>
-          <input
-            type="file"
-            accept="image/*"
-            capture="environment"
-            multiple
-            style={{ display: 'none' }}
-            ref={fileInputRef}
-            onChange={handleFileChange}
-          />
+      <div className={styles.titleSection}>
+        <h2 className={styles.title}>營養計算機</h2>
+        <button className={styles.historyButton} onClick={handleHistoryClick}>
+          過去紀錄
+        </button>
+      </div>
+      <div className={styles.divider}></div>
+      
+      <div className={styles.stepLabel}>Step 2. 請選擇一款飼料</div>
+      
+      <div className={styles.section}>
+        <label className={styles.sectionLabel}>選擇飼料:</label>
+        <div className={styles.feedSelectSection}>
+          <div className={styles.selectedFeedDisplay}>
+            {feeds.length > 0 && selectedFeed >= 0 ? (
+              <div className={styles.selectedFeedInfo}>
+                <div className={styles.selectedFeedImage}>
+                  <img src={feeds[selectedFeed].img} alt={feeds[selectedFeed].name} />
+                  {!feeds[selectedFeed].is_verified && (
+                    <div className={styles.verifyingBadge}>
+                      <img src="/assets/icon/Verifying.png" alt="審核中" />
+                    </div>
+                  )}
+                </div>
+                <div className={styles.selectedFeedDetails}>
+                  <div className={styles.selectedFeedName}>{feeds[selectedFeed].name}</div>
+                  <div className={styles.selectedFeedBrand}>{feeds[selectedFeed].brand}</div>
+                  {feeds[selectedFeed].price && (
+                    <div className={styles.selectedFeedPrice}>NT$ {feeds[selectedFeed].price}</div>
+                  )}
+                  <div className={styles.selectedFeedStatus}>
+                    {feeds[selectedFeed].is_verified ? (
+                      <span className={styles.verified}>✓ 已驗證</span>
+                    ) : (
+                      <span className={styles.unverified}>審核中 ({feeds[selectedFeed].review_count}/5)</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className={styles.noFeedSelected}>
+                <div className={styles.noFeedIcon}>
+                  <img src="/assets/icon/SearchNoResult.png" alt="無選擇" />
+                </div>
+                <div className={styles.noFeedText}>
+                  {selectedPet ? '請選擇飼料' : '請先選擇寵物'}
+                </div>
+              </div>
+            )}
+          </div>
+          <div className={styles.feedActionButtons}>
+            <button className={styles.selectFeedBtn} type="button" onClick={() => setShowFeedSelectModal(true)}>
+              選擇飼料
+            </button>
+            <button className={styles.addFeedBtn} type="button" onClick={handleShowCreateFeedModal}>
+              新增飼料
+            </button>
+          </div>
         </div>
       </div>
-      <div className="pet-select-label">飼料資訊</div>
-      <div className="feed-info-section">
+      
+      <div className={styles.section}>
+        <label className={styles.sectionLabel}>飼料資訊:</label>
+        <div className={styles.feedInfoSection}>
         {[
           ['品名', 'name', 'text'],
           ['品牌', 'brand', 'text'],
@@ -305,22 +645,64 @@ const handleFileChange = async (e) => {
           ['鎂', 'mg', 'number', 'mg'],
           ['鈉', 'na', 'number', 'mg'],
         ].map(([label, key, type, unit]) => (
-          <div className="feed-info-row" key={key}>
-            <span className="feed-info-label">{label}：</span>
+          <div className={styles.feedInfoRow} key={key}>
+            <span className={styles.feedInfoLabel}>{label}：</span>
             <input
-              className="pet-info-input"
+              className={styles.feedInfoInput}
               type={type}
               value={feedInfo[key]}
               onChange={e => handleFeedInfoChange(key, e.target.value)}
             />
-            {unit && <span className="feed-info-unit">{unit}</span>}
+            {unit && <span className={styles.feedInfoUnit}>{unit}</span>}
           </div>
         ))}
+        </div>
       </div>
-      <div className="step-btn-row">
-        <button className="previous-step-btn" onClick={onPrev}>上一步</button>
-        <button className="next-step-btn" onClick={handleNext}>下一步</button>
+      
+      <div className={styles.actionButtons}>
+        <button className={styles.prevButton} onClick={onPrev}>上一步</button>
+        <button className={styles.nextButton} onClick={handleNext}>下一步</button>
       </div>
+      
+      <CreateFeedModal
+        isOpen={showCreateFeedModal}
+        onClose={handleCloseCreateFeedModal}
+        onConfirm={handleCreateFeed}
+        defaultPetType={selectedPet?.species === '狗' ? 'dog' : 'cat'}
+      />
+      
+      <HistoryRecordModal
+        isOpen={showHistoryModal}
+        onClose={() => setShowHistoryModal(false)}
+      />
+      
+      <FeedSelectModal
+        isOpen={showFeedSelectModal}
+        onClose={() => setShowFeedSelectModal(false)}
+        onSelectFeed={handleFeedSelect}
+        petType={selectedPet?.species === '狗' ? 'dog' : 'cat'}
+      />
+      
+      <FeedReviewConfirmModal
+        isVisible={showConfirmModal}
+        onClose={handleConfirmModalClose}
+        onConfirm={handleConfirmModalConfirm}
+      />
+      
+      <FeedReviewModal
+        feed={pendingFeedForReview}
+        isOpen={showReviewModal}
+        onClose={handleReviewModalClose}
+        onConfirm={handleReviewConfirm}
+        onReportError={handleReportError}
+      />
+      
+      {notification && (
+        <NotificationComponent 
+          message={notification} 
+          onClose={() => setNotification('')} 
+        />
+      )}
     </>
   );
 }

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Image, PetHeadshot, UserHeadshot
+from .models import Image, PetHeadshot, UserHeadshot, AbnormalPostImage, FeedImage
 
 # 圖片管理 - Firebase Storage 版本
 @admin.register(Image)
@@ -78,6 +78,72 @@ class UserHeadshotAdmin(admin.ModelAdmin):
         }),
         ('時間戳記', {
             'fields': ('uploaded_at',),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def firebase_url_preview(self, obj):
+        """顯示 Firebase URL 的預覽"""
+        max_length = 50
+        if obj.firebase_url and len(obj.firebase_url) > max_length:
+            return f"{obj.firebase_url[:max_length]}..."
+        return obj.firebase_url or "無"
+    firebase_url_preview.short_description = 'Firebase URL 預覽'
+
+# 異常貼文圖片管理
+@admin.register(AbnormalPostImage)
+class AbnormalPostImageAdmin(admin.ModelAdmin):
+    list_display = ('id', 'abnormal_post', 'sort_order', 'original_filename', 'uploaded_at')
+    list_filter = ('uploaded_at', 'content_type_mime')
+    search_fields = ('abnormal_post__id', 'original_filename', 'alt_text')
+    readonly_fields = ('uploaded_at', 'updated_at', 'firebase_url', 'firebase_path')
+    ordering = ('abnormal_post', 'sort_order')
+    
+    fieldsets = (
+        ('基本資訊', {
+            'fields': ('abnormal_post', 'sort_order', 'alt_text')
+        }),
+        ('Firebase Storage', {
+            'fields': ('firebase_url', 'firebase_path')
+        }),
+        ('檔案資訊', {
+            'fields': ('original_filename', 'file_size', 'content_type_mime')
+        }),
+        ('時間戳記', {
+            'fields': ('uploaded_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def firebase_url_preview(self, obj):
+        """顯示 Firebase URL 的預覽"""
+        max_length = 50
+        if obj.firebase_url and len(obj.firebase_url) > max_length:
+            return f"{obj.firebase_url[:max_length]}..."
+        return obj.firebase_url or "無"
+    firebase_url_preview.short_description = 'Firebase URL 預覽'
+
+# 飼料圖片管理
+@admin.register(FeedImage)
+class FeedImageAdmin(admin.ModelAdmin):
+    list_display = ('id', 'feed', 'image_type', 'original_filename', 'uploaded_at')
+    list_filter = ('uploaded_at', 'image_type', 'content_type_mime')
+    search_fields = ('feed__name', 'feed__brand', 'original_filename', 'alt_text')
+    readonly_fields = ('uploaded_at', 'updated_at', 'firebase_url', 'firebase_path')
+    ordering = ('feed', 'image_type')
+    
+    fieldsets = (
+        ('基本資訊', {
+            'fields': ('feed', 'image_type', 'alt_text')
+        }),
+        ('Firebase Storage', {
+            'fields': ('firebase_url', 'firebase_path')
+        }),
+        ('檔案資訊', {
+            'fields': ('original_filename', 'file_size', 'content_type_mime')
+        }),
+        ('時間戳記', {
+            'fields': ('uploaded_at', 'updated_at'),
             'classes': ('collapse',)
         }),
     )
