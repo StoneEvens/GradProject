@@ -7,10 +7,12 @@ import FeedReviewConfirmModal from '../components/FeedReviewConfirmModal';
 import FeedReviewModal from '../components/FeedReviewModal';
 import axios from '../utils/axios';
 import styles from '../styles/AllFeedsPage.module.css';
+import { useUser } from '../context/UserContext';
 
 const AllFeedsPageContent = () => {
   const navigate = useNavigate();
   const { showNotification } = useNotification();
+  const { userData } = useUser();
   const [loading, setLoading] = useState(true);
   const [allFeeds, setAllFeeds] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -49,6 +51,7 @@ const AllFeedsPageContent = () => {
         isVerified: item.is_verified,
         reviewCount: item.review_count,
         created_by: item.created_by,
+        created_by_id: item.created_by_id,
         created_at: item.created_at,
         lastUsedAt: item.created_at
       }));
@@ -77,23 +80,44 @@ const AllFeedsPageContent = () => {
     try {
       // 如果飼料未驗證且用戶想要標記，需要先檢查是否可以使用此飼料
       if (!feed.isVerified && !feed.isMarked) {
-        // 檢查使用者是否已審核過此飼料或提交過錯誤回報
-        const reviewCheckResponse = await axios.get(`/feeds/${feed.id}/check-review/`);
+        // 檢查是否為飼料創建者本人
+        const isCreator = userData && feed.created_by_id === userData.id;
+        console.log('AllFeedsPage handleToggleMark debug:', {
+          feedId: feed.id,
+          feedCreatedBy: feed.created_by,
+          userDataId: userData?.id,
+          isCreator: isCreator
+        });
         
-        if (reviewCheckResponse.data.can_use_feed) {
-          // 如果可以使用（已審核過或已回報錯誤），直接標記而不顯示審核 modal
+        if (isCreator) {
+          // 如果是創建者本人，直接標記而不需要審核
           const response = await axios.post('/feeds/mark/', {
             feed_id: feed.id
           });
           
           // 重新載入數據
           loadAllFeeds();
+          showNotification('飼料已加入精選');
           return;
         } else {
-          // 如果無法使用，顯示確認 modal
-          setSelectedFeed(feed);
-          setShowConfirmModal(true);
-          return;
+          // 如果不是創建者，檢查使用者是否已審核過此飼料或提交過錯誤回報
+          const reviewCheckResponse = await axios.get(`/feeds/${feed.id}/check-review/`);
+          
+          if (reviewCheckResponse.data.can_use_feed) {
+            // 如果可以使用（已審核過或已回報錯誤），直接標記而不顯示審核 modal
+            const response = await axios.post('/feeds/mark/', {
+              feed_id: feed.id
+            });
+            
+            // 重新載入數據
+            loadAllFeeds();
+            return;
+          } else {
+            // 如果無法使用，顯示確認 modal
+            setSelectedFeed(feed);
+            setShowConfirmModal(true);
+            return;
+          }
         }
       }
       

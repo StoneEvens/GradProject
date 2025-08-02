@@ -11,10 +11,12 @@ import FeedReviewModal from './FeedReviewModal';
 import mockFeed1 from '../MockPicture/mockFeed1.png';
 import mockFeed2 from '../MockPicture/mockFeed2.png';
 import mockFeed3 from '../MockPicture/mockFeed3.png';
+import { useUser } from '../context/UserContext';
 
 function CalculatorStep2({ onNext, onPrev, selectedPet }) {
   const { user_id } = useParams();
   const navigate = useNavigate();
+  const { userData } = useUser();
   const [selectedFeed, setSelectedFeed] = useState(0);
   const [feeds, setFeeds] = useState([]);
   const [showCreateFeedModal, setShowCreateFeedModal] = useState(false);
@@ -234,65 +236,96 @@ function CalculatorStep2({ onNext, onPrev, selectedPet }) {
         const matchedFeed = feedDetailData.find(feed => feed.id === feedId);
         
         if (matchedFeed && !matchedFeed.is_verified) {
-          // 如果匹配到的是審核中飼料，檢查是否可以使用
-          try {
-            const reviewCheckResponse = await axios.get(`/feeds/${feedId}/check-review/`);
+          // 檢查是否為飼料創建者本人
+          const isCreator = userData && matchedFeed.created_by_id === userData.id;
+          
+          if (isCreator) {
+            // 如果是創建者本人，直接添加到列表，無需審核
+            const existingFeed = {
+              id: matchedFeed.id,
+              name: matchedFeed.name || feedName || '自訂飼料',
+              brand: matchedFeed.brand || feedBrand || '未知品牌',
+              img: matchedFeed.front_image_url || [mockFeed1, mockFeed2, mockFeed3][0],
+              carb: matchedFeed.carbohydrate ?? 0,
+              protein: matchedFeed.protein ?? 0,
+              fat: matchedFeed.fat ?? 0,
+              ca: matchedFeed.calcium ?? 0,
+              p: matchedFeed.phosphorus ?? 0,
+              mg: matchedFeed.magnesium ?? 0,
+              na: matchedFeed.sodium ?? 0,
+              price: matchedFeed.price,
+              review_count: matchedFeed.review_count ?? 0,
+              is_verified: matchedFeed.is_verified ?? false,
+              pet_type: matchedFeed.pet_type,
+            };
             
-            if (reviewCheckResponse.data.can_use_feed) {
-              // 如果可以使用（已審核過或已回報錯誤），直接添加到列表
-              const existingFeed = {
-                id: matchedFeed.id,
-                name: matchedFeed.name || feedName || '自訂飼料',
-                brand: matchedFeed.brand || feedBrand || '未知品牌',
-                img: matchedFeed.front_image_url || [mockFeed1, mockFeed2, mockFeed3][0],
-                carb: matchedFeed.carbohydrate ?? 0,
-                protein: matchedFeed.protein ?? 0,
-                fat: matchedFeed.fat ?? 0,
-                ca: matchedFeed.calcium ?? 0,
-                p: matchedFeed.phosphorus ?? 0,
-                mg: matchedFeed.magnesium ?? 0,
-                na: matchedFeed.sodium ?? 0,
-                price: matchedFeed.price,
-                review_count: matchedFeed.review_count ?? 0,
-                is_verified: matchedFeed.is_verified ?? false,
-                pet_type: matchedFeed.pet_type,
-              };
+            const newFeeds = [...feeds, existingFeed];
+            setFeeds(newFeeds);
+            const newIndex = newFeeds.length - 1;
+            setSelectedFeed(newIndex);
+            handleSelectFeed(newIndex, newFeeds);
+            setNotification(`已選擇飼料：${matchedFeed.brand} - ${matchedFeed.name}`);
+          } else {
+            // 如果不是創建者，檢查是否可以使用
+            try {
+              const reviewCheckResponse = await axios.get(`/feeds/${feedId}/check-review/`);
               
-              const newFeeds = [...feeds, existingFeed];
-              setFeeds(newFeeds);
-              const newIndex = newFeeds.length - 1;
-              setSelectedFeed(newIndex);
-              handleSelectFeed(newIndex, newFeeds);
-              setNotification(responseData.message);
-            } else {
-              // 如果未審核過，顯示確認 modal
-              const feedForReview = {
-                id: matchedFeed.id,
-                name: matchedFeed.name || feedName || '自訂飼料',
-                brand: matchedFeed.brand || feedBrand || '未知品牌',
-                frontImage: matchedFeed.front_image_url,
-                protein: matchedFeed.protein ?? 0,
-                fat: matchedFeed.fat ?? 0,
-                carbohydrate: matchedFeed.carbohydrate ?? 0,
-                calcium: matchedFeed.calcium ?? 0,
-                phosphorus: matchedFeed.phosphorus ?? 0,
-                magnesium: matchedFeed.magnesium ?? 0,
-                sodium: matchedFeed.sodium ?? 0,
-                price: matchedFeed.price,
-                isVerified: matchedFeed.is_verified ?? false,
-                reviewCount: matchedFeed.review_count ?? 0,
-                pet_type: matchedFeed.pet_type,
-                created_by_name: matchedFeed.created_by_name,
-                created_at: matchedFeed.created_at,
-              };
-              
-              setPendingFeedForReview(feedForReview);
-              setShowConfirmModal(true);
-              return; // 等待用戶審核決定
+              if (reviewCheckResponse.data.can_use_feed) {
+                // 如果可以使用（已審核過或已回報錯誤），直接添加到列表
+                const existingFeed = {
+                  id: matchedFeed.id,
+                  name: matchedFeed.name || feedName || '自訂飼料',
+                  brand: matchedFeed.brand || feedBrand || '未知品牌',
+                  img: matchedFeed.front_image_url || [mockFeed1, mockFeed2, mockFeed3][0],
+                  carb: matchedFeed.carbohydrate ?? 0,
+                  protein: matchedFeed.protein ?? 0,
+                  fat: matchedFeed.fat ?? 0,
+                  ca: matchedFeed.calcium ?? 0,
+                  p: matchedFeed.phosphorus ?? 0,
+                  mg: matchedFeed.magnesium ?? 0,
+                  na: matchedFeed.sodium ?? 0,
+                  price: matchedFeed.price,
+                  review_count: matchedFeed.review_count ?? 0,
+                  is_verified: matchedFeed.is_verified ?? false,
+                  pet_type: matchedFeed.pet_type,
+                };
+                
+                const newFeeds = [...feeds, existingFeed];
+                setFeeds(newFeeds);
+                const newIndex = newFeeds.length - 1;
+                setSelectedFeed(newIndex);
+                handleSelectFeed(newIndex, newFeeds);
+                setNotification(responseData.message);
+              } else {
+                // 如果未審核過，顯示確認 modal
+                const feedForReview = {
+                  id: matchedFeed.id,
+                  name: matchedFeed.name || feedName || '自訂飼料',
+                  brand: matchedFeed.brand || feedBrand || '未知品牌',
+                  frontImage: matchedFeed.front_image_url,
+                  protein: matchedFeed.protein ?? 0,
+                  fat: matchedFeed.fat ?? 0,
+                  carbohydrate: matchedFeed.carbohydrate ?? 0,
+                  calcium: matchedFeed.calcium ?? 0,
+                  phosphorus: matchedFeed.phosphorus ?? 0,
+                  magnesium: matchedFeed.magnesium ?? 0,
+                  sodium: matchedFeed.sodium ?? 0,
+                  price: matchedFeed.price,
+                  isVerified: matchedFeed.is_verified ?? false,
+                  reviewCount: matchedFeed.review_count ?? 0,
+                  pet_type: matchedFeed.pet_type,
+                  created_by_name: matchedFeed.created_by_name,
+                  created_at: matchedFeed.created_at,
+                };
+                
+                setPendingFeedForReview(feedForReview);
+                setShowConfirmModal(true);
+                return; // 等待用戶審核決定
+              }
+            } catch (reviewCheckError) {
+              console.error('檢查審核狀態失敗:', reviewCheckError);
+              setNotification('檢查飼料狀態失敗，請稍後再試');
             }
-          } catch (reviewCheckError) {
-            console.error('檢查審核狀態失敗:', reviewCheckError);
-            setNotification('檢查飼料狀態失敗，請稍後再試');
           }
         } else {
           // 已驗證的飼料，直接添加

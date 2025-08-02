@@ -134,7 +134,6 @@ class PostFrame(Interactables):
 
     def get_interaction_stats(self):
         stats = super().get_interaction_stats()
-        print(stats)
         stats.append(self.comments_count)
         return stats
 

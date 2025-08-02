@@ -539,6 +539,7 @@ class RecentlyUsedFeedsView(APIView):
                 'created_at': user_feed.feed.created_at,
                 'updated_at': user_feed.feed.updated_at,
                 'created_by': user_feed.feed.created_by.username if user_feed.feed.created_by else None,
+                'created_by_id': user_feed.feed.created_by.id if user_feed.feed.created_by else None,
                 'created_by_name': user_feed.feed.created_by.username if user_feed.feed.created_by else None,
                 # UserFeed 相關資訊
                 'usage_count': user_feed.usage_count,
@@ -664,7 +665,7 @@ class AllFeedsView(APIView):
                 'nutrition_image_url': None,
                 'created_at': feed.created_at,
                 'updated_at': feed.updated_at,
-                'created_by': feed.created_by.id if feed.created_by else None,
+                'created_by': feed.created_by.username if feed.created_by else None,
                 'created_by_id': feed.created_by.id if feed.created_by else None,
                 'created_by_name': feed.created_by.username if feed.created_by else None,
                 # 標記狀態
@@ -762,7 +763,7 @@ class AllFeedsPreviewView(APIView):
                 'nutrition_image_url': None,
                 'created_at': feed.created_at,
                 'updated_at': feed.updated_at,
-                'created_by': feed.created_by.id if feed.created_by else None,
+                'created_by': feed.created_by.username if feed.created_by else None,
                 'created_by_id': feed.created_by.id if feed.created_by else None,
                 'created_by_name': feed.created_by.username if feed.created_by else None,
                 # 標記狀態
@@ -1030,7 +1031,7 @@ class FeedSearchView(APIView):
                 'nutrition_image_url': None,
                 'created_at': feed.created_at,
                 'updated_at': feed.updated_at,
-                'created_by': feed.created_by.id if feed.created_by else None,
+                'created_by': feed.created_by.username if feed.created_by else None,
                 'created_by_id': feed.created_by.id if feed.created_by else None,
                 'created_by_name': feed.created_by.username if feed.created_by else None,
                 # 標記狀態

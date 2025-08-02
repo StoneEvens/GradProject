@@ -8,10 +8,12 @@ import FeedReviewModal from '../components/FeedReviewModal';
 import NotificationComponent from '../components/Notification';
 import axios from '../utils/axios';
 import styles from '../styles/FeedDetailPage.module.css';
+import { useUser } from '../context/UserContext';
 
 const FeedDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { userData } = useUser();
   const [feed, setFeed] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -46,11 +48,11 @@ const FeedDetailPage = () => {
     try {
       // 如果飼料未驗證且用戶想要標記，需要先檢查是否可以使用此飼料
       if (!feed.is_verified && !isMarked) {
-        // 檢查使用者是否已審核過此飼料或提交過錯誤回報
-        const reviewCheckResponse = await axios.get(`/feeds/${feed.id}/check-review/`);
+        // 檢查是否為飼料創建者本人
+        const isCreator = userData && feed.created_by_id === userData.id;
         
-        if (reviewCheckResponse.data.can_use_feed) {
-          // 如果可以使用（已審核過或已回報錯誤），直接標記而不顯示審核 modal
+        if (isCreator) {
+          // 如果是創建者本人，直接標記而不需要審核
           const response = await axios.post('/feeds/mark/', {
             feed_id: feed.id
           });
@@ -58,9 +60,22 @@ const FeedDetailPage = () => {
           setNotification('飼料已加入精選');
           return;
         } else {
-          // 如果無法使用，顯示確認 modal
-          setShowConfirmModal(true);
-          return;
+          // 如果不是創建者，檢查使用者是否已審核過此飼料或提交過錯誤回報
+          const reviewCheckResponse = await axios.get(`/feeds/${feed.id}/check-review/`);
+          
+          if (reviewCheckResponse.data.can_use_feed) {
+            // 如果可以使用（已審核過或已回報錯誤），直接標記而不顯示審核 modal
+            const response = await axios.post('/feeds/mark/', {
+              feed_id: feed.id
+            });
+            setIsMarked(!isMarked);
+            setNotification('飼料已加入精選');
+            return;
+          } else {
+            // 如果無法使用，顯示確認 modal
+            setShowConfirmModal(true);
+            return;
+          }
         }
       }
       

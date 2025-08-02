@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from '../utils/axios';
 import styles from '../styles/FeedSelectModal.module.css';
+import { useUser } from '../context/UserContext';
 
 const FeedSelectModal = ({ isOpen, onClose, onSelectFeed, petType }) => {
   const navigate = useNavigate();
+  const { userData } = useUser();
   const [loading, setLoading] = useState(true);
   const [markedFeeds, setMarkedFeeds] = useState([]);
   const [recentFeeds, setRecentFeeds] = useState([]);
@@ -51,6 +53,7 @@ const FeedSelectModal = ({ isOpen, onClose, onSelectFeed, petType }) => {
           isVerified: item.feed.is_verified,
           reviewCount: item.feed.review_count,
           created_by: item.feed.created_by,
+          created_by_id: item.feed.created_by_id,
           created_by_name: item.feed.created_by_name,
           created_at: item.feed.created_at,
           lastUsedAt: item.created_at,
@@ -81,6 +84,7 @@ const FeedSelectModal = ({ isOpen, onClose, onSelectFeed, petType }) => {
           reviewCount: item.review_count,
           usageCount: item.usage_count,
           created_by: item.created_by,
+          created_by_id: item.created_by_id,
           created_by_name: item.created_by_name,
           created_at: item.created_at,
           lastUsedAt: item.last_used_at,
@@ -126,29 +130,33 @@ const FeedSelectModal = ({ isOpen, onClose, onSelectFeed, petType }) => {
     onClose();
   };
 
-  const renderFeedCard = (feed) => (
-    <div 
-      key={feed.markId || feed.id} 
-      className={styles.feedCard} 
-      onClick={() => handleFeedSelect(feed)}
-    >
-      <div className={styles.feedImageContainer}>
-        {feed.frontImage ? (
-          <img src={feed.frontImage} alt={feed.name} className={styles.feedImage} />
-        ) : (
-          <div className={styles.feedImagePlaceholder}>
-            <span>無圖片</span>
-          </div>
-        )}
-        {/* 審核中標示 */}
-        {!feed.isVerified && (
-          <div className={styles.verifyingBadge}>
-            <img src="/assets/icon/Verifying.png" alt="審核中" />
-          </div>
-        )}
+  const renderFeedCard = (feed) => {
+    const isCreator = userData && feed.created_by_id === userData.id;
+    
+    return (
+      <div 
+        key={feed.markId || feed.id} 
+        className={styles.feedCard} 
+        onClick={() => handleFeedSelect(feed)}
+      >
+        <div className={styles.feedImageContainer}>
+          {feed.frontImage ? (
+            <img src={feed.frontImage} alt={feed.name} className={styles.feedImage} />
+          ) : (
+            <div className={styles.feedImagePlaceholder}>
+              <span>無圖片</span>
+            </div>
+          )}
+          {/* 審核中標示 */}
+          {!feed.isVerified && (
+            <div className={styles.verifyingBadge}>
+              <img src="/assets/icon/Verifying.png" alt="審核中" />
+            </div>
+          )}
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   // 處理點擊遮罩關閉 modal
   const handleOverlayClick = (e) => {
