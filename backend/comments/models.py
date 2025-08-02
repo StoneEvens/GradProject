@@ -3,9 +3,9 @@ from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from media.models import Image
-from social.models import PostFrame
+from social.models import PostFrame, Interactables
 
-class Comment(models.Model):
+class Comment(Interactables):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -20,7 +20,6 @@ class Comment(models.Model):
         related_name='comments'
     )
 
-    post_date = models.DateTimeField(auto_now_add=True)
     content = models.TextField()
     popularity = models.IntegerField(default=0)
 
@@ -33,13 +32,13 @@ class Comment(models.Model):
     )
 
     def __str__(self):
-        return f"Comment {self.id} by {self.user.username}"
+        return f"Comment {self.id if self.id else ''} by {self.user.username}"
     
     def get_comments(postFrame: PostFrame):
-        return Comment.objects.filter(postFrame=postFrame, parent=None).order_by('-popularity', '-post_date')
-    
+        return Comment.objects.filter(postFrame=postFrame, parent=None).order_by('-popularity', '-created_at')
+
     def get_replies(parent):
-        return Comment.objects.filter(parent=parent).order_by('-popularity', '-post_date')
+        return Comment.objects.filter(parent=parent).order_by('-popularity', '-created_at')
 
     def update_comment(self, content):
         self.content = content

@@ -1,19 +1,40 @@
 import React, { useState, useRef } from 'react';
 import axios from '../utils/axios';
 import '../styles/PostComments.css';
+import { useNavigate } from 'react-router-dom';
 import { checkUserAccount } from '../services/userService';
+import EditIcon from '../../public/assets/icon/PetpageEditButton.png';
+import HeartIcon from '../../public/assets/icon/PostHeart.png';
+import HeartFilledIcon from '../../public/assets/icon/PostLiked.png';
+
+//使用方法
+//留言系統我整個是做在一起的，包含貼文留言預覽的兩個留言、留言區的留言、回覆
+//
+//當使用PostComments作為貼文留言預覽時，請使用<PostComments previewComments={[來自後端或自行建立的comments陣列]} (去掉大括號)/>
+//
+//當使用PostComments作為貼文留言區時，請使用<PostComments postID={貼文ID} (去掉大括號)/>
+//
+//若要更改PostComments的Comments內容時，請使用setComments([新的comments陣列])
+//若要更改PostComments的PreviewComments內容時，請使用setLocalPreviewComments([新的comments陣列])
+//第一層就是留言區，有回覆按鈕可以回覆的就是第一層，提供postID就會自動抓取貼文留言
+//第二層和貼文留言預覽是同一個系統，需要提供完整的留言/回覆陣列，被動顯示，不會自動抓取
+//不論是日常發文或是論壇發文又或是留言全部都是Interactables，所以以上三種的ID不會撞到，只要在以上類別的前端底下照上述給入PostID即可
 
 const PostComments = ({user, postID, previewComments, handleClose}) => {
+    const navigate = useNavigate();
     //React自動幫忙生成的function
     const [comments, setComments] = useState([]);
+    const [localPreviewComments, setLocalPreviewComments] = useState(previewComments || []);
     const [commentText, setCommentText] = useState('');
     const [clickedCommentID, setClickedCommentID] = useState(null);
     const [isCommenting, setIsCommenting] = useState(false);
     const [replyingCommentID, setReplyingCommentID] = useState(null);
     const [replies, setReplies] = useState({});
     const [editingCommentID, setEditingCommentID] = useState(null);
+    const [selectedImages, setSelectedImages] = useState([]);
     const [editText, setEditText] = useState('');
     const [replyText, setReplyText] = useState('');
+    const fileInputRef = useRef(null);
 
     const handleCommentChange = (event) => {
         setCommentText(event.target.value);
@@ -21,6 +42,42 @@ const PostComments = ({user, postID, previewComments, handleClose}) => {
 
     const handleReplyChange = (event) => {
         setReplyText(event.target.value);
+    };
+
+    const handleImageSelect = () => {
+      fileInputRef.current?.click();
+    };
+
+    const handleFileChange = (event) => {
+      const files = Array.from(event.target.files);
+      if (files.length > 0) {
+        const imageFiles = files.filter(file => file.type.startsWith('image/'));
+        
+        // Create preview URLs for the selected images
+        const imagePreviewPromises = imageFiles.map(file => {
+          return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve({
+              file,
+              preview: e.target.result,
+              id: Date.now() + Math.random()
+            });
+            reader.readAsDataURL(file);
+          });
+        });
+        
+        Promise.all(imagePreviewPromises).then(imagePreviews => {
+          setSelectedImages(prev => [...prev, ...imagePreviews]);
+        });
+      }
+    };
+
+    const removeImage = (imageId) => {
+      setSelectedImages(prev => prev.filter(img => img.id !== imageId));
+    };
+
+    const handleUserClick = (userInfo) => {
+      navigate(`/user/${userInfo.user_account}`);
     };
 
     const submitComment = async () => {
@@ -197,6 +254,59 @@ const PostComments = ({user, postID, previewComments, handleClose}) => {
       }
     };
 
+    const likeComment = async (commentID) => {
+        try {
+          // 立即更新 UI
+          if (postID) {
+            setComments(prevComments => 
+              prevComments.map(comment => 
+                comment.id === commentID 
+                  ? { ...comment, isLiked: !comment.isLiked }
+                  : comment
+              )
+            );
+          }
+
+          if (previewComments) {
+            // 使用 setLocalPreviewComments 來更新狀態
+            setLocalPreviewComments(prevComments => 
+              prevComments.map(comment => 
+                comment.id === commentID 
+                  ? { ...comment, isLiked: !comment.isLiked }
+                  : comment
+              )
+            );
+          }
+
+          const response = await axios.post(`/interactions/comments/${commentID}/interaction/`, {
+            relation: 'liked'  // 發送 'liked' 來切換按讚狀態
+          });
+    
+          const result = response.data;
+
+          return {
+            success: true,
+            data: result.data,
+            message: result.detail || '操作成功'
+          };
+        } catch (error) {
+          // 發生錯誤時恢復原始狀態
+          setComments(prevComments => 
+            prevComments.map(comment => 
+              comment.id === commentID 
+                ? { ...comment, isLiked: !comment.isLiked }
+                : comment
+            )
+          );
+          
+          console.error('貼文互動錯誤:', error);
+          return {
+            success: false,
+            error: error.response?.data?.detail || error.message || '操作失敗'
+          };
+        }
+    };
+
     const displayReply = async (commentID) => {
         if (clickedCommentID === commentID) {
             setClickedCommentID(null);
@@ -258,12 +368,12 @@ const PostComments = ({user, postID, previewComments, handleClose}) => {
                 const fetchedComments = await fetchComments(postID);
                 setComments(fetchedComments);
             } else if (previewComments) {
-                setComments(previewComments);
+                setLocalPreviewComments(previewComments);
             }
         };
 
         loadComments();
-    }, [postID]);
+    }, [postID, previewComments]);
 
     return postID ? (
     <div className="modalOverlay" onClick={() => handleClose()}>
@@ -282,12 +392,30 @@ const PostComments = ({user, postID, previewComments, handleClose}) => {
               comments.map((comment) => (
                 <div className="comment-block">
                   <div className="comment-header">
-                    <strong>{comment.user.username}</strong>
+                    <strong onClick={() => handleUserClick(comment.user)}>{comment.user.username}</strong>
                     <div className="comment-header-info">
-                      <span className="comment-date">{new Date(comment.post_date).toLocaleDateString()}</span>
+                      <span className="comment-date">{new Date(comment.created_at).toLocaleDateString()}</span>
                       {comment.content !== "[此評論已刪除]" && (
-                        <button className="like-button" onClick={() => comment.isAuthor ? startEditing(comment) : console.log('Like button clicked')}>
-                          {comment.isAuthor ? (editingCommentID === comment.id ? '取消' : '編輯') : '點讚'}
+                        <button 
+                          className="like-button" 
+                          onClick={() => comment.isAuthor ? startEditing(comment) : likeComment(comment.id)}
+                          title={comment.isAuthor ? (editingCommentID === comment.id ? '取消' : '編輯') : (comment.isLiked ? '取消點讚' : '點讚')}
+                        >
+                          <div className="icon-container">
+                            {comment.isAuthor ? (
+                              editingCommentID === comment.id ? (
+                                <span className="close-icon">×</span>
+                              ) : (
+                                <img src={EditIcon} alt="編輯" className="action-icon" />
+                              )
+                            ) : (
+                              <img 
+                                src={comment.isLiked ? HeartFilledIcon : HeartIcon} 
+                                alt={comment.isLiked ? '取消點讚' : '點讚'} 
+                                className="action-icon" 
+                              />
+                            )}
+                          </div>
                         </button>
                       )}
                     </div>
@@ -322,6 +450,7 @@ const PostComments = ({user, postID, previewComments, handleClose}) => {
                         onChange={handleReplyChange}
                       />
                       <div className="button-group">
+                        <button className="submit-comment-button" onClick={() => console.log('新增圖片')}>新增圖片</button>
                         <button className="submit-comment-button" onClick={submitReply}>回覆</button>
                       </div>
                     </div>
@@ -343,27 +472,46 @@ const PostComments = ({user, postID, previewComments, handleClose}) => {
               value={commentText}
               onChange={handleCommentChange}
             ></textarea>
-            <button className="submit-comment-button" onClick={submitComment}>
-              送出留言
-            </button>
+            <div className="button-group">
+              <button className="submit-comment-button" onClick={() => console.log('新增圖片')}>新增圖片</button>
+              <button className="submit-comment-button" onClick={submitComment}>送出留言</button>
+            </div>
           </div>
         </div>
       </div>
     </div>
   ) : (
     <div className="comments-container">
-      {!previewComments || previewComments.length === 0 ? (
+      {!localPreviewComments || localPreviewComments.length === 0 ? (
       <p>目前沒有任何內容</p>
       ) : (
-      previewComments.map((comment) => (
+      localPreviewComments.map((comment) => (
         <div key={comment.id} className="comment-block">
         <div className="comment-header">
-          <strong>{comment.user.username}</strong>
+          <strong onClick={() => handleUserClick(comment.user)}>{comment.user.username}</strong>
           <div className="comment-header-info">
-            <span className="comment-date">{new Date(comment.post_date).toLocaleDateString()}</span>
+            <span className="comment-date">{new Date(comment.created_at).toLocaleDateString()}</span>
             {comment.content !== "[此評論已刪除]" && (
-              <button className="like-button" onClick={() => comment.isAuthor ? startEditing(comment) : console.log('Like button clicked')}>
-                {comment.isAuthor ? (editingCommentID === comment.id ? '取消' : '編輯') : '點讚'}
+              <button 
+                className="like-button" 
+                onClick={() => comment.isAuthor ? startEditing(comment) : likeComment(comment.id)}
+                title={comment.isAuthor ? (editingCommentID === comment.id ? '取消' : '編輯') : (comment.isLiked ? '取消點讚' : '點讚')}
+              >
+                <div className="icon-container">
+                  {comment.isAuthor ? (
+                    editingCommentID === comment.id ? (
+                      <span className="close-icon">×</span>
+                    ) : (
+                      <img src={EditIcon} alt="編輯" className="action-icon" />
+                    )
+                  ) : (
+                    <img 
+                      src={comment.isLiked ? HeartFilledIcon : HeartIcon} 
+                      alt={comment.isLiked ? '取消點讚' : '點讚'} 
+                      className="action-icon" 
+                    />
+                  )}
+                </div>
               </button>
             )}
           </div>

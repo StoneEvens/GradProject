@@ -13,10 +13,10 @@ from google.oauth2 import service_account
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
 FIELD_ALIASES = {
-    "白血球計數": ["白血球", "白血球 (WBC)", "白血球計數"],
-    "紅血球計數": ["紅血球", "紅血球 (RBC)", "紅血球計數"],
-    "血紅蛋白": ["血紅蛋白", "血紅素", "血紅素 (HGB)"],
-    "血比容": ["血比容", "血比容 (紅血球壓積)", "血比容 (PCV)"],
+    "白血球計數": ["白血球", "WBC", "白血球計數"],
+    "紅血球計數": ["紅血球", "RBC", "紅血球計數"],
+    "血紅蛋白": ["血紅蛋白", "血紅素", "HGB"],
+    "血比容": ["血比容", "血比容 (紅血球壓積)", "PCV"],
     "平均紅血球體積": ["平均紅血球體積", "MCV"],
     "平均紅血球血紅蛋白量": ["平均紅血球血紅蛋白量", "MCH"],
     "平均紅血球血紅蛋白濃度": ["平均紅血球血紅蛋白濃度", "MCHC"],
@@ -26,7 +26,7 @@ FIELD_ALIASES = {
     "單核球計數": ["單核球計數", "Monocytes (absolute)"],
     "嗜酸性球計數": ["嗜酸性球計數", "Eosinophils (absolute)"],
     "嗜鹼性球計數": ["嗜鹼性球計數", "Basophils (absolute)"],
-    "血小板計數": ["血小板計數", "Platelet count"],
+    "血小板計數": ["血小板計數", "Platelet count", "PLT"],
     "網狀紅血球計數": ["網狀紅血球計數", "Reticulocytes (absolute)"],
     "白蛋白": ["白蛋白", "Albumin"],
     "球蛋白": ["球蛋白", "Globulin"],
@@ -49,37 +49,105 @@ FIELD_ALIASES = {
     "血清淀粉樣蛋白A": ["血清淀粉樣蛋白A", "Serum Amyloid A"]
 }
 
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
+from .models import HealthReport
+from pets.models import Pet
+from datetime import datetime
+import json
+
+class HealthReportListView(APIView):
+    permission_classes = [AllowAny]
+    def get(self, request):
+        reports = HealthReport.objects.all().order_by('-created_at')
+        data = []
+        for r in reports:
+            data.append({
+                "id": r.id,
+                "pet_name": r.pet.pet_name,
+                "check_date": r.check_date.strftime("%Y-%m-%d") if r.check_date else "",
+                "check_type": r.check_type,
+                "check_location": r.check_location or "",
+                "notes": r.notes or "",
+                "created_at": r.created_at.strftime("%Y-%m-%d"),
+                "data": r.data or {}
+            })
+        return Response(data, status=status.HTTP_200_OK)
+
+class HealthReportUploadView(APIView):
+    permission_classes = [AllowAny]
+    """
+    使用者提交健康報告表單，儲存到資料庫
+    """
+    @swagger_auto_schema(
+        operation_description="提交健康報告表單",
+        manual_parameters=[
+            openapi.Parameter('pet_id', openapi.IN_FORM, type=openapi.TYPE_INTEGER, required=True, description='寵物 ID'),
+            openapi.Parameter('check_date', openapi.IN_FORM, type=openapi.TYPE_STRING, required=True, description='檢查日期 (YYYY-MM-DD)'),
+            openapi.Parameter('check_type', openapi.IN_FORM, type=openapi.TYPE_STRING, required=True, description='檢查類型 (cbc/biochemistry/urinalysis/other)'),
+            openapi.Parameter('check_location', openapi.IN_FORM, type=openapi.TYPE_STRING, required=False, description='檢查地點'),
+            openapi.Parameter('notes', openapi.IN_FORM, type=openapi.TYPE_STRING, required=False, description='備註'),
+            openapi.Parameter('data', openapi.IN_FORM, type=openapi.TYPE_STRING, required=True, description='健康數據 (JSON)')
+        ],
+        responses={201: "上傳成功", 400: "參數錯誤"}
+    )
+    def post(self, request):
+        try:
+            pet_id = request.data.get('pet_id')
+            check_date_str = request.data.get('check_date')
+            check_type = request.data.get('check_type')
+            check_location = request.data.get('check_location', '')
+            notes = request.data.get('notes', '')
+            data_raw = request.data.get('data')
+
+            # 驗證 Pet
+            try:
+                pet = Pet.objects.get(id=pet_id)
+            except Pet.DoesNotExist:
+                return Response({'error': '找不到寵物'}, status=status.HTTP_404_NOT_FOUND)
+
+            # 解析日期
+            try:
+                check_date = datetime.strptime(check_date_str, "%Y-%m-%d")
+            except ValueError:
+                return Response({'error': '日期格式錯誤，應為 YYYY-MM-DD'}, status=status.HTTP_400_BAD_REQUEST)
+
+            # 解析 JSON data
+            try:
+                data = json.loads(data_raw)
+            except json.JSONDecodeError:
+                return Response({'error': 'data 必須為有效的 JSON'}, status=status.HTTP_400_BAD_REQUEST)
+
+            # 建立健康報告
+            report = HealthReport.objects.create(
+                pet=pet,
+                check_date=check_date,
+                check_type=check_type,
+                check_location=check_location,
+                notes=notes,
+                data=data
+            )
+
+            return Response({'message': '上傳成功', 'report_id': report.id}, status=status.HTTP_201_CREATED)
+
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 class OCRUploadView(APIView):
     permission_classes = [AllowAny]
     parser_classes = (MultiPartParser, FormParser)
 
-    @swagger_auto_schema(
-        operation_description="上傳健康檢查報告圖片並擷取檢查結果",
-        manual_parameters=[
-            openapi.Parameter("pet_id", openapi.IN_FORM, type=openapi.TYPE_INTEGER, required=True, description="寵物 ID"),
-            openapi.Parameter(
-                name="image",
-                in_=openapi.IN_FORM,
-                type=openapi.TYPE_FILE,
-                required=True,
-                description="上傳報告圖片"
-            )
-        ],
-        responses={200: openapi.Response('成功', schema=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                'extracted_results': openapi.Schema(type=openapi.TYPE_OBJECT)
-            }
-        ))}
-    )
-    
     def post(self, request, *args, **kwargs):
         pet_id = request.data.get('pet_id')
         if not pet_id:
             return Response({'error': '缺少 pet_id'}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            pet = Pet.objects.get(id=pet_id)
+            Pet.objects.get(id=pet_id)  # 只驗證，不建檔
         except Pet.DoesNotExist:
             return Response({'error': '找不到寵物'}, status=status.HTTP_404_NOT_FOUND)
 
@@ -102,9 +170,6 @@ class OCRUploadView(APIView):
 
         raw_text = texts[0].description if texts else ""
         extracted_data = self.extract_test_results(raw_text)
-
-        # 存到資料庫
-        HealthReport.objects.create(pet=pet, data={"extracted_results": extracted_data})
 
         return Response({'extracted_results': extracted_data}, status=status.HTTP_200_OK)
 
@@ -132,7 +197,7 @@ class OCRUploadView(APIView):
                 result[field] = None
 
         return result
-
+    
 def convert_ocr_to_health_data(ocr_result):
     FIELD_CHINESE_TO_ENGLISH = {
         "白血球計數": "WBC",
@@ -190,3 +255,61 @@ def convert_ocr_to_health_data(ocr_result):
             "檢查結果": value
         })
     return converted
+
+class HealthReportDetailView(APIView):
+    permission_classes = [AllowAny]
+
+    @swagger_auto_schema(
+        operation_description="更新指定健康報告",
+        manual_parameters=[
+            openapi.Parameter('check_date', openapi.IN_FORM, type=openapi.TYPE_STRING, required=False, description='檢查日期 (YYYY-MM-DD)'),
+            openapi.Parameter('check_type', openapi.IN_FORM, type=openapi.TYPE_STRING, required=False, description='檢查類型 (cbc/biochemistry/urinalysis/other)'),
+            openapi.Parameter('check_location', openapi.IN_FORM, type=openapi.TYPE_STRING, required=False, description='檢查地點'),
+            openapi.Parameter('notes', openapi.IN_FORM, type=openapi.TYPE_STRING, required=False, description='備註'),
+            openapi.Parameter('data', openapi.IN_FORM, type=openapi.TYPE_STRING, required=False, description='健康數據 (JSON)')
+        ],
+        responses={200: "更新成功", 404: "找不到報告", 400: "參數錯誤"}
+    )
+    def put(self, request, report_id):
+        try:
+            report = HealthReport.objects.get(id=report_id)
+        except HealthReport.DoesNotExist:
+            return Response({'error': '找不到健康報告'}, status=status.HTTP_404_NOT_FOUND)
+
+        # 更新欄位（有傳才更新）
+        check_date_str = request.data.get('check_date')
+        if check_date_str:
+            try:
+                report.check_date = datetime.strptime(check_date_str, "%Y-%m-%d")
+            except ValueError:
+                return Response({'error': '日期格式錯誤，應為 YYYY-MM-DD'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if 'check_type' in request.data:
+            report.check_type = request.data.get('check_type') or None
+
+        if 'check_location' in request.data:
+            report.check_location = request.data.get('check_location') or ""
+
+        if 'notes' in request.data:
+            report.notes = request.data.get('notes') or ""
+
+        if 'data' in request.data:
+            try:
+                report.data = json.loads(request.data.get('data'))
+            except json.JSONDecodeError:
+                return Response({'error': 'data 必須為有效的 JSON'}, status=status.HTTP_400_BAD_REQUEST)
+
+        report.save()
+        return Response({'message': '更新成功'}, status=status.HTTP_200_OK)
+
+    @swagger_auto_schema(
+        operation_description="刪除指定健康報告",
+        responses={204: "刪除成功", 404: "找不到報告"}
+    )
+    def delete(self, request, report_id):
+        try:
+            report = HealthReport.objects.get(id=report_id)
+            report.delete()
+            return Response({'message': '刪除成功'}, status=status.HTTP_204_NO_CONTENT)
+        except HealthReport.DoesNotExist:
+            return Response({'error': '找不到健康報告'}, status=status.HTTP_404_NOT_FOUND)

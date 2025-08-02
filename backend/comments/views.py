@@ -37,6 +37,8 @@ class PostCommentsView(generics.ListCreateAPIView):
             parent=None
         )
 
+        postFrame.add_comment()  # 更新評論數量
+
         return Response(
             {"detail": "評論已成功建立"},
             status=drf_status.HTTP_201_CREATED

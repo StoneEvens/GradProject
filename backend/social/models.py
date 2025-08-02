@@ -5,55 +5,19 @@ from django.contrib.contenttypes.models import ContentType
 from rest_framework import status as drf_status
 from django.utils.text import slugify
 import re
-from typing import TYPE_CHECKING
 from pets.models import Pet
 from accounts.models import CustomUser
 
-if TYPE_CHECKING:
-    from .models import PostFrame
-
-#----------貼文的"框"----------
-class PostFrame(models.Model):
+class Interactables(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     downvotes = models.IntegerField(default=0, help_text="點踩數")
     likes = models.IntegerField(default=0, help_text="按讚數")
     saves = models.IntegerField(default=0, help_text="收藏數")
     shares = models.IntegerField(default=0, help_text="分享數")
     upvotes = models.IntegerField(default=0, help_text="點讚數")
-    updated_at = models.DateTimeField(auto_now=True)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='postframes')
-
-    def __str__(self):
-        return f"{self.user.username}'s Post at {self.created_at}"
-    
-    def create(user: CustomUser):
-        postFrame = PostFrame.objects.create(user=user)
-        return postFrame
-    
-    def getUser(self):
-        return self.user
-
-    # 獲取貼文ID
-    def get_postFrame_ID(self):
-        return self.id
-    
-    # 獲取貼文框本身
-    def get_postFrames(postID=None, user=None, userList:list=None, idList:list=None):
-        if postID is not None:
-            return PostFrame.objects.get(id=postID)
-            
-        if user is not None:
-            return PostFrame.objects.filter(user=user).order_by('-created_at')[:50]
-        
-        if userList is not None:
-            return PostFrame.objects.filter(user__in=userList).order_by('-created_at')[:50]
-        
-        if idList is not None:
-            return PostFrame.objects.filter(id__in=idList).order_by('-created_at')[:50]
-        
-        return PostFrame.objects.none()
 
     def handle_interaction(self, fromRelation:str = None, toRelation:str = None):
+
         update_fields = []
         ops = 0
 
@@ -116,70 +80,6 @@ class PostFrame(models.Model):
             self.shares,
             self.likes
         ]
-
-    def handle_interaction(self, user, relation, allowed_relations):
-        """
-        處理用戶對貼文的互動
-        用於 interactions app 的 view
-        """
-        from interactions.models import UserInteraction
-        
-        if relation not in allowed_relations:
-            return False, f"不支援的互動類型: {relation}", 400
-        
-        try:
-            # 檢查是否已經有相同的互動
-            existing_interaction = UserInteraction.objects.filter(
-                user=user,
-                postFrame=self,
-                relation=relation
-            ).first()
-            
-            if existing_interaction:
-                # 如果已經有相同互動，則移除它
-                existing_interaction.delete()
-                
-                # 更新計數
-                if relation == 'liked':
-                    self.likes = max(0, self.likes - 1)
-                elif relation == 'upvoted':
-                    self.upvotes = max(0, self.upvotes - 1)
-                elif relation == 'downvoted':
-                    self.downvotes = max(0, self.downvotes - 1)
-                elif relation == 'saved':
-                    self.saves = max(0, self.saves - 1)
-                elif relation == 'shared':
-                    self.shares = max(0, self.shares - 1)
-                
-                self.save()
-                action_name = self._get_action_name(relation)
-                return True, f"已取消{action_name}", 200
-            else:
-                # 創建新的互動
-                UserInteraction.objects.create(
-                    user=user,
-                    postFrame=self,
-                    relation=relation
-                )
-                
-                # 更新計數
-                if relation == 'liked':
-                    self.likes += 1
-                elif relation == 'upvoted':
-                    self.upvotes += 1
-                elif relation == 'downvoted':
-                    self.downvotes += 1
-                elif relation == 'saved':
-                    self.saves += 1
-                elif relation == 'shared':
-                    self.shares += 1
-                
-                self.save()
-                action_name = self._get_action_name(relation)
-                return True, f"成功{action_name}", 200
-                
-        except Exception as e:
-            return False, f"操作失敗: {str(e)}", 500
     
     def _get_action_name(self, relation):
         """獲取互動類型的中文名稱"""
@@ -191,6 +91,52 @@ class PostFrame(models.Model):
             'shared': '分享'
         }
         return action_names.get(relation, relation)
+
+#----------貼文的"框"----------
+class PostFrame(Interactables):
+    updated_at = models.DateTimeField(auto_now=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='postframes')
+    comments_count = models.IntegerField(default=0, help_text="評論數")
+
+    def __str__(self):
+        return f"{self.user.username}'s Post at {self.created_at}"
+    
+    def create(user: CustomUser):
+        postFrame = PostFrame.objects.create(user=user)
+        return postFrame
+    
+    def getUser(self):
+        return self.user
+
+    # 獲取貼文ID
+    def get_postFrame_ID(self):
+        return self.id
+    
+    # 獲取貼文框本身
+    def get_postFrames(postID=None, user=None, userList:list=None, idList:list=None):
+        if postID is not None:
+            return PostFrame.objects.get(id=postID)
+            
+        if user is not None:
+            return PostFrame.objects.filter(user=user).order_by('-created_at')[:50]
+        
+        if userList is not None:
+            return PostFrame.objects.filter(user__in=userList).order_by('-created_at')[:50]
+        
+        if idList is not None:
+            return PostFrame.objects.filter(id__in=idList).order_by('-created_at')[:50]
+        
+        return PostFrame.objects.none()
+
+    def add_comment(self):
+        self.comments_count += 1
+        self.save(update_fields=['comments_count'])
+
+    def get_interaction_stats(self):
+        stats = super().get_interaction_stats()
+        print(stats)
+        stats.append(self.comments_count)
+        return stats
 
 #----------貼文內容----------
 #SoL (Slice of Life) 貼文內容
@@ -237,6 +183,9 @@ class SoLContent(models.Model):
             return SoLContent.objects.filter(content_text__icontains=query)[:50]
         
         return SoLContent.objects.none()
+    
+    def get_postFrame(self) -> PostFrame:
+        return self.postFrame
 
 # === 貼文的 Hashtag ===
 class PostHashtag(models.Model):
