@@ -12,12 +12,13 @@ from pathlib import Path
 import io
 
 from pets.models import Pet
-from feeds.models import Feed
+from feeds.models import Feed, UserFeed
 from .serializers import PetSerializer
 from ocrapp.models import HealthReport
 from ocrapp.views import convert_ocr_to_health_data
-from feeds.serializers import FeedSerializer
+from feeds.serializers import FeedSerializer, UserFeedSerializer
 from django.contrib.auth import get_user_model
+from django.utils import timezone
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
 User = get_user_model()
@@ -127,103 +128,467 @@ class FeedListByUser(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        feeds = Feed.objects.filter(user=request.user)
-        serializer = FeedSerializer(feeds, many=True, context={'request': request})
+        """取得使用者的飼料清單（基於 UserFeed 關係）"""
+        pet_id = request.query_params.get('pet_id')
+        
+        queryset = UserFeed.objects.filter(user=request.user).select_related('feed', 'pet')
+        
+        # 根據寵物ID篩選
+        if pet_id:
+            try:
+                from pets.models import Pet
+                pet = Pet.objects.get(id=pet_id, owner=request.user)
+                queryset = queryset.filter(pet=pet)
+            except Pet.DoesNotExist:
+                return Response({
+                    "error": "找不到該寵物或您沒有權限"
+                }, status=status.HTTP_404_NOT_FOUND)
+        
+        user_feeds = queryset.order_by('-last_used_at')
+        serializer = UserFeedSerializer(user_feeds, many=True, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 class FeedCreateView(APIView):
     permission_classes = [IsAuthenticated]
     parser_classes = [JSONParser, FormParser, MultiPartParser]
 
+    def _upload_feed_image(self, feed, image_data, image_type):
+        """
+        上傳飼料圖片到 Firebase，參考 abnormal post 的邏輯
+        """
+        import base64
+        import io
+        from django.core.files.uploadedfile import InMemoryUploadedFile
+        from utils.firebase_service import firebase_storage_service
+        from media.models import FeedImage
+        import logging
+        
+        logger = logging.getLogger(__name__)
+        
+        try:
+            # 解析 base64 圖片數據
+            if ',' in image_data:
+                header, image_data = image_data.split(',', 1)
+                # 從 header 中提取 MIME 類型
+                if 'data:' in header and ';base64' in header:
+                    content_type = header.split('data:')[1].split(';base64')[0]
+                else:
+                    content_type = 'image/jpeg'
+            else:
+                content_type = 'image/jpeg'
+                
+            # 解碼 base64 數據
+            image_data = base64.b64decode(image_data)
+            
+            # 生成檔案名稱
+            file_extension = '.jpg'
+            if 'png' in content_type:
+                file_extension = '.png'
+            elif 'gif' in content_type:
+                file_extension = '.gif'
+            elif 'webp' in content_type:
+                file_extension = '.webp'
+                
+            file_name = f"feed_{image_type}_{feed.id}{file_extension}"
+            
+            # 建立檔案流
+            image_file = io.BytesIO(image_data)
+            
+            # 建立 Django 檔案物件
+            django_file = InMemoryUploadedFile(
+                image_file,
+                None,
+                file_name,
+                content_type,
+                len(image_data),
+                None
+            )
+            
+            # 使用 Firebase Storage 服務上傳圖片
+            success, message, firebase_url, firebase_path = firebase_storage_service.upload_feed_photo(
+                feed_id=feed.id,
+                photo_file=django_file,
+                photo_type=image_type,
+                pet_type=feed.pet_type
+            )
+            
+            if success:
+                # 創建 FeedImage 記錄
+                FeedImage.create_or_update(
+                    feed=feed,
+                    image_type=image_type,
+                    firebase_url=firebase_url,
+                    firebase_path=firebase_path,
+                    original_filename=file_name,
+                    content_type=content_type,
+                    file_size=len(image_data)
+                )
+                logger.info(f"飼料圖片 {image_type} 上傳成功: {firebase_url}")
+            else:
+                logger.error(f"飼料圖片 {image_type} 上傳失敗: {message}")
+                
+        except Exception as e:
+            logger.error(f"處理飼料圖片 {image_type} 時出錯: {str(e)}", exc_info=True)
+
     def post(self, request):
         data = request.data
-        user = request.user  # 使用認證的用戶
+        user = request.user
 
         def parse_float(value):
             try:
                 return float(value)
             except (TypeError, ValueError):
-                return 0
+                return 0.0
+
+        # 必要欄位驗證
+        name = data.get("name", "").strip()
+        brand = data.get("brand", "").strip()
+        pet_type = data.get("pet_type", "cat")
+        pet_id = data.get("pet_id")
+        
+        if not name or not brand:
+            return Response({
+                "error": "名稱和品牌為必填欄位"
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        if pet_type not in ['cat', 'dog']:
+            return Response({
+                "error": "pet_type 必須是 'cat' 或 'dog'"
+            }, status=status.HTTP_400_BAD_REQUEST)
+            
+        if not pet_id:
+            return Response({
+                "error": "請提供 pet_id"
+            }, status=status.HTTP_400_BAD_REQUEST)
+            
+        # 驗證寵物是否屬於該用戶
+        try:
+            from pets.models import Pet
+            pet = Pet.objects.get(id=pet_id, owner=user)
+        except Pet.DoesNotExist:
+            return Response({
+                "error": "找不到該寵物或您沒有權限"
+            }, status=status.HTTP_404_NOT_FOUND)
 
         try:
-            feed = Feed.objects.create(
-                user=user,
-                name=data.get("name"),
-                brand=data.get("brand"),
-                protein=parse_float(data.get("protein")),
-                fat=parse_float(data.get("fat")),
-                carbohydrate=parse_float(data.get("carbohydrate")),
-                calcium=parse_float(data.get("calcium")),
-                phosphorus=parse_float(data.get("phosphorus")),
-                magnesium=parse_float(data.get("magnesium")),
-                sodium=parse_float(data.get("sodium")),
-                front_image_url=data.get("front_image_url"),
-                nutrition_image_url=data.get("nutrition_image_url"),
-            )
+            from django.db import transaction
+            with transaction.atomic():
+                # 檢查是否已存在相同營養成分的飼料（只比對營養成分和寵物類型）
+                existing_feed = Feed.objects.filter(
+                    pet_type=pet_type,
+                    protein=parse_float(data.get("protein")),
+                    fat=parse_float(data.get("fat")),
+                    carbohydrate=parse_float(data.get("carbohydrate")),
+                    calcium=parse_float(data.get("calcium")),
+                    phosphorus=parse_float(data.get("phosphorus")),
+                    magnesium=parse_float(data.get("magnesium")),
+                    sodium=parse_float(data.get("sodium"))
+                ).first()
 
-            return Response({
-                "message": "飼料建立成功",
-                "feed_id": feed.id,
-                "data": FeedSerializer(feed).data
-            }, status=status.HTTP_201_CREATED)
-        
+                if existing_feed:
+                    # 如果飼料已存在，建立或更新 UserFeed 關係（以寵物為單位）
+                    user_feed, created = UserFeed.objects.get_or_create(
+                        user=user,
+                        feed=existing_feed,
+                        pet=pet,
+                        defaults={'usage_count': 0}
+                    )
+                    
+                    if not created:
+                        # 如果關係已存在，只更新最後使用時間，不增加使用次數
+                        user_feed.last_used_at = timezone.now()
+                        user_feed.save(update_fields=['last_used_at'])
+                    
+                    return Response({
+                        "message": "資料庫中已有此飼料，直接幫您匹配",
+                        "feed_id": existing_feed.id,
+                        "data": UserFeedSerializer(user_feed).data,
+                        "is_existing": True
+                    }, status=status.HTTP_200_OK)
+                
+                else:
+                    # 建立新的共用飼料
+                    new_feed = Feed.objects.create(
+                        name=name,
+                        brand=brand,
+                        pet_type=pet_type,
+                        protein=parse_float(data.get("protein")),
+                        fat=parse_float(data.get("fat")),
+                        carbohydrate=parse_float(data.get("carbohydrate")),
+                        calcium=parse_float(data.get("calcium")),
+                        phosphorus=parse_float(data.get("phosphorus")),
+                        magnesium=parse_float(data.get("magnesium")),
+                        sodium=parse_float(data.get("sodium")),
+                        price=data.get("price", 0),
+                        created_by=user
+                    )
+                    
+                    # 處理圖片上傳 - 參考 abnormal post 的邏輯
+                    front_image = data.get("front_image")
+                    nutrition_image = data.get("nutrition_image")
+                    
+                    # 處理正面圖片
+                    if front_image:
+                        self._upload_feed_image(new_feed, front_image, 'front')
+                    
+                    # 處理營養標籤圖片  
+                    if nutrition_image:
+                        self._upload_feed_image(new_feed, nutrition_image, 'nutrition')
+
+                    # 建立 UserFeed 關係
+                    user_feed = UserFeed.objects.create(
+                        user=user,
+                        feed=new_feed,
+                        pet=pet,
+                        usage_count=1
+                    )
+
+                    return Response({
+                        "message": "新飼料建立成功",
+                        "feed_id": new_feed.id,
+                        "data": UserFeedSerializer(user_feed).data,
+                        "is_existing": False
+                    }, status=status.HTTP_201_CREATED)
+
         except Exception as e:
             import traceback
             traceback.print_exc()
-            return Response({"error": f"建立 Feed 發生錯誤：{str(e)}"}, status=500)
+            return Response({
+                "error": f"建立飼料時發生錯誤：{str(e)}"
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 class FeedUpdateView(APIView):
-    permission_classes = [AllowAny]
+    """飼料資訊驗證 API - 僅驗證不更新資料庫"""
+    permission_classes = [IsAuthenticated]
     parser_classes = [JSONParser, FormParser, MultiPartParser]
 
     def post(self, request):
+        """驗證飼料資訊格式，但不更新資料庫"""
         data = request.data
+        user = request.user
         feed_id = data.get("feed_id")
 
         if not feed_id:
-            return Response({"error": "請提供 feed_id"}, status=status.HTTP_400_BAD_REQUEST)
-
-        try:
-            feed = Feed.objects.get(id=feed_id)
-        except Feed.DoesNotExist:
-            return Response({"error": "找不到該飼料"}, status=status.HTTP_404_NOT_FOUND)
+            return Response({
+                "error": "請提供 feed_id"
+            }, status=status.HTTP_400_BAD_REQUEST)
 
         def parse_float(value):
             try:
                 return float(value)
             except (TypeError, ValueError):
-                return 0
+                return None
 
         try:
-            # 更新欄位
-            feed.name = data.get("name", feed.name)
-            feed.brand = data.get("brand", feed.brand)
-            feed.protein = parse_float(data.get("protein")) if "protein" in data else feed.protein
-            feed.fat = parse_float(data.get("fat")) if "fat" in data else feed.fat
-            feed.carbohydrate = parse_float(data.get("carbohydrate")) if "carbohydrate" in data else feed.carbohydrate
-            feed.calcium = parse_float(data.get("calcium")) if "calcium" in data else feed.calcium
-            feed.phosphorus = parse_float(data.get("phosphorus")) if "phosphorus" in data else feed.phosphorus
-            feed.magnesium = parse_float(data.get("magnesium")) if "magnesium" in data else feed.magnesium
-            feed.sodium = parse_float(data.get("sodium")) if "sodium" in data else feed.sodium
-            feed.front_image_url = data.get("front_image_url", feed.front_image_url)
-            feed.nutrition_image_url = data.get("nutrition_image_url", feed.nutrition_image_url)
-
-            feed.save()
-
+            # 檢查用戶是否有權限存取該飼料
+            user_feed = UserFeed.objects.select_related('feed').get(
+                user=user, 
+                feed_id=feed_id
+            )
+        except UserFeed.DoesNotExist:
             return Response({
-                "message": "飼料更新成功",
-                "data": FeedSerializer(feed).data
+                "error": "找不到該飼料或您沒有權限存取"
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        # 驗證資料格式但不儲存
+        validated_data = {}
+        validation_errors = []
+        
+        # 驗證營養素數值
+        nutrition_fields = [
+            'protein', 'fat', 'carbohydrate', 'calcium', 
+            'phosphorus', 'magnesium', 'sodium'
+        ]
+        
+        for field in nutrition_fields:
+            if field in data:
+                value = parse_float(data.get(field))
+                if value is not None and value >= 0:
+                    validated_data[field] = value
+                elif value is not None and value < 0:
+                    validation_errors.append(f"{field} 不能為負數")
+                else:
+                    validation_errors.append(f"{field} 格式不正確")
+        
+        # 驗證文字欄位
+        if 'name' in data:
+            name = data.get('name', '').strip()
+            if len(name) > 100:
+                validation_errors.append("飼料名稱不能超過100字元")
+            else:
+                validated_data['name'] = name
+                
+        if 'brand' in data:
+            brand = data.get('brand', '').strip()
+            if len(brand) > 100:
+                validation_errors.append("品牌名稱不能超過100字元")
+            else:
+                validated_data['brand'] = brand
+
+        if validation_errors:
+            return Response({
+                "error": "資料驗證失敗",
+                "validation_errors": validation_errors
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response({
+            "message": "資料驗證成功，前端可進行計算",
+            "validated_data": validated_data,
+            "feed_info": {
+                "id": user_feed.feed.id,
+                "name": user_feed.feed.name,
+                "brand": user_feed.feed.brand
+            }
+        }, status=status.HTTP_200_OK)
+
+
+class SharedFeedListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        """取得共用飼料清單（可根據寵物類型篩選）"""
+        pet_type = request.query_params.get('pet_type')
+        search = request.query_params.get('search', '').strip()
+        
+        queryset = Feed.objects.all().order_by('-created_at')
+        
+        if pet_type in ['cat', 'dog']:
+            queryset = queryset.filter(pet_type=pet_type)
+            
+        if search:
+            from django.db import models
+            queryset = queryset.filter(
+                models.Q(name__icontains=search) | 
+                models.Q(brand__icontains=search)
+            )
+        
+        # 限制結果數量
+        queryset = queryset[:50]
+        
+        serializer = FeedSerializer(queryset, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class AddExistingFeedView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request):
+        """將現有的共用飼料加入使用者的飼料清單"""
+        feed_id = request.data.get('feed_id')
+        user = request.user
+        
+        if not feed_id:
+            return Response({
+                "error": "請提供 feed_id"
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            feed = Feed.objects.get(id=feed_id)
+        except Feed.DoesNotExist:
+            return Response({
+                "error": "找不到指定的飼料"
+            }, status=status.HTTP_404_NOT_FOUND)
+        
+        pet_id = request.data.get('pet_id')
+        if not pet_id:
+            return Response({
+                "error": "請提供 pet_id"
+            }, status=status.HTTP_400_BAD_REQUEST)
+            
+        # 驗證寵物是否屬於該用戶
+        try:
+            from pets.models import Pet
+            pet = Pet.objects.get(id=pet_id, owner=user)
+        except Pet.DoesNotExist:
+            return Response({
+                "error": "找不到該寵物或您沒有權限"
+            }, status=status.HTTP_404_NOT_FOUND)
+        
+        try:
+            user_feed, created = UserFeed.objects.get_or_create(
+                user=user,
+                feed=feed,
+                pet=pet,
+                defaults={'usage_count': 0}
+            )
+            
+            if not created:
+                # 如果飼料已在清單中，只更新最後使用時間
+                user_feed.last_used_at = timezone.now()
+                user_feed.save(update_fields=['last_used_at'])
+                message = "飼料已在您的清單中"
+            else:
+                message = "飼料已成功加入您的清單"
+            
+            return Response({
+                "message": message,
+                "data": UserFeedSerializer(user_feed).data
             }, status=status.HTTP_200_OK)
-
+            
         except Exception as e:
-            import traceback
-            traceback.print_exc()
-            return Response({"error": f"更新 Feed 發生錯誤：{str(e)}"}, status=500)
-
+            return Response({
+                "error": f"加入飼料時發生錯誤：{str(e)}"
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 # 載入 OpenAI API 金鑰
 load_dotenv()
 api_key = os.getenv('OPENAI_API_KEY')
 client = OpenAI(api_key=api_key)
+
+
+
+class FeedUsageTracker(APIView):
+    """記錄飼料使用次數的 API"""
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request):
+        """更新飼料使用次數"""
+        feed_id = request.data.get('feed_id')
+        user = request.user
+        
+        if not feed_id:
+            return Response({
+                "error": "請提供 feed_id"
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        pet_id = request.data.get('pet_id')
+        if not pet_id:
+            return Response({
+                "error": "請提供 pet_id"
+            }, status=status.HTTP_400_BAD_REQUEST)
+            
+        # 驗證寵物是否屬於該用戶
+        try:
+            from pets.models import Pet
+            pet = Pet.objects.get(id=pet_id, owner=user)
+        except Pet.DoesNotExist:
+            return Response({
+                "error": "找不到該寵物或您沒有權限"
+            }, status=status.HTTP_404_NOT_FOUND)
+        
+        try:
+            user_feed = UserFeed.objects.get(
+                user=user, 
+                feed_id=feed_id, 
+                pet=pet
+            )
+            user_feed.increment_usage()
+            
+            return Response({
+                "message": "使用次數已更新",
+                "usage_count": user_feed.usage_count,
+                "last_used_at": user_feed.last_used_at
+            }, status=status.HTTP_200_OK)
+            
+        except UserFeed.DoesNotExist:
+            return Response({
+                "error": "找不到該飼料記錄或寵物不匹配"
+            }, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({
+                "error": f"更新使用次數失敗：{str(e)}"
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 
 
 class PetNutritionCalculator(APIView):
@@ -441,14 +806,39 @@ class PetNutritionCalculator(APIView):
             response = client.chat.completions.create(
                 model="gpt-4o",
                 messages=[
-                    {"role": "system", "content": "你是一名專業的寵物營養師，會用中文清楚、自然、口語化地說明寵物的營養分析與建議。請不要使用 LaTeX 公式或 Markdown 表格，直接用條列式或段落方式表達內容。"},
+                    {"role": "system", "content": "你是一名專業的寵物營養師。請用中文提供清楚、簡潔的分析報告。\n\n格式要求：\n1. 使用簡單的段落格式，每個主題間空一行\n2. 使用 '-' 開頭的條列式來列出營養數值\n3. 不要使用 **粗體**、*斜體*、表格或代碼區塊\n4. 數值資訊請用中文單位（公克、大卡）\n5. 內容應包含：每日飼料量、各項營養素建議量與實際量對比、健康建議"},
                     {"role": "user", "content": message}
                 ],
                 max_tokens=1500,
-                temperature=0.7
+                temperature=0.5
             )
             return response.choices[0].message.content.strip()
         except APIError as e:
             return f"無法產生建議：API 錯誤 - {str(e)}"
         except Exception as e:
             return f"無法產生建議：{str(e)}"
+
+
+class CompatibilityRedirectView(APIView):
+    """向後兼容的重定向視圖"""
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        return Response({
+            'message': '此 API 已遷移到 feeds app',
+            'new_endpoints': {
+                'shared_feeds': '/feeds/shared/',
+                'create_feed': '/feeds/create/',
+                'add_to_user': '/feeds/add-to-user/'
+            }
+        }, status=status.HTTP_301_MOVED_PERMANENTLY)
+    
+    def post(self, request):
+        return Response({
+            'message': '此 API 已遷移到 feeds app',
+            'new_endpoints': {
+                'shared_feeds': '/feeds/shared/',
+                'create_feed': '/feeds/create/',
+                'add_to_user': '/feeds/add-to-user/'
+            }
+        }, status=status.HTTP_301_MOVED_PERMANENTLY)

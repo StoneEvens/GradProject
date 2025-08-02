@@ -131,10 +131,17 @@ const EditProfileModal = ({ user, isOpen, onClose, onSave }) => {
     onClose();
   };
 
+  // 處理點擊遮罩關閉 modal
+  const handleOverlayClick = (e) => {
+    if (e.target === e.currentTarget && !loading) {
+      handleCancel();
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
-    <div className={styles.modalOverlay}>
+    <div className={styles.modalOverlay} onClick={handleOverlayClick}>
       {notification && (
         <Notification
           message={notification}

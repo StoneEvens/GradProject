@@ -30,6 +30,11 @@ import PetRelatedPostsListPage from './pages/PetRelatedPostsListPage';
 import PetAbnormalPostsPage from './pages/PetAbnormalPostsPage';
 import AbnormalPostDetailPage from './pages/AbnormalPostDetailPage';
 import CalculatorPage from './pages/CalculatorPage';
+import FeedPage from './pages/FeedPage';
+import FeedDetailPage from './pages/FeedDetailPage';
+import MarkedFeedsPage from './pages/MarkedFeedsPage';
+import AllFeedsPage from './pages/AllFeedsPage';
+import FeedSearchResultPage from './pages/FeedSearchResultPage';
 import { isAuthenticated, refreshAccessToken } from './services/authService';
 
 const App = () => {
@@ -268,6 +273,31 @@ const App = () => {
         <Route 
           path="/calculator" 
           element={isUserAuthenticated ? <CalculatorPage /> : <Navigate to="/" />} 
+        />
+        {/* 飼料頁面：未登入導向HomePage */}
+        <Route 
+          path="/feeds" 
+          element={isUserAuthenticated ? <FeedPage /> : <Navigate to="/" />} 
+        />
+        {/* 飼料詳情頁面：未登入導向HomePage */}
+        <Route 
+          path="/feeds/:id" 
+          element={isUserAuthenticated ? <FeedDetailPage /> : <Navigate to="/" />} 
+        />
+        {/* 我的精選飼料頁面：未登入導向HomePage */}
+        <Route 
+          path="/feeds/my-marked" 
+          element={isUserAuthenticated ? <MarkedFeedsPage /> : <Navigate to="/" />} 
+        />
+        {/* 所有飼料頁面：未登入導向HomePage */}
+        <Route 
+          path="/feeds/all" 
+          element={isUserAuthenticated ? <AllFeedsPage /> : <Navigate to="/" />} 
+        />
+        {/* 飼料搜尋結果頁面：未登入導向HomePage */}
+        <Route 
+          path="/feeds/search" 
+          element={isUserAuthenticated ? <FeedSearchResultPage /> : <Navigate to="/" />} 
         />
       </Routes>
     </BrowserRouter>

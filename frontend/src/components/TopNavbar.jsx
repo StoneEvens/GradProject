@@ -63,7 +63,10 @@ const TopNavbar = ({ onSearchSubmit, onSearchChange, initialSearchValue }) => {
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    if (onSearchSubmit) {
+    if (isFeedPage && searchQuery.trim()) {
+      // 在飼料頁面進行搜尋時，導航到搜尋結果頁面
+      navigate(`/feeds/search?q=${encodeURIComponent(searchQuery.trim())}`);
+    } else if (onSearchSubmit) {
       onSearchSubmit(searchQuery);
     }
   };
@@ -78,6 +81,15 @@ const TopNavbar = ({ onSearchSubmit, onSearchChange, initialSearchValue }) => {
 
   // 判斷是否在社群頁面或社群搜尋頁面
   const isSocialPage = location.pathname === '/social' || location.pathname.startsWith('/social/search');
+  
+  // 判斷是否在飼料頁面或飼料相關搜尋頁面
+  const isFeedPage = location.pathname === '/feeds' || 
+                     location.pathname === '/feeds/all' || 
+                     location.pathname === '/feeds/my-marked' || 
+                     location.pathname.startsWith('/feeds/search');
+  
+  // 判斷是否需要顯示搜尋框
+  const showSearchBar = isSocialPage || isFeedPage;
 
   return (
     <NotificationProvider>
@@ -97,12 +109,12 @@ const TopNavbar = ({ onSearchSubmit, onSearchChange, initialSearchValue }) => {
           />
         </div>
         <div className={styles.rightSection}>
-          {isSocialPage ? (
-            // 在社群頁面顯示搜尋框
+          {showSearchBar ? (
+            // 在社群頁面或飼料頁面顯示搜尋框
             <form onSubmit={handleSearchSubmit} className={styles.searchForm}>
               <input
                 type="text"
-                placeholder="搜尋..."
+                placeholder={isFeedPage ? "搜尋飼料名稱或品牌..." : "搜尋..."}
                 value={searchQuery}
                 onChange={handleSearchChange}
                 className={styles.searchInput}

@@ -83,7 +83,7 @@
   display: flex;
   align-items: center;
   margin-top: 40px;
-  margin-bottom: 40px;
+  margin-bottom: 20px;
   position: relative;
 }
 
@@ -166,36 +166,12 @@
   word-break: break-all;
 }
 
-/* 分頁切換 - 參考 UserProfilePage */
-.tabs {
-  display: flex;
-  margin: 18px 0 10px 0;
-  margin-left: 10px;
-  margin-right: 10px;
-}
-
-.tab {
-  flex: 1;
-  text-align: center;
-  font-size: 1.1rem;
-  font-weight: bold;
-  padding: 8px 0;
-  background: #FFB370;
-  color: #222;
-  border-radius: 6px 6px 0 0;
-  margin-right: 4px;
-  cursor: pointer;
-  border: none;
-  transition: background 0.2s, color 0.2s;
-}
-
-.tab:last-child {
-  margin-right: 0;
-}
-
-.tab.active, .tab:hover {
+/* 分隔線 - 匹配 PetSwitcher 樣式 */
+.divider {
+  width: 94%;
+  height: 1.5px;
   background: #F08651;
-  color: #fff;
+  margin: 10px auto 20px auto;
 }
 
 /* 功能按鈕網格 - 改良設計 */
