@@ -128,14 +128,9 @@ class PostFrame(Interactables):
         
         return PostFrame.objects.none()
 
-    def add_comment(self):
-        self.comments_count += 1
-        self.save(update_fields=['comments_count'])
-
     def get_interaction_stats(self):
-        stats = super().get_interaction_stats()
-        stats.append(self.comments_count)
-        return stats
+        # 留言數由序列化器動態計算，這裡只返回基本的互動統計
+        return super().get_interaction_stats()
 
 #----------貼文內容----------
 #SoL (Slice of Life) 貼文內容

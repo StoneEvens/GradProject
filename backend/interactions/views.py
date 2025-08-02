@@ -134,10 +134,10 @@ class BaseInteractionView(APIView):
 
 class CommentInteractionView(BaseInteractionView):
     """
-    處理評論的互動操作 (點讚/踩)
+    處理評論的互動操作 (按讚/點讚/踩)
     """
     model = Comment
-    allowed_relations = ['upvoted', 'downvoted']
+    allowed_relations = ['liked', 'upvoted', 'downvoted']
 
 class PostInteractionView(BaseInteractionView):
     """

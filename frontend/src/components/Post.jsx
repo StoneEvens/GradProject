@@ -612,6 +612,7 @@ const Post = ({
       )}
 
       <PostComments
+        user={currentUser}
         previewComments={postData.top_comments || []}
       />
 

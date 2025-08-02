@@ -124,14 +124,17 @@ class PostFrameSerializer(serializers.ModelSerializer):
             return []
     
     def get_interaction_stats(self, postFrame: PostFrame):
+        from comments.models import Comment
         stats = postFrame.get_interaction_stats()
+        # 動態計算留言總數（包含回覆）
+        comment_count = Comment.objects.filter(postFrame=postFrame).count()
         return {
             'upvotes': stats[0],
             'downvotes': stats[1],
             'saves': stats[2],
             'shares': stats[3],
             'likes': stats[4],
-            'comments': stats[5],
+            'comments': comment_count,
             'total_score': stats[0] - stats[1]
         }
 
@@ -298,14 +301,18 @@ class SolPostSerializer(serializers.ModelSerializer):
             return []
     
     def get_interaction_stats(self, solContent: SoLContent):
-        stats = solContent.get_postFrame().get_interaction_stats()
+        from comments.models import Comment
+        postFrame = solContent.get_postFrame()
+        stats = postFrame.get_interaction_stats()
+        # 動態計算留言總數（包含回覆）
+        comment_count = Comment.objects.filter(postFrame=postFrame).count()
         return {
             'upvotes': stats[0],
             'downvotes': stats[1],
             'saves': stats[2],
             'shares': stats[3],
             'likes': stats[4],
-            'comments': stats[5],
+            'comments': comment_count,
             'total_score': stats[0] - stats[1]
         }
 
@@ -435,13 +442,17 @@ class PostPreviewSerializer(serializers.ModelSerializer):
     
     def get_interaction_stats(self, postFrame: PostFrame):
         """獲取互動統計"""
+        from comments.models import Comment
         stats = postFrame.get_interaction_stats()
+        # 動態計算留言總數（包含回覆）
+        comment_count = Comment.objects.filter(postFrame=postFrame).count()
         return {
             'upvotes': stats[0],
             'downvotes': stats[1],
             'saves': stats[2],
             'shares': stats[3],
             'likes': stats[4],
+            'comments': comment_count,
             'total_score': stats[0] - stats[1]
         }
     

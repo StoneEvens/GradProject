@@ -178,10 +178,32 @@ const SocialPage = () => {
   };
 
   // 處理留言
-  const handleComment = (postId) => {
-    console.log('留言操作:', { postId });
-    // 導航到貼文詳情頁面
-    navigate(`/post/${postId}`);
+  const handleComment = (postId, increment = 0) => {
+    console.log('留言操作:', { postId, increment });
+    
+    // 如果有 increment 參數，更新貼文的留言數
+    if (increment !== 0) {
+      setPosts(prevPosts => 
+        prevPosts.map(post => {
+          const currentPostId = post.id || post.post_id;
+          if (currentPostId === postId) {
+            return {
+              ...post,
+              interaction_stats: {
+                ...post.interaction_stats,
+                comments: (post.interaction_stats?.comments || 0) + increment
+              }
+            };
+          }
+          return post;
+        })
+      );
+    }
+    
+    // 如果沒有 increment（即點擊留言按鈕），導航到貼文詳情頁面
+    if (increment === 0) {
+      navigate(`/post/${postId}`);
+    }
   };
 
   // 處理標籤點擊

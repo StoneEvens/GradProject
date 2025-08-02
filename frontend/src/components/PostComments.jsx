@@ -1,31 +1,24 @@
 import React, { useState, useRef } from 'react';
 import axios from '../utils/axios';
-import '../styles/PostComments.css';
+import styles from '../styles/PostComments.module.css';
 import { useNavigate } from 'react-router-dom';
 import { checkUserAccount } from '../services/userService';
+import Comment from './Comment';
+import ConfirmNotification from './ConfirmNotification';
 // Use public assets directly in src attributes
 const EditIcon = '/assets/icon/PetpageEditButton.png';
 const HeartIcon = '/assets/icon/PostHeart.png';
 const HeartFilledIcon = '/assets/icon/PostLiked.png';
 
 //使用方法
-//留言系統我整個是做在一起的，包含貼文留言預覽的兩個留言、留言區的留言、回覆
-//
-//當使用PostComments作為貼文留言預覽時，請使用<PostComments previewComments={[來自後端或自行建立的comments陣列]} (去掉大括號)/>
-//
-//當使用PostComments作為貼文留言區時，請使用<PostComments postID={貼文ID} (去掉大括號)/>
-//
-//若要更改PostComments的Comments內容時，請使用setComments([新的comments陣列])
-//若要更改PostComments的PreviewComments內容時，請使用setLocalPreviewComments([新的comments陣列])
-//第一層就是留言區，有回覆按鈕可以回覆的就是第一層，提供postID就會自動抓取貼文留言
-//第二層和貼文留言預覽是同一個系統，需要提供完整的留言/回覆陣列，被動顯示，不會自動抓取
-//不論是日常發文或是論壇發文又或是留言全部都是Interactables，所以以上三種的ID不會撞到，只要在以上類別的前端底下照上述給入PostID即可
+//留言系統用於顯示貼文的留言區
+//使用PostComments時，請使用<PostComments postID={貼文ID} user={當前使用者} handleClose={關閉函數} />
+//提供postID就會自動抓取貼文留言
 
-const PostComments = ({user, postID, previewComments, handleClose}) => {
+const PostComments = ({user, postID, handleClose, onCommentCountChange}) => {
     const navigate = useNavigate();
     //React自動幫忙生成的function
     const [comments, setComments] = useState([]);
-    const [localPreviewComments, setLocalPreviewComments] = useState(previewComments || []);
     const [commentText, setCommentText] = useState('');
     const [clickedCommentID, setClickedCommentID] = useState(null);
     const [isCommenting, setIsCommenting] = useState(false);
@@ -34,8 +27,10 @@ const PostComments = ({user, postID, previewComments, handleClose}) => {
     const [editingCommentID, setEditingCommentID] = useState(null);
     const [selectedImages, setSelectedImages] = useState([]);
     const [editText, setEditText] = useState('');
+    const [repliesLoaded, setRepliesLoaded] = useState(false);
     const [replyText, setReplyText] = useState('');
     const fileInputRef = useRef(null);
+    const [deleteConfirm, setDeleteConfirm] = useState({ show: false, commentId: null });
 
     const handleCommentChange = (event) => {
         setCommentText(event.target.value);
@@ -54,8 +49,26 @@ const PostComments = ({user, postID, previewComments, handleClose}) => {
       if (files.length > 0) {
         const imageFiles = files.filter(file => file.type.startsWith('image/'));
         
+        // 檢查是否超過三張圖片限制
+        const currentImageCount = selectedImages.length;
+        const availableSlots = 3 - currentImageCount;
+        
+        if (availableSlots <= 0) {
+          alert('最多只能選擇 3 張圖片');
+          // 清空 input 的值，以便下次選擇
+          event.target.value = '';
+          return;
+        }
+        
+        // 限制新選擇的圖片數量
+        const limitedImageFiles = imageFiles.slice(0, availableSlots);
+        
+        if (imageFiles.length > availableSlots) {
+          alert(`只能再選擇 ${availableSlots} 張圖片，已自動選取前 ${availableSlots} 張`);
+        }
+        
         // Create preview URLs for the selected images
-        const imagePreviewPromises = imageFiles.map(file => {
+        const imagePreviewPromises = limitedImageFiles.map(file => {
           return new Promise((resolve) => {
             const reader = new FileReader();
             reader.onload = (e) => resolve({
@@ -71,6 +84,9 @@ const PostComments = ({user, postID, previewComments, handleClose}) => {
           setSelectedImages(prev => [...prev, ...imagePreviews]);
         });
       }
+      
+      // 清空 input 的值，以便下次選擇相同檔案
+      event.target.value = '';
     };
 
     const removeImage = (imageId) => {
@@ -82,18 +98,25 @@ const PostComments = ({user, postID, previewComments, handleClose}) => {
     };
 
     const submitComment = async () => {
-        if (commentText.trim()) {
-        const newComment = await createComment(postID, user, commentText);
+        // 允許只有圖片沒有文字的留言，或只有文字沒有圖片的留言
+        if (commentText.trim() || selectedImages.length > 0) {
+        const newComment = await createComment(postID, user, commentText, selectedImages);
         if (newComment) {
             setComments((prevComments) => [...prevComments, newComment]);
             setCommentText('');
+            setSelectedImages([]); // 清空選中的圖片
+            // 通知父元件留言數增加
+            if (onCommentCountChange) {
+                onCommentCountChange(1);
+            }
         }
         }
     };
 
     const submitReply = async () => {
-        if (replyText.trim()) {
-            const newReply = await createReply(postID, user, replyText, replyingCommentID);
+        // 允許只有圖片沒有文字的回覆，或只有文字沒有圖片的回覆
+        if (commentText.trim() || selectedImages.length > 0) {
+            const newReply = await createReply(postID, user, commentText, replyingCommentID, selectedImages);
             if (newReply) {
                 setComments((prevComments) =>
                     prevComments.map((comment) =>
@@ -107,9 +130,14 @@ const PostComments = ({user, postID, previewComments, handleClose}) => {
                     ...prev,
                     [replyingCommentID]: [...(prev[replyingCommentID] || []), newReply]
                 }));
-                setReplyText('');
+                setCommentText('');
+                setSelectedImages([]); // 清空選中的圖片
                 setReplyingCommentID(null);
                 setIsCommenting(false);
+                // 通知父元件留言數增加
+                if (onCommentCountChange) {
+                    onCommentCountChange(1);
+                }
             }
         }
     };
@@ -146,15 +174,19 @@ const PostComments = ({user, postID, previewComments, handleClose}) => {
       }
     };
 
-    const createComment = async (postID, user, commentText) => {
+    const createComment = async (postID, user, commentText, images = []) => {
         try {
-            const response = await axios.post(`/comments/post/${postID}/comments/`, {
-                user,
-                postID,
-                content: commentText,
-            }, {
+            const formData = new FormData();
+            formData.append('content', commentText || '');
+            
+            // 添加圖片到 FormData
+            images.forEach((imageObj) => {
+                formData.append('images', imageObj.file);
+            });
+
+            const response = await axios.post(`/comments/post/${postID}/comments/`, formData, {
                 headers: {
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'multipart/form-data',
                 },
             });
             return response.data;
@@ -164,16 +196,19 @@ const PostComments = ({user, postID, previewComments, handleClose}) => {
         }
     };
 
-    const createReply = async (postID, user, commentText, parentCommentID) => {
+    const createReply = async (postID, user, commentText, parentCommentID, images = []) => {
         try {
-            const response = await axios.post(`/comments/comments/${parentCommentID}/replies/`, {
-                user,
-                postID,
-                content: commentText,
-                comment_id: parentCommentID,
-            }, {
+            const formData = new FormData();
+            formData.append('content', commentText || '');
+            
+            // 添加圖片到 FormData
+            images.forEach((imageObj) => {
+                formData.append('images', imageObj.file);
+            });
+
+            const response = await axios.post(`/comments/comments/${parentCommentID}/replies/`, formData, {
                 headers: {
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'multipart/form-data',
                 },
             });
             return response.data;
@@ -202,14 +237,6 @@ const PostComments = ({user, postID, previewComments, handleClose}) => {
         );
       }
 
-      // Update the comment in the previewComments if available
-      if (previewComments) {
-        previewComments.forEach((comment) => {
-          if (comment.id === commentID) {
-            comment.content = updatedContent;
-          }
-        });
-      }
 
       // Leave edit mode
       setEditingCommentID(null);
@@ -222,7 +249,14 @@ const PostComments = ({user, postID, previewComments, handleClose}) => {
       }
     };
 
-    const deleteComment = async (commentID) => {
+    const handleDeleteClick = (commentID) => {
+      setDeleteConfirm({ show: true, commentId: commentID });
+    };
+
+    const deleteComment = async () => {
+      const commentID = deleteConfirm.commentId;
+      if (!commentID) return;
+      
       try {
         await axios.delete(`/comments/comments/${commentID}/`, {
           headers: {
@@ -236,48 +270,80 @@ const PostComments = ({user, postID, previewComments, handleClose}) => {
         if (postID) {
           setComments((prevComments) =>
           prevComments.map((comment) =>
-          comment.id === commentID ? { ...comment, content: "[此評論已刪除]" } : comment
+          comment.id === commentID ? { 
+            ...comment, 
+            content: "[此評論已刪除]",
+            images: [] // 清空圖片數據
+          } : comment
           )
         );
-        }
-
-        if (previewComments) {
-          previewComments.forEach((comment) => {
-            if (comment.id === commentID) {
-              comment.content = "[此評論已刪除]";
-            }
+        
+        // 同時更新 replies 狀態中的對應回覆
+        setReplies(prevReplies => {
+          const newReplies = { ...prevReplies };
+          Object.keys(newReplies).forEach(parentID => {
+            newReplies[parentID] = newReplies[parentID].map(reply => {
+              if (reply.id === commentID) {
+                return { 
+                  ...reply, 
+                  content: "[此評論已刪除]",
+                  images: [] // 清空圖片數據
+                };
+              }
+              return reply;
+            });
           });
+          return newReplies;
+        });
         }
 
-
+        setDeleteConfirm({ show: false, commentId: null });
       } catch (error) {
         console.error('Error deleting comment:', error);
+        setDeleteConfirm({ show: false, commentId: null });
+        
+        // 顯示錯誤訊息給使用者
+        alert('刪除留言時發生錯誤，請稍後再試');
       }
     };
 
     const likeComment = async (commentID) => {
         try {
-          // 立即更新 UI
-          if (postID) {
+          // 先保存原始狀態以便回滾
+          let originalComment;
+          
+          // 立即更新 UI - 包含isLiked狀態和likes數量
             setComments(prevComments => 
-              prevComments.map(comment => 
-                comment.id === commentID 
-                  ? { ...comment, isLiked: !comment.isLiked }
-                  : comment
-              )
+              prevComments.map(comment => {
+                if (comment.id === commentID) {
+                  originalComment = { ...comment };
+                  return { 
+                    ...comment, 
+                    isLiked: !comment.isLiked,
+                    likes: comment.isLiked ? (comment.likes || 0) - 1 : (comment.likes || 0) + 1
+                  };
+                }
+                return comment;
+              })
             );
-          }
 
-          if (previewComments) {
-            // 使用 setLocalPreviewComments 來更新狀態
-            setLocalPreviewComments(prevComments => 
-              prevComments.map(comment => 
-                comment.id === commentID 
-                  ? { ...comment, isLiked: !comment.isLiked }
-                  : comment
-              )
-            );
-          }
+          // 同時更新回覆中的評論
+          setReplies(prevReplies => {
+            const newReplies = { ...prevReplies };
+            Object.keys(newReplies).forEach(parentID => {
+              newReplies[parentID] = newReplies[parentID].map(reply => {
+                if (reply.id === commentID) {
+                  return { 
+                    ...reply, 
+                    isLiked: !reply.isLiked,
+                    likes: reply.isLiked ? (reply.likes || 0) - 1 : (reply.likes || 0) + 1
+                  };
+                }
+                return reply;
+              });
+            });
+            return newReplies;
+          });
 
           const response = await axios.post(`/interactions/comments/${commentID}/interaction/`, {
             relation: 'liked'  // 發送 'liked' 來切換按讚狀態
@@ -295,10 +361,29 @@ const PostComments = ({user, postID, previewComments, handleClose}) => {
           setComments(prevComments => 
             prevComments.map(comment => 
               comment.id === commentID 
-                ? { ...comment, isLiked: !comment.isLiked }
+                ? { ...comment, isLiked: !comment.isLiked, likes: comment.isLiked ? (comment.likes || 0) + 1 : (comment.likes || 0) - 1 }
                 : comment
             )
           );
+
+
+          // 恢復回覆中的評論狀態
+          setReplies(prevReplies => {
+            const newReplies = { ...prevReplies };
+            Object.keys(newReplies).forEach(parentID => {
+              newReplies[parentID] = newReplies[parentID].map(reply => {
+                if (reply.id === commentID) {
+                  return { 
+                    ...reply, 
+                    isLiked: !reply.isLiked,
+                    likes: reply.isLiked ? (reply.likes || 0) + 1 : (reply.likes || 0) - 1
+                  };
+                }
+                return reply;
+              });
+            });
+            return newReplies;
+          });
           
           console.error('貼文互動錯誤:', error);
           return {
@@ -310,37 +395,34 @@ const PostComments = ({user, postID, previewComments, handleClose}) => {
 
     const displayReply = async (commentID) => {
         if (clickedCommentID === commentID) {
+            // 隱藏回覆，但不清空 replies 數據
             setClickedCommentID(null);
-            setReplies([]);
         } else {
+            // 展開回覆
             setClickedCommentID(commentID);
-            // Fetch replies when showing them
-            if (!replies[commentID]) {
+            // 如果還沒有載入過回覆，則載入
+            if (!replies[commentID] || replies[commentID].length === 0) {
                 const fetchedReplies = await fetchReplies(commentID);
                 setReplies(prev => ({
                     ...prev,
-                    [commentID]: fetchedReplies
+                    [commentID]: fetchedReplies || []
                 }));
             }
         }
     };
 
     const toggleIsCommenting = async (commentID) => {
-        if (isCommenting) {
+        if (replyingCommentID === commentID) {
+            // 如果正在回覆這個留言，則取消回覆
             setIsCommenting(false);
             setReplyingCommentID(null);
+            setCommentText('');
         } else {
+            // 開始回覆這個留言，但不自動展開既有回覆
             setIsCommenting(true);
             setReplyingCommentID(commentID);
-            setClickedCommentID(commentID);
-            // Fetch replies when showing them
-            if (!replies[commentID]) {
-                const fetchedReplies = await fetchReplies(commentID);
-                setReplies(prev => ({
-                    ...prev,
-                    [commentID]: fetchedReplies
-                }));
-            }
+            setCommentText('');
+            // 不自動設置 clickedCommentID，避免展開回覆
         }
     };
 
@@ -368,176 +450,184 @@ const PostComments = ({user, postID, previewComments, handleClose}) => {
             if (postID) {
                 const fetchedComments = await fetchComments(postID);
                 setComments(fetchedComments);
-            } else if (previewComments) {
-                setLocalPreviewComments(previewComments);
+                
+                // 為每個留言檢查是否有回覆
+                const repliesMap = {};
+                for (const comment of fetchedComments) {
+                    try {
+                        const commentReplies = await fetchReplies(comment.id);
+                        repliesMap[comment.id] = commentReplies || [];
+                    } catch (error) {
+                        console.error(`獲取留言 ${comment.id} 回覆失敗:`, error);
+                        repliesMap[comment.id] = [];
+                    }
+                }
+                setReplies(repliesMap);
+                setRepliesLoaded(true);
             }
         };
 
         loadComments();
-    }, [postID, previewComments]);
+    }, [postID]);
 
-    return postID ? (
-    <div className="modalOverlay" onClick={() => handleClose()}>
-      <div className="modalContainer" onClick={(e) => e.stopPropagation()}>
-        <div className="modalHeader">
-          <h2>留言區</h2>
-          <button className="closeButton" onClick={() => handleClose()}>×</button>
+    if (!postID) {
+        return null;
+    }
+
+    return (
+    <div className={styles.modalOverlay} onClick={() => handleClose()}>
+      <div className={styles.modalContainer} onClick={(e) => e.stopPropagation()}>
+        <div className={styles.modalHeader}>
+          <div className={styles.modalTitle}>
+            <h2>留言區</h2>
+          </div>
+          <button className={styles.closeButton} onClick={() => handleClose()}>
+            ×
+          </button>
         </div>
-        <div className="modalBody">
-          <div className={`comments-container ${comments.length === 0 ? 'empty' : ''}`}>
+        <div className={styles.modalBody}>
+          <div className={`${styles.commentsContainer} ${comments.length === 0 ? styles.empty : ''}`}>
             {comments.length === 0 ? (
-              <div className='comment-block'>
+              <div className={styles.commentBlock}>
                 <p>目前沒有任何留言</p>
               </div>
             ) : (
               comments.map((comment) => (
-                <div className="comment-block">
-                  <div className="comment-header">
-                    <strong onClick={() => handleUserClick(comment.user)}>{comment.user.username}</strong>
-                    <div className="comment-header-info">
-                      <span className="comment-date">{new Date(comment.created_at).toLocaleDateString()}</span>
-                      {comment.content !== "[此評論已刪除]" && (
-                        <button 
-                          className="like-button" 
-                          onClick={() => comment.isAuthor ? startEditing(comment) : likeComment(comment.id)}
-                          title={comment.isAuthor ? (editingCommentID === comment.id ? '取消' : '編輯') : (comment.isLiked ? '取消點讚' : '點讚')}
-                        >
-                          <div className="icon-container">
-                            {comment.isAuthor ? (
-                              editingCommentID === comment.id ? (
-                                <span className="close-icon">×</span>
-                              ) : (
-                                <img src={EditIcon} alt="編輯" className="action-icon" />
-                              )
-                            ) : (
-                              <img 
-                                src={comment.isLiked ? HeartFilledIcon : HeartIcon} 
-                                alt={comment.isLiked ? '取消點讚' : '點讚'} 
-                                className="action-icon" 
-                              />
-                            )}
-                          </div>
-                        </button>
-                      )}
+                <React.Fragment key={comment.id}>
+                  <Comment
+                    comment={comment}
+                    type="normal"
+                    onLike={likeComment}
+                    onReply={toggleIsCommenting}
+                    onShowReplies={displayReply}
+                    onDelete={handleDeleteClick}
+                    onReport={(commentId) => {
+                      console.log('檢舉留言:', commentId);
+                      alert('檢舉功能尚未實作');
+                    }}
+                    currentUser={user}
+                    showingReplies={clickedCommentID === comment.id}
+                    isReplying={replyingCommentID === comment.id}
+                    hasReplies={repliesLoaded && Array.isArray(replies[comment.id]) && replies[comment.id].length > 0}
+                  />
+                  
+                  {clickedCommentID === comment.id && replies[comment.id] && (
+                    <div className={styles.repliesContainer}>
+                      {replies[comment.id].map((reply) => (
+                        <Comment
+                          key={reply.id}
+                          comment={reply}
+                          type="reply"
+                          onLike={likeComment}
+                          onDelete={handleDeleteClick}
+                          onReport={(commentId) => {
+                            console.log('檢舉留言:', commentId);
+                            alert('檢舉功能尚未實作');
+                          }}
+                          currentUser={user}
+                        />
+                      ))}
                     </div>
-                  </div>
-                  {editingCommentID === comment.id ? (
-                    <div className="edit-container">
-                      <textarea
-                        placeholder='編輯留言...'
-                        className="comment-input edit-textarea"
-                        value={editText}
-                        onChange={handleEditChange}
-                      />
-                      <div className="button-group">
-                        <button className="submit-comment-button" onClick={() => deleteComment(comment.id)}>刪除</button>
-                        <button className="submit-comment-button" onClick={() => updateComment(comment.id, editText)}>儲存</button>
-                      </div>
-                    </div>
-                  ) : (
-                    <p className="comment-text">{comment.content}</p>
                   )}
-                  <div className="comment-actions">
-                    <button className='show-replies-button' onClick={() => displayReply(comment.id)}>{clickedCommentID === comment.id ? '隱藏回覆' : '顯示回覆'}</button>
-                    <button className="reply-button" onClick={() => toggleIsCommenting(comment.id)}>{replyingCommentID === comment.id ? '取消回覆' : '回覆'}</button>
-                  </div>
-
-                  {replyingCommentID === comment.id && isCommenting ? (
-                    <div className="reply-container">
-                      <textarea
-                        placeholder='撰寫回復...'
-                        className="comment-input reply-textarea"
-                        value={replyText}
-                        onChange={handleReplyChange}
-                      />
-                      <div className="button-group">
-                        <button className="submit-comment-button" onClick={() => console.log('新增圖片')}>新增圖片</button>
-                        <button className="submit-comment-button" onClick={submitReply}>回覆</button>
-                      </div>
-                    </div>
-                  ) : null}
-
-                  {clickedCommentID === comment.id ? <PostComments
-                    previewComments={replies[comment.id] || []}
-                  /> : null}
-                </div>
+                </React.Fragment>
               ))
             )}
           </div>
         </div>
-        <div className="modalFooter">
-          <div className="new-comment">
+        <div className={styles.commentInputSection}>
+          {replyingCommentID && (
+            <div className={styles.replyingIndicator}>
+              <span className={styles.replyingText}>
+                正在回覆 {comments.find(c => c.id === replyingCommentID)?.user?.username || '用戶'}
+              </span>
+              <button 
+                className={styles.cancelReplyBtn}
+                onClick={() => {
+                  setReplyingCommentID(null);
+                  setIsCommenting(false);
+                  setCommentText('');
+                }}
+              >
+                ×
+              </button>
+            </div>
+          )}
+          
+          {/* 圖片預覽區域 */}
+          {selectedImages.length > 0 && (
+            <div className={styles.imagePreviewContainer}>
+              {selectedImages.map((image) => (
+                <div key={image.id} className={styles.imagePreviewItem}>
+                  <img src={image.preview} alt="預覽" className={styles.previewImage} />
+                  <button 
+                    className={styles.removeImageBtn}
+                    onClick={() => removeImage(image.id)}
+                    title="移除圖片"
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+          
+          <div className={styles.inputContainer}>
+            <div className={styles.inputUserAvatar}>
+              <img 
+                src={user?.headshot_url || "/assets/icon/DefaultUser.png"} 
+                alt={user?.username || "User"}
+                onError={(e) => {
+                  if (e.target.src !== "/assets/icon/DefaultUser.png") {
+                    e.target.src = "/assets/icon/DefaultUser.png";
+                  }
+                }}
+              />
+            </div>
             <textarea
-              placeholder='撰寫留言...'
-              className="comment-input"
+              placeholder={replyingCommentID ? '撰寫回覆...' : '撰寫留言...'}
+              className={styles.inputTextarea}
               value={commentText}
               onChange={handleCommentChange}
-            ></textarea>
-            <div className="button-group">
-              <button className="submit-comment-button" onClick={() => console.log('新增圖片')}>新增圖片</button>
-              <button className="submit-comment-button" onClick={submitComment}>送出留言</button>
+            />
+            <div className={styles.inputActions}>
+              <button 
+                className={`${styles.photoBtn} ${selectedImages.length >= 3 ? styles.disabled : ''}`}
+                onClick={selectedImages.length >= 3 ? undefined : handleImageSelect}
+                disabled={selectedImages.length >= 3}
+                title={selectedImages.length >= 3 ? "已達圖片上限 (3張)" : `新增圖片 (${selectedImages.length}/3)`}
+              >
+                <img src="/assets/icon/CommentPhotoIcon.png" alt="新增圖片" />
+              </button>
+              <button 
+                className={styles.sendBtn} 
+                onClick={replyingCommentID ? submitReply : submitComment}
+                title={replyingCommentID ? "送出回覆" : "送出留言"}
+              >
+                <img src="/assets/icon/CommentSendIcon.png" alt={replyingCommentID ? "送出回覆" : "送出留言"} />
+              </button>
             </div>
           </div>
+          
+          {/* Hidden file input */}
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            multiple
+            accept="image/*"
+            style={{ display: 'none' }}
+          />
         </div>
       </div>
-    </div>
-  ) : (
-    <div className="comments-container">
-      {!localPreviewComments || localPreviewComments.length === 0 ? (
-      <p>目前沒有任何內容</p>
-      ) : (
-      localPreviewComments.map((comment) => (
-        <div key={comment.id} className="comment-block">
-        <div className="comment-header">
-          <strong onClick={() => handleUserClick(comment.user)}>{comment.user.username}</strong>
-          <div className="comment-header-info">
-            <span className="comment-date">{new Date(comment.created_at).toLocaleDateString()}</span>
-            {comment.content !== "[此評論已刪除]" && (
-              <button 
-                className="like-button" 
-                onClick={() => comment.isAuthor ? startEditing(comment) : likeComment(comment.id)}
-                title={comment.isAuthor ? (editingCommentID === comment.id ? '取消' : '編輯') : (comment.isLiked ? '取消點讚' : '點讚')}
-              >
-                <div className="icon-container">
-                  {comment.isAuthor ? (
-                    editingCommentID === comment.id ? (
-                      <span className="close-icon">×</span>
-                    ) : (
-                      <img src={EditIcon} alt="編輯" className="action-icon" />
-                    )
-                  ) : (
-                    <img 
-                      src={comment.isLiked ? HeartFilledIcon : HeartIcon} 
-                      alt={comment.isLiked ? '取消點讚' : '點讚'} 
-                      className="action-icon" 
-                    />
-                  )}
-                </div>
-              </button>
-            )}
-          </div>
-        </div>
-        {editingCommentID === comment.id ? (
-          <div className="edit-container">
-            <textarea
-              placeholder='編輯留言...'
-              className="comment-input edit-textarea"
-              value={editText}
-              onChange={handleEditChange}
-            />
-            <div className="button-group">
-              <button className="submit-comment-button" onClick={() => deleteComment(comment.id)}>刪除</button>
-              <button className="submit-comment-button" onClick={() => updateComment(comment.id, editText)}>儲存</button>
-            </div>
-          </div>
-        ) : (
-          <p className="comment-text">{comment.content}</p>
-        )}
-        </div>
-      ))
+      {deleteConfirm.show && (
+        <ConfirmNotification
+          message="確定要刪除這則留言嗎？"
+          onConfirm={deleteComment}
+          onCancel={() => setDeleteConfirm({ show: false, commentId: null })}
+        />
       )}
     </div>
-  );
+    );
 };
 
 export default PostComments;

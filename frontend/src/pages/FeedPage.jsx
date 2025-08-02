@@ -169,25 +169,13 @@ const FeedPage = () => {
   const handleToggleMark = async (feed) => {
     try {
       // 如果飼料未驗證且用戶想要標記，需要先檢查是否可以使用此飼料
-      console.log('條件檢查:', {
-        isVerified: feed.isVerified,
-        isMarked: feed.isMarked,
-        shouldEnterCondition: !feed.isVerified && !feed.isMarked
-      });
       
       if (!feed.isVerified && !feed.isMarked) {
         // 檢查是否為飼料創建者本人
         const isCreator = userData && feed.created_by_id === userData.id;
-        console.log('handleToggleMark debug:', {
-          feedId: feed.id,
-          feedCreatedById: feed.created_by_id,
-          userDataId: userData?.id,
-          isCreator: isCreator
-        });
         
         if (isCreator) {
           // 如果是創建者本人，直接標記而不需要審核
-          console.log('執行創建者路徑：直接標記飼料');
           const response = await axios.post('/feeds/mark/', {
             feed_id: feed.id
           });
@@ -195,10 +183,8 @@ const FeedPage = () => {
           // 重新載入所有數據以确保一致性
           loadAllSections();
           setNotification('飼料已加入精選');
-          console.log('創建者標記完成');
           return;
         } else {
-          console.log('執行非創建者路徑：需要審核');
           // 如果不是創建者，檢查使用者是否已審核過此飼料或提交過錯誤回報
           const reviewCheckResponse = await axios.get(`/feeds/${feed.id}/check-review/`);
           
