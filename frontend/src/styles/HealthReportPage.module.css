@@ -7,12 +7,35 @@
 
 .content {
   flex: 1;
-  padding: 20px;
-  padding-top: 100px;
-  padding-bottom: 100px;
-  max-width: 500px;
+  padding: 30px;
+  padding-top: 80px;
+  padding-bottom: 90px;
+  max-width: 430px;
   margin: 0 auto;
   width: 100%;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+/* 載入中樣式 */
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+  color: #89350c;
+  font-size: 16px;
+}
+
+.errorContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+  color: #89350c;
+  font-size: 16px;
+  text-align: center;
 }
 
 /* List Page Styles */
@@ -22,12 +45,37 @@
   gap: 20px;
 }
 
+/* 標題列 */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 20px 0 8px 0;
+  gap: 15px;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+.titleSection {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  flex: 1;
+}
+
 .title {
-  text-align: center;
-  font-size: 24px;
+  font-size: 1.3rem;
   font-weight: 700;
-  color: #333;
+  color: #89350c;
   margin: 0;
+}
+
+/* 分隔線 */
+.divider {
+  width: 100%;
+  height: 2px;
+  background-color: #FFB370;
+  margin-bottom: 20px;
 }
 
 .selectContainer {
@@ -36,16 +84,17 @@
 }
 
 .select {
-  background-color: #E8F4FD;
+  background-color: #FFB370;
   border: none;
-  border-radius: 12px;
+  border-radius: 8px;
   padding: 12px 20px;
   font-weight: 600;
   font-size: 16px;
-  color: #333;
+  color: #fff;
   cursor: pointer;
   min-width: 200px;
   text-align: center;
+  transition: all 0.2s ease;
 }
 
 .select:disabled {
@@ -53,13 +102,107 @@
   opacity: 0.8;
 }
 
+.select option {
+  background-color: #FFF6ea;
+  color: #89350c;
+  font-weight: 500;
+}
+
+/* 健康報告列表 */
+.reportList {
+  margin-bottom: 20px;
+}
+
+/* 健康報告預覽項目 */
+.reportItem {
+  display: flex;
+  align-items: center;
+  background: #FFF6EA;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid #FFE5C4;
+}
+
+.reportItem:hover {
+  background: #FFF2D9;
+  border-color: #FFB370;
+}
+
+.reportIcon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+
+.reportIcon img {
+  width: 32px;
+  height: 32px;
+}
+
+.reportContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.reportDateRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 2px;
+}
+
+.reportDate {
+  font-size: 14px;
+  font-weight: bold;
+  color: #89350c;
+}
+
+.reportInfo {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.reportLabel {
+  font-size: 12px;
+  color: #89350c;
+  font-weight: 500;
+}
+
+.reportDetail {
+  font-size: 12px;
+  color: #89350c;
+  font-weight: 400;
+}
+
+.reportArrow {
+  font-size: 16px;
+  color: #FFB370;
+  margin-left: 8px;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.reportItem:hover .reportArrow {
+  color: #FF8C42;
+  transform: translateX(2px);
+}
+
+/* 舊的表格樣式保留為備用 */
 .tableWrapper {
-  background-color: #FFCC80;
+  background-color: transparent;
   border-radius: 16px;
-  padding: 16px;
+  padding: 0;
   max-height: 400px;
   overflow-y: auto;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .table {
@@ -93,8 +236,31 @@
   background-color: #FFF8E1;
 }
 
+/* 空狀態 */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.emptyIcon {
+  width: 100px;
+  height: 100px;
+  margin-bottom: 16px;
+  opacity: 0.6;
+}
+
+.emptyState p {
+  color: #888;
+  font-size: 16px;
+  margin: 0;
+}
+
 .uploadButton {
-  background-color: #FF9800;
+  background-color: #FFB370;
   color: white;
   border: none;
   border-radius: 12px;
@@ -102,12 +268,15 @@
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: all 0.2s ease;
   align-self: center;
+  box-shadow: 0 2px 4px rgba(255, 179, 112, 0.3);
 }
 
 .uploadButton:hover {
-  background-color: #F57C00;
+  background-color: #FF8C42;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(255, 179, 112, 0.4);
 }
 
 /* Upload Page Styles */
@@ -131,16 +300,18 @@
 
 .input {
   padding: 12px 16px;
-  border: none;
+  border: 1px solid #FFE5C4;
   border-radius: 8px;
   background-color: white;
   font-size: 16px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  color: #89350c;
+  transition: all 0.2s ease;
 }
 
 .input:focus {
   outline: none;
-  box-shadow: 0 0 0 2px #FF9800;
+  border-color: #FFB370;
+  box-shadow: 0 0 0 2px rgba(255, 179, 112, 0.2);
 }
 
 .ocrUploadSection {
@@ -150,60 +321,70 @@
 }
 
 .ocrButton {
-  background-color: #E8F4FD;
-  color: #333;
-  border: none;
+  background-color: #FFF6EA;
+  color: #89350c;
+  border: 2px solid #FFB370;
   border-radius: 12px;
   padding: 12px 24px;
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: all 0.2s ease;
 }
 
 .ocrButton:hover:not(:disabled) {
-  background-color: #BBDEFB;
+  background-color: #FFB370;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(255, 179, 112, 0.3);
 }
 
 .ocrButton:disabled {
   cursor: not-allowed;
   opacity: 0.6;
+  background-color: #f5f5f5;
+  border-color: #ddd;
+  color: #999;
 }
 
 .section {
-  background-color: #FFCC80;
-  border-radius: 16px;
+  background-color: #FFF6EA;
+  border: 1px solid #FFE5C4;
+  border-radius: 12px;
   padding: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
 }
 
 .sectionTitle {
-  background-color: #E8F4FD;
+  background-color: #FFB370;
   border-radius: 8px;
   text-align: center;
   font-weight: 600;
   padding: 12px;
   margin: 0 0 16px 0;
   font-size: 16px;
-  color: #333;
+  color: white;
 }
 
 .textarea {
   width: 100%;
   min-height: 120px;
   padding: 12px 16px;
-  border: none;
+  border: 1px solid #FFE5C4;
   border-radius: 8px;
   background-color: white;
   font-size: 16px;
+  color: #89350c;
   resize: vertical;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   box-sizing: border-box;
+  transition: all 0.2s ease;
+  font-family: inherit;
 }
 
 .textarea:focus {
   outline: none;
-  box-shadow: 0 0 0 2px #FF9800;
+  border-color: #FFB370;
+  box-shadow: 0 0 0 2px rgba(255, 179, 112, 0.2);
 }
 
 .buttonContainer {
@@ -214,7 +395,7 @@
 }
 
 .confirmButton {
-  background-color: #FF9800;
+  background-color: #FFB370;
   color: white;
   border: none;
   border-radius: 12px;
@@ -222,11 +403,14 @@
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(255, 179, 112, 0.3);
 }
 
 .confirmButton:hover {
-  background-color: #F57C00;
+  background-color: #FF8C42;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(255, 179, 112, 0.4);
 }
 
 /* View Page Styles */
@@ -237,10 +421,11 @@
 }
 
 .infoSection {
-  background-color: #FFCC80;
-  border-radius: 16px;
+  background-color: #FFF6EA;
+  border: 1px solid #FFE5C4;
+  border-radius: 12px;
   padding: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
 }
 
 .infoRow {
@@ -251,12 +436,13 @@
 
 .infoLabel {
   font-weight: 600;
-  color: #333;
+  color: #89350c;
   min-width: 100px;
 }
 
 .infoValue {
-  color: #666;
+  color: #89350c;
+  font-weight: 500;
 }
 
 .toggleContainer {
@@ -266,18 +452,20 @@
 }
 
 .toggleButton {
-  background: none;
+  background: #FFB370;
   border: none;
-  color: #333;
+  color: white;
   font-size: 14px;
   cursor: pointer;
   padding: 8px 12px;
-  border-radius: 4px;
-  transition: background-color 0.2s ease;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  font-weight: 500;
 }
 
 .toggleButton:hover {
-  background-color: rgba(0, 0, 0, 0.05);
+  background-color: #FF8C42;
+  transform: translateY(-1px);
 }
 
 .buttonRow {
@@ -288,7 +476,7 @@
 }
 
 .editButton {
-  background-color: #2196F3;
+  background-color: #FFB370;
   color: white;
   border: none;
   border-radius: 8px;
@@ -297,15 +485,18 @@
   font-weight: 600;
   cursor: pointer;
   flex: 1;
-  transition: background-color 0.2s ease;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(255, 179, 112, 0.3);
 }
 
 .editButton:hover {
-  background-color: #1976D2;
+  background-color: #FF8C42;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(255, 179, 112, 0.4);
 }
 
 .deleteButton {
-  background-color: #F44336;
+  background-color: #FF6B6B;
   color: white;
   border: none;
   border-radius: 8px;
@@ -314,15 +505,18 @@
   font-weight: 600;
   cursor: pointer;
   flex: 1;
-  transition: background-color 0.2s ease;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(255, 107, 107, 0.3);
 }
 
 .deleteButton:hover {
-  background-color: #D32F2F;
+  background-color: #FF5252;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(255, 107, 107, 0.4);
 }
 
 .cancelButton {
-  background-color: #9E9E9E;
+  background-color: #B0B0B0;
   color: white;
   border: none;
   border-radius: 8px;
@@ -331,31 +525,79 @@
   font-weight: 600;
   cursor: pointer;
   flex: 1;
-  transition: background-color 0.2s ease;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(176, 176, 176, 0.3);
 }
 
 .cancelButton:hover {
-  background-color: #757575;
+  background-color: #9E9E9E;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(176, 176, 176, 0.4);
 }
 
-/* Responsive Design */
+/* 手機版優化 */
 @media (max-width: 480px) {
   .content {
-    padding: 16px;
-    padding-top: 100px;
-    padding-bottom: 100px;
+    padding: 0 15px 80px 15px;
+  }
+  
+  .header {
+    padding: 15px 0 12px 0;
+    gap: 10px;
+  }
+  
+  .title {
+    font-size: 1.3rem;
   }
   
   .buttonRow {
     flex-direction: column;
   }
   
-  .table {
-    font-size: 12px;
+  .reportItem {
+    padding: 10px 12px;
+    margin-bottom: 6px;
   }
   
-  .table th,
-  .table td {
-    padding: 8px 4px;
+  .reportIcon {
+    width: 36px;
+    height: 36px;
+    margin-right: 10px;
+  }
+  
+  .reportIcon img {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .reportDate {
+    font-size: 13px;
+  }
+  
+  .reportLabel,
+  .reportDetail {
+    font-size: 11px;
+  }
+  
+  .emptyState {
+    padding: 50px 15px;
+  }
+  
+  .emptyState p {
+    font-size: 15px;
+  }
+  
+  .emptyIcon {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .section {
+    padding: 16px;
+  }
+  
+  .buttonContainer {
+    flex-direction: column;
+    gap: 8px;
   }
 }

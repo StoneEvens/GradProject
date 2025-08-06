@@ -1,0 +1,400 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #FFF2D9;
+}
+
+.content {
+  flex: 1;
+  padding: 30px;
+  padding-top: 80px;
+  padding-bottom: 90px;
+  max-width: 430px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+  color: #89350c;
+  font-size: 16px;
+}
+
+.errorContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+  color: #89350c;
+  font-size: 16px;
+  text-align: center;
+}
+
+/* 標題列 */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 20px 0 8px 0;
+  gap: 15px;
+}
+
+.titleSection {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  flex: 1;
+}
+
+.petAvatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #FFB370;
+}
+
+.title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #89350c;
+  margin: 0;
+  white-space: nowrap;
+}
+
+
+/* 分隔線 */
+.divider {
+  width: 100%;
+  height: 2px;
+  background-color: #FFB370;
+  margin-bottom: 20px;
+}
+
+/* AI內容統整區域 */
+.aiSection {
+  background-color: #FFF6EA;
+  border-radius: 12px;
+  padding: 0;
+  margin-bottom: 30px;
+  border: 1px solid #FFE5C4;
+  overflow: hidden;
+}
+
+/* AI標題列 */
+.aiHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  background-color: #FFF6EA;
+  border-bottom: 1px solid #FFE5C4;
+}
+
+.aiTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: #89350c;
+  margin: 0;
+}
+
+.aiEditButton {
+  background-color: #F08651;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.aiEditButton:hover {
+  background-color: #E07641;
+}
+
+.aiEditButton:disabled {
+  cursor: not-allowed;
+}
+
+.aiEditButton:disabled:hover {
+  background-color: #F08651;
+  transform: none;
+}
+
+/* AI內容區域 */
+.aiContentArea {
+  padding: 20px;
+  min-height: 400px;
+  background-color: white;
+}
+
+.contentDisplay {
+  width: 100%;
+}
+
+.contentText {
+  font-size: 16px;
+  line-height: 1.6;
+  color: #89350c;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+/* AI 生成載入動畫 */
+.generatingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 350px;
+  gap: 20px;
+}
+
+.generatingSpinner {
+  width: 60px;
+  height: 60px;
+  border: 5px solid #FFE5C4;
+  border-top: 5px solid #FFB370;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.generatingText {
+  font-size: 18px;
+  font-weight: 600;
+  color: #89350c;
+  text-align: center;
+  margin: 0;
+}
+
+.generatingSubText {
+  font-size: 14px;
+  color: #89350c;
+  text-align: center;
+  opacity: 0.8;
+  margin: 0;
+}
+
+/* 編輯模式 */
+.editingContainer {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.contentTextarea {
+  width: 100%;
+  min-height: 350px;
+  padding: 15px;
+  border: 2px solid #FFB370;
+  border-radius: 8px;
+  background-color: white;
+  font-size: 16px;
+  line-height: 1.6;
+  color: #89350c;
+  resize: vertical;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+.contentTextarea:focus {
+  outline: none;
+  border-color: #FF8C42;
+  box-shadow: 0 0 0 2px rgba(255, 179, 112, 0.2);
+}
+
+.editingActions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.cancelEditButton {
+  background-color: #FFCE99;
+  color: #89350c;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cancelEditButton:hover {
+  background-color: #FFB370;
+  color: white;
+}
+
+.saveEditButton {
+  background-color: #F08651;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.saveEditButton:hover {
+  background-color: #E07641;
+}
+
+/* 操作按鈕 */
+.actionButtons {
+  display: flex;
+  gap: 15px;
+  justify-content: space-between;
+  margin-top: 30px;
+}
+
+.previousButton {
+  background-color: #FFCE99;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 14px 28px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  flex: 1;
+  max-width: 150px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+}
+
+.previousButton:hover {
+  background-color: #FFB370;
+}
+
+.previousButton:disabled {
+  cursor: not-allowed;
+}
+
+.previousButton:disabled:hover {
+  background-color: #FFCE99;
+  transform: none;
+}
+
+.confirmButton {
+  background-color: #F08651;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 14px 28px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  flex: 1;
+  max-width: 150px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+}
+
+.confirmButton:hover {
+  background-color: #E07641;
+}
+
+.confirmButton:disabled {
+  cursor: not-allowed;
+}
+
+.confirmButton:disabled:hover {
+  background-color: #F08651;
+  transform: none;
+}
+
+/* 手機版優化 */
+@media (max-width: 480px) {
+  .content {
+    padding: 0 15px 80px 15px;
+  }
+  
+  .header {
+    padding: 15px 0 12px 0;
+    gap: 10px;
+  }
+  
+  .title {
+    font-size: 1.2rem;
+  }
+  
+  
+  .aiSection {
+    margin-bottom: 20px;
+  }
+  
+  .aiHeader {
+    padding: 12px 15px;
+  }
+  
+  .aiTitle {
+    font-size: 15px;
+  }
+  
+  .aiEditButton {
+    padding: 5px 10px;
+    font-size: 13px;
+  }
+  
+  .aiContentArea {
+    padding: 15px;
+    min-height: 300px;
+  }
+  
+  .contentTextarea {
+    min-height: 250px;
+    font-size: 14px;
+  }
+  
+  .generatingContainer {
+    min-height: 250px;
+  }
+  
+  .generatingSpinner {
+    width: 50px;
+    height: 50px;
+    border-width: 4px;
+  }
+  
+  .generatingText {
+    font-size: 16px;
+  }
+  
+  .generatingSubText {
+    font-size: 13px;
+  }
+  
+  .actionButtons {
+    gap: 12px;
+  }
+  
+  .previousButton,
+  .confirmButton {
+    padding: 12px 20px;
+    font-size: 15px;
+    height: 45px;
+  }
+}

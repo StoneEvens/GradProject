@@ -460,18 +460,17 @@ const CreatePostPage = () => {
   };
 
   // 處理圖片編輯保存
-  const handleImageEditSave = (annotations) => {
+  const handleImageEditSave = (editedImage) => {
     // 更新圖片的標註資料
     setSelectedImages(prev => 
       prev.map(img => 
         img.id === editingImage.id 
-          ? { ...img, annotations: annotations }
+          ? { ...img, annotations: editedImage.annotations || [] }
           : img
       )
     );
     setShowImageEditor(false);
     setEditingImage(null);
-    showNotification('圖片標註已保存');
   };
 
   // 關閉圖片編輯器

@@ -532,7 +532,13 @@ class AddExistingFeedView(APIView):
 # 載入 OpenAI API 金鑰
 load_dotenv()
 api_key = os.getenv('OPENAI_API_KEY')
-client = OpenAI(api_key=api_key)
+
+# 初始化 OpenAI client（只在有 API key 時初始化）
+if api_key:
+    client = OpenAI(api_key=api_key)
+else:
+    client = None
+    print("Warning: OpenAI API key not found. GPT features will not be available.")
 
 
 
@@ -803,6 +809,9 @@ class PetNutritionCalculator(APIView):
                 "\n請先列出你的計算結果，包含一天飼料建議攝取量、各項營養素建議攝取量、和與飼料提供營養素量對比，若有健康報告，再根據健康報告給出微調建議。"
             )
 
+            if not client:
+                return "無法產生建議：OpenAI API 未設定，請聯絡系統管理員"
+            
             response = client.chat.completions.create(
                 model="gpt-4o",
                 messages=[

@@ -113,5 +113,10 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': False,
         },
+        'social': {
+            'handlers': ['console', 'file', 'error_file'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
     },
 } 

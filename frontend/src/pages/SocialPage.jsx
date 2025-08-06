@@ -4,8 +4,10 @@ import TopNavbar from '../components/TopNavbar';
 import BottomNavbar from '../components/BottomNavigationbar';
 import SocialSearchResults from '../components/SocialSearchResults';
 import PostList from '../components/PostList';
+import ArchiveList from '../components/ArchiveList';
 import { getUserProfile } from '../services/userService';
 import { getPosts } from '../services/socialService';
+import { getPublicDiseaseArchivesPreview } from '../services/petService';
 import styles from '../styles/SocialPage.module.css';
 
 const SocialPage = () => {
@@ -16,6 +18,7 @@ const SocialPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
+  const [activeTab, setActiveTab] = useState('daily'); // 新增 tab 狀態
   
   // 貼文相關狀態
   const [posts, setPosts] = useState([]);
@@ -23,6 +26,13 @@ const SocialPage = () => {
   const [error, setError] = useState(null);
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(0);
+
+  // 論壇相關狀態
+  const [archives, setArchives] = useState([]);
+  const [archivesLoading, setArchivesLoading] = useState(false);
+  const [archivesError, setArchivesError] = useState(null);
+  const [archivesHasMore, setArchivesHasMore] = useState(true);
+  const [archivesPage, setArchivesPage] = useState(0);
 
   // 獲取當前用戶資訊
   useEffect(() => {
@@ -77,12 +87,56 @@ const SocialPage = () => {
     }
   };
 
-  // 初始載入貼文
+  // 載入疾病檔案
+  const loadArchives = async (pageNum = 0, isLoadMore = false) => {
+    try {
+      if (!isLoadMore) {
+        setArchivesLoading(true);
+        setArchivesError(null);
+      }
+      
+      const result = await getPublicDiseaseArchivesPreview({
+        offset: pageNum * 10,
+        limit: 10
+      });
+      
+      if (result.success) {
+        const newArchives = result.data.archives || [];
+        
+        if (isLoadMore) {
+          setArchives(prevArchives => [...prevArchives, ...newArchives]);
+        } else {
+          setArchives(newArchives);
+        }
+        
+        setArchivesHasMore(result.data.has_more || false);
+        setArchivesPage(pageNum);
+      } else {
+        throw new Error(result.error || '載入疾病檔案失敗');
+      }
+    } catch (error) {
+      console.error('載入疾病檔案失敗:', error);
+      if (!isLoadMore) {
+        setArchivesError(error.message);
+        setArchives([]);
+      }
+    } finally {
+      if (!isLoadMore) {
+        setArchivesLoading(false);
+      }
+    }
+  };
+
+  // 初始載入資料
   useEffect(() => {
     if (!showSearchResults) {
-      loadPosts(0, false);
+      if (activeTab === 'daily') {
+        loadPosts(0, false);
+      } else if (activeTab === 'forum') {
+        loadArchives(0, false);
+      }
     }
-  }, [showSearchResults]);
+  }, [showSearchResults, activeTab]);
 
   // 監聽貼文更新
   useEffect(() => {
@@ -96,19 +150,23 @@ const SocialPage = () => {
     }
   }, [location.state, showSearchResults]);
 
-  // 從URL參數和location state初始化搜尋狀態
+  // 從URL參數和location state初始化搜尋狀態和標籤
   useEffect(() => {
     const queryFromUrl = searchParams.get('q') || searchParams.get('query') || '';
     const queryFromState = location.state?.searchQuery || '';
+    const tabFromUrl = searchParams.get('tab') || 'daily';
     
     const finalQuery = queryFromState || queryFromUrl;
+    
+    // 設定初始標籤
+    setActiveTab(tabFromUrl);
     
     if (finalQuery) {
       setSearchQuery(finalQuery);
       setShowSearchResults(true);
       // 如果來自state，更新URL參數
       if (queryFromState) {
-        setSearchParams({ q: finalQuery });
+        setSearchParams({ q: finalQuery, tab: tabFromUrl });
       }
     } else {
       setSearchQuery('');
@@ -167,6 +225,13 @@ const SocialPage = () => {
   const handleLoadMore = async () => {
     if (hasMore && !loading) {
       await loadPosts(page + 1, true);
+    }
+  };
+
+  // 處理載入更多疾病檔案
+  const handleLoadMoreArchives = async () => {
+    if (archivesHasMore && !archivesLoading) {
+      await loadArchives(archivesPage + 1, true);
     }
   };
 
@@ -241,6 +306,55 @@ const SocialPage = () => {
     handleUserClick(user);
   };
 
+  // 處理疾病檔案按讚（暫未實作）
+  const handleArchiveLike = (archiveId, isLiked) => {
+    console.log('疾病檔案按讚功能暫未實作');
+    // 功能暫未實作
+  };
+
+  // 處理疾病檔案留言
+  const handleArchiveComment = (archiveId, increment = 0) => {
+    console.log('SocialPage 收到疾病檔案留言通知:', { archiveId, increment });
+    
+    if (increment !== 0) {
+      // 更新 archives 狀態中對應檔案的留言數
+      setArchives(prevArchives => 
+        prevArchives.map(archive => {
+          if (archive.id === archiveId) {
+            const oldCount = archive.interaction_stats?.comments || 0;
+            const newCount = oldCount + increment;
+            console.log('SocialPage 更新檔案留言數:', { 
+              archiveId, 
+              oldCount, 
+              increment, 
+              newCount 
+            });
+            return {
+              ...archive,
+              interaction_stats: {
+                ...archive.interaction_stats,
+                comments: newCount
+              }
+            };
+          }
+          return archive;
+        })
+      );
+    }
+  };
+
+  // 處理疾病檔案收藏（暫未實作）
+  const handleArchiveSave = (archiveId, isSaved) => {
+    console.log('疾病檔案收藏功能暫未實作');
+    // 功能暫未實作
+  };
+
+  // 處理疾病檔案菜單
+  const handleArchiveMenu = (archiveId) => {
+    console.log('SocialPage 收到疾病檔案菜單點擊:', { archiveId });
+    // TODO: 實作菜單功能
+  };
+
   return (
     <div className={styles.container}>
       <TopNavbar 
@@ -248,6 +362,31 @@ const SocialPage = () => {
         onSearchChange={handleSearchChange}
         initialSearchValue={searchQuery}
       />
+      
+      {/* 分頁切換 */}
+      {!showSearchResults && (
+        <div className={styles.tabs}>
+          <button
+            className={`${styles.tab} ${activeTab === 'daily' ? styles.active : ''}`}
+            onClick={() => {
+              setActiveTab('daily');
+              setSearchParams({ tab: 'daily' });
+            }}
+          >
+            日常貼文
+          </button>
+          <button
+            className={`${styles.tab} ${activeTab === 'forum' ? styles.active : ''}`}
+            onClick={() => {
+              setActiveTab('forum');
+              setSearchParams({ tab: 'forum' });
+            }}
+          >
+            寵物論壇
+          </button>
+        </div>
+      )}
+      
       <div className={styles.content}>
         {showSearchResults ? (
           <SocialSearchResults 
@@ -256,20 +395,37 @@ const SocialPage = () => {
           />
         ) : (
           <div className={styles.postsSection}>
-            <PostList
-              posts={posts}
-              loading={loading}
-              error={error}
-              hasMore={hasMore}
-              onLoadMore={handleLoadMore}
-              onLike={handleLike}
-              onComment={handleComment}
-              onSave={handleSave}
-              onUserClick={handlePostUserClick}
-              onHashtagClick={handleHashtagClick}
-              emptyMessage="目前沒有貼文，快來發布第一篇吧！"
-              className={styles.postList}
-            />
+            {activeTab === 'daily' ? (
+              <PostList
+                posts={posts}
+                loading={loading}
+                error={error}
+                hasMore={hasMore}
+                onLoadMore={handleLoadMore}
+                onLike={handleLike}
+                onComment={handleComment}
+                onSave={handleSave}
+                onUserClick={handlePostUserClick}
+                onHashtagClick={handleHashtagClick}
+                emptyMessage="目前沒有貼文，快來發布第一篇吧！"
+                className={styles.postList}
+              />
+            ) : (
+              <ArchiveList
+                archives={archives}
+                loading={archivesLoading}
+                error={archivesError}
+                hasMore={archivesHasMore}
+                onLoadMore={handleLoadMoreArchives}
+                onLike={handleArchiveLike}
+                onComment={handleArchiveComment}
+                onSave={handleArchiveSave}
+                onUserClick={handleUserClick}
+                onMenuClick={handleArchiveMenu}
+                emptyMessage="目前沒有疾病檔案，快來分享第一篇吧！"
+                className={styles.archiveList}
+              />
+            )}
           </div>
         )}
       </div>

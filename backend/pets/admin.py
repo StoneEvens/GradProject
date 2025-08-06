@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .models import (
     Pet, AbnormalPost, Symptom, PostSymptomsRelation,
-    Illness, ForumContent, ArchiveAbnormalPostRelation, ArchiveIllnessRelation
+    Illness, DiseaseArchiveContent, ArchiveAbnormalPostRelation, ArchiveIllnessRelation
 )
 
 # 寵物管理
@@ -39,7 +39,7 @@ class IllnessAdmin(admin.ModelAdmin):
     search_fields = ('illness_name',)
 
 # 病程紀錄管理
-@admin.register(ForumContent)
+@admin.register(DiseaseArchiveContent)
 class IllnessArchiveAdmin(admin.ModelAdmin):
     list_display = ('archive_title', 'pet', 'go_to_doctor', 'health_status', 'content', 'postFrame')
     list_filter = ('go_to_doctor', 'health_status')
