@@ -16,4 +16,10 @@ urlpatterns = [
     
     # 獲取用戶收藏的貼文
     path('user/saved-posts/', views.UserSavedPostsView.as_view(), name='user_saved_posts'),
+    
+    # 獲取用戶按讚的疾病檔案
+    path('user/liked-archives/', views.UserLikedArchivesView.as_view(), name='user_liked_archives'),
+    
+    # 獲取用戶收藏的疾病檔案
+    path('user/saved-archives/', views.UserSavedArchivesView.as_view(), name='user_saved_archives'),
 ]

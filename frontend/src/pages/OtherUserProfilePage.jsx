@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import styles from '../styles/UserProfilePage.module.css';
 import TopNavbar from '../components/TopNavbar';
 import BottomNavbar from '../components/BottomNavigationbar';
 import Notification from '../components/Notification';
 import ConfirmFollowModal from '../components/ConfirmFollowModal';
 import PostPreviewList from '../components/PostPreviewList';
+import ArchiveList from '../components/ArchiveList';
 import { NotificationProvider } from '../context/NotificationContext';
 import { getOtherUserProfile, getUserPostsPreview, getUserArchives, getUserSummary } from '../services/userService';
 import { getUserFollowStatus, followUser } from '../services/socialService';
@@ -13,6 +14,8 @@ import { getUserFollowStatus, followUser } from '../services/socialService';
 const OtherUserProfilePage = () => {
   const { userAccount } = useParams();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState('community');
   const [notification, setNotification] = useState('');
   const [user, setUser] = useState(null);
@@ -26,6 +29,12 @@ const OtherUserProfilePage = () => {
   });
   const [canViewContent, setCanViewContent] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+
+  // 從URL參數初始化標籤
+  useEffect(() => {
+    const tabFromUrl = searchParams.get('tab') || 'community';
+    setActiveTab(tabFromUrl);
+  }, [searchParams]);
 
   useEffect(() => {
     if (userAccount) {
@@ -106,6 +115,8 @@ const OtherUserProfilePage = () => {
   // 切換分頁
   const handleTabChange = (tab) => {
     setActiveTab(tab);
+    // 更新URL參數
+    setSearchParams({ tab });
   };
 
   // 顯示通知
@@ -299,20 +310,22 @@ const OtherUserProfilePage = () => {
                   />
                 )
               ) : (
-                <div className={styles.photoGrid}>
-                  {user.account_privacy === 'private' && !canViewContent ? (
-                    <div style={{gridColumn: '1/4', textAlign: 'center', color: '#666', padding: '40px 20px'}}>
-                      <div style={{fontSize: '1.1rem', marginBottom: '8px'}}>此帳號為私人帳號</div>
-                      <div style={{fontSize: '0.9rem', color: '#999'}}>追蹤以查看他的論壇</div>
-                    </div>
-                  ) : archives.length === 0 ? (
-                    <div style={{gridColumn: '1/4', textAlign: 'center', color: '#aaa'}}>尚未發布任何病程紀錄</div>
-                  ) : archives.map((archive, idx) => (
-                    <div key={archive.id} className={styles.photoCell}>
-                      <div style={{color:'#333',fontSize:'0.95rem',textAlign:'center',padding:'8px',wordBreak:'break-all'}}>{archive.archive_title}</div>
-                    </div>
-                  ))}
-                </div>
+                user.account_privacy === 'private' && !canViewContent ? (
+                  <div style={{textAlign: 'center', color: '#666', padding: '40px 20px'}}>
+                    <div style={{fontSize: '1.1rem', marginBottom: '8px'}}>此帳號為私人帳號</div>
+                    <div style={{fontSize: '0.9rem', color: '#999'}}>追蹤以查看他的論壇</div>
+                  </div>
+                ) : (
+                  <ArchiveList
+                    fetchUserArchives={true}
+                    userId={user?.id}
+                    emptyMessage="尚未發布任何疾病檔案"
+                    onLike={(archiveId, isLiked) => console.log('疾病檔案按讚功能暫未實作')}
+                    onComment={(archiveId) => console.log('Archive comment:', archiveId)}
+                    onSave={(archiveId, isSaved) => console.log('疾病檔案收藏功能暫未實作')}
+                    onMenuClick={(archiveId) => console.log('Archive menu:', archiveId)}
+                  />
+                )
               )}
             </>
           )}

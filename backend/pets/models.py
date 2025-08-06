@@ -106,6 +106,7 @@ class AbnormalPost(models.Model):
     weight = models.FloatField(null=True, blank=True)  # 允許空值
     is_emergency = models.BooleanField(default=False)  # 新增：是否為就醫記錄
     record_date = models.DateTimeField(null=True, blank=True)  # 新增：記錄日期
+    is_private = models.BooleanField(default=True)  # 新增：隱私設定，預設為私人
 
     def __str__(self):
         return f"AbnormalPost {self.id} for Pet {self.pet.pet_name}"
@@ -127,7 +128,7 @@ class Illness(models.Model):
         return self.illness_name
 
 # 病程紀錄
-class ForumContent(models.Model):
+class DiseaseArchiveContent(models.Model):
     archive_title = models.CharField(max_length=100)
     content = models.TextField()
     go_to_doctor = models.BooleanField(default=False)
@@ -136,24 +137,47 @@ class ForumContent(models.Model):
     postFrame = models.ForeignKey(
         'social.PostFrame', on_delete=models.CASCADE, related_name='illness_archives_postFrame', null=True
     )
+    is_private = models.BooleanField(default=True)  # 新增：隱私設定，預設為私人
 
     def __str__(self):
         return f"Archive: {self.archive_title} for {self.pet.pet_name}"
     
+    def get_interaction_stats(self):
+        """從關聯的 PostFrame 獲取互動統計"""
+        if self.postFrame:
+            return self.postFrame.get_interaction_stats()
+        return [0, 0, 0, 0, 0]  # upvotes, downvotes, saves, shares, likes
+    
+    def check_user_interaction(self, user, interaction_type):
+        """檢查用戶與疾病檔案的互動狀態"""
+        if self.postFrame:
+            from interactions.models import UserInteraction
+            return UserInteraction.objects.filter(
+                user=user,
+                interactables=self.postFrame,
+                relation=interaction_type
+            ).exists()
+        return False
+    
     def get_content(user: CustomUser = None, hashtag: str = None, query: str = None, pets: list[Pet] = None):
+        base_queryset = DiseaseArchiveContent.objects.filter(is_private=False)
+        
         if user:
-            return ForumContent.objects.filter(postFrame__user=user).order_by('-post_date')[:50]
+            # 如果指定用戶，返回該用戶的所有記錄(包括私人記錄)和其他用戶的公開記錄
+            user_archives = DiseaseArchiveContent.objects.filter(postFrame__user=user)
+            public_archives = base_queryset.exclude(postFrame__user=user)
+            return user_archives.union(public_archives).order_by('-postFrame__post_date')[:50]
         
         if hashtag:
-            return ForumContent.objects.filter(content__icontains=query)[:50]
+            return base_queryset.filter(content__icontains=query)[:50]
         
         if query:
-            return ForumContent.objects.filter(content__icontains=query)[:50]
+            return base_queryset.filter(content__icontains=query)[:50]
         
         if pets:
-            return ForumContent.objects.filter(pet__in=pets).order_by('-postFrame__post_date')
+            return base_queryset.filter(pet__in=pets).order_by('-postFrame__post_date')
         
-        return ForumContent.objects.none()
+        return base_queryset.none()
 
 # 異常貼文的症狀(多對多關聯拆分)
 class PostSymptomsRelation(models.Model):
@@ -169,7 +193,7 @@ class PostSymptomsRelation(models.Model):
 # 病程紀錄的異常貼文(多對多關聯拆分)
 class ArchiveAbnormalPostRelation(models.Model):
     archive = models.ForeignKey(
-        ForumContent,
+        DiseaseArchiveContent,
         on_delete=models.CASCADE,
         related_name='abnormal_posts',
         null=True
@@ -189,7 +213,7 @@ class ArchiveAbnormalPostRelation(models.Model):
 
 # 病程紀錄的病因(多對多關聯拆分)
 class ArchiveIllnessRelation(models.Model):
-    archive = models.ForeignKey(ForumContent, on_delete=models.CASCADE, related_name='illnesses', null=True)
+    archive = models.ForeignKey(DiseaseArchiveContent, on_delete=models.CASCADE, related_name='illnesses', null=True)
     illness = models.ForeignKey(Illness, on_delete=models.CASCADE, related_name='archives')
 
     class Meta:
@@ -198,5 +222,5 @@ class ArchiveIllnessRelation(models.Model):
     def __str__(self):
         return f"{self.archive.archive_title} - {self.illness.illness_name}"
     
-    def get_illnesses(archives: list[ForumContent]):
+    def get_illnesses(archives: list[DiseaseArchiveContent]):
         return ArchiveIllnessRelation.objects.filter(archive__in=archives).values_list('illness__illness_name', flat=True)

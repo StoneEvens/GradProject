@@ -4,7 +4,8 @@ import TopNavbar from '../components/TopNavbar';
 import BottomNavbar from '../components/BottomNavigationbar';
 import ImageViewer from '../components/ImageViewer';
 import { NotificationProvider } from '../context/NotificationContext';
-import { getAbnormalPostDetail, getUserPets, deleteAbnormalPost } from '../services/petService';
+import { getAbnormalPostDetail, getPublicAbnormalPostDetail, getUserPets, deleteAbnormalPost } from '../services/petService';
+import { getUserProfile } from '../services/userService';
 import Notification from '../components/Notification';
 import ConfirmNotification from '../components/ConfirmNotification';
 import styles from '../styles/AbnormalPostDetailPage.module.css';
@@ -12,9 +13,13 @@ import styles from '../styles/AbnormalPostDetailPage.module.css';
 const AbnormalPostDetailPage = () => {
   const { petId, postId } = useParams();
   const navigate = useNavigate();
+  
+  // 檢測是否為公開瀏覽模式
+  const isPublicView = window.location.pathname.includes('/public');
   const [loading, setLoading] = useState(true);
   const [post, setPost] = useState(null);
   const [pet, setPet] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
   const [showMenu, setShowMenu] = useState(false);
   const [showImageViewer, setShowImageViewer] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
@@ -67,33 +72,65 @@ const AbnormalPostDetailPage = () => {
     try {
       setLoading(true);
       
-      // 載入寵物資料
-      const pets = await getUserPets();
-      const currentPet = pets.find(p => p.pet_id === parseInt(petId));
-      if (currentPet) {
-        setPet(currentPet);
-      }
-
-      // 直接載入特定的異常貼文詳情
-      const postData = await getAbnormalPostDetail(petId, postId);
-      
-      if (postData) {
-        setPost(postData);
+      if (isPublicView) {
+        // 公開模式：只需要獲取異常記錄詳情，用戶和寵物資訊會包含在回應中
+        const postData = await getPublicAbnormalPostDetail(postId);
+        
+        if (postData) {
+          setPost(postData);
+          // 從異常記錄資料中提取寵物和用戶資訊
+          if (postData.pet_info) {
+            setPet(postData.pet_info);
+          }
+          if (postData.user_info) {
+            setCurrentUser(postData.user_info);
+          }
+        } else {
+          console.error('找不到指定的公開異常記錄');
+          navigate('/social?tab=forum');
+        }
       } else {
-        console.error('找不到指定的異常記錄');
-        navigate(`/pet/${petId}/abnormal-posts`);
+        // 私人模式：載入用戶資料、寵物資料和異常記錄詳情
+        const [userProfile, pets, postData] = await Promise.all([
+          getUserProfile(),
+          getUserPets(),
+          getAbnormalPostDetail(petId, postId)
+        ]);
+        
+        setCurrentUser(userProfile);
+        
+        const currentPet = pets.find(p => p.pet_id === parseInt(petId));
+        if (currentPet) {
+          setPet(currentPet);
+        }
+        
+        if (postData) {
+          setPost(postData);
+        } else {
+          console.error('找不到指定的異常記錄');
+          navigate(`/pet/${petId}/abnormal-posts`);
+        }
       }
+      
+      // 除錯資訊
+      console.log('Debug - isPublicView:', isPublicView);
+      console.log('Debug - post:', post);
+      console.log('Debug - pet:', pet);
       
     } catch (error) {
       console.error('載入資料失敗:', error);
-      navigate(`/pet/${petId}/abnormal-posts`);
+      if (isPublicView) {
+        navigate('/social?tab=forum');
+      } else {
+        navigate(`/pet/${petId}/abnormal-posts`);
+      }
     } finally {
       setLoading(false);
     }
   };
 
   const handleBack = () => {
-    navigate(`/pet/${petId}/abnormal-posts`);
+    navigate(-1);
   };
 
   const handleEdit = () => {
@@ -245,21 +282,24 @@ const AbnormalPostDetailPage = () => {
               ❮
             </button>
             <h2 className={styles.title}>{formatDate(post.record_date)}</h2>
-            <div className={styles.menuContainer}>
-              <button className={styles.menuButton} onClick={toggleMenu}>
-                <img src="/assets/icon/PostMoreInfo.png" alt="更多選項" />
-              </button>
-              {showMenu && (
-                <div className={styles.menuDropdown}>
-                  <button className={styles.menuItem} onClick={handleEdit}>
-                    編輯紀錄
-                  </button>
-                  <button className={styles.menuItem} onClick={handleDelete}>
-                    刪除紀錄
-                  </button>
-                </div>
-              )}
-            </div>
+            {/* 只有非公開模式且寵物主人才能看到選單 */}
+            {!isPublicView && currentUser && pet && currentUser.id === pet.owner && (
+              <div className={styles.menuContainer}>
+                <button className={styles.menuButton} onClick={toggleMenu}>
+                  <img src="/assets/icon/PostMoreInfo.png" alt="更多選項" />
+                </button>
+                {showMenu && (
+                  <div className={styles.menuDropdown}>
+                    <button className={styles.menuItem} onClick={handleEdit}>
+                      編輯紀錄
+                    </button>
+                    <button className={styles.menuItem} onClick={handleDelete}>
+                      刪除紀錄
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
           
           <div className={styles.divider}></div>

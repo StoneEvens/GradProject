@@ -187,7 +187,13 @@ const PetPage = () => {
                   <img src="/assets/icon/PetpageFeedButton.png" alt="飼料專區" className={styles.functionIcon} />
                   <span className={styles.functionLabel}>飼料專區</span>
                 </div>
-                <div className={styles.functionCell} onClick={() => handleFunctionClick('疾病檔案')}>
+                <div className={styles.functionCell} onClick={() => {
+                  if (currentPet) {
+                    navigate(`/pet/${currentPet.id}/disease-archive`);
+                  } else {
+                    showNotification('請先選擇一隻寵物');
+                  }
+                }}>
                   <img src="/assets/icon/PetpageIllnessArchiveButton.png" alt="疾病檔案" className={styles.functionIcon} />
                   <span className={styles.functionLabel}>疾病檔案</span>
                 </div>
@@ -195,7 +201,7 @@ const PetPage = () => {
                   <img src="/assets/icon/PetpagePetAbnormalPostButton.png" alt="異常紀錄" className={styles.functionIcon} />
                   <span className={styles.functionLabel}>異常紀錄</span>
                 </div>
-                <div className={styles.functionCell} onClick={() => navigate('/healthreport/upload')}>
+                <div className={styles.functionCell} onClick={() => navigate('/health-reports')}>
                   <img src="/assets/icon/PetpageHealthReportButton.png" alt="健康報告" className={styles.functionIcon} />
                   <span className={styles.functionLabel}>健康報告</span>
                 </div>

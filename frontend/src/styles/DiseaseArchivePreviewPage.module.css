@@ -1,0 +1,399 @@
+/* 疾病檔案預覽頁面樣式 - 與其他頁面保持一致的風格 */
+.container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #FFF2D9;
+}
+
+.content {
+  flex: 1;
+  padding: 30px;
+  padding-top: 80px;
+  padding-bottom: 90px;
+  max-width: 430px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+.loadingContainer,
+.errorContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+  color: #89350c;
+  font-size: 16px;
+  text-align: center;
+}
+
+/* 標題列 */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 20px 0 8px 0;
+  gap: 15px;
+}
+
+.titleSection {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  flex: 1;
+}
+
+.petAvatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #FFB370;
+}
+
+.title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #89350c;
+  margin: 0;
+  white-space: nowrap;
+}
+
+/* 分隔線 */
+.divider {
+  width: 100%;
+  height: 2px;
+  background-color: #FFB370;
+  margin-bottom: 20px;
+}
+
+/* 用戶和寵物資訊區域 - 參考Post的userInfo設計 */
+.userPetInfo {
+  display: flex;
+  align-items: center;
+  background-color: #FFF6EA;
+  border-radius: 12px;
+  padding: 15px;
+  margin-bottom: 15px;
+  border: 1px solid #FFE5C4;
+}
+
+.userAvatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #FFB370;
+  margin-right: 12px;
+}
+
+.userDetails {
+  flex: 1;
+}
+
+.userName {
+  font-size: 16px;
+  font-weight: bold;
+  color: #89350c;
+  margin: 0 0 5px 0;
+}
+
+.petInfo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #666;
+}
+
+.petName {
+  color: #666;
+}
+
+.petSeparator {
+  color: #ccc;
+}
+
+.petType {
+  color: #999;
+}
+
+/* 檔案標題和狀態標籤 */
+.archiveHeader {
+  background-color: #FFF6EA;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 15px;
+  border: 1px solid #FFE5C4;
+}
+
+.archiveTitle {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #89350c;
+  margin: 0 0 15px 0;
+}
+
+.statusTags {
+  display: flex;
+  gap: 10px;
+}
+
+.statusTag {
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.diagnosed {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.undiagnosed {
+  background-color: #FF9800;
+  color: white;
+}
+
+.treated {
+  background-color: #2196F3;
+  color: white;
+}
+
+.untreated {
+  background-color: #F44336;
+  color: white;
+}
+
+/* 主要病因 */
+.mainCause {
+  background-color: #FFF6EA;
+  border-radius: 12px;
+  padding: 15px;
+  margin-bottom: 15px;
+  border: 1px solid #FFE5C4;
+}
+
+.causeLabel {
+  font-size: 14px;
+  font-weight: bold;
+  color: #89350c;
+  margin-right: 8px;
+}
+
+.causeText {
+  font-size: 14px;
+  color: #666;
+}
+
+/* 內容區域 */
+.contentSection {
+  background-color: #FFF6EA;
+  border-radius: 12px;
+  margin-bottom: 30px;
+  border: 1px solid #FFE5C4;
+  overflow: hidden;
+}
+
+.dateSection {
+  border-bottom: 1px solid #FFE5C4;
+}
+
+.dateSection:last-child {
+  border-bottom: none;
+}
+
+.sectionContent {
+  padding: 20px;
+}
+
+.contentLine {
+  font-size: 15px;
+  line-height: 1.6;
+  color: #333;
+  margin: 0 0 10px 0;
+}
+
+.contentLine:first-child {
+  font-weight: bold;
+  color: #89350c;
+  font-size: 16px;
+}
+
+.contentLine:last-child {
+  margin-bottom: 0;
+}
+
+.noContent {
+  padding: 40px 20px;
+  text-align: center;
+  color: #999;
+}
+
+.noContent p {
+  white-space: pre-wrap;
+  line-height: 1.6;
+}
+
+/* 異常記錄預覽容器 */
+.abnormalPostsContainer {
+  padding: 0 20px 20px;
+}
+
+/* 異常記錄預覽 - 參考CreateDiseaseArchivePage的樣式 */
+.abnormalPostPreview {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  background-color: #FFECD6;
+  border-radius: 8px;
+  border: 1px solid #FFE5C4;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.abnormalPostPreview:hover {
+  background-color: #FFE5C4;
+  transform: translateX(3px);
+}
+
+.abnormalPostPreview:last-child {
+  margin-bottom: 0;
+}
+
+.postPreviewIcon {
+  width: 40px;
+  height: 40px;
+  margin-right: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.postPreviewIcon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.postPreviewContent {
+  flex: 1;
+}
+
+.postPreviewDate {
+  font-size: 14px;
+  font-weight: bold;
+  color: #89350c;
+  margin-bottom: 4px;
+}
+
+.postPreviewSymptoms {
+  font-size: 13px;
+  color: #666;
+}
+
+.postPreviewArrow {
+  color: #999;
+  font-size: 18px;
+  margin-left: 10px;
+}
+
+/* 操作按鈕 - 參考CreateDiseaseArchivePage的樣式 */
+.actionButtons {
+  display: flex;
+  gap: 15px;
+  justify-content: space-between;
+  margin-top: 30px;
+}
+
+.previousButton {
+  background-color: #ffce99;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 14px 28px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  flex: 1;
+  max-width: 150px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+}
+
+.previousButton:hover {
+  background-color: #FFB370;
+}
+
+.previousButton:disabled {
+  background-color: #D3D3D3;
+  color: #A0A0A0;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.previousButton:disabled:hover {
+  background-color: #D3D3D3;
+  transform: none;
+}
+
+.confirmButton {
+  background-color: #F08651;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 14px 28px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  flex: 1;
+  max-width: 150px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+}
+
+.confirmButton:hover {
+  background-color: #E07641;
+}
+
+.confirmButton:disabled {
+  background-color: #D3D3D3;
+  color: #A0A0A0;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.confirmButton:disabled:hover {
+  background-color: #D3D3D3;
+  transform: none;
+}
+
+/* 響應式設計 */
+@media (max-width: 480px) {
+  .content {
+    padding: 20px;
+    padding-top: 70px;
+    padding-bottom: 80px;
+  }
+  
+  .actionButtons {
+    gap: 12px;
+  }
+  
+  .previousButton,
+  .confirmButton {
+    padding: 12px 20px;
+    font-size: 15px;
+    height: 45px;
+  }
+}

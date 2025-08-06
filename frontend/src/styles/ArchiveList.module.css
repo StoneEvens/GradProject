@@ -1,0 +1,186 @@
+/* 疾病檔案列表樣式 - 基於 PostList 樣式 */
+.container {
+  width: 100%;
+  max-width: 430px;
+  margin: 0 auto;
+  padding: 0 15px;
+  box-sizing: border-box;
+}
+
+.archiveList {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* 載入狀態 */
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  color: #89350C;
+}
+
+.loading p {
+  margin-top: 12px;
+  font-size: 14px;
+  color: #666;
+}
+
+/* 載入更多指示器 */
+.loadingMore {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  color: #89350C;
+}
+
+.loadingMore p {
+  margin-top: 8px;
+  font-size: 14px;
+  color: #666;
+}
+
+/* 沒有更多內容提示 */
+.noMore {
+  text-align: center;
+  padding: 20px;
+  color: #999;
+  font-size: 14px;
+}
+
+/* 錯誤狀態 */
+.error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.error p {
+  color: #d32f2f;
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+
+.retryButton {
+  background-color: #F08651;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.retryButton:hover {
+  background-color: #E07641;
+}
+
+/* 空狀態 */
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.emptyIcon {
+  width: 80px;
+  height: 80px;
+  margin-bottom: 16px;
+  opacity: 0.6;
+}
+
+.empty p {
+  color: #999;
+  font-size: 16px;
+  margin: 0;
+}
+
+/* 旋轉器動畫 */
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #F08651;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 高亮動畫 */
+@keyframes highlight {
+  0%, 100% {
+    background-color: transparent;
+  }
+  50% {
+    background-color: rgba(240, 134, 81, 0.1);
+  }
+}
+
+/* 響應式設計 */
+@media (max-width: 480px) {
+  .container {
+    padding: 0 10px;
+  }
+  
+  .loading, .error, .empty {
+    padding: 50px 15px;
+  }
+  
+  .loadingMore, .noMore {
+    padding: 20px 15px;
+  }
+  
+  .spinner {
+    width: 30px;
+    height: 30px;
+    border-width: 2px;
+  }
+  
+  .emptyIcon {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .empty p {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 360px) {
+  .container {
+    padding: 0 8px;
+  }
+  
+  .loading, .error, .empty {
+    padding: 40px 10px;
+  }
+  
+  .loadingMore, .noMore {
+    padding: 15px 10px;
+  }
+  
+  .spinner {
+    width: 25px;
+    height: 25px;
+  }
+  
+  .empty p {
+    font-size: 13px;
+  }
+}

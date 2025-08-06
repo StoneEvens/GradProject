@@ -44,10 +44,9 @@
 /* 貼文卡片 */
 .postCard {
   background-color: #FFF6ea;
-  border-radius: 16px;
+  border-radius: 8px;
   padding: 20px;
   margin-bottom: 30px;
-  border: 2px solid #FFB370;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 

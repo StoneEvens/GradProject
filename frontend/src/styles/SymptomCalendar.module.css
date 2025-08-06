@@ -1,0 +1,311 @@
+/* 症狀日曆組件樣式 */
+.symptomCalendar {
+  margin-bottom: 20px;
+}
+
+/* 標題區域 */
+.header {
+  padding: 0 0 15px 0;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: bold;
+  color: #89350c;
+  margin: 0;
+}
+
+.subtitle {
+  font-size: 12px;
+  color: #89350c;
+  margin: 0;
+  opacity: 0.7;
+}
+
+/* 篩選區域 */
+.filterSection {
+  padding: 15px 20px;
+  background-color: #FFF6EA;
+  border-bottom: 1px solid #FFE5C4;
+  border-radius: 8px;
+  margin-bottom: 15px;
+}
+
+/* 已選擇的症狀容器 */
+.selectedSymptomsContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 15px;
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+.selectedSymptom {
+  display: flex;
+  align-items: center;
+  background-color: #F08651;
+  color: white;
+  border-radius: 12px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.symptomText {
+  margin-right: 6px;
+}
+
+.removeSymptomBtn {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  padding: 0;
+  margin: 0;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s ease;
+}
+
+.removeSymptomBtn:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.filterRow {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.symptomSelect {
+  flex: 1;
+  padding: 6px 10px;
+  border: 1px solid #FFB370;
+  border-radius: 6px;
+  background-color: white;
+  font-size: 13px;
+  color: #89350c;
+  outline: none;
+  cursor: pointer;
+  height: 32px;
+}
+
+.symptomSelect:focus {
+  border-color: #F08651;
+  box-shadow: 0 0 0 2px rgba(240, 134, 81, 0.2);
+}
+
+.addButton {
+  padding: 6px 12px;
+  background-color: #FFB370;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  white-space: nowrap;
+  height: 32px;
+}
+
+.addButton:hover {
+  background-color: #F08651;
+}
+
+.addButton:disabled {
+  background-color: #D3D3D3;
+  color: #A0A0A0;
+  cursor: not-allowed;
+}
+
+.resetButton {
+  padding: 6px 12px;
+  background-color: #F08651;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  white-space: nowrap;
+  height: 32px;
+}
+
+.resetButton:hover {
+  background-color: #E07641;
+}
+
+/* 日曆容器 */
+.calendarContainer {
+  padding: 20px;
+  background-color: #FFF6EA;
+}
+
+.calendarHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.navButton {
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: #F08651;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+
+.navButton:hover {
+  background-color: rgba(240, 134, 81, 0.1);
+}
+
+.monthYear {
+  font-size: 16px;
+  font-weight: bold;
+  color: #89350c;
+}
+
+/* 日曆 */
+.calendar {
+  background-color: white;
+  border-radius: 8px;
+  border: 1px solid #FFE5C4;
+  overflow: hidden;
+}
+
+.weekDays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  background-color: #FFE5C4;
+}
+
+.weekDay {
+  padding: 10px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: bold;
+  color: #89350c;
+}
+
+.daysGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.dayCell {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  border-right: 1px solid #F5F5F5;
+  border-bottom: 1px solid #F5F5F5;
+  position: relative;
+}
+
+.dayCell:nth-child(7n) {
+  border-right: none;
+}
+
+.emptyDay {
+  background-color: #FAFAFA;
+}
+
+.validDay {
+  background-color: white;
+  color: #333;
+  cursor: default;
+}
+
+.highlightedDay {
+  background-color: #F08651 !important;
+  color: white !important;
+  font-weight: bold;
+  position: relative;
+}
+
+.highlightedDay::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 6px;
+  height: 6px;
+  background-color: white;
+  border-radius: 50%;
+}
+
+/* 響應式設計 */
+@media (max-width: 480px) {
+  .header {
+    padding: 12px 15px;
+  }
+  
+  .title {
+    font-size: 16px;
+  }
+  
+  .subtitle {
+    font-size: 12px;
+  }
+  
+  .filterSection {
+    padding: 12px 15px;
+  }
+  
+  .filterRow {
+    flex-direction: column;
+    gap: 8px;
+    align-items: stretch;
+  }
+  
+  .symptomSelect {
+    width: 100%;
+    margin-bottom: 8px;
+  }
+  
+  .addButton,
+  .resetButton {
+    width: 100%;
+    padding: 10px 16px;
+  }
+  
+  .selectedSymptomsContainer {
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+  
+  .selectedSymptom {
+    font-size: 11px;
+    padding: 4px 8px;
+  }
+  
+  .calendarContainer {
+    padding: 15px;
+  }
+  
+  .dayCell {
+    font-size: 12px;
+  }
+  
+  .weekDay {
+    padding: 8px;
+    font-size: 11px;
+  }
+}
