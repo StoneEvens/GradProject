@@ -307,6 +307,19 @@ const ArchivePreviewForPublic = ({
     
     // 导向疾病档案详情页，标记为公开浏览模式
     if (archiveData?.id) {
+      // 預載入策略：先在當前頁面開始載入資料
+      try {
+        // 預載入詳情頁面資料（非阻塞）
+        import('../services/petService').then(({ getDiseaseArchiveDetail }) => {
+          getDiseaseArchiveDetail(archiveData.id).catch(() => {
+            // 預載入失敗不影響導航
+          });
+        });
+      } catch (error) {
+        // 預載入失敗不影響導航
+      }
+      
+      // 立即導航
       navigate(`/disease-archive/${archiveData.id}/public`);
     }
   };

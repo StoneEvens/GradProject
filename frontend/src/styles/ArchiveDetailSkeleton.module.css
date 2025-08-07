@@ -1,0 +1,390 @@
+/* 骨架屏容器 */
+.skeletonContainer {
+  width: 100%;
+  max-width: 430px;
+  margin: 0 auto;
+  padding: 20px;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+/* 骨架屏動畫 */
+@keyframes skeleton-loading {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* 通用骨架樣式 */
+@mixin skeleton-base {
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 0px,
+    #f8f8f8 40px,
+    #f0f0f0 80px
+  );
+  background-size: 200px 100%;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+  border-radius: 8px;
+}
+
+/* 標題區域 */
+.headerSkeleton {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 20px 0 8px 0;
+  gap: 15px;
+}
+
+.titleSection {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex: 1;
+}
+
+.backButtonSkeleton {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 0px,
+    #f8f8f8 40px,
+    #f0f0f0 80px
+  );
+  background-size: 200px 100%;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+  border-radius: 8px;
+}
+
+.titleSkeleton {
+  height: 22px;
+  width: 140px;
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 0px,
+    #f8f8f8 40px,
+    #f0f0f0 80px
+  );
+  background-size: 200px 100%;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+  border-radius: 6px;
+}
+
+.publishButtonSkeleton {
+  width: 80px;
+  height: 32px;
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 0px,
+    #f8f8f8 40px,
+    #f0f0f0 80px
+  );
+  background-size: 200px 100%;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+  border-radius: 8px;
+}
+
+.divider {
+  width: 100%;
+  height: 2px;
+  background-color: #FFB370;
+  margin-bottom: 20px;
+}
+
+/* 卡片容器 */
+.cardContainer {
+  background: #FFF6ea;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+/* 用戶資訊 */
+.userSection {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.avatarSkeleton {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 0px,
+    #f8f8f8 40px,
+    #f0f0f0 80px
+  );
+  background-size: 200px 100%;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+}
+
+.userInfo {
+  flex: 1;
+}
+
+.usernameSkeleton {
+  width: 120px;
+  height: 18px;
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 0px,
+    #f8f8f8 40px,
+    #f0f0f0 80px
+  );
+  background-size: 200px 100%;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+  border-radius: 4px;
+  margin-bottom: 6px;
+}
+
+.dateSkeleton {
+  width: 80px;
+  height: 14px;
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 0px,
+    #f8f8f8 40px,
+    #f0f0f0 80px
+  );
+  background-size: 200px 100%;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+  border-radius: 4px;
+}
+
+/* 檔案標題 */
+.archiveTitleSkeleton {
+  width: 70%;
+  height: 24px;
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 0px,
+    #f8f8f8 40px,
+    #f0f0f0 80px
+  );
+  background-size: 200px 100%;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+  border-radius: 6px;
+  margin-bottom: 20px;
+}
+
+/* 寵物資訊 */
+.petInfoSection {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding: 12px;
+  background: #fafafa;
+  border-radius: 12px;
+}
+
+.petAvatarSkeleton {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 0px,
+    #f8f8f8 40px,
+    #f0f0f0 80px
+  );
+  background-size: 200px 100%;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+}
+
+.petInfoText {
+  flex: 1;
+}
+
+.petNameSkeleton {
+  width: 100px;
+  height: 16px;
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 0px,
+    #f8f8f8 40px,
+    #f0f0f0 80px
+  );
+  background-size: 200px 100%;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+  border-radius: 4px;
+  margin-bottom: 6px;
+}
+
+.petDetailsSkeleton {
+  width: 150px;
+  height: 14px;
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 0px,
+    #f8f8f8 40px,
+    #f0f0f0 80px
+  );
+  background-size: 200px 100%;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+  border-radius: 4px;
+}
+
+/* 標籤區域 */
+.tagsSection {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.tagSkeleton {
+  width: 60px;
+  height: 28px;
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 0px,
+    #f8f8f8 40px,
+    #f0f0f0 80px
+  );
+  background-size: 200px 100%;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+  border-radius: 14px;
+}
+
+/* 內容區域 */
+.contentSection {
+  margin-bottom: 24px;
+}
+
+.contentLineSkeleton {
+  height: 16px;
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 0px,
+    #f8f8f8 40px,
+    #f0f0f0 80px
+  );
+  background-size: 200px 100%;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+  border-radius: 4px;
+  margin-bottom: 10px;
+  width: 100%;
+}
+
+/* 症狀區域 */
+.symptomsSection {
+  margin-bottom: 24px;
+}
+
+.sectionTitleSkeleton {
+  width: 100px;
+  height: 20px;
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 0px,
+    #f8f8f8 40px,
+    #f0f0f0 80px
+  );
+  background-size: 200px 100%;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+  border-radius: 4px;
+  margin-bottom: 16px;
+}
+
+.symptomsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.symptomCardSkeleton {
+  height: 80px;
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 0px,
+    #f8f8f8 40px,
+    #f0f0f0 80px
+  );
+  background-size: 200px 100%;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+  border-radius: 12px;
+}
+
+/* 互動按鈕 - 卡片內部 */
+.interactionSection {
+  display: flex;
+  justify-content: space-around;
+  padding-top: 20px;
+  border-top: 1px solid #e8e8e8;
+}
+
+.interactionButtonSkeleton {
+  width: 60px;
+  height: 36px;
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 0px,
+    #f8f8f8 40px,
+    #f0f0f0 80px
+  );
+  background-size: 200px 100%;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+  border-radius: 8px;
+}
+
+/* 公開模式互動區域 */
+.publicInteractionSection {
+  margin-top: 10px;
+  margin-bottom: 20px;
+  padding: 16px;
+  background-color: #FFF6EA;
+  border-radius: 8px;
+  border-top: 1px solid rgba(240, 134, 81, 0.2);
+}
+
+.publicInteractionButtons {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  gap: 20px;
+}
+
+.publicInteractionButton {
+  width: 80px;
+  height: 36px;
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 0px,
+    #f8f8f8 40px,
+    #f0f0f0 80px
+  );
+  background-size: 200px 100%;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+  border-radius: 6px;
+}
+
+/* 響應式設計 */
+@media (max-width: 380px) {
+  .skeletonContainer {
+    padding: 16px;
+  }
+  
+  .cardContainer {
+    padding: 16px;
+  }
+  
+  .symptomsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

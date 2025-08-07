@@ -282,3 +282,105 @@ class ArchiveIllnessRelationSerializer(serializers.ModelSerializer):
     class Meta:
         model = ArchiveIllnessRelation
         fields = '__all__'
+
+# === DiseaseArchiveSearchSerializer (搜尋用的簡化版序列化器) ===
+class DiseaseArchiveSearchSerializer(serializers.ModelSerializer):
+    # 基本資料
+    pet_name = serializers.CharField(source='pet.pet_name', read_only=True)
+    pet_type = serializers.CharField(source='pet.pet_type', read_only=True)
+    user_account = serializers.CharField(source='postFrame.user.user_account', read_only=True)
+    user_fullname = serializers.CharField(source='postFrame.user.user_fullname', read_only=True)
+    post_date = serializers.DateTimeField(source='postFrame.created_at', read_only=True)
+    illness_names = serializers.SerializerMethodField()
+    
+    # ArchiveList 元件所需的額外欄位
+    user_info = serializers.SerializerMethodField()
+    pet_info = serializers.SerializerMethodField()
+    interaction_stats = serializers.SerializerMethodField()
+    user_interaction = serializers.SerializerMethodField()
+    postFrame = serializers.IntegerField(source='postFrame.id', read_only=True)
+    
+    class Meta:
+        model = DiseaseArchiveContent
+        fields = [
+            'id', 'archive_title', 'content', 'pet_name', 'pet_type',
+            'user_account', 'user_fullname', 'post_date', 'go_to_doctor',
+            'health_status', 'illness_names', 'user_info', 'pet_info',
+            'interaction_stats', 'user_interaction', 'postFrame', 'is_private'
+        ]
+    
+    def get_illness_names(self, obj):
+        """獲取疾病名稱陣列"""
+        illness_relations = ArchiveIllnessRelation.objects.filter(archive=obj).select_related('illness')
+        return [relation.illness.illness_name for relation in illness_relations]
+    
+    def get_user_info(self, obj):
+        """獲取用戶資訊（ArchiveList 需要的格式）"""
+        if not obj.postFrame or not obj.postFrame.user:
+            return None
+        
+        user = obj.postFrame.user
+        user_headshot_url = None
+        if hasattr(user, 'headshot') and user.headshot:
+            user_headshot_url = user.headshot.firebase_url
+        
+        return {
+            'user_fullname': user.user_fullname,
+            'user_account': user.user_account,
+            'headshot_url': user_headshot_url
+        }
+    
+    def get_pet_info(self, obj):
+        """獲取寵物資訊（ArchiveList 需要的格式）"""
+        if not obj.pet:
+            return None
+        
+        pet_headshot_url = None
+        if hasattr(obj.pet, 'headshot') and obj.pet.headshot:
+            pet_headshot_url = obj.pet.headshot.firebase_url
+        
+        return {
+            'pet_id': obj.pet.id,
+            'id': obj.pet.id,
+            'pet_name': obj.pet.pet_name,
+            'breed': obj.pet.breed,
+            'pet_type': obj.pet.pet_type,
+            'headshot_url': pet_headshot_url
+        }
+    
+    def get_interaction_stats(self, obj):
+        """獲取互動統計"""
+        from comments.models import Comment
+        stats = obj.get_interaction_stats()
+        comment_count = 0
+        if obj.postFrame:
+            comment_count = Comment.objects.filter(postFrame=obj.postFrame).count()
+        
+        return {
+            'upvotes': stats[0],
+            'downvotes': stats[1],
+            'saves': stats[2],
+            'shares': stats[3],
+            'likes': stats[4],
+            'comments': comment_count
+        }
+    
+    def get_user_interaction(self, obj):
+        """獲取當前用戶與檔案的互動狀態"""
+        request = self.context.get('request')
+        if request and hasattr(request, 'user') and request.user.is_authenticated:
+            user = request.user
+            return {
+                'is_liked': obj.check_user_interaction(user, 'liked'),
+                'is_upvoted': obj.check_user_interaction(user, 'upvoted'),
+                'is_downvoted': obj.check_user_interaction(user, 'downvoted'),
+                'is_saved': obj.check_user_interaction(user, 'saved'),
+                'is_shared': obj.check_user_interaction(user, 'shared')
+            }
+        return {
+            'is_liked': False,
+            'is_upvoted': False,
+            'is_downvoted': False,
+            'is_saved': False,
+            'is_shared': False
+        }
