@@ -1,12 +1,15 @@
 from rest_framework import serializers
 from media.models import Image, UserHeadshot
-from .models import PostFrame, PostHashtag, SoLContent, PostPets, ImageAnnotation
+from .models import PostFrame, PostHashtag, SoLContent, PostPets
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from pets.models import Pet
+from social.models import ImageAnnotation
 from interactions.models import UserInteraction
 from accounts.serializers import UserBasicSerializer
 from accounts.models import CustomUser
+from comments.models import Comment
+from comments.serializers import CommentSerializer
 
 User = get_user_model()
 
@@ -23,6 +26,7 @@ class PostFrameSerializer(serializers.ModelSerializer):
     interaction_stats = serializers.SerializerMethodField()
     user_interaction = serializers.SerializerMethodField()
     annotations = serializers.SerializerMethodField()
+    top_comments = serializers.SerializerMethodField()
 
     class Meta:
         model = PostFrame
@@ -37,7 +41,8 @@ class PostFrameSerializer(serializers.ModelSerializer):
             'images',
             'interaction_stats',
             'user_interaction',
-            'annotations'
+            'annotations',
+            'top_comments',
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
     
@@ -119,13 +124,17 @@ class PostFrameSerializer(serializers.ModelSerializer):
             return []
     
     def get_interaction_stats(self, postFrame: PostFrame):
+        from comments.models import Comment
         stats = postFrame.get_interaction_stats()
+        # 動態計算留言總數（包含回覆）
+        comment_count = Comment.objects.filter(postFrame=postFrame).count()
         return {
             'upvotes': stats[0],
             'downvotes': stats[1],
             'saves': stats[2],
             'shares': stats[3],
             'likes': stats[4],
+            'comments': comment_count,
             'total_score': stats[0] - stats[1]
         }
 
@@ -150,7 +159,7 @@ class PostFrameSerializer(serializers.ModelSerializer):
                 'is_shared': False
             }
 
-        records = UserInteraction.objects.filter(user=user, postFrame=postFrame)
+        records = UserInteraction.objects.filter(user=user, interactables=postFrame)
 
         return {
             'is_liked': records.filter(relation='liked').exists(),
@@ -189,6 +198,13 @@ class PostFrameSerializer(serializers.ModelSerializer):
             ]
         except:
             return []
+        
+    def get_top_comments(self, postFrame: PostFrame):
+        comments = Comment.get_comments(postFrame)[:2]
+
+        serializers = CommentSerializer(comments, many=True, context=self.context)
+
+        return serializers.data
 
 # === SoLContent 序列化器 (簡化版，用於特定場景) ===
 class SolPostSerializer(serializers.ModelSerializer):
@@ -222,13 +238,13 @@ class SolPostSerializer(serializers.ModelSerializer):
         ]
     
     def get_post_id(self, solContent: SoLContent):
-        return solContent.postFrame.id
+        return solContent.get_postFrame().id
     
     def get_created_at(self, solContent: SoLContent):
-        return solContent.postFrame.created_at
-    
+        return solContent.get_postFrame().created_at
+
     def get_user_info(self, solContent: SoLContent):
-        user = solContent.postFrame.getUser()
+        user = solContent.get_postFrame().getUser()
         headshot_url = None
         try:
             if hasattr(user, 'headshot') and user.headshot:
@@ -285,13 +301,18 @@ class SolPostSerializer(serializers.ModelSerializer):
             return []
     
     def get_interaction_stats(self, solContent: SoLContent):
-        stats = solContent.postFrame.get_interaction_stats()
+        from comments.models import Comment
+        postFrame = solContent.get_postFrame()
+        stats = postFrame.get_interaction_stats()
+        # 動態計算留言總數（包含回覆）
+        comment_count = Comment.objects.filter(postFrame=postFrame).count()
         return {
             'upvotes': stats[0],
             'downvotes': stats[1],
             'saves': stats[2],
             'shares': stats[3],
             'likes': stats[4],
+            'comments': comment_count,
             'total_score': stats[0] - stats[1]
         }
 
@@ -316,7 +337,7 @@ class SolPostSerializer(serializers.ModelSerializer):
                 'is_shared': False
             }
 
-        records = UserInteraction.objects.filter(user=user, postFrame=solContent.postFrame)
+        records = UserInteraction.objects.filter(user=user, interactables=solContent.postFrame)
 
         return {
             'is_liked': records.filter(relation='liked').exists(),
@@ -421,13 +442,17 @@ class PostPreviewSerializer(serializers.ModelSerializer):
     
     def get_interaction_stats(self, postFrame: PostFrame):
         """獲取互動統計"""
+        from comments.models import Comment
         stats = postFrame.get_interaction_stats()
+        # 動態計算留言總數（包含回覆）
+        comment_count = Comment.objects.filter(postFrame=postFrame).count()
         return {
             'upvotes': stats[0],
             'downvotes': stats[1],
             'saves': stats[2],
             'shares': stats[3],
             'likes': stats[4],
+            'comments': comment_count,
             'total_score': stats[0] - stats[1]
         }
     
@@ -453,7 +478,7 @@ class PostPreviewSerializer(serializers.ModelSerializer):
                 'is_shared': False
             }
 
-        records = UserInteraction.objects.filter(user=user, postFrame=postFrame)
+        records = UserInteraction.objects.filter(user=user, interactables=postFrame)
 
         return {
             'is_liked': records.filter(relation='liked').exists(),

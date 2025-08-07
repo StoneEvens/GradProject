@@ -1,0 +1,403 @@
+/* 標題區域 */
+.titleSection {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 30px;
+  margin-bottom: 5px;
+  position: relative;
+}
+
+.title {
+  font-size: 24px;
+  color: #89350c;
+  text-align: left;
+  margin: 0;
+  font-weight: bold;
+}
+
+.historyButton {
+  background: none;
+  border: none;
+  color: #89350c;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: opacity 0.2s ease;
+}
+
+.historyButton:hover {
+  opacity: 0.7;
+}
+
+.historyButton::before {
+  content: '';
+  background-image: url('/assets/icon/HistoryRecordIcon.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  width: 24px;
+  height: 24px;
+  display: inline-block;
+}
+
+.stepLabel {
+  font-size: 18px;
+  color: #89350c;
+  font-weight: bold;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.divider {
+  width: 100%;
+  height: 1.5px;
+  background: #FFB370;
+  margin: 10px 0 25px 0;
+}
+
+/* 通用區域樣式 */
+.section {
+  margin-bottom: 20px;
+}
+
+.sectionLabel {
+  display: block;
+  font-size: 16px;
+  color: #89350c;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+/* 模式切換區域 */
+.modeSwitch {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 22px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; 
+  left: 0;
+  right: 0; 
+  bottom: 0;
+  background-color: #E0E0E0;
+  transition: 0.4s;
+  border-radius: 34px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 16px; 
+  width: 16px;
+  left: 3px; 
+  bottom: 3px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #FFB370;
+}
+
+input:checked + .slider:before {
+  transform: translateX(18px);
+}
+
+.modeText {
+  font-size: 13px;
+  color: #89350c;
+  font-weight: 500;
+}
+
+/* 寵物選擇區域 - 類似 PetSwitcher */
+.petSwitcher {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding: 8px 0;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.petSwitcher::-webkit-scrollbar {
+  display: none;
+}
+
+.petItem {
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 4px;
+  border-radius: 50%;
+}
+
+.petAvatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #E0E0E0;
+  background: #fff;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.petItem:hover .petAvatar {
+  border-color: #FFB370;
+  opacity: 0.8;
+}
+
+/* 選中狀態的寵物 */
+.activePet .petAvatar {
+  border-color: #FFB370;
+  border-width: 4px;
+  box-shadow: 0 4px 12px rgba(255, 179, 112, 0.4);
+}
+
+/* 寵物資訊區域 */
+.petInfoSection {
+  background-color: #ffeed6;
+  border-radius: 16px;
+  padding: 20px;
+  border: 2px solid #FFB370;
+}
+
+.petInfoRow {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.petInfoRow:last-child {
+  margin-bottom: 0;
+}
+
+.petInfoLabel {
+  font-size: 14px;
+  color: #89350c;
+  font-weight: 500;
+  min-width: 55px;
+  margin-right: 10px;
+}
+
+.petInfoInput {
+  flex: 1;
+  max-width: 200px;
+  padding: 6px 12px;
+  border: 2px solid #FFB370;
+  border-radius: 8px;
+  background-color: white;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.petInfoInput:focus {
+  border-color: #F08651;
+}
+
+.petInfoValue {
+  font-size: 14px;
+  color: #89350c;
+  font-weight: 500;
+}
+
+.petInfoUnit {
+  font-size: 14px;
+  color: #89350c;
+  font-weight: 500;
+  margin-left: 8px;
+}
+
+.petInfoSelect {
+  flex: 1;
+  max-width: 200px;
+  padding: 6px 12px;
+  border: 2px solid #FFB370;
+  border-radius: 8px;
+  background-color: white;
+  font-size: 14px;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+.petInfoSelect:focus {
+  border-color: #F08651;
+}
+
+/* 錯誤訊息 */
+.errorMsg {
+  color: #E07641;
+  margin-top: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center;
+}
+
+/* 新增寵物提示 */
+.addingHint {
+  color: #89350c;
+  font-size: 14px;
+  opacity: 0.7;
+  margin-left: 8px;
+}
+
+/* 操作按鈕 */
+.actionButtons {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 30px;
+}
+
+.nextButton {
+  background-color: #F08651;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 14px 40px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+}
+
+.nextButton:hover {
+  background-color: #E07641;
+}
+
+/* 響應式設計 */
+@media (max-width: 480px) {
+  .titleSection {
+    margin-top: 25px;
+    margin-bottom: 15px;
+  }
+
+  .title {
+    font-size: 20px;
+  }
+
+  .stepLabel {
+    font-size: 16px;
+    margin-bottom: 16px;
+  }
+
+  .section {
+    margin-bottom: 18px;
+  }
+
+  .sectionLabel {
+    font-size: 15px;
+    margin-bottom: 8px;
+  }
+
+  .petSwitcher {
+    gap: 12px;
+  }
+
+  .petAvatar {
+    width: 50px;
+    height: 50px;
+    border-width: 3px;
+  }
+
+  .activePet .petAvatar {
+    border-width: 3px;
+  }
+
+  .petInfoSection {
+    padding: 14px;
+  }
+
+  .petInfoLabel {
+    font-size: 13px;
+  }
+
+  .petInfoInput,
+  .petInfoSelect {
+    font-size: 13px;
+    padding: 5px 10px;
+  }
+
+  .petInfoUnit {
+    font-size: 13px;
+  }
+
+  .nextButton {
+    padding: 12px 30px;
+    font-size: 15px;
+    height: 45px;
+  }
+}
+
+@media (max-width: 360px) {
+  .petSwitcher {
+    gap: 10px;
+  }
+
+  .petAvatar {
+    width: 45px;
+    height: 45px;
+    border-width: 2px;
+  }
+
+  .activePet .petAvatar {
+    border-width: 3px;
+  }
+
+  .petInfoSection {
+    padding: 12px;
+  }
+
+  .petInfoRow {
+    margin-bottom: 12px;
+  }
+
+  .petInfoLabel {
+    font-size: 12px;
+    min-width: 50px;
+  }
+
+  .petInfoInput,
+  .petInfoSelect {
+    font-size: 12px;
+    padding: 4px 8px;
+  }
+
+  .errorMsg {
+    font-size: 12px;
+  }
+
+  .modeText {
+    font-size: 13px;
+  }
+}

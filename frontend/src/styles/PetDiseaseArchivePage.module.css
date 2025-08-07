@@ -1,0 +1,255 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #FFF2D9;
+}
+
+.content {
+  flex: 1;
+  padding: 30px;
+  padding-top: 80px;
+  padding-bottom: 90px;
+  max-width: 430px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+  color: #89350c;
+  font-size: 16px;
+}
+
+/* 標題列 */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 20px 0 8px 0;
+  gap: 15px;
+}
+
+.titleSection {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  flex: 1;
+}
+
+.petAvatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #FFB370;
+}
+
+.title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #89350c;
+  margin: 0;
+  white-space: nowrap;
+}
+
+.newButton {
+  background: #FFB370;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.newButton:hover {
+  background: #F08651;
+  transform: translateY(-1px);
+}
+
+/* 分隔線 */
+.divider {
+  width: 100%;
+  height: 2px;
+  background-color: #FFB370;
+  margin-bottom: 20px;
+}
+
+/* 論壇列表 */
+.forumList {
+  margin-bottom: 20px;
+}
+
+/* 論壇預覽項目 */
+.forumItem {
+  display: flex;
+  align-items: center;
+  background: #FFF6EA;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid #FFE5C4;
+}
+
+.forumItem:hover {
+  background: #FFF2D9;
+  border-color: #FFB370;
+}
+
+.forumIcon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+
+.forumIcon img {
+  width: 32px;
+  height: 32px;
+}
+
+.forumContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.forumTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 2px;
+}
+
+.forumTitle {
+  font-size: 14px;
+  font-weight: bold;
+  color: #89350c;
+}
+
+.forumInfo {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.forumLabel {
+  font-size: 12px;
+  color: #89350c;
+  font-weight: 500;
+}
+
+.forumDate {
+  font-size: 12px;
+  color: #89350c;
+  font-weight: 400;
+}
+
+.forumArrow {
+  font-size: 16px;
+  color: #FFB370;
+  margin-left: 8px;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.forumItem:hover .forumArrow {
+  color: #FF8C42;
+  transform: translateX(2px);
+}
+
+/* 空狀態 */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.emptyIcon {
+  width: 100px;
+  height: 100px;
+  margin-bottom: 16px;
+  opacity: 0.6;
+}
+
+.emptyState p {
+  color: #888;
+  font-size: 16px;
+  margin: 0;
+}
+
+/* 手機版優化 */
+@media (max-width: 480px) {
+  .content {
+    padding: 0 15px 80px 15px;
+  }
+  
+  .header {
+    padding: 15px 0 12px 0;
+    gap: 10px;
+  }
+  
+  .title {
+    font-size: 1.3rem;
+  }
+  
+  .newButton {
+    padding: 10px 16px;
+    font-size: 13px;
+  }
+  
+  .forumItem {
+    padding: 10px 12px;
+    margin-bottom: 6px;
+  }
+  
+  .forumIcon {
+    width: 36px;
+    height: 36px;
+    margin-right: 10px;
+  }
+  
+  .forumIcon img {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .forumTitle {
+    font-size: 13px;
+  }
+  
+  .forumLabel,
+  .forumDate {
+    font-size: 11px;
+  }
+  
+  .emptyState {
+    padding: 50px 15px;
+  }
+  
+  .emptyState p {
+    font-size: 15px;
+  }
+  
+  .emptyIcon {
+    width: 80px;
+    height: 80px;
+  }
+}

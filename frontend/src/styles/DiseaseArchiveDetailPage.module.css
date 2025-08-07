@@ -1,0 +1,210 @@
+/* 疾病檔案詳細頁面樣式 - 參考 DiseaseArchivePreviewPage 風格 */
+.container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #FFF2D9;
+}
+
+.content {
+  flex: 1;
+  padding: 30px;
+  padding-top: 80px;
+  padding-bottom: 90px;
+  max-width: 430px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+.loadingContainer,
+.errorContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+  color: #89350c;
+  font-size: 16px;
+  text-align: center;
+}
+
+/* 標題列 */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 20px 0 8px 0;
+  gap: 15px;
+}
+
+.titleSection {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex: 1;
+}
+
+.backButton {
+  background: none;
+  border: none;
+  padding: 8px 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  font-size: 20px;
+  color: #89350c;
+  font-weight: bold;
+}
+
+.title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #89350c;
+  margin: 0;
+  white-space: nowrap;
+}
+
+/* 公開發布按鈕 */
+.publishButton {
+  background-color: #F08651;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+/* 已公開狀態按鈕 */
+.publishedStatus {
+  background-color: #ffca9c;
+  color: #89350c;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.publishedStatus:hover {
+  background-color: #ffb370;
+}
+
+/* 分隔線 */
+.divider {
+  width: 100%;
+  height: 2px;
+  background-color: #FFB370;
+  margin-bottom: 20px;
+}
+
+/* 互動區域 - 參考設計圖 */
+.interactionSection {
+  margin-top: 10px;
+  margin-bottom: 20px;
+  padding: 16px;
+  background-color: #FFF6EA;
+  border-radius: 8px;
+  border-top: 1px solid rgba(240, 134, 81, 0.2);
+}
+
+.interactionButtons {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  gap: 20px;
+}
+
+.interactionButton {
+  background: none;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  cursor: pointer;
+  border-radius: 6px;
+  color: #666;
+  font-size: 14px;
+}
+
+.interactionIcon {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
+
+/* 按讚和收藏狀態樣式 */
+.interactionButton.liked {
+  color: #e74c3c;
+}
+
+.interactionButton.saved {
+  color: #f39c12;
+}
+
+
+/* 響應式設計 */
+@media (max-width: 480px) {
+  .content {
+    padding: 20px;
+    padding-top: 70px;
+    padding-bottom: 80px;
+  }
+
+  .header {
+    padding: 15px 0 5px 0;
+    gap: 10px;
+  }
+
+  .title {
+    font-size: 1.1rem;
+  }
+
+  .petAvatar {
+    width: 40px;
+    height: 40px;
+  }
+
+  .titleSection {
+    gap: 10px;
+  }
+
+  .backButton {
+    padding: 6px 8px;
+    font-size: 18px;
+  }
+
+  .publishButton {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+
+  .interactionSection {
+    margin-top: 16px;
+    padding: 12px;
+  }
+
+  .interactionButtons {
+    gap: 15px;
+  }
+
+  .interactionButton {
+    padding: 6px 8px;
+    font-size: 13px;
+    gap: 4px;
+  }
+
+  .interactionIcon {
+    width: 20px;
+    height: 20px;
+  }
+}

@@ -1,0 +1,345 @@
+/* Comment Wrapper - 包含卡片和外部按鈕 */
+.commentWrapper {
+  margin-bottom: 6px;
+}
+
+/* Comment Card - 基礎樣式 */
+.commentCard {
+  background-color: #FFF6ea;
+  padding: 12px;
+  border-radius: 12px;
+  border: none;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  font-size: 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  gap: 8px;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* 回覆卡片 - 有縮排效果 */
+.replyCard {
+  margin-left: 20px;
+  background-color: #FFF6ea;
+  margin-bottom: 1px;
+}
+
+/* 回覆的 wrapper 也需要縮排 */
+.commentWrapper:has(.replyCard) {
+  margin-left: 20px;
+  margin-bottom: 1px;
+}
+
+/* 頭像區域 */
+.userAvatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.userAvatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 留言主體內容區域 */
+.commentMain {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0px;
+  align-items: flex-start;
+}
+
+/* 頭部信息 - 用戶名和愛心按讚在同一行 */
+.commentHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 100%;
+  margin: 0;
+}
+
+.username {
+  font-size: 14px;
+  font-weight: 600;
+  color: #8B4513;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.username:hover {
+  color: #F08651;
+  text-decoration: underline;
+}
+
+/* 愛心按讚區域 */
+.likeSection {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.likeButton {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  transition: transform 0.2s;
+}
+
+.likeButton:hover {
+  transform: scale(1.1);
+}
+
+.heartIcon {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+}
+
+.likeCount {
+  font-size: 12px;
+  color: #8B4513;
+  font-weight: 500;
+}
+
+.replyButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  transition: transform 0.2s;
+  border-radius: 50%;
+}
+
+.replyButton:hover {
+  transform: scale(1.1);
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.replyIcon {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+}
+
+.editIcon {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+}
+
+.editCancel {
+  font-size: 20px;
+  color: #F08651;
+  font-weight: bold;
+}
+
+/* 留言內容 */
+.commentContent {
+  margin: 0;
+}
+
+.commentText {
+  margin: 0;
+  color: #5D4037;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.deletedCommentText {
+  margin: 0;
+  color: #999;
+  font-size: 14px;
+  line-height: 1.4;
+  font-style: italic;
+}
+
+/* 留言操作按鈕 - 現在在卡片外面 */
+.commentActions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-start;
+  margin-top: 4px;
+  margin-left: 6px;
+}
+
+.actionButton {
+  background: none;
+  border: none;
+  font-size: 12px;
+  color: #8B4513;
+  cursor: pointer;
+  padding: 2px 0;
+  transition: color 0.2s;
+  font-weight: 500;
+}
+
+.actionButton:hover {
+  color: #F08651;
+  text-decoration: underline;
+}
+
+/* 編輯模式 */
+.editContainer {
+  margin-bottom: 8px;
+}
+
+.editTextarea {
+  width: 100%;
+  min-height: 80px;
+  padding: 12px;
+  border: 1px solid #E0E0E0;
+  border-radius: 8px;
+  background-color: #FFFFFF;
+  font-size: 14px;
+  color: #5D4037;
+  resize: vertical;
+  margin-bottom: 8px;
+}
+
+.editActions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.deleteButton, .saveButton {
+  padding: 6px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.deleteButton {
+  background-color: #FF6B6B;
+  color: white;
+}
+
+.saveButton {
+  background-color: #F08651;
+  color: white;
+}
+
+.deleteButton:hover, .saveButton:hover {
+  opacity: 0.9;
+}
+
+/* 回覆輸入區域 */
+.replyInputContainer {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #E0E0E0;
+}
+
+.replyTextarea {
+  width: 100%;
+  min-height: 60px;
+  padding: 12px;
+  border: 1px solid #E0E0E0;
+  border-radius: 8px;
+  background-color: #FFFFFF;
+  font-size: 14px;
+  color: #5D4037;
+  resize: vertical;
+  margin-bottom: 8px;
+}
+
+.replyActions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.replySubmitButton {
+  padding: 6px 16px;
+  background-color: #F08651;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.replySubmitButton:hover {
+  opacity: 0.9;
+}
+
+/* 留言圖片樣式 */
+.commentImages {
+  margin-top: 8px;
+  width: 100%;
+}
+
+/* 圖片網格容器 */
+.imageGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* 單張圖片佔滿容器 */
+.imageGrid.singleImage {
+  grid-template-columns: 1fr;
+}
+
+/* 兩張圖片並排 */
+.imageGrid.twoImages {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+/* 三張圖片的排列 */
+.imageGrid.threeImages {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+/* 圖片項目 */
+.imageItem {
+  position: relative;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 6px;
+}
+
+.imageItem img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.imageItem img:hover {
+  transform: scale(1.02);
+}
+
+/* 圖片載入失敗樣式 */
+.imageError {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f0f0f0;
+  color: #999;
+  font-size: 12px;
+  aspect-ratio: 1;
+}

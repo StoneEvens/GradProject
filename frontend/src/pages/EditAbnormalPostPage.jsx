@@ -243,7 +243,9 @@ const EditAbnormalPostPage = () => {
     
     const currentData = {
       petId: selectedPet ? selectedPet.id : null,
-      date: selectedDate ? selectedDate.toISOString() : null,
+      date: selectedDate ? 
+        `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}T12:00:00Z` 
+        : null,
       isEmergency,
       symptoms: selectedSymptoms.map(s => s.text).sort(),
       bodyStats: {
@@ -255,7 +257,9 @@ const EditAbnormalPostPage = () => {
       imageIds: selectedImages.filter(img => !img.isNew).map(img => img.id).sort()
     };
     
-    const originalDate = originalData.date ? new Date(originalData.date).toISOString() : null;
+    const originalDate = originalData.date ? 
+      `${new Date(originalData.date).getFullYear()}-${String(new Date(originalData.date).getMonth() + 1).padStart(2, '0')}-${String(new Date(originalData.date).getDate()).padStart(2, '0')}T12:00:00Z` 
+      : null;
     
     const changed = 
       currentData.petId !== originalData.petId ||
@@ -577,7 +581,9 @@ const EditAbnormalPostPage = () => {
         pet: {
           id: selectedPet.id
         },
-        date: selectedDate?.toISOString(),
+        date: selectedDate ? 
+          `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}T12:00:00Z` 
+          : null,
         isEmergency,
         symptoms: selectedSymptoms.map(symptom => ({
           text: typeof symptom === 'string' ? symptom : symptom.text

@@ -76,7 +76,10 @@ class UserPostsPreviewListAPIView(generics.ListAPIView):
         user_id = self.kwargs['pk']
         try:
             user = CustomUser.objects.get(id=user_id)
-            return PostFrame.objects.filter(user=user).order_by('-created_at')[:20]
+            return PostFrame.objects.filter(
+                user=user,
+                contents__isnull=False  # 只包含有內容的貼文，排除疾病檔案
+            ).distinct().order_by('-created_at')[:20]
         except CustomUser.DoesNotExist:
             return PostFrame.objects.none()
     
@@ -410,12 +413,12 @@ class PostDetailAPIView(generics.RetrieveAPIView):
     """獲取貼文詳情"""
     permission_classes = [IsAuthenticated]
     queryset = PostFrame.objects.all()
-    serializer_class = PostFrameSerializer
+    serializer_class = SolPostSerializer
     
     def retrieve(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
-            serializer = self.get_serializer(instance, context={'request': request})
+            serializer = SolPostSerializer(instance, context={'request': request})
             return APIResponse(
                 data=serializer.data,
                 message="獲取貼文詳情成功"
@@ -502,7 +505,7 @@ class DeletePostAPIView(APIView):
                 
                 # 刪除互動記錄
                 from interactions.models import UserInteraction
-                UserInteraction.objects.filter(postFrame=postFrame).delete()
+                UserInteraction.objects.filter(interactables=postFrame).delete()
                 
                 logger.info(f"貼文相關資料刪除完成: post_id={postFrame.id}")
                 
@@ -602,9 +605,12 @@ class PostListAPIView(generics.ListAPIView):
     @log_queries
     def get_queryset(self):
         # 獲取所有公開用戶的貼文，按創建時間倒序排列
+        # 只包含有 SoLContent 的 PostFrame（排除疾病檔案）
         return PostFrame.objects.select_related('user').prefetch_related(
             'contents', 'hashtags', 'tagged_pets'
-        ).order_by('-created_at')
+        ).filter(
+            contents__isnull=False  # 只包含有內容的貼文
+        ).distinct().order_by('-created_at')
     
     def list(self, request, *args, **kwargs):
         try:
@@ -839,6 +845,43 @@ class ImageAnnotationListCreateAPIView(APIView):
                 created_by=request.user
             )
             
+            # 如果標註的是寵物，建立 PostPet 關聯
+            if target_type == 'pet':
+                logger.info(f"嘗試為寵物標註建立 PostPet 關聯: target_id={target_id}, firebase_url={firebase_url}")
+                try:
+                    # 透過 firebase_url 找到對應的 PostFrame
+                    post_image = Image.objects.filter(firebase_url=firebase_url).first()
+                    logger.info(f"找到的 Image: {post_image}")
+                    
+                    if post_image:
+                        post_frame = post_image.postFrame
+                        logger.info(f"找到的 PostFrame: {post_frame.id}")
+                        
+                        # 獲取寵物並確認屬於當前用戶
+                        pet = Pet.objects.get(id=int(target_id), owner=request.user)
+                        logger.info(f"找到的寵物: {pet.pet_name} (ID: {pet.id})")
+                        
+                        # 檢查是否已經存在 PostPet 關聯，避免重複
+                        existing_relation = PostPets.objects.filter(postFrame=post_frame, pet=pet).first()
+                        if not existing_relation:
+                            PostPets.objects.create(
+                                postFrame=post_frame,
+                                pet=pet
+                            )
+                            logger.info(f"成功建立寵物關聯: {pet.pet_name} (ID: {target_id}) 與貼文 {post_frame.id}")
+                        else:
+                            logger.info(f"PostPet 關聯已存在: {pet.pet_name} (ID: {target_id}) 與貼文 {post_frame.id}")
+                        
+                    else:
+                        logger.warning(f"無法找到 firebase_url 對應的 Image: {firebase_url}")
+                        
+                except Pet.DoesNotExist:
+                    logger.warning(f"標註的寵物 ID {target_id} 不存在或不屬於當前用戶")
+                except Exception as pet_error:
+                    logger.error(f"建立寵物關聯失敗: {str(pet_error)}")
+            else:
+                logger.info(f"標註類型不是寵物: {target_type}")
+            
             serializer = ImageAnnotationSerializer(annotation)
             
             return APIResponse(
@@ -941,6 +984,41 @@ class ImageAnnotationDetailAPIView(APIView):
             )
         
         try:
+            # 如果刪除的是寵物標註，檢查是否需要移除 PostPet 關聯
+            if annotation.target_type == 'pet':
+                try:
+                    # 透過 firebase_url 找到對應的 PostFrame
+                    post_image = Image.objects.filter(firebase_url=annotation.firebase_url).first()
+                    if post_image:
+                        post_frame = post_image.postFrame
+                        pet_id = annotation.target_id
+                        
+                        # 檢查該貼文是否還有其他寵物標註
+                        remaining_pet_annotations = ImageAnnotation.objects.filter(
+                            target_type='pet',
+                            target_id=pet_id
+                        ).exclude(id=annotation.id)
+                        
+                        # 檢查是否還有其他圖片標註了同一隻寵物
+                        has_other_pet_annotations = False
+                        for other_annotation in remaining_pet_annotations:
+                            # 檢查是否屬於同一個貼文
+                            other_post_image = Image.objects.filter(firebase_url=other_annotation.firebase_url).first()
+                            if other_post_image and other_post_image.postFrame.id == post_frame.id:
+                                has_other_pet_annotations = True
+                                break
+                        
+                        # 如果沒有其他標註了這隻寵物，刪除 PostPet 關聯
+                        if not has_other_pet_annotations:
+                            PostPets.objects.filter(
+                                postFrame=post_frame,
+                                pet_id=pet_id
+                            ).delete()
+                            logger.info(f"刪除寵物關聯: 寵物 ID {pet_id} 與貼文 {post_frame.id}")
+                        
+                except Exception as pet_error:
+                    logger.error(f"處理寵物關聯刪除失敗: {str(pet_error)}")
+            
             annotation.delete()
             return APIResponse(
                 message="標註刪除成功"

@@ -9,7 +9,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
+  z-index: 1001;
   padding: 20px;
 }
 
@@ -17,11 +17,13 @@
 .modalContainer {
   background-color: #FFca9c;
   border-radius: 15px;
-  width: 100%;
-  max-width: 350px;
+  width: 350px;
+  height: 600px;
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   animation: slideIn 0.3s ease-out;
+  display: flex;
+  flex-direction: column;
 }
 
 @keyframes slideIn {
@@ -40,7 +42,7 @@
   background-color: #FFca9c;
   color: #333;
   padding: 20px;
-  text-align: center;
+  text-align: left;
   border-bottom: 1px solid #ffeed6;
 }
 
@@ -54,6 +56,8 @@
 .modalBody {
   background-color: #FFca9c;
   padding: 20px;
+  flex: 1;
+  overflow-y: auto;
 }
 
 /* 頭像區塊 */
@@ -87,6 +91,41 @@
 
 .hiddenInput {
   display: none;
+}
+
+/* 只讀欄位 */
+.readOnlyField {
+  background-color: #ffeed6;
+  border: 1px solid #ffdbaa;
+  border-radius: 10px;
+  padding: 12px;
+  color: #333;
+  font-size: 16px;
+  min-height: 20px;
+}
+
+/* 營養成分資訊 */
+.nutritionInfo {
+  background-color: #ffeed6;
+  border: 1px solid #ffdbaa;
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.nutritionRow {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: #333;
+}
+
+.nutritionRow:last-child {
+  margin-bottom: 0;
+}
+
+.nutritionRow span {
+  flex: 1;
 }
 
 /* 表單區塊 */
@@ -152,6 +191,7 @@
   padding: 20px;
   display: flex;
   gap: 10px;
+  flex-shrink: 0;
 }
 
 .cancelButton {
@@ -198,44 +238,10 @@
   cursor: not-allowed;
 }
 
-/* 響應式設計 */
+/* 保持固定尺寸 - 移除響應式變化 */
 @media (max-width: 480px) {
   .modalContainer {
-    max-width: 320px;
-    margin: 0 15px;
-  }
-  
-  .modalHeader h2 {
-    font-size: 16px;
-  }
-  
-  .avatarContainer {
-    width: 90px;
-    height: 90px;
-  }
-  
-  .modalBody {
-    padding: 15px;
-  }
-  
-  .modalFooter {
-    padding: 15px;
-    gap: 8px;
-  }
-  
-  .inputGroup label {
-    font-size: 14px;
-  }
-  
-  .formInput,
-  .formTextarea {
-    font-size: 14px;
-    padding: 10px;
-  }
-  
-  .cancelButton,
-  .saveButton {
-    padding: 8px 16px;
-    font-size: 14px;
+    width: 350px;
+    height: 600px;
   }
 } 

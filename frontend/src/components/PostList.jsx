@@ -4,6 +4,7 @@ import { useLocation } from 'react-router-dom';
 import Post from './Post';
 import Notification from './Notification';
 import { getUserPosts } from '../services/socialService';
+import { getUserProfile } from '../services/userService';
 import styles from '../styles/PostList.module.css';
 import PostComments from './PostComments';
 
@@ -33,6 +34,7 @@ const PostList = ({
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [openComments, setIsOpen] = useState(false);
   const [postID, setPostID] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
   
   // 用戶貼文相關狀態
   const [userPosts, setUserPosts] = useState([]);
@@ -44,6 +46,20 @@ const PostList = ({
   // 貼文元素的引用
   const postRefs = useRef({});
   const containerRef = useRef(null);
+
+  // 獲取當前用戶資訊
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      try {
+        const userProfile = await getUserProfile();
+        setCurrentUser(userProfile);
+      } catch (error) {
+        console.error('獲取用戶資料失敗:', error);
+      }
+    };
+    
+    fetchCurrentUser();
+  }, []);
 
   // 顯示通知
   const showNotification = (message) => {
@@ -253,6 +269,36 @@ const PostList = ({
     setPostID(null);
   };
 
+  // 處理留言數變化
+  const handleCommentCountChange = (increment) => {
+    if (!postID) return;
+    
+    // 更新對應貼文的留言數
+    if (fetchUserPosts) {
+      // 更新本地用戶貼文狀態
+      setUserPosts(prevPosts => 
+        prevPosts.map(post => {
+          const currentPostId = post.id || post.post_id;
+          if (currentPostId === postID) {
+            return {
+              ...post,
+              interaction_stats: {
+                ...post.interaction_stats,
+                comments: (post.interaction_stats?.comments || 0) + increment
+              }
+            };
+          }
+          return post;
+        })
+      );
+    } else {
+      // 對於外部傳入的 posts，通過 onComment 回調通知父組件
+      if (onComment) {
+        onComment(postID, increment);
+      }
+    }
+  };
+
 
   // 處理收藏 - 可選的通知回調
   const handleSave = (postId, isSaved) => {
@@ -356,9 +402,6 @@ const PostList = ({
               isInteractive={true}
               showFullDescription={true}
             />
-            <PostComments
-              comments={post.comments || []}
-            />
           </div>
         ))}
       </div>
@@ -379,8 +422,10 @@ const PostList = ({
       )}
 
       {openComments ? <PostComments
+        user={currentUser}
         postID={postID}
         handleClose={handleClose}
+        onCommentCountChange={handleCommentCountChange}
       /> : null}
 
     </div>

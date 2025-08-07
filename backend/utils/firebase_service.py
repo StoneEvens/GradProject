@@ -131,22 +131,41 @@ class FirebaseStorageService:
             
             # 建立 blob 物件
             blob = self.bucket.blob(file_path)
+            logger.info(f"Created blob for path: {file_path}")
+            logger.info(f"Bucket name: {self.bucket.name}")
             
             # 設定檔案內容類型
             if hasattr(image_file, 'content_type') and image_file.content_type:
                 blob.content_type = image_file.content_type
+                logger.info(f"Set content type: {image_file.content_type}")
+            else:
+                logger.info("No content type available")
             
             # 上傳檔案
+            logger.info(f"開始上傳檔案到: {file_path}")
             if isinstance(image_file, (InMemoryUploadedFile, TemporaryUploadedFile)):
+                logger.info(f"上傳檔案類型: {type(image_file)}, 大小: {image_file.size}")
                 blob.upload_from_file(image_file.file)
             else:
+                logger.info(f"上傳檔案類型: {type(image_file)}")
                 blob.upload_from_file(image_file)
             
+            logger.info("檔案上傳到 Firebase Storage 完成")
+            
+            # 檢查檔案是否真的存在
+            if blob.exists():
+                logger.info("確認檔案存在於 Firebase Storage")
+            else:
+                logger.error("檔案上傳後不存在於 Firebase Storage")
+                return False, "檔案上傳後不存在於 Firebase Storage", None
+            
             # 設定公開存取權限
+            logger.info("設定公開存取權限")
             blob.make_public()
             
             # 獲取公開 URL
             firebase_url = blob.public_url
+            logger.info(f"獲取公開 URL: {firebase_url}")
             
             logger.info(f"圖片上傳成功: {file_path}")
             return True, "圖片上傳成功", firebase_url
@@ -384,27 +403,37 @@ class FirebaseStorageService:
             logger.error(f"批量刪除貼文圖片時發生錯誤: {str(e)}")
             return False, f"批量刪除失敗: {str(e)}", results
 
-    def upload_feed_photo(self, user_id: int, feed_id: int, photo_file, photo_type: str) -> Tuple[bool, str, Optional[str], Optional[str]]:
+    def upload_feed_photo(self, feed_id: int, photo_file, photo_type: str, pet_type: str = 'cat') -> Tuple[bool, str, Optional[str], Optional[str]]:
         """
-        上傳飼料照片
+        上傳飼料照片到共用飼料資料庫
 
         Parameters:
-        - user_id: 用戶 ID
-        - feed_id: 飼料 ID
+        - feed_id: 飼料 ID（共用）
         - photo_file: 圖片檔案
         - photo_type: 照片類型 ('front', 'nutrition')
+        - pet_type: 寵物類型 ('cat', 'dog')
 
         Returns:
         - tuple: (是否成功, 訊息, Firebase URL, Firebase 路徑)
         """
-        folder = f"feeds/user_{user_id}/feed_{feed_id}/{photo_type}"
-        file_path = self.generate_file_path(folder, photo_file.name)
-        success, message, firebase_url = self.upload_image(photo_file, file_path)
-
-        if success:
-            return True, message, firebase_url, file_path
-        else:
-            return False, message, None, None
+        try:
+            # 直接生成路徑，像 upload_abnormal_record_image 一樣
+            file_extension = photo_file.name.split('.')[-1].lower() if '.' in photo_file.name else 'jpg'
+            unique_filename = f"feed_{photo_type}_{uuid.uuid4().hex}.{file_extension}"
+            file_path = f"feeds/shared/{pet_type}/feed_{feed_id}/{photo_type}/{unique_filename}"
+            
+            success, message, firebase_url = self.upload_image(photo_file, file_path)
+            
+            if success:
+                logger.info(f"飼料圖片上傳成功: feed_id={feed_id}, path={file_path}")
+                return True, message, firebase_url, file_path
+            else:
+                logger.error(f"飼料圖片上傳失敗: feed_id={feed_id}, error={message}")
+                return False, message, None, None
+                
+        except Exception as e:
+            logger.error(f"飼料圖片上傳異常: feed_id={feed_id}, error={str(e)}")
+            return False, f"飼料圖片上傳異常: {str(e)}", None, None
 
     def upload_abnormal_record_image(self, user_id: int, pet_id: int, image_file, sort_order: int = 0) -> Tuple[bool, str, Optional[str], Optional[str]]:
         """
@@ -489,6 +518,150 @@ class FirebaseStorageService:
         except Exception as e:
             logger.error(f"批量上傳異常記錄圖片時發生錯誤: {str(e)}")
             return False, f"批量上傳失敗: {str(e)}", uploaded_images
+
+    def upload_comment_image(self, user_id: int, comment_id: int, image_file, sort_order: int = 0) -> Tuple[bool, str, Optional[str], Optional[str]]:
+        """
+        上傳留言圖片
+
+        Parameters:
+        - user_id: 用戶 ID
+        - comment_id: 留言 ID
+        - image_file: 圖片檔案
+        - sort_order: 圖片排序順序
+
+        Returns:
+        - tuple: (是否成功, 訊息, Firebase URL, Firebase 路徑)
+        """
+        try:
+            # 生成留言圖片的檔案路徑
+            file_extension = image_file.name.split('.')[-1].lower() if '.' in image_file.name else 'jpg'
+            unique_filename = f"comment_{sort_order}_{uuid.uuid4().hex}.{file_extension}"
+            file_path = f"comments/{user_id}/{comment_id}/{unique_filename}"
+
+            success, message, firebase_url = self.upload_image(image_file, file_path)
+
+            if success:
+                logger.info(f"留言圖片上傳成功: comment_id={comment_id}, path={file_path}")
+                return True, message, firebase_url, file_path
+            else:
+                logger.error(f"留言圖片上傳失敗: comment_id={comment_id}, error={message}")
+                return False, message, None, None
+
+        except Exception as e:
+            logger.error(f"上傳留言圖片時發生錯誤: {str(e)}")
+            return False, f"上傳留言圖片失敗: {str(e)}", None, None
+
+    def upload_comment_images_batch(self, user_id: int, comment_id: int, image_files: list, start_sort_order: int = 0) -> Tuple[bool, str, list]:
+        """
+        批量上傳留言圖片
+
+        Parameters:
+        - user_id: 用戶 ID
+        - comment_id: 留言 ID
+        - image_files: 圖片檔案列表
+        - start_sort_order: 起始排序順序
+
+        Returns:
+        - tuple: (是否全部成功, 訊息, 成功上傳的圖片資訊列表)
+        """
+        uploaded_images = []
+        failed_count = 0
+
+        try:
+            for index, image_file in enumerate(image_files):
+                success, message, firebase_url, firebase_path = self.upload_comment_image(
+                    user_id=user_id,
+                    comment_id=comment_id,
+                    image_file=image_file,
+                    sort_order=start_sort_order + index
+                )
+
+                if success:
+                    uploaded_images.append({
+                        'firebase_url': firebase_url,
+                        'firebase_path': firebase_path,
+                        'sort_order': start_sort_order + index,
+                        'original_filename': getattr(image_file, 'name', f'comment_image_{index}'),
+                        'file_size': getattr(image_file, 'size', None),
+                        'content_type': getattr(image_file, 'content_type', None)
+                    })
+                else:
+                    failed_count += 1
+                    logger.error(f"留言圖片 {index} 上傳失敗: {message}")
+
+            total_files = len(image_files)
+            success_count = len(uploaded_images)
+
+            if failed_count == 0:
+                return True, f"所有 {total_files} 張留言圖片上傳成功", uploaded_images
+            elif success_count > 0:
+                return False, f"{success_count}/{total_files} 張留言圖片上傳成功，{failed_count} 張失敗", uploaded_images
+            else:
+                return False, f"所有 {total_files} 張留言圖片上傳失敗", uploaded_images
+
+        except Exception as e:
+            logger.error(f"批量上傳留言圖片時發生錯誤: {str(e)}")
+            return False, f"批量上傳失敗: {str(e)}", uploaded_images
+
+    def delete_comment_image(self, firebase_path: str) -> Tuple[bool, str]:
+        """
+        刪除留言圖片
+
+        Parameters:
+        - firebase_path: Firebase Storage 檔案路徑
+
+        Returns:
+        - tuple: (是否成功, 訊息)
+        """
+        try:
+            success, message = self.delete_image(firebase_path)
+            if success:
+                logger.info(f"留言圖片刪除成功: {firebase_path}")
+            else:
+                logger.error(f"留言圖片刪除失敗: {firebase_path}, error={message}")
+            return success, message
+        except Exception as e:
+            logger.error(f"刪除留言圖片時發生錯誤: {str(e)}")
+            return False, f"刪除留言圖片失敗: {str(e)}"
+
+    def delete_comment_images_batch(self, firebase_paths: list) -> Tuple[bool, str, dict]:
+        """
+        批量刪除留言圖片
+
+        Parameters:
+        - firebase_paths: Firebase Storage 檔案路徑列表
+
+        Returns:
+        - tuple: (是否全部成功, 訊息, 詳細結果)
+        """
+        results = {
+            'success': [],
+            'failed': [],
+            'total': len(firebase_paths)
+        }
+
+        try:
+            for path in firebase_paths:
+                if path:  # 確保路徑不為空
+                    success, message = self.delete_comment_image(path)
+                    if success:
+                        results['success'].append(path)
+                    else:
+                        results['failed'].append({'path': path, 'error': message})
+
+            success_count = len(results['success'])
+            failed_count = len(results['failed'])
+
+            if failed_count == 0:
+                return True, f"所有 {success_count} 張留言圖片刪除成功", results
+            elif success_count > 0:
+                return False, f"{success_count}/{results['total']} 張留言圖片刪除成功，{failed_count} 張失敗", results
+            else:
+                return False, f"所有 {results['total']} 張留言圖片刪除失敗", results
+
+        except Exception as e:
+            logger.error(f"批量刪除留言圖片時發生錯誤: {str(e)}")
+            return False, f"批量刪除失敗: {str(e)}", results
 
 
 # 全域服務實例

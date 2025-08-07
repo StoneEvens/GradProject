@@ -25,13 +25,28 @@ import LikedPostsPage from './pages/LikedPostsPage';
 import LikedPostsListPage from './pages/LikedPostsListPage';
 import SavedPostsPage from './pages/SavedPostsPage';
 import SavedPostsListPage from './pages/SavedPostsListPage';
+import LikedArchivesPage from './pages/LikedArchivesPage';
+import SavedArchivesPage from './pages/SavedArchivesPage';
 import PetRelatedPostsPage from './pages/PetRelatedPostsPage';
 import PetRelatedPostsListPage from './pages/PetRelatedPostsListPage';
 import PetAbnormalPostsPage from './pages/PetAbnormalPostsPage';
 import AbnormalPostDetailPage from './pages/AbnormalPostDetailPage';
 import CalculatorPage from './pages/CalculatorPage';
+import FeedPage from './pages/FeedPage';
+import FeedDetailPage from './pages/FeedDetailPage';
+import MarkedFeedsPage from './pages/MarkedFeedsPage';
+import AllFeedsPage from './pages/AllFeedsPage';
+import FeedSearchResultPage from './pages/FeedSearchResultPage';
 import { isAuthenticated, refreshAccessToken } from './services/authService';
-import HealthReport from './PetPage/HealthReport';
+import HealthReportsPage from './pages/HealthReportsPage';
+import HealthReportUploadPage from './pages/HealthReportUploadPage';
+import HealthReportDetailPage from './pages/HealthReportDetailPage';
+import PetDiseaseArchivePage from './pages/PetDiseaseArchivePage';
+import CreateDiseaseArchivePage from './pages/CreateDiseaseArchivePage';
+import DiseaseArchiveEditContentPage from './pages/DiseaseArchiveEditContentPage';
+import DiseaseArchivePreviewPage from './pages/DiseaseArchivePreviewPage';
+import DiseaseArchiveDetailPage from './pages/DiseaseArchiveDetailPage';
+import { UserProvider } from './context/UserContext';
 
 const App = () => {
   const [isUserAuthenticated, setIsUserAuthenticated] = useState(false);
@@ -110,7 +125,8 @@ const App = () => {
   }
 
   return (
-    <BrowserRouter>
+    <UserProvider>
+      <BrowserRouter>
       <Routes>
         {/* 根路徑：已登入導向MainPage，未登入導向HomePage */}
         <Route 
@@ -196,6 +212,16 @@ const App = () => {
           path="/saved-posts-list" 
           element={isUserAuthenticated ? <SavedPostsListPage /> : <Navigate to="/" />} 
         />
+        {/* 按讚的論壇文章頁面：未登入導向HomePage */}
+        <Route 
+          path="/liked-archives" 
+          element={isUserAuthenticated ? <LikedArchivesPage /> : <Navigate to="/" />} 
+        />
+        {/* 收藏的論壇文章頁面：未登入導向HomePage */}
+        <Route 
+          path="/saved-archives" 
+          element={isUserAuthenticated ? <SavedArchivesPage /> : <Navigate to="/" />} 
+        />
         {/* 寵物相關貼文頁面：未登入導向HomePage */}
         <Route 
           path="/pet/:petId/posts" 
@@ -226,6 +252,36 @@ const App = () => {
           path="/pet/:petId/edit" 
           element={isUserAuthenticated ? <EditPetPage /> : <Navigate to="/" />} 
         />
+        {/* 寵物疾病檔案頁面：未登入導向HomePage */}
+        <Route 
+          path="/pet/:petId/disease-archive" 
+          element={isUserAuthenticated ? <PetDiseaseArchivePage /> : <Navigate to="/" />} 
+        />
+        {/* 建立疾病檔案頁面：未登入導向HomePage */}
+        <Route 
+          path="/pet/:petId/disease-archive/create" 
+          element={isUserAuthenticated ? <CreateDiseaseArchivePage /> : <Navigate to="/" />} 
+        />
+        {/* 疾病檔案編輯頁面（第二步驟）：未登入導向HomePage */}
+        <Route 
+          path="/pet/:petId/disease-archive/edit-content" 
+          element={isUserAuthenticated ? <DiseaseArchiveEditContentPage /> : <Navigate to="/" />} 
+        />
+        {/* 疾病檔案預覽頁面：未登入導向HomePage */}
+        <Route 
+          path="/pet/:petId/disease-archive/preview" 
+          element={isUserAuthenticated ? <DiseaseArchivePreviewPage /> : <Navigate to="/" />} 
+        />
+        {/* 疾病檔案詳細頁面：未登入導向HomePage */}
+        <Route 
+          path="/pet/:petId/disease-archive/:archiveId" 
+          element={isUserAuthenticated ? <DiseaseArchiveDetailPage /> : <Navigate to="/" />} 
+        />
+        {/* 公開疾病檔案詳細頁面：未登入導向HomePage */}
+        <Route 
+          path="/disease-archive/:archiveId/public" 
+          element={isUserAuthenticated ? <DiseaseArchiveDetailPage /> : <Navigate to="/" />} 
+        />
         {/* 寵物異常貼文列表頁面：未登入導向HomePage */}
         <Route 
           path="/pet/:petId/abnormal-posts" 
@@ -234,6 +290,11 @@ const App = () => {
         {/* 異常貼文詳細頁面：未登入導向HomePage */}
         <Route 
           path="/pet/:petId/abnormal-post/:postId" 
+          element={isUserAuthenticated ? <AbnormalPostDetailPage /> : <Navigate to="/" />} 
+        />
+        {/* 公開異常貼文詳細頁面：未登入導向HomePage */}
+        <Route 
+          path="/abnormal-post/:postId/public" 
           element={isUserAuthenticated ? <AbnormalPostDetailPage /> : <Navigate to="/" />} 
         />
         {/* 編輯異常記錄頁面：未登入導向HomePage */}
@@ -271,13 +332,49 @@ const App = () => {
           path="/calculator" 
           element={isUserAuthenticated ? <CalculatorPage /> : <Navigate to="/" />} 
         />
-        {/* 計算機頁面：未登入導向HomePage */}
+        {/* 飼料頁面：未登入導向HomePage */}
         <Route 
-          path="/healthreport/upload" 
-          element={isUserAuthenticated ? <HealthReport /> : <Navigate to="/" />} 
+          path="/feeds" 
+          element={isUserAuthenticated ? <FeedPage /> : <Navigate to="/" />} 
+        />
+        {/* 飼料詳情頁面：未登入導向HomePage */}
+        <Route 
+          path="/feeds/:id" 
+          element={isUserAuthenticated ? <FeedDetailPage /> : <Navigate to="/" />} 
+        />
+        {/* 我的精選飼料頁面：未登入導向HomePage */}
+        <Route 
+          path="/feeds/my-marked" 
+          element={isUserAuthenticated ? <MarkedFeedsPage /> : <Navigate to="/" />} 
+        />
+        {/* 所有飼料頁面：未登入導向HomePage */}
+        <Route 
+          path="/feeds/all" 
+          element={isUserAuthenticated ? <AllFeedsPage /> : <Navigate to="/" />} 
+        />
+        {/* 飼料搜尋結果頁面：未登入導向HomePage */}
+        <Route 
+          path="/feeds/search" 
+          element={isUserAuthenticated ? <FeedSearchResultPage /> : <Navigate to="/" />} 
+        />
+        {/* 健康報告列表頁面 */}
+        <Route 
+          path="/health-reports" 
+          element={isUserAuthenticated ? <HealthReportsPage /> : <Navigate to="/" />} 
+        />
+        {/* 健康報告上傳頁面 */}
+        <Route 
+          path="/health-report/upload" 
+          element={isUserAuthenticated ? <HealthReportUploadPage /> : <Navigate to="/" />} 
+        />
+        {/* 健康報告詳情頁面 */}
+        <Route 
+          path="/health-report/:id" 
+          element={isUserAuthenticated ? <HealthReportDetailPage /> : <Navigate to="/" />} 
         />
       </Routes>
     </BrowserRouter>
+    </UserProvider>
   );
 };
 

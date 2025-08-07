@@ -1,0 +1,375 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #FFF2D9;
+}
+
+.content {
+  flex: 1;
+  padding: 30px;
+  padding-top: 80px;
+  padding-bottom: 90px;
+  max-width: 430px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  font-size: 16px;
+  color: #89350c;
+}
+
+/* 標題區域 */
+.titleSection {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 30px;
+  margin-bottom: 5px;
+  position: relative;
+}
+
+.title {
+  font-size: 24px;
+  color: #89350c;
+  text-align: left;
+  margin: 0;
+  font-weight: bold;
+}
+
+.viewMarkedButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: background-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #89350c;
+  font-size: 14px;
+}
+
+.viewMarkedButton:hover {
+  background-color: rgba(255, 179, 112, 0.2);
+}
+
+/* 新增飼料按鈕 */
+.addFeedButton {
+  background: #FFB370;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.addFeedButton:hover {
+  background: #F08651;
+  transform: translateY(-1px);
+}
+
+/* 分隔線 */
+.divider {
+  width: 100%;
+  height: 1.5px;
+  background: #FFB370;
+  margin: 10px 0 25px 0;
+}
+
+.viewMoreLink {
+  background: none;
+  border: none;
+  color: #FFB370;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.viewMoreLink:hover {
+  color: #FFB370;
+}
+
+/* 區塊 */
+.section {
+  margin-bottom: 20px;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.sectionLabel {
+  display: block;
+  font-size: 16px;
+  color: #89350c;
+  font-weight: bold;
+  margin-bottom: 0;
+}
+
+.sectionContent {
+  background-color: #fff6ea;
+  border-radius: 16px;
+  padding: 20px;
+  min-height: 120px;
+}
+
+.sectionTitle {
+  font-size: 16px;
+  font-weight: bold;
+  color: #89350c;
+  margin: 0 0 15px 0;
+}
+
+/* 飼料網格 */
+.feedGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  margin-bottom: 10px;
+}
+
+/* 飼料卡片 */
+.feedCard {
+  display: flex;
+  flex-direction: column;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+}
+
+.feedCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.feedImageContainer {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  background-color: #FFE4B5;
+  overflow: hidden;
+}
+
+.feedImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.feedImagePlaceholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #FFE4B5;
+  color: #89350c;
+  font-size: 12px;
+}
+
+/* 標記按鈕 */
+.markButton {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: white;
+  border: none;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease;
+}
+
+.markButton:hover {
+  transform: scale(1.1);
+}
+
+.markButton img {
+  width: 24px;
+  height: 24px;
+}
+
+/* 審核中標示 */
+.verifyingBadge {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 8px;
+  padding: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.verifyingBadge img {
+  width: 24px;
+  height: 24px;
+  display: block;
+}
+
+
+/* 飼料資訊 */
+.feedInfo {
+  padding: 10px;
+  background: white;
+}
+
+.feedName {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 4px 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.feedBrand {
+  font-size: 12px;
+  color: #666;
+  margin: 0 0 4px 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.feedPrice {
+  font-size: 14px;
+  font-weight: 600;
+  color: #F08651;
+  margin: 0;
+}
+
+.verifiedBadge {
+  display: inline-block;
+  font-size: 11px;
+  color: #28a745;
+  font-weight: 500;
+  margin-top: 4px;
+}
+
+/* 查看更多容器 */
+.viewMoreContainer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
+
+/* 空狀態 */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 100px;
+  color: #89350c;
+  font-size: 14px;
+  text-align: center;
+}
+
+.noResultImage {
+  width: 60px;
+  height: 60px;
+  margin-bottom: 4px;
+  opacity: 0.6;
+}
+
+/* 手機版優化 */
+@media (max-width: 480px) {
+  .content {
+    padding: 0 15px 80px 15px;
+  }
+  
+  .titleSection {
+    margin-top: 25px;
+    margin-bottom: 15px;
+  }
+  
+  .title {
+    font-size: 20px;
+  }
+  
+  .section {
+    margin-bottom: 15px;
+  }
+  
+  .sectionContent {
+    padding: 15px;
+  }
+
+  .sectionTitle {
+    font-size: 14px;
+    margin-bottom: 12px;
+  }
+
+  .feedGrid {
+    gap: 12px;
+  }
+
+  .feedName {
+    font-size: 12px;
+  }
+
+  .feedBrand {
+    font-size: 11px;
+  }
+
+  .feedPrice {
+    font-size: 12px;
+  }
+
+  .markButton {
+    width: 26px;
+    height: 26px;
+  }
+
+  .markButton img {
+    width: 22px;
+    height: 22px;
+  }
+
+  .viewMarkedButton {
+    padding: 6px;
+  }
+}
+
+@media (max-width: 360px) {
+  .feedGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .feedInfo {
+    padding: 8px;
+  }
+  
+  .sectionContent {
+    padding: 12px;
+  }
+}
