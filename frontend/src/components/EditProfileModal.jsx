@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import styles from '../styles/EditProfileModal.module.css';
 import { checkUserAccount } from '../services/userService';
 import Notification from './Notification';
+import { handleImageSelection, revokeImagePreview } from '../utils/imageUtils';
 
 const EditProfileModal = ({ user, isOpen, onClose, onSave }) => {
   const [formData, setFormData] = useState({
@@ -38,12 +39,34 @@ const EditProfileModal = ({ user, isOpen, onClose, onSave }) => {
   };
 
   // 處理頭像選擇
-  const handleImageSelect = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setSelectedImage(file);
-      const url = URL.createObjectURL(file);
-      setPreviewUrl(url);
+  const handleImageSelect = async (e) => {
+    // 清理舊的預覽URL
+    if (previewUrl && previewUrl.startsWith('blob:')) {
+      revokeImagePreview(previewUrl);
+    }
+
+    try {
+      const result = await handleImageSelection(e, {
+        compress: true,
+        compressOptions: {
+          maxWidth: 400,
+          maxHeight: 400,
+          quality: 0.8
+        },
+        validationOptions: {
+          maxSize: 5 * 1024 * 1024 // 5MB for profile pictures
+        }
+      });
+
+      if (result.success) {
+        setSelectedImage(result.processedFile);
+        setPreviewUrl(result.previewUrl);
+      } else {
+        showNotification(result.error);
+      }
+    } catch (error) {
+      console.error('頭像處理失敗:', error);
+      showNotification('頭像處理失敗，請重試');
     }
   };
 
@@ -131,10 +154,17 @@ const EditProfileModal = ({ user, isOpen, onClose, onSave }) => {
     onClose();
   };
 
+  // 處理點擊遮罩關閉 modal
+  const handleOverlayClick = (e) => {
+    if (e.target === e.currentTarget && !loading) {
+      handleCancel();
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
-    <div className={styles.modalOverlay}>
+    <div className={styles.modalOverlay} onClick={handleOverlayClick}>
       {notification && (
         <Notification
           message={notification}

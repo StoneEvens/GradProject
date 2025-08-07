@@ -5,6 +5,7 @@ import ConfirmNotification from './ConfirmNotification';
 import styles from '../styles/Post.module.css';
 import { togglePostLike, togglePostSave } from '../services/socialService';
 import { getUserProfile } from '../services/userService';
+import PostComments from './PostComments';
 
 const Post = ({ 
   postData,
@@ -54,7 +55,7 @@ const Post = ({
       const newIsLiked = userInteraction.is_liked ?? postData.is_liked ?? false;
       const newIsSaved = userInteraction.is_saved ?? postData.is_saved ?? false;
       const newLikeCount = interactionStats.likes ?? postData.like_count ?? 0;
-      const newCommentCount = postData.comment_count ?? 0;
+      const newCommentCount = interactionStats.comments ?? postData.comment_count ?? 0;
       
       console.log('Post 初始化狀態:', {
         postId: postData.id,
@@ -609,6 +610,11 @@ const Post = ({
           ))}
         </div>
       )}
+
+      <PostComments
+        user={currentUser}
+        previewComments={postData.top_comments || []}
+      />
 
       {/* 刪除確認對話框 */}
       {showDeleteConfirm && (

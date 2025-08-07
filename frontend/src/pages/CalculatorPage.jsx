@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import TopNavbar from '../components/TopNavbar.jsx';
-import BottomNavbar from '../components/BottomNavigationBar.jsx';
-import '../styles/CalculatorPage.css';
+import BottomNavbar from '../components/BottomNavigationbar';
+import styles from '../styles/CalculatorPage.module.css';
 import { getUserPets } from '../services/petService';
-// import CalculatorStep1 from '../components/CalculatorStep1';
 import CalculatorStep1 from '../components/CalculatorStep1.jsx';
 import CalculatorStep2 from '../components/CalculatorStep2.jsx';
 import CalculatorStep3 from '../components/CalculatorStep3.jsx';
@@ -15,6 +13,7 @@ function CalculatorPage() {
   const [selectedPet, setSelectedPet] = useState(null);
   const [pets, setPets] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [calculationResult, setCalculationResult] = useState(null);
 
   useEffect(() => {
     const fetchPets = async () => {
@@ -37,27 +36,32 @@ function CalculatorPage() {
     setStep(2);
   };
 
-  const [calculationResult, setCalculationResult] = useState(null);
-
   const handleStep2Next = (feed, result) => {
     setSelectedFeed(feed);
     setCalculationResult(result);
     setStep(3);
   };
 
+  const handleComplete = () => {
+    // 重置所有狀態，回到第一步
+    setStep(1);
+    setSelectedPet(null);
+    setSelectedFeed(null);
+    setCalculationResult(null);
+  };
 
   return (
-    <div className="calculator-page-container">
+    <div className={styles.container}>
       <TopNavbar />
-      <div className="calculator-content">
+      <div className={styles.content}>
         {loading ? (
-          <div style={{ padding: '2rem', textAlign: 'center' }}>載入中...</div>
+          <div className={styles.loadingContainer}>載入中...</div>
         ) : (
-          <>
+          <div className={styles.stepContent}>
             {step === 1 && <CalculatorStep1 onNext={handleStep1Next} pets={pets} />}
             {step === 2 && <CalculatorStep2 selectedPet={selectedPet} onNext={handleStep2Next} onPrev={() => setStep(1)} />}
-            {step === 3 && <CalculatorStep3 onPrev={() => setStep(2)} selectedFeed={selectedFeed} selectedPet={selectedPet} calculationResult={calculationResult}/>}
-          </>
+            {step === 3 && <CalculatorStep3 onPrev={() => setStep(2)} onComplete={handleComplete} selectedFeed={selectedFeed} selectedPet={selectedPet} calculationResult={calculationResult}/>}
+          </div>
         )}
       </div>
       <BottomNavbar />

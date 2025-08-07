@@ -2,11 +2,11 @@ from django.contrib import admin
 from .models import Comment
 
 class CommentAdmin(admin.ModelAdmin):
-    list_display = ('id', 'user', 'post_date', 'popularity', 'parent', 'content', 'postFrame')
-    list_filter = ('post_date',)
+    list_display = ('user', 'created_at', 'popularity', 'parent', 'content', 'postFrame')
+    list_filter = ('created_at',)
     search_fields = ('content', 'user__username')
-    readonly_fields = ('post_date', 'popularity')
+    readonly_fields = ('created_at', 'popularity')
     raw_id_fields = ('user', 'parent')
-    date_hierarchy = 'post_date'
+    date_hierarchy = 'created_at'
 
 admin.site.register(Comment, CommentAdmin)

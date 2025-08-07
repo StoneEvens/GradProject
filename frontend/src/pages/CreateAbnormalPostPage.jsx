@@ -322,7 +322,9 @@ const CreateAbnormalPostPage = () => {
 
       const draft = {
         selectedPet,
-        selectedDate: selectedDate ? selectedDate.toISOString() : null,
+        selectedDate: selectedDate ? 
+          `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}T12:00:00Z` 
+          : null,
         isEmergency,
         selectedSymptoms,
         bodyStats,
@@ -377,7 +379,9 @@ const CreateAbnormalPostPage = () => {
         try {
           const textOnlyDraft = {
             selectedPet,
-            selectedDate: selectedDate ? selectedDate.toISOString() : null,
+            selectedDate: selectedDate ? 
+              `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}T12:00:00Z` 
+              : null,
             isEmergency,
             selectedSymptoms,
             bodyStats,
@@ -708,7 +712,9 @@ const CreateAbnormalPostPage = () => {
         pet: {
           id: selectedPet.id
         },
-        date: selectedDate?.toISOString(),
+        date: selectedDate ? 
+          `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}T12:00:00Z` 
+          : null,
         isEmergency,
         symptoms: selectedSymptoms.map(symptom => ({
           text: typeof symptom === 'string' ? symptom : symptom.text

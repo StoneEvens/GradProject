@@ -20,6 +20,16 @@ const MyInteractionSettings = () => {
     navigate('/saved-posts');
   };
 
+  const handleLikedArchivesClick = () => {
+    // 導航到按讚的論壇文章頁面
+    navigate('/liked-archives');
+  };
+
+  const handleSavedArchivesClick = () => {
+    // 導航到收藏的論壇文章頁面
+    navigate('/saved-archives');
+  };
+
   return (
     <div className={styles.myInteractionContainer}>
       {/* 我的互動標題列 */}
@@ -56,6 +66,26 @@ const MyInteractionSettings = () => {
           <div className={styles.interactionItem} onClick={handleSavedPostsClick}>
             <div className={styles.itemLeft}>
               <span className={styles.itemText}>收藏的貼文</span>
+            </div>
+            <div className={styles.itemRight}>
+              <span className={styles.chevronIcon}>❯</span>
+            </div>
+          </div>
+
+          {/* 按讚的論壇文章 */}
+          <div className={styles.interactionItem} onClick={handleLikedArchivesClick}>
+            <div className={styles.itemLeft}>
+              <span className={styles.itemText}>按讚的論壇文章</span>
+            </div>
+            <div className={styles.itemRight}>
+              <span className={styles.chevronIcon}>❯</span>
+            </div>
+          </div>
+
+          {/* 收藏的論壇文章 */}
+          <div className={styles.interactionItem} onClick={handleSavedArchivesClick}>
+            <div className={styles.itemLeft}>
+              <span className={styles.itemText}>收藏的論壇文章</span>
             </div>
             <div className={styles.itemRight}>
               <span className={styles.chevronIcon}>❯</span>

@@ -13,6 +13,44 @@
   overflow-y: auto;
 }
 
+/* 分頁切換樣式 */
+.tabs {
+  display: flex;
+  width: 100%;
+  max-width: calc(430px + 30px); /* PostList 寬度 + 其 padding */
+  margin: 0 auto;
+  padding: 20px 35px 10px 35px; /* 左右 padding = 20px (content) + 15px (PostList) */
+  box-sizing: border-box;
+  position: sticky;
+  top: calc(60px + max(env(safe-area-inset-top), 10px));
+  background-color: #FFF2D9;
+  z-index: 10;
+}
+
+.tab {
+  flex: 1;
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: bold;
+  padding: 10px 0;
+  background: transparent;
+  color: #999;
+  border: none;
+  border-bottom: 2px solid #FFB370;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  border-radius: 8px 8px 0 0; /* 只有上方圓角 */
+}
+
+.tab:last-child {
+  margin-right: 0;
+}
+
+.tab.active {
+  background: #FFB370;
+  color: #fff;
+}
+
 /* 貼文區域樣式 */
 .postsSection {
   width: 100%;

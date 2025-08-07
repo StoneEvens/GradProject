@@ -1,0 +1,476 @@
+/* 標題區域 */
+.titleSection {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 30px;
+  margin-bottom: 5px;
+  position: relative;
+}
+
+.title {
+  font-size: 24px;
+  color: #89350c;
+  text-align: left;
+  margin: 0;
+  font-weight: bold;
+}
+
+.historyButton {
+  background: none;
+  border: none;
+  color: #89350c;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: opacity 0.2s ease;
+}
+
+.historyButton:hover {
+  opacity: 0.7;
+}
+
+.historyButton::before {
+  content: '';
+  background-image: url('/assets/icon/HistoryRecordIcon.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  width: 24px;
+  height: 24px;
+  display: inline-block;
+}
+
+.stepLabel {
+  font-size: 18px;
+  color: #89350c;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.divider {
+  width: 100%;
+  height: 1.5px;
+  background: #FFB370;
+  margin: 10px 0 25px 0;
+}
+
+/* 通用區域樣式 */
+.section {
+  margin-bottom: 20px;
+}
+
+.sectionLabel {
+  display: block;
+  font-size: 16px;
+  color: #89350c;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+/* 飼料選擇區域 */
+.feedSelectSection {
+  background-color: #fff6ea;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+/* 選擇的飼料顯示區域 */
+.selectedFeedDisplay {
+  margin-bottom: 10px;
+  min-height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.selectedFeedInfo {
+  display: flex;
+  align-items: center;
+  background-color: white;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  gap: 16px;
+}
+
+.selectedFeedImage {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  flex-shrink: 0;
+}
+
+.selectedFeedImage img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.verifyingBadge {
+  position: absolute;
+  bottom: 4px;
+  left: 4px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 4px;
+  padding: 2px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.verifyingBadge img {
+  width: 16px;
+  height: 16px;
+  display: block;
+}
+
+
+.selectedFeedDetails {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.selectedFeedName {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.selectedFeedBrand {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+}
+
+.selectedFeedPrice {
+  font-size: 14px;
+  color: #F08651;
+  font-weight: 500;
+  margin: 0;
+}
+
+.selectedFeedStatus {
+  font-size: 12px;
+}
+
+.verified {
+  color: #4CAF50;
+  font-weight: 500;
+}
+
+.unverified {
+  color: #FF9800;
+  font-weight: 500;
+}
+
+/* 未選擇飼料狀態 */
+.noFeedSelected {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #666;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 12px;
+  width: 100%;
+}
+
+.noFeedIcon {
+  margin-bottom: 12px;
+}
+
+.noFeedIcon img {
+  width: 48px;
+  height: 48px;
+  opacity: 0.6;
+}
+
+.noFeedText {
+  font-size: 14px;
+  color: #666;
+}
+
+/* 飼料操作按鈕容器 */
+.feedActionButtons {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.selectFeedBtn {
+  background-color: #FFB370;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.selectFeedBtn:hover {
+  background-color: #F08651;
+}
+
+.addFeedBtn {
+  background-color: #FFB370;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.addFeedBtn:hover {
+  background-color: #F08651;
+}
+
+/* 飼料資訊區域 */
+.feedInfoSection {
+  background-color: #ffeed6;
+  border-radius: 16px;
+  padding: 20px;
+  border: 2px solid #FFB370;
+  position: relative;
+}
+
+.feedActions {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+}
+
+.reviewButton {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.reviewButton:hover:not(:disabled) {
+  background-color: #218838;
+}
+
+.reviewButton:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+
+.feedInfoRow {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.feedInfoRow:last-child {
+  margin-bottom: 0;
+}
+
+.feedInfoLabel {
+  font-size: 14px;
+  color: #89350c;
+  font-weight: 500;
+  min-width: 100px;
+  margin-right: 10px;
+}
+
+.feedInfoInput {
+  flex: 1;
+  max-width: 200px;
+  padding: 6px 12px;
+  border: 2px solid #FFB370;
+  border-radius: 8px;
+  background-color: white;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.feedInfoInput:focus {
+  border-color: #F08651;
+}
+
+.feedInfoUnit {
+  font-size: 14px;
+  color: #89350c;
+  font-weight: 500;
+  margin-left: 8px;
+  min-width: 25px;
+}
+
+/* 操作按鈕 */
+.actionButtons {
+  display: flex;
+  gap: 15px;
+  justify-content: space-between;
+  margin-top: 30px;
+}
+
+.prevButton {
+  background-color: #ffce99;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 14px 28px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  flex: 1;
+  max-width: 150px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+}
+
+.prevButton:hover {
+  background-color: #FFB370;
+}
+
+.nextButton {
+  background-color: #F08651;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 14px 28px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  flex: 1;
+  max-width: 150px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+}
+
+.nextButton:hover {
+  background-color: #E07641;
+}
+
+.hiddenInput {
+  display: none;
+}
+
+/* 響應式設計 */
+@media (max-width: 480px) {
+  .titleSection {
+    margin-top: 25px;
+    margin-bottom: 15px;
+  }
+
+  .title {
+    font-size: 20px;
+  }
+
+  .stepLabel {
+    font-size: 16px;
+    margin-bottom: 16px;
+  }
+
+  .section {
+    margin-bottom: 18px;
+  }
+
+  .sectionLabel {
+    font-size: 15px;
+    margin-bottom: 8px;
+  }
+
+  .feedSelectSection,
+  .feedInfoSection {
+    padding: 14px;
+  }
+
+  .feedGrid {
+    gap: 12px;
+    margin-bottom: 40px;
+  }
+
+  .feedInfoLabel {
+    font-size: 13px;
+    min-width: 85px;
+  }
+
+  .feedInfoInput {
+    font-size: 13px;
+    padding: 5px 10px;
+  }
+
+  .feedInfoUnit {
+    font-size: 13px;
+  }
+
+  .actionButtons {
+    gap: 12px;
+    margin-top: 25px;
+  }
+
+  .prevButton,
+  .nextButton {
+    padding: 12px 20px;
+    font-size: 15px;
+    height: 45px;
+  }
+}
+
+@media (max-width: 360px) {
+  .feedSelectSection,
+  .feedInfoSection {
+    padding: 12px;
+  }
+
+  .feedGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .feedInfoRow {
+    margin-bottom: 12px;
+  }
+
+  .feedInfoLabel {
+    font-size: 12px;
+    min-width: 75px;
+  }
+
+  .feedInfoInput {
+    font-size: 12px;
+    padding: 4px 8px;
+  }
+
+  .feedActionButtons {
+    gap: 8px;
+  }
+  
+  .selectFeedBtn,
+  .addFeedBtn {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+}

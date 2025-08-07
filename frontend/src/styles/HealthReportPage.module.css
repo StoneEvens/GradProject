@@ -1,0 +1,603 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #FFF2D9;
+}
+
+.content {
+  flex: 1;
+  padding: 30px;
+  padding-top: 80px;
+  padding-bottom: 90px;
+  max-width: 430px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+/* 載入中樣式 */
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+  color: #89350c;
+  font-size: 16px;
+}
+
+.errorContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+  color: #89350c;
+  font-size: 16px;
+  text-align: center;
+}
+
+/* List Page Styles */
+.listContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* 標題列 */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 20px 0 8px 0;
+  gap: 15px;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+.titleSection {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  flex: 1;
+}
+
+.title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #89350c;
+  margin: 0;
+}
+
+/* 分隔線 */
+.divider {
+  width: 100%;
+  height: 2px;
+  background-color: #FFB370;
+  margin-bottom: 20px;
+}
+
+.selectContainer {
+  display: flex;
+  justify-content: center;
+}
+
+.select {
+  background-color: #FFB370;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-weight: 600;
+  font-size: 16px;
+  color: #fff;
+  cursor: pointer;
+  min-width: 200px;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.select:disabled {
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+.select option {
+  background-color: #FFF6ea;
+  color: #89350c;
+  font-weight: 500;
+}
+
+/* 健康報告列表 */
+.reportList {
+  margin-bottom: 20px;
+}
+
+/* 健康報告預覽項目 */
+.reportItem {
+  display: flex;
+  align-items: center;
+  background: #FFF6EA;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid #FFE5C4;
+}
+
+.reportItem:hover {
+  background: #FFF2D9;
+  border-color: #FFB370;
+}
+
+.reportIcon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+
+.reportIcon img {
+  width: 32px;
+  height: 32px;
+}
+
+.reportContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.reportDateRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 2px;
+}
+
+.reportDate {
+  font-size: 14px;
+  font-weight: bold;
+  color: #89350c;
+}
+
+.reportInfo {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.reportLabel {
+  font-size: 12px;
+  color: #89350c;
+  font-weight: 500;
+}
+
+.reportDetail {
+  font-size: 12px;
+  color: #89350c;
+  font-weight: 400;
+}
+
+.reportArrow {
+  font-size: 16px;
+  color: #FFB370;
+  margin-left: 8px;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.reportItem:hover .reportArrow {
+  color: #FF8C42;
+  transform: translateX(2px);
+}
+
+/* 舊的表格樣式保留為備用 */
+.tableWrapper {
+  background-color: transparent;
+  border-radius: 16px;
+  padding: 0;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  background-color: white;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.table th,
+.table td {
+  padding: 12px 8px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.table th {
+  background-color: #f5f5f5;
+  font-weight: 600;
+  color: #333;
+}
+
+.tableRow {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.tableRow:hover {
+  background-color: #FFF8E1;
+}
+
+/* 空狀態 */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.emptyIcon {
+  width: 100px;
+  height: 100px;
+  margin-bottom: 16px;
+  opacity: 0.6;
+}
+
+.emptyState p {
+  color: #888;
+  font-size: 16px;
+  margin: 0;
+}
+
+.uploadButton {
+  background-color: #FFB370;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 16px 32px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  align-self: center;
+  box-shadow: 0 2px 4px rgba(255, 179, 112, 0.3);
+}
+
+.uploadButton:hover {
+  background-color: #FF8C42;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(255, 179, 112, 0.4);
+}
+
+/* Upload Page Styles */
+.uploadContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.label {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.input {
+  padding: 12px 16px;
+  border: 1px solid #FFE5C4;
+  border-radius: 8px;
+  background-color: white;
+  font-size: 16px;
+  color: #89350c;
+  transition: all 0.2s ease;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #FFB370;
+  box-shadow: 0 0 0 2px rgba(255, 179, 112, 0.2);
+}
+
+.ocrUploadSection {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+.ocrButton {
+  background-color: #FFF6EA;
+  color: #89350c;
+  border: 2px solid #FFB370;
+  border-radius: 12px;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ocrButton:hover:not(:disabled) {
+  background-color: #FFB370;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(255, 179, 112, 0.3);
+}
+
+.ocrButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  background-color: #f5f5f5;
+  border-color: #ddd;
+  color: #999;
+}
+
+.section {
+  background-color: #FFF6EA;
+  border: 1px solid #FFE5C4;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.sectionTitle {
+  background-color: #FFB370;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: 600;
+  padding: 12px;
+  margin: 0 0 16px 0;
+  font-size: 16px;
+  color: white;
+}
+
+.textarea {
+  width: 100%;
+  min-height: 120px;
+  padding: 12px 16px;
+  border: 1px solid #FFE5C4;
+  border-radius: 8px;
+  background-color: white;
+  font-size: 16px;
+  color: #89350c;
+  resize: vertical;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.textarea:focus {
+  outline: none;
+  border-color: #FFB370;
+  box-shadow: 0 0 0 2px rgba(255, 179, 112, 0.2);
+}
+
+.buttonContainer {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.confirmButton {
+  background-color: #FFB370;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 16px 32px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(255, 179, 112, 0.3);
+}
+
+.confirmButton:hover {
+  background-color: #FF8C42;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(255, 179, 112, 0.4);
+}
+
+/* View Page Styles */
+.viewContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.infoSection {
+  background-color: #FFF6EA;
+  border: 1px solid #FFE5C4;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.infoRow {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.infoLabel {
+  font-weight: 600;
+  color: #89350c;
+  min-width: 100px;
+}
+
+.infoValue {
+  color: #89350c;
+  font-weight: 500;
+}
+
+.toggleContainer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+.toggleButton {
+  background: #FFB370;
+  border: none;
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.toggleButton:hover {
+  background-color: #FF8C42;
+  transform: translateY(-1px);
+}
+
+.buttonRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.editButton {
+  background-color: #FFB370;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  flex: 1;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(255, 179, 112, 0.3);
+}
+
+.editButton:hover {
+  background-color: #FF8C42;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(255, 179, 112, 0.4);
+}
+
+.deleteButton {
+  background-color: #FF6B6B;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  flex: 1;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(255, 107, 107, 0.3);
+}
+
+.deleteButton:hover {
+  background-color: #FF5252;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(255, 107, 107, 0.4);
+}
+
+.cancelButton {
+  background-color: #B0B0B0;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  flex: 1;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(176, 176, 176, 0.3);
+}
+
+.cancelButton:hover {
+  background-color: #9E9E9E;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(176, 176, 176, 0.4);
+}
+
+/* 手機版優化 */
+@media (max-width: 480px) {
+  .content {
+    padding: 0 15px 80px 15px;
+  }
+  
+  .header {
+    padding: 15px 0 12px 0;
+    gap: 10px;
+  }
+  
+  .title {
+    font-size: 1.3rem;
+  }
+  
+  .buttonRow {
+    flex-direction: column;
+  }
+  
+  .reportItem {
+    padding: 10px 12px;
+    margin-bottom: 6px;
+  }
+  
+  .reportIcon {
+    width: 36px;
+    height: 36px;
+    margin-right: 10px;
+  }
+  
+  .reportIcon img {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .reportDate {
+    font-size: 13px;
+  }
+  
+  .reportLabel,
+  .reportDetail {
+    font-size: 11px;
+  }
+  
+  .emptyState {
+    padding: 50px 15px;
+  }
+  
+  .emptyState p {
+    font-size: 15px;
+  }
+  
+  .emptyIcon {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .section {
+    padding: 16px;
+  }
+  
+  .buttonContainer {
+    flex-direction: column;
+    gap: 8px;
+  }
+}

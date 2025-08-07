@@ -747,6 +747,7 @@ class SocialService {
       const response = await authAxios.get(url);
 
       const result = response.data;
+      
       if (result.success) {
         return {
           success: true,
@@ -1021,6 +1022,186 @@ class SocialService {
       };
     }
   }
+
+  /**
+   * 切換疾病檔案按讚狀態
+   * @param {number} archiveId - 疾病檔案ID
+   * @returns {Promise} 操作結果
+   */
+  async toggleArchiveLike(archiveId) {
+    try {
+      console.log('toggleArchiveLike API 調用:', { archiveId });
+      
+      const response = await authAxios.post(`/interactions/illness-archives/${archiveId}/interaction/`, {
+        relation: 'liked'  // 發送 'liked' 來切換按讚狀態
+      });
+
+      console.log('toggleArchiveLike API 響應:', {
+        status: response.status,
+        data: response.data
+      });
+
+      const result = response.data;
+      return {
+        success: true,
+        data: result.data,
+        message: result.detail || '操作成功'
+      };
+    } catch (error) {
+      console.error('疾病檔案按讚錯誤:', error);
+      console.error('錯誤詳情:', {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message
+      });
+      return {
+        success: false,
+        error: error.response?.data?.detail || error.message || '操作失敗'
+      };
+    }
+  }
+
+  /**
+   * 切換疾病檔案收藏狀態
+   * @param {number} archiveId - 疾病檔案ID
+   * @returns {Promise} 操作結果
+   */
+  async toggleArchiveSave(archiveId) {
+    try {
+      console.log('toggleArchiveSave API 調用:', { archiveId });
+      
+      const response = await authAxios.post(`/interactions/illness-archives/${archiveId}/interaction/`, {
+        relation: 'saved'  // 發送 'saved' 來切換收藏狀態
+      });
+
+      console.log('toggleArchiveSave API 響應:', {
+        status: response.status,
+        data: response.data
+      });
+
+      const result = response.data;
+      return {
+        success: true,
+        data: result.data,
+        message: result.detail || '操作成功'
+      };
+    } catch (error) {
+      console.error('疾病檔案收藏錯誤:', error);
+      console.error('錯誤詳情:', {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message
+      });
+      return {
+        success: false,
+        error: error.response?.data?.detail || error.message || '操作失敗'
+      };
+    }
+  }
+
+  /**
+   * 獲取用戶按讚的疾病檔案列表
+   * @param {Object} params - 查詢參數
+   * @param {string} params.sort - 排序方式
+   * @param {number} params.page - 頁數
+   * @param {number} params.limit - 每頁數量
+   * @returns {Promise} 按讚疾病檔案列表
+   */
+  async getUserLikedArchives(params = {}) {
+    try {
+      const queryParams = new URLSearchParams({
+        sort: params.sort || 'archive_date_desc',
+        page: params.page || 1,
+        limit: params.limit || 10,
+        ...params
+      });
+
+      const response = await authAxios.get(`/interactions/user/liked-archives/?${queryParams}`);
+      const result = response.data;
+      
+      console.log('獲取按讚疾病檔案 API 回應:', result);
+      
+      // 處理分頁回應
+      if (result.results) {
+        return {
+          success: true,
+          data: {
+            archives: result.results,
+            count: result.count,
+            next: result.next,
+            previous: result.previous,
+            has_more: !!result.next
+          },
+          message: '獲取按讚疾病檔案成功'
+        };
+      } else {
+        return {
+          success: true,
+          data: result.data || result,
+          message: result.message || '獲取按讚疾病檔案成功'
+        };
+      }
+    } catch (error) {
+      console.error('獲取按讚疾病檔案錯誤:', error);
+      return {
+        success: false,
+        error: error.response?.data?.message || error.message || '獲取按讚疾病檔案失敗',
+        data: { archives: [], has_more: false }
+      };
+    }
+  }
+
+  /**
+   * 獲取用戶收藏的疾病檔案列表
+   * @param {Object} params - 查詢參數
+   * @param {string} params.sort - 排序方式
+   * @param {number} params.page - 頁數
+   * @param {number} params.limit - 每頁數量
+   * @returns {Promise} 收藏疾病檔案列表
+   */
+  async getUserSavedArchives(params = {}) {
+    try {
+      const queryParams = new URLSearchParams({
+        sort: params.sort || 'archive_date_desc',
+        page: params.page || 1,
+        limit: params.limit || 10,
+        ...params
+      });
+
+      const response = await authAxios.get(`/interactions/user/saved-archives/?${queryParams}`);
+      const result = response.data;
+      
+      console.log('獲取收藏疾病檔案 API 回應:', result);
+      
+      // 處理分頁回應
+      if (result.results) {
+        return {
+          success: true,
+          data: {
+            archives: result.results,
+            count: result.count,
+            next: result.next,
+            previous: result.previous,
+            has_more: !!result.next
+          },
+          message: '獲取收藏疾病檔案成功'
+        };
+      } else {
+        return {
+          success: true,
+          data: result.data || result,
+          message: result.message || '獲取收藏疾病檔案成功'
+        };
+      }
+    } catch (error) {
+      console.error('獲取收藏疾病檔案錯誤:', error);
+      return {
+        success: false,
+        error: error.response?.data?.message || error.message || '獲取收藏疾病檔案失敗',
+        data: { archives: [], has_more: false }
+      };
+    }
+  }
 }
 
 // 創建單例實例
@@ -1051,5 +1232,9 @@ export const reorderPostImages = socialService.reorderPostImages.bind(socialServ
 export const createAnnotation = socialService.createAnnotation.bind(socialService);
 export const updateAnnotation = socialService.updateAnnotation.bind(socialService);
 export const deleteAnnotation = socialService.deleteAnnotation.bind(socialService);
+export const toggleArchiveLike = socialService.toggleArchiveLike.bind(socialService);
+export const toggleArchiveSave = socialService.toggleArchiveSave.bind(socialService);
+export const getUserLikedArchives = socialService.getUserLikedArchives.bind(socialService);
+export const getUserSavedArchives = socialService.getUserSavedArchives.bind(socialService);
 
 export default socialService; 

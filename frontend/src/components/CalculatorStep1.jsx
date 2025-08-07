@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import '../styles/CalculatorStep1.css';
+import styles from '../styles/CalculatorStep1.module.css';
 import defaultAvatar from '../MockPicture/mockCat1.jpg';
+import NotificationComponent from './Notification';
+import HistoryRecordModal from './HistoryRecordModal';
 
 // Mapping between English and Chinese species
 const speciesMap = {
@@ -14,9 +16,17 @@ const speciesReverseMap = {
 };
 
 function CalculatorStep1({ onNext, pets: apiPets }) {
+  const [notification, setNotification] = useState('');
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
+  
+  // 過去紀錄按鈕點擊事件
+  const handleHistoryClick = () => {
+    setShowHistoryModal(true);
+  };
+  
   // Check if apiPets is valid
   if (!apiPets || !Array.isArray(apiPets) || apiPets.length === 0) {
-    return <div className="calculator-step1">沒有寵物資料，請先添加寵物</div>;
+    return <div className={styles.container}>沒有寵物資料，請先添加寵物</div>;
   }
 
   // Format pets: convert species from English to Chinese for display
@@ -108,7 +118,7 @@ function CalculatorStep1({ onNext, pets: apiPets }) {
         console.log('寵物更新成功！');
       } catch (err) {
         console.error('寵物更新失敗：', err);
-        alert('更新寵物資料失敗，請稍後再試');
+        setNotification('更新寵物資料失敗，請稍後再試');
       }
 
       onNext(pets[selectedPet]);
@@ -117,123 +127,150 @@ function CalculatorStep1({ onNext, pets: apiPets }) {
 
   return (
     <>
-      <div className="calculator-title">營養計算機</div>
-      <div className="pet-select-label">
-        Step 1.<br />請選擇一隻寵物
+      <div className={styles.titleSection}>
+        <h2 className={styles.title}>營養計算機</h2>
+        <button className={styles.historyButton} onClick={handleHistoryClick}>
+          過去紀錄
+        </button>
       </div>
-      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', margin: '12px 0' }}>
-        <label className="switch">
-          <input
-            type="checkbox"
-            checked={isAdding}
-            onChange={() => {
-              const newMode = !isAdding;
-              setIsAdding(newMode);
-              setNewPet({ pet_name: '', species: '貓', weight: '', height: '', note: '' });
-              console.log('目前模式:', newMode ? '新增' : '選擇');
-            }}
-          />
-          <span className="slider round"></span>
-        </label>
-        <span style={{ marginLeft: 12 }}>
-          {isAdding ? '新增臨時寵物模式' : '選擇寵物模式'}
-        </span>
+      <div className={styles.divider}></div>
+      
+      <div className={styles.stepLabel}>
+        <span>Step 1. 請選擇一隻寵物</span>
+        <div className={styles.modeSwitch}>
+          <label className={styles.switch}>
+            <input
+              type="checkbox"
+              checked={isAdding}
+              onChange={() => {
+                const newMode = !isAdding;
+                setIsAdding(newMode);
+                setNewPet({ pet_name: '', species: '貓', weight: '', height: '', note: '' });
+                console.log('目前模式:', newMode ? '新增' : '選擇');
+              }}
+            />
+            <span className={styles.slider}></span>
+          </label>
+          <span className={styles.modeText}>
+            {isAdding ? '新增臨時寵物' : '選擇寵物'}
+          </span>
+        </div>
       </div>
 
-      <div className="pet-select-section">
-        <div className="pet-avatar-grid">
+      <div className={styles.section}>
+        <label className={styles.sectionLabel}>選擇寵物:</label>
+        <div className={styles.petSwitcher}>
           {pets.map((pet, idx) => (
-            <img
+            <div
               key={`pet-${pet.id}`}
-              src={pet.avatar}
-              alt={pet.pet_name}
-              className={`pet-avatar${selectedPet === idx && !isAdding ? ' selected' : ''}`}
+              className={`${styles.petItem} ${selectedPet === idx && !isAdding ? styles.activePet : ''}`}
               onClick={() => handleSelectPet(idx)}
-            />
+            >
+              <img
+                src={pet.avatar}
+                alt={pet.pet_name}
+                className={styles.petAvatar}
+              />
+            </div>
           ))}
         </div>
       </div>
 
-      <div className="pet-select-label">
-        寵物資訊 {isAdding && <span style={{ color: 'gray' }}>（新增臨時寵物中）</span>}
-      </div>
-
-      <div className="pet-info-section">
-        <div className="pet-info-row">
-          <span className="pet-info-label">名字：</span>
-          {isAdding ? (
-            <input
-              className="pet-info-input"
-              type="text"
-              value={newPet.pet_name}
-              onChange={(e) => setNewPet({ ...newPet, pet_name: e.target.value })}
-              placeholder="請輸入名字"
-            />
-          ) : (
-            <span>{pets[selectedPet]?.pet_name || '未知'}</span>
-          )}
-        </div>
-        <div className="pet-info-row">
-          <span className="pet-info-label">物種：</span>
-          {isAdding ? (
-            <select
-              className="pet-info-input"
-              value={newPet.species}
-              onChange={(e) => setNewPet({ ...newPet, species: e.target.value })}
-            >
-              <option value="貓">貓</option>
-              <option value="狗">狗</option>
-            </select>
-          ) : (
-            <span>{pets[selectedPet]?.species || '未知'}</span>
-          )}
-        </div>
-        <div className="pet-info-row">
-          <span className="pet-info-label">體重：</span>
-          {isAdding ? (
-            <input
-              className="pet-info-input"
-              type="number"
-              value={newPet.weight}
-              onChange={(e) => setNewPet({ ...newPet, weight: e.target.value })}
-              placeholder="公斤"
-            />
-          ) : (
-            <input
-              className="pet-info-input"
-              type="number"
-              value={editInfo.weight}
-              onChange={(e) => handleInfoChange('weight', e.target.value)}
-            />
-          )}
-          <span>公斤</span>
-        </div>
-        <div className="pet-info-row">
-          <span className="pet-info-label">身高：</span>
-          {isAdding ? (
-            <input
-              className="pet-info-input"
-              type="number"
-              value={newPet.height}
-              onChange={(e) => setNewPet({ ...newPet, height: e.target.value })}
-              placeholder="公分"
-            />
-          ) : (
-            <input
-              className="pet-info-input"
-              type="number"
-              value={editInfo.height}
-              onChange={(e) => handleInfoChange('height', e.target.value)}
-            />
-          )}
-          <span>公分</span>
+      <div className={styles.section}>
+        <label className={styles.sectionLabel}>
+          寵物資訊 {isAdding && <span className={styles.addingHint}>（新增臨時寵物中）</span>}
+        </label>
+        <div className={styles.petInfoSection}>
+          <div className={styles.petInfoRow}>
+            <span className={styles.petInfoLabel}>名字：</span>
+            {isAdding ? (
+              <input
+                className={styles.petInfoInput}
+                type="text"
+                value={newPet.pet_name}
+                onChange={(e) => setNewPet({ ...newPet, pet_name: e.target.value })}
+                placeholder="請輸入名字"
+              />
+            ) : (
+              <span className={styles.petInfoValue}>{pets[selectedPet]?.pet_name || '未知'}</span>
+            )}
+          </div>
+          <div className={styles.petInfoRow}>
+            <span className={styles.petInfoLabel}>物種：</span>
+            {isAdding ? (
+              <select
+                className={styles.petInfoSelect}
+                value={newPet.species}
+                onChange={(e) => setNewPet({ ...newPet, species: e.target.value })}
+              >
+                <option value="貓">貓</option>
+                <option value="狗">狗</option>
+              </select>
+            ) : (
+              <span className={styles.petInfoValue}>{pets[selectedPet]?.species || '未知'}</span>
+            )}
+          </div>
+          <div className={styles.petInfoRow}>
+            <span className={styles.petInfoLabel}>體重：</span>
+            {isAdding ? (
+              <input
+                className={styles.petInfoInput}
+                type="number"
+                value={newPet.weight}
+                onChange={(e) => setNewPet({ ...newPet, weight: e.target.value })}
+                placeholder="公斤"
+              />
+            ) : (
+              <input
+                className={styles.petInfoInput}
+                type="number"
+                value={editInfo.weight}
+                onChange={(e) => handleInfoChange('weight', e.target.value)}
+              />
+            )}
+            <span className={styles.petInfoUnit}>公斤</span>
+          </div>
+          <div className={styles.petInfoRow}>
+            <span className={styles.petInfoLabel}>身高：</span>
+            {isAdding ? (
+              <input
+                className={styles.petInfoInput}
+                type="number"
+                value={newPet.height}
+                onChange={(e) => setNewPet({ ...newPet, height: e.target.value })}
+                placeholder="公分"
+              />
+            ) : (
+              <input
+                className={styles.petInfoInput}
+                type="number"
+                value={editInfo.height}
+                onChange={(e) => handleInfoChange('height', e.target.value)}
+              />
+            )}
+            <span className={styles.petInfoUnit}>公分</span>
+          </div>
         </div>
         {errorMsg && (
-          <div style={{ color: 'red', marginTop: 4, marginLeft: 8, fontSize: '0.95rem' }}>{errorMsg}</div>
+          <div className={styles.errorMsg}>{errorMsg}</div>
         )}
       </div>
 
-      <button className="next-step-btn" onClick={handleNext}>下一步</button>
+      <div className={styles.actionButtons}>
+        <button className={styles.nextButton} onClick={handleNext}>下一步</button>
+      </div>
+      
+      <HistoryRecordModal
+        isOpen={showHistoryModal}
+        onClose={() => setShowHistoryModal(false)}
+      />
+      
+      {notification && (
+        <NotificationComponent 
+          message={notification} 
+          onClose={() => setNotification('')} 
+        />
+      )}
     </>
   );
 }

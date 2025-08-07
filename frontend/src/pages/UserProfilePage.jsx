@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import styles from '../styles/UserProfilePage.module.css';
 import TopNavbar from '../components/TopNavbar';
 import BottomNavbar from '../components/BottomNavigationbar';
 import Notification from '../components/Notification';
 import EditProfileModal from '../components/EditProfileModal';
 import PostPreviewList from '../components/PostPreviewList';
+import ArchiveList from '../components/ArchiveList';
 import { NotificationProvider } from '../context/NotificationContext';
 import { getUserProfile, getUserPostsPreview, getUserArchives, getUserSummary, updateUserProfile } from '../services/userService';
 
 const UserProfilePage = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState('community');
   const [notification, setNotification] = useState('');
   const [user, setUser] = useState(null);
@@ -19,6 +22,12 @@ const UserProfilePage = () => {
   const [archives, setArchives] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  // 從URL參數初始化標籤
+  useEffect(() => {
+    const tabFromUrl = searchParams.get('tab') || 'community';
+    setActiveTab(tabFromUrl);
+  }, [searchParams]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -82,6 +91,8 @@ const UserProfilePage = () => {
   // 切換分頁
   const handleTabChange = (tab) => {
     setActiveTab(tab);
+    // 更新URL參數
+    setSearchParams({ tab });
   };
 
   // 顯示通知
@@ -112,6 +123,11 @@ const UserProfilePage = () => {
       // 如果更新了頭像，在URL後面加上時間戳避免快取問題
       if (updatedUser.headshot_url && updateData.image) {
         updatedUser.headshot_url = `${updatedUser.headshot_url}?t=${Date.now()}`;
+        
+        // 觸發全局頭像更新事件
+        window.dispatchEvent(new CustomEvent('avatar-updated', {
+          detail: { headshot_url: updatedUser.headshot_url }
+        }));
       }
       
       setUser(updatedUser);
@@ -191,15 +207,15 @@ const UserProfilePage = () => {
                   userId={user.id}
                 />
               ) : (
-                <div className={styles.photoGrid}>
-                  {archives.length === 0 ? (
-                    <div style={{gridColumn: '1/4', textAlign: 'center', color: '#aaa'}}>尚未發布任何病程紀錄</div>
-                  ) : archives.map((archive, idx) => (
-                    <div key={archive.id} className={styles.photoCell}>
-                      <div style={{color:'#333',fontSize:'0.95rem',textAlign:'center',padding:'8px',wordBreak:'break-all'}}>{archive.archive_title}</div>
-                    </div>
-                  ))}
-                </div>
+                <ArchiveList
+                  fetchUserArchives={true}
+                  userId={user?.id} // 傳遞當前用戶的ID
+                  emptyMessage="尚未發布任何疾病檔案"
+                  onLike={(archiveId, isLiked) => console.log('疾病檔案按讚功能暫未實作')}
+                  onComment={(archiveId) => console.log('Archive comment:', archiveId)}
+                  onSave={(archiveId, isSaved) => console.log('疾病檔案收藏功能暫未實作')}
+                  onMenuClick={(archiveId) => console.log('Archive menu:', archiveId)}
+                />
               )}
             </>
           )}
