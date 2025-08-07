@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import styles from '../styles/SocialSearchResults.module.css';
 import ConfirmFollowModal from './ConfirmFollowModal';
 import PostPreviewList from './PostPreviewList';
+import ArchiveList from './ArchiveList';
 import { searchUsers, getUserFollowStatus, followUser, getUserFollowStatusBatch } from '../services/socialService';
 import { getUserProfile } from '../services/userService';
 
@@ -12,6 +13,7 @@ const SocialSearchResults = ({ searchQuery, onUserClick }) => {
   const [users, setUsers] = useState([]);
   const [posts, setPosts] = useState([]);
   const [hashtagPosts, setHashtagPosts] = useState([]);
+  const [forums, setForums] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [followStates, setFollowStates] = useState({});
@@ -40,6 +42,7 @@ const SocialSearchResults = ({ searchQuery, onUserClick }) => {
       setUsers([]);
       setPosts([]);
       setHashtagPosts([]);
+      setForums([]);
       setError(null);
     }
   }, [searchQuery]);
@@ -59,12 +62,14 @@ const SocialSearchResults = ({ searchQuery, onUserClick }) => {
           setUsers([]);
           setPosts([]);
           setHashtagPosts(result.data.posts || []);
+          setForums([]);
           setActiveTab('tags'); // 自動切換到標籤頁面
         } else {
-          // 一般搜尋：用戶和貼文結果
+          // 一般搜尋：用戶、貼文和論壇結果
           setUsers(result.data.users || []);
           setPosts(result.data.posts || []);
           setHashtagPosts([]);
+          setForums(result.data.forums || []);
           
           // 獲取所有用戶的追蹤狀態
           if (result.data.users && result.data.users.length > 0) {
@@ -76,6 +81,7 @@ const SocialSearchResults = ({ searchQuery, onUserClick }) => {
         setUsers([]);
         setPosts([]);
         setHashtagPosts([]);
+        setForums([]);
       }
     } catch (error) {
       console.error('搜尋錯誤:', error);
@@ -83,6 +89,7 @@ const SocialSearchResults = ({ searchQuery, onUserClick }) => {
       setUsers([]);
       setPosts([]);
       setHashtagPosts([]);
+      setForums([]);
     } finally {
       setIsLoading(false);
     }
@@ -352,9 +359,15 @@ const SocialSearchResults = ({ searchQuery, onUserClick }) => {
         )}
 
         {!isLoading && !error && activeTab === 'forums' && (
-          <div className={styles.comingSoon}>
-            <p>此功能正在開發中...</p>
-          </div>
+          <ArchiveList
+            archives={forums}
+            loading={isLoading}
+            error={error}
+            emptyMessage="找不到符合的論壇文章"
+            hasMore={false}
+            onLoadMore={null}
+            style={{ backgroundColor: 'transparent' }}
+          />
         )}
       </div>
       

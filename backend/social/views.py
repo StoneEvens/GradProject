@@ -102,7 +102,7 @@ class UserPostsPreviewListAPIView(generics.ListAPIView):
 
 #----------搜尋 API----------
 class SearchAPIView(APIView):
-    """搜尋 API - 支援用戶和標籤搜尋"""
+    """搜尋 API - 支援用戶、標籤和論壇搜尋"""
     permission_classes = [IsAuthenticated]
     
     @log_queries
@@ -113,7 +113,8 @@ class SearchAPIView(APIView):
             return APIResponse(
                 data={
                     'users': [],
-                    'posts': []
+                    'posts': [],
+                    'forums': []
                 },
                 message="搜尋詞至少需要2個字符"
             )
@@ -133,7 +134,8 @@ class SearchAPIView(APIView):
             return APIResponse(
                 data={
                     'users': [],  # Hashtag 搜尋不返回使用者
-                    'posts': post_serializer.data
+                    'posts': post_serializer.data,
+                    'forums': []  # Hashtag 搜尋不返回論壇
                 },
                 message="根據Hashtag搜尋結果"
             )
@@ -144,6 +146,31 @@ class SearchAPIView(APIView):
                 Q(user_fullname__icontains=query) |
                 Q(user_account__icontains=query)
             )[:10]
+            
+            # 搜尋論壇（DiseaseArchiveContent）- 優先標題，其次內容
+            from pets.models import DiseaseArchiveContent
+            from pets.serializers import DiseaseArchiveSearchSerializer
+            
+            # 先搜尋標題匹配的
+            forums_by_title = DiseaseArchiveContent.objects.filter(
+                archive_title__icontains=query,
+                is_private=False  # 只搜尋公開的論壇
+            ).select_related('pet', 'postFrame', 'postFrame__user')[:20]
+            
+            # 再搜尋內容匹配的（排除已經標題匹配的）
+            title_ids = list(forums_by_title.values_list('id', flat=True))
+            forums_by_content = DiseaseArchiveContent.objects.filter(
+                content__icontains=query,
+                is_private=False
+            ).exclude(
+                id__in=title_ids
+            ).select_related('pet', 'postFrame', 'postFrame__user')[:30]
+            
+            # 合併結果，標題匹配的在前
+            forums = list(forums_by_title) + list(forums_by_content)
+            forums = forums[:30]  # 限制總數為30
+            
+            forum_serializer = DiseaseArchiveSearchSerializer(forums, many=True, context={'request': request})
             
             if users.exists():
                 # 序列化找到的用戶
@@ -160,9 +187,10 @@ class SearchAPIView(APIView):
                 return APIResponse(
                     data={
                         'users': user_serializer.data,  # 返回相關使用者
-                        'posts': post_serializer.data   # 返回這些使用者的貼文
+                        'posts': post_serializer.data,   # 返回這些使用者的貼文
+                        'forums': forum_serializer.data  # 返回論壇搜尋結果
                     },
-                    message="用戶及其貼文搜尋結果"
+                    message="用戶、貼文及論壇搜尋結果"
                 )
             else:
                 # 若找不到用戶，則從貼文內容中搜尋
@@ -175,9 +203,10 @@ class SearchAPIView(APIView):
                 return APIResponse(
                     data={
                         'users': [],  # 沒有相關使用者
-                        'posts': post_serializer.data
+                        'posts': post_serializer.data,
+                        'forums': forum_serializer.data  # 返回論壇搜尋結果
                     },
-                    message="根據貼文內容搜尋結果"
+                    message="根據貼文內容及論壇搜尋結果"
                 )
 
 #----------搜尋建議 API----------

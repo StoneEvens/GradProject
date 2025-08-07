@@ -47,7 +47,7 @@ class SocialService {
       return {
         success: false,
         error: error.message,
-        data: { users: [], posts: [] }
+        data: { users: [], posts: [], forums: [] }
       };
     }
   }

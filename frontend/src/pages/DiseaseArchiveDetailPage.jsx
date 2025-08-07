@@ -3,8 +3,9 @@ import { useParams, useNavigate } from 'react-router-dom';
 import TopNavbar from '../components/TopNavbar';
 import BottomNavbar from '../components/BottomNavigationBar';
 import ArchiveCard from '../components/ArchiveCard';
+import PageTransition from '../components/PageTransition';
 import { NotificationProvider } from '../context/NotificationContext';
-import { getUserPets, getDiseaseArchiveDetail, publishDiseaseArchive } from '../services/petService';
+import { getUserPets, getDiseaseArchiveDetail, publishDiseaseArchive, deleteDiseaseArchive } from '../services/petService';
 import { getUserProfile } from '../services/userService';
 import { toggleArchiveLike, toggleArchiveSave } from '../services/socialService';
 import Notification from '../components/Notification';
@@ -22,6 +23,7 @@ const DiseaseArchiveDetailPage = () => {
   const [archive, setArchive] = useState(null);
   const [pet, setPet] = useState(null);
   const [user, setUser] = useState(null);
+  const [loadError, setLoadError] = useState(false); // 新增載入錯誤狀態
   const [showMenu, setShowMenu] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
@@ -56,6 +58,11 @@ const DiseaseArchiveDetailPage = () => {
   const loadData = async () => {
     try {
       setLoading(true);
+      setLoadError(false); // 重置錯誤狀態
+      
+      // 設定最小載入時間，確保過渡動畫順暢
+      const minLoadTime = 250;
+      const startTime = Date.now();
       
       // 獲取疾病檔案資料
       const archiveData = await getDiseaseArchiveDetail(archiveId);
@@ -146,19 +153,23 @@ const DiseaseArchiveDetailPage = () => {
         }
       } else {
         console.error('找不到指定的疾病檔案');
-        if (isPublicView) {
-          navigate('/social');
-        } else {
-          navigate(`/pet/${petId}/disease-archive`);
-        }
+        setLoadError(true); // 設定載入錯誤狀態
+      }
+      
+      // 確保最小載入時間，讓過渡動畫完整播放
+      const elapsed = Date.now() - startTime;
+      if (elapsed < minLoadTime) {
+        await new Promise(resolve => setTimeout(resolve, minLoadTime - elapsed));
       }
       
     } catch (error) {
       console.error('載入資料失敗:', error);
-      if (isPublicView) {
-        navigate('/social');
-      } else {
-        navigate(`/pet/${petId}/disease-archive`);
+      setLoadError(true); // 設定載入錯誤狀態
+      
+      // 確保最小載入時間即使在錯誤情況下也要滿足
+      const elapsed = Date.now() - startTime;
+      if (elapsed < minLoadTime) {
+        await new Promise(resolve => setTimeout(resolve, minLoadTime - elapsed));
       }
     } finally {
       setLoading(false);
@@ -175,7 +186,7 @@ const DiseaseArchiveDetailPage = () => {
   };
 
   const handleDelete = () => {
-    setConfirmMessage('確定要刪除這個疾病檔案嗎？');
+    setConfirmMessage('確定要刪除這篇文章嗎？此操作無法復原。');
     setConfirmAction(() => confirmDelete);
     setShowConfirmNotification(true);
     setShowMenu(false);
@@ -183,12 +194,20 @@ const DiseaseArchiveDetailPage = () => {
 
   const confirmDelete = async () => {
     try {
-      // TODO: 實作刪除 API
-      console.log('刪除疾病檔案:', archiveId);
-      showNotification('疾病檔案已刪除');
-      setTimeout(() => {
-        navigate(`/pet/${petId}/disease-archive`);
-      }, 1500);
+      const result = await deleteDiseaseArchive(archiveId);
+      
+      if (result.success) {
+        showNotification(result.message || '疾病檔案已刪除');
+        setTimeout(() => {
+          if (isPublicView) {
+            navigate('/social');
+          } else {
+            navigate(`/pet/${petId}/disease-archive`);
+          }
+        }, 1500);
+      } else {
+        showNotification(result.error || '刪除失敗，請稍後再試');
+      }
     } catch (error) {
       console.error('刪除失敗:', error);
       showNotification('刪除失敗，請稍後再試');
@@ -198,10 +217,10 @@ const DiseaseArchiveDetailPage = () => {
   const handlePublish = () => {
     if (archive?.isPrivate) {
       // 當前是私人，要發布為公開
-      setConfirmMessage('確定要公開發布這個疾病檔案嗎？發布後相關的異常記錄也會變為公開。');
+      setConfirmMessage('確定要公開發布這篇文章嗎？發布後相關的異常記錄也會變為公開。');
     } else {
       // 當前是公開，要轉為私人
-      setConfirmMessage('確定要將這個疾病檔案轉為私人嗎？相關的異常記錄也會變為私人。');
+      setConfirmMessage('確定要將這篇文章轉為私人嗎？其他用戶將無法查看。');
     }
     setConfirmAction(() => confirmPublish);
     setShowConfirmNotification(true);
@@ -230,6 +249,7 @@ const DiseaseArchiveDetailPage = () => {
       showNotification('操作失敗，請稍後再試');
     }
   };
+
 
   // 顯示通知
   const showNotification = (msg) => {
@@ -352,28 +372,64 @@ const DiseaseArchiveDetailPage = () => {
   };
 
 
-  if (loading) {
-    return (
-      <NotificationProvider>
-        <div className={styles.container}>
-          <TopNavbar />
-          <div className={styles.loadingContainer}>
-            載入中...
-          </div>
-          <BottomNavbar />
-        </div>
-      </NotificationProvider>
-    );
-  }
+  // 使用 PageTransition 取代原本的 loading 狀態
+  // if (loading) {
+  //   return (
+  //     <NotificationProvider>
+  //       <div className={styles.container}>
+  //         <TopNavbar />
+  //         <div className={styles.content}>
+  //           <ArchiveDetailSkeleton isPublicView={isPublicView} />
+  //         </div>
+  //         <BottomNavbar />
+  //       </div>
+  //     </NotificationProvider>
+  //   );
+  // }
 
-  if (!archive) {
+  // 只有在載入完成且確實有錯誤時才顯示錯誤頁面
+  if (!loading && loadError) {
     return (
       <NotificationProvider>
         <div className={styles.container}>
           <TopNavbar />
-          <div className={styles.errorContainer}>
-            找不到疾病檔案，正在返回...
-          </div>
+          <PageTransition 
+            isLoading={false} 
+            overlayColor="#FFF2D9"
+            fadeDuration={400}
+          >
+            <div className={styles.content}>
+              <div className={styles.errorContainer}>
+                <div className={styles.errorMessage}>
+                  <h3>找不到疾病檔案</h3>
+                  <p>該檔案可能已被刪除或不存在</p>
+                  <div className={styles.errorButtons}>
+                    <button 
+                      className={styles.retryButton} 
+                      onClick={() => {
+                        setLoadError(false);
+                        loadData();
+                      }}
+                    >
+                      重新載入
+                    </button>
+                    <button 
+                      className={styles.backButton} 
+                      onClick={() => {
+                        if (isPublicView) {
+                          navigate('/social');
+                        } else {
+                          navigate(`/pet/${petId}/disease-archive`);
+                        }
+                      }}
+                    >
+                      返回
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </PageTransition>
           <BottomNavbar />
         </div>
       </NotificationProvider>
@@ -384,6 +440,12 @@ const DiseaseArchiveDetailPage = () => {
     <NotificationProvider>
       <div className={styles.container}>
         <TopNavbar />
+        
+        <PageTransition 
+          isLoading={loading} 
+          overlayColor="#FFF2D9"
+          fadeDuration={400}
+        >
         
         <div className={styles.content}>
           {/* 標題區域 */}
@@ -430,6 +492,17 @@ const DiseaseArchiveDetailPage = () => {
             onShowNotification={showNotification}
           />
           
+          {/* 刪除按鈕 - 在 ArchiveCard 下方，只有在非公開瀏覽模式才顯示 */}
+          {!isPublicView && (
+            <button 
+              className={styles.deleteButtonInline}
+              onClick={handleDelete}
+            >
+              刪除疾病檔案
+            </button>
+          )}
+          
+          
           {/* 公開瀏覽模式的互動區域 */}
           {isPublicView && (
             <div className={styles.interactionSection}>
@@ -473,6 +546,7 @@ const DiseaseArchiveDetailPage = () => {
             </div>
           )}
         </div>
+        </PageTransition>
 
         <BottomNavbar />
         

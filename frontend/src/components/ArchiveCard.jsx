@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import SymptomCalendar from './SymptomCalendar';
 import styles from '../styles/ArchiveCard.module.css';
@@ -16,6 +16,7 @@ const ArchiveCard = ({
   const { petId } = useParams();
   const [validatedArchiveData, setValidatedArchiveData] = useState(archiveData);
   const [isValidating, setIsValidating] = useState(false);
+  const [hasValidated, setHasValidated] = useState(false);
   
   // 獲取寵物ID，優先使用pet物件的ID，然後是URL參數
   const getPetId = () => {
@@ -24,27 +25,31 @@ const ArchiveCard = ({
     return petId;
   };
 
+  // 使用 useMemo 來記憶異常記錄的 ID，避免不必要的重新驗證
+  const abnormalPostIds = useMemo(() => {
+    return archiveData?.abnormalPostsData?.map(post => post.id) || [];
+  }, [archiveData?.abnormalPostsData]);
+
   // 驗證異常記錄是否存在並更新檔案
   useEffect(() => {
-    // 調試：輸出 archiveData 的結構
+    // 如果已經驗證過，或者沒有異常記錄，直接返回
+    if (hasValidated || abnormalPostIds.length === 0) {
+      setValidatedArchiveData(archiveData);
+      return;
+    }
+
+    // 調試：輸出 archiveData 的結構（只在第一次時輸出）
     console.log('ArchiveCard - archiveData 結構:', archiveData);
     console.log('ArchiveCard - archiveData keys:', Object.keys(archiveData || {}));
     
     const validateAndUpdateArchive = async () => {
-      if (!archiveData?.abnormalPostsData || archiveData.abnormalPostsData.length === 0) {
-        return;
-      }
-
       setIsValidating(true);
       try {
-        // 獲取所有異常記錄的ID
-        const postIds = archiveData.abnormalPostsData.map(post => post.id);
-        
         // 獲取當前寵物ID
         const currentPetId = getPetId();
         
         // 批量驗證異常記錄是否存在，傳入 petId
-        const { validIds, invalidIds } = await validateAbnormalPostsExist(postIds, currentPetId);
+        const { validIds, invalidIds } = await validateAbnormalPostsExist(abnormalPostIds, currentPetId);
         
         // 如果有無效的記錄
         if (invalidIds.length > 0) {
@@ -88,17 +93,21 @@ const ArchiveCard = ({
           // 所有記錄都有效，使用原始資料
           setValidatedArchiveData(archiveData);
         }
+        
+        // 標記為已驗證
+        setHasValidated(true);
       } catch (error) {
         console.error('驗證異常記錄時發生錯誤:', error);
         // 發生錯誤時使用原始資料
         setValidatedArchiveData(archiveData);
+        setHasValidated(true);
       } finally {
         setIsValidating(false);
       }
     };
 
     validateAndUpdateArchive();
-  }, [archiveData, onShowNotification]);
+  }, [abnormalPostIds, archiveData, hasValidated, onShowNotification]);
 
   // 處理用戶點擊
   const handleUserClick = (e) => {
