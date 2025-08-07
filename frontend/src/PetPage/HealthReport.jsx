@@ -104,7 +104,6 @@ const ListPage = ({ reports, setReports, onUpload, onRowClick }) => {
   return (
     <>
       <h1 className="hr-title">健康報告</h1>
-      <select className="hr-select" disabled value="血液檢查報告" />
 
       <div className="hr-table-wrapper">
         <table className="hr-table">
