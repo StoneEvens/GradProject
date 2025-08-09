@@ -215,8 +215,14 @@ function CalculatorStep3({ onPrev, onComplete, selectedFeed, selectedPet, calcul
                   {selectedPet?.isTemporary && <span className={styles.temporaryPetHint}>(臨時寵物)</span>}
                   計算結果：
                 </div>
+
+                {/* 🔹 在這裡先顯示 feed_hint */}
+                {result?.feed_hint && <ResultDisplay text={result.feed_hint} />}
+
+
                 <ResultDisplay text={result?.description} />
               </div>
+
             </div>
           )}
         </div>
