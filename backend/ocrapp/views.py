@@ -136,7 +136,6 @@ class HealthReportUploadView(APIView):
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
 class OCRUploadView(APIView):
     permission_classes = [AllowAny]
     parser_classes = (MultiPartParser, FormParser)

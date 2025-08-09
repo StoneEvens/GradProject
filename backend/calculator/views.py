@@ -686,6 +686,11 @@ class PetNutritionCalculator(APIView):
         # 飼料攝取量（克）
         feed_g_per_day = (daily_ME / ME_feed) * 100
 
+        feed_hint = (
+            "以下為按照飼料和寵物體重、年齡階段等數值計算出的建議餵食數值，"
+            "若需要更多餵食建議，請滑到最下方，我們會抓取您最新一次上傳的健康報告進行餵食建議"
+        )
+
         # 實際攝取量
         actual = {
             'protein': round(feed_g_per_day * protein / 100, 2),
@@ -704,6 +709,7 @@ class PetNutritionCalculator(APIView):
 
         return Response({
             "pet_type": pet_type,
+            "feed_hint": feed_hint,
             "life_stage": life_stage,
             "weight_kg": weight,
             "daily_ME_kcal": round(daily_ME, 2),
@@ -759,12 +765,54 @@ class PetNutritionCalculator(APIView):
             }
         return {}
 
+    # def find_abnormal_values(self, pet_type, stage, report, reference):
+    #     result = {}
+    #     stage_key = "幼年" if stage in ["puppy", "kitten"] else "成犬" if pet_type == "dog" else "成貓"
+    #     ref_ranges = reference.get(pet_type, {}).get(stage_key, {})
+
+    #     for item in report:
+    #         name = item.get("英文名稱")
+    #         value = item.get("檢查結果")
+
+    #         if name in ref_ranges:
+    #             low = ref_ranges[name].get("min")
+    #             high = ref_ranges[name].get("max")
+
+    #             if low is not None and value < low:
+    #                 result[name] = "低於標準"
+    #             elif high is not None and value > high:
+    #                 result[name] = "高於標準"
+
+    #     return result
     def find_abnormal_values(self, pet_type, stage, report, reference):
         result = {}
         stage_key = "幼年" if stage in ["puppy", "kitten"] else "成犬" if pet_type == "dog" else "成貓"
         ref_ranges = reference.get(pet_type, {}).get(stage_key, {})
 
-        for item in report:
+        # --- NEW: 把 ref_ranges（若為 list）轉成 {name: {min,max}} ---
+        if isinstance(ref_ranges, list):
+            ref_ranges = {
+                r.get("英文名稱"): {"min": r.get("min"), "max": r.get("max")}
+                for r in ref_ranges
+                if isinstance(r, dict) and r.get("英文名稱")
+            }
+        elif not isinstance(ref_ranges, dict):
+            ref_ranges = {}
+
+        # --- NEW: 正規化 report 成為 list[dict] ---
+        if isinstance(report, dict):
+            # 允許 {"BUN": 18, ...} 或 {"BUN": {"檢查結果": 18}, ...}
+            norm_report = []
+            for k, v in report.items():
+                if isinstance(v, dict):
+                    norm_report.append(v)
+                else:
+                    norm_report.append({"英文名稱": k, "檢查結果": v})
+        else:
+            # 原本就為 list 的情況，只保留 dict，避免拿到字串
+            norm_report = [x for x in (report or []) if isinstance(x, dict)]
+
+        for item in norm_report:
             name = item.get("英文名稱")
             value = item.get("檢查結果")
 
@@ -772,9 +820,19 @@ class PetNutritionCalculator(APIView):
                 low = ref_ranges[name].get("min")
                 high = ref_ranges[name].get("max")
 
-                if low is not None and value < low:
+                try:
+                    v = float(value) if value not in (None, "") else None
+                except (TypeError, ValueError):
+                    continue
+                lo = float(low) if low not in (None, "") else None
+                hi = float(high) if high not in (None, "") else None
+
+                if v is None or (lo is None and hi is None):
+                    continue
+
+                if lo is not None and v < lo:
                     result[name] = "低於標準"
-                elif high is not None and value > high:
+                elif hi is not None and v > hi:
                     result[name] = "高於標準"
 
         return result
