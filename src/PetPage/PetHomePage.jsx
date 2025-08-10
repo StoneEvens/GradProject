@@ -7,6 +7,13 @@ import BottomNavigationBar from '../components/BottomNavigationBar';
 
 const PetHomePage = () => {
   const [showAddFoodModal, setShowAddFoodModal] = useState(false);
+  const [selectedFood, setSelectedFood] = useState(null);
+  const [newFood, setNewFood] = useState({ name: '', image: '' });
+  const [foodCards, setFoodCards] = useState([
+    { id: 1, name: '示範飼料1', image: '/food.jpg' },
+    { id: 2, name: '示範飼料2', image: '/food.jpg' },
+  ]);
+
   const [selectedDateIndex, setSelectedDateIndex] = useState(0);
   const nutritionResults = [
     '點擊我去使用計算機',
@@ -53,46 +60,69 @@ const PetHomePage = () => {
         <section className="section-box">
           <div className="section-title">飼料食用中</div>
           <div className="food-items">
-            <div className="food-card">
-              <img src="/food.jpg" alt="food1" />
-            </div>
-            <div className="food-card">
-              <img src="/food.jpg" alt="food2" />
-            </div>
+            {foodCards.map((food) => (
+              <div key={food.id} className="food-card" onClick={() => setSelectedFood(food)}>
+                <img src={food.image} alt={food.name} />
+              </div>
+            ))}
           </div>
           <button className="food-add" onClick={() => setShowAddFoodModal(true)}>新增</button>
 
-        {showAddFoodModal && (
-        <div className="modal-overlay" onClick={() => setShowAddModal(false)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <h3>新增飼料</h3>
-            <label>
-              飼料名稱：
-              <input type="text" placeholder="請輸入飼料名稱" />
-            </label>
-            <label>
-              包裝圖片：
-              <input type="file" />
-            </label>
-            <label>
-              上傳成分表：
-              <input type="file" />
-            </label>
-            <div className="modal-actions">
-              <button className="btn cancel" onClick={() => setShowAddModal(false)}>取消</button>
-              <button className="btn confirm">儲存</button>
+          {/* 🪟 新增飼料視窗 */}
+          {showAddFoodModal && (
+            <div className="modal-overlay" onClick={() => setShowAddFoodModal(false)}>
+              <div className="modal-content" onClick={e => e.stopPropagation()}>
+                <h3>新增飼料</h3>
+                <label>
+                  飼料名稱：
+                  <input type="text" value={newFood.name} onChange={(e) => setNewFood({ ...newFood, name: e.target.value })} />
+                </label>
+                <label>
+                  包裝圖片：
+                  <input type="file" onChange={(e) => {
+                    const file = e.target.files[0];
+                    const reader = new FileReader();
+                    reader.onloadend = () => setNewFood({ ...newFood, image: reader.result });
+                    if (file) reader.readAsDataURL(file);
+                  }} />
+                </label>
+                <div className="modal-actions">
+                  <button className="btn cancel" onClick={() => setShowAddFoodModal(false)}>取消</button>
+                  <button className="btn confirm" onClick={() => {
+                    if (newFood.name && newFood.image) {
+                      setFoodCards([...foodCards, { ...newFood, id: Date.now() }]);
+                      setNewFood({ name: '', image: '' });
+                      setShowAddFoodModal(false);
+                    }
+                  }}>儲存</button>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      )}
-      </section>
+          )}
+
+          {/* 📄 飼料詳細視窗 */}
+          {selectedFood && (
+            <div className="modal-overlay" onClick={() => setSelectedFood(null)}>
+              <div className="modal-content" onClick={e => e.stopPropagation()}>
+                <h3>{selectedFood.name}</h3>
+                <img src={selectedFood.image} alt={selectedFood.name} style={{ width: '100%' }} />
+                <div className="modal-actions">
+                  <button className="btn cancel" onClick={() => setSelectedFood(null)}>返回</button>
+                  <button className="btn confirm" onClick={() => {
+                    setFoodCards(foodCards.filter(f => f.id !== selectedFood.id));
+                    setSelectedFood(null);
+                  }}>刪除</button>
+                </div>
+              </div>
+            </div>
+          )}
+        </section>
 
         {/* 📊 營養計算機 */}
         <section className="section-box">
           <div className="section-title-with-nav">
-          <div className="section-title">營養計算機</div>
-          
-        </div>
+            <div className="section-title">營養計算機</div>
+          </div>
           <div className="nutrition-box">
             <button className="calc-btn" onClick={() => alert('導向營養計算機頁面')}>{nutritionResults[selectedDateIndex]}</button>
           </div>
