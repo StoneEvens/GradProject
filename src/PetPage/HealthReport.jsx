@@ -24,7 +24,7 @@ const HealthReport = () => {
   const [page, setPage] = useState('list');
   const [reports, setReports] = useState([]);
   const [current, setCurrent] = useState(null);
-  const [filterCat, setFilterCat] = useState('ALL'); // 新增：篩選類別
+  const [filterCat, setFilterCat] = useState('ALL');
 
   const toUpload = () => {
     setCurrent({ date: '', cat: 'CBC', values: {}, note: '', file: null });
