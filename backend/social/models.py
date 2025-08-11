@@ -124,7 +124,7 @@ class PostFrame(Interactables):
             return PostFrame.objects.filter(user__in=userList).order_by('-created_at')[:50]
         
         if idList is not None:
-            return PostFrame.objects.filter(id__in=idList).order_by('-created_at')[:50]
+            return PostFrame.objects.filter(id__in=idList).order_by('-created_at')
         
         return PostFrame.objects.none()
 

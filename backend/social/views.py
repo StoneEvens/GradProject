@@ -16,6 +16,7 @@ from accounts.models import CustomUser
 from django.db import transaction
 from django.utils.text import slugify
 from django.utils import timezone
+from django.apps import apps
 import json
 import re
 import logging
@@ -305,6 +306,9 @@ class CreatePostAPIView(APIView):
                 location=location
             )
 
+            recommendation_service = apps.get_app_config('social').recommendation_service
+            recommendation_service.embed_new_post(postFrame.id, content)
+
             # 創建標籤關聯
             logger.info(f"準備創建標籤，解析得到的標籤: {hashtags}")
             for tag in hashtags:
@@ -541,7 +545,10 @@ class DeletePostAPIView(APIView):
             except Exception as data_error:
                 logger.error(f"刪除貼文相關資料時出錯: {str(data_error)}")
                 # 繼續刪除主貼文
-            
+
+            recommendation_service = apps.get_app_config('social').recommendation_service
+            recommendation_service.delete_post_data(postFrame.id)
+
             # 最後刪除 PostFrame
             post_id = postFrame.id
             postFrame.delete()
@@ -633,14 +640,60 @@ class PostListAPIView(generics.ListAPIView):
     
     @log_queries
     def get_queryset(self):
-        # 獲取所有公開用戶的貼文，按創建時間倒序排列
-        # 只包含有 SoLContent 的 PostFrame（排除疾病檔案）
-        return PostFrame.objects.select_related('user').prefetch_related(
-            'contents', 'hashtags', 'tagged_pets'
-        ).filter(
-            contents__isnull=False  # 只包含有內容的貼文
-        ).distinct().order_by('-created_at')
-    
+        recommendation_service = apps.get_app_config('social').recommendation_service
+
+        history = []
+        recommend_list = []
+
+        # 獲取用戶的互動歷史
+        # 先取得用戶和日常貼文SoLContent的互動歷史(互動不包含留言，留言會在下方單獨處理)
+        interaction_list = UserInteraction.objects.filter(user=self.request.user).values()
+        for interaction in interaction_list:
+            # 先假設用戶互動的是PostFrame，把按讚留言紀錄過濾掉
+            postFrame = PostFrame.get_postFrames(postID=interaction['interactables_id'])
+
+            # 根據找到的PostFrame獲取SoLContent(若不是SoLContent則忽略)
+            if postFrame is not None:
+                solContent = SoLContent.get_content(postFrame)
+
+                if solContent is not None:
+                    history.append({
+                        "id": interaction['interactables_id'],
+                        "action": interaction['relation'],
+                        "timestamp": int(interaction['created_at'].timestamp())
+                    })
+
+        # 接者處理留言的歷史
+        comment_list = Comment.objects.filter(user=self.request.user).select_related('postFrame')
+        for comment in comment_list:
+            # 還是先抓留言來自哪個PostFrame
+            postFrame = comment.postFrame
+
+            # 根據找到的PostFrame獲取SoLContent(若不是SoLContent則忽略)
+            if postFrame is not None:
+                solContent = SoLContent.get_content(postFrame)
+
+                if solContent is not None:
+                    history.append({
+                        "id": postFrame.id,
+                        "action": "comment",
+                        "timestamp": int(comment.created_at.timestamp())
+                    })
+
+        seen_ids = {p['id'] for p in history}
+
+        #print(history)
+
+        embedded_history = recommendation_service.embed_user_history([(p['id'], p['action'], p['timestamp']) for p in history])
+        search_list = recommendation_service.recommend_posts(embedded_history, top_k=30+len(seen_ids))
+
+        for post_id in search_list:
+            if post_id not in seen_ids:
+                # Do something with each recommended post ID
+                recommend_list.append(post_id)
+
+        return PostFrame.get_postFrames(idList=recommend_list)
+
     def list(self, request, *args, **kwargs):
         try:
             queryset = self.filter_queryset(self.get_queryset())
@@ -1171,7 +1224,11 @@ class UpdatePostAPIView(APIView):
                     content_text=content,
                     location=location
                 )
-            
+
+            recommendation_service = apps.get_app_config('social').recommendation_service
+            recommendation_service.delete_post_data(postFrame.id)
+            recommendation_service.embed_new_post(postFrame.id, content)
+
             # 處理標籤更新
             hashtags = DataHandler.parse_hashtags(content, hashtag_data)
             

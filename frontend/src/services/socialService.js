@@ -460,6 +460,16 @@ class SocialService {
         ...params
       });
 
+      // 獲取當前用戶名稱（如果存在）
+      const currentUser = localStorage.getItem('username');
+      
+      // 添加到查詢參數
+      if (currentUser) {
+        queryParams.append('current_user', currentUser);
+      }
+      
+      console.log('獲取貼文，請求參數:', queryParams.toString());
+      
       const response = await authAxios.get(`/social/posts/?${queryParams}`);
       const result = response.data;
       
