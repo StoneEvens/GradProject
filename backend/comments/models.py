@@ -33,6 +33,9 @@ class Comment(Interactables):
     def __str__(self):
         return f"Comment {self.id if self.id else ''} by {self.user.username}"
     
+    def get_comment_by_id(id: int):
+        return Comment.objects.filter(id=id).first()
+
     def get_comments(postFrame: PostFrame):
         return Comment.objects.filter(postFrame=postFrame, parent=None).order_by('-popularity', '-created_at')
 

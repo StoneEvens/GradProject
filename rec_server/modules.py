@@ -24,16 +24,12 @@ class RecommendationService:
     def __init__(self):
         ##---------HyperParameters---------##
         self.BATCH_SIZE = 4
-        self.ACTION_WEIGHTS = {"liked": 1.0, "comment": 1.5, "share": 2.0}
+        self.ACTION_WEIGHTS = {"like": 1.0, "comment": 1.5, "share": 2.0}
 
-        ##---------Device Selection---------##
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        print(f"Using device: {self.device}")
-        
         ##---------Model Selection---------##
         model_path = "c:/Users/Steven/bert-base-chinese"
         self.tokenizer = AutoTokenizer.from_pretrained(model_path)
-        self.model = AutoModel.from_pretrained(model_path).eval().to(self.device)
+        self.model = AutoModel.from_pretrained(model_path).eval().cuda()
 
         #----------Load embeddings and post IDs----------#
         # Get the project root directory (where post_embs.npy is located)
@@ -41,28 +37,20 @@ class RecommendationService:
         emb_path = os.path.join(base_dir, 'post_embs.npy')
         ids_path = os.path.join(base_dir, 'post_ids.npy')
 
-        #print(f"Looking for files in: {base_dir}")
-        #print(f"Embeddings path: {emb_path}")
-        #print(f"IDs path: {ids_path}")
+        print(f"Looking for files in: {base_dir}")
+        print(f"Embeddings path: {emb_path}")
+        print(f"IDs path: {ids_path}")
 
         if not os.path.exists(emb_path) or not os.path.exists(ids_path):
-            from social.models import PostFrame, SoLContent, PostHashtag
-
-            all_posts = SoLContent.objects.all()
-            data_array = []
-            id_array = []
-            for post in all_posts:
-                data_array.append({
-                    "id": SoLContent.get_postFrame(post).id,
-                    "timestamp": int(post.get_postFrame().created_at.timestamp()),
-                    "content": post.content_text,
-                    "hashtags": [hashtag.tag for hashtag in PostHashtag.get_hashtags(post.get_postFrame())]
-                })
-            print(data_array[0])
-
-            # Initialize FAISS index
-            self.initialize(data_array)
-
+            # Initialize recommendation service if test data exists
+            testdata_path = os.path.join(base_dir, 'testdata.json')
+            if os.path.exists(testdata_path):
+                with open(testdata_path, "r", encoding="utf-8") as f:
+                    data_array = json.load(f)
+                self.initialize()
+            else:
+                raise FileNotFoundError(f"Test data file not found: {testdata_path}")
+            
         # Load the embeddings and IDs
         self.post_embeddings = np.load(emb_path)
         self.post_ids = np.load(ids_path)
@@ -92,7 +80,7 @@ class RecommendationService:
                 padding=True,
                 truncation=True,
                 return_tensors="pt"
-            ).to(self.device)
+            ).to("cuda")
 
             with torch.no_grad():
                 outputs = self.model(**encoded)
@@ -117,7 +105,7 @@ class RecommendationService:
             padding=True,
             truncation=True,
             return_tensors="pt"
-        ).to(self.device)
+        ).to("cuda")
 
         # Generate embedding
         with torch.no_grad():
