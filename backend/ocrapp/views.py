@@ -7,6 +7,8 @@ from drf_yasg import openapi
 import re
 from .models import HealthReport
 from pets.models import Pet
+import io
+from pdf2image import convert_from_bytes
 
 from google.cloud import vision
 from google.oauth2 import service_account
@@ -58,6 +60,7 @@ from .models import HealthReport
 from pets.models import Pet
 from datetime import datetime
 import json
+import traceback
 
 class HealthReportListView(APIView):
     permission_classes = [AllowAny]
@@ -136,6 +139,71 @@ class HealthReportUploadView(APIView):
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+# class OCRUploadView(APIView):
+#     permission_classes = [AllowAny]
+#     parser_classes = (MultiPartParser, FormParser)
+
+#     def post(self, request, *args, **kwargs):
+#         pet_id = request.data.get('pet_id')
+#         if not pet_id:
+#             return Response({'error': '缺少 pet_id'}, status=status.HTTP_400_BAD_REQUEST)
+
+#         try:
+#             Pet.objects.get(id=pet_id)  # 只驗證，不建檔
+#         except Pet.DoesNotExist:
+#             return Response({'error': '找不到寵物'}, status=status.HTTP_404_NOT_FOUND)
+
+#         uploaded_image = request.FILES.get('image')
+#         if not uploaded_image:
+#             return Response({'error': '沒有上傳圖片'}, status=status.HTTP_400_BAD_REQUEST)
+
+#         # OCR 流程
+#         credentials_path = r"C:\Users\lxzhe\GradProject\backend\ocrapp\ai-project-454107-a1e8b881803e.json"
+#         credentials = service_account.Credentials.from_service_account_file(credentials_path)
+#         client = vision.ImageAnnotatorClient(credentials=credentials)
+
+#         content = uploaded_image.read()
+#         image = vision.Image(content=content)
+#         response = client.text_detection(image=image)
+#         texts = response.text_annotations
+
+#         if response.error.message:
+#             return Response({'error': response.error.message}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+#         raw_text = texts[0].description if texts else ""
+#         extracted_data = self.extract_test_results(raw_text)
+
+#         return Response({'extracted_results': extracted_data}, status=status.HTTP_200_OK)
+
+#     def extract_test_results(self, text):
+#         text = text.replace('\n', ' ')
+#         text = re.sub(r'\s+', ' ', text)
+#         result = {}
+
+#         for field, aliases in FIELD_ALIASES.items():
+#             matched = False
+#             for alias in aliases:
+#                 # 允許任意空白與符號，匹配數值和單位
+#                 pattern = rf"{alias}.*?([\d\.]+)\s*([^\s]+)"
+#                 match = re.search(pattern, text)
+#                 if match:
+#                     value = match.group(1)
+#                     unit = match.group(2)
+#                     result[field] = {
+#                         "result": value,
+#                         "unit": unit
+#                     }
+#                     matched = True
+#                     break
+#             if not matched:
+#                 result[field] = None
+
+#         return result
+    
+
+from pdf2image import convert_from_bytes
+import io
+
 class OCRUploadView(APIView):
     permission_classes = [AllowAny]
     parser_classes = (MultiPartParser, FormParser)
@@ -150,27 +218,69 @@ class OCRUploadView(APIView):
         except Pet.DoesNotExist:
             return Response({'error': '找不到寵物'}, status=status.HTTP_404_NOT_FOUND)
 
-        uploaded_image = request.FILES.get('image')
-        if not uploaded_image:
-            return Response({'error': '沒有上傳圖片'}, status=status.HTTP_400_BAD_REQUEST)
+        # 兼容：優先 image，沒有就拿 file
+        uploaded_file = request.FILES.get('image') or request.FILES.get('file')
+        if not uploaded_file:
+            return Response({'error': '沒有上傳檔案（image 或 file）'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # OCR 流程
+        # ===== 保留你原本的金鑰寫法（可改為 .env，但這裡照舊）=====
         credentials_path = r"C:\Users\lxzhe\GradProject\backend\ocrapp\ai-project-454107-a1e8b881803e.json"
         credentials = service_account.Credentials.from_service_account_file(credentials_path)
         client = vision.ImageAnnotatorClient(credentials=credentials)
+        # ========================================================
 
-        content = uploaded_image.read()
-        image = vision.Image(content=content)
-        response = client.text_detection(image=image)
-        texts = response.text_annotations
+        content_type = (uploaded_file.content_type or "").lower()
+        filename = (uploaded_file.name or "").lower()
+        is_pdf = (content_type == "application/pdf") or filename.endswith(".pdf")
 
-        if response.error.message:
-            return Response({'error': response.error.message}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        try:
+            if is_pdf:
+                # ---------------- PDF → 逐頁轉圖片再 OCR（保留 text_detection 寫法） ----------------
+                pdf_bytes = uploaded_file.read()
+                # 300 dpi 較清楚；更高更清晰但較慢與較吃記憶體
+                images = convert_from_bytes(pdf_bytes, dpi=300, fmt="jpeg")
 
-        raw_text = texts[0].description if texts else ""
-        extracted_data = self.extract_test_results(raw_text)
+                all_text = []
+                for img in images:
+                    buf = io.BytesIO()
+                    img.save(buf, format="JPEG")
+                    image = vision.Image(content=buf.getvalue())
 
-        return Response({'extracted_results': extracted_data}, status=status.HTTP_200_OK)
+                    # 照你舊寫法：text_detection + 取 texts[0].description
+                    response = client.text_detection(
+                        image=image,
+                        image_context={"language_hints": ["zh", "en"]}  # 可有可無，但對中文常有幫助
+                    )
+                    if response.error.message:
+                        return Response({'error': response.error.message}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+                    texts = response.text_annotations
+                    page_text = texts[0].description if texts else ""
+                    if page_text:
+                        all_text.append(page_text)
+
+                raw_text = "\n".join(all_text)
+            else:
+                # ---------------- 單張圖片（完全保留你原本流程） ----------------
+                content = uploaded_file.read()
+                image = vision.Image(content=content)
+                response = client.text_detection(
+                    image=image,
+                    image_context={"language_hints": ["zh", "en"]}
+                )
+                if response.error.message:
+                    return Response({'error': response.error.message}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+                texts = response.text_annotations
+                raw_text = texts[0].description if texts else ""
+
+            extracted_data = self.extract_test_results(raw_text)
+            return Response({'extracted_results': extracted_data}, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            # 維持簡潔的錯誤（避免曝露環境細節）；若想保留原樣也可回傳 str(e)
+            traceback.print_exc()
+            return Response({'error': 'OCR 處理失敗'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def extract_test_results(self, text):
         text = text.replace('\n', ' ')
@@ -180,7 +290,7 @@ class OCRUploadView(APIView):
         for field, aliases in FIELD_ALIASES.items():
             matched = False
             for alias in aliases:
-                # 允許任意空白與符號，匹配數值和單位
+                # 允許任意空白與符號，匹配數值和單位（保留你原本 pattern）
                 pattern = rf"{alias}.*?([\d\.]+)\s*([^\s]+)"
                 match = re.search(pattern, text)
                 if match:
@@ -196,7 +306,8 @@ class OCRUploadView(APIView):
                 result[field] = None
 
         return result
-    
+
+
 def convert_ocr_to_health_data(ocr_result):
     FIELD_CHINESE_TO_ENGLISH = {
         "白血球計數": "WBC",
