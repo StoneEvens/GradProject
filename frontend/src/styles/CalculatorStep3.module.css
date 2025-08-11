@@ -144,6 +144,14 @@
   margin-bottom: 20px;
 }
 
+.feedHint {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #8a6d3b; /* 比 .resultTitle 淡一點，和提示文字色系接近 */
+  margin-bottom: 12px;
+}
+
+
 .sectionTitle {
   font-weight: bold;
   color: #89350c;
