@@ -79,7 +79,7 @@
       hdgDiff = Math.min(hdgDiff, oppositeHdgDiff);
 
       const DISTANCE_THRESHOLD = 5; // meters
-      const HEADING_THRESHOLD = 15; // degrees - made stricter
+      const HEADING_THRESHOLD = 5; // degrees - made stricter
 
       // Debug output
       console.log('Placement check:', {
@@ -424,15 +424,27 @@
         if (!currentPosition) return alert('Waiting for GPS fix…');
         if (currentOrientation === null) return alert('Please wait for compass heading');
 
-        // Show alignment instructions
-        alert('Important: When AR starts, point your device in the same direction as when you took the photo. The red line shows X axis (right), blue line shows Z axis (forward).');
+        // Capture the compass heading RIGHT NOW and start AR immediately
+        // This ensures no time gap where the user might turn the device
+        arCameraOffset = currentOrientation;
+        console.log('Compass heading captured at AR start:', arCameraOffset + '°');
         
-        const button = ARButton.createButton(renderer, { requiredFeatures: ['local-floor'] });
-        document.body.appendChild(button);
-
-        renderer.xr.addEventListener('sessionstart', () => {
-          startMatchingLoop();
-        });
+        // Start AR session directly instead of creating a button
+        try {
+          const session = await navigator.xr.requestSession('immersive-ar', { requiredFeatures: ['local-floor'] });
+          renderer.xr.setSession(session);
+          
+          // Wait for the first frame to ensure AR is fully initialized
+          renderer.xr.addEventListener('sessionstart', () => {
+            // Add a small delay to ensure AR coordinate system is stable
+            setTimeout(() => {
+              startMatchingLoop();
+            }, 100);
+          });
+        } catch (error) {
+          console.error('Failed to start AR session:', error);
+          alert('Failed to start AR session. Make sure your device supports WebXR AR.');
+        }
       };
     }
 
@@ -453,24 +465,13 @@
         }
       }
 
-      // Record the compass heading when AR starts
-      // Add 180° because AR considers looking backward as 0°
-      arCameraOffset = (currentOrientation + 180) % 360;
-      console.log('AR started. Camera facing:', currentOrientation + '°, AR offset:', arCameraOffset + '°');
+      // The compass heading was already captured when the user dismissed the alert
+      // This ensures the timing is correct and matches the user's actual orientation
+      console.log('AR fully started. Using captured compass reference:', arCameraOffset + '°');
       
       // Place photos immediately
       photos.forEach(photo => {
         if (!photo.placed) {
-          // Convert the photo's absolute heading to AR space
-          // Adding 180° to offset because AR's "forward" is actually backward
-          const photoAngleInAR = ((photo.heading - arCameraOffset) + 360) % 360;
-          
-          console.log('Placing photo:', {
-            photoAbsoluteHeading: photo.heading + '°',
-            arZeroDirection: arCameraOffset + '°',
-            angleInARSpace: photoAngleInAR + '°'
-          });
-          
           placePhotoInAR(photo);
           photo.placed = true;
         }
@@ -487,25 +488,32 @@
         currentLon: currentPosition.longitude
       });
 
-      // Calculate the angle between true north and the direction to the photo location
-      const dLat = photo.lat - currentPosition.latitude;
-      const dLon = photo.lon - currentPosition.longitude;
-      const bearing = Math.atan2(dLon, dLat);
-
       // Place photo 2 meters in front
       const PHOTO_DISTANCE = 2;
       
-      // Calculate the photo's angle in AR space
-      // If AR zero is 90° (East), and photo was taken at 180° (South),
-      // then in AR it should appear at -90° (90° to the right)
-      const photoAngleInAR = ((photo.heading - arCameraOffset) + 360) % 360;
+      // Calculate the relative angle from current AR camera direction to photo direction
+      // If photo was taken at 90° and we're currently facing 45°, 
+      // the photo should appear 45° to our right
+      let relativeAngle = photo.heading - arCameraOffset;
       
-      // Convert to radians for THREE.js
-      const angleRad = (photoAngleInAR * Math.PI / 180);
+      // Normalize angle to -180 to +180 range
+      while (relativeAngle > 180) relativeAngle -= 360;
+      while (relativeAngle < -180) relativeAngle += 360;
       
-      // Calculate position - basic trig to place photo at the right angle
+      console.log('Placing photo:', {
+        photoAbsoluteHeading: photo.heading + '°',
+        arReferenceDirection: arCameraOffset + '°',
+        relativeAngle: relativeAngle + '°'
+      });
+      
+      // Convert to radians for THREE.js (negative because THREE.js Y rotation is clockwise when viewed from above)
+      const angleRad = -relativeAngle * Math.PI / 180;
+      
+      // Calculate position using standard trigonometry
+      // sin gives us left/right (x), cos gives us forward/back (z)
+      // Note: In THREE.js, positive Z is towards camera, negative Z is away from camera
       const dx = PHOTO_DISTANCE * Math.sin(angleRad);
-      const dz = -PHOTO_DISTANCE * Math.cos(angleRad);
+      const dz = -PHOTO_DISTANCE * Math.cos(angleRad);  // Negative to correct Z-axis direction
 
       // Create texture and material
       const texture = new THREE.TextureLoader().load(photo.dataURL);
@@ -516,44 +524,33 @@
       });
 
       // Set photo size (portrait-oriented by default since phone photos)
-      const BASE_HEIGHT = 2.0;  // 2 meters tall
+      const BASE_HEIGHT = 3;  // 3 meters tall
       const BASE_WIDTH = BASE_HEIGHT * 0.75;  // 3:4 aspect ratio for phone photos
       const geometry = new THREE.PlaneGeometry(BASE_WIDTH, BASE_HEIGHT);
       const mesh = new THREE.Mesh(geometry, material);
 
-      // Position at ground level and apply rotation
-      mesh.position.set(dx, 0, dz);
-      mesh.rotation.y = -angleRad;  // Negative because THREE.js uses opposite rotation
-
-      // Add to scene immediately
-      scene.add(mesh);
+      // Position at ground level and apply rotation to face the camera
+      mesh.position.set(dx, 1, dz);
+      
+      // The photo should face its original absolute direction relative to AR coordinate system
+      // We need to adjust for the AR camera's starting orientation
+      // If AR started facing East (90°) and photo was taken facing North (0°), 
+      // photo should be rotated -90° in AR space to face North
+      // Adding π (180°) to make the photo face towards the viewer instead of away
+      const photoRotationRad = -(photo.heading - arCameraOffset) * Math.PI / 180 + Math.PI;
+      mesh.rotation.y = photoRotationRad;
       
       console.log('Photo placed:', {
-        position: `${dx.toFixed(2)}m, 0m, ${dz.toFixed(2)}m`,
-        heading: `${photo.heading.toFixed(1)}°`,
-        size: `${BASE_WIDTH.toFixed(2)}m x ${BASE_HEIGHT.toFixed(2)}m`
-      });
-      
-      // Debug output
-      console.log('Photo placement:', {
-        compassHeading: photo.heading.toFixed(1) + '°',
-        rotation: (rotationY * 180 / Math.PI).toFixed(1) + '°',
-        position: {
-          x: dx.toFixed(2) + 'm',
-          y: '1.6m',
-          z: dz.toFixed(2) + 'm'
-        }
-      });
-
-      scene.add(mesh);
-      
-      console.log('Photo placed:', {
-        position: { x: dx.toFixed(2), y: 1.6, z: dz.toFixed(2) },
-        rotation: (rotationY * 180 / Math.PI).toFixed(1) + '°',
+        position: { x: dx.toFixed(2), y: 1, z: dz.toFixed(2) },
+        rotation: (angleRad * 180 / Math.PI).toFixed(1) + '°',
         photoHeading: photo.heading.toFixed(1) + '°',
-        currentHeading: currentOrientation.toFixed(1) + '°',
+        currentHeading: arCameraOffset.toFixed(1) + '°',
+        relativeAngle: relativeAngle.toFixed(1) + '°',
         distance: PHOTO_DISTANCE + 'm'
       });
+
+      // Add to scene
+      scene.add(mesh);
     }
 
     function render() {
