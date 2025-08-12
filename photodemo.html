@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Then-and-Now AR Photo</title>
+  <style>
+    body { margin: 0; overflow: hidden; font-family: sans-serif; }
+    #ui {
+      position: absolute; top: 1rem; left: 1rem; z-index: 10;
+      background: rgba(255,255,255,0.8); padding: 0.5rem; border-radius: 4px;
+    }
+    button { margin: 0.25rem 0; width: 100%; }
+    #fileInput { display: none; }
+  </style>
+</head>
+<body>
+    <script src="https://cdn.jsdelivr.net/gh/SimonEast/MiniConsoleJS@main/console.js"></script>
+  <div id="ui">
+    <button id="takePhoto">Take "Then" Photo</button>
+    <button id="startAR">Start AR Mode</button>
+    <input type="file" accept="image/*" capture="environment" id="fileInput">
+    <div id="compass-status" style="color: red; margin-top: 10px;">Waiting for compass...</div>
+    <div id="compass-debug" style="margin-top: 5px;">
+      <div style="font-weight: bold;">Current Heading:</div>
+      <div id="compass-value" style="font-size: 24px; font-family: monospace;">---°</div>
+    </div>
+  </div>
+
+  <script type="module">
+    import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.150.1/build/three.module.js';
+    import { ARButton } from 'https://cdn.jsdelivr.net/npm/three@0.150.1/examples/jsm/webxr/ARButton.js';
+    
+
+    let camera, scene, renderer;
+    let currentPosition = null;
+    let currentOrientation = null;
+    let matchInterval = null;
+    const photos = [];
+
+    // ======= Helper Functions =======
+    // great-circle distance in meters
+    function getDistance(lat1, lon1, lat2, lon2) {
+      const R = 6371e3;
+      const toRad = deg => deg * Math.PI/180;
+      const dLat = toRad(lat2 - lat1);
+      const dLon = toRad(lon2 - lon1);
+      const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon/2)**2;
+      return 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
+
+    // smallest angular difference (0–180°)
+    function headingDiff(h1, h2) {
+      let d = Math.abs(h1 - h2) % 360;
+      return d > 180 ? 360 - d : d;
+    }
+
+    // return true when within thresholds
+    function shouldPlacePhoto(saved) {
+      if (!currentPosition || currentOrientation == null) return false;
+
+      // Calculate position difference
+      const dist = getDistance(
+        currentPosition.latitude, currentPosition.longitude,
+        saved.lat, saved.lon
+      );
+
+      // Compare absolute compass headings directly
+      // Check both forward and backward directions
+      let hdgDiff = Math.abs(saved.heading - currentOrientation);
+      if (hdgDiff > 180) {
+        hdgDiff = 360 - hdgDiff;
+      }
+      // Also check if we're facing exactly opposite (180 degrees)
+      let oppositeHdgDiff = Math.abs((saved.heading + 180) % 360 - currentOrientation);
+      if (oppositeHdgDiff > 180) {
+        oppositeHdgDiff = 360 - oppositeHdgDiff;
+      }
+      // Use the smaller of the two differences
+      hdgDiff = Math.min(hdgDiff, oppositeHdgDiff);
+
+      const DISTANCE_THRESHOLD = 5; // meters
+      const HEADING_THRESHOLD = 15; // degrees - made stricter
+
+      // Debug output
+      console.log('Placement check:', {
+        distance: dist.toFixed(2) + 'm',
+        distanceThreshold: DISTANCE_THRESHOLD + 'm',
+        currentCompassHeading: currentOrientation.toFixed(1) + '°',
+        savedPhotoHeading: saved.heading.toFixed(1) + '°',
+        oppositeHeading: ((saved.heading + 180) % 360).toFixed(1) + '°',
+        forwardDiff: Math.abs(saved.heading - currentOrientation).toFixed(1) + '°',
+        backwardDiff: oppositeHdgDiff.toFixed(1) + '°',
+        finalHeadingDiff: hdgDiff.toFixed(1) + '°',
+        headingThreshold: HEADING_THRESHOLD + '°',
+        withinDistance: dist <= DISTANCE_THRESHOLD,
+        withinHeading: hdgDiff <= HEADING_THRESHOLD
+      });
+      
+      // Make sure we're actually facing the right direction
+      // Only place photo when we're within both distance and heading thresholds
+      if (dist <= DISTANCE_THRESHOLD && hdgDiff <= HEADING_THRESHOLD) {
+        console.log("Position and heading match! Placing photo...");
+        return true;
+      }
+      return false;
+    }
+
+    initScene();
+    initGeolocation();
+    setupUI();
+    renderer.setAnimationLoop(render);
+
+    function initScene() {
+      scene    = new THREE.Scene();
+      camera   = new THREE.PerspectiveCamera(70, window.innerWidth/window.innerHeight, 0.01, 20);
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.xr.enabled = true;
+      document.body.appendChild(renderer.domElement);
+      window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth/window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+    }
+
+    // Promise-based geolocation and orientation
+    function waitForGeolocation() {
+      return new Promise((resolve, reject) => {
+        if (!navigator.geolocation) reject('Geolocation not supported');
+        
+        const successCallback = (pos) => {
+          currentPosition = pos.coords;
+          console.log('Got position:', currentPosition);
+          resolve(currentPosition);
+        };
+        
+        const errorCallback = (error) => {
+          console.error('Geolocation error:', error);
+          reject(error);
+        };
+        
+        navigator.geolocation.watchPosition(
+          successCallback,
+          errorCallback,
+          { enableHighAccuracy: true, maximumAge: 10000 }
+        );
+      });
+    }
+
+    function showCalibrationModal() {
+      const modal = document.createElement('div');
+      modal.style.cssText = `
+        position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+        background: white; padding: 20px; border-radius: 10px; z-index: 1000;
+        box-shadow: 0 0 10px rgba(0,0,0,0.5); max-width: 80%;
+      `;
+      modal.innerHTML = `
+        <h3 style="margin-top: 0;">Compass Calibration Needed</h3>
+        <p>Please calibrate your device's compass:</p>
+        <ol>
+          <li>Move away from any magnetic interference (metals, electronics)</li>
+          <li>Move your device in a figure-8 pattern several times</li>
+          <li>Rotate your device horizontally 360 degrees</li>
+        </ol>
+        <button onclick="this.parentElement.remove()" style="width: 100%; padding: 10px;">
+          Got it
+        </button>
+      `;
+      document.body.appendChild(modal);
+    }
+
+    function waitForOrientation() {
+      return new Promise((resolve) => {
+        let calibrationStartTime = Date.now();
+        let hasShownModal = false;
+        let readings = [];
+        let orientationHandler = null;
+        
+        const checkOrientation = (event) => {
+          // Log all available orientation data for debugging
+          console.log('Orientation event:', {
+            alpha: event.alpha,
+            beta: event.beta,
+            gamma: event.gamma,
+            absolute: event.absolute,
+            webkitCompassHeading: event.webkitCompassHeading,
+            webkitCompassAccuracy: event.webkitCompassAccuracy
+          });
+
+          let heading = null;
+          let orientationType = '';
+
+          // Debug what kind of event we're getting
+          const eventType = event.type;
+          const isAbsolute = !!event.absolute;
+          console.log('Event details:', {
+            type: eventType,
+            absolute: isAbsolute,
+            alpha: event.alpha,
+            webkitCompassHeading: event.webkitCompassHeading,
+            webkitCompassAccuracy: event.webkitCompassAccuracy
+          });
+
+          // iOS devices
+          if (typeof event.webkitCompassHeading === 'number') {
+            heading = (360 - event.webkitCompassHeading) % 360;
+            orientationType = 'iOS compass';
+            console.log('iOS heading:', heading);
+          }
+          // Android absolute orientation - ONLY if we're sure it's absolute
+          else if (eventType === 'deviceorientationabsolute' || 
+                   (event.absolute === true && typeof event.alpha === 'number')) {
+            heading = event.alpha;
+            orientationType = 'Android absolute compass';
+            console.log('Android absolute heading:', heading);
+          }
+          // Don't fall back to relative orientation anymore as it's not reliable
+          else {
+            console.log('Waiting for absolute orientation...');
+            window.updateCompassStatus('calibrating', 'Waiting for absolute orientation');
+            return;
+          }
+
+          // Always update the display and current orientation when we get a reading
+          if (heading !== null) {
+            currentOrientation = heading;
+            window.updateCompassValue(heading);
+            
+            // Add to readings array for stability check
+            readings.push(heading);
+            if (readings.length > 10) readings.shift();
+
+            // Check if we have stable readings
+            let isStable = false;
+            if (readings.length >= 5) {
+              const avgReading = readings.reduce((a, b) => a + b) / readings.length;
+              isStable = readings.every(r => 
+                Math.abs(r - avgReading) < 10 || // within 10 degrees
+                Math.abs(r - avgReading) > 350   // or wrapping around 360
+              );
+            }
+
+            if (isStable) {
+              console.log('Compass stabilized:', currentOrientation);
+              window.updateCompassStatus(true, 
+                event.webkitCompassHeading ? 'iOS compass' :
+                event.absolute ? 'Android absolute compass' : 'Relative compass'
+              );
+              resolve(currentOrientation);
+              return;
+            }
+
+            // Show calibration status
+            if (!hasShownModal) {
+              showCalibrationModal();
+              hasShownModal = true;
+            }
+
+            const calibrationTime = (Date.now() - calibrationStartTime) / 1000;
+            window.updateCompassStatus('calibrating', 
+              `${readings.length}/5 readings (${calibrationTime.toFixed(1)}s)`
+            );
+          }
+        };
+
+        // Add manual override button after timeout only if we have some readings but they're not stable
+        setTimeout(() => {
+          if (readings.length > 0 && !hasShownModal) return; // Only show if we're still calibrating
+          const overrideBtn = document.createElement('button');
+          overrideBtn.innerText = 'Continue with current orientation';
+          overrideBtn.style.cssText = 'position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 1000; padding: 10px;';
+          overrideBtn.onclick = () => {
+            if (currentOrientation !== null) {
+              window.updateCompassStatus(true, 'manual override');
+              resolve(currentOrientation);
+              overrideBtn.remove();
+            }
+          };
+          document.body.appendChild(overrideBtn);
+        }, 20000); // Show override button after 20 seconds
+
+        const tryRequestPermission = async () => {
+          try {
+            // Function to check if we have a working compass
+            const checkCompassAvailable = () => {
+              return new Promise((resolve) => {
+                const testOrientation = (e) => {
+                  window.removeEventListener('deviceorientationabsolute', testOrientation);
+                  window.removeEventListener('deviceorientation', testOrientation);
+                  resolve(
+                    (e.webkitCompassHeading !== undefined) || 
+                    (e.absolute === true && e.alpha !== null) ||
+                    (e.type === 'deviceorientationabsolute' && e.alpha !== null)
+                  );
+                };
+                
+                // Try both event types
+                window.addEventListener('deviceorientationabsolute', testOrientation, { once: true });
+                window.addEventListener('deviceorientation', testOrientation, { once: true });
+                
+                // Timeout after 2 seconds
+                setTimeout(() => resolve(false), 2000);
+              });
+            };
+
+            // iOS permission request
+            if (typeof DeviceOrientationEvent !== 'undefined' && 
+                typeof DeviceOrientationEvent.requestPermission === 'function') {
+              const permission = await DeviceOrientationEvent.requestPermission();
+              if (permission === 'granted') {
+                window.addEventListener('deviceorientation', checkOrientation);
+                window.updateCompassStatus('calibrating', 'Checking iOS compass...');
+              } else {
+                console.error('Orientation permission denied');
+                window.updateCompassStatus('error', 'Permission denied');
+              }
+            } else {
+              // Try absolute orientation first
+              window.addEventListener('deviceorientationabsolute', checkOrientation);
+              
+              // After a short delay, check if we got any absolute readings
+              setTimeout(async () => {
+                const hasCompass = await checkCompassAvailable();
+                if (!hasCompass) {
+                  window.updateCompassStatus('error', 'No compass available. Please check device settings.');
+                  console.error('No compass hardware or permissions available');
+                }
+              }, 3000);
+            }
+          } catch (error) {
+            console.error('Error requesting orientation permission:', error);
+            window.updateCompassStatus('error', error.message);
+          }
+        };
+
+        // Start requesting permissions
+        tryRequestPermission();
+      });
+    }
+
+    async function initGeolocation() {
+      try {
+        await Promise.all([
+          waitForGeolocation(),
+          waitForOrientation()
+        ]);
+        console.log('Both position and orientation initialized');
+      } catch (error) {
+        console.error('Error initializing sensors:', error);
+      }
+    }
+
+    function setupUI() {
+      const fileInput = document.getElementById('fileInput');
+      const compassStatus = document.getElementById('compass-status');
+      const compassValue = document.getElementById('compass-value');
+      
+      // Function to update compass value display
+      window.updateCompassValue = (heading) => {
+        if (heading !== null && heading !== undefined) {
+          const formattedHeading = heading.toFixed(1).padStart(6, ' ');
+          compassValue.textContent = `${formattedHeading}°`;
+          // Add a visual indicator of the direction (N/E/S/W)
+          const direction = 
+            (heading >= 337.5 || heading < 22.5) ? 'N' :
+            (heading >= 22.5 && heading < 67.5) ? 'NE' :
+            (heading >= 67.5 && heading < 112.5) ? 'E' :
+            (heading >= 112.5 && heading < 157.5) ? 'SE' :
+            (heading >= 157.5 && heading < 202.5) ? 'S' :
+            (heading >= 202.5 && heading < 247.5) ? 'SW' :
+            (heading >= 247.5 && heading < 292.5) ? 'W' :
+            'NW';
+          compassValue.textContent += ` ${direction}`;
+        } else {
+          compassValue.textContent = '---°';
+        }
+      };
+      
+      // Function to update compass status
+      window.updateCompassStatus = (status, detail) => {
+        if (status === true) {
+          compassStatus.style.color = 'green';
+          compassStatus.textContent = `Compass ready ✓ (${detail})`;
+        } else if (status === 'calibrating') {
+          compassStatus.style.color = 'orange';
+          compassStatus.textContent = `Calibrating compass... (${detail}s elapsed) Move in figure-8 pattern`;
+        } else if (status === 'timeout') {
+          compassStatus.style.color = 'orange';
+          compassStatus.textContent = `Compass calibration taking long (${detail}s). Try moving away from interference.`;
+        } else if (status === 'error') {
+          compassStatus.style.color = 'red';
+          compassStatus.textContent = `Compass error: ${detail}`;
+        }
+      };
+
+      // Capture
+      document.getElementById('takePhoto').onclick = () => {
+        fileInput.value = ''; 
+        fileInput.click();
+      };
+      fileInput.onchange = () => {
+        const file = fileInput.files[0];
+        if (!file || !currentPosition) return alert('Waiting for GPS fix…');
+        if (currentOrientation === null) return alert('Waiting for compass heading…');
+        
+        const reader = new FileReader();
+        reader.onload = () => {
+          photos.push({
+            dataURL: reader.result,
+            lat: currentPosition.latitude,
+            lon: currentPosition.longitude,
+            heading: currentOrientation,
+            placed: false
+          });
+          alert(`Photo saved at lat: ${currentPosition.latitude.toFixed(5)}, lon: ${currentPosition.longitude.toFixed(5)}, heading: ${currentOrientation.toFixed(1)}°`);
+        };
+        reader.readAsDataURL(file);
+      };
+
+      // AR
+      document.getElementById('startAR').onclick = async () => {
+        if (photos.length === 0) return alert('Please take a "then" photo first.');
+        if (!currentPosition) return alert('Waiting for GPS fix…');
+        if (currentOrientation === null) return alert('Please wait for compass heading');
+
+        // Show alignment instructions
+        alert('Important: When AR starts, point your device in the same direction as when you took the photo. The red line shows X axis (right), blue line shows Z axis (forward).');
+        
+        const button = ARButton.createButton(renderer, { requiredFeatures: ['local-floor'] });
+        document.body.appendChild(button);
+
+        renderer.xr.addEventListener('sessionstart', () => {
+          startMatchingLoop();
+        });
+      };
+    }
+
+    let arCameraOffset = null;  // The compass heading when AR starts
+
+    async function startMatchingLoop() {
+      // First, ensure we have valid sensor data
+      if (!currentPosition || currentOrientation === null) {
+        console.log("Waiting for initial sensor data...");
+        try {
+          await Promise.all([
+            waitForGeolocation(),
+            waitForOrientation()
+          ]);
+        } catch (error) {
+          console.error("Error getting sensor data:", error);
+          return;
+        }
+      }
+
+      // Record the compass heading when AR starts
+      // Add 180° because AR considers looking backward as 0°
+      arCameraOffset = (currentOrientation + 180) % 360;
+      console.log('AR started. Camera facing:', currentOrientation + '°, AR offset:', arCameraOffset + '°');
+      
+      // Place photos immediately
+      photos.forEach(photo => {
+        if (!photo.placed) {
+          // Convert the photo's absolute heading to AR space
+          // Adding 180° to offset because AR's "forward" is actually backward
+          const photoAngleInAR = ((photo.heading - arCameraOffset) + 360) % 360;
+          
+          console.log('Placing photo:', {
+            photoAbsoluteHeading: photo.heading + '°',
+            arZeroDirection: arCameraOffset + '°',
+            angleInARSpace: photoAngleInAR + '°'
+          });
+          
+          placePhotoInAR(photo);
+          photo.placed = true;
+        }
+      });
+    }
+
+    function placePhotoInAR(photo) {
+      console.log('Attempting to place photo with:', {
+        photoHeading: photo.heading,
+        currentHeading: currentOrientation,
+        photoLat: photo.lat,
+        photoLon: photo.lon,
+        currentLat: currentPosition.latitude,
+        currentLon: currentPosition.longitude
+      });
+
+      // Calculate the angle between true north and the direction to the photo location
+      const dLat = photo.lat - currentPosition.latitude;
+      const dLon = photo.lon - currentPosition.longitude;
+      const bearing = Math.atan2(dLon, dLat);
+
+      // Place photo 2 meters in front
+      const PHOTO_DISTANCE = 2;
+      
+      // Calculate the photo's angle in AR space
+      // If AR zero is 90° (East), and photo was taken at 180° (South),
+      // then in AR it should appear at -90° (90° to the right)
+      const photoAngleInAR = ((photo.heading - arCameraOffset) + 360) % 360;
+      
+      // Convert to radians for THREE.js
+      const angleRad = (photoAngleInAR * Math.PI / 180);
+      
+      // Calculate position - basic trig to place photo at the right angle
+      const dx = PHOTO_DISTANCE * Math.sin(angleRad);
+      const dz = -PHOTO_DISTANCE * Math.cos(angleRad);
+
+      // Create texture and material
+      const texture = new THREE.TextureLoader().load(photo.dataURL);
+      const material = new THREE.MeshBasicMaterial({ 
+        map: texture, 
+        side: THREE.DoubleSide,
+        transparent: true 
+      });
+
+      // Set photo size (portrait-oriented by default since phone photos)
+      const BASE_HEIGHT = 2.0;  // 2 meters tall
+      const BASE_WIDTH = BASE_HEIGHT * 0.75;  // 3:4 aspect ratio for phone photos
+      const geometry = new THREE.PlaneGeometry(BASE_WIDTH, BASE_HEIGHT);
+      const mesh = new THREE.Mesh(geometry, material);
+
+      // Position at ground level and apply rotation
+      mesh.position.set(dx, 0, dz);
+      mesh.rotation.y = -angleRad;  // Negative because THREE.js uses opposite rotation
+
+      // Add to scene immediately
+      scene.add(mesh);
+      
+      console.log('Photo placed:', {
+        position: `${dx.toFixed(2)}m, 0m, ${dz.toFixed(2)}m`,
+        heading: `${photo.heading.toFixed(1)}°`,
+        size: `${BASE_WIDTH.toFixed(2)}m x ${BASE_HEIGHT.toFixed(2)}m`
+      });
+      
+      // Debug output
+      console.log('Photo placement:', {
+        compassHeading: photo.heading.toFixed(1) + '°',
+        rotation: (rotationY * 180 / Math.PI).toFixed(1) + '°',
+        position: {
+          x: dx.toFixed(2) + 'm',
+          y: '1.6m',
+          z: dz.toFixed(2) + 'm'
+        }
+      });
+
+      scene.add(mesh);
+      
+      console.log('Photo placed:', {
+        position: { x: dx.toFixed(2), y: 1.6, z: dz.toFixed(2) },
+        rotation: (rotationY * 180 / Math.PI).toFixed(1) + '°',
+        photoHeading: photo.heading.toFixed(1) + '°',
+        currentHeading: currentOrientation.toFixed(1) + '°',
+        distance: PHOTO_DISTANCE + 'm'
+      });
+    }
+
+    function render() {
+      renderer.render(scene, camera);
+    }
+  </script>
+</body>
+</html>
