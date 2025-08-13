@@ -49,7 +49,7 @@ const PetHomePage = () => {
         <section className="section-box">
           <div className="section-title">常用快捷鍵</div>
           <div className="quick-links">
-            <button className="quick-btn"><img src="/history.png" alt="病程" />病程紀錄</button>
+            <button className="quick-btn"><img src="/history.png" alt="病程" />寵物病史</button>
             <button className="quick-btn"><img src="user.png" alt="飼主帳號" />飼主帳號</button>
             <button className="quick-btn"><img src="/problem.png" alt="異常" />異常紀錄</button>
             <button className="quick-btn"><img src="/report.png" alt="報告" />健康報告</button>

@@ -183,7 +183,7 @@ const renderProgress = () => (
             <label>狀態：
               <select name="status" value={diseaseInput.status} onChange={handleDiseaseChange}>
                 <option value="">請選擇</option>
-                <option value="代治療">代治療</option>
+                <option value="待治療">待治療</option>
                 <option value="治療中">治療中</option>
                 <option value="已治療">已治療</option>
               </select>
