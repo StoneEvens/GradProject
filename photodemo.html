@@ -489,7 +489,7 @@
       });
 
       // Place photo 2 meters in front
-      const PHOTO_DISTANCE = 2;
+      const PHOTO_DISTANCE = 0.5;
       
       // Calculate the relative angle from current AR camera direction to photo direction
       // If photo was taken at 90° and we're currently facing 45°, 
@@ -524,7 +524,7 @@
       });
 
       // Set photo size (portrait-oriented by default since phone photos)
-      const BASE_HEIGHT = 3;  // 3 meters tall
+      const BASE_HEIGHT = 1;  // 3 meters tall
       const BASE_WIDTH = BASE_HEIGHT * 0.75;  // 3:4 aspect ratio for phone photos
       const geometry = new THREE.PlaneGeometry(BASE_WIDTH, BASE_HEIGHT);
       const mesh = new THREE.Mesh(geometry, material);
@@ -532,13 +532,8 @@
       // Position at ground level and apply rotation to face the camera
       mesh.position.set(dx, 1, dz);
       
-      // The photo should face its original absolute direction relative to AR coordinate system
-      // We need to adjust for the AR camera's starting orientation
-      // If AR started facing East (90°) and photo was taken facing North (0°), 
-      // photo should be rotated -90° in AR space to face North
-      // Adding π (180°) to make the photo face towards the viewer instead of away
-      const photoRotationRad = -(photo.heading - arCameraOffset) * Math.PI / 180 + Math.PI;
-      mesh.rotation.y = photoRotationRad;
+      // Correct rotation to prevent flipping
+      mesh.rotation.y = (photo.heading * Math.PI / 180);
       
       console.log('Photo placed:', {
         position: { x: dx.toFixed(2), y: 1, z: dz.toFixed(2) },
