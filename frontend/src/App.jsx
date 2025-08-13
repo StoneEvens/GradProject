@@ -46,6 +46,7 @@ import CreateDiseaseArchivePage from './pages/CreateDiseaseArchivePage';
 import DiseaseArchiveEditContentPage from './pages/DiseaseArchiveEditContentPage';
 import DiseaseArchivePreviewPage from './pages/DiseaseArchivePreviewPage';
 import DiseaseArchiveDetailPage from './pages/DiseaseArchiveDetailPage';
+import InteractiveCityPage from './pages/InteractiveCityPage';
 import { UserProvider } from './context/UserContext';
 
 const App = () => {
@@ -371,6 +372,11 @@ const App = () => {
         <Route 
           path="/health-report/:id" 
           element={isUserAuthenticated ? <HealthReportDetailPage /> : <Navigate to="/" />} 
+        />
+        {/* 互動城市頁面 */}
+        <Route 
+          path="/interactive-city" 
+          element={isUserAuthenticated ? <InteractiveCityPage /> : <Navigate to="/" />} 
         />
       </Routes>
     </BrowserRouter>

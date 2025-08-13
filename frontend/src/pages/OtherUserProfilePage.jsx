@@ -29,6 +29,12 @@ const OtherUserProfilePage = () => {
   });
   const [canViewContent, setCanViewContent] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  
+  // 貼文分頁相關狀態
+  const [postsLoading, setPostsLoading] = useState(false);
+  const [postsError, setPostsError] = useState(null);
+  const [postsHasMore, setPostsHasMore] = useState(true);
+  const [postsPage, setPostsPage] = useState(0);
 
   // 從URL參數初始化標籤
   useEffect(() => {
@@ -66,7 +72,7 @@ const OtherUserProfilePage = () => {
       if (canView) {
         // 可以查看內容時才載入貼文和檔案
         await Promise.all([
-          loadUserPosts(userAccount),
+          loadUserPosts(userAccount, 0, false),
           loadUserArchives(userAccount)
         ]);
       }
@@ -92,14 +98,50 @@ const OtherUserProfilePage = () => {
     }
   };
 
-  const loadUserPosts = async (userAccountOrId) => {
+  // 載入貼文預覽（支援分頁）
+  const loadUserPosts = async (userAccountOrId, pageNum = 0, isLoadMore = false) => {
     try {
-      const posts = await getUserPostsPreview(userAccountOrId);
-      setPostsPreview(Array.isArray(posts) ? posts : []);
-    } catch (postsErr) {
-      console.warn('取得貼文預覽失敗:', postsErr);
-      setPostsPreview([]);
+      if (!isLoadMore) {
+        setPostsLoading(true);
+        setPostsError(null);
+      }
+      
+      const result = await getUserPostsPreview(userAccountOrId, {
+        offset: pageNum * 15,
+        limit: 15
+      });
+      
+      if (result.success) {
+        const newPosts = result.data.posts || [];
+        
+        if (isLoadMore) {
+          setPostsPreview(prevPosts => [...prevPosts, ...newPosts]);
+        } else {
+          setPostsPreview(newPosts);
+        }
+        
+        setPostsHasMore(result.data.has_more || false);
+        setPostsPage(pageNum);
+      } else {
+        throw new Error(result.error || '載入貼文預覽失敗');
+      }
+    } catch (error) {
+      console.error('載入貼文預覽失敗:', error);
+      if (!isLoadMore) {
+        setPostsError(error.message);
+        setPostsPreview([]);
+      }
+    } finally {
+      if (!isLoadMore) {
+        setPostsLoading(false);
+      }
     }
+  };
+
+  // 載入更多貼文
+  const handleLoadMorePosts = async () => {
+    if (!userAccount) return;
+    return loadUserPosts(userAccount, postsPage + 1, true);
   };
 
   const loadUserArchives = async (userAccountOrId) => {
@@ -302,11 +344,14 @@ const OtherUserProfilePage = () => {
                 ) : (
                   <PostPreviewList
                     posts={postsPreview}
-                    loading={loading}
-                    error={null}
+                    loading={postsLoading}
+                    error={postsError}
                     emptyMessage="尚未發布任何日常貼文"
                     userId={user?.id}
                     userAccount={user?.user_account}
+                    hasMore={postsHasMore}
+                    onLoadMore={handleLoadMorePosts}
+                    enableProgressiveLoading={true}
                   />
                 )
               ) : (

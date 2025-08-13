@@ -256,4 +256,50 @@
   .searchResultContent {
     background: linear-gradient(to top, rgba(0, 0, 0, 0.95), rgba(0, 0, 0, 0.8), transparent);
   }
+}
+
+/* 載入更多指示器 */
+.loadingMore {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  color: #666;
+  margin-top: 10px;
+}
+
+.loadingMore .spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #e3e3e3;
+  border-top: 2px solid #3498db;
+  border-radius: 50%;
+  animation: spinMore 1s linear infinite;
+  margin-bottom: 10px;
+}
+
+@keyframes spinMore {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loadingMore p {
+  margin: 0;
+  font-size: 14px;
+}
+
+/* 沒有更多內容指示器 */
+.noMore {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  color: #999;
+  margin-top: 10px;
+}
+
+.noMore p {
+  margin: 0;
+  font-size: 14px;
 } 

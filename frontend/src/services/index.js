@@ -13,8 +13,8 @@ export * from './notificationService';
 // 用戶服務
 export * from './userService';
 
-// 文章推薦服務
-export * from './articleRecommendationsService';
+// 文章推薦服務 - 已移除測試資料，改用疾病檔案推薦
+// export * from './articleRecommendationsService';
 
 
 
