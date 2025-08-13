@@ -328,7 +328,7 @@ class CreatePostAPIView(APIView):
             )
 
             recommendation_service = apps.get_app_config('social').recommendation_service
-            recommendation_service.embed_new_post(postFrame.id, content)
+            recommendation_service.embed_new_post(postFrame.id, content, "social")
 
             # 創建標籤關聯
             logger.info(f"準備創建標籤，解析得到的標籤: {hashtags}")
@@ -568,7 +568,7 @@ class DeletePostAPIView(APIView):
                 # 繼續刪除主貼文
 
             recommendation_service = apps.get_app_config('social').recommendation_service
-            recommendation_service.delete_post_data(postFrame.id)
+            recommendation_service.delete_post_data(postFrame.id, "social")
 
             # 最後刪除 PostFrame
             post_id = postFrame.id
@@ -716,13 +716,17 @@ class PostListAPIView(generics.ListAPIView):
                 ).order_by('-created_at')
 
             embedded_history = recommendation_service.embed_user_history([(p['id'], p['action'], p['timestamp']) for p in history])
-            # 獲取更多推薦以支援分頁，至少100筆
-            search_list = recommendation_service.recommend_posts(embedded_history, top_k=100+len(seen_ids))
+            # 只推薦社交貼文（日常貼文），獲取更多推薦以支援分頁
+            search_results = recommendation_service.recommend_posts(
+                embedded_history, 
+                top_k=100+len(seen_ids),
+                content_type_filter="social"  # 只推薦日常貼文
+            )
 
-            for post_id in search_list:
-                if post_id not in seen_ids:
-                    # Do something with each recommended post ID
-                    recommend_list.append(post_id)
+            for result in search_results:
+                original_post_id = result['original_id']
+                if original_post_id not in seen_ids:
+                    recommend_list.append(original_post_id)
 
             return PostFrame.get_postFrames(idList=recommend_list)
         except Exception as e:
@@ -1264,8 +1268,8 @@ class UpdatePostAPIView(APIView):
                 )
 
             recommendation_service = apps.get_app_config('social').recommendation_service
-            recommendation_service.delete_post_data(postFrame.id)
-            recommendation_service.embed_new_post(postFrame.id, content)
+            recommendation_service.delete_post_data(postFrame.id, "social")
+            recommendation_service.embed_new_post(postFrame.id, content, "social")
 
             # 處理標籤更新
             hashtags = DataHandler.parse_hashtags(content, hashtag_data)

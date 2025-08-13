@@ -49,7 +49,7 @@ urlpatterns = [
     path(f'{api_v1_prefix}calculator/', include('calculator.urls')),
     path(f'{api_v1_prefix}comments/', include('comments.urls')),
     path(f'{api_v1_prefix}media/', include('media.urls')),
-    path(f'{api_v1_prefix}article_recommendations/', include('articleRecommendation.urls')),
+    # path(f'{api_v1_prefix}article_recommendations/', include('articleRecommendation.urls')),  # 已移除測試資料
     path(f'{api_v1_prefix}ocr/', include('ocrapp.urls')),
 
     # Swagger 文檔
