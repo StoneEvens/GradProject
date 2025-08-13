@@ -21,7 +21,11 @@ logging.set_verbosity_error()  # This will suppress transformers warnings
 script_dir = os.path.dirname(os.path.abspath(__file__))
 
 class RecommendationService:
-    def __init__(self):
+    def __init__(self, content_type: str = "social"):
+        if content_type not in ["social", "forum"]:
+            raise ValueError("content_type must be either 'social' or 'forum'")
+        self.content_type = content_type
+
         ##---------HyperParameters---------##
         self.BATCH_SIZE = 4
         self.ACTION_WEIGHTS = {"liked": 1.0, "comment": 1.5, "share": 2.0}
@@ -31,67 +35,62 @@ class RecommendationService:
         print(f"Using device: {self.device}")
         
         ##---------Model Selection---------##
-        self.tokenizer = AutoTokenizer.from_pretrained("ckiplab/bert-base-chinese")
-        self.model = AutoModel.from_pretrained("ckiplab/bert-base-chinese").eval().to(self.device)
+        model_path = "c:/Users/Steven/bert-base-chinese"
+        self.tokenizer = AutoTokenizer.from_pretrained(model_path)
+        self.model = AutoModel.from_pretrained(model_path).eval().to(self.device)
 
         #----------Load embeddings and post IDs----------#
         # Get the project root directory (where post_embs.npy is located)
         base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        emb_path = os.path.join(base_dir, 'post_embs.npy')
-        ids_path = os.path.join(base_dir, 'post_ids.npy')
+        emb_path = os.path.join(base_dir, f'{self.content_type}_post_embs.npy')
+        ids_path = os.path.join(base_dir, f'{self.content_type}_post_ids.npy')
 
         #print(f"Looking for files in: {base_dir}")
         #print(f"Embeddings path: {emb_path}")
         #print(f"IDs path: {ids_path}")
 
         if not os.path.exists(emb_path) or not os.path.exists(ids_path):
-            from social.models import PostFrame, SoLContent, PostHashtag
-            from pets.models import DiseaseArchiveContent
-
             data_array = []
-            
-            # 收集日常貼文 (SoLContent)
-            social_posts = SoLContent.objects.all()
-            for post in social_posts:
-                postframe = post.postFrame
-                if postframe:
+            if self.content_type == "social":
+                from social.models import PostFrame, SoLContent, PostHashtag
+                all_posts = SoLContent.objects.all()
+                for post in all_posts:
+                    post_frame = SoLContent.get_postFrame(post)
                     data_array.append({
-                        "id": f"social_{postframe.id}",
-                        "content_type": "social",
-                        "timestamp": int(postframe.created_at.timestamp()),
+                        "id": post_frame.id,
+                        "timestamp": int(post_frame.created_at.timestamp()),
                         "content": post.content_text,
-                        "hashtags": [hashtag.tag for hashtag in PostHashtag.objects.filter(postFrame=postframe)]
+                        "hashtags": [hashtag.tag for hashtag in PostHashtag.get_hashtags(post_frame)]
                     })
-            
-            # 收集疾病檔案 (DiseaseArchiveContent)
-            disease_archives = DiseaseArchiveContent.objects.filter(is_private=False)  # 只取公開的
-            for archive in disease_archives:
-                postframe = archive.postFrame
-                if postframe:
+            elif self.content_type == "forum":
+                from pets.models import DiseaseArchiveContent
+                all_posts = DiseaseArchiveContent.objects.all()
+                for post in all_posts:
+                    postframe = post.postFrame
                     data_array.append({
-                        "id": f"disease_{postframe.id}",
-                        "content_type": "disease", 
+                        "id": postframe.id,
                         "timestamp": int(postframe.created_at.timestamp()),
-                        "content": archive.content,
-                        "hashtags": []  # 疾病檔案目前沒有hashtag
+                        "content": post.content,
+                        "hashtags": [] # 疾病目前沒有 hashtags
                     })
-                    
-            print(f"Loaded {len([d for d in data_array if d['content_type'] == 'social'])} social posts and {len([d for d in data_array if d['content_type'] == 'disease'])} disease archives")
 
-            # Initialize FAISS index
-            self.initialize(data_array)
+            if data_array:
+                print(data_array[0])
+                # Initialize FAISS index
+                self.initialize(data_array)
+            else:
+                print(f"No data found to initialize for content type: {self.content_type}")
 
-        # Load the embeddings, IDs and content types
-        self.post_embeddings = np.load(emb_path)
-        self.post_ids = np.load(ids_path, allow_pickle=True)  # Allow pickle to load string arrays
-        
-        # Load content types if exists
-        content_types_path = os.path.join(base_dir, 'post_content_types.npy')
-        if os.path.exists(content_types_path):
-            self.post_content_types = np.load(content_types_path, allow_pickle=True)
+
+        # Load the embeddings and IDs
+        if os.path.exists(emb_path) and os.path.exists(ids_path):
+            self.post_embeddings = np.load(emb_path)
+            self.post_ids = np.load(ids_path)
         else:
-            # For backward compatibility, assume all are social posts
-            self.post_content_types = np.array(['social'] * len(self.post_ids))
+            # Initialize with empty arrays if files don't exist after initialization attempt
+            print(f"Warning: Embedding files not found for {self.content_type}. Initializing empty.")
+            self.post_embeddings = np.array([])
+            self.post_ids = np.array([])
 
     #----------Mean Pooling----------#
     def __mean_pooling(self, outputs, mask):
@@ -130,16 +129,13 @@ class RecommendationService:
 
         post_ids        = np.array(all_ids)                          # shape: (N_posts,)
         post_embeddings = np.vstack(all_embeddings)                  # shape: (N_posts, hidden_dim)
-        post_content_types = np.array([p["content_type"] for p in data_array])  # shape: (N_posts,)
-        
-        np.save("post_ids.npy",        post_ids)
-        np.save("post_embs.npy",       post_embeddings)
-        np.save("post_content_types.npy", post_content_types)
+        np.save(f'{self.content_type}_post_ids.npy',        post_ids)
+        np.save(f'{self.content_type}_post_embs.npy',       post_embeddings)
 
         return post_embeddings.shape[1]  # Return the dimension of embeddings
     
     #----------Embedding New Post----------#
-    def embed_new_post(self, post_id: int, content: str, content_type: str = "social") -> np.ndarray:
+    def embed_new_post(self, post_id: int, content: str) -> np.ndarray:
         # Encode the text
         encoded = self.tokenizer(
             [content],
@@ -155,85 +151,41 @@ class RecommendationService:
             emb = torch.nn.functional.normalize(emb, p=2, dim=1)
             emb = emb.cpu().numpy()
 
-        # Create formatted ID with content type prefix
-        formatted_id = f"{content_type}_{post_id}"
-        
-        # Add new embedding, ID and content type to the arrays
+        # Add new embedding and ID to the arrays
         self.post_embeddings = np.vstack([self.post_embeddings, emb])
-        self.post_ids = np.append(self.post_ids, formatted_id)
-        self.post_content_types = np.append(self.post_content_types, content_type)
+        self.post_ids = np.append(self.post_ids, post_id)
 
         # Save updated arrays
         np.save("post_ids.npy", self.post_ids)
         np.save("post_embs.npy", self.post_embeddings)
-        np.save("post_content_types.npy", self.post_content_types)
 
         print(self.post_embeddings.shape)
         
     #----------Delete Post Data----------#
-    def delete_post_data(self, post_id: int, content_type: str = None):
-        # Try to find the formatted ID first
-        if content_type:
-            formatted_id = f"{content_type}_{post_id}"
-        else:
-            # Try both social and disease prefixes
-            formatted_id = None
-            for prefix in ['social', 'disease']:
-                candidate_id = f"{prefix}_{post_id}"
-                if candidate_id in self.post_ids:
-                    formatted_id = candidate_id
-                    break
-        
-        if formatted_id and formatted_id in self.post_ids:
-            idx = np.where(self.post_ids == formatted_id)[0][0]
+    def delete_post_data(self, post_id: int):
+        if post_id in self.post_ids:
+            idx = np.where(self.post_ids == post_id)[0][0]
             self.post_ids = np.delete(self.post_ids, idx)
             self.post_embeddings = np.delete(self.post_embeddings, idx, axis=0)
-            self.post_content_types = np.delete(self.post_content_types, idx)
-            
             np.save("post_ids.npy", self.post_ids)
             np.save("post_embs.npy", self.post_embeddings)
-            np.save("post_content_types.npy", self.post_content_types)
 
             print(self.post_embeddings.shape)
         else:
-            print(f"Warning: Post ID {post_id} not found in vector store")
+            raise ValueError(f"Post ID {post_id} not found in vector store")
 
     #----------Embedding User History----------#
     def embed_user_history(self,
         posts: List[Tuple[int, str, float]],
         decay_lambda_per_hour: float = 0.1
     ) -> np.ndarray:
-        # Handle empty posts list
-        if not posts:
-            # Return average of all embeddings as default
-            agg = np.mean(self.post_embeddings, axis=0)
-            return agg / np.linalg.norm(agg)
-            
         now = max(ts for _, _, ts in posts)
         emb_map = dict(zip(self.post_ids, self.post_embeddings))
 
         vecs, ws = [], []
         for pid, action, ts in posts:
-            # Try to find the embedding with different prefixes
-            emb = None
-            
-            # First try to find as-is (backward compatibility)
-            if pid in emb_map:
-                emb = emb_map[pid]
-            else:
-                # Try with social prefix
-                social_id = f"social_{pid}"
-                if social_id in emb_map:
-                    emb = emb_map[social_id]
-                else:
-                    # Try with disease prefix
-                    disease_id = f"disease_{pid}"
-                    if disease_id in emb_map:
-                        emb = emb_map[disease_id]
-                        
-            if emb is None: 
-                continue
-                
+            emb = emb_map.get(pid)
+            if emb is None: continue
             age_hours = (now - ts) / 3600.0
             w = self.ACTION_WEIGHTS.get(action, 1.0) * math.exp(-decay_lambda_per_hour * age_hours)
             vecs.append(emb * w)
@@ -250,40 +202,14 @@ class RecommendationService:
     def recommend_posts(
         self,
         user_vec: np.ndarray,
-        top_k: int = 10,
-        content_type_filter: str = None  # "social", "disease", or None for both
-    ) -> List[dict]:  # Return list of dicts with id, content_type, and original_id
+        top_k: int = 10
+    ) -> List[int]:  # Changed from np.ndarray to List[int]
         dimension = self.post_embeddings.shape[1]  # Should be 768
         index = faiss.IndexFlatIP(dimension)  # Using inner product for similarity
         index.add(self.post_embeddings.astype(np.float32))  # Add vectors to the index
 
-        # If filtering by content type, search more results to ensure we have enough after filtering
-        search_k = top_k * 3 if content_type_filter else top_k
-        
         q = user_vec.astype("float32").reshape(1, -1)
-        distances, indices = index.search(q, search_k)
+        distances, indices = index.search(q, top_k)
 
-        results = []
-        for idx in indices[0]:
-            post_id = self.post_ids[idx]
-            content_type = self.post_content_types[idx]
-            
-            # Apply content type filter if specified
-            if content_type_filter and content_type != content_type_filter:
-                continue
-                
-            # Extract original post ID (remove prefix)
-            original_id = int(post_id.split('_')[1])
-            
-            results.append({
-                'id': post_id,
-                'content_type': content_type,
-                'original_id': original_id
-            })
-            
-            # Stop when we have enough results
-            if len(results) >= top_k:
-                break
-        
-        print(f"Recommended {len(results)} posts from {self.post_embeddings.shape[0]} total")
-        return results
+        print(self.post_embeddings.shape)
+        return self.post_ids[indices[0]].tolist()  # Convert numpy array to Python list

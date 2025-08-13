@@ -327,8 +327,8 @@ class CreatePostAPIView(APIView):
                 location=location
             )
 
-            recommendation_service = apps.get_app_config('social').recommendation_service
-            recommendation_service.embed_new_post(postFrame.id, content, "social")
+            recommendation_service = apps.get_app_config('social').get_recommendation_service()
+            recommendation_service.embed_new_post(postFrame.id, content)
 
             # 創建標籤關聯
             logger.info(f"準備創建標籤，解析得到的標籤: {hashtags}")
@@ -567,8 +567,8 @@ class DeletePostAPIView(APIView):
                 logger.error(f"刪除貼文相關資料時出錯: {str(data_error)}")
                 # 繼續刪除主貼文
 
-            recommendation_service = apps.get_app_config('social').recommendation_service
-            recommendation_service.delete_post_data(postFrame.id, "social")
+            recommendation_service = apps.get_app_config('social').get_recommendation_service()
+            recommendation_service.delete_post_data(postFrame.id)
 
             # 最後刪除 PostFrame
             post_id = postFrame.id
@@ -661,7 +661,7 @@ class PostListAPIView(generics.ListAPIView):
     
     @log_queries
     def get_queryset(self):
-        recommendation_service = apps.get_app_config('social').recommendation_service
+        recommendation_service = apps.get_app_config('social').get_recommendation_service()
 
         history = []
         recommend_list = []
@@ -1251,9 +1251,9 @@ class UpdatePostAPIView(APIView):
                     location=location
                 )
 
-            recommendation_service = apps.get_app_config('social').recommendation_service
-            recommendation_service.delete_post_data(postFrame.id, "social")
-            recommendation_service.embed_new_post(postFrame.id, content, "social")
+            recommendation_service = apps.get_app_config('social').get_recommendation_service()
+            recommendation_service.delete_post_data(postFrame.id)
+            recommendation_service.embed_new_post(postFrame.id, content)
 
             # 處理標籤更新
             hashtags = DataHandler.parse_hashtags(content, hashtag_data)
