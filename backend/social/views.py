@@ -682,17 +682,22 @@ class PostListAPIView(generics.ListAPIView):
 
         seen_ids = {p['id'] for p in history}
 
-        #print(history)
+        if len(history) > 0:
+            print(len(history), "條互動歷史")
 
-        embedded_history = recommendation_service.embed_user_history([(p['id'], p['action'], p['timestamp']) for p in history])
-        search_list = recommendation_service.recommend_posts(embedded_history, top_k=30+len(seen_ids))
+            embedded_history = recommendation_service.embed_user_history([(p['id'], p['action'], p['timestamp']) for p in history])
+            search_list = recommendation_service.recommend_posts(embedded_history, top_k=30+len(seen_ids))
 
-        for post_id in search_list:
-            if post_id not in seen_ids:
-                # Do something with each recommended post ID
-                recommend_list.append(post_id)
+            for post_id in search_list:
+                if post_id not in seen_ids:
+                    # Do something with each recommended post ID
+                    recommend_list.append(post_id)
 
-        return PostFrame.get_postFrames(idList=recommend_list)
+            return PostFrame.get_postFrames(idList=recommend_list)
+        else:
+            print("無用戶互動歷史")
+
+            return PostFrame.objects.all().order_by('-created_at')[:30]
 
     def list(self, request, *args, **kwargs):
         try:
