@@ -71,7 +71,6 @@ class UserPostsPreviewListAPIView(generics.ListAPIView):
     """獲取用戶的貼文預覽列表"""
     permission_classes = [IsAuthenticated]
     serializer_class = PostPreviewSerializer
-    pagination_class = None  # 禁用分頁，因為我們已經限制了結果數量
     
     def get_queryset(self):
         user_id = self.kwargs['pk']
@@ -80,26 +79,48 @@ class UserPostsPreviewListAPIView(generics.ListAPIView):
             return PostFrame.objects.filter(
                 user=user,
                 contents__isnull=False  # 只包含有內容的貼文，排除疾病檔案
-            ).distinct().order_by('-created_at')[:20]
+            ).distinct().order_by('-created_at')
         except CustomUser.DoesNotExist:
             return PostFrame.objects.none()
     
     def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
-        
-        # 處理分頁
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True, context={'request': request})
-            return self.get_paginated_response(serializer.data)
-        
-        # 如果不使用分頁
-        serializer = self.get_serializer(queryset, many=True, context={'request': request})
-        
-        return APIResponse(
-            data=serializer.data,
-            message="獲取用戶貼文預覽成功"
-        )
+        try:
+            queryset = self.filter_queryset(self.get_queryset())
+            
+            # 獲取分頁參數
+            page_size = min(int(request.query_params.get('limit', 15)), 50)  # 默認15個，最大50個
+            offset = int(request.query_params.get('offset', 0))
+            
+            # 手動分頁
+            total_count = queryset.count()
+            posts = queryset[offset:offset + page_size]
+            has_more = offset + page_size < total_count
+            
+            # 序列化數據
+            serializer = self.get_serializer(posts, many=True, context={'request': request})
+            
+            return APIResponse(
+                data={
+                    'posts': serializer.data,
+                    'has_more': has_more,
+                    'total_count': total_count,
+                    'offset': offset,
+                    'limit': page_size
+                },
+                message="獲取用戶貼文預覽成功"
+            )
+            
+        except ValueError as e:
+            return APIResponse(
+                message="分頁參數錯誤",
+                status=drf_status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            logger.error(f"獲取用戶貼文預覽失敗: {str(e)}", exc_info=True)
+            return APIResponse(
+                message="獲取用戶貼文預覽失敗",
+                status=drf_status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 #----------搜尋 API----------
 class SearchAPIView(APIView):
@@ -640,59 +661,76 @@ class PostListAPIView(generics.ListAPIView):
     
     @log_queries
     def get_queryset(self):
-        recommendation_service = apps.get_app_config('social').recommendation_service
+        try:
+            recommendation_service = apps.get_app_config('social').recommendation_service
 
-        history = []
-        recommend_list = []
+            history = []
+            recommend_list = []
 
-        # 獲取用戶的互動歷史
-        # 先取得用戶和日常貼文SoLContent的互動歷史(互動不包含留言，留言會在下方單獨處理)
-        interaction_list = UserInteraction.objects.filter(user=self.request.user).values()
-        for interaction in interaction_list:
-            # 先假設用戶互動的是PostFrame，把按讚留言紀錄過濾掉
-            postFrame = PostFrame.get_postFrames(postID=interaction['interactables_id'])
+            # 獲取用戶的互動歷史
+            # 先取得用戶和日常貼文SoLContent的互動歷史(互動不包含留言，留言會在下方單獨處理)
+            interaction_list = UserInteraction.objects.filter(user=self.request.user).values()
+            for interaction in interaction_list:
+                # 先假設用戶互動的是PostFrame，把按讚留言紀錄過濾掉
+                try:
+                    postFrame = PostFrame.get_postFrames(postID=interaction['interactables_id'])
+                except PostFrame.DoesNotExist:
+                    # 如果找不到對應的PostFrame，跳過這個互動
+                    continue
 
-            # 根據找到的PostFrame獲取SoLContent(若不是SoLContent則忽略)
-            if postFrame is not None:
-                solContent = SoLContent.get_content(postFrame)
+                # 根據找到的PostFrame獲取SoLContent(若不是SoLContent則忽略)
+                if postFrame is not None:
+                    solContent = SoLContent.get_content(postFrame)
 
-                if solContent is not None:
-                    history.append({
-                        "id": interaction['interactables_id'],
-                        "action": interaction['relation'],
-                        "timestamp": int(interaction['created_at'].timestamp())
-                    })
+                    if solContent is not None:
+                        history.append({
+                            "id": interaction['interactables_id'],
+                            "action": interaction['relation'],
+                            "timestamp": int(interaction['created_at'].timestamp())
+                        })
 
-        # 接者處理留言的歷史
-        comment_list = Comment.objects.filter(user=self.request.user).select_related('postFrame')
-        for comment in comment_list:
-            # 還是先抓留言來自哪個PostFrame
-            postFrame = comment.postFrame
+            # 接者處理留言的歷史
+            comment_list = Comment.objects.filter(user=self.request.user).select_related('postFrame')
+            for comment in comment_list:
+                # 還是先抓留言來自哪個PostFrame
+                postFrame = comment.postFrame
 
-            # 根據找到的PostFrame獲取SoLContent(若不是SoLContent則忽略)
-            if postFrame is not None:
-                solContent = SoLContent.get_content(postFrame)
+                # 根據找到的PostFrame獲取SoLContent(若不是SoLContent則忽略)
+                if postFrame is not None:
+                    solContent = SoLContent.get_content(postFrame)
 
-                if solContent is not None:
-                    history.append({
-                        "id": postFrame.id,
-                        "action": "comment",
-                        "timestamp": int(comment.created_at.timestamp())
-                    })
+                    if solContent is not None:
+                        history.append({
+                            "id": postFrame.id,
+                            "action": "comment",
+                            "timestamp": int(comment.created_at.timestamp())
+                        })
 
-        seen_ids = {p['id'] for p in history}
+            seen_ids = {p['id'] for p in history}
 
-        #print(history)
+            # 如果沒有歷史記錄，返回最新的貼文
+            if not history:
+                logger.info(f"用戶 {self.request.user.id} 沒有互動歷史，返回最新貼文")
+                return PostFrame.objects.filter(
+                    contents__isnull=False
+                ).order_by('-created_at')
 
-        embedded_history = recommendation_service.embed_user_history([(p['id'], p['action'], p['timestamp']) for p in history])
-        search_list = recommendation_service.recommend_posts(embedded_history, top_k=30+len(seen_ids))
+            embedded_history = recommendation_service.embed_user_history([(p['id'], p['action'], p['timestamp']) for p in history])
+            # 獲取更多推薦以支援分頁，至少100筆
+            search_list = recommendation_service.recommend_posts(embedded_history, top_k=100+len(seen_ids))
 
-        for post_id in search_list:
-            if post_id not in seen_ids:
-                # Do something with each recommended post ID
-                recommend_list.append(post_id)
+            for post_id in search_list:
+                if post_id not in seen_ids:
+                    # Do something with each recommended post ID
+                    recommend_list.append(post_id)
 
-        return PostFrame.get_postFrames(idList=recommend_list)
+            return PostFrame.get_postFrames(idList=recommend_list)
+        except Exception as e:
+            logger.error(f"推薦系統錯誤: {str(e)}", exc_info=True)
+            # 如果推薦系統出錯，返回最新的貼文作為備用
+            return PostFrame.objects.filter(
+                contents__isnull=False
+            ).order_by('-created_at')
 
     def list(self, request, *args, **kwargs):
         try:

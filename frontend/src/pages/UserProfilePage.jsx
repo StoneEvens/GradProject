@@ -22,12 +22,64 @@ const UserProfilePage = () => {
   const [archives, setArchives] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  
+  // 貼文分頁相關狀態
+  const [postsLoading, setPostsLoading] = useState(false);
+  const [postsError, setPostsError] = useState(null);
+  const [postsHasMore, setPostsHasMore] = useState(true);
+  const [postsPage, setPostsPage] = useState(0);
 
   // 從URL參數初始化標籤
   useEffect(() => {
     const tabFromUrl = searchParams.get('tab') || 'community';
     setActiveTab(tabFromUrl);
   }, [searchParams]);
+
+  // 載入貼文預覽（支援分頁）
+  const loadPostsPreview = async (userId, pageNum = 0, isLoadMore = false) => {
+    try {
+      if (!isLoadMore) {
+        setPostsLoading(true);
+        setPostsError(null);
+      }
+      
+      const result = await getUserPostsPreview(userId, {
+        offset: pageNum * 15,
+        limit: 15
+      });
+      
+      if (result.success) {
+        const newPosts = result.data.posts || [];
+        
+        if (isLoadMore) {
+          setPostsPreview(prevPosts => [...prevPosts, ...newPosts]);
+        } else {
+          setPostsPreview(newPosts);
+        }
+        
+        setPostsHasMore(result.data.has_more || false);
+        setPostsPage(pageNum);
+      } else {
+        throw new Error(result.error || '載入貼文預覽失敗');
+      }
+    } catch (error) {
+      console.error('載入貼文預覽失敗:', error);
+      if (!isLoadMore) {
+        setPostsError(error.message);
+        setPostsPreview([]);
+      }
+    } finally {
+      if (!isLoadMore) {
+        setPostsLoading(false);
+      }
+    }
+  };
+
+  // 載入更多貼文
+  const handleLoadMorePosts = async () => {
+    if (!user) return;
+    return loadPostsPreview(user.id, postsPage + 1, true);
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -47,19 +99,10 @@ const UserProfilePage = () => {
         }
         
         // 分別處理貼文預覽與病程紀錄，避免其中一個失敗影響整體
-        let posts = [];
         let archs = [];
         
-        try {
-          posts = await getUserPostsPreview(userData.id);
-          // 確保回傳的是陣列
-          if (!Array.isArray(posts)) {
-            posts = [];
-          }
-        } catch (postsErr) {
-          console.error('取得貼文預覽失敗:', postsErr);
-          posts = [];
-        }
+        // 初始載入貼文預覽（分頁方式）
+        await loadPostsPreview(userData.id, 0, false);
         
         try {
           archs = await getUserArchives(userData.id);
@@ -72,7 +115,6 @@ const UserProfilePage = () => {
           archs = [];
         }
         
-        setPostsPreview(posts);
         setArchives(archs);
       } catch (err) {
         console.error('載入個人資料失敗:', err);
@@ -201,10 +243,13 @@ const UserProfilePage = () => {
               {activeTab === 'community' ? (
                 <PostPreviewList
                   posts={postsPreview}
-                  loading={loading}
-                  error={null}
+                  loading={postsLoading}
+                  error={postsError}
                   emptyMessage="尚未發布任何日常貼文"
                   userId={user.id}
+                  hasMore={postsHasMore}
+                  onLoadMore={handleLoadMorePosts}
+                  enableProgressiveLoading={true}
                 />
               ) : (
                 <ArchiveList

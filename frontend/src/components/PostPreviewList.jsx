@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from '../styles/PostPreviewList.module.css';
 
@@ -14,9 +14,39 @@ const PostPreviewList = ({
   isSavedPosts = false,
   isPetRelatedPosts = false,
   petId = null,
-  style = {}
+  style = {},
+  // 新增分頁相關 props
+  hasMore = false,
+  onLoadMore = null,
+  enableProgressiveLoading = false
 }) => {
   const navigate = useNavigate();
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+
+  // 處理無限滾動
+  const handleScroll = useCallback(() => {
+    if (!enableProgressiveLoading || !hasMore || isLoadingMore || loading || !onLoadMore) return;
+
+    // 檢查是否滾動到底部
+    const scrollHeight = document.documentElement.scrollHeight;
+    const scrollTop = document.documentElement.scrollTop;
+    const clientHeight = document.documentElement.clientHeight;
+
+    if (scrollTop + clientHeight >= scrollHeight - 200) { // 提前200px觸發載入
+      setIsLoadingMore(true);
+      onLoadMore().finally(() => {
+        setIsLoadingMore(false);
+      });
+    }
+  }, [enableProgressiveLoading, hasMore, isLoadingMore, loading, onLoadMore]);
+
+  // 註冊滾動事件
+  useEffect(() => {
+    if (enableProgressiveLoading && hasMore && onLoadMore) {
+      window.addEventListener('scroll', handleScroll);
+      return () => window.removeEventListener('scroll', handleScroll);
+    }
+  }, [handleScroll, enableProgressiveLoading, hasMore, onLoadMore]);
 
   // 處理點擊貼文預覽
   const handlePostClick = (post) => {
@@ -169,6 +199,21 @@ const PostPreviewList = ({
           </div>
         ))}
       </div>
+      
+      {/* 載入更多指示器 */}
+      {enableProgressiveLoading && hasMore && (isLoadingMore || loading) && (
+        <div className={styles.loadingMore}>
+          <div className={styles.spinner}></div>
+          <p>載入更多貼文中...</p>
+        </div>
+      )}
+      
+      {/* 沒有更多內容指示器 */}
+      {enableProgressiveLoading && !hasMore && posts.length > 0 && (
+        <div className={styles.noMore}>
+          <p>已載入所有貼文</p>
+        </div>
+      )}
     </div>
   );
 };
