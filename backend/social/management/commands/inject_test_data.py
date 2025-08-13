@@ -18,9 +18,9 @@ class Command(BaseCommand):
         print(test_data[0])
         print(test_data[0].get('content'))
 
-        #for post in test_data:
-            #postFrame = PostFrame.create(user = user)
-            #sol_content = SoLContent.create(postFrame=postFrame, content_text=post.get('content'), location="新北市")
+        for post in test_data:
+            postFrame = PostFrame.create(user = user)
+            sol_content = SoLContent.create(postFrame=postFrame, content_text=post.get('content'), location="新北市")
 
         # Your data injection logic here
         self.stdout.write(self.style.SUCCESS("Test data injected successfully"))
