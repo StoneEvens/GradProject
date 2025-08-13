@@ -153,6 +153,12 @@ class RecommendationService:
         posts: List[Tuple[int, str, float]],
         decay_lambda_per_hour: float = 0.1
     ) -> np.ndarray:
+        # Handle empty posts list
+        if not posts:
+            # Return average of all embeddings as default
+            agg = np.mean(self.post_embeddings, axis=0)
+            return agg / np.linalg.norm(agg)
+            
         now = max(ts for _, _, ts in posts)
         emb_map = dict(zip(self.post_ids, self.post_embeddings))
 
