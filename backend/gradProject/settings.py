@@ -151,6 +151,7 @@ DATABASES = {
 }
 
 AUTH_USER_MODEL = 'accounts.CustomUser'
+RECOMMENDATIONS_ENABLED = False
 
 
 # Password validation
