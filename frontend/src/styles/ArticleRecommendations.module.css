@@ -82,4 +82,83 @@
 
 .scrollDown {
   margin-top: 5px;
+}
+
+/* 新增疾病檔案相關樣式 */
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 310px;
+}
+
+.loadingText {
+  font-size: 14px;
+  color: #666;
+}
+
+.emptyState {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 310px;
+}
+
+.emptyText {
+  font-size: 14px;
+  color: #999;
+}
+
+.archiveInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+
+.petName {
+  color: #666;
+  font-weight: 500;
+}
+
+.healthStatus {
+  color: #F08651;
+  font-weight: 500;
+  font-size: 12px;
+}
+
+/* 新增：疾病檔案組件包裝器樣式 */
+.archiveItemWrapper {
+  margin-bottom: 8px;
+}
+
+.archiveItemWrapper:last-child {
+  margin-bottom: 0;
+}
+
+/* 調整ArchivePreviewForPublic在推薦區域內的樣式 */
+.archiveItemWrapper :global(.container) {
+  background-color: #ffeed6;
+  margin-bottom: 0;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+}
+
+.archiveItemWrapper :global(.container):hover {
+  background-color: #ffdbaa;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* 調整標題字體大小以適應推薦區域 */
+.archiveItemWrapper :global(.archiveTitle) {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* 調整內容文字以適應推薦區域 */
+.archiveItemWrapper :global(.contentText) {
+  font-size: 13px;
+  -webkit-line-clamp: 1; /* 推薦區域只顯示一行內容 */
 } 

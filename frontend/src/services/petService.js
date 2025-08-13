@@ -525,6 +525,32 @@ export const deleteDiseaseArchive = async (archiveId) => {
   }
 };
 
+// 獲取推薦疾病檔案
+export const getRecommendedDiseaseArchives = async (params = {}) => {
+  try {
+    const { sort = 'popular', limit = 5, offset = 0 } = params;
+    const res = await axios.get('/pets/disease-archives/recommended/', {
+      params: { sort, limit, offset }
+    });
+    return {
+      success: true,
+      data: res.data.data
+    };
+  } catch (error) {
+    console.error('獲取推薦疾病檔案失敗:', {
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      message: error.message
+    });
+    return {
+      success: false,
+      error: error.response?.data?.message || error.message,
+      data: null
+    };
+  }
+};
+
 export default {
   getUserPets,
   createPet,

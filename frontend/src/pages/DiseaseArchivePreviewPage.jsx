@@ -271,13 +271,9 @@ const DiseaseArchivePreviewPage = () => {
       localStorage.removeItem(DRAFT_KEY);
       localStorage.removeItem('diseaseArchiveDraft'); // 保留舊的鍵名以防萬一
       
-      // 延遲後導向到疾病檔案詳細頁面
+      // 延遲後導向到寵物疾病檔案列表頁面
       setTimeout(() => {
-        if (result && result.id) {
-          navigate(`/pet/${petId}/disease-archive/${result.id}`);
-        } else {
-          navigate(`/pet/${petId}/disease-archive`);
-        }
+        navigate(`/pet/${petId}/disease-archive`);
       }, 1500);
       
     } catch (error) {
