@@ -1744,6 +1744,15 @@ class CreateDiseaseArchiveAPIView(APIView):
                     illness=illness
                 )
             
+            # 如果是公開檔案，加入推薦系統
+            if not is_private:
+                try:
+                    from django.apps import apps
+                    recommendation_service = apps.get_app_config('social').recommendation_service
+                    recommendation_service.embed_new_post(post_frame.id, formatted_content, "disease")
+                except Exception as e:
+                    logger.error(f"添加疾病檔案到推薦系統失敗: {str(e)}")
+            
             logger.info(f"用戶 {user.id} 成功建立疾病檔案，ID: {disease_archive.id}")
             
             # 序列化回傳資料
@@ -1878,6 +1887,273 @@ class GetMyDiseaseArchivesPreviewAPIView(APIView):
                 message="獲取資料失敗，請稍後再試",
                 code=500,
                 success=False
+            )
+
+
+class RecommendedDiseaseArchivesAPIView(APIView):
+    """
+    獲取推薦的疾病檔案列表（基於用戶的互動歷史）
+    
+    查詢參數:
+    - limit: 限制返回數量 (預設: 10, 最大: 50)
+    - offset: 分頁偏移量 (預設: 0)
+    - sort: 排序方式 (recommendation|latest|popular, 預設: recommendation)
+    
+    回傳格式:
+    {
+        "code": 200,
+        "message": "獲取推薦疾病檔案成功",
+        "success": true,
+        "data": {
+            "archives": [...],
+            "has_more": false,
+            "total_count": 10,
+            "recommendation_type": "personalized|latest|popular"
+        }
+    }
+    """
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        try:
+            # 獲取查詢參數
+            limit = min(int(request.query_params.get('limit', 10)), 50)  # 最大5個
+            offset = int(request.query_params.get('offset', 0))
+            sort_type = request.query_params.get('sort', 'recommendation')  # recommendation|latest|popular
+            
+            from django.apps import apps
+            from interactions.models import UserInteraction
+            from comments.models import Comment
+            from social.models import PostFrame
+            
+            # 如果指定非推薦排序，直接返回相應結果
+            if sort_type == 'latest':
+                return self._get_latest_archives(request, limit, offset)
+            elif sort_type == 'popular':
+                return self._get_popular_archives(request, limit, offset)
+            
+            # 以下是推薦系統邏輯
+            recommendation_service = apps.get_app_config('social').recommendation_service
+            
+            # 收集用戶與疾病檔案的互動歷史
+            history = self._collect_disease_interaction_history(request.user)
+            
+            seen_ids = {p['id'] for p in history}
+            
+            # 如果沒有歷史記錄，返回最新公開疾病檔案
+            if not history:
+                logger.info(f"用戶 {request.user.id} 沒有疾病檔案互動歷史，返回最新公開疾病檔案")
+                return self._get_latest_archives_with_pagination(request, limit, offset, "latest")
+            
+            # 使用推薦系統獲取疾病檔案推薦
+            try:
+                embedded_history = recommendation_service.embed_user_history([(p['id'], p['action'], p['timestamp']) for p in history])
+                search_results = recommendation_service.recommend_posts(
+                    embedded_history,
+                    top_k=limit + offset + 20,  # 獲取更多結果以支援分頁和過濾
+                    content_type_filter="disease"
+                )
+                
+                recommended_ids = []
+                for result in search_results:
+                    original_post_id = result['original_id']
+                    if original_post_id not in seen_ids:
+                        recommended_ids.append(original_post_id)
+                
+                # 根據推薦的 PostFrame IDs 獲取對應的疾病檔案
+                if recommended_ids:
+                    return self._get_recommended_archives_with_pagination(
+                        request, recommended_ids, limit, offset, "personalized"
+                    )
+                else:
+                    # 如果沒有推薦結果，返回最新公開疾病檔案
+                    logger.info(f"推薦系統沒有結果，返回最新疾病檔案")
+                    return self._get_latest_archives_with_pagination(request, limit, offset, "latest")
+                    
+            except Exception as rec_error:
+                logger.error(f"推薦系統錯誤: {str(rec_error)}")
+                # 推薦系統出錯時，返回最新疾病檔案
+                return self._get_latest_archives_with_pagination(request, limit, offset, "latest")
+                
+        except Exception as e:
+            logger.error(f"獲取推薦疾病檔案失敗: {str(e)}", exc_info=True)
+            return APIResponse(
+                message="獲取推薦疾病檔案失敗",
+                status=drf_status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+    def _collect_disease_interaction_history(self, user):
+        """收集用戶與疾病檔案的互動歷史"""
+        history = []
+        
+        try:
+            from interactions.models import UserInteraction
+            from comments.models import Comment
+            from social.models import PostFrame
+            
+            # 獲取用戶與疾病檔案的互動歷史
+            interaction_list = UserInteraction.objects.filter(user=user).values()
+            for interaction in interaction_list:
+                try:
+                    postFrame = PostFrame.objects.get(id=interaction['interactables_id'])
+                    # 檢查是否有關聯的疾病檔案
+                    if hasattr(postFrame, 'illness_archives_postFrame') and postFrame.illness_archives_postFrame.exists():
+                        disease_archive = postFrame.illness_archives_postFrame.first()
+                        if disease_archive and not disease_archive.is_private:
+                            history.append({
+                                "id": interaction['interactables_id'],
+                                "action": interaction['relation'],
+                                "timestamp": int(interaction['created_at'].timestamp())
+                            })
+                except PostFrame.DoesNotExist:
+                    continue
+            
+            # 處理疾病檔案的留言歷史
+            comment_list = Comment.objects.filter(user=user).select_related('postFrame')
+            for comment in comment_list:
+                postFrame = comment.postFrame
+                if hasattr(postFrame, 'illness_archives_postFrame') and postFrame.illness_archives_postFrame.exists():
+                    disease_archive = postFrame.illness_archives_postFrame.first()
+                    if disease_archive and not disease_archive.is_private:
+                        history.append({
+                            "id": postFrame.id,
+                            "action": "comment", 
+                            "timestamp": int(comment.created_at.timestamp())
+                        })
+            
+            return history
+            
+        except Exception as e:
+            logger.error(f"收集疾病檔案互動歷史失敗: {str(e)}")
+            return []
+    
+    def _get_latest_archives(self, request, limit, offset):
+        """獲取最新疾病檔案"""
+        return self._get_latest_archives_with_pagination(request, limit, offset, "latest")
+    
+    def _get_popular_archives(self, request, limit, offset):
+        """獲取熱門疾病檔案"""
+        try:
+            archives_queryset = DiseaseArchiveContent.objects.filter(
+                is_private=False
+            ).select_related(
+                'postFrame', 'pet'
+            ).prefetch_related(
+                'illnesses__illness'
+            ).order_by('-postFrame__likes')  # 按讚數排序
+            
+            total_count = archives_queryset.count()
+            archives = archives_queryset[offset:offset + limit]
+            has_more = offset + limit < total_count
+            
+            serializer = DiseaseArchiveContentSerializer(
+                archives, many=True, context={'request': request}
+            )
+            
+            return APIResponse(
+                data={
+                    'archives': serializer.data,
+                    'has_more': has_more,
+                    'total_count': total_count,
+                    'recommendation_type': 'popular'
+                },
+                message="獲取熱門疾病檔案成功"
+            )
+            
+        except Exception as e:
+            logger.error(f"獲取熱門疾病檔案失敗: {str(e)}")
+            return APIResponse(
+                message="獲取熱門疾病檔案失敗",
+                status=drf_status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+    def _get_latest_archives_with_pagination(self, request, limit, offset, recommendation_type):
+        """獲取最新疾病檔案（帶分頁）"""
+        try:
+            archives_queryset = DiseaseArchiveContent.objects.filter(
+                is_private=False
+            ).select_related(
+                'postFrame', 'pet'
+            ).prefetch_related(
+                'illnesses__illness'
+            ).order_by('-postFrame__created_at')
+            
+            total_count = archives_queryset.count()
+            archives = archives_queryset[offset:offset + limit]
+            has_more = offset + limit < total_count
+            
+            serializer = DiseaseArchiveContentSerializer(
+                archives, many=True, context={'request': request}
+            )
+            
+            return APIResponse(
+                data={
+                    'archives': serializer.data,
+                    'has_more': has_more,
+                    'total_count': total_count,
+                    'recommendation_type': recommendation_type
+                },
+                message="獲取最新疾病檔案成功"
+            )
+            
+        except Exception as e:
+            logger.error(f"獲取最新疾病檔案失敗: {str(e)}")
+            return APIResponse(
+                message="獲取最新疾病檔案失敗",
+                status=drf_status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+    def _get_recommended_archives_with_pagination(self, request, recommended_ids, limit, offset, recommendation_type):
+        """根據推薦ID獲取疾病檔案（帶分頁）"""
+        try:
+            # 應用分頁到推薦ID列表
+            paginated_ids = recommended_ids[offset:offset + limit]
+            has_more = offset + limit < len(recommended_ids)
+            
+            if not paginated_ids:
+                return APIResponse(
+                    data={
+                        'archives': [],
+                        'has_more': False,
+                        'total_count': 0,
+                        'recommendation_type': recommendation_type
+                    },
+                    message="沒有更多推薦結果"
+                )
+            
+            # 根據推薦的 PostFrame IDs 獲取對應的疾病檔案
+            archives = DiseaseArchiveContent.objects.filter(
+                postFrame__id__in=paginated_ids,
+                is_private=False
+            ).select_related(
+                'postFrame', 'pet'
+            ).prefetch_related(
+                'illnesses__illness'
+            )
+            
+            # 按照推薦順序排序
+            archives_dict = {archive.postFrame.id: archive for archive in archives}
+            ordered_archives = [archives_dict[post_id] for post_id in paginated_ids if post_id in archives_dict]
+            
+            serializer = DiseaseArchiveContentSerializer(
+                ordered_archives, many=True, context={'request': request}
+            )
+            
+            return APIResponse(
+                data={
+                    'archives': serializer.data,
+                    'has_more': has_more,
+                    'total_count': len(recommended_ids),
+                    'recommendation_type': recommendation_type
+                },
+                message="獲取推薦疾病檔案成功"
+            )
+            
+        except Exception as e:
+            logger.error(f"獲取推薦疾病檔案失敗: {str(e)}")
+            return APIResponse(
+                message="獲取推薦疾病檔案失敗",
+                status=drf_status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
 
@@ -2236,9 +2512,27 @@ class PublishDiseaseArchiveAPIView(APIView):
                 )
             
             # 切換疾病檔案的狀態
+            old_is_private = archive.is_private
             new_is_private = not archive.is_private
             archive.is_private = new_is_private
             archive.save(update_fields=['is_private'])
+            
+            # 更新推薦系統
+            if archive.postFrame:
+                try:
+                    from django.apps import apps
+                    recommendation_service = apps.get_app_config('social').recommendation_service
+                    
+                    if old_is_private and not new_is_private:
+                        # 從私人變為公開：加入推薦系統
+                        recommendation_service.embed_new_post(archive.postFrame.id, archive.content, "disease")
+                        logger.info(f"疾病檔案 {archive_id} 已加入推薦系統")
+                    elif not old_is_private and new_is_private:
+                        # 從公開變為私人：從推薦系統移除
+                        recommendation_service.delete_post_data(archive.postFrame.id, "disease") 
+                        logger.info(f"疾病檔案 {archive_id} 已從推薦系統移除")
+                except Exception as e:
+                    logger.error(f"更新疾病檔案推薦系統狀態失敗: {str(e)}")
             
             action = "轉為私人" if new_is_private else "公開發布"
             logger.info(f"疾病檔案 {archive_id} 已{action}")
@@ -2476,8 +2770,16 @@ class DeleteDiseaseArchiveAPIView(APIView):
                     success=False
                 )
             
-            # 刪除相關的 PostFrame (如果存在)
+            # 從推薦系統中移除疾病檔案
             if hasattr(archive, 'postFrame') and archive.postFrame:
+                try:
+                    from django.apps import apps
+                    recommendation_service = apps.get_app_config('social').recommendation_service
+                    recommendation_service.delete_post_data(archive.postFrame.id, "disease")
+                except Exception as e:
+                    logger.error(f"從推薦系統移除疾病檔案失敗: {str(e)}")
+                
+                # 刪除相關的 PostFrame
                 archive.postFrame.delete()
             
             # 刪除檔案

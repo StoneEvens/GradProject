@@ -29,4 +29,5 @@ urlpatterns = [
     path('disease-archive/<int:archive_id>/delete/', DeleteDiseaseArchiveAPIView.as_view(), name='delete-disease-archive'),
     path('disease-archive/<int:archive_id>/like/', DiseaseArchiveLikeAPIView.as_view(), name='disease-archive-like'),
     path('disease-archive/<int:archive_id>/save/', DiseaseArchiveSaveAPIView.as_view(), name='disease-archive-save'),
+    path('disease-archives/recommended/', RecommendedDiseaseArchivesAPIView.as_view(), name='recommended-disease-archives'),
 ]

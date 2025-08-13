@@ -71,7 +71,6 @@ class UserPostsPreviewListAPIView(generics.ListAPIView):
     """獲取用戶的貼文預覽列表"""
     permission_classes = [IsAuthenticated]
     serializer_class = PostPreviewSerializer
-    pagination_class = None  # 禁用分頁，因為我們已經限制了結果數量
     
     def get_queryset(self):
         user_id = self.kwargs['pk']
@@ -80,26 +79,48 @@ class UserPostsPreviewListAPIView(generics.ListAPIView):
             return PostFrame.objects.filter(
                 user=user,
                 contents__isnull=False  # 只包含有內容的貼文，排除疾病檔案
-            ).distinct().order_by('-created_at')[:20]
+            ).distinct().order_by('-created_at')
         except CustomUser.DoesNotExist:
             return PostFrame.objects.none()
     
     def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
-        
-        # 處理分頁
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True, context={'request': request})
-            return self.get_paginated_response(serializer.data)
-        
-        # 如果不使用分頁
-        serializer = self.get_serializer(queryset, many=True, context={'request': request})
-        
-        return APIResponse(
-            data=serializer.data,
-            message="獲取用戶貼文預覽成功"
-        )
+        try:
+            queryset = self.filter_queryset(self.get_queryset())
+            
+            # 獲取分頁參數
+            page_size = min(int(request.query_params.get('limit', 15)), 50)  # 默認15個，最大50個
+            offset = int(request.query_params.get('offset', 0))
+            
+            # 手動分頁
+            total_count = queryset.count()
+            posts = queryset[offset:offset + page_size]
+            has_more = offset + page_size < total_count
+            
+            # 序列化數據
+            serializer = self.get_serializer(posts, many=True, context={'request': request})
+            
+            return APIResponse(
+                data={
+                    'posts': serializer.data,
+                    'has_more': has_more,
+                    'total_count': total_count,
+                    'offset': offset,
+                    'limit': page_size
+                },
+                message="獲取用戶貼文預覽成功"
+            )
+            
+        except ValueError as e:
+            return APIResponse(
+                message="分頁參數錯誤",
+                status=drf_status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            logger.error(f"獲取用戶貼文預覽失敗: {str(e)}", exc_info=True)
+            return APIResponse(
+                message="獲取用戶貼文預覽失敗",
+                status=drf_status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 #----------搜尋 API----------
 class SearchAPIView(APIView):
@@ -307,7 +328,7 @@ class CreatePostAPIView(APIView):
             )
 
             recommendation_service = apps.get_app_config('social').recommendation_service
-            recommendation_service.embed_new_post(postFrame.id, content)
+            recommendation_service.embed_new_post(postFrame.id, content, "social")
 
             # 創建標籤關聯
             logger.info(f"準備創建標籤，解析得到的標籤: {hashtags}")
@@ -547,7 +568,7 @@ class DeletePostAPIView(APIView):
                 # 繼續刪除主貼文
 
             recommendation_service = apps.get_app_config('social').recommendation_service
-            recommendation_service.delete_post_data(postFrame.id)
+            recommendation_service.delete_post_data(postFrame.id, "social")
 
             # 最後刪除 PostFrame
             post_id = postFrame.id
@@ -1231,8 +1252,8 @@ class UpdatePostAPIView(APIView):
                 )
 
             recommendation_service = apps.get_app_config('social').recommendation_service
-            recommendation_service.delete_post_data(postFrame.id)
-            recommendation_service.embed_new_post(postFrame.id, content)
+            recommendation_service.delete_post_data(postFrame.id, "social")
+            recommendation_service.embed_new_post(postFrame.id, content, "social")
 
             # 處理標籤更新
             hashtags = DataHandler.parse_hashtags(content, hashtag_data)
