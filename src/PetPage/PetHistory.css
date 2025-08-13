@@ -1,0 +1,189 @@
+.pet-history-container {
+  padding-top: 80px;
+  padding-bottom: 80px;
+  background-color: #fff9f2;
+  min-height: 100vh;
+  font-family: 'Arial', sans-serif;
+}
+
+.main-content {
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 10px;
+}
+
+.page-title {
+  text-align: center;
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 16px;
+  color: #333;
+}
+
+/* 進度條 */
+.progress-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.progress-step {
+  flex: 1;
+  text-align: center;
+  cursor: pointer;
+  position: relative;
+}
+
+.progress-step .dot {
+  width: 12px;
+  height: 12px;
+  background-color: #ccc;
+  border-radius: 50%;
+  margin: 0 auto 4px;
+}
+
+.progress-step.active .dot {
+  background-color: #FF914D;
+}
+
+.progress-step span {
+  font-size: 12px;
+  color: #666;
+}
+
+/* 表單區域 */
+.step-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-box {
+  background-color: #fff1e1;
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.05);
+}
+
+.form-box h4 {
+  margin-bottom: 8px;
+  color: #333;
+  font-size: 16px;
+}
+
+label {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 14px;
+  color: #333;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  padding: 6px 8px;
+  font-size: 14px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  margin-top: 4px;
+  box-sizing: border-box;
+}
+
+input[type="file"] {
+  background-color: #fff;
+}
+
+button {
+  background-color: #FFB370;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-top: 10px;
+}
+
+button:hover {
+  background-color: #ff984a;
+}
+
+/* 記錄顯示 */
+.record-box {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 10px;
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+.record-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 4px;
+  border-bottom: 1px solid #eee;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.record-row span {
+  flex: 1;
+  text-align: center;
+}
+
+.record-row span:last-child {
+  color: red;
+  cursor: pointer;
+}
+
+/* tag style */
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.tag {
+  background-color: #ffd2a3;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+}
+
+/* 按鈕區 */
+.button-group {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.save-btn {
+  background-color: #5DADE2;
+}
+
+.next-btn {
+  background-color: #F39C12;
+}
+
+.complete-btn {
+  background-color: #27AE60;
+}
+
+/* Modal */
+.modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 300px;
+  transform: translate(-50%, -50%);
+  background-color: #fffaf2;
+  padding: 20px;
+  border: 2px solid #FFB370;
+  border-radius: 12px;
+  z-index: 1000;
+  box-shadow: 0 0 10px rgba(0,0,0,0.2);
+}
