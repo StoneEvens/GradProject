@@ -57,11 +57,10 @@
 
 /* 圖片上傳區域 */
 .imageSection {
-  background-color: #ffeed6;
+  background-color: #fff6ea;
   border-radius: 16px;
   padding: 20px;
   margin-bottom: 20px;
-  border: 2px solid #FFB370;
 }
 
 .noImageState {
@@ -112,7 +111,6 @@
   border-radius: 8px;
   overflow: hidden;
   background-color: #fff;
-  border: 2px solid #FFB370;
   flex-shrink: 0;
 }
 
@@ -222,17 +220,15 @@
   font-size: 16px;
   font-family: inherit;
   resize: none;
-  background-color: #ffeed6;
-  border: 2px solid #FFB370;
-  color: #333;
+  background-color: #fff6ea;
+  color: #89350c;
   box-sizing: border-box;
   outline: none;
-  transition: border-color 0.2s ease;
   min-height: 100px;
 }
 
 .descriptionInput:focus {
-  border-color: #F08651;
+  background-color: white;
 }
 
 .descriptionInput::placeholder {
@@ -271,11 +267,10 @@
 
 /* Hashtag 區域 */
 .hashtagSection {
-  background-color: #ffeed6;
+  background-color: #fff6ea;
   border-radius: 16px;
   padding: 15px 20px;
   margin-bottom: 30px;
-  border: 2px solid #FFB370;
 }
 
 .hashtagPreviewContainer {

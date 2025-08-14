@@ -355,6 +355,16 @@ const SocialPage = () => {
     // TODO: 實作菜單功能
   };
 
+  // 處理疾病檔案刪除或轉為私人
+  const handleArchiveDelete = (archiveId) => {
+    console.log('SocialPage 收到檔案刪除或轉為私人通知:', { archiveId });
+    
+    // 從 archives 狀態中移除被刪除或轉為私人的檔案
+    setArchives(prevArchives => 
+      prevArchives.filter(archive => archive.id !== archiveId)
+    );
+  };
+
   return (
     <div className={styles.container}>
       <TopNavbar 
@@ -422,6 +432,7 @@ const SocialPage = () => {
                 onSave={handleArchiveSave}
                 onUserClick={handleUserClick}
                 onMenuClick={handleArchiveMenu}
+                onArchiveDelete={handleArchiveDelete}
                 emptyMessage="目前沒有疾病檔案，快來分享第一篇吧！"
                 className={styles.archiveList}
               />

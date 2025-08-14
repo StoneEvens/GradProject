@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import TopNavbar from '../components/TopNavbar';
 import BottomNavbar from '../components/BottomNavigationBar';
 import ArchiveCard from '../components/ArchiveCard';
@@ -16,6 +16,7 @@ import styles from '../styles/DiseaseArchiveDetailPage.module.css';
 const DiseaseArchiveDetailPage = () => {
   const { petId, archiveId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   
   // 檢測是否為公開瀏覽模式
   const isPublicView = window.location.pathname.includes('/public');
@@ -35,11 +36,23 @@ const DiseaseArchiveDetailPage = () => {
   const [confirmAction, setConfirmAction] = useState(null);
   const [showComments, setShowComments] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
+  
+  // 從location.state或sessionStorage獲取目標異常記錄ID
+  const [targetAbnormalPostId, setTargetAbnormalPostId] = useState(
+    location.state?.targetAbnormalPostId || 
+    sessionStorage.getItem('targetAbnormalPostId')
+  );
+  
+  // 清除 sessionStorage 中的目標ID（只使用一次）
+  useEffect(() => {
+    if (targetAbnormalPostId && sessionStorage.getItem('targetAbnormalPostId')) {
+      sessionStorage.removeItem('targetAbnormalPostId');
+    }
+  }, [targetAbnormalPostId]);
 
   useEffect(() => {
     loadData();
   }, [petId, archiveId]);
-
 
   // 點擊外部關閉菜單
   useEffect(() => {
@@ -177,7 +190,13 @@ const DiseaseArchiveDetailPage = () => {
   };
 
   const handleBack = () => {
-    navigate(-1);
+    // 如果是從編輯異常記錄頁面回來的，導航到疾病檔案預覽頁面
+    if (location.state?.fromEditAbnormal) {
+      navigate(`/pet/${petId}/disease-archive/preview`);
+    } else {
+      // 否則返回上一頁
+      navigate(-1);
+    }
   };
 
   const handleEdit = () => {
@@ -490,6 +509,7 @@ const DiseaseArchiveDetailPage = () => {
             currentUser={currentUser}
             isPublicView={isPublicView}
             onShowNotification={showNotification}
+            targetAbnormalPostId={targetAbnormalPostId}
           />
           
           {/* 刪除按鈕 - 在 ArchiveCard 下方，只有在非公開瀏覽模式才顯示 */}

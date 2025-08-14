@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from '../styles/PostMenu.module.css';
 
-const PostMenu = ({ isOpen, onClose, menuItems }) => {
+const PostMenu = ({ isOpen, onClose, menuItems, onActionClick }) => {
   const navigate = useNavigate();
   
   // 點擊 ESC 鍵關閉選單

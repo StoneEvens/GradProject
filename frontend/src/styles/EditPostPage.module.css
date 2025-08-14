@@ -47,8 +47,6 @@
   border-radius: 16px;
   padding: 20px;
   margin-bottom: 30px;
-  border: 2px solid #FFB370;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* 用戶資訊區域 */
@@ -397,20 +395,18 @@
   width: 100%;
   min-height: 100px;
   padding: 12px;
-  border: 2px solid #FFB370;
   border-radius: 12px;
+  border-color: white;
   font-size: 15px;
   line-height: 1.4;
   resize: vertical;
   font-family: inherit;
-  transition: border-color 0.2s;
-  background-color: #FFF6ea;
+  background-color: white;
   color: #333;
 }
 
 .descriptionInput:focus {
   outline: none;
-  border-color: #F08651;
   background-color: white;
 }
 
@@ -429,7 +425,6 @@
   border-radius: 16px;
   padding: 15px 20px;
   margin-bottom: 30px;
-  border: 2px solid #FFB370;
 }
 
 .hashtagPreviewContainer {

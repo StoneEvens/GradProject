@@ -90,6 +90,24 @@
   color: white;
 }
 
+/* 診斷狀態樣式 */
+.statusTag.diagnosed {
+  background-color: #4CAF50; /* 綠色 - 已就醫 */
+}
+
+.statusTag.undiagnosed {
+  background-color: #FF9800; /* 橙色 - 未就醫 */
+}
+
+/* 治療狀態樣式 */
+.statusTag.treated {
+  background-color: #2196F3; /* 藍色 - 已痊癒 */
+}
+
+.statusTag.untreated {
+  background-color: #F44336; /* 紅色 - 未痊癒/治療中 */
+}
+
 /* 主要病因 */
 .mainCause {
   margin-bottom: 15px;

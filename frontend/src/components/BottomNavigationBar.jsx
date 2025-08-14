@@ -23,6 +23,7 @@ const BottomNavbar = () => {
     ];
   }
 
+
   const handleNavItemClick = (action) => {
     // 如果點擊的是發文按鈕，則切換發文選單的顯示狀態
     if (action === 'post') {

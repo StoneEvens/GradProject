@@ -11,6 +11,7 @@ import styles from '../styles/CreateAbnormalPostPage.module.css';
 
 const EditAbnormalPostPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { petId, postId } = useParams();
   const fileInputRef = useRef(null);
   
@@ -634,12 +635,25 @@ const EditAbnormalPostPage = () => {
       
       // 根據是否切換了寵物來決定導航目標
       setTimeout(() => {
+        // 準備導航狀態
+        const navigationState = {
+          fromEdit: true,
+          fromDiseaseArchive: location.state?.fromDiseaseArchive,
+          diseaseArchiveId: location.state?.diseaseArchiveId
+        };
+        
         if (selectedPet.id !== parseInt(petId)) {
           // 切換了寵物，導航到新寵物的該異常記錄詳細頁面
-          navigate(`/pet/${selectedPet.id}/abnormal-post/${postId}`);
+          navigate(`/pet/${selectedPet.id}/abnormal-post/${postId}`, { 
+            replace: true,
+            state: navigationState
+          });
         } else {
           // 沒有切換寵物，返回原詳細頁面
-          navigate(`/pet/${petId}/abnormal-post/${postId}`);
+          navigate(`/pet/${petId}/abnormal-post/${postId}`, { 
+            replace: true,
+            state: navigationState
+          });
         }
       }, 1500);
       

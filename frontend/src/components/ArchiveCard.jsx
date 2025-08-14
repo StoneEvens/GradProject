@@ -10,7 +10,8 @@ const ArchiveCard = ({
   pet,
   currentUser,  // 新增參數，當前登入的用戶
   isPublicView = false,  // 新增參數，指示是否為公開瀏覽模式
-  onShowNotification = null  // 新增參數，用於顯示通知
+  onShowNotification = null,  // 新增參數，用於顯示通知
+  targetAbnormalPostId = null  // 新增參數，目標異常記錄ID
 }) => {
   const navigate = useNavigate();
   const { petId } = useParams();
@@ -38,9 +39,6 @@ const ArchiveCard = ({
       return;
     }
 
-    // 調試：輸出 archiveData 的結構（只在第一次時輸出）
-    console.log('ArchiveCard - archiveData 結構:', archiveData);
-    console.log('ArchiveCard - archiveData keys:', Object.keys(archiveData || {}));
     
     const validateAndUpdateArchive = async () => {
       setIsValidating(true);
@@ -109,6 +107,26 @@ const ArchiveCard = ({
     validateAndUpdateArchive();
   }, [abnormalPostIds, archiveData, hasValidated, onShowNotification]);
 
+  // 滾動到目標異常記錄
+  useEffect(() => {
+    if (targetAbnormalPostId && validatedArchiveData && !isValidating) {
+      // 延遲執行，確保DOM已渲染，並且驗證完成
+      const scrollToTarget = () => {
+        const elementId = `abnormal-post-${targetAbnormalPostId}`;
+        const element = document.getElementById(elementId);
+        
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      };
+
+      // 使用多次延遲重試，確保DOM完全渲染
+      setTimeout(scrollToTarget, 300);
+      setTimeout(scrollToTarget, 800);
+      setTimeout(scrollToTarget, 1500);
+    }
+  }, [targetAbnormalPostId, validatedArchiveData, isValidating]);
+
   // 處理用戶點擊
   const handleUserClick = (e) => {
     // 阻止事件冒泡
@@ -141,14 +159,52 @@ const ArchiveCard = ({
     }
   };
 
-  // 格式化診斷狀態
-  const formatDiagnosisStatus = (status) => {
-    return status === 'diagnosed' ? '已就醫' : '未就醫';
+  // 格式化診斷狀態 - 支援新舊兩種格式
+  const formatDiagnosisStatus = (data) => {
+    // 新格式：使用 goToDoctor (boolean)
+    if (data.goToDoctor !== undefined) {
+      return data.goToDoctor ? '已就醫' : '未就醫';
+    }
+    // 舊格式：使用 diagnosisStatus (string)
+    if (data.diagnosisStatus) {
+      return data.diagnosisStatus === 'diagnosed' ? '已就醫' : '未就醫';
+    }
+    return '未就醫'; // 預設值
   };
 
-  // 格式化治療狀態
-  const formatTreatmentStatus = (status) => {
-    return status === 'treated' ? '已痊癒' : '未痊癒';
+  // 格式化治療狀態 - 支援新舊兩種格式
+  const formatTreatmentStatus = (data) => {
+    // 新格式：使用 healthStatus (string)
+    if (data.healthStatus) {
+      return data.healthStatus;
+    }
+    // 舊格式：使用 treatmentStatus (string)
+    if (data.treatmentStatus) {
+      return data.treatmentStatus === 'treated' ? '已痊癒' : '未痊癒';
+    }
+    return '治療中'; // 預設值
+  };
+
+  // 判斷診斷狀態的樣式類
+  const getDiagnosisStatusClass = (data) => {
+    if (data.goToDoctor !== undefined) {
+      return data.goToDoctor ? 'diagnosed' : 'undiagnosed';
+    }
+    if (data.diagnosisStatus) {
+      return data.diagnosisStatus === 'diagnosed' ? 'diagnosed' : 'undiagnosed';
+    }
+    return 'undiagnosed';
+  };
+
+  // 判斷治療狀態的樣式類
+  const getTreatmentStatusClass = (data) => {
+    if (data.healthStatus) {
+      return data.healthStatus === '已痊癒' ? 'treated' : 'untreated';
+    }
+    if (data.treatmentStatus) {
+      return data.treatmentStatus === 'treated' ? 'treated' : 'untreated';
+    }
+    return 'untreated';
   };
 
 
@@ -243,16 +299,30 @@ const ArchiveCard = ({
             {section.abnormalPosts.map(post => (
               <div 
                 key={post.id}
+                id={`abnormal-post-${post.id}`}
                 className={styles.abnormalPostPreview}
-                onClick={() => {
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  
                   if (isPublicView) {
                     // 公開瀏覽模式下，導向公開異常貼文詳情頁面
-                    navigate(`/abnormal-post/${post.id}/public`);
+                    navigate(`/abnormal-post/${post.id}/public`, {
+                      state: { 
+                        targetAbnormalPostId: post.id
+                      }
+                    });
                     return;
                   }
                   const currentPetId = getPetId();
                   if (currentPetId) {
-                    navigate(`/pet/${currentPetId}/abnormal-post/${post.id}`);
+                    navigate(`/pet/${currentPetId}/abnormal-post/${post.id}`, {
+                      state: { 
+                        targetAbnormalPostId: post.id,
+                        fromDiseaseArchive: true,
+                        diseaseArchiveId: archiveData.id || archiveData.archive_id || archiveData.archiveId
+                      }
+                    });
                   } else {
                     console.error('無法獲取寵物ID');
                     if (onShowNotification) {
@@ -261,7 +331,9 @@ const ArchiveCard = ({
                   }
                 }}
                 style={{ 
-                  cursor: 'pointer'
+                  cursor: 'pointer',
+                  userSelect: 'none',
+                  pointerEvents: 'auto'
                 }}
               >
                 <div className={styles.postPreviewIcon}>
@@ -315,11 +387,11 @@ const ArchiveCard = ({
       <div className={styles.archiveHeader}>
         <h2 className={styles.archiveTitle}>{validatedArchiveData.archiveTitle}</h2>
         <div className={styles.statusTags}>
-          <span className={`${styles.statusTag} ${validatedArchiveData.diagnosisStatus === 'diagnosed' ? styles.diagnosed : styles.undiagnosed}`}>
-            {formatDiagnosisStatus(validatedArchiveData.diagnosisStatus)}
+          <span className={`${styles.statusTag} ${styles[getDiagnosisStatusClass(validatedArchiveData)]}`}>
+            {formatDiagnosisStatus(validatedArchiveData)}
           </span>
-          <span className={`${styles.statusTag} ${validatedArchiveData.treatmentStatus === 'treated' ? styles.treated : styles.untreated}`}>
-            {formatTreatmentStatus(validatedArchiveData.treatmentStatus)}
+          <span className={`${styles.statusTag} ${styles[getTreatmentStatusClass(validatedArchiveData)]}`}>
+            {formatTreatmentStatus(validatedArchiveData)}
           </span>
         </div>
       </div>

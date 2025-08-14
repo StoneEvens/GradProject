@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import TopNavbar from '../components/TopNavbar';
 import BottomNavbar from '../components/BottomNavigationbar';
 import ImageViewer from '../components/ImageViewer';
@@ -13,6 +13,7 @@ import styles from '../styles/AbnormalPostDetailPage.module.css';
 const AbnormalPostDetailPage = () => {
   const { petId, postId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   
   // 檢測是否為公開瀏覽模式
   const isPublicView = window.location.pathname.includes('/public');
@@ -130,11 +131,36 @@ const AbnormalPostDetailPage = () => {
   };
 
   const handleBack = () => {
-    navigate(-1);
+    // 檢查是否有目標異常記錄ID
+    if (location.state?.targetAbnormalPostId) {
+      // 將目標異常記錄ID存儲到 sessionStorage
+      sessionStorage.setItem('targetAbnormalPostId', location.state.targetAbnormalPostId);
+    }
+    
+    // 如果是從編輯頁面來的
+    if (location.state?.fromEdit) {
+      // 如果原本是從疾病檔案詳情頁來的，返回到疾病檔案詳情頁
+      if (location.state?.fromDiseaseArchive && location.state?.diseaseArchiveId) {
+        navigate(`/pet/${petId}/disease-archive/${location.state.diseaseArchiveId}`, {
+          state: { fromEditAbnormal: true }
+        });
+      } else {
+        // 否則導航到異常記錄列表頁
+        navigate(`/pet/${petId}/abnormal-posts`);
+      }
+    } else {
+      // 否則返回上一頁
+      navigate(-1);
+    }
   };
 
   const handleEdit = () => {
-    navigate(`/pet/${petId}/abnormal-post/${postId}/edit`);
+    navigate(`/pet/${petId}/abnormal-post/${postId}/edit`, {
+      state: {
+        fromDiseaseArchive: location.state?.fromDiseaseArchive,
+        diseaseArchiveId: location.state?.diseaseArchiveId
+      }
+    });
   };
 
   const handleDelete = () => {
