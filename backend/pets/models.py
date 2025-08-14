@@ -129,6 +129,8 @@ class Illness(models.Model):
 
 # 病程紀錄
 class DiseaseArchiveContent(models.Model):
+    from social.models import PostFrame  # 引入PostFrame模型
+
     archive_title = models.CharField(max_length=100)
     content = models.TextField()
     go_to_doctor = models.BooleanField(default=False)
@@ -158,8 +160,8 @@ class DiseaseArchiveContent(models.Model):
                 relation=interaction_type
             ).exists()
         return False
-    
-    def get_content(user: CustomUser = None, hashtag: str = None, query: str = None, pets: list[Pet] = None):
+
+    def get_content(user: CustomUser = None, hashtag: str = None, query: str = None, pets: list[Pet] = None, postFrame: PostFrame = None):
         base_queryset = DiseaseArchiveContent.objects.filter(is_private=False)
         
         if user:
@@ -177,6 +179,9 @@ class DiseaseArchiveContent(models.Model):
         if pets:
             return base_queryset.filter(pet__in=pets).order_by('-postFrame__post_date')
         
+        if postFrame:
+            return base_queryset.filter(postFrame=postFrame)
+
         return base_queryset.none()
 
 # 異常貼文的症狀(多對多關聯拆分)

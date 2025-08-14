@@ -1,4 +1,5 @@
 from django.apps import AppConfig
+import threading
 
 
 class SocialConfig(AppConfig):
@@ -7,14 +8,22 @@ class SocialConfig(AppConfig):
     _recommendation_service = None
 
     def ready(self):
-        # Don't initialize the recommendation service here to avoid slow startup
-        # It will be lazy-loaded when first accessed
-        pass
+        if not hasattr(SocialConfig, '_init_started'):
+            SocialConfig._init_started = True
+            # Initialize in a separate thread
+            threading.Thread(target=self._initialize_recommendation_service, daemon=True).start()
+            print("請等待推薦服務初始化完成...")
+
+    def _initialize_recommendation_service(self):
+        """Initialize the recommendation service after a delay"""
+        try:
+            from utils.recommendation_service import RecommendationService
+            if SocialConfig._recommendation_service is None:
+                print("Initializing Social Recommendation Service")
+                SocialConfig._recommendation_service = RecommendationService()
+        except Exception as e:
+            print(f"Error initializing recommendation service: {e}")
 
     @classmethod
     def get_recommendation_service(cls):
-        """Lazy-load the recommendation service when first accessed"""
-        if cls._recommendation_service is None:
-            from utils.recommendation_service import RecommendationService
-            cls._recommendation_service = RecommendationService(content_type="social")
         return cls._recommendation_service

@@ -21,11 +21,7 @@ logging.set_verbosity_error()  # This will suppress transformers warnings
 script_dir = os.path.dirname(os.path.abspath(__file__))
 
 class RecommendationService:
-    def __init__(self, content_type: str = "social"):
-        if content_type not in ["social", "forum"]:
-            raise ValueError("content_type must be either 'social' or 'forum'")
-        self.content_type = content_type
-
+    def __init__(self):
         ##---------HyperParameters---------##
         self.BATCH_SIZE = 4
         self.ACTION_WEIGHTS = {"liked": 1.0, "comment": 1.5, "share": 2.0}
@@ -42,55 +38,56 @@ class RecommendationService:
         #----------Load embeddings and post IDs----------#
         # Get the project root directory (where post_embs.npy is located)
         base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        emb_path = os.path.join(base_dir, f'{self.content_type}_post_embs.npy')
-        ids_path = os.path.join(base_dir, f'{self.content_type}_post_ids.npy')
+        social_emb_path = os.path.join(base_dir, 'social_post_embs.npy')
+        social_ids_path = os.path.join(base_dir, 'social_post_ids.npy')
+        forum_emb_path = os.path.join(base_dir, 'forum_post_embs.npy')
+        forum_ids_path = os.path.join(base_dir, 'forum_post_ids.npy')
 
         #print(f"Looking for files in: {base_dir}")
         #print(f"Embeddings path: {emb_path}")
         #print(f"IDs path: {ids_path}")
 
-        if not os.path.exists(emb_path) or not os.path.exists(ids_path):
+        if not os.path.exists(social_emb_path) or not os.path.exists(social_ids_path):
             data_array = []
-            if self.content_type == "social":
-                from social.models import PostFrame, SoLContent, PostHashtag
-                all_posts = SoLContent.objects.all()
-                for post in all_posts:
-                    post_frame = SoLContent.get_postFrame(post)
-                    data_array.append({
-                        "id": post_frame.id,
-                        "timestamp": int(post_frame.created_at.timestamp()),
-                        "content": post.content_text,
-                        "hashtags": [hashtag.tag for hashtag in PostHashtag.get_hashtags(post_frame)]
-                    })
-            elif self.content_type == "forum":
-                from pets.models import DiseaseArchiveContent
-                all_posts = DiseaseArchiveContent.objects.all()
-                for post in all_posts:
-                    postframe = post.postFrame
-                    data_array.append({
-                        "id": postframe.id,
-                        "timestamp": int(postframe.created_at.timestamp()),
-                        "content": post.content,
-                        "hashtags": [] # 疾病目前沒有 hashtags
-                    })
+            from social.models import SoLContent, PostHashtag
+            all_posts = SoLContent.objects.all()
+            for post in all_posts:
+                post_frame = SoLContent.get_postFrame(post)
+                data_array.append({
+                    "id": post_frame.id,
+                    "timestamp": int(post_frame.created_at.timestamp()),
+                    "content": post.content_text,
+                    "hashtags": [hashtag.tag for hashtag in PostHashtag.get_hashtags(post_frame)]
+                })
 
             if data_array:
                 print(data_array[0])
                 # Initialize FAISS index
-                self.initialize(data_array)
+                self.__initialize(data_array, content_type="social")
             else:
-                print(f"No data found to initialize for content type: {self.content_type}")
+                print(f"No data found to initialize for social contents")
 
+        if not os.path.exists(forum_emb_path) or not os.path.exists(forum_ids_path):
+            data_array = []
+            from pets.models import DiseaseArchiveContent
+            all_posts = DiseaseArchiveContent.objects.all()
+            for post in all_posts:
+                post_frame = post.postFrame
+                data_array.append({
+                    "id": post_frame.id,
+                    "timestamp": int(post_frame.created_at.timestamp()),
+                    "content": post.content,
+                    "hashtags": [] # 疾病目前沒有 hashtags
+                })
 
-        # Load the embeddings and IDs
-        if os.path.exists(emb_path) and os.path.exists(ids_path):
-            self.post_embeddings = np.load(emb_path)
-            self.post_ids = np.load(ids_path)
-        else:
-            # Initialize with empty arrays if files don't exist after initialization attempt
-            print(f"Warning: Embedding files not found for {self.content_type}. Initializing empty.")
-            self.post_embeddings = np.array([])
-            self.post_ids = np.array([])
+            if data_array:
+                print(data_array[0])
+                # Initialize FAISS index
+                self.__initialize(data_array, content_type="forum")
+            else:
+                print(f"No data found to initialize for forum contents")
+
+        print("推薦服務初始化已完成")
 
     #----------Mean Pooling----------#
     def __mean_pooling(self, outputs, mask):
@@ -101,7 +98,11 @@ class RecommendationService:
         return summed / counts
 
     #----------Build FAISS Index----------#
-    def initialize(self, data_array):
+    def __initialize(self, data_array, content_type):
+        if content_type not in ["social", "forum"]:
+            print(f"Warning: Unsupported content type '{content_type}'.")
+            return
+
         print("Initializing FAISS index...")
         batch_size = self.BATCH_SIZE
         all_ids     = []
@@ -129,13 +130,18 @@ class RecommendationService:
 
         post_ids        = np.array(all_ids)                          # shape: (N_posts,)
         post_embeddings = np.vstack(all_embeddings)                  # shape: (N_posts, hidden_dim)
-        np.save(f'{self.content_type}_post_ids.npy',        post_ids)
-        np.save(f'{self.content_type}_post_embs.npy',       post_embeddings)
+        np.save(f'{content_type}_post_ids.npy', post_ids)
+        np.save(f'{content_type}_post_embs.npy', post_embeddings)
 
-        return post_embeddings.shape[1]  # Return the dimension of embeddings
-    
     #----------Embedding New Post----------#
-    def embed_new_post(self, post_id: int, content: str) -> np.ndarray:
+    def embed_new_post(self, post_id: int, content: str, content_type: str) -> np.ndarray:
+        if content_type not in ["social", "forum"]:
+            print(f"Warning: Unsupported content type '{content_type}'.")
+            return
+
+        post_embeddings = np.load(f'{content_type}_post_embs.npy')
+        post_ids = np.load(f'{content_type}_post_ids.npy')
+
         # Encode the text
         encoded = self.tokenizer(
             [content],
@@ -152,35 +158,51 @@ class RecommendationService:
             emb = emb.cpu().numpy()
 
         # Add new embedding and ID to the arrays
-        self.post_embeddings = np.vstack([self.post_embeddings, emb])
-        self.post_ids = np.append(self.post_ids, post_id)
+        post_embeddings = np.vstack([post_embeddings, emb])
+        post_ids = np.append(post_ids, post_id)
 
         # Save updated arrays
-        np.save("post_ids.npy", self.post_ids)
-        np.save("post_embs.npy", self.post_embeddings)
+        np.save(f'{content_type}_post_ids.npy', post_ids)
+        np.save(f'{content_type}_post_embs.npy', post_embeddings)
 
-        print(self.post_embeddings.shape)
-        
+        print(post_embeddings.shape)
+
     #----------Delete Post Data----------#
-    def delete_post_data(self, post_id: int):
-        if post_id in self.post_ids:
-            idx = np.where(self.post_ids == post_id)[0][0]
-            self.post_ids = np.delete(self.post_ids, idx)
-            self.post_embeddings = np.delete(self.post_embeddings, idx, axis=0)
-            np.save("post_ids.npy", self.post_ids)
-            np.save("post_embs.npy", self.post_embeddings)
+    def delete_post_data(self, post_id: int, content_type: str):
+        if content_type not in ["social", "forum"]:
+            print(f"Warning: Unsupported content type '{content_type}'.")
+            return
 
-            print(self.post_embeddings.shape)
+        post_ids = np.load(f'{content_type}_post_ids.npy')
+        post_embeddings = np.load(f'{content_type}_post_embs.npy')
+
+        if post_id in post_ids:
+            idx = np.where(post_ids == post_id)[0][0]
+            post_ids = np.delete(post_ids, idx)
+            post_embeddings = np.delete(post_embeddings, idx, axis=0)
+            np.save(f'{content_type}_post_ids.npy', post_ids)
+            np.save(f'{content_type}_post_embs.npy', post_embeddings)
+
+            print(post_embeddings.shape)
         else:
             raise ValueError(f"Post ID {post_id} not found in vector store")
 
     #----------Embedding User History----------#
     def embed_user_history(self,
         posts: List[Tuple[int, str, float]],
-        decay_lambda_per_hour: float = 0.1
+        content_type: str,
+        decay_lambda_per_hour: float = 0.1,
     ) -> np.ndarray:
+
+        if content_type not in ["social", "forum"]:
+            print(f"Warning: Unsupported content type '{content_type}'.")
+            return
+
+        post_ids = np.load(f'{content_type}_post_ids.npy')
+        post_embeddings = np.load(f'{content_type}_post_embs.npy')
+
         now = max(ts for _, _, ts in posts)
-        emb_map = dict(zip(self.post_ids, self.post_embeddings))
+        emb_map = dict(zip(post_ids, post_embeddings))
 
         vecs, ws = [], []
         for pid, action, ts in posts:
@@ -192,7 +214,7 @@ class RecommendationService:
             ws.append(w)
 
         if not vecs:
-            agg = np.mean(self.post_embeddings, axis=0)
+            agg = np.mean(post_embeddings, axis=0)
         else:
             agg = np.sum(vecs, axis=0) / np.sum(ws)
 
@@ -202,14 +224,23 @@ class RecommendationService:
     def recommend_posts(
         self,
         user_vec: np.ndarray,
+        content_type: str,
         top_k: int = 10
     ) -> List[int]:  # Changed from np.ndarray to List[int]
-        dimension = self.post_embeddings.shape[1]  # Should be 768
+        
+        if content_type not in ["social", "forum"]:
+            print(f"Warning: Unsupported content type '{content_type}'.")
+            return []
+
+        post_ids = np.load(f'{content_type}_post_ids.npy')
+        post_embeddings = np.load(f'{content_type}_post_embs.npy')
+
+        dimension = post_embeddings.shape[1]  # Should be 768
         index = faiss.IndexFlatIP(dimension)  # Using inner product for similarity
-        index.add(self.post_embeddings.astype(np.float32))  # Add vectors to the index
+        index.add(post_embeddings.astype(np.float32))  # Add vectors to the index
 
         q = user_vec.astype("float32").reshape(1, -1)
         distances, indices = index.search(q, top_k)
 
-        print(self.post_embeddings.shape)
-        return self.post_ids[indices[0]].tolist()  # Convert numpy array to Python list
+        print(post_embeddings.shape)
+        return post_ids[indices[0]].tolist()  # Convert numpy array to Python list
