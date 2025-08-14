@@ -328,7 +328,7 @@ class CreatePostAPIView(APIView):
             )
 
             recommendation_service = apps.get_app_config('social').get_recommendation_service()
-            recommendation_service.embed_new_post(postFrame.id, content)
+            recommendation_service.embed_new_post(post_id=postFrame.id, content=content, content_type="social")
 
             # 創建標籤關聯
             logger.info(f"準備創建標籤，解析得到的標籤: {hashtags}")
@@ -568,7 +568,7 @@ class DeletePostAPIView(APIView):
                 # 繼續刪除主貼文
 
             recommendation_service = apps.get_app_config('social').get_recommendation_service()
-            recommendation_service.delete_post_data(postFrame.id)
+            recommendation_service.delete_post_data(post_id=postFrame.id, content_type="social")
 
             # 最後刪除 PostFrame
             post_id = postFrame.id
@@ -677,7 +677,7 @@ class PostListAPIView(generics.ListAPIView):
             if postFrame is not None:
                 solContent = SoLContent.get_content(postFrame)
 
-                if solContent is not None:
+                if solContent.exists():
                     history.append({
                         "id": interaction['interactables_id'],
                         "action": interaction['relation'],
@@ -694,7 +694,7 @@ class PostListAPIView(generics.ListAPIView):
             if postFrame is not None:
                 solContent = SoLContent.get_content(postFrame)
 
-                if solContent is not None:
+                if solContent.exists():
                     history.append({
                         "id": postFrame.id,
                         "action": "comment",
@@ -706,8 +706,8 @@ class PostListAPIView(generics.ListAPIView):
         if len(history) > 0:
             print(len(history), "條互動歷史")
 
-            embedded_history = recommendation_service.embed_user_history([(p['id'], p['action'], p['timestamp']) for p in history])
-            search_list = recommendation_service.recommend_posts(embedded_history, top_k=30+len(seen_ids))
+            embedded_history = recommendation_service.embed_user_history(posts=[(p['id'], p['action'], p['timestamp']) for p in history], content_type="social")
+            search_list = recommendation_service.recommend_posts(user_vec=embedded_history, top_k=30+len(seen_ids), content_type="social")
 
             for post_id in search_list:
                 if post_id not in seen_ids:
@@ -1252,8 +1252,8 @@ class UpdatePostAPIView(APIView):
                 )
 
             recommendation_service = apps.get_app_config('social').get_recommendation_service()
-            recommendation_service.delete_post_data(postFrame.id)
-            recommendation_service.embed_new_post(postFrame.id, content)
+            recommendation_service.delete_post_data(post_id=postFrame.id, content_type="social")
+            recommendation_service.embed_new_post(post_id=postFrame.id, content=content, content_type="social")
 
             # 處理標籤更新
             hashtags = DataHandler.parse_hashtags(content, hashtag_data)
