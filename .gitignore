@@ -2,6 +2,7 @@
 __pycache__/
 *.pyc
 .pyc
+*.npy
 # VS Code
 .vscode/
 # Node / frontend

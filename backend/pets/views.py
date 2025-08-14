@@ -3,6 +3,10 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from datetime import date
 from django.utils import timezone
+from django.apps import apps
+from interactions.models import UserInteraction
+from social.models import PostFrame
+from comments.models import Comment
 from .models import *
 from .serializers import *
 from media.models import AbnormalPostImage 
@@ -1748,8 +1752,8 @@ class CreateDiseaseArchiveAPIView(APIView):
             if not is_private:
                 try:
                     from django.apps import apps
-                    recommendation_service = apps.get_app_config('social').recommendation_service
-                    recommendation_service.embed_new_post(post_frame.id, formatted_content, "disease")
+                    recommendation_service = apps.get_app_config('social').get_recommendation_service()
+                    recommendation_service.embed_new_post(post_id=post_frame.id, content=formatted_content, content_type='forum')
                 except Exception as e:
                     logger.error(f"添加疾病檔案到推薦系統失敗: {str(e)}")
             
@@ -1933,7 +1937,7 @@ class RecommendedDiseaseArchivesAPIView(APIView):
                 return self._get_popular_archives(request, limit, offset)
             
             # 以下是推薦系統邏輯
-            recommendation_service = apps.get_app_config('social').recommendation_service
+            recommendation_service = apps.get_app_config('social').get_recommendation_service()
             
             # 收集用戶與疾病檔案的互動歷史
             history = self._collect_disease_interaction_history(request.user)
@@ -1947,18 +1951,19 @@ class RecommendedDiseaseArchivesAPIView(APIView):
             
             # 使用推薦系統獲取疾病檔案推薦
             try:
-                embedded_history = recommendation_service.embed_user_history([(p['id'], p['action'], p['timestamp']) for p in history])
-                search_results = recommendation_service.recommend_posts(
-                    embedded_history,
-                    top_k=limit + offset + 20,  # 獲取更多結果以支援分頁和過濾
-                    content_type_filter="disease"
-                )
-                
-                recommended_ids = []
-                for result in search_results:
-                    original_post_id = result['original_id']
-                    if original_post_id not in seen_ids:
-                        recommended_ids.append(original_post_id)
+                if len(history) > 0:
+                    embedded_history = recommendation_service.embed_user_history(posts=[(p['id'], p['action'], p['timestamp']) for p in history], content_type='forum')
+                    search_results = recommendation_service.recommend_posts(
+                        user_vec=embedded_history,
+                        content_type='forum',
+                        top_k=30+len(history),  # 獲取更多結果以支援分頁和過濾
+                    )
+                    
+                    recommended_ids = []
+                    for result in search_results:
+                        original_post_id = result['original_id']
+                        if original_post_id not in seen_ids:
+                            recommended_ids.append(original_post_id)
                 
                 # 根據推薦的 PostFrame IDs 獲取對應的疾病檔案
                 if recommended_ids:
@@ -2299,18 +2304,80 @@ class PublicDiseaseArchivesPreviewAPIView(APIView):
             # 獲取分頁參數
             offset = int(request.query_params.get('offset', 0))
             limit = min(int(request.query_params.get('limit', 10)), 50)  # 最大50個
-            
-            # 獲取所有公開的疾病檔案
-            archives_queryset = DiseaseArchiveContent.objects.filter(
-                is_private=False  # 只獲取公開的檔案
-            ).select_related(
-                'pet', 'postFrame', 'postFrame__user'
-            ).prefetch_related(
-                'illnesses__illness',
-                'pet__headshot',
-                'postFrame__user__headshot'
-            ).order_by('-postFrame__created_at')
-            
+
+            recommendation_service = apps.get_app_config('social').get_recommendation_service()
+
+            history = []
+            recommend_list = []
+
+            interaction_list = UserInteraction.objects.filter(user=self.request.user).values()
+            for interaction in interaction_list:
+                # 先假設用戶互動的是PostFrame，把按讚留言紀錄過濾掉
+                postFrame = PostFrame.get_postFrames(postID=interaction['interactables_id'])
+
+                # 根據找到的PostFrame獲取DiseaseArchiveContent(若不是DiseaseArchiveContent則忽略)
+                if postFrame is not None:
+                    diseaseArchiveContent = DiseaseArchiveContent.get_content(postFrame=postFrame)
+
+                    if diseaseArchiveContent.exists():
+                        history.append({
+                            "id": interaction['interactables_id'],
+                            "action": interaction['relation'],
+                            "timestamp": int(interaction['created_at'].timestamp())
+                        })
+
+            # 接者處理留言的歷史
+            comment_list = Comment.objects.filter(user=self.request.user).select_related('postFrame')
+            for comment in comment_list:
+                # 還是先抓留言來自哪個PostFrame
+                postFrame = comment.postFrame
+
+                # 根據找到的PostFrame獲取DiseaseArchiveContent(若不是DiseaseArchiveContent則忽略)
+                if postFrame is not None:
+                    diseaseArchiveContent = DiseaseArchiveContent.get_content(postFrame=postFrame)
+
+                    if diseaseArchiveContent.exists():
+                        history.append({
+                            "id": postFrame.id,
+                            "action": "comment",
+                            "timestamp": int(comment.created_at.timestamp())
+                        })
+
+            seen_ids = {p['id'] for p in history}
+
+            if len(history) > 0:
+                print(len(history), "條互動歷史")
+
+                embedded_history = recommendation_service.embed_user_history(posts=[(p['id'], p['action'], p['timestamp']) for p in history], content_type="forum")
+                search_list = recommendation_service.recommend_posts(user_vec=embedded_history, top_k=30+len(seen_ids), content_type="forum")
+
+                for post_id in search_list:
+                    if post_id not in seen_ids:
+                        # Do something with each recommended post ID
+                        recommend_list.append(post_id)
+
+                archives_queryset = DiseaseArchiveContent.objects.filter(postFrame__id__in=recommend_list, is_private=False).select_related(
+                    'pet', 'postFrame', 'postFrame__user'
+                ).prefetch_related(
+                    'illnesses__illness',
+                    'pet__headshot',
+                    'postFrame__user__headshot'
+                ).order_by('-postFrame__created_at')
+
+            else:
+                # 如果沒有互動歷史，則不進行推薦
+                print("沒有互動歷史")
+
+                archives_queryset = DiseaseArchiveContent.objects.filter(
+                    is_private=False  # 只獲取公開的檔案
+                ).select_related(
+                    'pet', 'postFrame', 'postFrame__user'
+                ).prefetch_related(
+                    'illnesses__illness',
+                    'pet__headshot',
+                    'postFrame__user__headshot'
+                ).order_by('-postFrame__created_at')
+
             # 計算總數
             total_count = archives_queryset.count()
             
@@ -2521,15 +2588,15 @@ class PublishDiseaseArchiveAPIView(APIView):
             if archive.postFrame:
                 try:
                     from django.apps import apps
-                    recommendation_service = apps.get_app_config('social').recommendation_service
+                    recommendation_service = apps.get_app_config('social').get_recommendation_service()
                     
                     if old_is_private and not new_is_private:
                         # 從私人變為公開：加入推薦系統
-                        recommendation_service.embed_new_post(archive.postFrame.id, archive.content, "disease")
+                        recommendation_service.embed_new_post(post_id=archive.postFrame.id, content=archive.content)
                         logger.info(f"疾病檔案 {archive_id} 已加入推薦系統")
                     elif not old_is_private and new_is_private:
                         # 從公開變為私人：從推薦系統移除
-                        recommendation_service.delete_post_data(archive.postFrame.id, "disease") 
+                        recommendation_service.delete_post_data(post_id=archive.postFrame.id)
                         logger.info(f"疾病檔案 {archive_id} 已從推薦系統移除")
                 except Exception as e:
                     logger.error(f"更新疾病檔案推薦系統狀態失敗: {str(e)}")
@@ -2774,8 +2841,8 @@ class DeleteDiseaseArchiveAPIView(APIView):
             if hasattr(archive, 'postFrame') and archive.postFrame:
                 try:
                     from django.apps import apps
-                    recommendation_service = apps.get_app_config('social').recommendation_service
-                    recommendation_service.delete_post_data(archive.postFrame.id, "disease")
+                    recommendation_service = apps.get_app_config('social').get_recommendation_service()
+                    recommendation_service.delete_post_data(post_id=archive.postFrame.id)
                 except Exception as e:
                     logger.error(f"從推薦系統移除疾病檔案失敗: {str(e)}")
                 
