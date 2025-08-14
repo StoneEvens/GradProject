@@ -615,43 +615,66 @@ class PostTagPetsAPIView(APIView):
             )
 
 #----------用戶貼文列表 API----------
-class UserPostListAPIView(generics.ListAPIView):
+class UserPostListAPIView(APIView):
     """獲取指定用戶的貼文列表"""
     permission_classes = [IsAuthenticated]
-    serializer_class = SolPostSerializer
     
     @log_queries
-    def get_queryset(self):
-        user_id = self.kwargs.get('pk')
-        
+    def get(self, request, pk):
         try:
             # 檢查用戶是否存在
-            user = CustomUser.objects.get(id=user_id)
+            user = CustomUser.objects.get(id=pk)
+            
+            # 獲取分頁參數
+            limit = min(int(request.query_params.get('limit', 10)), 50)  # 最大50個
+            offset = int(request.query_params.get('offset', 0))
             
             # 獲取該用戶的所有貼文內容
-            return SoLContent.objects.filter(
+            queryset = SoLContent.objects.filter(
                 postFrame__user=user
             ).select_related('postFrame').order_by('-postFrame__created_at')
             
+            # 手動分頁
+            total_count = queryset.count()
+            posts = queryset[offset:offset + limit]
+            has_more = offset + limit < total_count
+            
+            # 序列化數據
+            serializer = SolPostSerializer(posts, many=True, context={'request': request})
+            
+            return APIResponse(
+                data={
+                    'posts': serializer.data,
+                    'has_more': has_more,
+                    'total_count': total_count,
+                    'offset': offset,
+                    'limit': limit
+                },
+                message="獲取用戶貼文列表成功"
+            )
+            
         except CustomUser.DoesNotExist:
-            return SoLContent.objects.none()
-    
-    def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
-        
-        # 處理分頁
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True, context={'request': request})
-            return self.get_paginated_response(serializer.data)
-        
-        # 如果不使用分頁
-        serializer = self.get_serializer(queryset, many=True, context={'request': request})
-        
-        return APIResponse(
-            data=serializer.data,
-            message="獲取用戶貼文列表成功"
-        )
+            return APIResponse(
+                data={
+                    'posts': [],
+                    'has_more': False,
+                    'total_count': 0,
+                    'offset': 0,
+                    'limit': limit
+                },
+                message="用戶不存在"
+            )
+        except ValueError as e:
+            return APIResponse(
+                message="分頁參數錯誤",
+                status=drf_status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            logger.error(f"獲取用戶貼文列表失敗: {str(e)}", exc_info=True)
+            return APIResponse(
+                message="獲取用戶貼文列表失敗",
+                status=drf_status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 #----------全局貼文列表 API----------
 class PostListAPIView(generics.ListAPIView):

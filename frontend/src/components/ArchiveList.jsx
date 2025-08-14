@@ -18,6 +18,7 @@ const ArchiveList = ({
   onSave = null,
   onUserClick = null,
   onMenuClick = null,
+  onArchiveDelete = null,  // 新增：檔案刪除回調
   emptyMessage = '目前沒有疾病檔案',
   className = '',
   style = {},
@@ -287,6 +288,23 @@ const ArchiveList = ({
     }
   };
 
+  // 處理檔案刪除或轉為私人
+  const handleArchiveDelete = (archiveId) => {
+    console.log('ArchiveList 收到檔案刪除通知:', { archiveId, fetchUserArchives });
+    
+    if (fetchUserArchives) {
+      // 從用戶檔案列表中移除
+      setUserArchives(prevArchives => 
+        prevArchives.filter(archive => archive.id !== archiveId)
+      );
+    } else {
+      // 對於外部傳入的 archives，通知父組件
+      if (onArchiveDelete) {
+        onArchiveDelete(archiveId);
+      }
+    }
+  };
+
   // 處理用戶點擊
   const handleUserClick = (user) => {
     if (onUserClick) {
@@ -379,6 +397,8 @@ const ArchiveList = ({
               onComment={() => handleComment(archive.id)}
               onSave={(isSaved) => handleSave(archive.id, isSaved)}
               onMenuClick={() => handleMenuClick(archive.id)}
+              onDelete={(archiveId) => handleArchiveDelete(archiveId)}
+              onShowNotification={showNotification}
             />
           </div>
         ))}

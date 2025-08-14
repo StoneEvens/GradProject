@@ -179,25 +179,37 @@ const DiseaseArchiveEditContentPage = () => {
   const validateContent = (content) => {
     const errors = [];
     
-    // 檢查是否有不當的日期格式修改
+    // 基本驗證：檢查內容是否為空
+    if (!content || content.trim().length === 0) {
+      errors.push('內容不能為空');
+      return errors;
+    }
+    
+    // 檢查內容長度（可選）
+    if (content.length < 50) {
+      errors.push('內容過短，請提供更詳細的描述');
+    }
+    
+    // 溫和提示：檢查日期格式的最佳實踐（不再強制限制）
     const lines = content.split('\n');
     const datePattern = /^\d{1,2}月\d{1,2}日/;
-    const invalidDatePattern = /\d{1,2}月\d{1,2}日/g;
+    let hasDateInMiddle = false;
     
-    lines.forEach((line, index) => {
+    lines.forEach((line) => {
       const trimmedLine = line.trim();
       if (trimmedLine) {
-        // 檢查是否有段落中間插入的日期格式
-        const dateMatches = trimmedLine.match(invalidDatePattern);
-        if (dateMatches) {
-          // 檢查是否是段落開頭的正確格式
-          const isValidStart = datePattern.test(trimmedLine);
-          if (!isValidStart && dateMatches.length > 0) {
-            errors.push(`第${index + 1}行包含不當的日期格式，日期格式「X月X日」只能出現在段落開頭`);
-          }
+        // 檢查行中是否包含日期格式，但不在開頭
+        const dateInLinePattern = /\d{1,2}月\d{1,2}日/;
+        if (dateInLinePattern.test(trimmedLine) && !datePattern.test(trimmedLine)) {
+          hasDateInMiddle = true;
         }
       }
     });
+    
+    // 只提供建議，不強制限制
+    if (hasDateInMiddle && !isEditing) {
+      console.log('提示：日期格式建議放在段落開頭，以便系統更好地關聯異常記錄');
+    }
     
     return errors;
   };
@@ -243,7 +255,10 @@ const DiseaseArchiveEditContentPage = () => {
     const previewData = {
       ...archiveData,
       generated_content: editedContent || archiveData.generated_content,
-      abnormalPostsData: [] // 預設空陣列，之後可以從API獲取
+      abnormalPostsData: [], // 預設空陣列，之後可以從API獲取
+      // 轉換字段名稱以符合後端API期望
+      goToDoctor: archiveData.diagnosisStatus === 'diagnosed',
+      healthStatus: archiveData.treatmentStatus === 'treated' ? '已痊癒' : '治療中'
     };
     
     // 如果有異常記錄ID，可以在這裡獲取詳細資料
@@ -381,6 +396,14 @@ const DiseaseArchiveEditContentPage = () => {
             <div className={styles.aiContentArea}>
             {isEditing ? (
               <div className={styles.editingContainer}>
+                <div className={styles.editingTips}>
+                  <p className={styles.tipTitle}>編輯提示：</p>
+                  <ul className={styles.tipList}>
+                    <li>您可以自由編輯AI生成的內容</li>
+                    <li>日期格式（如「12月3日」）建議放在段落開頭，系統會自動關聯對應的異常記錄</li>
+                    <li>保持內容結構清晰，有助於日後查閱</li>
+                  </ul>
+                </div>
                 <textarea
                   className={styles.contentTextarea}
                   value={editedContent}

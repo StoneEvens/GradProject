@@ -46,6 +46,16 @@ const PostList = ({
   // 貼文元素的引用
   const postRefs = useRef({});
   const containerRef = useRef(null);
+  
+  // 標記是否已經滾動到目標貼文
+  const hasScrolledToTarget = useRef(false);
+  
+  // 當組件卸載時重置滾動標記
+  useEffect(() => {
+    return () => {
+      hasScrolledToTarget.current = false;
+    };
+  }, []);
 
   // 獲取當前用戶資訊
   useEffect(() => {
@@ -85,12 +95,18 @@ const PostList = ({
       });
       
       if (result.success) {
-        // 處理用戶貼文的數據格式 - 檢查是否為分頁格式
-        let rawPosts = result.data || [];
+        // 處理用戶貼文的數據格式 - 檢查不同的數據格式
+        let rawPosts = [];
         
-        // 如果是分頁格式（包含results字段），取出results
-        if (rawPosts && typeof rawPosts === 'object' && rawPosts.results) {
-          rawPosts = rawPosts.results;
+        if (result.data && result.data.posts) {
+          // 新格式：data.posts
+          rawPosts = result.data.posts;
+        } else if (result.data && result.data.results) {
+          // 舊的分頁格式：data.results
+          rawPosts = result.data.results;
+        } else if (Array.isArray(result.data)) {
+          // 直接陣列格式
+          rawPosts = result.data;
         }
         
         // 確保rawPosts是陣列
@@ -160,15 +176,20 @@ const PostList = ({
     }
   }, [location.state, fetchUserPosts, userId, loadUserPosts]);
 
-  // 滾動到指定貼文
+  // 滾動到指定貼文 - 只在第一次找到目標貼文時執行
   useEffect(() => {
+    // 如果已經滾動過，或者沒有指定目標貼文，就不執行
+    if (hasScrolledToTarget.current || (!targetPostId && targetPostIndex === null)) {
+      return;
+    }
+    
     const currentPosts = fetchUserPosts ? userPosts : posts;
-    console.log('PostList - 滾動到指定貼文:', {
+    console.log('PostList - 檢查是否需要滾動到指定貼文:', {
       targetPostId,
       targetPostIndex,
       fetchUserPosts,
       currentPostsLength: currentPosts.length,
-      currentPosts: currentPosts.map(p => p.id || p.post_id)
+      hasScrolled: hasScrolledToTarget.current
     });
     
     // 優先使用 targetPostIndex，如果沒有則使用 targetPostId
@@ -184,27 +205,29 @@ const PostList = ({
       }
       
       if (targetIndex >= 0) {
+        // 標記已經找到並準備滾動
+        hasScrolledToTarget.current = true;
+        
         // 延遲執行，確保DOM已更新
         setTimeout(() => {
           const postElement = postRefs.current[targetIndex] || 
                             document.querySelector(`[data-post-id="${currentPosts[targetIndex].id || currentPosts[targetIndex].post_id}"]`);
           
-          console.log('PostList - 查找貼文元素:', {
+          console.log('PostList - 執行滾動到貼文:', {
             targetIndex,
             targetPostId: currentPosts[targetIndex]?.id || currentPosts[targetIndex]?.post_id,
-            postElement,
-            allDataPostIds: Array.from(document.querySelectorAll('[data-post-id]')).map(el => el.getAttribute('data-post-id'))
-        });
-        
-        if (postElement) {
-          postElement.scrollIntoView({ 
-            behavior: 'smooth', 
-            block: 'center' 
+            postElement
           });
-          // 高亮顯示該貼文
-          postElement.style.animation = 'highlight 2s ease-in-out';
-          console.log('PostList - 滾動和高亮完成');
-        }
+        
+          if (postElement) {
+            postElement.scrollIntoView({ 
+              behavior: 'smooth', 
+              block: 'center' 
+            });
+            // 高亮顯示該貼文
+            postElement.style.animation = 'highlight 2s ease-in-out';
+            console.log('PostList - 滾動和高亮完成');
+          }
         }, 500);
       }
     }

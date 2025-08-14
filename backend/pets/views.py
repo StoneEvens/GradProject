@@ -2680,7 +2680,7 @@ class UpdateDiseaseArchiveAPIView(APIView):
             # 獲取疾病檔案，確認是該用戶的檔案
             archive = DiseaseArchiveContent.objects.filter(
                 id=archive_id,
-                pet__user=user
+                pet__owner=user
             ).first()
             
             if not archive:
@@ -2759,7 +2759,7 @@ class DeleteDiseaseArchiveAPIView(APIView):
             # 獲取疾病檔案，確認是該用戶的檔案
             archive = DiseaseArchiveContent.objects.filter(
                 id=archive_id,
-                pet__user=user
+                pet__owner=user
             ).first()
             
             if not archive:
