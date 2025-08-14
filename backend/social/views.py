@@ -327,8 +327,8 @@ class CreatePostAPIView(APIView):
                 location=location
             )
 
-            recommendation_service = apps.get_app_config('social').recommendation_service
-            recommendation_service.embed_new_post(postFrame.id, content, "social")
+            recommendation_service = apps.get_app_config('social').get_recommendation_service()
+            recommendation_service.embed_new_post(post_id=postFrame.id, content=content, content_type="social")
 
             # 創建標籤關聯
             logger.info(f"準備創建標籤，解析得到的標籤: {hashtags}")
@@ -567,8 +567,8 @@ class DeletePostAPIView(APIView):
                 logger.error(f"刪除貼文相關資料時出錯: {str(data_error)}")
                 # 繼續刪除主貼文
 
-            recommendation_service = apps.get_app_config('social').recommendation_service
-            recommendation_service.delete_post_data(postFrame.id, "social")
+            recommendation_service = apps.get_app_config('social').get_recommendation_service()
+            recommendation_service.delete_post_data(post_id=postFrame.id, content_type="social")
 
             # 最後刪除 PostFrame
             post_id = postFrame.id
@@ -684,80 +684,64 @@ class PostListAPIView(generics.ListAPIView):
     
     @log_queries
     def get_queryset(self):
-        try:
-            recommendation_service = apps.get_app_config('social').recommendation_service
+        recommendation_service = apps.get_app_config('social').get_recommendation_service()
 
-            history = []
-            recommend_list = []
+        history = []
+        recommend_list = []
 
-            # 獲取用戶的互動歷史
-            # 先取得用戶和日常貼文SoLContent的互動歷史(互動不包含留言，留言會在下方單獨處理)
-            interaction_list = UserInteraction.objects.filter(user=self.request.user).values()
-            for interaction in interaction_list:
-                # 先假設用戶互動的是PostFrame，把按讚留言紀錄過濾掉
-                try:
-                    postFrame = PostFrame.get_postFrames(postID=interaction['interactables_id'])
-                except PostFrame.DoesNotExist:
-                    # 如果找不到對應的PostFrame，跳過這個互動
-                    continue
+        # 獲取用戶的互動歷史
+        # 先取得用戶和日常貼文SoLContent的互動歷史(互動不包含留言，留言會在下方單獨處理)
+        interaction_list = UserInteraction.objects.filter(user=self.request.user).values()
+        for interaction in interaction_list:
+            # 先假設用戶互動的是PostFrame，把按讚留言紀錄過濾掉
+            postFrame = PostFrame.get_postFrames(postID=interaction['interactables_id'])
 
-                # 根據找到的PostFrame獲取SoLContent(若不是SoLContent則忽略)
-                if postFrame is not None:
-                    solContent = SoLContent.get_content(postFrame)
+            # 根據找到的PostFrame獲取SoLContent(若不是SoLContent則忽略)
+            if postFrame is not None:
+                solContent = SoLContent.get_content(postFrame)
 
-                    if solContent is not None:
-                        history.append({
-                            "id": interaction['interactables_id'],
-                            "action": interaction['relation'],
-                            "timestamp": int(interaction['created_at'].timestamp())
-                        })
+                if solContent.exists():
+                    history.append({
+                        "id": interaction['interactables_id'],
+                        "action": interaction['relation'],
+                        "timestamp": int(interaction['created_at'].timestamp())
+                    })
 
-            # 接者處理留言的歷史
-            comment_list = Comment.objects.filter(user=self.request.user).select_related('postFrame')
-            for comment in comment_list:
-                # 還是先抓留言來自哪個PostFrame
-                postFrame = comment.postFrame
+        # 接者處理留言的歷史
+        comment_list = Comment.objects.filter(user=self.request.user).select_related('postFrame')
+        for comment in comment_list:
+            # 還是先抓留言來自哪個PostFrame
+            postFrame = comment.postFrame
 
-                # 根據找到的PostFrame獲取SoLContent(若不是SoLContent則忽略)
-                if postFrame is not None:
-                    solContent = SoLContent.get_content(postFrame)
+            # 根據找到的PostFrame獲取SoLContent(若不是SoLContent則忽略)
+            if postFrame is not None:
+                solContent = SoLContent.get_content(postFrame)
 
-                    if solContent is not None:
-                        history.append({
-                            "id": postFrame.id,
-                            "action": "comment",
-                            "timestamp": int(comment.created_at.timestamp())
-                        })
+                if solContent.exists():
+                    history.append({
+                        "id": postFrame.id,
+                        "action": "comment",
+                        "timestamp": int(comment.created_at.timestamp())
+                    })
 
-            seen_ids = {p['id'] for p in history}
+        seen_ids = {p['id'] for p in history}
 
-            # 如果沒有歷史記錄，返回最新的貼文
-            if not history:
-                logger.info(f"用戶 {self.request.user.id} 沒有互動歷史，返回最新貼文")
-                return PostFrame.objects.filter(
-                    contents__isnull=False
-                ).order_by('-created_at')
+        if len(history) > 0:
+            print(len(history), "條互動歷史")
 
-            embedded_history = recommendation_service.embed_user_history([(p['id'], p['action'], p['timestamp']) for p in history])
-            # 只推薦社交貼文（日常貼文），獲取更多推薦以支援分頁
-            search_results = recommendation_service.recommend_posts(
-                embedded_history, 
-                top_k=100+len(seen_ids),
-                content_type_filter="social"  # 只推薦日常貼文
-            )
+            embedded_history = recommendation_service.embed_user_history(posts=[(p['id'], p['action'], p['timestamp']) for p in history], content_type="social")
+            search_list = recommendation_service.recommend_posts(user_vec=embedded_history, top_k=30+len(seen_ids), content_type="social")
 
-            for result in search_results:
-                original_post_id = result['original_id']
-                if original_post_id not in seen_ids:
-                    recommend_list.append(original_post_id)
+            for post_id in search_list:
+                if post_id not in seen_ids:
+                    # Do something with each recommended post ID
+                    recommend_list.append(post_id)
 
             return PostFrame.get_postFrames(idList=recommend_list)
-        except Exception as e:
-            logger.error(f"推薦系統錯誤: {str(e)}", exc_info=True)
-            # 如果推薦系統出錯，返回最新的貼文作為備用
-            return PostFrame.objects.filter(
-                contents__isnull=False
-            ).order_by('-created_at')
+        else:
+            print("無用戶互動歷史")
+
+            return PostFrame.objects.all().order_by('-created_at')[:30]
 
     def list(self, request, *args, **kwargs):
         try:
@@ -1290,9 +1274,9 @@ class UpdatePostAPIView(APIView):
                     location=location
                 )
 
-            recommendation_service = apps.get_app_config('social').recommendation_service
-            recommendation_service.delete_post_data(postFrame.id, "social")
-            recommendation_service.embed_new_post(postFrame.id, content, "social")
+            recommendation_service = apps.get_app_config('social').get_recommendation_service()
+            recommendation_service.delete_post_data(post_id=postFrame.id, content_type="social")
+            recommendation_service.embed_new_post(post_id=postFrame.id, content=content, content_type="social")
 
             # 處理標籤更新
             hashtags = DataHandler.parse_hashtags(content, hashtag_data)
