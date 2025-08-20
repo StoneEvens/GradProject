@@ -622,6 +622,45 @@ class PetNutritionCalculator(APIView):
         ],
         responses={200: "成功"}
     )
+
+    def _extract_conditions(self, data):
+        """
+        同時支援：
+        - multipart/form-data 重複欄位: conditions=A, conditions=B
+        - JSON 字串: conditions='["A","B"]'
+        - 單一字串: conditions='其他：xxx'
+        回傳去重後的 list[str]
+        """
+        out = []
+
+        # 1) multipart 重複欄位
+        if hasattr(data, "getlist"):
+            out.extend([str(s).strip() for s in data.getlist("conditions") if str(s).strip()])
+
+        # 2) 單一欄位（可能是 JSON/字串）
+        raw = data.get("conditions")
+        if isinstance(raw, (list, tuple)):
+            out.extend([str(c).strip() for c in raw if str(c).strip()])
+        elif isinstance(raw, str):
+            s = raw.strip()
+            if s:
+                try:
+                    parsed = json.loads(s)
+                    if isinstance(parsed, list):
+                        out.extend([str(c).strip() for c in parsed if str(c).strip()])
+                    else:
+                        out.append(s)
+                except Exception:
+                    out.append(s)
+
+        # 去重
+        uniq, seen = [], set()
+        for c in out:
+            if c and c not in seen:
+                uniq.append(c)
+                seen.add(c)
+        return uniq
+
     def post(self, request):
         data = request.data
         pet_id = data.get('pet_id')
@@ -631,22 +670,24 @@ class PetNutritionCalculator(APIView):
         expected_adult_weight = data.get('expected_adult_weight')
         litter_size = data.get('litter_size')
         weeks_of_lactation = data.get('weeks_of_lactation')
-        conditions_raw = data.get('conditions')
-        conditions = []
-        if isinstance(conditions_raw, (list, tuple)):
-            conditions = [str(c).strip() for c in conditions_raw if str(c).strip()]
-        elif isinstance(conditions_raw, str):
-            try:
-                parsed = json.loads(conditions_raw)
-                if isinstance(parsed, list):
-                    conditions = [str(c).strip() for c in parsed if str(c).strip()]
-                elif conditions_raw.strip():
-                    conditions = [conditions_raw.strip()]
-            except Exception:
-                if conditions_raw.strip():
-                    conditions = [conditions_raw.strip()]
-        # 可選：去重
-        conditions = list(dict.fromkeys(conditions))
+        # conditions_raw = data.get('conditions')
+        # conditions = []
+        # if isinstance(conditions_raw, (list, tuple)):
+        #     conditions = [str(c).strip() for c in conditions_raw if str(c).strip()]
+        # elif isinstance(conditions_raw, str):
+        #     try:
+        #         parsed = json.loads(conditions_raw)
+        #         if isinstance(parsed, list):
+        #             conditions = [str(c).strip() for c in parsed if str(c).strip()]
+        #         elif conditions_raw.strip():
+        #             conditions = [conditions_raw.strip()]
+        #     except Exception:
+        #         if conditions_raw.strip():
+        #             conditions = [conditions_raw.strip()]
+        # # 可選：去重
+        # conditions = list(dict.fromkeys(conditions))
+        conditions = self._extract_conditions(request.data)
+        print("[DEBUG] incoming conditions:", conditions)
 
         # 飼料每 100 克含量（輸入）
         protein = float(data.get('protein'))
@@ -869,8 +910,8 @@ class PetNutritionCalculator(APIView):
                 "肝臟疾病":   ["避免過高脂肪", "分餐、易消化蛋白"],
                 "心臟病":     ["避免高鈉", "控制體重"],
                 "糖尿病":     ["控制碳水化合物", "固定餵食時間"],
-                "泌尿道結石/下泌尿道疾病": ["提高飲水量/濕食", "依石種類調整礦物質"],
-                "胰臟炎史":   ["低脂配方"],
+                "泌尿道結石": ["提高飲水量/濕食", "依石種類調整礦物質"],
+                "胰臟炎":   ["低脂配方"],
                 "關節炎/肥胖": ["總熱量控制", "關節保健營養素可考慮"],
                 "食物過敏/腸胃敏感": ["單一蛋白或水解蛋白", "避免已知過敏原"],
             }
@@ -887,14 +928,14 @@ class PetNutritionCalculator(APIView):
                 f"每日建議攝取 {round(daily_ME, 2)} kcal，飼料代謝能為 {round(ME_feed, 2)} kcal/100g。\n"
                 f"建議每日餵食飼料 {round(feed_amount, 2)} 公克。\n\n"
                 f"{abn_txt}\n\n"
-                f"理想攝取量:\n"
+                f"{abn_txt}\n\n{cond_txt}\n\n{diet_txt}\n\n"
                 + "\n".join([f"- {k}: {v}g" for k, v in rec.items()]) +
                 "\n實際攝取量:\n"
                 + "\n".join([f"- {k}: {v}g" for k, v in actual.items()]) +
                 "\n請先列出你的計算結果，包含一天飼料建議攝取量、各項營養素建議攝取量、和與飼料提供營養素量對比，若有健康報告，再根據健康報告給出微調建議，然後根據『慢性病/照護重點』與『飲食提醒』給出照護建議。"
-                "\n注意：以上數值已計算好，**不要修改數值，只做文字建議**。"
+                # "\n注意：以上數值已計算好，**不要修改數值，只做文字建議**。"
             )
-
+            print(message)
             if not client:
                 return "無法產生建議：OpenAI API 未設定，請聯絡系統管理員"
             
