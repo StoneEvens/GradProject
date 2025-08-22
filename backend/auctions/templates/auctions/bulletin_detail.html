@@ -1,0 +1,12 @@
+<h1>{{ bulletin.title }}</h1>
+<p>{{ bulletin.description }}</p>
+
+{% if display %}
+<h2>Winner's Pet</h2>
+<p><strong>{{ display.pet_name }}</strong></p>
+{% if display.pet_photo %}
+<img src="{{ display.pet_photo.url }}" style="max-width:300px;" />
+{% endif %}
+{% else %}
+<p>No approved content yet.</p>
+{% endif %}
