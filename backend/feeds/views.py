@@ -19,7 +19,7 @@ from feeds.models import Feed, FeedReview, FeedErrorReport, UserFeedMark, UserFe
 from feeds.serializers import FeedReviewSerializer, FeedErrorReportSerializer, UserFeedMarkSerializer
 
 NUTRIENT_KEYWORDS = {
-    'protein': ['protein', '蛋白', '粗蛋白'],
+    'protein': ['protein', '蛋白', '粗蛋白', '粗蛋白質'],
     'fat': ['fat', '脂肪', '粗脂肪'],
     'carbohydrate': ['carbohydrate', 'carb', '碳水', '碳水化合物', '纖維', '粗纖維'],
     'calcium': ['calcium', '鈣'],
@@ -72,14 +72,15 @@ class FeedOCRView(APIView):
             return Response({'extracted_nutrients': {}}, status=status.HTTP_200_OK)
 
         raw_text = texts[0].description
-        extracted = self.extract_nutrients(raw_text)
+        # extracted = self.extract_nutrients(raw_text)
+        extracted = self.extract_nutrients(raw_text, debug=True)
         return Response({
             'raw_text': raw_text,
             'extracted_nutrients': extracted
         }, status=status.HTTP_200_OK)
 
 
-    def extract_nutrients(self, text):
+    # def extract_nutrients(self, text):
         # 整理文字
         text = text.replace('\n', ' ')
         text = re.sub(r'\s+', ' ', text)
@@ -101,6 +102,42 @@ class FeedOCRView(APIView):
             if not matched:
                 result[field] = None  # 沒找到也標註
         return result
+    def extract_nutrients(self, text, debug=False):
+        lines = [l.strip() for l in text.split("\n") if l.strip()]
+
+        if debug:
+            print("=== OCR Lines ===")
+            for l in lines:
+                print(l)
+
+        result = {}
+
+        for field, keywords in NUTRIENT_KEYWORDS.items():
+            result[field] = None
+
+            for i, line in enumerate(lines):
+                if any(k.lower() in line.lower() for k in keywords):
+                    if debug:
+                        print(f"\n[DEBUG] 找到關鍵字: {keywords} 在 -> {line}")
+
+                    # 往下最多 3 行找數字
+                    for j in range(i, min(i+3, len(lines))):
+                        match = re.search(r"([\d]+(?:\.\d+)?)\s*%?", lines[j])
+                        if match:
+                            try:
+                                value = float(match.group(1))
+                                if 0 <= value <= 100:  # 合理範圍
+                                    result[field] = value
+                                    if debug:
+                                        print(f"[DEBUG] {field} -> {value} (來自行: {lines[j]})")
+                                    break
+                            except ValueError:
+                                continue
+                    break  # 找到就跳出
+
+        return result
+
+
 
 
 class FeedReviewView(APIView):

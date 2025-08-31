@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.db import models
 from django.utils import timezone
+from media.models import SuperImage
 
 
 class Bulletin(models.Model):
@@ -34,7 +35,7 @@ class AuctionResult(models.Model):
 
     # 新增展示內容
     pet_name = models.CharField(max_length=100, blank=True)
-    pet_photo = models.ImageField(upload_to="pet_photos/", blank=True, null=True)
+    # pet_photo = models.ImageField(upload_to="pet_photos/", blank=True, null=True)
 
     STATUS_CHOICES = [
         ("PENDING", "Pending Review"),
@@ -91,3 +92,18 @@ class Wallet(models.Model):
 
     def __str__(self):
         return f"{self.user} Wallet ({self.balance})"
+
+
+class BulletinPetImage(SuperImage):
+    """
+    每週競標贏家的寵物照片，存放於 Firebase
+    """
+    result = models.OneToOneField(
+        "AuctionResult",
+        on_delete=models.CASCADE,
+        related_name="pet_image"
+    )
+
+    def __str__(self):
+        return f"BulletinPetImage for Result {self.result_id}"
+
