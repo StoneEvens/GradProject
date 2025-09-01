@@ -727,3 +727,54 @@ def cleanup_post_images(firebase_paths: list, logger=None) -> bool:
         if logger:
             logger.error(f"清理貼文圖片時發生錯誤: {str(delete_error)}")
         return False 
+    
+def upload_bulletin_pet_image(self, user_id: int, session_code: str, image_file) -> Tuple[bool, str, Optional[str], Optional[str]]:
+    """
+    上傳競標贏家的寵物照片 (Bulletin 用)
+    
+    Parameters:
+    - user_id: 用戶 ID
+    - session_code: 當週競標場次代碼 (例如 '2025-W34')
+    - image_file: 上傳的圖片檔案 (InMemoryUploadedFile / TemporaryUploadedFile)
+    
+    Returns:
+    - tuple: (是否成功, 訊息, Firebase URL, Firebase 路徑)
+    """
+    try:
+        folder = f"bulletin/pets/session_{session_code}/user_{user_id}"
+        file_path = self.generate_file_path(folder, image_file.name, None)
+        
+        success, message, firebase_url = self.upload_image(image_file, file_path)
+        
+        if success:
+            logger.info(f"競標寵物圖片上傳成功: user={user_id}, session={session_code}, path={file_path}")
+            return True, message, firebase_url, file_path
+        else:
+            logger.error(f"競標寵物圖片上傳失敗: {message}")
+            return False, message, None, None
+    
+    except Exception as e:
+        logger.error(f"競標寵物圖片上傳異常: {str(e)}")
+        return False, f"競標寵物圖片上傳異常: {str(e)}", None, None
+
+def delete_bulletin_pet_image(self, firebase_path: str) -> Tuple[bool, str]:
+    """
+    刪除競標贏家的寵物照片 (Bulletin 用)
+
+    Parameters:
+    - firebase_path: Firebase Storage 檔案路徑
+
+    Returns:
+    - tuple: (是否成功, 訊息)
+    """
+    try:
+        success, message = self.delete_image(firebase_path)
+        if success:
+            logger.info(f"競標寵物圖片刪除成功: {firebase_path}")
+        else:
+            logger.error(f"競標寵物圖片刪除失敗: {firebase_path}, error={message}")
+        return success, message
+    except Exception as e:
+        logger.error(f"刪除競標寵物圖片時發生錯誤: {str(e)}")
+        return False, f"刪除競標寵物圖片失敗: {str(e)}"
+
