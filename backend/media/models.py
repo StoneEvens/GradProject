@@ -117,6 +117,84 @@ class UserHeadshot(SuperImage):
         return UserHeadshot.objects.create(user=user, firebase_path=firebase_path, firebase_url=firebase_url)
 
 
+class CheckpointHeadshot(SuperImage):
+    """
+    互動城市站點頭像模型
+    用於儲存站點的代表圖片
+    """
+    checkpoint = models.OneToOneField(
+        'interactivecity.Checkpoint', 
+        on_delete=models.CASCADE, 
+        related_name='headshot',
+        help_text="關聯的站點"
+    )
+    
+    @staticmethod
+    def get_checkpoint_headshot_url(checkpoint):
+        """獲取站點頭像 URL"""
+        try:
+            headshot = CheckpointHeadshot.objects.filter(checkpoint=checkpoint).first()
+            return headshot.firebase_url if headshot else None
+        except:
+            return None
+    
+    @staticmethod
+    def get_headshot(checkpoint):
+        """獲取站點頭像對象"""
+        return CheckpointHeadshot.objects.filter(checkpoint=checkpoint).first()
+    
+    @staticmethod
+    def create(checkpoint, firebase_path: str, firebase_url: str, original_filename='', content_type='image/jpeg', file_size=None):
+        """創建站點頭像記錄"""
+        return CheckpointHeadshot.objects.create(
+            checkpoint=checkpoint, 
+            firebase_path=firebase_path, 
+            firebase_url=firebase_url,
+            original_filename=original_filename,
+            content_type_mime=content_type,
+            file_size=file_size,
+            alt_text=f"{checkpoint.name} 站點頭像"
+        )
+    
+    @staticmethod
+    def update_or_create(checkpoint, firebase_path: str, firebase_url: str, original_filename='', content_type='image/jpeg', file_size=None):
+        """更新或創建站點頭像記錄"""
+        # 刪除舊頭像（如果存在）
+        old_headshot = CheckpointHeadshot.objects.filter(checkpoint=checkpoint).first()
+        if old_headshot and old_headshot.firebase_path:
+            try:
+                from utils.firebase_service import firebase_storage_service
+                delete_success, delete_msg = firebase_storage_service.delete_image(old_headshot.firebase_path)
+                if not delete_success:
+                    logger.warning(f"刪除舊站點頭像失敗: {delete_msg}")
+            except Exception as e:
+                logger.warning(f"刪除舊站點頭像時發生異常: {str(e)}")
+        
+        # 創建或更新頭像記錄
+        headshot, created = CheckpointHeadshot.objects.update_or_create(
+            checkpoint=checkpoint,
+            defaults={
+                'firebase_url': firebase_url,
+                'firebase_path': firebase_path,
+                'original_filename': original_filename,
+                'content_type_mime': content_type,
+                'file_size': file_size,
+                'alt_text': f"{checkpoint.name} 站點頭像"
+            }
+        )
+        
+        return headshot
+    
+    def save(self, *args, **kwargs):
+        """覆寫 save 方法以自動生成 alt_text"""
+        if not self.alt_text and self.checkpoint:
+            self.alt_text = f"{self.checkpoint.name} 站點頭像"
+        super().save(*args, **kwargs)
+    
+    def __str__(self):
+        return f"CheckpointHeadshot for {self.checkpoint.name if self.checkpoint else 'Unknown'}"
+
+
 # 異常貼文圖片
 class AbnormalPostImage(SuperImage):
     """
@@ -405,3 +483,177 @@ class CommentImage(SuperImage):
             file_size=file_size,
             alt_text=f"評論圖片 {sort_order + 1}"
         )
+
+
+# 互動城市站點展示圖片
+class CheckpointDisplayImage(SuperImage):
+    """
+    互動城市站點展示圖片模型
+    專門用於儲存使用者在站點展示的寵物照片
+    """
+    from django.contrib.contenttypes.models import ContentType
+    from django.contrib.contenttypes.fields import GenericForeignKey
+    
+    display_right = models.OneToOneField(
+        'interactivecity.DisplayRight',
+        on_delete=models.CASCADE,
+        related_name='display_image',
+        help_text="關聯的展示權記錄"
+    )
+    
+    # 支援多種來源的圖片（寵物頭像、貼文圖片等）
+    source_content_type = models.ForeignKey(
+        ContentType, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True,
+        help_text="圖片來源類型"
+    )
+    source_object_id = models.PositiveIntegerField(null=True, blank=True)
+    source_content_object = GenericForeignKey('source_content_type', 'source_object_id')
+    
+    # 展示設定
+    caption = models.CharField(
+        max_length=200, 
+        blank=True,
+        help_text="展示說明文字"
+    )
+    is_active = models.BooleanField(
+        default=True,
+        help_text="是否啟用展示"
+    )
+    
+    class Meta:
+        verbose_name = '站點展示圖片'
+        verbose_name_plural = '站點展示圖片'
+        indexes = [
+            models.Index(fields=['display_right']),
+            models.Index(fields=['source_content_type', 'source_object_id']),
+        ]
+    
+    def __str__(self):
+        checkpoint_name = self.display_right.checkpoint.name if self.display_right else "Unknown"
+        return f"CheckpointDisplayImage for {checkpoint_name}"
+    
+    def save(self, *args, **kwargs):
+        """覆寫 save 方法以自動生成 alt_text"""
+        if not self.alt_text and self.display_right:
+            checkpoint = self.display_right.checkpoint
+            user = self.display_right.user
+            self.alt_text = f"{user.username} 在 {checkpoint.name} 的展示圖片"
+        super().save(*args, **kwargs)
+    
+    @classmethod
+    def create_from_pet_image(cls, display_right, pet_image_url, pet_image_path, 
+                             pet=None, caption='', original_filename='', 
+                             content_type='image/jpeg', file_size=None):
+        """
+        從寵物圖片創建站點展示圖片
+        
+        Parameters:
+        - display_right: DisplayRight 實例
+        - pet_image_url: 寵物圖片的 Firebase URL
+        - pet_image_path: 寵物圖片的 Firebase 路徑
+        - pet: Pet 實例（可選，用於設定來源）
+        - caption: 展示說明文字
+        - original_filename: 原始檔案名稱
+        - content_type: MIME 類型
+        - file_size: 檔案大小
+        
+        Returns:
+        - CheckpointDisplayImage 實例
+        """
+        from django.contrib.contenttypes.models import ContentType
+        
+        display_image = cls(
+            display_right=display_right,
+            firebase_url=pet_image_url,
+            firebase_path=pet_image_path,
+            caption=caption,
+            original_filename=original_filename,
+            content_type_mime=content_type,
+            file_size=file_size
+        )
+        
+        # 設定來源為寵物（如果提供）
+        if pet:
+            display_image.source_content_type = ContentType.objects.get_for_model(pet)
+            display_image.source_object_id = pet.id
+        
+        display_image.save()
+        return display_image
+    
+    @classmethod 
+    def create_from_upload(cls, display_right, firebase_url, firebase_path,
+                          caption='', original_filename='', 
+                          content_type='image/jpeg', file_size=None):
+        """
+        從用戶上傳創建站點展示圖片
+        
+        Parameters:
+        - display_right: DisplayRight 實例
+        - firebase_url: Firebase Storage URL
+        - firebase_path: Firebase Storage 路徑
+        - caption: 展示說明文字
+        - original_filename: 原始檔案名稱
+        - content_type: MIME 類型
+        - file_size: 檔案大小
+        
+        Returns:
+        - CheckpointDisplayImage 實例
+        """
+        return cls.objects.create(
+            display_right=display_right,
+            firebase_url=firebase_url,
+            firebase_path=firebase_path,
+            caption=caption,
+            original_filename=original_filename,
+            content_type_mime=content_type,
+            file_size=file_size
+        )
+    
+    @classmethod
+    def get_current_display_image(cls, checkpoint):
+        """
+        獲取站點當前的展示圖片
+        
+        Parameters:
+        - checkpoint: Checkpoint 實例
+        
+        Returns:
+        - CheckpointDisplayImage 實例或 None
+        """
+        from interactivecity.models import DisplayRight
+        from django.utils import timezone
+        
+        # 獲取當前有效的展示權
+        current_display_right = DisplayRight.objects.filter(
+            checkpoint=checkpoint,
+            status='active',
+            start_date__lte=timezone.now(),
+            end_date__gte=timezone.now()
+        ).first()
+        
+        if current_display_right:
+            return cls.objects.filter(
+                display_right=current_display_right,
+                is_active=True
+            ).first()
+        
+        return None
+    
+    @property
+    def is_display_active(self):
+        """檢查展示權是否仍然有效"""
+        return (
+            self.is_active and 
+            self.display_right and 
+            self.display_right.is_active
+        )
+    
+    @property
+    def days_remaining(self):
+        """獲取剩餘展示天數"""
+        if self.display_right:
+            return self.display_right.days_remaining
+        return 0

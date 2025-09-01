@@ -1,0 +1,242 @@
+.checkpointInfoArea {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 30px);
+  max-width: 380px;
+  background: #fff;
+  border-radius: 20px 20px 0 0;
+  padding: 0;
+  padding-bottom: 30px;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  animation: slideUp 0.3s ease-out;
+  border: 3px solid #ffca8c;
+  border-bottom: none;
+  overflow: visible;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateX(-50%) translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+}
+
+/* 頂部區域 - 照片和站點名稱 */
+.topSection {
+  display: flex;
+  align-items: center;
+  position: relative;
+  margin-bottom: 15px;
+}
+
+/* 圖片包裹器 */
+.imageWrapper {
+  position: absolute;
+  top: -40px;
+  left: -2px;
+  z-index: 2;
+}
+
+.imageContainer {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid #ffca8c;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  background: #fff;
+}
+
+.checkpointImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 站點名稱區域 */
+.nameSection {
+  flex: 1;
+  background: #fff6ea;
+  padding: 10px 15px 10px 75px; /* 左邊padding增加到75px避免被照片擋住 */
+  margin-left: 60px; /* 從照片圓心開始 (120px/2) */
+  margin-top: 10px; /* 上方留空隙 */
+  margin-right: 10px; /* 右方留空隙 */
+  border-radius: 15px;
+  position: relative;
+  z-index: 1;
+  height: 70px; /* 高度調整為70px，配合照片底部 (120px - 40px(top) - 10px(margin-top)) */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+}
+
+.checkpointName {
+  font-size: 18px;
+  font-weight: bold;
+  color: #8b4513;
+  margin: 0;
+  text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.5);
+}
+
+.ownerInfo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ownerLabel {
+  font-size: 13px;
+  color: #a0522d;
+}
+
+/* 描述區域 */
+.descriptionSection {
+  padding: 15px 20px 20px;
+  background: #fff6ea;
+  margin: 10px 10px 15px 10px;
+  border-radius: 15px;
+}
+
+.description {
+  font-size: 14px;
+  color: #89350c;
+  line-height: 1.5;
+  margin: 0;
+  padding: 0 10px;
+}
+
+/* 按鈕區域 */
+.buttonContainer {
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  padding: 0 10px;
+}
+
+.closeButton,
+.enterButton {
+  width: 45%;
+  padding: 12px 16px;
+  border-radius: 15px;
+  font-size: 16px;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.closeButton {
+  background: #ffeed6;
+  color: #89350c;
+}
+
+.closeButton:active {
+  transform: scale(0.98);
+}
+
+.enterButton {
+  background: #ffb370;
+  color: #fff;
+}
+
+.enterButton:active {
+  transform: scale(0.98);
+}
+
+/* 響應式設計 */
+@media (max-width: 430px) {
+  .checkpointInfoArea {
+    width: calc(100% - 20px);
+    max-width: 380px;
+    padding-bottom: 25px;
+  }
+
+  .imageWrapper {
+    top: -35px;
+    left: -2px;
+  }
+
+  .imageContainer {
+    width: 100px;
+    height: 100px;
+    border-width: 3px;
+  }
+
+  .nameSection {
+    padding: 8px 12px 8px 60px; /* 左邊padding調整為60px */
+    margin-left: 50px; /* 從照片圓心開始 (100px/2) */
+    margin-top: 8px;
+    margin-right: 8px;
+    height: 57px; /* 高度調整配合照片底部 (100px - 35px(top) - 8px(margin-top)) */
+  }
+
+  .checkpointName {
+    font-size: 16px;
+  }
+
+  .ownerLabel {
+    font-size: 12px;
+  }
+
+  .description {
+    font-size: 13px;
+  }
+
+  .closeButton,
+  .enterButton {
+    width: 45%;
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+}
+
+/* 深色模式支援 */
+@media (prefers-color-scheme: dark) {
+  .checkpointInfoArea {
+    background: #2a2a2a;
+    border-color: #444;
+  }
+
+  .nameSection {
+    background: #3a3530;
+  }
+
+  .descriptionSection {
+    background: #3a3530;
+  }
+
+  .checkpointName {
+    color: #fff;
+  }
+
+  .ownerLabel {
+    color: #daa520;
+  }
+
+  .description {
+    color: #ccc;
+  }
+
+  .closeButton {
+    background: #3a3530;
+    color: #ff9966;
+  }
+
+  .enterButton {
+    background: #ff9966;
+    color: #fff;
+  }
+
+  .imageContainer {
+    border-color: #666;
+    background: #333;
+  }
+}
