@@ -1,0 +1,12 @@
+<h1>{{ bulletin.title }}</h1>
+<p>{{ bulletin.description }}</p>
+
+{% if display %}
+<h2>贏家的寵物</h2>
+<p>{{ display.pet_name }}</p>
+{% if display.pet_image %}
+<img src="{{ display.pet_image.url }}" style="max-width:300px;">
+{% endif %}
+{% else %}
+<p>尚未有審核通過的內容</p>
+{% endif %}
