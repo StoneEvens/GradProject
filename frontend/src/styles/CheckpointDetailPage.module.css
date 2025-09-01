@@ -1,0 +1,166 @@
+/* 站點詳情頁面樣式 */
+.container {
+  position: relative;
+  width: 100%;
+  max-width: 430px;  /* 與其他頁面一致的最大寬度 */
+  height: 100vh;
+  margin: 0 auto;    /* 置中對齊 */
+  overflow: hidden;
+  background: #000;
+  font-family: 'Noto Sans TC', sans-serif;
+}
+
+/* 載入畫面 - 參考 InteractiveCityPage 設計 */
+.loadingScreen {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #ffeed6;  /* 與其他頁面一致的背景色 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.loadingContent {
+  text-align: center;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #89350c;  /* 與主題色一致 */
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 20px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loadingText {
+  font-size: 18px;
+  color: #89350c;  /* 與主題色一致 */
+  margin: 20px 0 0 0;
+  font-weight: 500;
+}
+
+.debugMessage {
+  font-size: 14px;
+  color: #89350c;
+  margin: 10px 0 0 0;
+  opacity: 0.7;
+  font-style: italic;
+}
+
+/* 返回按鈕 - 與 InteractiveCityPage 一致 */
+.backButton {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  width: 45px;
+  height: 45px;
+  background-color: rgba(255, 255, 255, 0.95);
+  border: none;
+  border-radius: 50%;
+  font-size: 24px;
+  font-weight: bold;
+  color: #89350c;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.backButton:hover {
+  transform: scale(1.05);
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* 使用者資訊區域 - 與 InteractiveCityPage 一致 */
+.userInfoSection {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  z-index: 1000;
+}
+
+.avatarButton {
+  width: 75px;
+  height: 75px;
+  background-color: rgba(255, 255, 255, 0.95);
+  border: 3px solid rgba(255, 255, 255, 1);
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px);
+  padding: 0;
+  overflow: hidden;
+  position: relative;
+  z-index: 2;
+  transition: all 0.3s ease;
+}
+
+.avatarButton:hover {
+  transform: scale(1.05);
+}
+
+.avatarImage {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+
+/* 響應式設計 - 確保在小螢幕上也能正確顯示 */
+@media (max-width: 430px) {
+  .container {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .backButton {
+    top: 15px;
+    left: 15px;
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+  }
+  
+  .userInfoSection {
+    top: 15px;
+    right: 15px;
+  }
+  
+  .avatarButton {
+    width: 65px;
+    height: 65px;
+  }
+  
+  .loadingText {
+    font-size: 16px;
+  }
+  
+  .debugMessage {
+    font-size: 12px;
+  }
+}
+
