@@ -1,0 +1,6 @@
+<h1>提交你的寵物照片</h1>
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">送出</button>
+</form>

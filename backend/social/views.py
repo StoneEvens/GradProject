@@ -688,6 +688,11 @@ class PostListAPIView(generics.ListAPIView):
 
         history = []
         recommend_list = []
+        
+        # 如果推薦服務還沒初始化，直接返回最新貼文
+        if recommendation_service is None:
+            print("推薦服務尚未初始化，返回最新貼文")
+            return PostFrame.objects.all().order_by('-created_at')[:30]
 
         # 獲取用戶的互動歷史
         # 先取得用戶和日常貼文SoLContent的互動歷史(互動不包含留言，留言會在下方單獨處理)

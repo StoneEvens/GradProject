@@ -1939,6 +1939,11 @@ class RecommendedDiseaseArchivesAPIView(APIView):
             # 以下是推薦系統邏輯
             recommendation_service = apps.get_app_config('social').get_recommendation_service()
             
+            # 如果推薦服務還沒初始化，直接返回最新檔案
+            if recommendation_service is None:
+                logger.info("推薦服務尚未初始化，返回最新的疾病檔案")
+                return self._get_latest_archives(request, limit, offset)
+            
             # 收集用戶與疾病檔案的互動歷史
             history = self._collect_disease_interaction_history(request.user)
             
@@ -2309,6 +2314,50 @@ class PublicDiseaseArchivesPreviewAPIView(APIView):
 
             history = []
             recommend_list = []
+            
+            # 如果推薦服務還沒初始化，直接返回最新的公開檔案
+            if recommendation_service is None:
+                print("推薦服務尚未初始化，返回最新的公開疾病檔案")
+                archives_queryset = DiseaseArchiveContent.objects.filter(
+                    is_private=False  # 只獲取公開的檔案
+                ).select_related(
+                    'pet', 'postFrame', 'postFrame__user'
+                ).prefetch_related(
+                    'illnesses__illness',
+                    'pet__headshot',
+                    'postFrame__user__headshot'
+                ).order_by('-postFrame__created_at')
+                
+                # 計算總數
+                total_count = archives_queryset.count()
+                
+                # 分頁
+                archives = archives_queryset[offset:offset + limit]
+                has_more = offset + limit < total_count
+                
+                # 序列化數據
+                serialized_data = []
+                for archive in archives:
+                    serializer = DiseaseArchiveContentSerializer(
+                        archive, 
+                        context={'request': request}
+                    )
+                    serialized_data.append(serializer.data)
+                
+                return APIResponse(
+                    data={
+                        'archives': serialized_data,
+                        'pagination': {
+                            'total': total_count,
+                            'offset': offset,
+                            'limit': limit,
+                            'has_more': has_more
+                        }
+                    },
+                    message='獲取公開疾病檔案預覽列表成功',
+                    code=200,
+                    success=True
+                )
 
             interaction_list = UserInteraction.objects.filter(user=self.request.user).values()
             for interaction in interaction_list:

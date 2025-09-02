@@ -55,6 +55,8 @@ INSTALLED_APPS = [
     "articleRecommendation",
     "calculator",
     "ocrapp",
+    "auctions",
+    "interactivecity",
 ]
 
 MIDDLEWARE = [
@@ -145,6 +147,9 @@ SIMPLE_JWT = {
 
 ROOT_URLCONF = 'gradProject.urls'
 
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -201,7 +206,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Taipei'
 
 USE_I18N = True
 
