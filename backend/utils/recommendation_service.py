@@ -31,7 +31,7 @@ class RecommendationService:
         print(f"Using device: {self.device}")
         
         ##---------Model Selection---------##
-        model_path = "c:/Users/Steven/bert-base-chinese"
+        model_path = os.path.join(script_dir, "bert-base-chinese")
         self.tokenizer = AutoTokenizer.from_pretrained(model_path)
         self.model = AutoModel.from_pretrained(model_path).eval().to(self.device)
 

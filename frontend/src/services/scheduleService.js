@@ -1,7 +1,7 @@
 import { authAxios } from './authService';
 
 // 使用硬編碼的默認 API URL 而不是依賴 process.env
-const API_URL = 'http://localhost:8000/api/v1';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
 
 // 獲取用戶行程
 export const getUserSchedules = async () => {

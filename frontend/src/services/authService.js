@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // 使用硬編碼的默認 API URL
-const API_URL = 'http://localhost:8000/api/v1';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
 
 // 檢查 token 是否過期
 const isTokenExpired = (token) => {
