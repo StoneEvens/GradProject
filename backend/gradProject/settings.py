@@ -28,7 +28,7 @@ SECRET_KEY = 'django-insecure-9$@4-v*$7-=1r-l@3(fytpr_*f1b!@z^j00f%31hcp6(udqh6s
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -68,12 +68,35 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://localhost:5173",
-]
+# In development, allow all origins
+CORS_ALLOW_ALL_ORIGINS = True  # Only use this in development!
+
+# For production, specify allowed origins:
+# CORS_ALLOWED_ORIGINS = [
+#     "http://your-production-domain.com",
+# ]
 
 CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
+
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
 
 # REST Framework 設置
 REST_FRAMEWORK = {
