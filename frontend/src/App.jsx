@@ -47,6 +47,7 @@ import DiseaseArchiveEditContentPage from './pages/DiseaseArchiveEditContentPage
 import DiseaseArchivePreviewPage from './pages/DiseaseArchivePreviewPage';
 import DiseaseArchiveDetailPage from './pages/DiseaseArchiveDetailPage';
 import InteractiveCityPage from './pages/InteractiveCityPage';
+import CheckpointDetailPage from './pages/CheckpointDetailPage';
 import { UserProvider } from './context/UserContext';
 
 const App = () => {
@@ -377,6 +378,11 @@ const App = () => {
         <Route 
           path="/interactive-city" 
           element={isUserAuthenticated ? <InteractiveCityPage /> : <Navigate to="/" />} 
+        />
+        {/* 站點詳情頁面 */}
+        <Route 
+          path="/checkpoint/:id" 
+          element={isUserAuthenticated ? <CheckpointDetailPage /> : <Navigate to="/" />} 
         />
       </Routes>
     </BrowserRouter>

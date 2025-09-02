@@ -31,9 +31,12 @@ class RecommendationService:
         print(f"Using device: {self.device}")
         
         ##---------Model Selection---------##
-        model_path = os.path.join(script_dir, "bert-base-chinese")
-        self.tokenizer = AutoTokenizer.from_pretrained(model_path)
-        self.model = AutoModel.from_pretrained(model_path).eval().to(self.device)
+        # model_path = "c:/Users/Steven/bert-base-chinese"
+        # self.tokenizer = AutoTokenizer.from_pretrained(model_path)
+        # self.model = AutoModel.from_pretrained(model_path).eval().to(self.device)
+        self.tokenizer = AutoTokenizer.from_pretrained("bert-base-chinese")
+        self.model = AutoModel.from_pretrained("bert-base-chinese")
+
 
         #----------Load embeddings and post IDs----------#
         # Get the project root directory (where post_embs.npy is located)
