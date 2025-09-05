@@ -94,6 +94,7 @@ const InteractiveCityPage = () => {
     const isSecureContext = window.isSecureContext || 
                            location.protocol === 'https:' || 
                            location.hostname === 'localhost' ||
+                           location.hostname === '140.119.19.25' ||
                            location.hostname === '127.0.0.1';
     
     if (!isSecureContext) {
