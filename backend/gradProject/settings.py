@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     "ocrapp",
     "auctions",
     "interactivecity",
+    'sslserver',
 ]
 
 MIDDLEWARE = [
