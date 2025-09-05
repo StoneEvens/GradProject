@@ -735,7 +735,7 @@ class PostListAPIView(generics.ListAPIView):
             print(len(history), "條互動歷史")
 
             embedded_history = recommendation_service.embed_user_history(posts=[(p['id'], p['action'], p['timestamp']) for p in history], content_type="social")
-            search_list = recommendation_service.recommend_posts(user_vec=embedded_history, top_k=30+len(seen_ids), content_type="social")
+            search_list = recommendation_service.recommend_posts(user_vec=embedded_history, content_type="social")
 
             for post_id in search_list:
                 if post_id not in seen_ids:
