@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import axios from '../utils/axios';
 import styles from '../styles/CalculatorStep1.module.css';
 import defaultAvatar from '../MockPicture/mockCat1.jpg';
 import NotificationComponent from './Notification';
@@ -114,7 +114,7 @@ function CalculatorStep1({ onNext, pets: apiPets }) {
       };
 
       try {
-        await axios.post('http://127.0.0.1:8000/api/v1/calculator/pets/update/', updatePayload);
+        await axios.post('/calculator/pets/update/', updatePayload);
         console.log('寵物更新成功！');
       } catch (err) {
         console.error('寵物更新失敗：', err);

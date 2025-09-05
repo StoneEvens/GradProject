@@ -1960,8 +1960,7 @@ class RecommendedDiseaseArchivesAPIView(APIView):
                     embedded_history = recommendation_service.embed_user_history(posts=[(p['id'], p['action'], p['timestamp']) for p in history], content_type='forum')
                     search_results = recommendation_service.recommend_posts(
                         user_vec=embedded_history,
-                        content_type='forum',
-                        top_k=30+len(history),  # 獲取更多結果以支援分頁和過濾
+                        content_type='forum'
                     )
                     
                     recommended_ids = []
@@ -2398,7 +2397,7 @@ class PublicDiseaseArchivesPreviewAPIView(APIView):
                 print(len(history), "條互動歷史")
 
                 embedded_history = recommendation_service.embed_user_history(posts=[(p['id'], p['action'], p['timestamp']) for p in history], content_type="forum")
-                search_list = recommendation_service.recommend_posts(user_vec=embedded_history, top_k=30+len(seen_ids), content_type="forum")
+                search_list = recommendation_service.recommend_posts(user_vec=embedded_history, content_type="forum")
 
                 for post_id in search_list:
                     if post_id not in seen_ids:
