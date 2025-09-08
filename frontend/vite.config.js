@@ -7,11 +7,15 @@ import path from 'path'
 export default defineConfig({
   plugins: [react()],
   server: {
-    host: '0.0.0.0',
-    port: 5173,
-    https: {
-      key: fs.readFileSync(path.resolve(__dirname, '140.119.19.25-key.pem')),
-      cert: fs.readFileSync(path.resolve(__dirname, '140.119.19.25.pem')),
+    host: '127.0.0.1',  // Local development
+    port: 5173,         // Specific port to avoid conflicts
+    cors: true,
+    // Allow requests from the reverse proxy domain
+    allowedHosts: ['petapp.geniusbee.net', 'localhost', '127.0.0.1'],
+    // Disable HMR to avoid WebSocket connection issues through reverse proxy
+    hmr: false,
+    watch: {
+      usePolling: true
     }
   },
   assetsInclude: ['**/*.glb'],
