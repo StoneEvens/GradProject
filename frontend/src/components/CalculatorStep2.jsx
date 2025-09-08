@@ -199,6 +199,7 @@ function CalculatorStep2({ onNext, onPrev, selectedPet }) {
 
       // Step 2: 建立 Feed（包含自動比對邏輯和圖片數據）
       const parseNumber = (val) => typeof val === 'number' ? val : 0;
+      const parseMgToG = (val) => (typeof val === 'number' ? val/1000 : 0);
       const createFeedPayload = {
         name: feedName || '自訂飼料',
         brand: feedBrand || '未知品牌',
@@ -209,8 +210,8 @@ function CalculatorStep2({ onNext, onPrev, selectedPet }) {
         carbohydrate: parseNumber(nutrients.carbohydrate),
         calcium: parseNumber(nutrients.calcium),
         phosphorus: parseNumber(nutrients.phosphorus),
-        magnesium: parseNumber(nutrients.magnesium),
-        sodium: parseNumber(nutrients.sodium),
+        magnesium: parseMgToG(nutrients.magnesium),
+        sodium: parseMgToG(nutrients.sodium),
         price: feedPrice,
         front_image: frontImageBase64,
         nutrition_image: nutritionImageBase64
@@ -251,8 +252,8 @@ function CalculatorStep2({ onNext, onPrev, selectedPet }) {
               fat: matchedFeed.fat ?? 0,
               ca: matchedFeed.calcium ?? 0,
               p: matchedFeed.phosphorus ?? 0,
-              mg: matchedFeed.magnesium ?? 0,
-              na: matchedFeed.sodium ?? 0,
+              mg: (matchedFeed.magnesium ?? 0) * 1000,
+              na: (matchedFeed.sodium ?? 0) * 1000,
               price: matchedFeed.price,
               review_count: matchedFeed.review_count ?? 0,
               is_verified: matchedFeed.is_verified ?? false,
@@ -282,8 +283,8 @@ function CalculatorStep2({ onNext, onPrev, selectedPet }) {
                   fat: matchedFeed.fat ?? 0,
                   ca: matchedFeed.calcium ?? 0,
                   p: matchedFeed.phosphorus ?? 0,
-                  mg: matchedFeed.magnesium ?? 0,
-                  na: matchedFeed.sodium ?? 0,
+                  mg: (matchedFeed.magnesium ?? 0) * 1000,
+                  na: (matchedFeed.sodium ?? 0) * 1000,
                   price: matchedFeed.price,
                   review_count: matchedFeed.review_count ?? 0,
                   is_verified: matchedFeed.is_verified ?? false,
@@ -339,8 +340,8 @@ function CalculatorStep2({ onNext, onPrev, selectedPet }) {
             fat: matchedFeed.fat ?? 0,
             ca: matchedFeed.calcium ?? 0,
             p: matchedFeed.phosphorus ?? 0,
-            mg: matchedFeed.magnesium ?? 0,
-            na: matchedFeed.sodium ?? 0,
+            mg: (matchedFeed.magnesium ?? 0) * 1000,
+            na: (matchedFeed.sodium ?? 0) * 1000,
             price: matchedFeed.price,
             review_count: matchedFeed.review_count ?? 0,
             is_verified: matchedFeed.is_verified ?? false,
@@ -370,8 +371,8 @@ function CalculatorStep2({ onNext, onPrev, selectedPet }) {
           fat: createdFeed?.fat || parseNumber(nutrients.fat),
           ca: createdFeed?.calcium || parseNumber(nutrients.calcium),
           p: createdFeed?.phosphorus || parseNumber(nutrients.phosphorus),
-          mg: createdFeed?.magnesium || parseNumber(nutrients.magnesium),
-          na: createdFeed?.sodium || parseNumber(nutrients.sodium),
+          mg: createdFeed?.magnesium != null ? createdFeed.magnesium * 1000 : parseNumber(nutrients.magnesium),
+          na: createdFeed?.sodium    != null ? createdFeed.sodium    * 1000 : parseNumber(nutrients.sodium),
           price: createdFeed?.price || feedPrice,
           pet_type: petType
         };
@@ -440,7 +441,7 @@ function CalculatorStep2({ onNext, onPrev, selectedPet }) {
         '碳水化合物': feedInfo.carb,
         '鈣': feedInfo.ca,
         '磷': feedInfo.p,
-        '鏁': feedInfo.mg,
+        '鎂': feedInfo.mg,
         '鈉': feedInfo.na
       };
       
@@ -463,7 +464,7 @@ function CalculatorStep2({ onNext, onPrev, selectedPet }) {
         '碳水化合物': feedInfo.carb,
         '鈣': feedInfo.ca,
         '磷': feedInfo.p,
-        '鏁': feedInfo.mg,
+        '鎂': feedInfo.mg,
         '鈉': feedInfo.na
       };
       
@@ -524,6 +525,8 @@ function CalculatorStep2({ onNext, onPrev, selectedPet }) {
         return isNaN(num) ? defaultValue : num;
       };
 
+      const mgToG = (v) => { const n = parseFloat(v); return isNaN(n) ? 0 : (n / 1000); };
+
       const formData = new FormData();
       formData.append('pet_id', selectedPet?.id || '');
       formData.append('pet_type', selectedPet.species === '狗' ? 'dog' : 'cat');
@@ -537,8 +540,22 @@ function CalculatorStep2({ onNext, onPrev, selectedPet }) {
       formData.append('carbohydrates', safeFloat(feedInfo.carb));
       formData.append('calcium', safeFloat(feedInfo.ca));
       formData.append('phosphorus', safeFloat(feedInfo.p));
-      formData.append('magnesium', safeFloat(feedInfo.mg));
-      formData.append('sodium', safeFloat(feedInfo.na));
+      formData.append('magnesium', mgToG(feedInfo.mg));
+      formData.append('sodium', mgToG(feedInfo.na));
+      formData.append('feed_id', feed.id);
+      formData.append('persist', 'true');
+      formData.append('name', (feedInfo.name || '').trim());
+      formData.append('brand', (feedInfo.brand || '').trim());
+      
+      const condsRaw = Array.isArray(selectedPet?.conditions) ? selectedPet.conditions : [];
+      const conds = [...new Set(condsRaw.map(c => String(c).trim()).filter(Boolean))];
+      if (conds.length) {
+        // A: JSON（後端可直接 json.loads）
+        formData.append('conditions', JSON.stringify(conds));
+        // B: 重複欄位（後端可用 getlist('conditions')）
+        conds.forEach(c => formData.append('conditions', c));
+      }
+      console.log('送出的 conditions:', conds);
       
       console.log('發送到後端的資料:');
       for (let [key, value] of formData.entries()) {
@@ -555,18 +572,45 @@ function CalculatorStep2({ onNext, onPrev, selectedPet }) {
           },
         }
       );
+      const pr = res.data.persist_result;
+      const usedFeedId = pr?.feed?.id ?? feed.id;   // ← 用新的 id（若有）
+
+      await axios.post('/calculator/feeds/usage/', {
+        feed_id: usedFeedId,
+        pet_id: selectedPet?.id
+      });
+      if (pr && pr.feed && pr.feed.id && pr.action) {
+        // 更新當前 feed
+        setFeeds(prev => {
+          const arr = [...prev];
+          arr[selectedFeed] = {
+            ...arr[selectedFeed],
+            id: pr.feed.id,
+            name: pr.feed.name,
+            brand: pr.feed.brand,
+            carb: pr.feed.carbohydrate,
+            protein: pr.feed.protein,
+            fat: pr.feed.fat,
+            ca: pr.feed.calcium,
+            p: pr.feed.phosphorus,
+            mg: (pr.feed.magnesium ?? 0) * 1000, // 顯示仍用 mg
+            na: (pr.feed.sodium ?? 0) * 1000,
+          };
+          return arr;
+        });
+      }
       console.log('計算成功：', res.data);
       
       // 計算成功後更新飼料使用次數
-      try {
-        await axios.post('/calculator/feeds/usage/', {
-          feed_id: feed.id,
-          pet_id: selectedPet?.id
-        });
-        console.log('飼料使用次數已更新');
-      } catch (usageError) {
-        console.warn('更新使用次數失敗，但不影響主要功能：', usageError);
-      }
+      // try {
+      //   await axios.post('/calculator/feeds/usage/', {
+      //     feed_id: feed.id,
+      //     pet_id: selectedPet?.id
+      //   });
+      //   console.log('飼料使用次數已更新');
+      // } catch (usageError) {
+      //   console.warn('更新使用次數失敗，但不影響主要功能：', usageError);
+      // }
       
       // 通知第三步計算完成
       onNext(feed, {
