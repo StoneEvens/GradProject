@@ -15,6 +15,11 @@ const speciesReverseMap = {
   '狗': 'dog',
 };
 
+const CONDITION_OPTIONS = [
+  '慢性腎臟病', '肝臟疾病', '關節炎/肥胖', '心臟病', '糖尿病',
+  '泌尿道結石', '胰臟炎',
+]
+
 function CalculatorStep1({ onNext, pets: apiPets }) {
   const [notification, setNotification] = useState('');
   const [showHistoryModal, setShowHistoryModal] = useState(false);
@@ -82,6 +87,16 @@ function CalculatorStep1({ onNext, pets: apiPets }) {
     return '';
   };
 
+  const [selectedConditions, setSelectedConditions] = useState([]);
+  const [otherChecked, setOtherChecked] = useState(false);
+  const [otherText, setOtherText] = useState('');
+
+  const toggleCondition = (c) => {
+    setSelectedConditions(prev =>
+      prev.includes(c) ? prev.filter(x => x !== c) : [...prev, c]
+    );
+  };
+
   const handleNext = async () => {
     const err = validate();
     if (err) {
@@ -89,7 +104,12 @@ function CalculatorStep1({ onNext, pets: apiPets }) {
       return;
     }
 
-    setErrorMsg('');
+    const conditionsToSend = Array.from(new Set([
+      ...selectedConditions,
+      ...(otherText.trim() ? [otherText.trim()] : []),
+    ]));
+
+    // setErrorMsg('');
 
     if (isAdding) {
       // Convert species from Chinese to English before sending to backend
@@ -102,6 +122,7 @@ function CalculatorStep1({ onNext, pets: apiPets }) {
         height: parseFloat(newPet.height),
         avatar: defaultAvatar,
         isTemporary: true,
+        conditions: conditionsToSend,
       };
 
       // Pass pet_type in English to backend
@@ -110,7 +131,7 @@ function CalculatorStep1({ onNext, pets: apiPets }) {
       const updatePayload = {
         pet_id: pets[selectedPet]?.id,
         weight: parseFloat(editInfo.weight),
-        height: parseFloat(editInfo.height),
+        length: parseFloat(editInfo.height),
       };
 
       try {
@@ -121,7 +142,8 @@ function CalculatorStep1({ onNext, pets: apiPets }) {
         setNotification('更新寵物資料失敗，請稍後再試');
       }
 
-      onNext(pets[selectedPet]);
+      // onNext(pets[selectedPet]);
+      onNext({ ...pets[selectedPet], conditions: conditionsToSend });
     }
   };
 
@@ -255,6 +277,46 @@ function CalculatorStep1({ onNext, pets: apiPets }) {
           <div className={styles.errorMsg}>{errorMsg}</div>
         )}
       </div>
+
+      {/*新增：慢性病/照護重點（含「其他」） */}
+      <div className={styles.section}>
+        <label className={styles.sectionLabel}>慢性病/照護重點：</label>
+
+        {/* 卡片外框，視覺同 .petInfoSection */}
+        <div className={styles.chronicPanel}>
+          <div className={styles.chronicGroup}>
+            {CONDITION_OPTIONS.map(c => (
+              <label key={c} className={styles.checkboxItem}>
+                <input
+                  type="checkbox"
+                  checked={selectedConditions.includes(c)}
+                  onChange={() => toggleCondition(c)}
+                />
+                <span className={styles.chipText}>{c}</span>
+              </label>
+            ))}
+
+            {/* 其他（內嵌輸入） */}
+            <label className={`${styles.checkboxItem} ${styles.checkboxOther}`}>
+              <input
+                type="checkbox"
+                checked={otherChecked || !!otherText}
+                onChange={(e) => setOtherChecked(e.target.checked)}
+              />
+              <span className={styles.chipText}>其他：</span>
+              <input
+                className={styles.otherInlineInput}
+                type="text"
+                value={otherText}
+                onChange={(e) => setOtherText(e.target.value)}
+                placeholder="請輸入"
+                maxLength={50}
+              />
+            </label>
+          </div>
+        </div>
+      </div>
+
 
       <div className={styles.actionButtons}>
         <button className={styles.nextButton} onClick={handleNext}>下一步</button>

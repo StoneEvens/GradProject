@@ -99,9 +99,9 @@
 .slider {
   position: absolute;
   cursor: pointer;
-  top: 0; 
+  top: 0;
   left: 0;
-  right: 0; 
+  right: 0;
   bottom: 0;
   background-color: #E0E0E0;
   transition: 0.4s;
@@ -111,9 +111,9 @@
 .slider:before {
   position: absolute;
   content: "";
-  height: 16px; 
+  height: 16px;
   width: 16px;
-  left: 3px; 
+  left: 3px;
   bottom: 3px;
   background-color: white;
   transition: 0.4s;
@@ -295,109 +295,135 @@ input:checked + .slider:before {
   background-color: #E07641;
 }
 
-/* 響應式設計 */
+/* 可選：提供給空資料訊息用 */
+.container { padding: 0 16px; }
+
+/* ========= 響應式設計 ========= */
 @media (max-width: 480px) {
   .titleSection {
     margin-top: 25px;
     margin-bottom: 15px;
   }
-
-  .title {
-    font-size: 20px;
-  }
-
-  .stepLabel {
-    font-size: 16px;
-    margin-bottom: 16px;
-  }
-
-  .section {
-    margin-bottom: 18px;
-  }
-
-  .sectionLabel {
-    font-size: 15px;
-    margin-bottom: 8px;
-  }
-
-  .petSwitcher {
-    gap: 12px;
-  }
-
-  .petAvatar {
-    width: 50px;
-    height: 50px;
-    border-width: 3px;
-  }
-
-  .activePet .petAvatar {
-    border-width: 3px;
-  }
-
-  .petInfoSection {
-    padding: 14px;
-  }
-
-  .petInfoLabel {
-    font-size: 13px;
-  }
-
-  .petInfoInput,
-  .petInfoSelect {
-    font-size: 13px;
-    padding: 5px 10px;
-  }
-
-  .petInfoUnit {
-    font-size: 13px;
-  }
-
-  .nextButton {
-    padding: 12px 30px;
-    font-size: 15px;
-    height: 45px;
-  }
+  .title { font-size: 20px; }
+  .stepLabel { font-size: 16px; margin-bottom: 16px; }
+  .section { margin-bottom: 18px; }
+  .sectionLabel { font-size: 15px; margin-bottom: 8px; }
+  .petSwitcher { gap: 12px; }
+  .petAvatar { width: 50px; height: 50px; border-width: 3px; }
+  .activePet .petAvatar { border-width: 3px; }
+  .petInfoSection { padding: 14px; }
+  .petInfoLabel { font-size: 13px; }
+  .petInfoInput, .petInfoSelect { font-size: 13px; padding: 5px 10px; }
+  .petInfoUnit { font-size: 13px; }
+  .nextButton { padding: 12px 30px; font-size: 15px; height: 45px; }
 }
 
 @media (max-width: 360px) {
-  .petSwitcher {
-    gap: 10px;
-  }
+  .petSwitcher { gap: 10px; }
+  .petAvatar { width: 45px; height: 45px; border-width: 2px; }
+  .activePet .petAvatar { border-width: 3px; }
+  .petInfoSection { padding: 12px; }
+  .petInfoRow { margin-bottom: 12px; }
+  .petInfoLabel { font-size: 12px; min-width: 50px; }
+  .petInfoInput, .petInfoSelect { font-size: 12px; padding: 4px 8px; }
+  .errorMsg { font-size: 12px; }
+  .modeText { font-size: 13px; }
+}
 
-  .petAvatar {
-    width: 45px;
-    height: 45px;
-    border-width: 2px;
-  }
+/* ======== 慢性病/照護重點（全域，非 media 內） ======== */
+.chronicPanel {
+  background-color: #ffeed6;
+  border: 2px solid #FFB370;
+  border-radius: 16px;
+  padding: 14px;
+}
 
-  .activePet .petAvatar {
-    border-width: 3px;
-  }
+.chronicGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 12px;
+}
 
-  .petInfoSection {
-    padding: 12px;
-  }
+.checkboxItem input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
 
-  .petInfoRow {
-    margin-bottom: 12px;
-  }
+/* 膠囊按鈕 */
+.checkboxItem {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #fff;
+  border: 2px solid #FFB370;
+  border-radius: 999px;
+  color: #89350c;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color .2s ease, box-shadow .2s ease, background-color .2s ease, color .2s ease;
+}
 
-  .petInfoLabel {
-    font-size: 12px;
-    min-width: 50px;
-  }
 
-  .petInfoInput,
-  .petInfoSelect {
-    font-size: 12px;
-    padding: 4px 8px;
-  }
+/* 勾選後（相容性 class） */
+.checked {
+  background: #F08651;
+  border-color: #F08651;
+  color: #fff;
+}
 
-  .errorMsg {
-    font-size: 12px;
-  }
+.chipText { line-height: 1; }
 
-  .modeText {
-    font-size: 13px;
-  }
+.checkboxItem:hover {
+  border-color: #F08651;
+  box-shadow: 0 2px 8px rgba(255, 179, 112, 0.35);
+}
+
+/* 勾選後：使用 :has 增強（新瀏覽器） */
+.checkboxItem:has(input:checked) {
+  background: #F08651;
+  border-color: #F08651;
+  color: #fff;
+}
+
+/* 補強：假如 :has 不可用，至少讓鄰近文字變色 */
+.checkboxItem input[type="checkbox"]:checked + .chipText { color: #fff; }
+
+/* 其他（內嵌輸入） */
+.checkboxItem { flex: 0 0 auto; box-sizing: border-box; }
+.checkboxOther {
+  padding-right: 10px;
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;   /* 禁止內部換行 */
+  flex: 0 0 auto;      /* 不佔滿一列 */
+}
+
+.otherInlineInput {
+  width: 12ch;         /* 適中寬度，避免撐爆 */
+  min-width: 0;
+  line-height: 1.2;
+  color: inherit;
+  outline: none;
+  background: transparent;
+  border: none;
+}
+
+.checkboxItem:has(input:checked) .otherInlineInput { border-bottom-color: rgba(255, 255, 255, 0.7); }
+.checked .otherInlineInput { border-bottom-color: rgba(255, 255, 255, 0.7); }
+
+/* 慢性病區塊的響應式覆寫 */
+@media (max-width: 480px) {
+  .chronicPanel { padding: 12px; }
+  .checkboxItem { font-size: 13px; padding: 6px 10px; }
+  .otherInlineInput { min-width: 130px; font-size: 13px; }
+}
+
+@media (max-width: 360px) {
+  .chronicPanel { padding: 10px; }
+  .checkboxItem { font-size: 12px; padding: 5px 8px; }
+  .otherInlineInput { min-width: 110px; font-size: 12px; }
 }

@@ -79,29 +79,92 @@ class FeedOCRView(APIView):
             'extracted_nutrients': extracted
         }, status=status.HTTP_200_OK)
 
+    # 正確的
+    # def extract_nutrients(self, text, debug=False):
+    #     lines = [l.strip() for l in text.split("\n") if l.strip()]
 
-    # def extract_nutrients(self, text):
-        # 整理文字
-        text = text.replace('\n', ' ')
-        text = re.sub(r'\s+', ' ', text)
-        result = {}
+    #     if debug:
+    #         print("=== OCR Lines ===")
+    #         for l in lines:
+    #             print(l)
 
-        for field, keywords in NUTRIENT_KEYWORDS.items():
-            matched = False
-            for keyword in keywords:
-                # 允許前後有雜訊，數字後面可能有 %
-                pattern = rf"{keyword}.*?([\d\.]+)\s*%?"
-                match = re.search(pattern, text, re.IGNORECASE)
-                if match:
-                    try:
-                        result[field] = float(match.group(1))
-                        matched = True
-                        break
-                    except ValueError:
-                        continue
-            if not matched:
-                result[field] = None  # 沒找到也標註
-        return result
+    #     result = {}
+
+    #     for field, keywords in NUTRIENT_KEYWORDS.items():
+    #         result[field] = None
+
+    #         for i, line in enumerate(lines):
+    #             if any(k.lower() in line.lower() for k in keywords):
+    #                 if debug:
+    #                     print(f"\n[DEBUG] 找到關鍵字: {keywords} 在 -> {line}")
+
+    #                 # 往下最多 3 行找數字
+    #                 for j in range(i, min(i+3, len(lines))):
+    #                     match = re.search(r"([\d]+(?:\.\d+)?)\s*%?", lines[j])
+    #                     if match:
+    #                         try:
+    #                             value = float(match.group(1))
+    #                             if 0 <= value <= 100:  # 合理範圍
+    #                                 result[field] = value
+    #                                 if debug:
+    #                                     print(f"[DEBUG] {field} -> {value} (來自行: {lines[j]})")
+    #                                 break
+    #                         except ValueError:
+    #                             continue
+    #                 break  # 找到就跳出
+
+    #     return result
+    @staticmethod
+    def merge_ocr_lines(lines):
+        merged = []
+        buffer = ""
+        for line in lines:
+            if re.search(r"\d", line):  # 這行有數字
+                if buffer:
+                    merged.append(buffer + " " + line)
+                    buffer = ""
+                else:
+                    merged.append(line)
+            else:
+                # 沒數字，先存著
+                if buffer:
+                    merged.append(buffer)
+                buffer = line
+        if buffer:
+            merged.append(buffer)
+        return merged
+
+
+    # def extract_nutrients(self, text, debug=False):
+    #     # Step 1: 切行 + 清理
+    #     lines = [l.strip() for l in text.split("\n") if l.strip()]
+
+    #     # Step 2: 合併被 OCR 拆掉的行
+    #     lines = self.merge_ocr_lines(lines)
+
+    #     if debug:
+    #         print("=== Merged OCR Lines ===")
+    #         for l in lines:
+    #             print(l)
+
+    #     # Step 3: 關鍵字比對
+    #     result = {}
+    #     for field, keywords in NUTRIENT_KEYWORDS.items():
+    #         result[field] = None
+    #         for line in lines:
+    #             if any(k.lower() in line.lower() for k in keywords):
+    #                 match = re.search(r"([\d]+(?:\.\d+)?)\s*%?", line)
+    #                 if match:
+    #                     try:
+    #                         value = float(match.group(1))
+    #                         if 0 <= value <= 100:  # 過濾掉不合理數字
+    #                             result[field] = value
+    #                             if debug:
+    #                                 print(f"[DEBUG] {field} -> {value} (來自行: {line})")
+    #                             break
+    #                     except ValueError:
+    #                         continue
+    #     return result
     def extract_nutrients(self, text, debug=False):
         lines = [l.strip() for l in text.split("\n") if l.strip()]
 
@@ -110,20 +173,22 @@ class FeedOCRView(APIView):
             for l in lines:
                 print(l)
 
-        result = {}
+        result = {field: None for field in NUTRIENT_KEYWORDS.keys()}
 
         for field, keywords in NUTRIENT_KEYWORDS.items():
-            result[field] = None
-
             for i, line in enumerate(lines):
-                if any(k.lower() in line.lower() for k in keywords):
+                if any(k in line for k in keywords):
                     if debug:
                         print(f"\n[DEBUG] 找到關鍵字: {keywords} 在 -> {line}")
 
-                    # 往下最多 3 行找數字
-                    for j in range(i, min(i+3, len(lines))):
+                    # 往下最多 3 行內找數字
+                    for j in range(i, min(i + 3, len(lines))):
+                        if debug:
+                            print(f"[DEBUG] 嘗試從這行找數字: {lines[j]}")
+
+                        # 🚨 只接受含有「%」或「最低量/最高量」的數字
                         match = re.search(r"([\d]+(?:\.\d+)?)\s*%?", lines[j])
-                        if match:
+                        if match and ("%" in lines[j] or "量" in lines[j]):
                             try:
                                 value = float(match.group(1))
                                 if 0 <= value <= 100:  # 合理範圍
@@ -133,9 +198,11 @@ class FeedOCRView(APIView):
                                     break
                             except ValueError:
                                 continue
-                    break  # 找到就跳出
+                    break  # 找到就不要再繼續找同一個 field
 
         return result
+
+
 
 
 
