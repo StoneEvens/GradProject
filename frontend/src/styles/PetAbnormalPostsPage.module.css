@@ -319,7 +319,9 @@
 /* 手機版優化 */
 @media (max-width: 480px) {
   .content {
-    padding: 0 15px 80px 15px;
+    padding: 15px;
+    padding-top: calc(60px + max(env(safe-area-inset-top), 10px) + 15px); /* TopNavbar 高度 + 額外間距 */
+    padding-bottom: calc(70px + max(env(safe-area-inset-bottom), 8px) + 15px); /* BottomNavbar 高度 + 額外間距 */
   }
   
   .header {
@@ -374,5 +376,128 @@
   .emptyIcon {
     width: 100px;
     height: 100px;
+  }
+}
+
+/* 小屏手機優化 */
+@media (max-width: 360px) {
+  .content {
+    padding: 12px;
+    padding-top: calc(60px + max(env(safe-area-inset-top), 10px) + 12px); /* TopNavbar 高度 + 額外間距 */
+    padding-bottom: calc(70px + max(env(safe-area-inset-bottom), 8px) + 12px); /* BottomNavbar 高度 + 額外間距 */
+  }
+  
+  .header {
+    padding: 12px 0 10px 0;
+    gap: 8px;
+    margin-left: 0;
+    margin-right: 0;
+  }
+  
+  .title {
+    font-size: 1.2rem;
+  }
+  
+  .titleSection {
+    gap: 8px;
+  }
+  
+  .petAvatar {
+    width: 45px;
+    height: 45px;
+  }
+  
+  .sortSelect {
+    padding: 3px 5px;
+    font-size: 0.7rem;
+    min-width: 100px;
+  }
+  
+  .resultInfo {
+    padding: 10px 12px;
+  }
+  
+  .resultLabel {
+    font-size: 15px;
+  }
+  
+  .resultCount {
+    font-size: 13px;
+  }
+  
+  .postPreviewItem {
+    padding: 10px 12px;
+    margin-bottom: 6px;
+  }
+  
+  .previewIcon {
+    width: 36px;
+    height: 36px;
+    margin-right: 10px;
+  }
+  
+  .previewIcon img {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .previewDate {
+    font-size: 13px;
+  }
+  
+  .previewLabel,
+  .previewSymptoms {
+    font-size: 11px;
+  }
+  
+  .emergencyLabel {
+    font-size: 9px;
+    padding: 1px 4px;
+  }
+  
+  .postItem {
+    padding: 14px;
+    margin-bottom: 10px;
+  }
+  
+  .postIcon {
+    width: 42px;
+    height: 42px;
+    margin-right: 14px;
+  }
+  
+  .postIcon img {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .postDate {
+    font-size: 15px;
+  }
+  
+  .postSymptoms {
+    font-size: 13px;
+  }
+  
+  .postArrow {
+    font-size: 18px;
+  }
+  
+  .emergencyTag {
+    font-size: 11px;
+    padding: 3px 8px;
+  }
+  
+  .emptyState {
+    padding: 40px 12px;
+  }
+  
+  .emptyState p {
+    font-size: 14px;
+  }
+  
+  .emptyIcon {
+    width: 80px;
+    height: 80px;
   }
 }
