@@ -9,8 +9,8 @@
 .content {
   flex: 1;
   padding: 30px;
-  padding-top: 80px;
-  padding-bottom: 90px;
+  padding-top: calc(60px + max(env(safe-area-inset-top), 10px) + 30px);
+  padding-bottom: calc(70px + max(env(safe-area-inset-bottom), 8px) + 30px);
   max-width: 430px;
   margin: 0 auto;
   width: 100%;
@@ -192,7 +192,6 @@
   background-color: #ffeed6;
   border-radius: 16px;
   padding: 15px 20px;
-  border: 2px solid #FFB370;
 }
 
 /* 已選擇症狀顯示區域 */
@@ -271,7 +270,6 @@
   display: flex;
   align-items: center;
   background-color: white;
-  border: 2px solid #FFB370;
   border-radius: 8px;
   flex: 1;
   height: 40px;
@@ -328,7 +326,6 @@
   background-color: #ffeed6;
   border-radius: 16px;
   padding: 16px;
-  border: 2px solid #FFB370;
 }
 
 .statRow {
@@ -358,7 +355,6 @@
 .statInput {
   width: 100px;
   padding: 6px 10px;
-  border: 2px solid #FFB370;
   border-radius: 8px;
   background-color: white;
   font-size: 14px;
@@ -384,7 +380,6 @@
   border-radius: 16px;
   padding: 20px;
   margin-bottom: 20px;
-  border: 2px solid #FFB370;
 }
 
 .noImageState {
@@ -435,7 +430,6 @@
   border-radius: 8px;
   overflow: hidden;
   background-color: #fff;
-  border: 2px solid #FFB370;
   flex-shrink: 0;
 }
 
@@ -518,7 +512,6 @@
   font-family: inherit;
   resize: none;
   background-color: #ffeed6;
-  border: 2px solid #FFB370;
   color: #333;
   box-sizing: border-box;
   outline: none;
