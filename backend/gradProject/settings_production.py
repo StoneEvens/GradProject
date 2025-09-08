@@ -10,6 +10,7 @@ ALLOWED_HOSTS = [
     'petapp.geniusbee.net',
     'geniusbee.net',
     '.geniusbee.net',
+    '127.0.0.1'
 ]
 
 # CORS configuration for production
@@ -17,6 +18,9 @@ CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOWED_ORIGINS = [
     "https://petapp.geniusbee.net",
     "https://geniusbee.net",
+    "http://127.0.0.1",
+    "http://localhost:8000",
+    "http://localhost:5173",
 ]
 
 # Security settings for production
