@@ -378,14 +378,19 @@
   }
   
   .statRow {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  
+  .statLabel {
+    min-width: 60px;
+    flex-shrink: 0;
   }
   
   .statInputWrapper {
-    align-self: stretch;
-    justify-content: space-between;
+    justify-content: flex-end;
   }
   
   .statInput {
@@ -459,8 +464,21 @@
     font-size: 13px;
   }
   
+  .statRow {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  
   .statLabel {
     font-size: 15px;
+    min-width: 50px;
+    flex-shrink: 0;
+  }
+  
+  .statInputWrapper {
+    justify-content: flex-end;
   }
   
   .statInput {
