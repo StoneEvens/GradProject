@@ -416,14 +416,18 @@
   }
   
   .nutritionRow {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  
+  .nutritionLabel {
+    min-width: 80px;
   }
   
   .nutritionInputWrapper {
-    align-self: stretch;
-    justify-content: space-between;
+    justify-content: flex-end;
   }
   
   .nutritionInput {
@@ -481,12 +485,20 @@
   }
   
   .infoRow {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
   }
   
   .infoRow .sectionLabel {
-    min-width: auto;
+    min-width: 70px;
+    flex-shrink: 0;
+  }
+  
+  .infoRow .infoContent {
+    flex: 1;
+    padding: 8px 12px;
+    font-size: 14px;
   }
 }

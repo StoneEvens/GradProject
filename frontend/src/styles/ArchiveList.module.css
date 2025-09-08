@@ -95,8 +95,8 @@
 }
 
 .emptyIcon {
-  width: 80px;
-  height: 80px;
+  width: 100px;
+  height: 100px;
   margin-bottom: 16px;
   opacity: 0.6;
 }
@@ -153,8 +153,8 @@
   }
   
   .emptyIcon {
-    width: 80px;
-    height: 80px;
+    width: 100px;
+    height: 100px;
   }
   
   .empty p {

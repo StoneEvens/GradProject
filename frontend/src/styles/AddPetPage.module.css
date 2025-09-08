@@ -7,10 +7,10 @@
 
 .content {
   flex: 1;
-  padding-top: 80px;
+  padding-top: calc(60px + max(env(safe-area-inset-top), 10px) + 20px);
   padding-left: 20px;
   padding-right: 20px;
-  padding-bottom: 80px;
+  padding-bottom: calc(70px + max(env(safe-area-inset-bottom), 8px) + 10px);
   max-width: 500px;
   margin-top: 80px;
   margin: 0 auto;
