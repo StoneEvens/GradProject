@@ -5,6 +5,7 @@ import BottomNavbar from '../components/BottomNavigationbar';
 import PostPreviewList from '../components/PostPreviewList';
 import Notification from '../components/Notification';
 import { getPetRelatedPosts } from '../services/socialService';
+import { getUserPets } from '../services/petService';
 import styles from '../styles/PetRelatedPostsPage.module.css';
 
 const PetRelatedPostsPage = () => {
@@ -33,22 +34,26 @@ const PetRelatedPostsPage = () => {
       setLoading(true);
       setError(null);
       
-      // 調用真實的 API
+      // 先載入寵物資料以獲取正確的頭像和名稱
+      try {
+        const pets = await getUserPets();
+        const currentPet = pets.find(pet => pet.pet_id === parseInt(petId));
+        if (currentPet) {
+          setPetName(currentPet.pet_name);
+          setPetAvatar(currentPet.headshot_url || '/assets/icon/DefaultAvatar.jpg');
+        }
+      } catch (petErr) {
+        console.warn('載入寵物資料失敗:', petErr);
+        // 繼續執行，使用預設值
+      }
+      
+      // 調用真實的 API 獲取相關貼文
       const response = await getPetRelatedPosts(petId, { sort: sortOption });
       
       if (response.success) {
         // 處理 API 回應數據
         const posts = response.data.posts || response.data || [];
         setRelatedPosts(posts);
-        
-        // 如果有貼文，從第一個貼文中獲取寵物名稱和頭像
-        if (posts.length > 0 && posts[0].tagged_pets && posts[0].tagged_pets.length > 0) {
-          const targetPet = posts[0].tagged_pets.find(pet => pet.id === parseInt(petId));
-          if (targetPet) {
-            setPetName(targetPet.pet_name);
-            setPetAvatar(targetPet.headshot_url || '/assets/icon/DefaultAvatar.jpg');
-          }
-        }
       } else {
         throw new Error(response.error || '獲取相關貼文失敗');
       }
