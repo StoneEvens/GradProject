@@ -344,6 +344,13 @@ class UserIllnessArchiveListAPIView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = DiseaseArchiveContentSerializer
     
+    def get_queryset(self):
+            if getattr(self, 'swagger_fake_view', False):  # swagger 生成時走這裡
+                return DiseaseArchiveContent.objects.none()
+            username = self.kwargs.get('pk')  # schema 時沒有 pk，就避免報錯
+            user = CustomUser.get_user(username=username)
+            return DiseaseArchiveContent.get_content(user=user)
+
     # 覆寫 list 方法以使用標準化響應格式（如果不使用分頁）
     def list(self, request, *args, **kwargs):
         username = self.kwargs['pk']
