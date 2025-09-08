@@ -244,5 +244,8 @@ class RecommendationService:
         q = user_vec.astype("float32").reshape(1, -1)
         distances, indices = index.search(q, k=len(post_ids))  # Retrieve all posts
 
+        recommendationList = indices[0].tolist()
+        
+
         print(post_embeddings.shape)
         return post_ids[indices[0]].tolist()  # Convert numpy array to Python list
