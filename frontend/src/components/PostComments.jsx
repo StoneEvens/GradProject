@@ -31,6 +31,7 @@ const PostComments = ({user, postID, handleClose, onCommentCountChange}) => {
     const [replyText, setReplyText] = useState('');
     const fileInputRef = useRef(null);
     const [deleteConfirm, setDeleteConfirm] = useState({ show: false, commentId: null });
+    const [userAvatarError, setUserAvatarError] = useState(false);
 
     const handleCommentChange = (event) => {
         setCommentText(event.target.value);
@@ -470,6 +471,11 @@ const PostComments = ({user, postID, handleClose, onCommentCountChange}) => {
         loadComments();
     }, [postID]);
 
+    // 當用戶改變時重置頭像錯誤狀態
+    React.useEffect(() => {
+        setUserAvatarError(false);
+    }, [user?.headshot_url]);
+
     if (!postID) {
         return null;
     }
@@ -574,11 +580,15 @@ const PostComments = ({user, postID, handleClose, onCommentCountChange}) => {
           <div className={styles.inputContainer}>
             <div className={styles.inputUserAvatar}>
               <img 
-                src={user?.headshot_url || "/assets/icon/DefaultUser.png"} 
+                src={userAvatarError || !user?.headshot_url ? "/assets/icon/DefaultAvatar.jpg" : user.headshot_url} 
                 alt={user?.username || "User"}
-                onError={(e) => {
-                  if (e.target.src !== "/assets/icon/DefaultUser.png") {
-                    e.target.src = "/assets/icon/DefaultUser.png";
+                onError={() => {
+                  setUserAvatarError(true);
+                }}
+                onLoad={() => {
+                  // 如果成功載入了用戶頭像，確保 error 狀態為 false
+                  if (user?.headshot_url && !userAvatarError) {
+                    setUserAvatarError(false);
                   }
                 }}
               />

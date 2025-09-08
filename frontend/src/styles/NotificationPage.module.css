@@ -10,8 +10,8 @@
 .content {
   flex: 1;
   padding: 20px 16px;
-  margin-top: 60px;
-  margin-bottom: 80px;
+  margin-top: calc(60px + max(env(safe-area-inset-top), 10px));
+  margin-bottom: calc(70px + max(env(safe-area-inset-bottom), 8px));
   overflow-y: auto;
 }
 
@@ -20,8 +20,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-top: 60px;
-  margin-bottom: 80px;
+  margin-top: calc(60px + max(env(safe-area-inset-top), 10px));
+  margin-bottom: calc(70px + max(env(safe-area-inset-bottom), 8px));
 }
 
 .loading {

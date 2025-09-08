@@ -10,7 +10,7 @@
   justify-content: center;
   align-items: center;
   z-index: 1001;
-  padding: 20px;
+  padding: 16px;
 }
 
 /* Modal Container */
@@ -18,7 +18,7 @@
   background-color: #FFca9c;
   border-radius: 15px;
   width: 100%;
-  max-width: 400px;
+  max-width: 450px;
   height: 80vh;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   animation: slideIn 0.3s ease-out;
@@ -509,9 +509,18 @@
 
 /* Responsive Design */
 @media (max-width: 480px) {
+  .modalOverlay {
+    padding: 12px;
+  }
+  
   .modalContainer {
-    max-width: 320px;
-    margin: 0 15px;
+    max-width: 95vw; /* 使用視窗寬度的95% */
+    min-width: 320px; /* 確保最小寬度 */
+    height: 85vh; /* 稍微增加高度 */
+  }
+  
+  .modalHeader {
+    padding: 16px 20px;
   }
   
   .modalHeader h2 {
@@ -519,17 +528,55 @@
   }
   
   .modalBody {
-    padding: 15px;
+    padding: 12px;
   }
   
-  .modalFooter {
-    padding: 15px;
+  .commentInputSection {
+    padding: 8px 12px 12px 12px;
+  }
+  
+  .inputContainer {
+    padding: 10px 12px;
+  }
+  
+  .inputTextarea {
+    font-size: 14px;
+  }
+}
+
+/* 針對更小的手機優化 */
+@media (max-width: 360px) {
+  .modalContainer {
+    max-width: 98vw;
+    min-width: 300px;
+  }
+  
+  .modalHeader {
+    padding: 14px 16px;
+  }
+  
+  .modalBody {
+    padding: 10px;
+  }
+  
+  .inputContainer {
+    padding: 8px 10px;
     gap: 8px;
   }
   
-  .commentInput {
-    font-size: 12px;
-    padding: 10px;
+  .inputUserAvatar {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .photoBtn, .sendBtn {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .photoBtn img, .sendBtn img {
+    width: 18px;
+    height: 18px;
   }
 }
 

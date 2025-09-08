@@ -148,10 +148,10 @@ const Comment = ({
         {/* 頭像 */}
         <div className={styles.userAvatar}>
           <img 
-            src={comment.user.headshot_url || "/assets/icon/DefaultUser.png"} 
+            src={comment.user.headshot_url || "/assets/icon/DefaultAvatar.jpg"} 
             alt={comment.user.username}
             onError={(e) => {
-              e.target.src = "/assets/icon/DefaultUser.png";
+              e.target.src = "/assets/icon/DefaultAvatar.jpg";
             }}
           />
         </div>

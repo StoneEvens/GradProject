@@ -74,12 +74,12 @@ const TopNavbar = ({ onSearchSubmit, onSearchChange, initialSearchValue }) => {
             className={styles.icon}
             onClick={() => navigate('/main')}
           />
-          <img 
+          {/* <img 
             src="/assets/icon/HeaderButton_ECity.png" 
             alt="互動城市"
             className={styles.icon}
             onClick={() => navigate('/interactive-city')}
-          />
+          /> */}
         </div>
         <div className={styles.rightSection}>
           {showSearchBar ? (

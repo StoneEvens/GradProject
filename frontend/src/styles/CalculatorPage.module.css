@@ -9,8 +9,8 @@
 .content {
   flex: 1;
   padding: 30px;
-  padding-top: 80px;
-  padding-bottom: 90px;
+  padding-top: calc(60px + max(env(safe-area-inset-top), 10px) + 30px);
+  padding-bottom: calc(70px + max(env(safe-area-inset-bottom), 8px) + 30px);
   max-width: 430px;
   margin: 0 auto;
   width: 100%;
@@ -36,15 +36,15 @@
 @media (max-width: 480px) {
   .content {
     padding: 15px;
-    padding-top: 75px;
-    padding-bottom: 85px;
+    padding-top: calc(60px + max(env(safe-area-inset-top), 10px) + 15px);
+    padding-bottom: calc(70px + max(env(safe-area-inset-bottom), 8px) + 15px);
   }
 }
 
 @media (max-width: 360px) {
   .content {
     padding: 12px;
-    padding-top: 70px;
-    padding-bottom: 80px;
+    padding-top: calc(60px + max(env(safe-area-inset-top), 10px) + 12px);
+    padding-bottom: calc(70px + max(env(safe-area-inset-bottom), 8px) + 12px);
   }
 }
