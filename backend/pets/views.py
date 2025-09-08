@@ -2018,7 +2018,7 @@ class RecommendedDiseaseArchivesAPIView(APIView):
             from social.models import PostFrame
             
             # 獲取用戶與疾病檔案的互動歷史
-            interaction_list = UserInteraction.objects.filter(user=user).values()
+            interaction_list = UserInteraction.objects.filter(user=user)[:50].values()
             for interaction in interaction_list:
                 try:
                     postFrame = PostFrame.objects.get(id=interaction['interactables_id'])
@@ -2035,7 +2035,7 @@ class RecommendedDiseaseArchivesAPIView(APIView):
                     continue
             
             # 處理疾病檔案的留言歷史
-            comment_list = Comment.objects.filter(user=user).select_related('postFrame')
+            comment_list = Comment.objects.filter(user=user)[:50].select_related('postFrame')
             for comment in comment_list:
                 postFrame = comment.postFrame
                 if hasattr(postFrame, 'illness_archives_postFrame') and postFrame.illness_archives_postFrame.exists():
@@ -2375,7 +2375,7 @@ class PublicDiseaseArchivesPreviewAPIView(APIView):
                     success=True
                 )
 
-            interaction_list = UserInteraction.objects.filter(user=self.request.user).values()
+            interaction_list = UserInteraction.objects.filter(user=self.request.user)[:50].values()
             for interaction in interaction_list:
                 # 先假設用戶互動的是PostFrame，把按讚留言紀錄過濾掉
                 postFrame = PostFrame.get_postFrames(postID=interaction['interactables_id'])
@@ -2392,7 +2392,7 @@ class PublicDiseaseArchivesPreviewAPIView(APIView):
                         })
 
             # 接者處理留言的歷史
-            comment_list = Comment.objects.filter(user=self.request.user).select_related('postFrame')
+            comment_list = Comment.objects.filter(user=self.request.user)[:50].select_related('postFrame')
             for comment in comment_list:
                 # 還是先抓留言來自哪個PostFrame
                 postFrame = comment.postFrame
