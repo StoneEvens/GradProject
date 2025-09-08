@@ -20,6 +20,7 @@ from django.apps import apps
 import json
 import re
 import logging
+import random
 
 User = get_user_model()
 logger = logging.getLogger(__name__)
@@ -741,10 +742,17 @@ class PostListAPIView(generics.ListAPIView):
             embedded_history = recommendation_service.embed_user_history(posts=[(p['id'], p['action'], p['timestamp']) for p in history], content_type="social")
             search_list = recommendation_service.recommend_posts(user_vec=embedded_history, content_type="social")
 
+            # Add recommended posts first
             for post_id in search_list:
                 if post_id not in seen_ids:
-                    # Do something with each recommended post ID
                     recommend_list.append(post_id)
+            # Randomly insert seen_ids into recommend_list
+            seen_list = list(seen_ids)
+            random.shuffle(seen_list)
+            # Insert each seen_id at a random position in recommend_list
+            for seen_id in seen_list:
+                insert_pos = random.randint(0, len(recommend_list))
+                recommend_list.insert(insert_pos, seen_id)
 
             return PostFrame.get_postFrames(idList=recommend_list)
         else:
@@ -1316,6 +1324,7 @@ class UpdatePostAPIView(APIView):
                 
                 # 獲取當前圖片的最大排序值
                 from media.models import Image
+
                 current_max_sort_order = Image.objects.filter(
                     postFrame=postFrame
                 ).aggregate(Max('sort_order'))['sort_order__max'] or -1
