@@ -73,7 +73,11 @@ class UserPostsPreviewListAPIView(generics.ListAPIView):
     serializer_class = PostPreviewSerializer
     
     def get_queryset(self):
+        if getattr(self, 'swagger_fake_view', False):
+            return PostFrame.objects.none()
         user_id = self.kwargs['pk']
+        if not user_id:  # 沒有 pk 就直接回空集合
+            return PostFrame.objects.none()
         try:
             user = CustomUser.objects.get(id=user_id)
             return PostFrame.objects.filter(

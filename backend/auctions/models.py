@@ -24,6 +24,20 @@ class AuctionSession(models.Model):
     def __str__(self):
         return f"{self.bulletin.title} - {self.session_code}"
 
+    def settle(self):
+        from .models import AuctionResult, Bid
+        top_bid = Bid.objects.filter(session=self).order_by("-amount", "created_at").first()
+        if top_bid:
+            result, _ = AuctionResult.objects.update_or_create(
+                session=self,
+                defaults={
+                    "winning_user": top_bid.user,
+                    "winning_amount": top_bid.amount,
+                }
+            )
+            return result
+        return None
+
 
 class AuctionResult(models.Model):
     session = models.OneToOneField(AuctionSession, on_delete=models.CASCADE)
@@ -67,6 +81,7 @@ class Bid(models.Model):
 
     class Meta:
         ordering = ["-amount", "created_at"]
+        unique_together = ("session", "user")  # 限制一個人一場只能有一筆
 
     def __str__(self):
         return f"{self.user} bid {self.amount} on {self.session}"

@@ -1,21 +1,78 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
-from .models import Bulletin, AuctionResult, BulletinPetImage
+from .models import Bulletin, AuctionResult, BulletinPetImage, AuctionSession, Bid, Wallet
+from .serializers import BidSerializer
 from .forms import WinnerSubmissionForm
 from django.contrib import messages
 from utils.firebase_service import firebase_storage_service
+from rest_framework import status, generics
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 
-# def bulletin_detail(request, pk):
-#     bulletin = get_object_or_404(Bulletin, pk=pk)
-#     display = (
-#         AuctionResult.objects.filter(session__bulletin=bulletin, content_status="APPROVED")
-#         .order_by("-session__end_date")
-#         .first()
-#     )
-#     return render(request, "auctions/bulletin_detail.html", {
-#         "bulletin": bulletin,
-#         "display": display,
-#     })
+class SessionBidsView(generics.ListAPIView):
+    """
+    查看某個場次的所有出價紀錄
+    GET /api/v1/auctions/sessions/<id>/bids/
+    """
+    serializer_class = BidSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        session_id = self.kwargs["session_id"]
+        session = get_object_or_404(AuctionSession, id=session_id)
+        return Bid.objects.filter(session=session).order_by("-amount", "created_at")
+
+class PlaceBidView(generics.GenericAPIView):
+    """
+    出價或更新出價
+    POST /api/v1/auctions/sessions/<id>/bid/
+    body: {"amount": 300}
+    """
+    serializer_class = BidSerializer
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, session_id):
+        session = get_object_or_404(AuctionSession, id=session_id)
+        amount = request.data.get("amount")
+
+        if not amount or int(amount) <= 0:
+            return Response({"error": "出價金額必須大於 0"}, status=status.HTTP_400_BAD_REQUEST)
+
+        amount = int(amount)
+        wallet = Wallet.objects.get(user=request.user)
+
+        if not wallet.can_afford(amount):
+            return Response({"error": "金幣不足，請先儲值"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # ✅ 更新或建立出價
+        bid, created = Bid.objects.update_or_create(
+            session=session,
+            user=request.user,
+            defaults={"amount": amount}
+        )
+
+        return Response(
+            {
+                "message": "出價成功" if created else "出價已更新",
+                "bid": BidSerializer(bid).data,
+            },
+            status=status.HTTP_200_OK
+        )
+
+class CurrentHighestBidView(generics.RetrieveAPIView):
+    """
+    查看當前場次最高出價
+    GET /api/v1/auctions/sessions/<id>/highest_bid/
+    """
+    serializer_class = BidSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        session_id = self.kwargs["session_id"]
+        session = get_object_or_404(AuctionSession, id=session_id)
+        return Bid.objects.filter(session=session).order_by("-amount", "created_at").first()
+
+
 def bulletin_detail(request, pk):
     from .models import Bulletin, AuctionResult
     bulletin = get_object_or_404(Bulletin, pk=pk)
