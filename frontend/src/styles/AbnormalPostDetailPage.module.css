@@ -349,7 +349,9 @@
 /* 手機版優化 */
 @media (max-width: 480px) {
   .content {
-    padding: 0 15px 80px 15px;
+    padding: 15px;
+    padding-top: calc(60px + max(env(safe-area-inset-top), 10px) + 15px); /* TopNavbar 高度 + 額外間距 */
+    padding-bottom: calc(70px + max(env(safe-area-inset-bottom), 8px) + 15px); /* BottomNavbar 高度 + 額外間距 */
   }
   
   .header {
@@ -407,5 +409,91 @@
   .menuButton img {
     width: 18px;
     height: 18px;
+  }
+}
+
+/* 小屏手機優化 */
+@media (max-width: 360px) {
+  .content {
+    padding: 12px;
+    padding-top: calc(60px + max(env(safe-area-inset-top), 10px) + 12px); /* TopNavbar 高度 + 額外間距 */
+    padding-bottom: calc(70px + max(env(safe-area-inset-bottom), 8px) + 12px); /* BottomNavbar 高度 + 額外間距 */
+  }
+  
+  .header {
+    margin-top: 12px;
+    margin-bottom: 6px;
+  }
+  
+  .title {
+    font-size: 16px;
+    margin: 0 8px;
+  }
+  
+  .section {
+    margin-bottom: 12px;
+  }
+  
+  .sectionLabel {
+    font-size: 15px;
+    margin-bottom: 8px;
+  }
+  
+  .petAvatar {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .symptomSection,
+  .bodyStatsContainer,
+  .descriptionSection,
+  .imageSection {
+    padding: 12px 15px;
+  }
+  
+  .symptomTag {
+    padding: 6px 10px;
+  }
+  
+  .symptomText {
+    font-size: 13px;
+  }
+  
+  .statLabel {
+    font-size: 15px;
+  }
+  
+  .statInput {
+    width: 80px;
+    padding: 6px 8px;
+    font-size: 13px;
+  }
+  
+  .statUnit {
+    font-size: 13px;
+  }
+  
+  .descriptionContent {
+    font-size: 13px;
+  }
+  
+  .imagePreview {
+    min-width: 150px;
+    width: 150px;
+    height: 85px;
+  }
+  
+  .backButton {
+    padding: 5px;
+    font-size: 16px;
+  }
+  
+  .menuButton {
+    padding: 5px;
+  }
+  
+  .menuButton img {
+    width: 16px;
+    height: 16px;
   }
 }

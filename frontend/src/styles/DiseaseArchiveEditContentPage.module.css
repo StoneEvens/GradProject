@@ -356,7 +356,9 @@
 /* 手機版優化 */
 @media (max-width: 480px) {
   .content {
-    padding: 0 15px 80px 15px;
+    padding: 15px;
+    padding-top: calc(60px + max(env(safe-area-inset-top), 10px) + 15px); /* TopNavbar 高度 + 額外間距 */
+    padding-bottom: calc(70px + max(env(safe-area-inset-bottom), 8px) + 15px); /* BottomNavbar 高度 + 額外間距 */
   }
   
   .header {
@@ -423,5 +425,79 @@
     padding: 12px 20px;
     font-size: 15px;
     height: 45px;
+  }
+}
+
+/* 小屏手機優化 */
+@media (max-width: 360px) {
+  .content {
+    padding: 12px;
+    padding-top: calc(60px + max(env(safe-area-inset-top), 10px) + 12px); /* TopNavbar 高度 + 額外間距 */
+    padding-bottom: calc(70px + max(env(safe-area-inset-bottom), 8px) + 12px); /* BottomNavbar 高度 + 額外間距 */
+  }
+  
+  .header {
+    padding: 12px 0 10px 0;
+    gap: 8px;
+  }
+  
+  .title {
+    font-size: 1.1rem;
+  }
+  
+  .aiSection {
+    margin-bottom: 15px;
+  }
+  
+  .aiHeader {
+    padding: 10px 12px;
+  }
+  
+  .aiTitle {
+    font-size: 14px;
+  }
+  
+  .aiEditButton {
+    padding: 4px 8px;
+    font-size: 12px;
+  }
+  
+  .aiContentArea {
+    padding: 12px;
+    min-height: 250px;
+  }
+  
+  .contentTextarea {
+    min-height: 200px;
+    font-size: 13px;
+  }
+  
+  .generatingContainer {
+    min-height: 200px;
+  }
+  
+  .generatingSpinner {
+    width: 40px;
+    height: 40px;
+    border-width: 3px;
+  }
+  
+  .generatingText {
+    font-size: 15px;
+  }
+  
+  .generatingSubText {
+    font-size: 12px;
+  }
+  
+  .actionButtons {
+    gap: 10px;
+  }
+  
+  .previousButton,
+  .confirmButton {
+    padding: 10px 15px;
+    font-size: 14px;
+    height: 40px;
   }
 }
