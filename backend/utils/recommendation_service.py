@@ -227,8 +227,7 @@ class RecommendationService:
     def recommend_posts(
         self,
         user_vec: np.ndarray,
-        content_type: str,
-        top_k: int = 10
+        content_type: str
     ) -> List[int]:  # Changed from np.ndarray to List[int]
         
         if content_type not in ["social", "forum"]:
@@ -243,7 +242,7 @@ class RecommendationService:
         index.add(post_embeddings.astype(np.float32))  # Add vectors to the index
 
         q = user_vec.astype("float32").reshape(1, -1)
-        distances, indices = index.search(q, top_k)
+        distances, indices = index.search(q, k=len(post_ids))  # Retrieve all posts
 
         print(post_embeddings.shape)
         return post_ids[indices[0]].tolist()  # Convert numpy array to Python list
