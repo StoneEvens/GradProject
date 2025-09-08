@@ -26,9 +26,21 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-9$@4-v*$7-=1r-l@3(fytpr_*f1b!@z^j00f%31hcp6(udqh6s'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False  # Set to False for production
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = [
+    'petapp.geniusbee.net',
+    'localhost',
+    '127.0.0.1',
+    'geniusbee.net',
+    '.geniusbee.net',  # Allows all subdomains
+    '140.119.19.25',
+]
+
+# Proxy settings for reverse proxy setup
+USE_X_FORWARDED_HOST = True
+USE_X_FORWARDED_PORT = True
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 
 # Application definition
@@ -71,13 +83,17 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-# In development, allow all origins
-CORS_ALLOW_ALL_ORIGINS = True  # Only use this in development!
+# CORS configuration for production
+CORS_ALLOW_ALL_ORIGINS = False  # Set to False for production security
 
 # For production, specify allowed origins:
-# CORS_ALLOWED_ORIGINS = [
-#     "http://your-production-domain.com",
-# ]
+CORS_ALLOWED_ORIGINS = [
+    "https://petapp.geniusbee.net",
+    "https://geniusbee.net",
+    "http://localhost:3000",  # Local development
+    "http://localhost:5173",  # Vite default port
+    "https://localhost:443"
+]
 
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_METHODS = [
@@ -289,3 +305,15 @@ LOGGING = {
 
 # 確保日誌目錄存在
 os.makedirs(os.path.join(BASE_DIR, 'logs'), exist_ok=True)
+
+# HTTPS and Security Settings
+SECURE_SSL_REDIRECT = True
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SECURE_HSTS_SECONDS = 31536000  # 1 year
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_BROWSER_XSS_FILTER = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+X_FRAME_OPTIONS = 'DENY'
