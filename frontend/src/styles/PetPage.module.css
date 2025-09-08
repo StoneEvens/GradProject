@@ -2,8 +2,8 @@
 .container {
   min-height: 100vh;
   background: #FFF2D9;
-  padding-top: 60px;
-  padding-bottom: 70px;
+  padding-top: calc(60px + max(env(safe-area-inset-top), 10px));
+  padding-bottom: calc(70px + max(env(safe-area-inset-bottom), 8px));
   box-sizing: border-box;
   min-width: 320px;
 }

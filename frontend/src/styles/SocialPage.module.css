@@ -8,7 +8,7 @@
 .content {
   flex: 1;
   margin-top: calc(60px + max(env(safe-area-inset-top), 10px));
-  margin-bottom: 80px;
+  margin-bottom: calc(70px + max(env(safe-area-inset-bottom), 8px));
   padding: 20px;
   overflow-y: auto;
 }

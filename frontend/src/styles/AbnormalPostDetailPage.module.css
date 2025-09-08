@@ -9,8 +9,8 @@
 .content {
   flex: 1;
   padding: 30px;
-  padding-top: 80px;
-  padding-bottom: 90px;
+  padding-top: calc(60px + max(env(safe-area-inset-top), 10px) + 30px);
+  padding-bottom: calc(70px + max(env(safe-area-inset-bottom), 8px) + 30px);
   max-width: 430px;
   margin: 0 auto;
   width: 100%;
@@ -198,7 +198,6 @@
   background-color: #ffeed6;
   border-radius: 16px;
   padding: 15px 20px;
-  border: 2px solid #FFB370;
 }
 
 .symptomsContainer {
@@ -234,7 +233,6 @@
   background-color: #ffeed6;
   border-radius: 16px;
   padding: 16px;
-  border: 2px solid #FFB370;
 }
 
 .statRow {
@@ -265,7 +263,6 @@
 
 .statInput {
   background-color: white;
-  border: 2px solid #FFB370;
   border-radius: 8px;
   padding: 8px 12px;
   font-size: 14px;
@@ -293,7 +290,6 @@
   background-color: #ffeed6;
   border-radius: 16px;
   padding: 20px;
-  border: 2px solid #FFB370;
   min-height: 120px;
 }
 
@@ -310,7 +306,6 @@
   background-color: #ffeed6;
   border-radius: 16px;
   padding: 20px;
-  border: 2px solid #FFB370;
 }
 
 .imagePreviewContainer {
@@ -337,7 +332,6 @@
   border-radius: 8px;
   overflow: hidden;
   background-color: #fff;
-  border: 2px solid #FFB370;
   flex-shrink: 0;
   display: flex;
   align-items: center;
