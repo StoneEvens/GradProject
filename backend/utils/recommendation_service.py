@@ -31,11 +31,11 @@ class RecommendationService:
         print(f"Using device: {self.device}")
         
         ##---------Model Selection---------##
-        # model_path = "c:/Users/Steven/bert-base-chinese"
-        # self.tokenizer = AutoTokenizer.from_pretrained(model_path)
-        # self.model = AutoModel.from_pretrained(model_path).eval().to(self.device)
-        self.tokenizer = AutoTokenizer.from_pretrained("bert-base-chinese")
-        self.model = AutoModel.from_pretrained("bert-base-chinese")
+        # Use path relative to the current script
+        model_path = os.path.join(script_dir, "bert-base-chinese")
+        print(f"Loading model from: {model_path}")
+        self.tokenizer = AutoTokenizer.from_pretrained(model_path, local_files_only=True)
+        self.model = AutoModel.from_pretrained(model_path, local_files_only=True).eval().to(self.device)
 
 
         #----------Load embeddings and post IDs----------#
