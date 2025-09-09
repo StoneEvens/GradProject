@@ -24,19 +24,46 @@ class AuctionSession(models.Model):
     def __str__(self):
         return f"{self.bulletin.title} - {self.session_code}"
 
+    # def settle(self):
+    #     from .models import AuctionResult, Bid
+    #     top_bid = Bid.objects.filter(session=self).order_by("-amount", "created_at").first()
+    #     if top_bid:
+    #         result, _ = AuctionResult.objects.update_or_create(
+    #             session=self,
+    #             defaults={
+    #                 "winning_user": top_bid.user,
+    #                 "winning_amount": top_bid.amount,
+    #             }
+    #         )
+    #         return result
+    #     return None
     def settle(self):
-        from .models import AuctionResult, Bid
+        """結算此場次，找最高出價並更新 AuctionResult，同時扣款"""
+        from .models import Bid, AuctionResult, Wallet
+
         top_bid = Bid.objects.filter(session=self).order_by("-amount", "created_at").first()
-        if top_bid:
-            result, _ = AuctionResult.objects.update_or_create(
-                session=self,
-                defaults={
-                    "winning_user": top_bid.user,
-                    "winning_amount": top_bid.amount,
-                }
-            )
-            return result
-        return None
+        if not top_bid:
+            return None
+
+        # 更新或建立結果
+        result, created = AuctionResult.objects.update_or_create(
+            session=self,
+            defaults={
+                "winning_user": top_bid.user,
+                "winning_amount": top_bid.amount,
+            },
+        )
+
+        wallet = Wallet.objects.get(user=top_bid.user)
+        if wallet.can_afford(top_bid.amount):
+            wallet.deduct(top_bid.amount)
+        else:
+            # 如果餘額不足，就不成立
+            result.content_status = "REJECTED"
+            result.save()
+
+        return result
+
 
 
 class AuctionResult(models.Model):
