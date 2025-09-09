@@ -7,10 +7,10 @@
 
 .content {
   flex: 1;
-  padding-top: 80px;
+  padding-top: calc(60px + max(env(safe-area-inset-top), 10px) + 20px);
   padding-left: 20px;
   padding-right: 20px;
-  padding-bottom: 80px;
+  padding-bottom: calc(70px + max(env(safe-area-inset-bottom), 8px) + 10px);
   max-width: 500px;
   margin-top: 80px;
   margin: 0 auto;
@@ -396,6 +396,8 @@
 @media (max-width: 480px) {
   .content {
     padding: 15px;
+    padding-top: calc(60px + max(env(safe-area-inset-top), 10px) + 15px); /* TopNavbar 高度 + 額外間距 */
+    padding-bottom: calc(70px + max(env(safe-area-inset-bottom), 8px) + 15px); /* BottomNavbar 高度 + 額外間距 */
   }
   
   .petTypeIcons {
@@ -475,5 +477,88 @@
   .saveButton {
     padding: 8px 16px;
     font-size: 14px;
+  }
+}
+
+/* 小屏手機優化 */
+@media (max-width: 360px) {
+  .content {
+    padding: 12px;
+    padding-top: calc(60px + max(env(safe-area-inset-top), 10px) + 12px); /* TopNavbar 高度 + 額外間距 */
+    padding-bottom: calc(70px + max(env(safe-area-inset-bottom), 8px) + 12px); /* BottomNavbar 高度 + 額外間距 */
+  }
+  
+  .title {
+    font-size: 20px;
+    margin-bottom: 30px;
+  }
+  
+  .petTypeIcons {
+    width: 200px;
+    height: 80px;
+  }
+  
+  .petTypeButtons {
+    width: 200px;
+  }
+  
+  .dividerLine {
+    width: 200px;
+  }
+  
+  .petIcon {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .petTypeButton {
+    padding: 10px 18px;
+    font-size: 1rem;
+    width: 85px;
+    height: 45px;
+  }
+  
+  .avatarUpload {
+    width: 90px;
+    height: 90px;
+  }
+  
+  .phaseTwoTopSection {
+    gap: 12px;
+    margin-top: 20px;
+  }
+  
+  .formGroup {
+    gap: 6px;
+  }
+  
+  .formGroup label {
+    font-size: 15px;
+  }
+  
+  .formGroup input,
+  .formGroup select {
+    padding: 10px;
+    font-size: 15px;
+  }
+  
+  .descriptionSection textarea {
+    padding: 10px;
+    font-size: 15px;
+    min-height: 80px;
+  }
+  
+  .actionButtons {
+    gap: 12px;
+    margin-top: 15px;
+    margin-bottom: 20px;
+  }
+  
+  .backButton,
+  .submitButton {
+    max-width: 110px;
+    height: 45px;
+    font-size: 15px;
+    padding: 10px 18px;
   }
 }
