@@ -8,6 +8,7 @@ from utils.firebase_service import firebase_storage_service
 from rest_framework import status, generics
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.views import APIView
 
 class SessionBidsView(generics.ListAPIView):
     """
@@ -21,6 +22,28 @@ class SessionBidsView(generics.ListAPIView):
         session_id = self.kwargs["session_id"]
         session = get_object_or_404(AuctionSession, id=session_id)
         return Bid.objects.filter(session=session).order_by("-amount", "created_at")
+
+class SettleAuctionView(APIView):
+    """
+    結算某場拍賣
+    POST /api/v1/auctions/sessions/<id>/settle/
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, session_id):
+        session = get_object_or_404(AuctionSession, id=session_id)
+        result = session.settle()
+
+        if result:
+            return Response(
+                {
+                    "message": "結算完成",
+                    "winner": result.winning_user.username,
+                    "amount": result.winning_amount,
+                },
+                status=status.HTTP_200_OK
+            )
+        return Response({"error": "沒有出價，無法結算"}, status=status.HTTP_400_BAD_REQUEST)
 
 class PlaceBidView(generics.GenericAPIView):
     """
