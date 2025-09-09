@@ -10,8 +10,8 @@
   flex: 1;
   margin-left: 10px;
   margin-right: 10px;
-  padding-top: 60px; /* TopNavbar 高度 */
-  padding-bottom: 70px; /* BottomNavbar 高度 */
+  padding-top: calc(60px + max(env(safe-area-inset-top), 10px)); /* TopNavbar 高度 + safe area */
+  padding-bottom: calc(70px + max(env(safe-area-inset-bottom), 8px)); /* BottomNavbar 高度 + safe area */
   display: flex;
   flex-direction: column;
 }

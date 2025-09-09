@@ -20,6 +20,7 @@ from django.apps import apps
 import json
 import re
 import logging
+import random
 
 User = get_user_model()
 logger = logging.getLogger(__name__)
@@ -696,11 +697,11 @@ class PostListAPIView(generics.ListAPIView):
         # 如果推薦服務還沒初始化，直接返回最新貼文
         if recommendation_service is None:
             print("推薦服務尚未初始化，返回最新貼文")
-            return PostFrame.objects.all().order_by('-created_at')[:30]
+            return PostFrame.objects.all().order_by('-created_at')
 
         # 獲取用戶的互動歷史
         # 先取得用戶和日常貼文SoLContent的互動歷史(互動不包含留言，留言會在下方單獨處理)
-        interaction_list = UserInteraction.objects.filter(user=self.request.user).values()
+        interaction_list = UserInteraction.objects.filter(user=self.request.user)[:50].values()
         for interaction in interaction_list:
             # 先假設用戶互動的是PostFrame，把按讚留言紀錄過濾掉
             postFrame = PostFrame.get_postFrames(postID=interaction['interactables_id'])
@@ -717,7 +718,7 @@ class PostListAPIView(generics.ListAPIView):
                     })
 
         # 接者處理留言的歷史
-        comment_list = Comment.objects.filter(user=self.request.user).select_related('postFrame')
+        comment_list = Comment.objects.filter(user=self.request.user)[:50].select_related('postFrame')
         for comment in comment_list:
             # 還是先抓留言來自哪個PostFrame
             postFrame = comment.postFrame
@@ -741,10 +742,17 @@ class PostListAPIView(generics.ListAPIView):
             embedded_history = recommendation_service.embed_user_history(posts=[(p['id'], p['action'], p['timestamp']) for p in history], content_type="social")
             search_list = recommendation_service.recommend_posts(user_vec=embedded_history, content_type="social")
 
+            # Add recommended posts first
             for post_id in search_list:
                 if post_id not in seen_ids:
-                    # Do something with each recommended post ID
                     recommend_list.append(post_id)
+            # Randomly insert seen_ids into recommend_list
+            seen_list = list(seen_ids)
+            random.shuffle(seen_list)
+            # Insert each seen_id at a random position in recommend_list
+            for seen_id in seen_list:
+                insert_pos = random.randint(0, len(recommend_list))
+                recommend_list.insert(insert_pos, seen_id)
 
             return PostFrame.get_postFrames(idList=recommend_list)
         else:
@@ -1316,6 +1324,7 @@ class UpdatePostAPIView(APIView):
                 
                 # 獲取當前圖片的最大排序值
                 from media.models import Image
+
                 current_max_sort_order = Image.objects.filter(
                     postFrame=postFrame
                 ).aggregate(Max('sort_order'))['sort_order__max'] or -1

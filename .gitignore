@@ -22,3 +22,10 @@ backend/logs/auth.log
 backend/logs/django.log
 *.pyc
 *.log
+
+
+check-service
+domain_configuration
+nginx.conf
+start-app
+stop-service

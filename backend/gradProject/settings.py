@@ -26,9 +26,28 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-9$@4-v*$7-=1r-l@3(fytpr_*f1b!@z^j00f%31hcp6(udqh6s'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = True  # Set to True for development
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = [
+    'petapp.geniusbee.net',
+    'localhost',
+    '127.0.0.1',
+    'geniusbee.net',
+    '.geniusbee.net',  # Allows all subdomains
+    '140.119.19.25',
+]
+
+# Development settings - disable SSL/HTTPS redirects
+SECURE_SSL_REDIRECT = False
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = False
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+
+# Proxy settings for reverse proxy setup
+USE_X_FORWARDED_HOST = False  # Disabled for local development
+USE_X_FORWARDED_PORT = False  # Disabled for local development
+# SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')  # Commented out for local development
 
 
 # Application definition
@@ -61,9 +80,9 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',  # Handle CORS as early as possible
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'corsheaders.middleware.CorsMiddleware', 
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -71,15 +90,44 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-# In development, allow all origins
-CORS_ALLOW_ALL_ORIGINS = True  # Only use this in development!
+# CORS configuration for production
+CORS_ALLOW_ALL_ORIGINS = False  # Set to False for production security
 
 # For production, specify allowed origins:
-# CORS_ALLOWED_ORIGINS = [
-#     "http://your-production-domain.com",
-# ]
+CORS_ALLOWED_ORIGINS = [
+    "https://petapp.geniusbee.net",
+    "https://geniusbee.net",
+    "http://localhost:3000",  # Local development
+    "http://localhost:5173",  # Vite default port
+    "http://localhost:8000",  # Django development server
+    "https://localhost:443",
+    "http://127.0.0.1:5173",  # Vite on 127.0.0.1
+    "https://127.0.0.1:5173"  # Vite on 127.0.0.1 (HTTPS)
+]
 
 CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
+
+# Handle preflight requests
+CORS_PREFLIGHT_MAX_AGE = 86400  # 24 hours
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
 CORS_ALLOW_METHODS = [
     'DELETE',
     'GET',
@@ -289,3 +337,26 @@ LOGGING = {
 
 # 確保日誌目錄存在
 os.makedirs(os.path.join(BASE_DIR, 'logs'), exist_ok=True)
+
+# HTTPS and Security Settings
+# Avoid redirecting HTTP->HTTPS in local development to prevent CORS preflight redirects.
+if DEBUG:
+    SECURE_SSL_REDIRECT = False
+    SECURE_PROXY_SSL_HEADER = None
+    SECURE_HSTS_SECONDS = 0
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = False
+    SECURE_HSTS_PRELOAD = False
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False
+else:
+    SECURE_SSL_REDIRECT = True
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SECURE_HSTS_SECONDS = 31536000  # 1 year
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_BROWSER_XSS_FILTER = True
+X_FRAME_OPTIONS = 'DENY'

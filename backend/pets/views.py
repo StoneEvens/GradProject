@@ -1,3 +1,4 @@
+from random import random
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -23,6 +24,7 @@ import logging
 from openai import OpenAI, APIError
 from dotenv import load_dotenv
 import os
+import random
 
 logger = logging.getLogger(__name__)
 
@@ -1971,11 +1973,19 @@ class RecommendedDiseaseArchivesAPIView(APIView):
                     )
                     
                     recommended_ids = []
-                    for result in search_results:
-                        original_post_id = result['original_id']
-                        if original_post_id not in seen_ids:
-                            recommended_ids.append(original_post_id)
-                
+                    
+                    # Add recommended posts first
+                    for post_id in search_results:
+                        if post_id not in seen_ids:
+                            recommended_ids.append(post_id)
+                    # Randomly insert seen_ids into recommend_list
+                    seen_list = list(seen_ids)
+                    random.shuffle(seen_list)
+                    # Insert each seen_id at a random position in recommended_ids
+                    for seen_id in seen_list:
+                        insert_pos = random.randint(0, len(recommended_ids))
+                        recommended_ids.insert(insert_pos, seen_id)
+
                 # 根據推薦的 PostFrame IDs 獲取對應的疾病檔案
                 if recommended_ids:
                     return self._get_recommended_archives_with_pagination(
@@ -2008,7 +2018,7 @@ class RecommendedDiseaseArchivesAPIView(APIView):
             from social.models import PostFrame
             
             # 獲取用戶與疾病檔案的互動歷史
-            interaction_list = UserInteraction.objects.filter(user=user).values()
+            interaction_list = UserInteraction.objects.filter(user=user)[:50].values()
             for interaction in interaction_list:
                 try:
                     postFrame = PostFrame.objects.get(id=interaction['interactables_id'])
@@ -2025,7 +2035,7 @@ class RecommendedDiseaseArchivesAPIView(APIView):
                     continue
             
             # 處理疾病檔案的留言歷史
-            comment_list = Comment.objects.filter(user=user).select_related('postFrame')
+            comment_list = Comment.objects.filter(user=user)[:50].select_related('postFrame')
             for comment in comment_list:
                 postFrame = comment.postFrame
                 if hasattr(postFrame, 'illness_archives_postFrame') and postFrame.illness_archives_postFrame.exists():
@@ -2365,7 +2375,7 @@ class PublicDiseaseArchivesPreviewAPIView(APIView):
                     success=True
                 )
 
-            interaction_list = UserInteraction.objects.filter(user=self.request.user).values()
+            interaction_list = UserInteraction.objects.filter(user=self.request.user)[:50].values()
             for interaction in interaction_list:
                 # 先假設用戶互動的是PostFrame，把按讚留言紀錄過濾掉
                 postFrame = PostFrame.get_postFrames(postID=interaction['interactables_id'])
@@ -2382,7 +2392,7 @@ class PublicDiseaseArchivesPreviewAPIView(APIView):
                         })
 
             # 接者處理留言的歷史
-            comment_list = Comment.objects.filter(user=self.request.user).select_related('postFrame')
+            comment_list = Comment.objects.filter(user=self.request.user)[:50].select_related('postFrame')
             for comment in comment_list:
                 # 還是先抓留言來自哪個PostFrame
                 postFrame = comment.postFrame
@@ -2406,10 +2416,17 @@ class PublicDiseaseArchivesPreviewAPIView(APIView):
                 embedded_history = recommendation_service.embed_user_history(posts=[(p['id'], p['action'], p['timestamp']) for p in history], content_type="forum")
                 search_list = recommendation_service.recommend_posts(user_vec=embedded_history, content_type="forum")
 
+                # Add recommended posts first
                 for post_id in search_list:
                     if post_id not in seen_ids:
-                        # Do something with each recommended post ID
                         recommend_list.append(post_id)
+                # Randomly insert seen_ids into recommend_list
+                seen_list = list(seen_ids)
+                random.shuffle(seen_list)
+                # Insert each seen_id at a random position in recommend_list
+                for seen_id in seen_list:
+                    insert_pos = random.randint(0, len(recommend_list))
+                    recommend_list.insert(insert_pos, seen_id)
 
                 archives_queryset = DiseaseArchiveContent.objects.filter(postFrame__id__in=recommend_list, is_private=False).select_related(
                     'pet', 'postFrame', 'postFrame__user'

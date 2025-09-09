@@ -1,2 +1,2 @@
-python -m manage runsslserver 0.0.0.0:8000 --certificate 140.119.19.25.pem --key 140.119.19.25-key.pem --noreload
-npm run dev -- --host
+Backend: python -m manage runserver --noreload
+Frontend: npm run dev -- --host
