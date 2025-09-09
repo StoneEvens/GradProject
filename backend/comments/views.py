@@ -26,6 +26,10 @@ class PostCommentsView(generics.ListCreateAPIView):
     def get_queryset(self):
         post_id = self.kwargs.get('post_id')
         postFrame = PostFrame.get_postFrames(postID=post_id)
+        
+        if postFrame is None:
+            return Comment.objects.none()
+            
         comments = Comment.get_comments(postFrame)
 
         return comments

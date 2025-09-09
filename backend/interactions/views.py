@@ -30,6 +30,13 @@ class UserInteractionView(APIView):
             fromRelation = UserInteraction.get_user_interactions(user, postID, 'upvoted')
         
         postFrame = PostFrame.get_postFrames(postID)
+        
+        if postFrame is None:
+            return Response({
+                'error': 'Post not found',
+                'message': 'The post you are trying to interact with does not exist.'
+            }, status=drf_status.HTTP_404_NOT_FOUND)
+        
         postFrameStatus = postFrame.handle_interaction(user, fromRelation, toRelation)
 
         interactionStatus = UserInteraction.create_interaction(

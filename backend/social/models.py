@@ -115,7 +115,10 @@ class PostFrame(Interactables):
     # 獲取貼文框本身
     def get_postFrames(postID=None, user=None, userList:list=None, idList:list=None):
         if postID is not None:
-            return PostFrame.objects.get(id=postID)
+            try:
+                return PostFrame.objects.get(id=postID)
+            except PostFrame.DoesNotExist:
+                return None
             
         if user is not None:
             return PostFrame.objects.filter(user=user).order_by('-created_at')[:50]
