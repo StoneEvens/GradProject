@@ -93,14 +93,16 @@
   flex-direction: column;
   align-items: center;
   margin-bottom: 40px;
+  position: relative;
 }
 
 .iconsAndDivider {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 30px;
+  margin-bottom: 80px;
   position: relative;
+  width: 300px;
 }
 
 .petTypeIcons {
@@ -109,7 +111,8 @@
   align-items: flex-end;
   position: relative;
   height: 80px;
-  width: 300px;
+  width: 100%;
+  margin-bottom: 0;
 }
 
 .petIconWrapper {
@@ -119,28 +122,36 @@
   justify-content: flex-end;
   height: 100%;
   position: relative;
-  flex: 1;
+  width: 80px;
+}
+
+.petIconWrapper:first-child {
+  position: absolute;
+  left: 0;
+}
+
+.petIconWrapper:last-child {
+  position: absolute;
+  right: 0;
 }
 
 .dividerLine {
-  width: 300px;
+  width: 100%;
   height: 3px;
   background-color: #FF8C42;
   border-radius: 2px;
   position: absolute;
   bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 0;
 }
 
 .petTypeButtons {
   display: flex;
   justify-content: space-between;
-  width: 300px;
+  width: 100%;
   position: absolute;
   bottom: -50px;
   left: 0;
-  right: 0;
 }
 
 .petIcon {
@@ -171,11 +182,11 @@
 }
 
 .petTypeButton:first-child {
-  left: 30px;
+  left: 0;
 }
 
 .petTypeButton:last-child {
-  right: 30px;
+  right: 0;
 }
 
 .petTypeButton:hover {
@@ -415,30 +426,24 @@
     padding-bottom: calc(70px + max(env(safe-area-inset-bottom), 8px) + 15px); /* BottomNavbar 高度 + 額外間距 */
   }
   
-  .petTypeIcons {
+  .iconsAndDivider {
     width: 220px;
+    margin-bottom: 70px;
+  }
+  
+  .petTypeIcons {
     height: 70px;
   }
   
   .petIconWrapper {
-    position: absolute;
-  }
-  
-  .petIconWrapper:first-child {
-    left: 0;
-  }
-  
-  .petIconWrapper:last-child {
-    right: 0;
+    width: 70px;
   }
   
   .petTypeButtons {
-    width: 220px;
     bottom: -40px;
   }
   
   .dividerLine {
-    width: 220px;
     height: 2px;
   }
   
@@ -448,19 +453,10 @@
   }
   
   .petTypeButton {
-    padding: 8px 20px;
+    padding: 8px 12px;
     font-size: 1rem;
     width: 70px;
     height: 35px;
-    position: absolute;
-  }
-  
-  .petTypeButton:first-child {
-    left: 0px;
-  }
-  
-  .petTypeButton:last-child {
-    right: 0px;
   }
   
   .backButton {
@@ -529,30 +525,21 @@
     margin-bottom: 30px;
   }
   
-  .petTypeIcons {
+  .iconsAndDivider {
     width: 180px;
+    margin-bottom: 60px;
+  }
+  
+  .petTypeIcons {
     height: 60px;
   }
   
   .petIconWrapper {
-    position: absolute;
-  }
-  
-  .petIconWrapper:first-child {
-    left: 0;
-  }
-  
-  .petIconWrapper:last-child {
-    right: 0;
+    width: 60px;
   }
   
   .petTypeButtons {
-    width: 180px;
     bottom: -35px;
-  }
-  
-  .dividerLine {
-    width: 180px;
   }
   
   .petIcon {
@@ -561,19 +548,10 @@
   }
   
   .petTypeButton {
-    padding: 6px 16px;
+    padding: 6px 10px;
     font-size: 0.9rem;
     width: 60px;
     height: 30px;
-    position: absolute;
-  }
-  
-  .petTypeButton:first-child {
-    left: 0px;
-  }
-  
-  .petTypeButton:last-child {
-    right: 0px;
   }
   
   .avatarUpload {
