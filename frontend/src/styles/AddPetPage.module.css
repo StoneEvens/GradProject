@@ -420,6 +420,18 @@
     height: 70px;
   }
   
+  .petIconWrapper {
+    position: absolute;
+  }
+  
+  .petIconWrapper:first-child {
+    left: 0;
+  }
+  
+  .petIconWrapper:last-child {
+    right: 0;
+  }
+  
   .petTypeButtons {
     width: 220px;
     bottom: -40px;
@@ -444,11 +456,11 @@
   }
   
   .petTypeButton:first-child {
-    left: 5px;
+    left: 0px;
   }
   
   .petTypeButton:last-child {
-    right: 5px;
+    right: 0px;
   }
   
   .backButton {
@@ -522,6 +534,18 @@
     height: 60px;
   }
   
+  .petIconWrapper {
+    position: absolute;
+  }
+  
+  .petIconWrapper:first-child {
+    left: 0;
+  }
+  
+  .petIconWrapper:last-child {
+    right: 0;
+  }
+  
   .petTypeButtons {
     width: 180px;
     bottom: -35px;
@@ -545,11 +569,11 @@
   }
   
   .petTypeButton:first-child {
-    left: 0;
+    left: 0px;
   }
   
   .petTypeButton:last-child {
-    right: 0;
+    right: 0px;
   }
   
   .avatarUpload {
