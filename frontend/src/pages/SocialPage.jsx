@@ -242,6 +242,13 @@ const SocialPage = () => {
     // 不需要更新 posts 狀態，因為 Post 組件會自己管理狀態
   };
 
+  // 處理刪除貼文
+  const handleDelete = (postId) => {
+    console.log('SocialPage 收到貼文刪除通知:', { postId });
+    // 從貼文列表中移除已刪除的貼文
+    setPosts(prevPosts => prevPosts.filter(post => post.id !== postId));
+  };
+
   // 處理留言
   const handleComment = (postId, increment = 0) => {
     console.log('留言操作:', { postId, increment });
@@ -415,6 +422,7 @@ const SocialPage = () => {
                 onLike={handleLike}
                 onComment={handleComment}
                 onSave={handleSave}
+                onDelete={handleDelete}
                 onUserClick={handlePostUserClick}
                 onHashtagClick={handleHashtagClick}
                 emptyMessage="目前沒有貼文，快來發布第一篇吧！"

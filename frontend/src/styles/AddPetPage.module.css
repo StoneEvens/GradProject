@@ -114,10 +114,12 @@
 
 .petIconWrapper {
   display: flex;
-  align-items: flex-end;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
   height: 100%;
   position: relative;
+  flex: 1;
 }
 
 .dividerLine {
@@ -135,6 +137,10 @@
   display: flex;
   justify-content: space-between;
   width: 300px;
+  position: absolute;
+  bottom: -50px;
+  left: 0;
+  right: 0;
 }
 
 .petIcon {
@@ -161,6 +167,15 @@
   align-items: center;
   justify-content: center;
   transition: background-color 0.2s;
+  position: absolute;
+}
+
+.petTypeButton:first-child {
+  left: 30px;
+}
+
+.petTypeButton:last-child {
+  right: 30px;
 }
 
 .petTypeButton:hover {
@@ -401,13 +416,13 @@
   }
   
   .petTypeIcons {
-    gap: 60px;
-    height: 90px;
+    width: 220px;
+    height: 70px;
   }
   
   .petTypeButtons {
-    justify-content: space-between;
     width: 220px;
+    bottom: -40px;
   }
   
   .dividerLine {
@@ -416,15 +431,24 @@
   }
   
   .petIcon {
-    width: 90px;
-    height: 90px;
+    width: 70px;
+    height: 70px;
   }
   
   .petTypeButton {
-    padding: 14px 28px;
-    font-size: 1.2rem;
-    width: 100px;
-    height: 50px;
+    padding: 8px 20px;
+    font-size: 1rem;
+    width: 70px;
+    height: 35px;
+    position: absolute;
+  }
+  
+  .petTypeButton:first-child {
+    left: 5px;
+  }
+  
+  .petTypeButton:last-child {
+    right: 5px;
   }
   
   .backButton {
@@ -494,28 +518,38 @@
   }
   
   .petTypeIcons {
-    width: 200px;
-    height: 80px;
+    width: 180px;
+    height: 60px;
   }
   
   .petTypeButtons {
-    width: 200px;
+    width: 180px;
+    bottom: -35px;
   }
   
   .dividerLine {
-    width: 200px;
+    width: 180px;
   }
   
   .petIcon {
-    width: 80px;
-    height: 80px;
+    width: 60px;
+    height: 60px;
   }
   
   .petTypeButton {
-    padding: 10px 18px;
-    font-size: 1rem;
-    width: 85px;
-    height: 45px;
+    padding: 6px 16px;
+    font-size: 0.9rem;
+    width: 60px;
+    height: 30px;
+    position: absolute;
+  }
+  
+  .petTypeButton:first-child {
+    left: 0;
+  }
+  
+  .petTypeButton:last-child {
+    right: 0;
   }
   
   .avatarUpload {

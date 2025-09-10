@@ -439,6 +439,27 @@ const FeedPage = () => {
       
     } catch (error) {
       console.error('新增飼料失敗:', error);
+      
+      // 詳細錯誤診斷
+      if (error.response) {
+        console.error('錯誤狀態碼:', error.response.status);
+        console.error('錯誤訊息:', error.response.data);
+        
+        if (error.response.status === 413) {
+          setNotification('圖片檔案過大，請選擇較小的圖片或聯繫管理員');
+        } else if (error.response.status === 400) {
+          setNotification(error.response.data?.message || '資料格式錯誤，請檢查輸入');
+        } else {
+          setNotification('新增飼料失敗，請稍後再試');
+        }
+      } else if (error.request) {
+        console.error('無回應:', error.request);
+        setNotification('伺服器無回應，請檢查網路連線');
+      } else {
+        console.error('錯誤:', error.message);
+        setNotification('發生未知錯誤，請稍後再試');
+      }
+      
       throw error; // 讓 modal 組件處理錯誤
     }
   };

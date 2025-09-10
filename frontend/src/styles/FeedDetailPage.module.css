@@ -9,12 +9,13 @@
 .content {
   flex: 1;
   padding: 30px;
-  padding-top: 80px;
-  padding-bottom: 90px;
+  padding-top: calc(60px + max(env(safe-area-inset-top), 10px) + 30px);
+  padding-bottom: calc(70px + max(env(safe-area-inset-bottom), 8px) + 30px);
   max-width: 430px;
   margin: 0 auto;
   width: 100%;
   box-sizing: border-box;
+  overflow-y: auto;
 }
 
 .loadingContainer,
@@ -399,11 +400,13 @@
 /* 手機版優化 */
 @media (max-width: 480px) {
   .content {
-    padding: 0 15px 80px 15px;
+    padding: 15px 15px 15px 15px;
+    padding-top: calc(60px + max(env(safe-area-inset-top), 10px) + 15px); /* TopNavbar 高度 + 額外間距 */
+    padding-bottom: calc(70px + max(env(safe-area-inset-bottom), 8px) + 15px); /* BottomNavbar 高度 + 額外間距 */
   }
   
   .header {
-    margin-top: 15px;
+    margin-top: 25px;
     margin-bottom: 8px;
   }
   
@@ -500,5 +503,91 @@
     flex: 1;
     padding: 8px 12px;
     font-size: 14px;
+  }
+  
+  .sectionLabel {
+    font-size: 14px;
+  }
+  
+  .infoBox {
+    font-size: 14px;
+    padding: 12px 15px;
+  }
+  
+  .nutritionContainer {
+    padding: 12px;
+  }
+  
+  .nutritionLabel {
+    font-size: 14px;
+  }
+  
+  .warningContent {
+    padding: 15px;
+  }
+  
+  .warningTitle {
+    font-size: 14px;
+  }
+  
+  .warningText {
+    font-size: 13px;
+  }
+  
+  .warningNote {
+    font-size: 12px;
+  }
+}
+
+/* 小螢幕優化 */
+@media (max-width: 360px) {
+  .content {
+    padding: 12px 12px 12px 12px;
+    padding-top: calc(60px + max(env(safe-area-inset-top), 10px) + 12px); /* TopNavbar 高度 + 額外間距 */
+    padding-bottom: calc(70px + max(env(safe-area-inset-bottom), 8px) + 12px); /* BottomNavbar 高度 + 額外間距 */
+  }
+  
+  .header {
+    margin-top: 20px;
+  }
+  
+  .title {
+    font-size: 16px;
+  }
+  
+  .imageSection {
+    padding: 12px;
+  }
+  
+  .mainImageContainer {
+    height: 180px;
+  }
+  
+  .thumbnail {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .thumbnailImage {
+    height: 38px;
+  }
+  
+  .thumbnailLabel {
+    font-size: 9px;
+  }
+  
+  .nutritionInput {
+    width: 80px;
+    padding: 6px 10px;
+    font-size: 13px;
+  }
+  
+  .nutritionLabel {
+    font-size: 13px;
+    min-width: 70px;
+  }
+  
+  .nutritionUnit {
+    font-size: 13px;
   }
 }
