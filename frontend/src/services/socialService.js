@@ -828,6 +828,44 @@ class SocialService {
   }
 
   /**
+   * 刪除整個貼文
+   * @param {number} postId - 貼文 ID
+   * @returns {Promise} 刪除結果
+   */
+  async deletePost(postId) {
+    try {
+      console.log('刪除貼文 API 調用:', { postId });
+
+      const response = await authAxios.delete(`/social/posts/${postId}/delete/`, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        timeout: 30000,
+      });
+
+      const result = response.data;
+      
+      console.log('刪除貼文 API 回應:', result);
+      
+      if (result.success || response.status === 200) {
+        return {
+          success: true,
+          message: result.message || '貼文刪除成功'
+        };
+      } else {
+        throw new Error(result.message || '刪除貼文失敗');
+      }
+      
+    } catch (error) {
+      console.error('刪除貼文錯誤:', error);
+      return {
+        success: false,
+        error: error.response?.data?.message || error.message || '刪除貼文失敗'
+      };
+    }
+  }
+
+  /**
    * 刪除貼文中的圖片
    * @param {number} postId - 貼文 ID
    * @param {number} imageId - 圖片 ID
@@ -1229,6 +1267,7 @@ export const removeFollower = socialService.removeFollower.bind(socialService);
 export const checkAnnotationPermission = socialService.checkAnnotationPermission.bind(socialService);
 export const createPost = socialService.createPost.bind(socialService);
 export const updatePost = socialService.updatePost.bind(socialService);
+export const deletePost = socialService.deletePost.bind(socialService);
 export const getPost = socialService.getPost.bind(socialService);
 export const getPosts = socialService.getPosts.bind(socialService);
 export const getUserPosts = socialService.getUserPosts.bind(socialService);

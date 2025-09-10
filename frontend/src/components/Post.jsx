@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Annotation from './Annotation';
 import ConfirmNotification from './ConfirmNotification';
 import styles from '../styles/Post.module.css';
-import { togglePostLike, togglePostSave } from '../services/socialService';
+import { togglePostLike, togglePostSave, deletePost } from '../services/socialService';
 import { getUserProfile } from '../services/userService';
 import PostComments from './PostComments';
 
@@ -12,6 +12,7 @@ const Post = ({
   onLike,
   onComment,
   onSave,
+  onDelete, // 新增刪除回調
   onUserClick,
   onHashtagClick,
   isInteractive = true, // 是否允許互動（按讚、留言等）
@@ -354,10 +355,32 @@ const Post = ({
   };
 
   // 確認刪除貼文
-  const confirmDeletePost = () => {
+  const confirmDeletePost = async () => {
     setShowDeleteConfirm(false);
-    console.log('刪除貼文功能開發中');
-    // 未來可以調用刪除 API
+    
+    try {
+      // 顯示載入狀態（可選）
+      console.log('正在刪除貼文...');
+      
+      // 調用刪除 API
+      const result = await deletePost(postData.id);
+      
+      if (result.success) {
+        console.log('貼文刪除成功');
+        
+        // 調用父組件的 onDelete 回調
+        if (onDelete) {
+          onDelete(postData.id);
+        }
+      } else {
+        console.error('刪除貼文失敗:', result.error);
+        // 可以顯示錯誤提示
+        alert(result.error || '刪除貼文失敗，請稍後再試');
+      }
+    } catch (error) {
+      console.error('刪除貼文時發生錯誤:', error);
+      alert('刪除貼文失敗，請稍後再試');
+    }
   };
 
   // 取消刪除貼文

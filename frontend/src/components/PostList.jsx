@@ -17,6 +17,7 @@ const PostList = ({
   onLike = null,
   onComment = null,
   onSave = null,
+  onDelete = null, // 新增刪除回調
   onUserClick = null,
   onHashtagClick = null,
   emptyMessage = '目前沒有貼文',
@@ -323,6 +324,25 @@ const PostList = ({
   };
 
 
+  // 處理刪除 - 從列表移除已刪除的貼文
+  const handleDelete = (postId) => {
+    console.log('PostList 收到刪除通知:', { postId });
+    
+    if (fetchUserPosts) {
+      // 從本地用戶貼文狀態中移除
+      setUserPosts(prevPosts => prevPosts.filter(post => {
+        const currentPostId = post.id || post.post_id;
+        return currentPostId !== postId;
+      }));
+      showNotification('貼文已成功刪除');
+    } else {
+      // 通知父組件處理刪除
+      if (onDelete) {
+        onDelete(postId);
+      }
+    }
+  };
+
   // 處理收藏 - 可選的通知回調
   const handleSave = (postId, isSaved) => {
     console.log('PostList 收到收藏通知:', { postId, isSaved });
@@ -420,6 +440,7 @@ const PostList = ({
               onLike={handleLike}
               onComment={() => handleComment(post.id || post.post_id)}
               onSave={handleSave}
+              onDelete={handleDelete}
               onUserClick={handleUserClick}
               onHashtagClick={onHashtagClick}
               isInteractive={true}
