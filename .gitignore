@@ -28,4 +28,5 @@ check-service
 domain_configuration
 nginx.conf
 start-app
+start-app.bat
 stop-service
