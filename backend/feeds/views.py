@@ -534,6 +534,13 @@ class MyMarkedFeedsPreviewView(APIView):
                 type=openapi.TYPE_INTEGER,
                 required=False,
                 description="限制返回數量，默認為3"
+            ),
+            openapi.Parameter(
+                name="pet_type",
+                in_=openapi.IN_QUERY,
+                type=openapi.TYPE_STRING,
+                required=False,
+                description="寵物類型篩選 (cat/dog)"
             )
         ],
         responses={
@@ -550,7 +557,13 @@ class MyMarkedFeedsPreviewView(APIView):
     )
     def get(self, request):
         limit = int(request.query_params.get('limit', 3))
-        marks = UserFeedMark.objects.filter(user=request.user).select_related('feed').order_by('-created_at')
+        pet_type = request.query_params.get('pet_type')
+        
+        query_filter = {'user': request.user}
+        if pet_type:
+            query_filter['feed__pet_type'] = pet_type
+            
+        marks = UserFeedMark.objects.filter(**query_filter).select_related('feed').order_by('-created_at')
         total_count = marks.count()
         
         if total_count == 0:
@@ -586,6 +599,13 @@ class RecentlyUsedFeedsView(APIView):
                 type=openapi.TYPE_INTEGER,
                 required=False,
                 description="限制返回數量，默認為10"
+            ),
+            openapi.Parameter(
+                name="pet_type",
+                in_=openapi.IN_QUERY,
+                type=openapi.TYPE_STRING,
+                required=False,
+                description="寵物類型篩選 (cat/dog)"
             )
         ],
         responses={
@@ -600,13 +620,37 @@ class RecentlyUsedFeedsView(APIView):
     )
     def get(self, request):
         limit = int(request.query_params.get('limit', 10))
+        pet_type = request.query_params.get('pet_type')
         
-        # 從 UserFeed 表中獲取最近使用的飼料，按 last_used_at 排序
-        recent_feeds = UserFeed.objects.filter(
-            user=request.user
-        ).select_related('feed', 'pet').order_by('-last_used_at')[:limit]
+        # 從 UserFeed 表中獲取最近使用的飼料，避免重複
+        # 使用子查詢來獲取每個飼料的最新使用記錄
+        from django.db.models import Max
         
-        if not recent_feeds.exists():
+        query_filter = {'user': request.user}
+        if pet_type:
+            query_filter['feed__pet_type'] = pet_type
+        
+        # 先獲取每個飼料的最新使用時間
+        latest_usage = UserFeed.objects.filter(
+            **query_filter
+        ).values('feed').annotate(
+            latest_used=Max('last_used_at')
+        ).order_by('-latest_used')[:limit]
+        
+        # 然後獲取對應的 UserFeed 記錄
+        feed_ids_with_latest = [(item['feed'], item['latest_used']) for item in latest_usage]
+        
+        recent_feeds = []
+        for feed_id, latest_used in feed_ids_with_latest:
+            user_feed = UserFeed.objects.filter(
+                user=request.user,
+                feed_id=feed_id,
+                last_used_at=latest_used
+            ).select_related('feed', 'pet').first()
+            if user_feed:
+                recent_feeds.append(user_feed)
+        
+        if not recent_feeds:
             return Response({
                 'data': [],
                 'message': '暫無使用記錄'
@@ -1310,6 +1354,8 @@ class UnifiedFeedCreateView(APIView):
         try:
             data = request.data
             user = request.user
+
+            print("Successfully got data")
 
             def parse_float(value):
                 try:

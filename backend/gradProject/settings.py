@@ -45,9 +45,9 @@ SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 
 # Proxy settings for reverse proxy setup
-USE_X_FORWARDED_HOST = False  # Disabled for local development
-USE_X_FORWARDED_PORT = False  # Disabled for local development
-# SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')  # Commented out for local development
+USE_X_FORWARDED_HOST = True  # Enable for reverse proxy
+USE_X_FORWARDED_PORT = True  # Enable for reverse proxy
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')  # Enable for HTTPS behind proxy
 
 
 # Application definition
@@ -97,12 +97,19 @@ CORS_ALLOW_ALL_ORIGINS = False  # Set to False for production security
 CORS_ALLOWED_ORIGINS = [
     "https://petapp.geniusbee.net",
     "https://geniusbee.net",
+    "https://petapp.geniusbee.net:4173",  # Vite preview server with domain
+    "https://petapp.geniusbee.net:5173",  # Vite dev server with domain
     "http://localhost:3000",  # Local development
     "http://localhost:5173",  # Vite default port
+    "https://localhost:5173",  # Vite default port (HTTPS)
+    "http://localhost:4173",  # Vite preview server
+    "https://localhost:4173",  # Vite preview server (HTTPS)
     "http://localhost:8000",  # Django development server
     "https://localhost:443",
     "http://127.0.0.1:5173",  # Vite on 127.0.0.1
-    "https://127.0.0.1:5173"  # Vite on 127.0.0.1 (HTTPS)
+    "https://127.0.0.1:5173",  # Vite on 127.0.0.1 (HTTPS)
+    "http://127.0.0.1:4173",  # Vite preview server
+    "https://127.0.0.1:4173",  # Vite preview server (HTTPS)
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -198,6 +205,10 @@ ROOT_URLCONF = 'gradProject.urls'
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
+
+# File upload settings - Set max upload size to 10MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
 
 TEMPLATES = [
     {
