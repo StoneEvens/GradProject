@@ -42,19 +42,29 @@ echo.
 REM Start Django backend
 echo [1/3] Django Backend (port 8000)...
 cd /d "%BACKEND_PATH%"
-start /min "" python manage.py runserver 127.0.0.1:8000
+start /min "" python manage.py runserver 127.0.0.1:8000 --noreload
 echo     Status: Starting...
 
 REM Wait and start Vite frontend
 timeout /t 3 /nobreak >nul
-echo [2/3] Vite Frontend (port 5173)...
+echo [2/3] Vite Frontend (port 4173)...
 cd /d "%FRONTEND_PATH%"  
-start /min "" npm run dev
+start /min "" npm run preview
 echo     Status: Starting...
 
 REM Wait and start Nginx
 timeout /t 3 /nobreak >nul
 echo [3/3] Nginx Reverse Proxy (port 443)...
+
+REM Ensure nginx directories exist and copy config
+if not exist "C:\nginx\logs" mkdir "C:\nginx\logs"
+copy /Y "%~dp0nginx.conf" "C:\nginx\conf\nginx.conf" >nul 2>&1
+if errorlevel 1 (
+    echo     Error: Failed to copy nginx configuration
+    pause
+    exit /b 1
+)
+
 cd /d "C:\nginx"
 start /min "" "C:\nginx\nginx.exe"
 echo     Status: Starting...
@@ -73,7 +83,7 @@ echo  ⚙️  Admin:    https://petapp.geniusbee.net/admin
 echo.
 echo  Local Development URLs:
 echo  📦 Django:   http://127.0.0.1:8000
-echo  ⚛️  Vite:     http://127.0.0.1:5173
+echo  ⚛️  Vite:     http://127.0.0.1:4173
 echo.
 echo ========================================
 echo Commands: petapp stop ^| petapp status

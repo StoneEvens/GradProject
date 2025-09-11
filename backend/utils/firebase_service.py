@@ -20,8 +20,8 @@ class FirebaseStorageService:
     # 支援的圖片格式
     SUPPORTED_IMAGE_FORMATS = ['jpg', 'jpeg', 'png', 'gif', 'webp']
     
-    # 最大檔案大小 (5MB)
-    MAX_FILE_SIZE = 5 * 1024 * 1024
+    # 最大檔案大小 (10MB)
+    MAX_FILE_SIZE = 10 * 1024 * 1024
     
     def __init__(self):
         """初始化 Firebase Storage 服務"""

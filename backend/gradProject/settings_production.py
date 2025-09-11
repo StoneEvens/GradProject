@@ -8,9 +8,11 @@ DEBUG = False
 
 ALLOWED_HOSTS = [
     'petapp.geniusbee.net',
+    'localhost',
+    '127.0.0.1',
     'geniusbee.net',
-    '.geniusbee.net',
-    '127.0.0.1'
+    '.geniusbee.net',  # Allows all subdomains
+    '140.119.19.25',
 ]
 
 # CORS configuration for production
@@ -18,9 +20,12 @@ CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOWED_ORIGINS = [
     "https://petapp.geniusbee.net",
     "https://geniusbee.net",
-    "http://127.0.0.1",
-    "http://localhost:8000",
-    "http://localhost:5173",
+    "http://localhost:3000",  # Local development
+    "http://localhost:5173",  # Vite default port
+    "http://localhost:8000",  # Django development server
+    "https://localhost:443",
+    "http://127.0.0.1:5173",  # Vite on 127.0.0.1
+    "https://127.0.0.1:5173"  # Vite on 127.0.0.1 (HTTPS)
 ]
 
 # Security settings for production
@@ -34,6 +39,10 @@ SECURE_BROWSER_XSS_FILTER = True
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 X_FRAME_OPTIONS = 'DENY'
+
+# File upload settings for production - Set max upload size to 10MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
 
 # Use a more secure secret key in production
 # You should set this via environment variable

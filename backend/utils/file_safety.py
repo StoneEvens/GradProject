@@ -25,8 +25,8 @@ SAFE_IMAGE_MIMETYPES = [
 # 最大允許圖片尺寸 (像素)
 MAX_IMAGE_DIMENSIONS = (5000, 5000)
 
-# 最大允許文件大小 (字節) - 5MB
-MAX_FILE_SIZE = 5 * 1024 * 1024
+# 最大允許文件大小 (字節) - 10MB
+MAX_FILE_SIZE = 10 * 1024 * 1024
 
 def validate_image_content(file_obj):
     """
