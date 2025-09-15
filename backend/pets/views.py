@@ -1762,7 +1762,7 @@ class CreateDiseaseArchiveAPIView(APIView):
                 try:
                     from django.apps import apps
                     recommendation_service = apps.get_app_config('social').get_recommendation_service()
-                    recommendation_service.embed_new_post(post_id=post_frame.id, content=formatted_content, content_type='forum')
+                    recommendation_service.embed_new_post(post_id=post_frame.id, content=str(formatted_content), content_type='forum')
                 except Exception as e:
                     logger.error(f"添加疾病檔案到推薦系統失敗: {str(e)}")
             
@@ -2664,11 +2664,11 @@ class PublishDiseaseArchiveAPIView(APIView):
                     
                     if old_is_private and not new_is_private:
                         # 從私人變為公開：加入推薦系統
-                        recommendation_service.embed_new_post(post_id=archive.postFrame.id, content=archive.content)
+                        recommendation_service.embed_new_post(post_id=archive.postFrame.id, content=archive.content, content_type='forum')
                         logger.info(f"疾病檔案 {archive_id} 已加入推薦系統")
                     elif not old_is_private and new_is_private:
                         # 從公開變為私人：從推薦系統移除
-                        recommendation_service.delete_post_data(post_id=archive.postFrame.id)
+                        recommendation_service.delete_post_data(post_id=archive.postFrame.id, content_type='forum')
                         logger.info(f"疾病檔案 {archive_id} 已從推薦系統移除")
                 except Exception as e:
                     logger.error(f"更新疾病檔案推薦系統狀態失敗: {str(e)}")
@@ -2914,7 +2914,7 @@ class DeleteDiseaseArchiveAPIView(APIView):
                 try:
                     from django.apps import apps
                     recommendation_service = apps.get_app_config('social').get_recommendation_service()
-                    recommendation_service.delete_post_data(post_id=archive.postFrame.id)
+                    recommendation_service.delete_post_data(post_id=archive.postFrame.id, content_type='forum')
                 except Exception as e:
                     logger.error(f"從推薦系統移除疾病檔案失敗: {str(e)}")
                 
