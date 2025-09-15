@@ -429,25 +429,35 @@ const PostList = ({
       )}
       
       <div className={styles.postList} ref={containerRef}>
-        {currentPosts.map((post, index) => (
-          <div 
-            key={post.id || post.post_id || index} 
-            data-post-id={post.id || post.post_id}
-            ref={el => postRefs.current[index] = el}
-          >
-            <Post
-              postData={post}
-              onLike={handleLike}
-              onComment={() => handleComment(post.id || post.post_id)}
-              onSave={handleSave}
-              onDelete={handleDelete}
-              onUserClick={handleUserClick}
-              onHashtagClick={onHashtagClick}
-              isInteractive={true}
-              showFullDescription={true}
-            />
-          </div>
-        ))}
+        {currentPosts
+          .filter(post => {
+            // 額外安全過濾：確保不顯示疾病檔案
+            const isArchive = post.archive_title ||
+                             post.generated_content ||
+                             post.archiveTitle ||
+                             post.content_type === 'archive' ||
+                             post.post_type === 'archive';
+            return !isArchive;
+          })
+          .map((post, index) => (
+            <div
+              key={post.id || post.post_id || index}
+              data-post-id={post.id || post.post_id}
+              ref={el => postRefs.current[index] = el}
+            >
+              <Post
+                postData={post}
+                onLike={handleLike}
+                onComment={() => handleComment(post.id || post.post_id)}
+                onSave={handleSave}
+                onDelete={handleDelete}
+                onUserClick={handleUserClick}
+                onHashtagClick={onHashtagClick}
+                isInteractive={true}
+                showFullDescription={true}
+              />
+            </div>
+          ))}
       </div>
 
       {/* 載入更多指示器 */}
