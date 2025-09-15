@@ -436,6 +436,7 @@ const Post = ({
     return null;
   }
 
+
   const currentImage = postData.images?.[currentImageIndex];
   const userInfo = postData.user_info || postData.user || {};
   const location = postData.content?.location || postData.location;
