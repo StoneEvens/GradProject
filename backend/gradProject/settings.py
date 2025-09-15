@@ -29,7 +29,7 @@ SECRET_KEY = 'django-insecure-9$@4-v*$7-=1r-l@3(fytpr_*f1b!@z^j00f%31hcp6(udqh6s
 DEBUG = True  # Set to True for development
 
 ALLOWED_HOSTS = [
-    'petapp.geniusbee.net',
+    'peter.geniusbee.net',
     'localhost',
     '127.0.0.1',
     'geniusbee.net',
@@ -95,10 +95,10 @@ CORS_ALLOW_ALL_ORIGINS = False  # Set to False for production security
 
 # For production, specify allowed origins:
 CORS_ALLOWED_ORIGINS = [
-    "https://petapp.geniusbee.net",
+    "https://peter.geniusbee.net",
     "https://geniusbee.net",
-    "https://petapp.geniusbee.net:4173",  # Vite preview server with domain
-    "https://petapp.geniusbee.net:5173",  # Vite dev server with domain
+    "https://peter.geniusbee.net:4173",  # Vite preview server with domain
+    "https://peter.geniusbee.net:5173",  # Vite dev server with domain
     "http://localhost:3000",  # Local development
     "http://localhost:5173",  # Vite default port
     "https://localhost:5173",  # Vite default port (HTTPS)

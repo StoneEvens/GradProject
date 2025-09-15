@@ -7,7 +7,7 @@ from .settings import *
 DEBUG = False
 
 ALLOWED_HOSTS = [
-    'petapp.geniusbee.net',
+    'peter.geniusbee.net',
     'localhost',
     '127.0.0.1',
     'geniusbee.net',
@@ -18,7 +18,7 @@ ALLOWED_HOSTS = [
 # CORS configuration for production
 CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOWED_ORIGINS = [
-    "https://petapp.geniusbee.net",
+    "https://peter.geniusbee.net",
     "https://geniusbee.net",
     "http://localhost:3000",  # Local development
     "http://localhost:5173",  # Vite default port
@@ -53,7 +53,7 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', SECRET_KEY)
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': os.environ.get('DB_NAME', 'petapp'),
+#         'NAME': os.environ.get('DB_NAME', 'peter'),
 #         'USER': os.environ.get('DB_USER', 'petapp_user'),
 #         'PASSWORD': os.environ.get('DB_PASSWORD'),
 #         'HOST': os.environ.get('DB_HOST', 'localhost'),
