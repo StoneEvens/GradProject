@@ -431,13 +431,15 @@ const PostList = ({
       <div className={styles.postList} ref={containerRef}>
         {currentPosts
           .filter(post => {
-            // 額外安全過濾：確保不顯示疾病檔案
-            const isArchive = post.archive_title ||
-                             post.generated_content ||
-                             post.archiveTitle ||
-                             post.content_type === 'archive' ||
-                             post.post_type === 'archive';
-            return !isArchive;
+            // 簡單方法：只顯示有圖片的貼文
+            const hasImages = post.images && Array.isArray(post.images) && post.images.length > 0;
+
+            // 簡化調試輸出
+            if (!hasImages) {
+              console.log(`🚫 PostList 過濾掉沒有圖片的項目 (ID: ${post.id || post.post_id})`);
+            }
+
+            return hasImages;
           })
           .map((post, index) => (
             <div

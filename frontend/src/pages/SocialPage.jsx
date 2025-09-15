@@ -63,25 +63,28 @@ const SocialPage = () => {
       if (result.success) {
         const allPosts = result.data.posts || [];
 
-        // 過濾掉疾病檔案，只保留一般貼文
-        // 疾病檔案通常有 archive_title, generated_content 等特有字段
-        // 一般貼文有 content, description 等字段
-        const newPosts = allPosts.filter(post => {
-          // 如果有 archive_title 或 generated_content，則可能是疾病檔案
-          const isArchive = post.archive_title ||
-                           post.generated_content ||
-                           post.archiveTitle ||
-                           post.content_type === 'archive' ||
-                           post.post_type === 'archive';
+        console.log('🔍 API 返回貼文數據:', allPosts.length, '筆');
 
-          // 只保留非疾病檔案的貼文
-          return !isArchive;
+        // 過濾掉疾病檔案，只保留一般貼文
+        // 簡單方法：一般貼文一定會有照片
+        const newPosts = allPosts.filter(post => {
+          // 檢查是否有圖片
+          const hasImages = post.images && Array.isArray(post.images) && post.images.length > 0;
+
+          // 簡化調試輸出
+          if (!hasImages) {
+            console.log(`🚫 過濾掉沒有圖片的項目 (ID: ${post.id || post.post_id})`);
+          }
+
+          // 只保留有圖片的貼文
+          return hasImages;
         });
 
-        console.log('載入貼文過濾結果:', {
+        console.log('📊 載入貼文過濾結果:', {
           總數: allPosts.length,
           過濾後: newPosts.length,
-          過濾掉的: allPosts.length - newPosts.length
+          過濾掉的: allPosts.length - newPosts.length,
+          過濾後的貼文IDs: newPosts.map(p => p.id || p.post_id)
         });
 
         if (isLoadMore) {
