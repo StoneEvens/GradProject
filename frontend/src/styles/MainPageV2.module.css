@@ -1,0 +1,68 @@
+.container {
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
+  background-color: #fef5e7;
+  position: relative;
+  width: 100%;
+  max-width: 430px;  /* 限制為標準手機寬度 */
+  margin: 0 auto;
+}
+
+.mainContent {
+  padding-top: calc(60px + max(env(safe-area-inset-top), 10px));
+  padding-bottom: calc(70px + max(env(safe-area-inset-bottom), 8px));
+  min-height: calc(100vh - 130px - max(env(safe-area-inset-top), 10px) - max(env(safe-area-inset-bottom), 8px));
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.aiSection {
+  flex-shrink: 0;
+  background-color: #fef5e7;
+  margin-top: 20px;
+}
+
+.todoSection {
+  flex: 1;
+  background-color: #fff6ea;
+  min-height: 200px;
+}
+
+.dailyTaskSection {
+  flex-shrink: 0;
+  background-color: #fef5e7;
+}
+
+.placeholder {
+  background-color: #fff8f0;
+  border-radius: 12px;
+  padding: 40px;
+  text-align: center;
+  color: #999;
+  font-size: 16px;
+  border: 2px dashed #ffd4a3;
+}
+
+/* 在小螢幕上的調整 */
+@media (max-width: 768px) {
+  .mainContent {
+    padding-top: calc(56px + max(env(safe-area-inset-top), 10px));
+    padding-bottom: calc(56px + max(env(safe-area-inset-bottom), 8px));
+  }
+  
+  .todoSection,
+  .dailyTaskSection {
+    padding: 12px;
+  }
+}
+
+/* 確保導航欄寬度與容器一致 */
+.container :global(.navbar) {
+  max-width: 430px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+}

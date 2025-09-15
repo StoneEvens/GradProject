@@ -12,6 +12,17 @@ const AddSchedule = ({ onClose, onSave, initialData, onDelete, onMarkCompleted, 
   const [showConfirmNotification, setShowConfirmNotification] = useState(false);
   const [description, setDescription] = useState(initialData?.description || '');
   
+  // 日期相關狀態
+  const [selectedScheduleDate, setSelectedScheduleDate] = useState(() => {
+    if (initialData?.date) {
+      return initialData.date;
+    }
+    if (selectedDate) {
+      return formatDate(new Date(selectedDate));
+    }
+    return formatDate(new Date());
+  });
+  
   // 開始時間相關狀態
   const [startHour, setStartHour] = useState(initialData?.start_time ? initialData.start_time.split(':')[0] : '08');
   const [startMinute, setStartMinute] = useState(initialData?.start_time ? initialData.start_time.split(':')[1] : '00');
@@ -41,12 +52,24 @@ const AddSchedule = ({ onClose, onSave, initialData, onDelete, onMarkCompleted, 
 
   // 取得日期標題
   const getDateTitle = () => {
-    if (!selectedDate) return '今日';
-    
-    const date = new Date(selectedDate);
+    const date = new Date(selectedScheduleDate);
     if (date.toDateString() === new Date().toDateString()) return '今日';
     
     return `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`;
+  };
+
+  // 格式化日期為 input[type="date"] 格式
+  const formatDateForInput = (dateStr) => {
+    const date = new Date(dateStr);
+    return date.getFullYear() + '-' + 
+           String(date.getMonth() + 1).padStart(2, '0') + '-' + 
+           String(date.getDate()).padStart(2, '0');
+  };
+
+  // 處理日期變更
+  const handleDateChange = (e) => {
+    const dateValue = e.target.value; // YYYY-MM-DD format
+    setSelectedScheduleDate(formatDate(new Date(dateValue)));
   };
 
   // 處理點擊外部關閉選擇器
@@ -99,10 +122,8 @@ const AddSchedule = ({ onClose, onSave, initialData, onDelete, onMarkCompleted, 
       endTime: `${endHour}:${endMinute}`
     };
     
-    // 如果有選定日期，添加到數據中
-    if (selectedDate) {
-      scheduleData.date = formatDate(new Date(selectedDate));
-    }
+    // 添加選定的日期
+    scheduleData.date = selectedScheduleDate;
     
     // 呼叫保存方法並關閉模態框
     onSave(scheduleData, initialData?.id);
@@ -172,8 +193,7 @@ const AddSchedule = ({ onClose, onSave, initialData, onDelete, onMarkCompleted, 
       <div className={styles.modal}>
         <div className={styles.headerSection}>
           <div className={styles.headerTitle}>
-            {isEditMode ? '修改行程' : '新增行程'} 
-            <span className={styles.dateLabel}>({getDateTitle()})</span>
+            {isEditMode ? '修改行程' : '新增行程'}
           </div>
           {isEditMode && (
             <div className={styles.headerButtons}>
@@ -194,6 +214,18 @@ const AddSchedule = ({ onClose, onSave, initialData, onDelete, onMarkCompleted, 
               </button>
             </div>
           )}
+        </div>
+        
+        <div className={styles.timeSection}>
+          <div className={styles.timeLabel}>日期</div>
+          <div className={styles.timeInputContainer}>
+            <input
+              type="date"
+              className={styles.dateInput}
+              value={formatDateForInput(selectedScheduleDate)}
+              onChange={handleDateChange}
+            />
+          </div>
         </div>
         
         <div className={styles.timeSection}>

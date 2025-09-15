@@ -1,0 +1,95 @@
+.dailyTasksContainer {
+  width: 100%;
+  padding: 16px;
+  background-color: #fef5e7;
+}
+
+.sectionTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 12px 0;
+}
+
+.tasksGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.taskCard {
+  background-color: white;
+  border-radius: 6px;
+  padding: 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+.taskContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.taskInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.taskIcon {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+.taskTitle {
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+}
+
+.completeButton {
+  background-color: #ffca9c;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #333;
+  cursor: pointer;
+}
+
+/* 手機版調整 */
+@media (max-width: 480px) {
+  .dailyTasksContainer {
+    padding: 12px;
+  }
+
+  .sectionTitle {
+    font-size: 16px;
+    margin-bottom: 10px;
+  }
+
+  .tasksGrid {
+    gap: 10px;
+  }
+
+  .taskCard {
+    padding: 12px;
+  }
+
+  .taskIcon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .taskTitle {
+    font-size: 15px;
+  }
+
+  .completeButton {
+    padding: 5px 10px;
+    font-size: 11px;
+  }
+
+}

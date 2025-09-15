@@ -1,0 +1,1063 @@
+/* 主容器 */
+.container {
+  min-height: 100vh;
+  background: #FFF2D9;
+  padding-top: calc(60px + max(env(safe-area-inset-top), 10px) + 30px);
+  padding-bottom: calc(70px + max(env(safe-area-inset-bottom), 8px) + 30px);
+  box-sizing: border-box;
+}
+
+.content {
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #89350c;
+  text-align: left;
+  margin: 20px 0;
+  padding-bottom: 16px;
+  border-bottom: 2px solid rgba(255, 179, 112, 0.3);
+}
+
+/* 功能區域 */
+.functionArea {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 16px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.2) 100%);
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.functionArea::-webkit-scrollbar {
+  display: none;
+}
+
+.functionButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  min-width: 100px;
+  background: #fff6ea;
+  border: 1px solid rgba(255, 179, 112, 0.2);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+  color: #8B4513;
+  font-size: 0.85rem;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.functionButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.functionButton:hover {
+  background: #f5eed8;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+  border-color: #FFB370;
+  color: #6B3410;
+}
+
+.functionButton:hover::before {
+  opacity: 1;
+}
+
+.functionButton:active {
+  background: #FFB370;
+  border: 2px solid transparent;
+  color: white;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1), 0 4px 12px rgba(255, 140, 26, 0.25);
+  transform: translateY(1px);
+}
+
+.functionButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #f0f0f0;
+  color: #999;
+  border-color: #ddd;
+}
+
+.functionButton:disabled:hover {
+  transform: none;
+  background: #f0f0f0;
+  box-shadow: 0 2px 8px rgba(255, 140, 26, 0.1);
+}
+
+.spacer {
+  flex: 1;
+  min-width: 20px;
+}
+
+/* 按鈕欄位 */
+.buttonBar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 24px;
+  padding: 16px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.2) 100%);
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.buttonBar::-webkit-scrollbar {
+  display: none;
+}
+
+.navButton {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 8px 10px;
+  min-width: 68px;
+  max-width: 80px;
+  flex-shrink: 0;
+  background: #fff6ea;
+  border: 1px solid rgba(255, 179, 112, 0.2);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.operatorSymbol {
+  font-size: 1rem;
+  font-weight: bold;
+  color: #F08651;
+  margin: 0 2px;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.navButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.navButton:hover {
+  background: #f5eed8;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+  border-color: #FFB370;
+}
+
+.navButton:hover::before {
+  opacity: 1;
+}
+
+.navButton.active {
+  background: #FFB370;
+  border: 2px solid transparent;
+  color: white;
+  box-shadow: 0 4px 16px rgba(255, 140, 26, 0.3);
+}
+
+.navButton img {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+  transition: transform 0.3s ease;
+}
+
+.navButton:hover img {
+  transform: scale(1.1);
+}
+
+.navButton:active {
+  background: #FFB370;
+  border: 2px solid transparent;
+  color: white;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1), 0 4px 12px rgba(255, 140, 26, 0.25);
+  transform: translateY(1px);
+}
+
+.navButton:active img {
+  filter: brightness(0) invert(1) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+.navButton:active span {
+  color: white;
+  font-weight: 700;
+}
+
+.navButton.active img {
+  filter: brightness(0) invert(1) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+.navButton span {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #8B4513;
+  white-space: nowrap;
+  transition: color 0.3s ease;
+}
+
+.navButton.active span {
+  color: white;
+  font-weight: 700;
+}
+
+/* 內容區域 */
+.contentArea {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.2) 100%);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  margin-bottom: 30px;
+}
+
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+  font-size: 1.1rem;
+  color: #666;
+}
+
+/* 區塊樣式 */
+.section {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.sectionHeader {
+  margin-bottom: 20px;
+}
+
+.sectionTitle {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #89350c;
+}
+
+/* 寵物模式切換按鈕 */
+.petModeToggle {
+  display: flex;
+  background: rgba(255, 179, 112, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.modeButton {
+  flex: 1;
+  padding: 8px 16px;
+  background: #fff6ea;
+  border: 2px solid rgba(255, 179, 112, 0.2);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #8B4513;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(255, 140, 26, 0.1);
+}
+
+.modeButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.modeButton:hover {
+  background: #f5eed8;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(255, 140, 26, 0.15);
+  border-color: #FFB370;
+}
+
+.modeButton:hover::before {
+  opacity: 1;
+}
+
+.modeButton.activeModeButton {
+  background: #FFB370;
+  border: 2px solid transparent;
+  color: white;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1), 0 4px 12px rgba(255, 140, 26, 0.25);
+  transform: translateY(1px);
+}
+
+.modeButton:first-child {
+  border-right: 1px solid rgba(255, 179, 112, 0.3);
+}
+
+.modeButton:last-child {
+  border-left: 1px solid rgba(255, 179, 112, 0.3);
+}
+
+.modeButton:first-child.activeModeButton {
+  border-right: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: inset 2px 2px 4px rgba(0, 0, 0, 0.1), 0 4px 12px rgba(255, 140, 26, 0.25);
+}
+
+.modeButton:last-child.activeModeButton {
+  border-left: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: inset -2px 2px 4px rgba(0, 0, 0, 0.1), 0 4px 12px rgba(255, 140, 26, 0.25);
+}
+
+.modeButton.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #f0f0f0;
+  color: #999;
+  border-color: #ddd;
+}
+
+.modeButton.disabled:hover {
+  transform: none;
+  background: #f0f0f0;
+  box-shadow: 0 2px 4px rgba(255, 140, 26, 0.1);
+  border-color: #ddd;
+}
+
+/* 臨時寵物表單 */
+.tempPetForm {
+  margin-top: 16px;
+}
+
+.select {
+  flex: 1;
+  padding: 6px 10px;
+  border: 1px solid rgba(255, 179, 112, 0.3);
+  border-radius: 6px;
+  font-size: 0.9rem;
+  background: white;
+  transition: border-color 0.3s ease;
+}
+
+.select:focus {
+  outline: none;
+  border-color: #FFB370;
+}
+
+.tempPetActions {
+  margin-top: 16px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.createTempPetButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 24px;
+  min-width: 140px;
+  background: #fff6ea;
+  border: 2px solid rgba(255, 179, 112, 0.2);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+  color: #8B4513;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.createTempPetButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.createTempPetButton:hover {
+  background: #f5eed8;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+  border-color: #FFB370;
+  color: #6B3410;
+}
+
+.createTempPetButton:hover::before {
+  opacity: 1;
+}
+
+.createTempPetButton:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.createTempPetButton.locked {
+  background: #FFB370;
+  border: 2px solid transparent;
+  color: white;
+  box-shadow: 0 4px 16px rgba(255, 140, 26, 0.3);
+}
+
+.createTempPetButton.locked:hover {
+  background: #F08651;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+  color: white;
+}
+
+/* 選擇寵物區域 */
+.petSwitcher {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 8px 0;
+  margin-bottom: 20px;
+}
+
+.petItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 8px;
+  min-width: 80px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.petItem {
+  position: relative;
+}
+
+.petItem img {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+}
+
+.petItem::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+  background: #fff6ea;
+  border: 2px solid rgba(255, 179, 112, 0.2);
+  box-shadow: 0 2px 8px rgba(255, 140, 26, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1;
+}
+
+.petItem::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.petItem:hover::before {
+  transform: translateX(-50%) translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 140, 26, 0.2);
+  border-color: #FFB370;
+}
+
+.petItem:hover::after {
+  opacity: 1;
+}
+
+.petItem:hover img {
+  transform: translateX(-50%) translateY(-2px);
+}
+
+.petItem span {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #8B4513;
+  text-align: center;
+  white-space: nowrap;
+  transition: color 0.3s ease;
+  z-index: 2;
+  position: relative;
+  margin-top: 64px;
+}
+
+
+
+.petItem.activePet span {
+  color: #F08651;
+  font-weight: 700;
+}
+
+.petItem.activePet span::after {
+  content: ' ✓';
+  color: #4CAF50;
+  font-weight: 700;
+  margin-left: 4px;
+}
+
+.petInfoSection {
+  background: #fff6ea;
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 16px;
+}
+
+.infoRow {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+  gap: 8px;
+}
+
+.infoRow:last-child {
+  margin-bottom: 0;
+}
+
+.label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #666;
+  min-width: 60px;
+}
+
+.value {
+  font-size: 0.95rem;
+  color: #333;
+  font-weight: 500;
+}
+
+.input {
+  flex: 1;
+  padding: 6px 10px;
+  border: 1px solid rgba(255, 179, 112, 0.3);
+  border-radius: 6px;
+  font-size: 0.9rem;
+  background: white;
+  transition: border-color 0.3s ease;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #FFB370;
+}
+
+.unit {
+  font-size: 0.85rem;
+  color: #999;
+  margin-left: 4px;
+}
+
+/* 寵物狀況區域 */
+.conditionPanel {
+  background: #fff6ea;
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.conditionGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.conditionItem {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: #fff6ea;
+  border: 1px solid rgba(255, 179, 112, 0.2);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+  min-height: 48px;
+}
+
+.conditionItem::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.conditionItem:hover {
+  background: #f5eed8;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+  border-color: #FFB370;
+}
+
+.conditionItem:hover::before {
+  opacity: 1;
+}
+
+.conditionItem.selected {
+  background: #FFB370;
+  border: 2px solid transparent;
+  color: white;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1), 0 4px 12px rgba(255, 140, 26, 0.25);
+  transform: translateY(1px);
+}
+
+.conditionItem.selected span {
+  color: white;
+  font-weight: 700;
+}
+
+.conditionItem input[type="checkbox"] {
+  display: none;
+}
+
+.conditionItem span {
+  font-size: 0.75rem;
+  color: #8B4513;
+  font-weight: 600;
+  text-align: center;
+  line-height: 1.2;
+  position: relative;
+  z-index: 1;
+}
+
+.otherConditionItem {
+  grid-column: span 3;
+  justify-content: flex-start;
+  gap: 12px;
+}
+
+.otherConditionItem span {
+  text-align: left;
+  min-width: 60px;
+  flex-shrink: 0;
+}
+
+.otherInput {
+  flex: 1;
+  padding: 6px 10px;
+  border: 1px solid rgba(255, 179, 112, 0.3);
+  border-radius: 6px;
+  font-size: 0.85rem;
+  background: white;
+  transition: border-color 0.3s ease;
+}
+
+.otherInput:focus {
+  outline: none;
+  border-color: #FFB370;
+}
+
+.otherConditionItem.selected .otherInput {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.otherConditionItem.selected .otherInput:focus {
+  background: white;
+  border-color: white;
+}
+
+.selectedConditions {
+  margin-top: 16px;
+  padding: 12px;
+  background: rgba(255, 179, 112, 0.1);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: #666;
+  line-height: 1.5;
+}
+
+/* 選擇飼料區域 */
+.feedActions {
+  display: flex;
+  background: rgba(255, 179, 112, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+.feedActionBtn {
+  flex: 1;
+  padding: 8px 16px;
+  background: #fff6ea;
+  border: 2px solid rgba(255, 179, 112, 0.2);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #8B4513;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(255, 140, 26, 0.1);
+}
+
+.feedActionBtn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.feedActionBtn:hover {
+  background: #f5eed8;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(255, 140, 26, 0.15);
+  border-color: #FFB370;
+}
+
+.feedActionBtn:hover::before {
+  opacity: 1;
+}
+
+.feedActionBtn:first-child {
+  border-right: 1px solid rgba(255, 179, 112, 0.3);
+}
+
+.feedActionBtn:last-child {
+  border-left: 1px solid rgba(255, 179, 112, 0.3);
+}
+
+.feedSelectSection {
+  margin-bottom: 20px;
+}
+
+.selectedFeedDisplay {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: #fff6ea;
+  border-radius: 12px;
+  margin-bottom: 16px;
+}
+
+.feedImage {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  border-radius: 8px;
+  background: white;
+  padding: 4px;
+}
+
+.feedDetails {
+  flex: 1;
+}
+
+.feedName {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.feedBrand {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.noFeedSelected {
+  padding: 40px;
+  text-align: center;
+  background: #fff6ea;
+  border-radius: 12px;
+  color: #999;
+  margin-bottom: 16px;
+}
+
+
+.feedInfoSection {
+  background: #fff6ea;
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 16px;
+}
+
+.feedInfoSection h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #89350c;
+  margin-bottom: 12px;
+}
+
+.nutrientGrid {
+  display: grid;
+  gap: 10px;
+}
+
+.nutrientRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nutrientLabel {
+  font-size: 0.85rem;
+  color: #666;
+  min-width: 80px;
+}
+
+.nutrientInput {
+  flex: 1;
+  padding: 6px 10px;
+  border: 1px solid rgba(255, 179, 112, 0.3);
+  border-radius: 6px;
+  font-size: 0.9rem;
+  background: white;
+}
+
+.nutrientInput:focus {
+  outline: none;
+  border-color: #FFB370;
+}
+
+.nutrientUnit {
+  font-size: 0.85rem;
+  color: #999;
+  min-width: 30px;
+}
+
+/* 計算結果區域 */
+.calculatingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  gap: 16px;
+}
+
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid rgba(255, 179, 112, 0.2);
+  border-top-color: #FFB370;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.resultContainer {
+  animation: slideIn 0.5s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.resultItem {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background: #fff6ea;
+  border: 1px solid rgba(255, 179, 112, 0.2);
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.resultRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.resultLabel {
+  font-size: 0.9rem;
+  color: #8B4513;
+  font-weight: 600;
+}
+
+.resultValue {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #F08651;
+}
+
+.resultDescription {
+  background: #fff6ea;
+  border-radius: 8px;
+  padding: 16px;
+  border: 1px solid rgba(255, 179, 112, 0.2);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  margin-top: 8px;
+}
+
+.descriptionText {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: #333;
+  white-space: pre-wrap;
+}
+
+.noResultContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  background: #fff6ea;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+}
+
+.noResultContainer p {
+  color: #999;
+  font-size: 0.95rem;
+}
+
+/* 響應式設計 - 小螢幕調整 */
+@media (max-width: 380px) {
+  .functionArea {
+    padding: 12px;
+    gap: 8px;
+  }
+  
+  .functionButton {
+    min-width: 85px;
+    padding: 6px 12px;
+    font-size: 0.8rem;
+  }
+  
+  .buttonBar {
+    padding: 12px;
+    gap: 2px;
+  }
+  
+  .navButton {
+    min-width: 58px;
+    max-width: 68px;
+    padding: 6px 8px;
+  }
+  
+  .navButton img {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .navButton span {
+    font-size: 0.65rem;
+  }
+  
+  .operatorSymbol {
+    font-size: 0.9rem;
+    margin: 0 1px;
+  }
+}
+
+/* 確保按鈕列不會超出容器 */
+@media (min-width: 420px) {
+  .functionArea {
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .buttonBar {
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}

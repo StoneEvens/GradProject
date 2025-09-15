@@ -3,14 +3,52 @@ import { authAxios } from './authService';
 // 使用硬編碼的默認 API URL 而不是依賴 process.env
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
 
-// 獲取用戶行程
+// 獲取用戶行程（所有未完成的行程）
 export const getUserSchedules = async () => {
   try {
-    const response = await authAxios.get('/accounts/plans/today/');
-    return response.data.data || [];
+    // 首先嘗試獲取所有行程的端點
+    try {
+      const response = await authAxios.get('/accounts/plans/');
+      return response.data.data || [];
+    } catch (error) {
+      // 如果沒有 /accounts/plans/ 端點，使用日期範圍獲取
+      console.log('嘗試使用日期範圍獲取行程...');
+    }
+
+    // 獲取從今天開始的未來30天的行程
+    const today = new Date();
+    const allSchedules = [];
+
+    // 並行獲取未來30天的行程以提高效率
+    const promises = [];
+    for (let i = 0; i < 30; i++) {
+      const targetDate = new Date(today);
+      targetDate.setDate(today.getDate() + i);
+      const formattedDate = formatDate(targetDate);
+
+      promises.push(
+        authAxios.get(`/accounts/plans/date/${formattedDate}/`)
+          .then(response => response.data.data || [])
+          .catch(() => []) // 忽略錯誤，返回空數組
+      );
+    }
+
+    const results = await Promise.all(promises);
+    results.forEach(daySchedules => {
+      allSchedules.push(...daySchedules);
+    });
+
+    return allSchedules;
   } catch (error) {
     console.error('獲取行程失敗:', error);
-    throw error;
+    // 如果上面的方法都失敗，回退到只獲取今天的行程
+    try {
+      const response = await authAxios.get('/accounts/plans/today/');
+      return response.data.data || [];
+    } catch (fallbackError) {
+      console.error('回退獲取今日行程也失敗:', fallbackError);
+      throw error;
+    }
   }
 };
 
