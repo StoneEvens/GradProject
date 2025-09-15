@@ -61,8 +61,29 @@ const SocialPage = () => {
       });
       
       if (result.success) {
-        const newPosts = result.data.posts || [];
-        
+        const allPosts = result.data.posts || [];
+
+        // 過濾掉疾病檔案，只保留一般貼文
+        // 疾病檔案通常有 archive_title, generated_content 等特有字段
+        // 一般貼文有 content, description 等字段
+        const newPosts = allPosts.filter(post => {
+          // 如果有 archive_title 或 generated_content，則可能是疾病檔案
+          const isArchive = post.archive_title ||
+                           post.generated_content ||
+                           post.archiveTitle ||
+                           post.content_type === 'archive' ||
+                           post.post_type === 'archive';
+
+          // 只保留非疾病檔案的貼文
+          return !isArchive;
+        });
+
+        console.log('載入貼文過濾結果:', {
+          總數: allPosts.length,
+          過濾後: newPosts.length,
+          過濾掉的: allPosts.length - newPosts.length
+        });
+
         if (isLoadMore) {
           setPosts(prevPosts => [...prevPosts, ...newPosts]);
         } else {
