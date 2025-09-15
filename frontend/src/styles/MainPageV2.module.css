@@ -10,7 +10,7 @@
 
 .mainContent {
   padding-top: calc(60px + max(env(safe-area-inset-top), 10px));
-  padding-bottom: calc(70px + max(env(safe-area-inset-bottom), 8px));
+  padding-bottom: calc(70px + max(env(safe-area-inset-bottom), 16px));
   min-height: calc(100vh - 130px - max(env(safe-area-inset-top), 10px) - max(env(safe-area-inset-bottom), 8px));
   width: 100%;
   box-sizing: border-box;

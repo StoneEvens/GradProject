@@ -334,22 +334,213 @@
 /* 禁用背景滾動 */
 body:has(.chatOverlay) {
   overflow: hidden;
+  position: fixed;
+  width: 100%;
+  height: 100%;
 }
 
 /* 響應式設計 */
 @media (max-width: 480px) {
   .chatOverlay {
-    padding: 10px;
+    padding: 12px;
   }
 
   .chatContainer {
-    max-width: 100%;
-    height: 100%;
-    max-height: 100vh;
-    border-radius: 0;
+    max-width: 95vw;
+    min-width: 320px;
+    height: 85vh;
+    max-height: 85vh;
+    border-radius: 15px;
+  }
+
+  .chatHeader {
+    padding: 16px 20px;
+  }
+
+  .headerText h3 {
+    font-size: 16px;
+  }
+
+  .status {
+    font-size: 11px;
+  }
+
+  .messagesContainer {
+    padding: 16px 12px;
+    gap: 12px;
   }
 
   .messageContent {
-    max-width: 80%;
+    max-width: 75%;
+  }
+
+  .messageBubble {
+    padding: 10px 14px;
+    font-size: 14px;
+  }
+
+  .messageAvatar {
+    width: 28px;
+    height: 28px;
+  }
+
+  .inputSection {
+    padding: 12px 16px;
+  }
+
+  .inputContainer {
+    padding: 10px 12px;
+    gap: 8px;
+  }
+
+  .inputUserAvatar img {
+    width: 28px;
+    height: 28px;
+  }
+
+  .inputTextarea {
+    font-size: 14px;
+    padding: 6px 0;
+  }
+
+  .sendBtn {
+    width: 32px;
+    height: 32px;
+  }
+
+  .sendBtn img {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+/* 針對更小的手機優化 */
+@media (max-width: 360px) {
+  .chatOverlay {
+    padding: 8px;
+  }
+
+  .chatContainer {
+    max-width: 98vw;
+    min-width: 300px;
+    height: 90vh;
+    max-height: 90vh;
+    border-radius: 12px;
+  }
+
+  .chatHeader {
+    padding: 14px 16px;
+  }
+
+  .headerText h3 {
+    font-size: 15px;
+  }
+
+  .aiAvatar {
+    width: 36px;
+    height: 36px;
+  }
+
+  .messagesContainer {
+    padding: 12px 8px;
+    gap: 10px;
+  }
+
+  .messageContent {
+    max-width: 70%;
+  }
+
+  .messageBubble {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+
+  .messageAvatar {
+    width: 26px;
+    height: 26px;
+  }
+
+  .inputSection {
+    padding: 10px 12px;
+  }
+
+  .inputContainer {
+    padding: 8px 10px;
+    gap: 6px;
+  }
+
+  .inputUserAvatar img {
+    width: 26px;
+    height: 26px;
+  }
+
+  .inputTextarea {
+    font-size: 13px;
+    padding: 4px 0;
+  }
+
+  .sendBtn {
+    width: 28px;
+    height: 28px;
+  }
+
+  .sendBtn img {
+    width: 14px;
+    height: 14px;
+  }
+
+  .closeButton {
+    width: 28px;
+    height: 28px;
+    font-size: 20px;
+  }
+}
+
+/* iOS 安全區域支持 */
+@media (max-width: 480px) {
+  .chatContainer {
+    /* 確保不被 iOS 的 safe area 遮擋 */
+    margin-top: max(env(safe-area-inset-top), 0px);
+    margin-bottom: max(env(safe-area-inset-bottom), 0px);
+    margin-left: max(env(safe-area-inset-left), 0px);
+    margin-right: max(env(safe-area-inset-right), 0px);
+  }
+
+  .inputSection {
+    /* 底部輸入區域的安全區域處理 */
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
+  }
+}
+
+/* 觸控優化 */
+@media (hover: none) {
+  .sendBtn:hover,
+  .closeButton:hover {
+    transform: none;
+    background-color: transparent;
+  }
+
+  .sendBtn:active {
+    transform: scale(0.95);
+  }
+
+  .closeButton:active {
+    background-color: rgba(255, 255, 255, 0.3);
+  }
+}
+
+/* 橫向模式優化 */
+@media (max-width: 768px) and (orientation: landscape) {
+  .chatContainer {
+    height: 95vh;
+    max-height: 95vh;
+  }
+
+  .messagesContainer {
+    padding: 12px;
+  }
+
+  .inputSection {
+    padding: 8px 16px;
   }
 }
