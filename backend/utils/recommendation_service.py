@@ -188,7 +188,7 @@ class RecommendationService:
 
             print(post_embeddings.shape)
         else:
-            raise ValueError(f"Post ID {post_id} not found in vector store")
+            print(f"Post ID {post_id} not found in vector store")
 
     #----------Embedding User History----------#
     def embed_user_history(self,
