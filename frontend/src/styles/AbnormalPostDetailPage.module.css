@@ -195,7 +195,7 @@
 
 /* 症狀區域 */
 .symptomSection {
-  background-color: #ffeed6;
+  background-color: #fff6ea;
   border-radius: 16px;
   padding: 15px 20px;
 }
@@ -230,7 +230,7 @@
 
 /* 身體數值區域 */
 .bodyStatsContainer {
-  background-color: #ffeed6;
+  background-color: #fff6ea;
   border-radius: 16px;
   padding: 16px;
 }
@@ -287,7 +287,7 @@
 
 /* 描述區域 */
 .descriptionSection {
-  background-color: #ffeed6;
+  background-color: #fff6ea;
   border-radius: 16px;
   padding: 20px;
   min-height: 120px;
@@ -303,7 +303,7 @@
 
 /* 圖片區域 */
 .imageSection {
-  background-color: #ffeed6;
+  background-color: #fff6ea;
   border-radius: 16px;
   padding: 20px;
 }

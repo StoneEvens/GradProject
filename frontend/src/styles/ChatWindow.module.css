@@ -1,0 +1,355 @@
+/* 聊天覆蓋層 */
+.chatOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 99999;
+  padding: 20px;
+  /* 確保覆蓋所有內容包括導航欄 */
+  width: 100vw;
+  height: 100vh;
+}
+
+/* 聊天容器 */
+.chatContainer {
+  background: #fff6ea;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 400px;
+  height: 600px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 30px rgba(240, 134, 81, 0.3);
+  overflow: hidden;
+  border: 2px solid #f08651;
+  position: relative;
+  z-index: 100000;
+}
+
+/* 聊天標題列 */
+.chatHeader {
+  background: linear-gradient(135deg, #f08651, #ff9a56);
+  color: white;
+  padding: 15px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.headerInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.aiAvatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  object-fit: cover;
+}
+
+.headerText h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.status {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.closeButton:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* 訊息區域 */
+.messagesContainer {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  background: #fff6ea;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* 訊息包裝器 */
+.messageWrapper {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.userMessage {
+  flex-direction: row-reverse;
+}
+
+.aiMessage {
+  flex-direction: row;
+}
+
+/* 訊息頭像 */
+.messageAvatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 2px solid #f08651;
+}
+
+/* 訊息內容 */
+.messageContent {
+  display: flex;
+  flex-direction: column;
+  max-width: 70%;
+}
+
+.userMessage .messageContent {
+  align-items: flex-end;
+}
+
+.aiMessage .messageContent {
+  align-items: flex-start;
+}
+
+/* 訊息氣泡 */
+.messageBubble {
+  background: white;
+  padding: 12px 16px;
+  border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(240, 134, 81, 0.2);
+  word-wrap: break-word;
+  line-height: 1.4;
+  font-size: 14px;
+}
+
+.userMessage .messageBubble {
+  background: linear-gradient(135deg, #f08651, #ff9a56);
+  color: white;
+  border-bottom-right-radius: 8px;
+}
+
+.aiMessage .messageBubble {
+  background: white;
+  color: #333;
+  border-bottom-left-radius: 8px;
+  border: 1px solid #f08651;
+}
+
+/* 訊息時間 */
+.messageTime {
+  font-size: 11px;
+  color: #8e8e93;
+  margin-top: 4px;
+  padding: 0 4px;
+}
+
+/* 打字指示器 */
+.typingIndicator {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 16px;
+  background: white;
+  border: 1px solid #f08651;
+}
+
+.typingIndicator span {
+  width: 6px;
+  height: 6px;
+  background: #f08651;
+  border-radius: 50%;
+  animation: typing 1.4s infinite;
+}
+
+.typingIndicator span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typingIndicator span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes typing {
+  0%, 60%, 100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  30% {
+    transform: translateY(-10px);
+    opacity: 1;
+  }
+}
+
+/* 輸入區域 */
+.inputSection {
+  background: #fff6ea;
+  border-top: 1px solid #f08651;
+  padding: 15px 20px;
+}
+
+.inputContainer {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  background: white;
+  border-radius: 25px;
+  padding: 8px 12px;
+  border: 2px solid #f08651;
+  transition: border-color 0.2s;
+}
+
+.inputContainer:focus-within {
+  border-color: #ff9a56;
+  box-shadow: 0 0 0 3px rgba(240, 134, 81, 0.2);
+}
+
+.inputUserAvatar {
+  flex-shrink: 0;
+}
+
+.inputUserAvatar img {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #f08651;
+}
+
+.inputTextarea {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  resize: none;
+  font-size: 14px;
+  line-height: 1.4;
+  padding: 8px 0;
+  min-height: 20px;
+  max-height: 100px;
+  font-family: inherit;
+}
+
+.inputTextarea::placeholder {
+  color: #8e8e93;
+}
+
+.inputActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sendBtn {
+  background: linear-gradient(135deg, #f08651, #ff9a56);
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.sendBtn:hover:not(:disabled) {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(240, 134, 81, 0.4);
+}
+
+.sendBtn:disabled {
+  background: #e9ecef;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.sendBtn img {
+  width: 18px;
+  height: 18px;
+  filter: brightness(0) invert(1);
+}
+
+.sendBtn:disabled img {
+  filter: brightness(0) invert(0.5);
+}
+
+/* 滾動條樣式 */
+.messagesContainer::-webkit-scrollbar {
+  width: 6px;
+}
+
+.messagesContainer::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.messagesContainer::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+
+.messagesContainer::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* 確保聊天框覆蓋所有元素 */
+.chatOverlay * {
+  pointer-events: auto;
+}
+
+.chatOverlay {
+  pointer-events: auto;
+}
+
+/* 禁用背景滾動 */
+body:has(.chatOverlay) {
+  overflow: hidden;
+}
+
+/* 響應式設計 */
+@media (max-width: 480px) {
+  .chatOverlay {
+    padding: 10px;
+  }
+
+  .chatContainer {
+    max-width: 100%;
+    height: 100%;
+    max-height: 100vh;
+    border-radius: 0;
+  }
+
+  .messageContent {
+    max-width: 80%;
+  }
+}

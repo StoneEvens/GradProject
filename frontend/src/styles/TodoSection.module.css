@@ -1,0 +1,302 @@
+.todoContainer {
+  width: 100%;
+  padding: 16px;
+  background-color: #fff6ea;
+}
+
+.titleRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0px;
+}
+
+.sectionTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.addButton {
+  background-color: #ffca9c;
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  font-size: 20px;
+  font-weight: bold;
+  color: #333;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.addButton:hover {
+  transform: scale(1.1);
+  box-shadow: 0 2px 8px rgba(255, 202, 156, 0.4);
+}
+
+.addButton:active {
+  transform: scale(0.95);
+}
+
+.todoGrid {
+  gap: 12px;
+  padding-top: 6px;
+}
+
+.todoGrid.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.todoGrid.horizontal {
+  display: flex;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.todoGrid.horizontal::-webkit-scrollbar {
+  display: none;
+}
+
+.todoCard {
+  position: relative;
+  background-color: transparent;
+  border-radius: 4px;
+  margin-top: 6px;
+  margin-left: 4px;
+  margin-bottom: 4px;
+  min-height: 150px;
+  display: flex;
+  flex-direction: column;
+}
+
+.todoGrid.horizontal .todoCard {
+  width: 120px;
+  flex-shrink: 0;
+}
+
+.todoCard.overdue .noteContent {
+  background-color: #fdc6c6;
+}
+
+.noteContent {
+  position: relative;
+  background-color: white;
+  border-radius: 4px;
+  flex: 1;
+  margin-top: -4px;
+  padding: 16px 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.todoCard {
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.todoCard:hover {
+  transform: translateY(-2px);
+}
+
+.tapeLine {
+  position: relative;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 12px;
+  background-color: #ffca9c;
+  border-radius: 2px;
+  z-index: 3;
+  margin-bottom: 0px;
+}
+
+
+
+.todoTitle {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  margin: 0;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #333;
+  word-break: break-word;
+  line-height: 1.4;
+}
+
+.timeInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  align-self: center;
+}
+
+.timeDisplay {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+}
+
+.timeNumber {
+  font-size: 18px;
+  font-weight: 700;
+  color: #333;
+  line-height: 1;
+}
+
+.timeUnit {
+  font-size: 10px;
+  color: #666;
+  margin-right: 3px;
+}
+
+.timeSuffix {
+  font-size: 11px;
+  color: #666;
+  margin-left: 2px;
+}
+
+
+.emptyCard {
+  position: relative;
+  background-color: transparent;
+  border-radius: 4px;
+  margin-top: 6px;
+  min-height: 150px;
+  display: flex;
+  flex-direction: column;
+  opacity: 0.5;
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.todoGrid.horizontal .emptyCard {
+  width: 120px;
+  flex-shrink: 0;
+}
+
+.emptyCard:hover {
+  transform: translateY(-2px);
+  opacity: 0.8;
+}
+
+.emptyCard .tapeLine {
+  opacity: 0.7;
+}
+
+.emptyContent {
+  position: relative;
+  background-color: white;
+  border-radius: 4px;
+  flex: 1;
+  margin-top: -4px;
+  padding: 16px 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  gap: 4px;
+}
+
+.emptyText {
+  font-size: 13px;
+  color: #999;
+}
+
+.addText {
+  font-size: 11px;
+  color: #ffca9c;
+  font-weight: 500;
+}
+
+.loadingMessage,
+.errorMessage,
+.emptyMessage {
+  width: 100%;
+  text-align: center;
+  padding: 20px;
+  color: #666;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.errorMessage {
+  color: #f44336;
+}
+
+/* 手機版調整 */
+@media (max-width: 480px) {
+  .todoContainer {
+    padding: 12px;
+  }
+
+  .sectionTitle {
+    font-size: 16px;
+    margin-bottom: 12px;
+  }
+
+  .todoGrid {
+    gap: 10px;
+    padding-bottom: 10px;
+  }
+
+  .todoCard,
+  .emptyCard {
+    min-height: 130px;
+  }
+
+  .todoGrid.horizontal .todoCard,
+  .todoGrid.horizontal .emptyCard {
+    width: 110px;
+  }
+
+  .todoTitle {
+    font-size: 13px;
+  }
+
+  .timeNumber {
+    font-size: 15px;
+  }
+
+  .timeUnit {
+    font-size: 9px;
+  }
+
+  .timeSuffix {
+    font-size: 10px;
+  }
+
+  .tapeLine {
+    width: 50%;
+    height: 10px;
+  }
+
+  .todoCard:hover {
+    transform: none;
+  }
+
+  .emptyCard:hover {
+    transform: none;
+  }
+
+  .addText {
+    font-size: 10px;
+  }
+}

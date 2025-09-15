@@ -5,6 +5,7 @@ import HomePage from './pages/HomePage';
 import RegisterPage from './pages/RegisterPage';
 import LoginPage from './pages/LoginPage';
 import MainPage from './pages/MainPage';
+import MainPageV2 from './pages/MainPageV2';
 import UserProfilePage from './pages/UserProfilePage';
 import OtherUserProfilePage from './pages/OtherUserProfilePage';
 import UserFollowConditionPage from './pages/UserFollowConditionPage';
@@ -32,6 +33,7 @@ import PetRelatedPostsListPage from './pages/PetRelatedPostsListPage';
 import PetAbnormalPostsPage from './pages/PetAbnormalPostsPage';
 import AbnormalPostDetailPage from './pages/AbnormalPostDetailPage';
 import CalculatorPage from './pages/CalculatorPage';
+import CalculatorPageV2 from './pages/CalculatorPageV2';
 import FeedPage from './pages/FeedPage';
 import FeedDetailPage from './pages/FeedDetailPage';
 import MarkedFeedsPage from './pages/MarkedFeedsPage';
@@ -133,7 +135,7 @@ const App = () => {
         {/* 根路徑：已登入導向MainPage，未登入導向HomePage */}
         <Route 
           path="/" 
-          element={isUserAuthenticated ? <MainPage /> : <HomePage />} 
+          element={isUserAuthenticated ? <MainPageV2 /> : <HomePage />} 
         />
         {/* 登入頁面：已登入導向MainPage */}
         <Route 
@@ -148,7 +150,7 @@ const App = () => {
         {/* 主頁面：未登入導向HomePage */}
         <Route 
           path="/main" 
-          element={isUserAuthenticated ? <MainPage /> : <Navigate to="/" />} 
+          element={isUserAuthenticated ? <MainPageV2 /> : <Navigate to="/" />} 
         />
         {/* 用戶個人頁：未登入導向HomePage */}
         <Route 
@@ -332,6 +334,11 @@ const App = () => {
         {/* 計算機頁面：未登入導向HomePage */}
         <Route 
           path="/calculator" 
+          element={isUserAuthenticated ? <CalculatorPageV2 /> : <Navigate to="/" />} 
+        />
+        {/* 舊版計算機頁面（保留用於測試） */}
+        <Route 
+          path="/calculator-old" 
           element={isUserAuthenticated ? <CalculatorPage /> : <Navigate to="/" />} 
         />
         {/* 飼料頁面：未登入導向HomePage */}

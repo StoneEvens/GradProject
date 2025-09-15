@@ -88,6 +88,7 @@
   cursor: default;
 }
 
+
 .timeSection {
   display: flex;
   margin-bottom: 16px;
@@ -176,6 +177,17 @@
   background-color: #F08651;
   color: #fff;
   font-weight: 500;
+}
+
+.dateInput {
+  width: 100%;
+  background: transparent;
+  border: none;
+  font-size: 18px;
+  font-weight: 500;
+  color: #333;
+  outline: none;
+  text-align: center;
 }
 
 .timeDivider {
