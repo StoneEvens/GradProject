@@ -49,14 +49,14 @@
 .header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-end;
   padding: 20px 0 8px 0;
   gap: 15px;
 }
 
 .titleSection {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   gap: 10px;
   flex: 1;
 }
@@ -75,6 +75,7 @@
   color: #89350c;
   margin: 0;
   white-space: nowrap;
+  padding-bottom: 5px;
 }
 
 .newButton {
@@ -88,6 +89,8 @@
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
+  margin-bottom: 5px;
+  align-self: flex-end;
 }
 
 .newButton:hover {
@@ -1000,20 +1003,35 @@
     align-items: stretch;
   }
 
-  /* 數值區域手機版調整 */
+  /* 數值區域手機版調整 - 保持橫向排列 */
   .valuesInlineContainer .formInlineGroup {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 8px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
   }
 
   .valueLabel {
     text-align: left;
     min-width: auto;
+    font-size: 12px;
+    flex-shrink: 0;
   }
 
   .valueInput {
-    width: 60%;
+    width: 50%;
+    min-width: 80px;
+    font-size: 12px;
+    padding: 8px 10px;
+  }
+
+  /* 數值顯示區域（詳情頁面用） */
+  .valuesInlineContainer .inlineValue {
+    width: 50%;
+    min-width: 80px;
+    font-size: 12px;
+    text-align: right;
+    word-break: break-word;
   }
 
   /* 備註區域手機版調整 */
@@ -1159,6 +1177,33 @@
     font-size: 1.2rem;
   }
 
+  /* 數值區域在小螢幕也保持橫向 */
+  .valuesInlineContainer .formInlineGroup {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .valueLabel {
+    font-size: 11px;
+    flex-shrink: 0;
+  }
+
+  .valueInput {
+    width: 45%;
+    min-width: 70px;
+    font-size: 11px;
+    padding: 6px 8px;
+  }
+
+  .valuesInlineContainer .inlineValue {
+    width: 45%;
+    min-width: 70px;
+    font-size: 11px;
+    text-align: right;
+  }
+
   .actionButtons {
     gap: 10px;
     margin-top: 20px;
@@ -1193,21 +1238,41 @@
   }
 }
 
-/* 英文版本下將 label 和 input 垂直排列 */
-.formStackedGroup {
+/* 英文版本下將 label 和 input 垂直排列（數值記錄除外） */
+.formStackedGroup:not(.valuesInlineContainer .formInlineGroup) {
   flex-direction: column !important;
   align-items: flex-start !important;
   gap: 8px !important;
 }
 
-.formStackedGroup .valueLabel,
+/* 英文版本下數值記錄區域保持橫向排列 */
+.valuesInlineContainer .formStackedGroup {
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 10px !important;
+}
+
+.formStackedGroup:not(.valuesInlineContainer .formInlineGroup) .valueLabel,
 .formStackedGroup .ocrLabel {
   margin-bottom: 0;
   width: 100%;
   min-width: unset;
 }
 
-.formStackedGroup .valueInput,
+.valuesInlineContainer .formStackedGroup .valueLabel {
+  width: auto;
+  min-width: auto;
+  font-size: 12px;
+}
+
+.valuesInlineContainer .formStackedGroup .valueInput {
+  width: 50%;
+  min-width: 80px;
+  max-width: none;
+}
+
+.formStackedGroup:not(.valuesInlineContainer .formInlineGroup) .valueInput,
 .formStackedGroup .inlineValue {
   width: 100%;
   max-width: 100%;
