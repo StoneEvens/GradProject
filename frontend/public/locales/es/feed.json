@@ -1,0 +1,255 @@
+{
+  "page": {
+    "title": "Alimentos Comunes",
+    "loading": "Cargando...",
+    "buttons": {
+      "addFeed": "Agregar Alimento",
+      "viewMore": "Ver Más",
+      "back": "❮"
+    },
+    "sections": {
+      "marked": "Mis Alimentos Favoritos:",
+      "recent": "Usados Recientemente:",
+      "all": "Todos los Alimentos:"
+    },
+    "messages": {
+      "loadError": "Error al cargar datos de alimentos",
+      "loadFailed": "Error de carga",
+      "noMarkedFeeds": "No se encontraron alimentos favoritos relevantes",
+      "noRecentFeeds": "No se encontraron registros de uso relevantes",
+      "noAllFeeds": "No se encontraron alimentos relevantes",
+      "feedMarked": "Alimento agregado a favoritos",
+      "feedUnmarked": "Marcador eliminado",
+      "operationFailed": "Operación fallida, inténtalo de nuevo más tarde",
+      "systemDetected": "Sistema detectó el mismo alimento",
+      "newFeedCreated": "Nuevo alimento creado exitosamente",
+      "reviewCompleted": "Revisión completada, alimento agregado a favoritos",
+      "errorReported": "Error reportado, gracias por tu comentario",
+      "errorReportFailed": "Reporte fallido, inténtalo de nuevo más tarde",
+      "imageTooLarge": "Archivo de imagen muy grande, selecciona una imagen más pequeña o contacta al administrador",
+      "dataFormatError": "Error de formato de datos, verifica la entrada",
+      "addFeedFailed": "Error al agregar alimento, inténtalo de nuevo más tarde",
+      "noResponse": "Servidor no responde, verifica la conexión de red",
+      "unknownError": "Error desconocido, inténtalo de nuevo más tarde",
+      "markFailed": "Error al alternar marcador",
+      "reviewFailed": "Revisión fallida, inténtalo de nuevo más tarde"
+    },
+    "feedCard": {
+      "noImage": "Sin Imagen",
+      "marked": "Marcado",
+      "mark": "Marcar",
+      "verifying": "Verificando"
+    },
+    "emptyState": {
+      "noResult": "Sin Resultados"
+    }
+  },
+  "allPage": {
+    "title": "Todos los Alimentos",
+    "loading": "Cargando...",
+    "messages": {
+      "loadError": "Error al cargar todos los alimentos",
+      "loadFailed": "Error de carga",
+      "noFeeds": "No se encontraron alimentos relevantes",
+      "feedMarked": "Alimento agregado a favoritos"
+    }
+  },
+  "markedPage": {
+    "title": "Mis Alimentos Favoritos",
+    "loading": "Cargando...",
+    "messages": {
+      "loadError": "Error al cargar alimentos favoritos",
+      "loadFailed": "Error de carga",
+      "noMarkedFeeds": "No se encontraron alimentos favoritos relevantes",
+      "markToggleFailed": "Error al alternar marcador",
+      "reviewFailed": "Revisión fallida"
+    }
+  },
+  "detailPage": {
+    "title": "Detalles del Alimento",
+    "loading": "Cargando...",
+    "loadError": "Error al cargar detalles del alimento",
+    "feedNotFound": "El alimento no existe",
+    "messages": {
+      "feedMarked": "Alimento agregado a favoritos",
+      "feedUnmarked": "Marcador eliminado",
+      "operationFailed": "Operación fallida, inténtalo de nuevo más tarde",
+      "reviewCompleted": "Revisión completada, alimento agregado a favoritos",
+      "reviewFailed": "Revisión fallida, inténtalo de nuevo más tarde",
+      "errorReported": "Error reportado, gracias por tu comentario",
+      "errorReportFailed": "Reporte fallido, inténtalo de nuevo más tarde"
+    },
+    "labels": {
+      "feedName": "Nombre del Alimento:",
+      "brand": "Marca:",
+      "price": "Precio:",
+      "nutrition": "Nutrición:",
+      "protein": "Proteína",
+      "fat": "Grasa",
+      "carbohydrate": "Carbohidrato",
+      "calcium": "Calcio",
+      "phosphorus": "Fósforo",
+      "magnesium": "Magnesio",
+      "sodium": "Sodio"
+    },
+    "buttons": {
+      "marked": "Marcado",
+      "mark": "Marcar",
+      "back": "❮"
+    },
+    "verification": {
+      "title": "Esta información del alimento aún no ha pasado la verificación",
+      "progress": "Progreso de revisión: {{count}}/5 personas confirmaron",
+      "note": "Requiere 5 usuarios para confirmar la precisión de la información antes de la aprobación",
+      "alt": "Verificando"
+    },
+    "image": {
+      "noImage": "Sin Imagen",
+      "frontAlt": "{{name}} - Imagen Frontal",
+      "nutritionAlt": "{{name}} - Etiqueta Nutricional",
+      "unknownFeed": "Alimento",
+      "indicator": "{{current}}/{{total}}",
+      "prev": "❮",
+      "next": "❯"
+    },
+    "info": {
+      "unknownFeed": "Alimento Desconocido",
+      "unknownBrand": "Marca Desconocida",
+      "pricePrefix": "$ ",
+      "noPrice": "No Proporcionado",
+      "unit": "%"
+    }
+  },
+  "createModal": {
+    "title": "Agregar Alimento",
+    "petType": {
+      "cat": "Gato",
+      "dog": "Perro"
+    },
+    "labels": {
+      "petType": "Tipo de Mascota",
+      "feedName": "Nombre del Alimento",
+      "feedBrand": "Marca del Alimento",
+      "feedPrice": "Precio del Alimento",
+      "frontImage": "Imagen Frontal",
+      "nutritionImage": "Etiqueta Nutricional"
+    },
+    "placeholders": {
+      "feedName": "Ingresa el nombre del alimento",
+      "feedBrand": "Ingresa la marca del alimento",
+      "feedPrice": "Ingresa el precio del alimento"
+    },
+    "buttons": {
+      "uploadFront": "Subir Imagen Frontal",
+      "uploadNutrition": "Subir Etiqueta Nutricional",
+      "removeFront": "Eliminar Imagen Frontal",
+      "removeNutrition": "Eliminar Etiqueta Nutricional",
+      "cancel": "Cancelar",
+      "confirm": "Confirmar Agregar",
+      "processing": "Procesando..."
+    },
+    "alt": {
+      "frontImage": "Frente del Alimento",
+      "nutritionImage": "Etiqueta Nutricional"
+    },
+    "messages": {
+      "imageTooLarge": "El tamaño de la imagen no puede exceder 5MB",
+      "selectImageFile": "Por favor selecciona un archivo de imagen",
+      "enterFeedName": "Por favor ingresa el nombre del alimento",
+      "enterFeedBrand": "Por favor ingresa la marca del alimento",
+      "feedNameTooLong": "El nombre del alimento no puede exceder 100 caracteres",
+      "brandNameTooLong": "El nombre de la marca no puede exceder 100 caracteres",
+      "enterFeedPrice": "Por favor ingresa el precio del alimento",
+      "invalidPrice": "Por favor ingresa un número de precio válido",
+      "uploadFrontImage": "Por favor sube la imagen frontal del alimento",
+      "uploadNutritionImage": "Por favor sube la imagen de la etiqueta nutricional"
+    }
+  },
+  "reviewModal": {
+    "labels": {
+      "createdBy": "Agregado por Usuario",
+      "createdDate": "Fecha de Agregado",
+      "unknownUser": "Usuario Desconocido",
+      "unknownDate": "Fecha Desconocida"
+    },
+    "buttons": {
+      "reportError": "Reportar Error",
+      "confirm": "Confirmar",
+      "processing": "Procesando..."
+    },
+    "messages": {
+      "reviewFailed": "Revisión fallida, inténtalo de nuevo más tarde",
+      "errorReportSuccess": "Gracias por tu reporte. Por favor espera a que el sistema revise el error. Puedes usar este alimento libremente actualmente, pero actualiza manualmente cualquier información incorrecta en la calculadora nutricional."
+    },
+    "alt": {
+      "feedImage": "Imagen del Alimento"
+    }
+  },
+  "reviewConfirmModal": {
+    "title": "Por Favor Ayuda a Revisar el Alimento",
+    "description": "Este alimento aún no ha pasado la revisión. Por favor ayuda a revisarlo antes de usar este alimento.",
+    "buttons": {
+      "cancel": "Cancelar",
+      "confirm": "Confirmar"
+    }
+  },
+  "errorReportModal": {
+    "title": "Reportar Error del Alimento",
+    "labels": {
+      "errorType": "Tipo de Error (Selección Múltiple Permitida)",
+      "errorDescription": "Descripción del Error",
+      "correctedData": "Datos Corregidos",
+      "nutritionCorrection": "Corrección Nutricional"
+    },
+    "errorTypes": {
+      "name": "Error de Nombre",
+      "brand": "Error de Marca",
+      "price": "Error de Precio",
+      "nutrition": "Error Nutricional",
+      "image": "Error de Imagen",
+      "other": "Otro Error"
+    },
+    "placeholders": {
+      "description": "Por favor describe el error que encontraste..."
+    },
+    "buttons": {
+      "cancel": "Cancelar",
+      "submit": "Enviar Reporte",
+      "submitting": "Enviando..."
+    },
+    "messages": {
+      "selectErrorType": "Por favor selecciona al menos un tipo de error",
+      "enterDescription": "Por favor describe el error",
+      "correctDataRequired": "Seleccionaste tipos de error pero no corregiste los siguientes datos: {{fields}}. Por favor corrige los datos o selecciona 'Otro Error'.",
+      "modifyDataRequired": "Por favor corrige al menos un elemento, o selecciona el tipo 'Otro Error'",
+      "submitFailed": "Error al reportar error, inténtalo de nuevo más tarde"
+    },
+    "fields": {
+      "feedName": "Nombre del Alimento",
+      "feedBrand": "Marca del Alimento",
+      "feedPrice": "Precio del Alimento",
+      "nutrition": "Nutrición"
+    }
+  },
+  "selectModal": {
+    "title": "Seleccionar Alimento",
+    "loading": "Cargando...",
+    "sections": {
+      "marked": "Mis Alimentos Favoritos:",
+      "recent": "Usados Recientemente:"
+    },
+    "messages": {
+      "loadFailed": "Error de carga",
+      "noMarkedFeeds": "Aún no hay alimentos favoritos",
+      "noRecentFeeds": "Aún no hay registros de uso",
+      "loadError": "Error al cargar datos de alimentos",
+      "noMarkedFeedsWithLink": "Aún no hay alimentos favoritos, ve a Página de Mascotas - Sección de Alimentos para agregar"
+    },
+    "buttons": {
+      "close": "✕"
+    },
+    "alt": {
+      "feedSection": "Sección de Alimentos"
+    }
+  }
+}

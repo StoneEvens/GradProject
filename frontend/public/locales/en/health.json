@@ -1,0 +1,97 @@
+{
+  "reports": {
+    "title": "'s Health Reports",
+    "upload": "Upload",
+    "noReports": "No health reports available",
+    "loading": "Loading...",
+    "backToList": "Back to List",
+    "notFound": "Report data not found",
+    "loadFailed": "Failed to load report",
+    "petDataFailed": "Unable to load pet data",
+    "readDataFailed": "Failed to read data"
+  },
+  "detail": {
+    "title": "Health Report",
+    "edit": "Edit",
+    "delete": "Delete",
+    "confirmDelete": "Are you sure you want to delete this health report?",
+    "deleteSuccess": "Deleted successfully",
+    "deleteFailed": "Delete failed, please try again later",
+    "viewPartial": "View Partial",
+    "viewAll": "View All",
+    "noNotes": "No notes"
+  },
+  "edit": {
+    "title": "Edit",
+    "update": "Update",
+    "back": "Back",
+    "updateSuccess": "Updated successfully",
+    "updateFailed": "Update failed, please check server or data format",
+    "enterValue": "Please enter value",
+    "enterLocation": "Please enter location",
+    "enterNotes": "Please enter additional description"
+  },
+  "upload": {
+    "title": "Add Health Report",
+    "cancel": "Back to List",
+    "submit": "Confirm Upload",
+    "uploadSuccess": "Upload successful",
+    "uploadFailed": "Upload failed, please check form or server status",
+    "selectDate": "Please select check date",
+    "ocrSuccess": "Image recognition successful",
+    "ocrFailed": "Recognition failed, please check if image is clear or format is correct",
+    "uploading": "Recognizing...",
+    "uploadReport": "Upload Report"
+  },
+  "fields": {
+    "checkType": "Check Type",
+    "checkDate": "Check Date",
+    "checkLocation": "Check Location",
+    "notes": "Notes",
+    "ocrUpload": "OCR Image Recognition",
+    "unknownDate": "Unknown Date",
+    "notFilled": "Not Filled"
+  },
+  "checkTypes": {
+    "cbc": "Complete Blood Count",
+    "biochemistry": "Blood Biochemistry",
+    "urinalysis": "Urinalysis",
+    "other": "Other Tests",
+    "unknown": "Health Check"
+  },
+  "bloodFields": {
+    "紅血球計數": "Red Blood Cell Count",
+    "白血球計數": "White Blood Cell Count",
+    "血紅蛋白": "Hemoglobin",
+    "血比容": "Hematocrit",
+    "平均紅血球體積": "Mean Corpuscular Volume",
+    "平均紅血球血紅蛋白量": "Mean Corpuscular Hemoglobin",
+    "平均紅血球血紅蛋白濃度": "Mean Corpuscular Hemoglobin Concentration",
+    "紅血球分布寬度": "Red Cell Distribution Width",
+    "嗜中性球計數": "Neutrophil Count",
+    "淋巴球計數": "Lymphocyte Count",
+    "單核球計數": "Monocyte Count",
+    "嗜酸性球計數": "Eosinophil Count",
+    "嗜鹼性球計數": "Basophil Count",
+    "血小板計數": "Platelet Count",
+    "網狀紅血球計數": "Reticulocyte Count",
+    "白蛋白": "Albumin",
+    "球蛋白": "Globulin",
+    "總蛋白": "Total Protein",
+    "丙氨酸轉氨酶": "Alanine Aminotransferase",
+    "天門冬酸轉氨酶": "Aspartate Aminotransferase",
+    "鹼性磷酸酶": "Alkaline Phosphatase",
+    "血中尿素氮": "Blood Urea Nitrogen",
+    "肌酸酐": "Creatinine",
+    "葡萄糖": "Glucose",
+    "磷": "Phosphorus",
+    "尿比重": "Urine Specific Gravity",
+    "尿液酸鹼值": "Urine pH",
+    "尿中紅血球": "Urine Red Blood Cells",
+    "尿中白血球": "Urine White Blood Cells",
+    "尿蛋白／肌酐比值": "Urine Protein/Creatinine Ratio"
+  },
+  "common": {
+    "selectDate": "Select Date"
+  }
+}

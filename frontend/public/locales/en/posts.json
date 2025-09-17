@@ -1,0 +1,494 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "back": "Back",
+    "create": "Create",
+    "creating": "Creating...",
+    "add": "Add",
+    "remove": "Remove",
+    "edit": "Edit",
+    "delete": "Delete",
+    "preview": "Preview",
+    "selectDate": "Select Date",
+    "draftSaved": "Draft saved",
+    "next": "Next"
+  },
+  "createPost": {
+    "title": "Create Post",
+    "sections": {
+      "images": "Images",
+      "description": "Description",
+      "hashtags": "Hashtags"
+    },
+    "placeholders": {
+      "description": "Enter description",
+      "hashtag": "Enter hashtag"
+    },
+    "imageUpload": {
+      "noImageSelected": "No images added yet",
+      "addImage": "Add Image",
+      "imageCounter": "Selected images: {{count}}/10",
+      "noImageAlt": "No image selected"
+    },
+    "hashtags": {
+      "counter": "Added hashtags: {{count}}/10"
+    },
+    "messages": {
+      "maxImagesReached": "Maximum 10 images allowed",
+      "imageTooLarge": "Image size cannot exceed 5MB",
+      "invalidFileType": "Please select image files",
+      "loadImagesFailed": "Unable to load saved images",
+      "loadImagesError": "Error occurred while loading images",
+      "loadDraftError": "Error occurred while loading draft",
+      "draftTooLarge": "Draft too large, saving text content only",
+      "storageQuotaExceeded": "Storage quota exceeded, saving text content only",
+      "enterHashtagContent": "Please enter hashtag content",
+      "hashtagExists": "This hashtag already exists",
+      "maxHashtagsReached": "Maximum 10 hashtags allowed",
+      "requireContent": "Please select at least one image or enter description"
+    }
+  },
+  "createAbnormalPost": {
+    "title": "Create Abnormal Record",
+    "sections": {
+      "selectPet": "Select Pet",
+      "date": "Date",
+      "symptoms": "Pet Symptoms",
+      "bodyStats": "Body Stats Record",
+      "images": "Image Record",
+      "description": "Additional Description"
+    },
+    "petSelection": {
+      "selectPet": "Select Pet:"
+    },
+    "dateSelection": {
+      "date": "Date:",
+      "emergency": "Medical Record"
+    },
+    "symptoms": {
+      "title": "Pet Symptoms:",
+      "selectSymptom": "Select Symptom",
+      "counter": "Selected symptoms: {{count}}/10"
+    },
+    "bodyStats": {
+      "title": "Body Stats Record:",
+      "weight": "Weight",
+      "waterIntake": "Water Intake",
+      "temperature": "Temperature",
+      "units": {
+        "kg": "kg",
+        "liters": "liters",
+        "celsius": "°C"
+      }
+    },
+    "imageUpload": {
+      "title": "Image Record:",
+      "noImageSelected": "No images added yet",
+      "addImage": "Add Image",
+      "imageCounter": "Selected images: {{count}}/10"
+    },
+    "description": {
+      "title": "Additional Description:",
+      "placeholder": "Text description"
+    },
+    "messages": {
+      "selectPet": "Please select a pet",
+      "selectDate": "Please select a date",
+      "selectSymptom": "Please select a symptom",
+      "symptomExists": "This symptom already exists",
+      "maxSymptomsReached": "Maximum 10 symptoms allowed",
+      "selectAtLeastOneSymptom": "Please select at least one symptom",
+      "petDataLoadFailed": "Failed to load pet data, please try again later",
+      "existingRecordFound": "{{petName}} already has an abnormal record on {{date}}, only one record per pet per day is allowed",
+      "existingRecordFoundSelectOther": "{{petName}} already has an abnormal record on {{date}}, please select another date or pet",
+      "selectPetFirst": "Please select a pet first",
+      "maxImagesReached": "Maximum 10 images allowed",
+      "imageTooLarge": "Image size cannot exceed 5MB",
+      "invalidFileType": "Please select image files",
+      "recordCreated": "Abnormal record created",
+      "createFailed": "Failed to create abnormal record, please try again later",
+      "invalidData": "Invalid data format, please check your input",
+      "loginRequired": "Please log in first",
+      "petNotFound": "Pet not found",
+      "serverError": "Server error, please try again later",
+      "draftTooLarge": "Draft too large, saving first 3 images only",
+      "draftTextOnly": "Draft too large, saving text content only",
+      "storageQuotaExceeded": "Storage quota exceeded, saving text content only"
+    },
+    "defaultSymptoms": [
+      "Sneezing", "Hair loss", "Vomiting", "Diarrhea", "Loss of appetite", "Lethargy",
+      "Fever", "Coughing", "Skin itching", "Rapid breathing", "Runny nose", "Red eyes"
+    ]
+  },
+  "editPost": {
+    "title": "Edit Post",
+    "messages": {
+      "loadPostFailed": "Failed to load post",
+      "loadPostError": "Failed to load post: {{error}}",
+      "loadUserDataFailed": "Failed to load user data",
+      "selectLocation": "Please select location",
+      "minOneImageRequired": "Post must have at least one image",
+      "updating": "Updating post...",
+      "deleteImageError": "Delete image failed: {{error}}",
+      "reorderImageError": "Reorder images failed: {{error}}",
+      "deleteAnnotationError": "Delete annotation failed: {{error}}",
+      "deleteOldAnnotationError": "Delete old annotation failed: {{error}}",
+      "createNewAnnotationError": "Create new annotation failed: {{error}}",
+      "updateAnnotationError": "Update annotation failed: {{error}}",
+      "createAnnotationError": "Create annotation failed: {{error}}",
+      "updateSuccess": "Post updated successfully!",
+      "updateFailed": "Update failed",
+      "networkError": "Network connection error, please check your connection and try again",
+      "timeoutError": "Request timeout, please try again later",
+      "permissionError": "You don't have permission to edit this post",
+      "postNotFound": "Post not found",
+      "updateError": "Update failed: {{error}}"
+    },
+    "ui": {
+      "selectLocation": "Select location",
+      "clickToEditAnnotations": "Click image to edit annotations",
+      "deleteImage": "Delete image",
+      "addImage": "Add image",
+      "writePostContent": "Write post content...",
+      "cancel": "Cancel",
+      "updatePost": "Update",
+      "updating": "Updating...",
+      "deleteConfirmMessage": "Are you sure you want to delete this image? The image will be deleted when you click 'Update', and all annotations on this image will also be deleted.",
+      "leaveConfirmMessage": "Are you sure you want to leave the edit page? Unsaved changes will be lost."
+    },
+    "locationOptions": [
+      "Taipei City", "New Taipei City", "Taoyuan City", "Taichung City", "Tainan City", "Kaohsiung City",
+      "Keelung City", "Hsinchu City", "Chiayi City", "Hsinchu County", "Miaoli County", "Changhua County",
+      "Nantou County", "Yunlin County", "Chiayi County", "Pingtung County", "Yilan County", "Hualien County",
+      "Taitung County", "Penghu County", "Kinmen County", "Lienchiang County"
+    ]
+  },
+  "postPreview": {
+    "title": "Post Preview",
+    "messages": {
+      "processingImages": "Processing images and annotations...",
+      "imageProcessError": "Failed to process image {{index}}",
+      "uploading": "Uploading to server...",
+      "publishSuccess": "Post published successfully!",
+      "publishFailed": "Publish failed",
+      "networkError": "Network connection error, please check your connection and try again",
+      "timeoutError": "Upload timeout, please try again later",
+      "fileSizeError": "Image file is too large, please select a smaller image",
+      "publishError": "Publish failed: {{error}}"
+    },
+    "ui": {
+      "annotationsCount": "{{count}} annotations",
+      "like": "Like",
+      "comment": "Comment",
+      "save": "Save",
+      "justNow": "Just now",
+      "publish": "Publish",
+      "publishing": "Publishing..."
+    },
+    "locationOptions": [
+      "Taipei City", "New Taipei City", "Taoyuan City", "Taichung City", "Tainan City", "Kaohsiung City",
+      "Keelung City", "Hsinchu City", "Chiayi City", "Hsinchu County", "Miaoli County", "Changhua County",
+      "Nantou County", "Yunlin County", "Chiayi County", "Pingtung County", "Yilan County", "Hualien County",
+      "Taitung County", "Penghu County", "Kinmen County", "Lienchiang County"
+    ]
+  },
+  "abnormalPostDetail": {
+    "messages": {
+      "publicPostNotFound": "Public abnormal record not found",
+      "postNotFound": "Abnormal record not found",
+      "deleteSuccess": "Abnormal record deleted successfully",
+      "deleteFailed": "Failed to delete abnormal record, please try again later",
+      "noPermission": "You don't have permission to delete this record"
+    },
+    "ui": {
+      "dateTitle": "{{year}}/{{month}}/{{day}} Abnormal Record",
+      "moreOptions": "More options",
+      "editRecord": "Edit",
+      "deleteRecord": "Delete",
+      "deleteConfirmMessage": "Are you sure you want to delete this abnormal record? This action cannot be undone.",
+      "noDescription": "No additional description",
+      "imageAlt": "Abnormal record image {{index}}"
+    }
+  },
+  "editAbnormalPost": {
+    "title": "Edit Abnormal Record",
+    "messages": {
+      "loadPostFailed": "Failed to load abnormal record",
+      "updateSuccess": "Abnormal record updated successfully",
+      "confirmAbandonEdit": "Are you sure you want to abandon editing?",
+      "confirmSwitchPet": "Are you sure you want to switch the record subject?",
+      "updateFailed": "Failed to update abnormal record, please try again later",
+      "invalidData": "Invalid data format, please check your input",
+      "pleaseLogin": "Please log in first",
+      "postNotFound": "Cannot find the specified abnormal record",
+      "serverError": "Server error, please try again later"
+    }
+  },
+  "petRelatedPosts": {
+    "title": "'s Related Posts",
+    "defaultPetName": "Pet",
+    "sortOptions": {
+      "dateDescending": "Newest First",
+      "dateAscending": "Oldest First"
+    },
+    "messages": {
+      "loadPostsFailed": "Failed to get related posts",
+      "loadPostsError": "Failed to load related posts, please try again later",
+      "noRelatedPosts": "{{petName}} has no related posts yet"
+    }
+  },
+  "abnormalPostFilter": {
+    "dateFormat": "{{year}}/{{month}}/{{day}}",
+    "filterByLabel": "By",
+    "filterLabel": "Filter",
+    "filterOptions": {
+      "symptom": "Symptom",
+      "date": "Date",
+      "both": "Symptom + Date"
+    },
+    "selectOption": "Select",
+    "addButton": "Add",
+    "removeSymptomButton": "X",
+    "resetButton": "Reset",
+    "filterButton": "Filter",
+    "defaultStartDate": "2025/1/1",
+    "defaultEndDate": "2025/1/22"
+  },
+  "abnormalPostPreview": {
+    "dateFormat": "{{month}}/{{day}}",
+    "noSymptoms": "No symptoms recorded",
+    "emergencyRecordAlt": "Emergency record",
+    "abnormalRecordAlt": "Abnormal record",
+    "emergencyBadge": "Emergency",
+    "symptomsLabel": "Symptoms"
+  },
+  "petAbnormalPosts": {
+    "title": "'s Abnormal Records",
+    "resultLabel": "Filter Results",
+    "sortOptions": {
+      "newest": "Newest First",
+      "oldest": "Oldest First"
+    },
+    "emptyStateAlt": "Empty state",
+    "noRecords": "No abnormal records yet",
+    "noFilteredRecords": "No abnormal records found matching the criteria",
+    "abnormalRecordAlt": "Abnormal record",
+    "emergencyLabel": "Medical Record",
+    "symptomsLabel": "Symptoms"
+  },
+  "datePicker": {
+    "title": "Select Date",
+    "yearLabel": "Year",
+    "monthLabel": "Month",
+    "dayLabel": "Day",
+    "yearOption": "{{year}}",
+    "monthOption": "{{month}}",
+    "dayOption": "{{day}}",
+    "selectedDateLabel": "Selected Date",
+    "dateFormat": "{{year}}/{{month}}/{{day}} ({{weekDay}})",
+    "weekDays": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+    "monthNames": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+  },
+  "post": {
+    "justNow": "Just now",
+    "minutesAgo": "{{minutes}} mins ago",
+    "hoursAgo": "{{hours}} hrs ago",
+    "daysAgo": "{{days}} days ago",
+    "deleteFailedAlert": "Failed to delete post, please try again later",
+    "userAvatarAlt": "User avatar",
+    "unknownUser": "Unknown user",
+    "moreOptionsAlt": "More options",
+    "editPost": "Edit Post",
+    "deletePost": "Delete Post",
+    "copyLink": "Copy Link",
+    "reportPost": "Report Post",
+    "postImageAlt": "Post image {{index}}",
+    "annotationsCount": "{{count}} annotations",
+    "annotationAlt": "Annotation",
+    "likeAlt": "Like",
+    "commentAlt": "Comment",
+    "saveAlt": "Save",
+    "showMore": "Show more",
+    "deleteConfirmMessage": "Are you sure you want to delete this post?"
+  },
+  "postComments": {
+    "title": "Comments",
+    "noComments": "No comments yet",
+    "maxImagesAlert": "Maximum 3 images allowed",
+    "imageSlotLimitAlert": "Can only select {{availableSlots}} more images, automatically selected first {{availableSlots}} images",
+    "deletedComment": "[This comment has been deleted]",
+    "deleteErrorAlert": "Error occurred while deleting comment, please try again later",
+    "reportNotImplemented": "Report feature not yet implemented",
+    "replyingTo": "Replying to {{username}}",
+    "user": "User",
+    "previewAlt": "Preview",
+    "removeImageTitle": "Remove image",
+    "replyPlaceholder": "Write a reply...",
+    "commentPlaceholder": "Write a comment...",
+    "imageUploadLimitTitle": "Image limit reached (3 images)",
+    "addImageTitle": "Add image ({{count}}/3)",
+    "addImageAlt": "Add image",
+    "sendReplyTitle": "Send reply",
+    "sendCommentTitle": "Send comment",
+    "sendReplyAlt": "Send reply",
+    "sendCommentAlt": "Send comment",
+    "deleteConfirmMessage": "Are you sure you want to delete this comment?"
+  },
+  "postPreviewList": {
+    "loading": "Loading post previews...",
+    "loadError": "Load failed: {{error}}",
+    "retry": "Retry",
+    "emptyStateAlt": "Empty state",
+    "defaultEmptyMessage": "No posts published yet",
+    "postImageAlt": "Post-{{index}}",
+    "noContent": "No content",
+    "loadingMore": "Loading more posts...",
+    "allLoaded": "All posts loaded"
+  },
+  "comment": {
+    "imageLoadError": "Image failed to load",
+    "likeAlt": "Like",
+    "unlikeAlt": "Unlike",
+    "replyTitle": "Reply",
+    "replyAlt": "Reply",
+    "commentImageAlt": "Comment image {{index}}",
+    "hideReplies": "Hide replies",
+    "showReplies": "Show replies",
+    "deleteComment": "Delete comment",
+    "reportComment": "Report comment"
+  },
+  "socialPage": {
+    "tabs": {
+      "daily": "Daily Posts",
+      "forum": "Pet Forum"
+    },
+    "messages": {
+      "fetchUserFailed": "Failed to get current user info",
+      "loadPostsFailed": "Failed to load posts",
+      "loadArchivesFailed": "Failed to load disease archives",
+      "postUpdatedDetected": "Post update detected, reloading posts list",
+      "noPosts": "No posts yet, be the first to publish!",
+      "noArchives": "No archives yet, be the first to share!"
+    }
+  },
+  "searchPostsPage": {
+    "emptyMessage": "No search results found"
+  },
+  "feedSearchResultPage": {
+    "title": "Search Results",
+    "loading": "Searching...",
+    "noImage": "No image",
+    "marked": "Marked",
+    "mark": "Mark",
+    "verifying": "Verifying",
+    "noResultAlt": "No results",
+    "searchInfo": "Search for \"{{searchQuery}}\"",
+    "searchInfoWithCount": "Search for \"{{searchQuery}}\" found {{totalCount}} results",
+    "noResultsFound": "No feed found related to \"{{searchQuery}}\"",
+    "messages": {
+      "enterSearchKeyword": "Please enter search keywords",
+      "searchFailed": "Search failed",
+      "feedMarked": "Feed added to favorites",
+      "toggleMarkFailed": "Toggle mark failed",
+      "reviewFailed": "Review failed",
+      "reportErrorFailed": "Error report failed"
+    }
+  },
+  "imageEditor": {
+    "title": "Edit Image",
+    "imageAlt": "Edit image",
+    "annotationsCount": "{{count}} annotations",
+    "annotationsAlt": "Annotations",
+    "instructions": "Click anywhere on the image to add annotation, click existing annotation to edit",
+    "buttons": {
+      "annotations": "Annotations",
+      "stickers": "Stickers",
+      "cancel": "Cancel",
+      "done": "Done",
+      "delete": "Delete",
+      "update": "Update",
+      "add": "Add"
+    },
+    "form": {
+      "annotationType": "Annotation Type",
+      "otherUser": "Other User",
+      "pet": "Pet",
+      "annotationContent": "Annotation Content",
+      "enterUsername": "Enter username",
+      "loading": "Loading...",
+      "selectPet": "Select Pet"
+    },
+    "petTypes": {
+      "dog": "Dog",
+      "cat": "Cat"
+    },
+    "messages": {
+      "localStorageCleanupError": "ImageEditor localStorage cleanup error",
+      "loadAnnotationsFailed": "Load annotations failed",
+      "loadedPetsData": "Loaded pets data",
+      "loadPetsFailed": "Load pets failed",
+      "saveAnnotationsFailed": "Save annotations failed",
+      "petNotFoundAdd": "Pet not found (add)",
+      "petNotFoundUpdate": "Pet not found (update)"
+    }
+  },
+  "socialSearchResults": {
+    "loading": "Searching...",
+    "error": "Error: {{error}}",
+    "noResultsAlt": "No results found",
+    "noUsersFound": "No matching users found",
+    "noPostsFound": "No matching posts found",
+    "noTagsFound": "No matching tags found",
+    "noTagPostsFound": "No posts found for tag \"{{searchQuery}}\"",
+    "noForumsFound": "No matching archives found",
+    "tabs": {
+      "accounts": "Users",
+      "posts": "Posts",
+      "tags": "Tags",
+      "forums": "Archives"
+    },
+    "buttons": {
+      "follow": "Follow",
+      "requestFollow": "Request Follow",
+      "following": "Following",
+      "requested": "Requested"
+    },
+    "messages": {
+      "fetchCurrentUserFailed": "Failed to fetch current user info",
+      "searchFailed": "Search failed",
+      "searchError": "Search error",
+      "searchErrorOccurred": "An error occurred during search",
+      "loadFollowStatesFailed": "Failed to load follow states",
+      "getUserFollowStatusFailed": "Failed to get user {{userId}} follow status",
+      "followOperationFailed": "Follow operation failed"
+    }
+  },
+  "postList": {
+    "loading": "Loading posts...",
+    "loadError": "Load failed: {{error}}",
+    "retry": "Retry",
+    "emptyStateAlt": "Empty state",
+    "userNoPostsYet": "This user hasn't published any posts yet",
+    "defaultEmptyMessage": "No posts yet",
+    "loadingMore": "Loading more...",
+    "noMorePosts": "- No more posts -",
+    "messages": {
+      "fetchUserDataFailed": "Failed to fetch user data",
+      "apiDataNotArray": "API returned post data is not in array format",
+      "loadUserPostsFailed": "Failed to load user posts",
+      "loadUserPostsError": "Failed to load user posts",
+      "postUpdateDetected": "PostList detected post update, reloading user posts",
+      "checkScrollToPost": "PostList - Check if need to scroll to specified post",
+      "executeScrollToPost": "PostList - Execute scroll to post",
+      "scrollAndHighlightComplete": "PostList - Scroll and highlight complete",
+      "likeNotificationReceived": "PostList received like notification",
+      "deleteNotificationReceived": "PostList received delete notification",
+      "postDeletedSuccessfully": "Post deleted successfully",
+      "saveNotificationReceived": "PostList received save notification",
+      "filterOutNoImagePost": "PostList filtered out post without images (ID: {{postId}})"
+    }
+  }
+}

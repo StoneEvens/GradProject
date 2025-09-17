@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import TopNavbar from '../components/TopNavbar';
 import BottomNavbar from '../components/BottomNavigationbar';
 import Notification from '../components/Notification';
@@ -19,6 +20,7 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 const PostPreviewPage = () => {
+  const { t } = useTranslation('posts');
   const navigate = useNavigate();
   const location = useLocation();
   const [user, setUser] = useState(null);
@@ -95,7 +97,7 @@ const PostPreviewPage = () => {
         setUser(userProfile);
       } catch (error) {
         console.error('獲取用戶資料失敗:', error);
-        showNotification('獲取用戶資料失敗');
+        showNotification(t('editPost.messages.loadUserDataFailed'));
       }
     };
 
@@ -176,31 +178,7 @@ const PostPreviewPage = () => {
     }
   };
 
-  // 預設位置選項
-  const locationOptions = [
-    '台北市',
-    '新北市',
-    '桃園市',
-    '台中市',
-    '台南市',
-    '高雄市',
-    '基隆市',
-    '新竹市',
-    '嘉義市',
-    '新竹縣',
-    '苗栗縣',
-    '彰化縣',
-    '南投縣',
-    '雲林縣',
-    '嘉義縣',
-    '屏東縣',
-    '宜蘭縣',
-    '花蓮縣',
-    '台東縣',
-    '澎湖縣',
-    '金門縣',
-    '連江縣'
-  ];
+  const locationOptions = t('postPreview.locationOptions', { returnObjects: true });
 
   // 返回編輯
   const handleBack = () => {
@@ -210,7 +188,7 @@ const PostPreviewPage = () => {
   // 發布貼文
   const handlePublish = async () => {
     if (!selectedLocation) {
-      showNotification('請選擇位置');
+      showNotification(t('editPost.messages.selectLocation'));
       return;
     }
     
@@ -220,7 +198,7 @@ const PostPreviewPage = () => {
     
     try {
       setIsPublishing(true);
-      showNotification('正在處理圖片和標註...');
+      showNotification(t('postPreview.messages.processingImages'));
       
       // 準備圖片檔案和標註資料
       const processedImages = [];
@@ -247,7 +225,7 @@ const PostPreviewPage = () => {
               });
             } catch (error) {
               console.error('轉換圖片失敗:', error);
-              throw new Error(`圖片 ${imageIndex + 1} 處理失敗`);
+              throw new Error(t('postPreview.messages.imageProcessError', { index: imageIndex + 1 }));
             }
           }
           
@@ -292,7 +270,7 @@ const PostPreviewPage = () => {
       console.log('完整發布資料:', publishData);
       
       // 顯示上傳狀態
-      showNotification('正在上傳到伺服器...');
+      showNotification(t('postPreview.messages.uploading'));
       
       // 調用發布 API
       const { createPost } = await import('../services/socialService');
@@ -313,14 +291,14 @@ const PostPreviewPage = () => {
         setShowAnnotationDots(false);
         
         console.log('🎉 貼文發布成功，已清理所有暫存資料');
-        showNotification('貼文發布成功！');
+        showNotification(t('postPreview.messages.publishSuccess'));
         
         // 延遲導航，讓用戶看到成功訊息
         setTimeout(() => {
           navigate('/social');
         }, 1500);
       } else {
-        throw new Error(result.error || '發布失敗');
+        throw new Error(result.error || t('postPreview.messages.publishFailed'));
       }
       
     } catch (error) {
@@ -329,14 +307,14 @@ const PostPreviewPage = () => {
       
       // 友善的錯誤訊息
       if (errorMsg.includes('network') || errorMsg.includes('Network')) {
-        errorMsg = '網路連線錯誤，請檢查網路連線後重試';
+        errorMsg = t('postPreview.messages.networkError');
       } else if (errorMsg.includes('timeout')) {
-        errorMsg = '上傳逾時，請稍後重試';
+        errorMsg = t('postPreview.messages.timeoutError');
       } else if (errorMsg.includes('大小')) {
-        errorMsg = '圖片檔案過大，請選擇較小的圖片';
+        errorMsg = t('postPreview.messages.fileSizeError');
       }
       
-      showNotification(`發布失敗: ${errorMsg}`);
+      showNotification(t('postPreview.messages.publishError', { error: errorMsg }));
     } finally {
       setIsPublishing(false);
     }
@@ -347,7 +325,7 @@ const PostPreviewPage = () => {
       <NotificationProvider>
         <div className={styles.container}>
           <TopNavbar />
-          <div className={styles.loading}>載入中...</div>
+          <div className={styles.loading}>{t('common.loading')}</div>
           <BottomNavbar />
         </div>
       </NotificationProvider>
@@ -363,7 +341,7 @@ const PostPreviewPage = () => {
         )}
         
         <div className={styles.content}>
-          <h2 className={styles.title}>貼文預覽</h2>
+          <h2 className={styles.title}>{t('postPreview.title')}</h2>
           <div className={styles.divider}></div>
           
           {/* 貼文預覽卡片 */}
@@ -381,7 +359,7 @@ const PostPreviewPage = () => {
                   className={styles.locationButton}
                   onClick={() => setShowLocationModal(true)}
                 >
-                  {selectedLocation || '選擇位置'}
+                  {selectedLocation || t('editPost.ui.selectLocation')}
                 </button>
               </div>
             </div>
@@ -418,7 +396,7 @@ const PostPreviewPage = () => {
                       <div 
                         className={styles.annotationIcon}
                         onClick={toggleAnnotationDots}
-                        title={`${postData.images[currentImageIndex].annotations.length} 個標註`}
+                        title={t('postPreview.ui.annotationsCount', { count: postData.images[currentImageIndex].annotations.length })}
                       >
                         <img 
                           src="/assets/icon/PostAnnotation.png" 
@@ -466,15 +444,15 @@ const PostPreviewPage = () => {
             {/* 互動按鈕 */}
             <div className={styles.interactionButtons}>
               <button className={styles.likeButton}>
-                <img src="/assets/icon/PostHeart.png" alt="按讚" className={styles.interactionIcon} />
+                <img src="/assets/icon/PostHeart.png" alt={t('postPreview.ui.like')} className={styles.interactionIcon} />
                 <span>0</span>
               </button>
               <button className={styles.commentButton}>
-                <img src="/assets/icon/PostComment.png" alt="留言" className={styles.interactionIcon} />
+                <img src="/assets/icon/PostComment.png" alt={t('postPreview.ui.comment')} className={styles.interactionIcon} />
                 <span>0</span>
               </button>
               <button className={styles.shareButton}>
-                <img src="/assets/icon/PostSave.png" alt="收藏" className={styles.interactionIcon} />
+                <img src="/assets/icon/PostSave.png" alt={t('postPreview.ui.save')} className={styles.interactionIcon} />
                 <span>0</span>
               </button>
             </div>
@@ -499,7 +477,7 @@ const PostPreviewPage = () => {
 
             {/* 時間顯示 */}
             <div className={styles.timeInfo}>
-              一秒前
+              {t('postPreview.ui.justNow')}
             </div>
           </div>
 
@@ -509,14 +487,14 @@ const PostPreviewPage = () => {
               className={styles.backButton}
               onClick={handleBack}
             >
-              返回
+              {t('common.back')}
             </button>
             <button 
               className={`${styles.publishButton} ${isPublishing ? styles.publishing : ''}`}
               onClick={handlePublish}
               disabled={isPublishing}
             >
-              {isPublishing ? '發布中...' : '發布'}
+              {isPublishing ? t('postPreview.ui.publishing') : t('postPreview.ui.publish')}
             </button>
           </div>
         </div>
@@ -525,7 +503,7 @@ const PostPreviewPage = () => {
         {showLocationModal && (
           <div className={styles.modalOverlay} onClick={() => setShowLocationModal(false)}>
             <div className={styles.locationModal} onClick={(e) => e.stopPropagation()}>
-              <h3 className={styles.modalTitle}>選擇位置</h3>
+              <h3 className={styles.modalTitle}>{t('editPost.ui.selectLocation')}</h3>
               <div className={styles.locationList}>
                 {locationOptions.map((location) => (
                   <button
@@ -541,7 +519,7 @@ const PostPreviewPage = () => {
                 className={styles.modalCloseButton}
                 onClick={() => setShowLocationModal(false)}
               >
-                取消
+                {t('common.cancel')}
               </button>
             </div>
           </div>

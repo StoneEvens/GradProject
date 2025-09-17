@@ -1,10 +1,12 @@
 import React, { useState, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import styles from '../styles/EditProfileModal.module.css';
 import { checkUserAccount } from '../services/userService';
 import Notification from './Notification';
 import { handleImageSelection, revokeImagePreview } from '../utils/imageUtils';
 
 const EditProfileModal = ({ user, isOpen, onClose, onSave }) => {
+  const { t } = useTranslation('profile');
   const [formData, setFormData] = useState({
     user_account: user?.user_account || '',
     user_fullname: user?.user_fullname || '',
@@ -66,7 +68,7 @@ const EditProfileModal = ({ user, isOpen, onClose, onSave }) => {
       }
     } catch (error) {
       console.error('頭像處理失敗:', error);
-      showNotification('頭像處理失敗，請重試');
+      showNotification(t('editModal.messages.imageProcessFailed'));
     }
   };
 
@@ -89,12 +91,12 @@ const EditProfileModal = ({ user, isOpen, onClose, onSave }) => {
   const validateForm = async () => {
     // 檢查必填欄位
     if (!formData.user_account.trim()) {
-      showNotification('請輸入帳號名稱');
+      showNotification(t('editModal.validation.enterAccount'));
       return false;
     }
 
     if (!formData.user_fullname.trim()) {
-      showNotification('請輸入真實姓名');
+      showNotification(t('editModal.validation.enterFullname'));
       return false;
     }
 
@@ -103,12 +105,12 @@ const EditProfileModal = ({ user, isOpen, onClose, onSave }) => {
       try {
         const accountExists = await checkUserAccount(formData.user_account);
         if (accountExists) {
-          showNotification('此帳號已被使用，請嘗試其他帳號');
+          showNotification(t('editModal.validation.accountExists'));
           return false;
         }
       } catch (error) {
         console.error('帳號檢查失敗:', error);
-        showNotification('帳號檢查失敗，請稍後再試');
+        showNotification(t('editModal.validation.checkAccountFailed'));
         return false;
       }
     }
@@ -134,7 +136,7 @@ const EditProfileModal = ({ user, isOpen, onClose, onSave }) => {
       onClose();
     } catch (error) {
       console.error('儲存個人資料失敗:', error);
-      showNotification('儲存個人資料失敗，請稍後再試');
+      showNotification(t('editModal.messages.saveFailed'));
     } finally {
       setLoading(false);
     }
@@ -173,16 +175,16 @@ const EditProfileModal = ({ user, isOpen, onClose, onSave }) => {
       )}
       <div className={styles.modalContainer}>
         <div className={styles.modalHeader}>
-          <h2>編輯個人資料</h2>
+          <h2>{t('editModal.title')}</h2>
         </div>
         
         <div className={styles.modalBody}>
           {/* 頭像區塊 */}
           <div className={styles.avatarSection}>
             <div className={styles.avatarContainer} onClick={handleAvatarClick}>
-              <img 
-                src={previewUrl} 
-                alt="頭像預覽" 
+              <img
+                src={previewUrl}
+                alt={t('editModal.avatar.preview')}
                 className={styles.avatarPreview}
               />
             </div>
@@ -198,7 +200,7 @@ const EditProfileModal = ({ user, isOpen, onClose, onSave }) => {
           {/* 表單區塊 */}
           <div className={styles.formSection}>
             <div className={styles.inputGroup}>
-              <label htmlFor="user_account">帳號 *</label>
+              <label htmlFor="user_account">{t('editModal.form.account')} {t('editModal.form.required')}</label>
               <input
                 type="text"
                 id="user_account"
@@ -212,7 +214,7 @@ const EditProfileModal = ({ user, isOpen, onClose, onSave }) => {
             </div>
 
             <div className={styles.inputGroup}>
-              <label htmlFor="user_fullname">真實姓名 *</label>
+              <label htmlFor="user_fullname">{t('editModal.form.fullname')} {t('editModal.form.required')}</label>
               <input
                 type="text"
                 id="user_fullname"
@@ -226,7 +228,7 @@ const EditProfileModal = ({ user, isOpen, onClose, onSave }) => {
             </div>
 
             <div className={styles.inputGroup}>
-              <label htmlFor="user_intro">使用者簡介</label>
+              <label htmlFor="user_intro">{t('editModal.form.intro')}</label>
               <textarea
                 id="user_intro"
                 name="user_intro"
@@ -241,19 +243,19 @@ const EditProfileModal = ({ user, isOpen, onClose, onSave }) => {
         </div>
 
         <div className={styles.modalFooter}>
-          <button 
-            className={styles.cancelButton} 
+          <button
+            className={styles.cancelButton}
             onClick={handleCancel}
             disabled={loading}
           >
-            取消
+            {t('common.cancel')}
           </button>
-          <button 
-            className={styles.saveButton} 
+          <button
+            className={styles.saveButton}
             onClick={handleSave}
             disabled={loading}
           >
-            {loading ? '儲存中...' : '確認'}
+            {loading ? t('common.saving') : t('common.confirm')}
           </button>
         </div>
       </div>

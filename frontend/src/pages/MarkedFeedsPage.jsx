@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import TopNavbar from '../components/TopNavbar';
 import BottomNavbar from '../components/BottomNavigationbar';
 import { NotificationProvider } from '../context/NotificationContext';
@@ -9,6 +10,7 @@ import axios from '../utils/axios';
 import styles from '../styles/MarkedFeedsPage.module.css';
 
 const MarkedFeedsPage = () => {
+  const { t } = useTranslation('feed');
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [markedFeeds, setMarkedFeeds] = useState([]);
@@ -57,9 +59,9 @@ const MarkedFeedsPage = () => {
       setMessage(response.data.message);
       
     } catch (error) {
-      console.error('載入精選飼料失敗:', error);
+      console.error('Failed to load marked feeds:', error);
       setMarkedFeeds([]);
-      setMessage('載入失敗');
+      setMessage(t('markedPage.messages.loadFailed'));
     } finally {
       setLoading(false);
     }
@@ -106,7 +108,7 @@ const MarkedFeedsPage = () => {
       loadMarkedFeeds();
       
     } catch (error) {
-      console.error('切換標記失敗:', error);
+      console.error('Failed to toggle mark:', error);
     }
   };
 
@@ -143,7 +145,7 @@ const MarkedFeedsPage = () => {
       loadMarkedFeeds();
       
     } catch (error) {
-      console.error('審核失敗:', error);
+      console.error('Review failed:', error);
       throw error; // 讓 modal 組件處理錯誤
     }
   };
@@ -155,7 +157,7 @@ const MarkedFeedsPage = () => {
       const response = await axios.post('/feeds/error-report/', errorData);
       
     } catch (error) {
-      console.error('錯誤回報失敗:', error);
+      console.error('Error report failed:', error);
       throw error; // 讓 modal 組件處理錯誤
     }
   };
@@ -185,7 +187,7 @@ const MarkedFeedsPage = () => {
           <img src={feed.frontImage} alt={feed.name} className={styles.feedImage} />
         ) : (
           <div className={styles.feedImagePlaceholder}>
-            <span>無圖片</span>
+            <span>{t('page.feedCard.noImage')}</span>
           </div>
         )}
         <button 
@@ -197,13 +199,13 @@ const MarkedFeedsPage = () => {
         >
           <img 
             src={feed.isMarked ? "/assets/icon/IsmarkedIcon.png" : "/assets/icon/MarkIcon.png"} 
-            alt={feed.isMarked ? "已標記" : "標記"} 
+            alt={feed.isMarked ? t('page.feedCard.marked') : t('page.feedCard.mark')} 
           />
         </button>
         {/* 審核中標示 - 顯示在左下角 */}
         {!feed.isVerified && (
           <div className={styles.verifyingBadge}>
-            <img src="/assets/icon/Verifying.png" alt="審核中" />
+            <img src="/assets/icon/Verifying.png" alt={t('page.feedCard.verifying')} />
           </div>
         )}
       </div>
@@ -225,7 +227,7 @@ const MarkedFeedsPage = () => {
             <button className={styles.backButton} onClick={handleBack}>
               ❮
             </button>
-            <h1 className={styles.title}>我的精選飼料</h1>
+            <h1 className={styles.title}>{t('markedPage.title')}</h1>
             <div className={styles.spacer}></div>
           </div>
           
@@ -233,7 +235,7 @@ const MarkedFeedsPage = () => {
 
           {loading ? (
             <div className={styles.loadingContainer}>
-              <span>載入中...</span>
+              <span>{t('markedPage.loading')}</span>
             </div>
           ) : (
             <div className={styles.feedSection}>
@@ -243,8 +245,8 @@ const MarkedFeedsPage = () => {
                 </div>
               ) : (
                 <div className={styles.emptyState}>
-                  <img src="/assets/icon/SearchNoResult.png" alt="無結果" className={styles.noResultImage} />
-                  <p>{searchQuery ? '未找到相關的精選飼料' : message}</p>
+                  <img src="/assets/icon/SearchNoResult.png" alt={t('page.emptyState.noResult')} className={styles.noResultImage} />
+                  <p>{searchQuery ? t('markedPage.messages.noMarkedFeeds') : message}</p>
                 </div>
               )}
             </div>

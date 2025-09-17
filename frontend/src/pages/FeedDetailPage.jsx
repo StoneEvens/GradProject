@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import TopNavbar from '../components/TopNavbar';
 import BottomNavbar from '../components/BottomNavigationbar';
 import { NotificationProvider } from '../context/NotificationContext';
@@ -11,6 +12,7 @@ import styles from '../styles/FeedDetailPage.module.css';
 import { useUser } from '../context/UserContext';
 
 const FeedDetailPage = () => {
+  const { t } = useTranslation('feed');
   const { id } = useParams();
   const navigate = useNavigate();
   const { userData } = useUser();
@@ -37,8 +39,8 @@ const FeedDetailPage = () => {
       setIsMarked(response.data.is_marked || false);
       
     } catch (error) {
-      console.error('載入飼料詳情失敗:', error);
-      setError('載入飼料詳情失敗');
+      console.error('Failed to load feed details:', error);
+      setError(t('detailPage.loadError'));
     } finally {
       setLoading(false);
     }
@@ -57,7 +59,7 @@ const FeedDetailPage = () => {
             feed_id: feed.id
           });
           setIsMarked(!isMarked);
-          setNotification('飼料已加入精選');
+          setNotification(t('detailPage.messages.feedMarked'));
           return;
         } else {
           // 如果不是創建者，檢查使用者是否已審核過此飼料或提交過錯誤回報
@@ -69,7 +71,7 @@ const FeedDetailPage = () => {
               feed_id: feed.id
             });
             setIsMarked(!isMarked);
-            setNotification('飼料已加入精選');
+            setNotification(t('detailPage.messages.feedMarked'));
             return;
           } else {
             // 如果無法使用，顯示確認 modal
@@ -85,11 +87,11 @@ const FeedDetailPage = () => {
       });
       
       setIsMarked(!isMarked);
-      setNotification(isMarked ? '已取消標記' : '飼料已加入精選');
+      setNotification(isMarked ? t('detailPage.messages.feedUnmarked') : t('detailPage.messages.feedMarked'));
       
     } catch (error) {
-      console.error('切換標記失敗:', error);
-      setNotification('操作失敗，請稍後再試');
+      console.error('Failed to toggle mark:', error);
+      setNotification(t('detailPage.messages.operationFailed'));
     }
   };
 
@@ -128,11 +130,11 @@ const FeedDetailPage = () => {
         is_verified: response.data.is_verified
       }));
       
-      setNotification('審核完成，飼料已加入精選');
+      setNotification(t('detailPage.messages.reviewCompleted'));
       
     } catch (error) {
-      console.error('審核失敗:', error);
-      setNotification('審核失敗，請稍後再試');
+      console.error('Review failed:', error);
+      setNotification(t('detailPage.messages.reviewFailed'));
       throw error; // 讓 modal 組件處理錯誤
     }
   };
@@ -142,11 +144,11 @@ const FeedDetailPage = () => {
     try {
       // 調用錯誤回報 API
       const response = await axios.post('/feeds/error-report/', errorData);
-      setNotification('已回報錯誤，感謝您的反饋');
+      setNotification(t('detailPage.messages.errorReported'));
       
     } catch (error) {
-      console.error('錯誤回報失敗:', error);
-      setNotification('回報失敗，請稍後再試');
+      console.error('Error report failed:', error);
+      setNotification(t('detailPage.messages.errorReportFailed'));
       throw error; // 讓 modal 組件處理錯誤
     }
   };
@@ -161,14 +163,14 @@ const FeedDetailPage = () => {
     if (feed?.front_image_url) {
       images.push({
         url: feed.front_image_url,
-        alt: `${feed.name || '飼料'} - 正面圖片`,
+        alt: t('detailPage.image.frontAlt', { name: feed.name || t('detailPage.image.unknownFeed') }),
         type: 'front'
       });
     }
     if (feed?.nutrition_image_url) {
       images.push({
         url: feed.nutrition_image_url,
-        alt: `${feed.name || '飼料'} - 營養成分表`,
+        alt: t('detailPage.image.nutritionAlt', { name: feed.name || t('detailPage.image.unknownFeed') }),
         type: 'nutrition'
       });
     }
@@ -177,7 +179,7 @@ const FeedDetailPage = () => {
 
   // 處理圖片載入錯誤
   const handleImageError = (e) => {
-    console.error('圖片載入失敗:', e.target.src);
+    console.error('Image load failed:', e.target.src);
     e.target.style.display = 'none';
   };
 
@@ -234,7 +236,7 @@ const FeedDetailPage = () => {
         <div className={styles.container}>
           <TopNavbar />
           <div className={styles.loadingContainer}>
-            載入中...
+            {t('detailPage.loading')}
           </div>
           <BottomNavbar />
         </div>
@@ -248,7 +250,7 @@ const FeedDetailPage = () => {
         <div className={styles.container}>
           <TopNavbar />
           <div className={styles.errorContainer}>
-            {error || '飼料不存在'}
+            {error || t('detailPage.feedNotFound')}
           </div>
           <BottomNavbar />
         </div>
@@ -267,7 +269,7 @@ const FeedDetailPage = () => {
             <button className={styles.backButton} onClick={handleBack}>
               ❮
             </button>
-            <h2 className={styles.title}>飼料詳情</h2>
+            <h2 className={styles.title}>{t('detailPage.title')}</h2>
             <div className={styles.menuContainer}>
               <button 
                 className={styles.menuButton}
@@ -275,7 +277,7 @@ const FeedDetailPage = () => {
               >
                 <img 
                   src={isMarked ? "/assets/icon/IsmarkedIcon.png" : "/assets/icon/MarkIcon.png"} 
-                  alt={isMarked ? "已標記" : "標記"} 
+                  alt={isMarked ? t('detailPage.buttons.marked') : t('detailPage.buttons.mark')} 
                 />
               </button>
             </div>
@@ -288,12 +290,12 @@ const FeedDetailPage = () => {
             <div className={styles.section}>
               <div className={styles.warningContent}>
                 <div className={styles.warningHeader}>
-                  <img src="/assets/icon/Verifying.png" alt="審核中" className={styles.warningIcon} />
-                  <span className={styles.warningTitle}>此飼料資訊尚未通過審核</span>
+                  <img src="/assets/icon/Verifying.png" alt={t('detailPage.verification.alt')} className={styles.warningIcon} />
+                  <span className={styles.warningTitle}>{t('detailPage.verification.title')}</span>
                 </div>
                 <div className={styles.warningText}>
-                  <p>審核進度: {feed.review_count || 0}/5 人已確認</p>
-                  <p className={styles.warningNote}>需要5位使用者確認資訊正確才能通過審核</p>
+                  <p>{t('detailPage.verification.progress', { count: feed.review_count || 0 })}</p>
+                  <p className={styles.warningNote}>{t('detailPage.verification.note')}</p>
                 </div>
               </div>
             </div>
@@ -317,14 +319,14 @@ const FeedDetailPage = () => {
                   />
                 ) : (
                   <div className={styles.imagePlaceholder}>
-                    無圖片
+                    {t('detailPage.image.noImage')}
                   </div>
                 )}
                 
                 {/* 圖片指示器 */}
                 {getFeedImages().length > 1 && (
                   <div className={styles.imageIndicator}>
-                    {currentImageIndex + 1}/{getFeedImages().length}
+                    {t('detailPage.image.indicator', { current: currentImageIndex + 1, total: getFeedImages().length })}
                   </div>
                 )}
                 
@@ -335,13 +337,13 @@ const FeedDetailPage = () => {
                       className={`${styles.imageNavButton} ${styles.prevButton}`}
                       onClick={handlePrevImage}
                     >
-                      ❮
+                      {t('detailPage.image.prev')}
                     </button>
                     <button 
                       className={`${styles.imageNavButton} ${styles.nextButton}`}
                       onClick={handleNextImage}
                     >
-                      ❯
+                      {t('detailPage.image.next')}
                     </button>
                   </>
                 )}
@@ -352,31 +354,31 @@ const FeedDetailPage = () => {
           {/* 飼料基本資訊 */}
           <div className={styles.section}>
             <div className={styles.infoRow}>
-              <label className={styles.sectionLabel}>飼料名稱:</label>
+              <label className={styles.sectionLabel}>{t('detailPage.labels.feedName')}</label>
               <div className={styles.infoContent}>
-                {feed.name || '未知飼料'}
+                {feed.name || t('detailPage.info.unknownFeed')}
               </div>
             </div>
             <div className={styles.infoRow}>
-              <label className={styles.sectionLabel}>品牌:</label>
+              <label className={styles.sectionLabel}>{t('detailPage.labels.brand')}</label>
               <div className={styles.infoContent}>
-                {feed.brand || '未知品牌'}
+                {feed.brand || t('detailPage.info.unknownBrand')}
               </div>
             </div>
             <div className={styles.infoRow}>
-              <label className={styles.sectionLabel}>價格:</label>
+              <label className={styles.sectionLabel}>{t('detailPage.labels.price')}</label>
               <div className={styles.infoContent}>
-                NT$ {feed.price || '未提供'}
+                {t('detailPage.info.pricePrefix')}{feed.price || t('detailPage.info.noPrice')}
               </div>
             </div>
           </div>
 
           {/* 營養成分區域 */}
           <div className={styles.section}>
-            <label className={styles.sectionLabel}>營養成分:</label>
+            <label className={styles.sectionLabel}>{t('detailPage.labels.nutrition')}</label>
             <div className={styles.nutritionContainer}>
               <div className={styles.nutritionRow}>
-                <span className={styles.nutritionLabel}>蛋白質</span>
+                <span className={styles.nutritionLabel}>{t('detailPage.labels.protein')}</span>
                 <div className={styles.nutritionInputWrapper}>
                   <input 
                     type="text"
@@ -384,11 +386,11 @@ const FeedDetailPage = () => {
                     readOnly
                     className={styles.nutritionInput}
                   />
-                  <span className={styles.nutritionUnit}>%</span>
+                  <span className={styles.nutritionUnit}>{t('detailPage.info.unit')}</span>
                 </div>
               </div>
               <div className={styles.nutritionRow}>
-                <span className={styles.nutritionLabel}>脂肪</span>
+                <span className={styles.nutritionLabel}>{t('detailPage.labels.fat')}</span>
                 <div className={styles.nutritionInputWrapper}>
                   <input 
                     type="text"
@@ -396,11 +398,11 @@ const FeedDetailPage = () => {
                     readOnly
                     className={styles.nutritionInput}
                   />
-                  <span className={styles.nutritionUnit}>%</span>
+                  <span className={styles.nutritionUnit}>{t('detailPage.info.unit')}</span>
                 </div>
               </div>
               <div className={styles.nutritionRow}>
-                <span className={styles.nutritionLabel}>碳水化合物</span>
+                <span className={styles.nutritionLabel}>{t('detailPage.labels.carbohydrate')}</span>
                 <div className={styles.nutritionInputWrapper}>
                   <input 
                     type="text"
@@ -408,11 +410,11 @@ const FeedDetailPage = () => {
                     readOnly
                     className={styles.nutritionInput}
                   />
-                  <span className={styles.nutritionUnit}>%</span>
+                  <span className={styles.nutritionUnit}>{t('detailPage.info.unit')}</span>
                 </div>
               </div>
               <div className={styles.nutritionRow}>
-                <span className={styles.nutritionLabel}>鈣</span>
+                <span className={styles.nutritionLabel}>{t('detailPage.labels.calcium')}</span>
                 <div className={styles.nutritionInputWrapper}>
                   <input 
                     type="text"
@@ -420,11 +422,11 @@ const FeedDetailPage = () => {
                     readOnly
                     className={styles.nutritionInput}
                   />
-                  <span className={styles.nutritionUnit}>%</span>
+                  <span className={styles.nutritionUnit}>{t('detailPage.info.unit')}</span>
                 </div>
               </div>
               <div className={styles.nutritionRow}>
-                <span className={styles.nutritionLabel}>磷</span>
+                <span className={styles.nutritionLabel}>{t('detailPage.labels.phosphorus')}</span>
                 <div className={styles.nutritionInputWrapper}>
                   <input 
                     type="text"
@@ -432,11 +434,11 @@ const FeedDetailPage = () => {
                     readOnly
                     className={styles.nutritionInput}
                   />
-                  <span className={styles.nutritionUnit}>%</span>
+                  <span className={styles.nutritionUnit}>{t('detailPage.info.unit')}</span>
                 </div>
               </div>
               <div className={styles.nutritionRow}>
-                <span className={styles.nutritionLabel}>鎂</span>
+                <span className={styles.nutritionLabel}>{t('detailPage.labels.magnesium')}</span>
                 <div className={styles.nutritionInputWrapper}>
                   <input 
                     type="text"
@@ -444,11 +446,11 @@ const FeedDetailPage = () => {
                     readOnly
                     className={styles.nutritionInput}
                   />
-                  <span className={styles.nutritionUnit}>%</span>
+                  <span className={styles.nutritionUnit}>{t('detailPage.info.unit')}</span>
                 </div>
               </div>
               <div className={styles.nutritionRow}>
-                <span className={styles.nutritionLabel}>鈉</span>
+                <span className={styles.nutritionLabel}>{t('detailPage.labels.sodium')}</span>
                 <div className={styles.nutritionInputWrapper}>
                   <input 
                     type="text"
@@ -456,7 +458,7 @@ const FeedDetailPage = () => {
                     readOnly
                     className={styles.nutritionInput}
                   />
-                  <span className={styles.nutritionUnit}>%</span>
+                  <span className={styles.nutritionUnit}>{t('detailPage.info.unit')}</span>
                 </div>
               </div>
             </div>

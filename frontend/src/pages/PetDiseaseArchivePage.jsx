@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import TopNavbar from '../components/TopNavbar';
 import BottomNavbar from '../components/BottomNavigationBar';
 import { NotificationProvider } from '../context/NotificationContext';
@@ -7,6 +8,7 @@ import { getUserPets, getMyDiseaseArchivesPreview } from '../services/petService
 import styles from '../styles/PetDiseaseArchivePage.module.css';
 
 const PetDiseaseArchivePage = () => {
+  const { t, i18n } = useTranslation('archives');
   const { petId } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -41,7 +43,7 @@ const PetDiseaseArchivePage = () => {
       setDiseaseArchives(petArchives);
       
     } catch (error) {
-      console.error('載入資料失敗:', error);
+      console.error(t('petDiseaseArchive.messages.loadDataFailed'), error);
     } finally {
       setLoading(false);
     }
@@ -62,7 +64,7 @@ const PetDiseaseArchivePage = () => {
         <div className={styles.container}>
           <TopNavbar />
           <div className={styles.loadingContainer}>
-            載入中...
+            {t('common.loading')}
           </div>
           <BottomNavbar />
         </div>
@@ -84,9 +86,9 @@ const PetDiseaseArchivePage = () => {
                 alt={pet?.pet_name}
                 className={styles.petAvatar}
               />
-              <span className={styles.title}>的疾病檔案</span>
+              <span className={styles.title}>{t('petDiseaseArchive.title')}</span>
             </div>
-            <button className={styles.newButton} onClick={handleCreateClick}>新增</button>
+            <button className={styles.newButton} onClick={handleCreateClick}>{t('petDiseaseArchive.buttons.new')}</button>
           </div>
           
           <div className={styles.divider}></div>
@@ -97,10 +99,10 @@ const PetDiseaseArchivePage = () => {
               <div className={styles.emptyState}>
                 <img 
                   src="/assets/icon/SearchNoResult.png" 
-                  alt="空狀態" 
+                  alt={t('petDiseaseArchive.emptyStateAlt')} 
                   className={styles.emptyIcon}
                 />
-                <p>尚無疾病檔案</p>
+                <p>{t('petDiseaseArchive.emptyStateText')}</p>
               </div>
             ) : (
               diseaseArchives.map(archive => (
@@ -112,7 +114,7 @@ const PetDiseaseArchivePage = () => {
                   <div className={styles.forumIcon}>
                     <img 
                       src="/assets/icon/PetpageIllnessArchiveButton.png" 
-                      alt="疾病檔案"
+                      alt={t('petDiseaseArchive.archiveIconAlt')}
                     />
                   </div>
                   
@@ -120,13 +122,13 @@ const PetDiseaseArchivePage = () => {
                     <div className={styles.forumTitleRow}>
                       <span className={styles.forumTitle}>{archive.archive_title}</span>
                       {archive.health_status === '已康復' && (
-                        <span className={styles.recoveredBadge}>已康復</span>
+                        <span className={styles.recoveredBadge}>{t('petDiseaseArchive.recoveredBadge')}</span>
                       )}
                     </div>
                     <div className={styles.forumInfo}>
-                      <span className={styles.forumLabel}>建立日期：</span>
+                      <span className={styles.forumLabel}>{t('petDiseaseArchive.createdDateLabel')}</span>
                       <span className={styles.forumDate}>
-                        {new Date(archive.created_at).toLocaleDateString('zh-TW')}
+                        {new Date(archive.created_at).toLocaleDateString(i18n.language === 'en' ? 'en-US' : 'zh-TW')}
                       </span>
                     </div>
                   </div>

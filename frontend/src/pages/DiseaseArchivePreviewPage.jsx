@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import TopNavbar from '../components/TopNavbar';
 import BottomNavbar from '../components/BottomNavigationBar';
 import Notification from '../components/Notification';
@@ -11,6 +12,7 @@ import { getUserProfile } from '../services/userService';
 import styles from '../styles/DiseaseArchivePreviewPage.module.css';
 
 const DiseaseArchivePreviewPage = () => {
+  const { t } = useTranslation('archives');
   const { petId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
@@ -22,46 +24,46 @@ const DiseaseArchivePreviewPage = () => {
   const [notification, setNotification] = useState('');
   const [archiveData, setArchiveData] = useState(null);
 
-  // 顯示通知
+  // Show notification
   const showNotification = (msg) => {
     setNotification(msg);
   };
 
-  // 隱藏通知
+  // Hide notification
   const hideNotification = () => {
     setNotification('');
   };
 
-  // 驗證異常記錄數據完整性
+  // Validate abnormal post data integrity
   const validateAbnormalPostData = async () => {
     if (!archiveData || !archiveData.abnormalPostsData || archiveData.abnormalPostsData.length === 0) {
-      console.log('跳過驗證：沒有異常記錄數據');
+      console.log(t('diseaseArchivePreview.console.skipValidation'));
       return;
     }
 
     try {
-      console.log('開始驗證異常記錄數據:', archiveData.abnormalPostsData);
+      console.log(t('diseaseArchivePreview.console.startValidation'), archiveData.abnormalPostsData);
       
       const postIds = archiveData.abnormalPostsData
         .map(post => post && post.id)
         .filter(id => id != null && id !== undefined && id !== '');
         
-      console.log('提取到的異常記錄ID:', postIds);
-      
+      console.log(t('diseaseArchivePreview.console.extractedIds'), postIds);
+
       if (postIds.length === 0) {
-        console.log('沒有有效的異常記錄ID');
+        console.log(t('diseaseArchivePreview.console.noValidIds'));
         return;
       }
 
       const { validIds, invalidIds } = await validateAbnormalPostsExist(postIds);
 
       if (invalidIds.length > 0) {
-        // 過濾掉已刪除的記錄
+        // Filter out deleted records
         const filteredAbnormalPosts = archiveData.abnormalPostsData.filter(post => 
           post && post.id && validIds.includes(post.id)
         );
 
-        // 更新archive數據
+        // Update archive data
         const updatedArchiveData = {
           ...archiveData,
           abnormalPostsData: filteredAbnormalPosts
@@ -69,7 +71,7 @@ const DiseaseArchivePreviewPage = () => {
 
         setArchiveData(updatedArchiveData);
 
-        // 同步更新localStorage中的數據
+        // Sync update localStorage data
         try {
           const DRAFT_KEY = `diseaseArchiveDraft_${petId}`;
           const savedDraft = localStorage.getItem(DRAFT_KEY);
@@ -83,24 +85,24 @@ const DiseaseArchivePreviewPage = () => {
             }
           }
         } catch (storageError) {
-          console.error('更新localStorage失敗:', storageError);
+          console.error(t('diseaseArchivePreview.console.updateLocalStorageFailed'), storageError);
         }
 
-        // 顯示通知
-        showNotification(`檢測到 ${invalidIds.length} 筆異常記錄已被刪除，已自動更新預覽`);
+        // Show notification
+        showNotification(t('diseaseArchivePreview.messages.deletedRecordsDetected', { count: invalidIds.length }));
       }
 
     } catch (error) {
-      console.error('驗證異常記錄數據失敗:', error);
+      console.error(t('diseaseArchivePreview.console.validationFailed'), error);
     }
   };
 
-  // 載入頁面數據
+  // Load page data
   useEffect(() => {
     loadPageData();
   }, [petId]);
 
-  // 頁面聚焦時驗證數據完整性
+  // Validate data integrity when page is focused
   useEffect(() => {
     let hasNavigatedAway = false;
     let validationTimeout = null;
@@ -111,27 +113,27 @@ const DiseaseArchivePreviewPage = () => {
 
     const handleVisibilityChange = () => {
       if (!document.hidden && hasNavigatedAway && archiveData && archiveData.abnormalPostsData && archiveData.abnormalPostsData.length > 0) {
-        // 只有在離開過頁面後重新回來才驗證
+        // Only validate when returning after leaving the page
         if (validationTimeout) clearTimeout(validationTimeout);
         validationTimeout = setTimeout(() => {
           validateAbnormalPostData();
-          hasNavigatedAway = false; // 重置標記
+          hasNavigatedAway = false; // Reset flag
         }, 1000);
       }
     };
 
     const handleFocus = () => {
       if (hasNavigatedAway && archiveData && archiveData.abnormalPostsData && archiveData.abnormalPostsData.length > 0) {
-        // 只有在離開過頁面後重新聚焦才驗證
+        // Only validate when refocusing after leaving the page
         if (validationTimeout) clearTimeout(validationTimeout);
         validationTimeout = setTimeout(() => {
           validateAbnormalPostData();
-          hasNavigatedAway = false; // 重置標記
+          hasNavigatedAway = false; // Reset flag
         }, 1000);
       }
     };
 
-    // 監聽頁面可見性變化和窗口聚焦
+    // Listen for page visibility changes and window focus
     document.addEventListener('visibilitychange', handleVisibilityChange);
     window.addEventListener('focus', handleFocus);
     window.addEventListener('beforeunload', handleBeforeUnload);
@@ -148,30 +150,30 @@ const DiseaseArchivePreviewPage = () => {
     try {
       setLoading(true);
       
-      // 檢查是否有從前一頁傳來的數據
+      // Check if there's data passed from the previous page
       if (!location.state || !location.state.archiveData) {
-        showNotification('缺少必要數據，返回編輯頁面');
+        showNotification(t('diseaseArchivePreview.messages.missingDataReturnEdit'));
         setTimeout(() => {
           navigate(`/pet/${petId}/disease-archive/edit-content`);
         }, 1500);
         return;
       }
       
-      // 載入用戶資料
+      // Load user profile
       const userProfile = await getUserProfile();
       setUser(userProfile);
       setCurrentUser(userProfile);
       
-      // 載入寵物資料
+      // Load pet data
       const petDetail = await getPetDetail(petId);
       if (petDetail) {
         setPet(petDetail);
       }
       
-      // 設置檔案數據
+      // Set archive data
       const data = location.state.archiveData;
       
-      // 從localStorage中獲取真實的異常記錄資訊
+      // Get real abnormal record information from localStorage
       try {
         const DRAFT_KEY = `diseaseArchiveDraft_${petId}`;
         const savedDraft = localStorage.getItem(DRAFT_KEY);
@@ -186,16 +188,16 @@ const DiseaseArchivePreviewPage = () => {
             const filteredPosts = objectValues.filter(post => post && post.id);
             
             const abnormalPostsData = filteredPosts.map(post => {
-              // 如果有rawData使用rawData，否則使用post本身
+              // Use rawData if available, otherwise use post itself
               if (post.rawData) {
                 return post.rawData;
               } else {
-                // 構建標準格式的異常記錄數據
+                // Build standard format abnormal record data
                 return {
                   id: post.id,
                   record_date: `2025-${String(post.date.split('月')[0]).padStart(2, '0')}-${String(post.date.split('月')[1].split('日')[0]).padStart(2, '0')}T12:00:00Z`,
                   symptoms: post.symptoms ? [{ symptom_name: post.symptoms }] : [],
-                  content: post.description || '異常記錄'
+                  content: post.description || t('diseaseArchivePreview.defaultContent.abnormalRecord')
                 };
               }
             });
@@ -203,34 +205,34 @@ const DiseaseArchivePreviewPage = () => {
             data.abnormalPostsData = abnormalPostsData;
           }
           
-          // 如果沒有從abnormalPostsForDates找到，嘗試其他可能的來源
+          // If not found from abnormalPostsForDates, try other possible sources
           if (!data.abnormalPostsData || data.abnormalPostsData.length === 0) {
-            // 嘗試從其他可能的字段獲取
+            // Try to get from other possible fields
             if (draftData.realAbnormalPosts && Array.isArray(draftData.realAbnormalPosts)) {
               data.abnormalPostsData = draftData.realAbnormalPosts;
             }
           }
           
-          // 優先使用realAbnormalPosts，因為它包含完整的API數據
+          // Prioritize realAbnormalPosts as it contains complete API data
           if (draftData.realAbnormalPosts && Array.isArray(draftData.realAbnormalPosts) && draftData.realAbnormalPosts.length > 0) {
             data.abnormalPostsData = draftData.realAbnormalPosts;
           }
         }
       } catch (error) {
-        console.error('從localStorage獲取異常記錄失敗:', error);
+        console.error(t('diseaseArchivePreview.console.getLocalStorageFailed'), error);
       }
       setArchiveData(data);
       
     } catch (error) {
-      console.error('載入資料失敗:', error);
-      showNotification('載入資料失敗');
+      console.error(t('diseaseArchivePreview.console.loadDataFailed'), error);
+      showNotification(t('diseaseArchivePreview.messages.loadDataFailed'));
     } finally {
       setLoading(false);
     }
   };
 
 
-  // 處理上一步
+  // Handle previous step
   const handlePreviousStep = () => {
     navigate(`/pet/${petId}/disease-archive/edit-content`, {
       state: {
@@ -240,12 +242,12 @@ const DiseaseArchivePreviewPage = () => {
     });
   };
 
-  // 處理確認建立檔案
+  // Handle confirm create archive
   const handleConfirmCreate = async () => {
     try {
       setLoading(true);
       
-      // 準備儲存的數據
+      // Prepare data to save
       const saveData = {
         petId: parseInt(petId),
         archiveTitle: archiveData.archiveTitle,
@@ -254,31 +256,31 @@ const DiseaseArchivePreviewPage = () => {
         symptoms: archiveData.symptoms || [],
         includedAbnormalPostIds: archiveData.includedAbnormalPostIds || [],
         goToDoctor: archiveData.goToDoctor || false,
-        healthStatus: archiveData.healthStatus || '治療中',
-        isPrivate: archiveData.isPrivate !== false // 預設為 true
+        healthStatus: archiveData.healthStatus || t('diseaseArchivePreview.defaultStatus.treating'),
+        isPrivate: archiveData.isPrivate !== false // Default to true
       };
       
-      console.log('準備建立疾病檔案:', saveData);
-      
-      // 呼叫 API 儲存疾病檔案
+      console.log(t('diseaseArchivePreview.console.preparingToCreate'), saveData);
+
+      // Call API to save disease archive
       const result = await saveDiseaseArchive(saveData);
+
+      console.log(t('diseaseArchivePreview.console.createSuccess'), result);
+      showNotification(t('diseaseArchivePreview.messages.createSuccess'));
       
-      console.log('疾病檔案建立成功:', result);
-      showNotification('疾病檔案建立成功！');
-      
-      // 清除 localStorage 中的草稿
+      // Clear draft in localStorage
       const DRAFT_KEY = `diseaseArchiveDraft_${petId}`;
       localStorage.removeItem(DRAFT_KEY);
-      localStorage.removeItem('diseaseArchiveDraft'); // 保留舊的鍵名以防萬一
+      localStorage.removeItem('diseaseArchiveDraft'); // Keep old key name just in case
       
-      // 延遲後導向到寵物疾病檔案列表頁面
+      // Navigate to pet disease archive list page after delay
       setTimeout(() => {
         navigate(`/pet/${petId}/disease-archive`);
       }, 1500);
       
     } catch (error) {
-      console.error('建立疾病檔案失敗:', error);
-      showNotification('建立疾病檔案失敗，請稍後再試');
+      console.error(t('diseaseArchivePreview.console.createFailed'), error);
+      showNotification(t('diseaseArchivePreview.messages.createFailed'));
     } finally {
       setLoading(false);
     }
@@ -290,7 +292,7 @@ const DiseaseArchivePreviewPage = () => {
         <div className={styles.container}>
           <TopNavbar />
           <div className={styles.loadingContainer}>
-            載入中...
+            {t('common.loading')}
           </div>
           <BottomNavbar />
         </div>
@@ -304,7 +306,7 @@ const DiseaseArchivePreviewPage = () => {
         <div className={styles.container}>
           <TopNavbar />
           <div className={styles.errorContainer}>
-            缺少必要數據，正在返回編輯頁面...
+            {t('diseaseArchivePreview.messages.missingDataReturning')}
           </div>
           <BottomNavbar />
         </div>
@@ -318,7 +320,7 @@ const DiseaseArchivePreviewPage = () => {
         <TopNavbar />
         
         <div className={styles.content}>
-          {/* 標題區域 */}
+          {/* Title section */}
           <div className={styles.header}>
             <div className={styles.titleSection}>
               <img 
@@ -326,13 +328,13 @@ const DiseaseArchivePreviewPage = () => {
                 alt={pet?.pet_name}
                 className={styles.petAvatar}
               />
-              <span className={styles.title}>疾病檔案預覽</span>
+              <span className={styles.title}>{t('diseaseArchivePreview.title')}</span>
             </div>
           </div>
 
           <div className={styles.divider}></div>
 
-          {/* 疾病檔案預覽卡片 */}
+          {/* Disease archive preview card */}
           <ArchiveCard 
             archiveData={archiveData}
             user={user}
@@ -340,26 +342,26 @@ const DiseaseArchivePreviewPage = () => {
             currentUser={currentUser}
           />
 
-          {/* 操作按鈕 */}
+          {/* Action buttons */}
           <div className={styles.actionButtons}>
             <button 
               className={styles.previousButton} 
               onClick={handlePreviousStep}
             >
-              上一步
+              {t('diseaseArchivePreview.buttons.previous')}
             </button>
             <button 
               className={styles.confirmButton} 
               onClick={handleConfirmCreate}
             >
-              確認建立
+              {t('diseaseArchivePreview.buttons.confirmCreate')}
             </button>
           </div>
         </div>
 
         <BottomNavbar />
         
-        {/* 通知組件 */}
+        {/* Notification component */}
         {notification && (
           <Notification message={notification} onClose={hideNotification} />
         )}

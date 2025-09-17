@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import styles from '../styles/TopNavbar.module.css';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Notification from './Notification';
@@ -6,6 +7,7 @@ import { NotificationProvider } from '../context/NotificationContext';
 import { useUser } from '../context/UserContext';
 
 const TopNavbar = ({ onSearchSubmit, onSearchChange, initialSearchValue }) => {
+  const { t } = useTranslation('main');
   const navigate = useNavigate();
   const location = useLocation();
   const [notification, setNotification] = useState('');
@@ -70,7 +72,7 @@ const TopNavbar = ({ onSearchSubmit, onSearchChange, initialSearchValue }) => {
         <div className={styles.leftSection}>
           <img 
             src="/assets/icon/HeaderButton_HomePage.png" 
-            alt="首頁"
+            alt={t('topNavbar.home')}
             className={styles.icon}
             onClick={() => navigate('/main')}
           />
@@ -87,7 +89,7 @@ const TopNavbar = ({ onSearchSubmit, onSearchChange, initialSearchValue }) => {
             <form onSubmit={handleSearchSubmit} className={styles.searchForm}>
               <input
                 type="text"
-                placeholder={isFeedPage ? "搜尋飼料名稱或品牌..." : "搜尋..."}
+                placeholder={isFeedPage ? t('topNavbar.feedSearchPlaceholder') : t('topNavbar.searchPlaceholder')}
                 value={searchQuery}
                 onChange={handleSearchChange}
                 className={styles.searchInput}
@@ -95,7 +97,7 @@ const TopNavbar = ({ onSearchSubmit, onSearchChange, initialSearchValue }) => {
               <button type="submit" className={styles.searchButton}>
                 <img 
                   src="/assets/icon/Community_Search.png" 
-                  alt="搜尋"
+                  alt={t('topNavbar.search')}
                   className={styles.searchIcon}
                 />
               </button>
@@ -104,14 +106,14 @@ const TopNavbar = ({ onSearchSubmit, onSearchChange, initialSearchValue }) => {
             // 在其他頁面顯示通知按鈕
             <img 
               src="/assets/icon/HeaderButton_Notification.png" 
-              alt="通知"
+              alt={t('topNavbar.notification')}
               className={styles.icon}
               onClick={handleNotification}
             />
           )}
           <img 
             src={userHeadshot} 
-            alt="用戶頭像"
+            alt={t('topNavbar.userAvatar')}
             className={`${styles.userHeadshot} ${imageLoading ? styles.loading : ''}`}
             onClick={() => navigate('/user-profile')}
           />

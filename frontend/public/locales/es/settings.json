@@ -1,0 +1,25 @@
+{
+  "title": "Configuración",
+  "account": {
+    "title": "Configuración de Cuenta",
+    "editProfile": "Editar Perfil",
+    "accountPrivacy": "Privacidad de Cuenta",
+    "privacyPublic": "Público",
+    "privacyPrivate": "Privado",
+    "privacyDescription": "Cuando se configura como privado, solo tus seguidores pueden ver tus publicaciones"
+  },
+  "interaction": {
+    "title": "Mis Interacciones",
+    "likedPosts": "Publicaciones que Me Gustan",
+    "savedPosts": "Publicaciones Guardadas",
+    "likedArchives": "Artículos de Foro que Me Gustan",
+    "savedArchives": "Artículos de Foro Guardados"
+  },
+  "language": {
+    "title": "Configuración de Idioma",
+    "systemLanguage": "Idioma del Sistema",
+    "changeLanguageInfo": "Elige tu idioma de visualización preferido. Los cambios tendrán efecto inmediatamente."
+  },
+  "logout": "Cerrar Sesión",
+  "loggingOut": "Cerrando sesión..."
+}

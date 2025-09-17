@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import styles from '../styles/UserProfilePage.module.css';
 import TopNavbar from '../components/TopNavbar';
 import BottomNavbar from '../components/BottomNavigationbar';
@@ -11,6 +12,7 @@ import { NotificationProvider } from '../context/NotificationContext';
 import { getUserProfile, getUserPostsPreview, getUserArchives, getUserSummary, updateUserProfile } from '../services/userService';
 
 const UserProfilePage = () => {
+  const { t } = useTranslation('profile');
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const location = useLocation();
@@ -118,7 +120,7 @@ const UserProfilePage = () => {
         setArchives(archs);
       } catch (err) {
         console.error('載入個人資料失敗:', err);
-        setNotification('載入個人資料失敗，請稍後再試');
+        setNotification(t('profilePage.messages.loadProfileFailed'));
         // 設定預設值避免錯誤
         setPostsPreview([]);
         setArchives([]);
@@ -173,11 +175,11 @@ const UserProfilePage = () => {
       }
       
       setUser(updatedUser);
-      showNotification('個人資料更新成功！');
+      showNotification(t('profilePage.messages.profileUpdateSuccess'));
       setIsEditModalOpen(false);
     } catch (error) {
       console.error('更新個人資料失敗:', error);
-      showNotification('個人資料更新失敗，請稍後再試');
+      showNotification(t('profilePage.messages.profileUpdateFailed'));
       throw error; // 讓Modal知道操作失敗
     }
   };
@@ -191,14 +193,14 @@ const UserProfilePage = () => {
         )}
         <main className={styles.content}>
           {loading ? (
-            <div style={{textAlign: 'center', margin: '40px 0'}}>載入中...</div>
+            <div style={{textAlign: 'center', margin: '40px 0'}}>{t('common.loading')}</div>
           ) : user && (
             <>
               {/* 頭像與簡介區塊 */}
               <div className={styles.profileHeader}>
                 <div className={styles.avatarSection}>
                   <img src={user.headshot_url || '/assets/icon/DefaultAvatar.jpg'} alt="頭像" className={styles.avatar} />
-                  <button className={styles.editButton} onClick={handleEditProfile}>編輯個人資料</button>
+                  <button className={styles.editButton} onClick={handleEditProfile}>{t('profilePage.editButton')}</button>
                 </div>
                 <div className={styles.profileInfo}>
                   <div className={styles.nickname}>{user.user_account}</div>
@@ -209,17 +211,17 @@ const UserProfilePage = () => {
                         className={styles.followStatItem}
                         onClick={() => navigate(`/user/${user.user_account}/follow/followers`)}
                       >
-                        粉絲: {userSummary.followers_count}
+                        {t('profilePage.followStats.followers')}: {userSummary.followers_count}
                       </span>
-                      <span 
+                      <span
                         className={styles.followStatItem}
                         onClick={() => navigate(`/user/${user.user_account}/follow/following`)}
                       >
-                        追蹤中: {userSummary.following_count}
+                        {t('profilePage.followStats.following')}: {userSummary.following_count}
                       </span>
                     </div>
                   )}
-                  <div className={styles.desc}>{user.user_intro || '這個人很低調，什麼都沒寫。'}</div>
+                  <div className={styles.desc}>{user.user_intro || t('profilePage.defaultIntro')}</div>
                 </div>
               </div>
 
@@ -229,13 +231,13 @@ const UserProfilePage = () => {
                   className={`${styles.tab} ${activeTab === 'community' ? styles.active : ''}`}
                   onClick={() => handleTabChange('community')}
                 >
-                  社群
+                  {t('profilePage.tabs.community')}
                 </button>
                 <button
                   className={`${styles.tab} ${activeTab === 'forum' ? styles.active : ''}`}
                   onClick={() => handleTabChange('forum')}
                 >
-                  論壇
+                  {t('profilePage.tabs.forum')}
                 </button>
               </div>
 
@@ -245,7 +247,7 @@ const UserProfilePage = () => {
                   posts={postsPreview}
                   loading={postsLoading}
                   error={postsError}
-                  emptyMessage="尚未發布任何日常貼文"
+                  emptyMessage={t('profilePage.emptyMessages.noPosts')}
                   userId={user.id}
                   hasMore={postsHasMore}
                   onLoadMore={handleLoadMorePosts}
@@ -255,7 +257,7 @@ const UserProfilePage = () => {
                 <ArchiveList
                   fetchUserArchives={true}
                   userId={user?.id} // 傳遞當前用戶的ID
-                  emptyMessage="尚未發布任何疾病檔案"
+                  emptyMessage={t('profilePage.emptyMessages.noArchives')}
                   onLike={(archiveId, isLiked) => console.log('疾病檔案按讚功能暫未實作')}
                   onComment={(archiveId) => console.log('Archive comment:', archiveId)}
                   onSave={(archiveId, isSaved) => console.log('疾病檔案收藏功能暫未實作')}

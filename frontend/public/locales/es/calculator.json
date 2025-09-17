@@ -1,0 +1,140 @@
+{
+  "title": "Calculadora Nutricional",
+  "functions": {
+    "reset": "Restablecer",
+    "quickCalculate": "Cálculo Rápido",
+    "history": "Historial"
+  },
+  "sections": {
+    "pet": "Seleccionar Mascota",
+    "condition": "Condición de la Mascota",
+    "feed": "Seleccionar Alimento",
+    "calculate": "Inicio",
+    "calculateResult": "Resultado"
+  },
+  "petSection": {
+    "selectPet": "Seleccionar Mascota",
+    "addTempPet": "Agregar Mascota Temporal",
+    "name": "Nombre:",
+    "speciesLabel": "Especie:",
+    "weight": "Peso:",
+    "height": "Altura:",
+    "stage": "Etapa:",
+    "weightUnit": "kg",
+    "heightUnit": "cm",
+    "createTempPet": "Crear Mascota Temporal",
+    "cancelSelection": "Cancelar Selección",
+    "placeholders": {
+      "petName": "Ingresa el nombre de la mascota",
+      "weight": "Ingresa el peso",
+      "height": "Ingresa la altura"
+    },
+    "species": {
+      "cat": "Gato",
+      "dog": "Perro"
+    },
+    "stages": {
+      "kitten": "Gatito",
+      "puppy": "Cachorro",
+      "adult": "Adulto",
+      "pregnant": "Embarazada",
+      "lactating": "Lactante"
+    }
+  },
+  "conditionSection": {
+    "other": "Otro:",
+    "otherPlaceholder": "Por favor ingresa",
+    "conditions": {
+      "chronicKidneyDisease": "Enfermedad Renal Crónica",
+      "liverDisease": "Enfermedad Hepática",
+      "arthritisObesity": "Artritis",
+      "heartDisease": "Enfermedad Cardíaca",
+      "diabetes": "Diabetes",
+      "urinaryStones": "Cálculos Urinarios",
+      "pancreatitis": "Pancreatitis",
+      "foodAllergyGISensitivity": "Sensibilidad GI",
+      "skinProblems": "Problemas de Piel"
+    }
+  },
+  "feedSection": {
+    "selectFeed": "Seleccionar Alimento",
+    "addFeed": "Agregar Alimento",
+    "noFeedSelected": "Por favor selecciona o agrega alimento",
+    "nutritionTitle": "Nutrición (por 100g)",
+    "nutrients": {
+      "protein": "Proteína",
+      "fat": "Grasa",
+      "carbohydrate": "Carbohidrato",
+      "calcium": "Calcio",
+      "phosphorus": "Fósforo",
+      "magnesium": "Magnesio",
+      "sodium": "Sodio"
+    },
+    "units": {
+      "g": "g",
+      "mg": "mg"
+    }
+  },
+  "calculationSection": {
+    "calculating": "Calculando, por favor espera...",
+    "noResult": "Haz clic en el botón 'Iniciar Cálculo' arriba para comenzar el cálculo nutricional",
+    "dailyCalories": "Requerimiento Calórico Diario:",
+    "dailyFeedAmount": "Recomendación de Alimento Diario:",
+    "kcalUnit": "kcal",
+    "gramUnit": "gramos"
+  },
+  "messages": {
+    "loading": "Cargando...",
+    "noLastUsedData": "No hay datos previos disponibles",
+    "petNotFound": "La mascota usada previamente ya no existe",
+    "dataLoaded": "Datos previos cargados exitosamente",
+    "loadFailed": "Error al cargar datos previos",
+    "calculatorReset": "La calculadora ha sido restablecida",
+    "selectPetFirst": "Por favor selecciona una mascota primero",
+    "selectFeedFirst": "Por favor selecciona un alimento primero",
+    "enterPetName": "Por favor ingresa el nombre de la mascota",
+    "enterWeight": "Por favor ingresa el peso",
+    "enterHeight": "Por favor ingresa la altura",
+    "tempPetCreated": "Mascota temporal creada y bloqueada",
+    "tempPetCanceled": "Selección de mascota temporal cancelada",
+    "calculateFailed": "Cálculo fallido, inténtalo de nuevo más tarde",
+    "feedCreated": "Alimento creado exitosamente",
+    "feedCreateFailed": "Error al crear alimento, inténtalo de nuevo más tarde",
+    "quickCalculateInDevelopment": "La función de cálculo rápido está en desarrollo",
+    "loadingPetsFailed": "Error al cargar mascotas:",
+    "loadingLastUsedDataFailed": "Error al cargar últimos datos usados:",
+    "createFeedFailed": "Error al crear alimento:",
+    "selectPetAndFeed": "Por favor selecciona mascota y alimento primero",
+    "enterPetWeight": "Por favor ingresa el peso de la mascota"
+  },
+  "historyModal": {
+    "title": "Registros del Historial",
+    "backToList": "❮ Volver a la Lista",
+    "loading": "Cargando...",
+    "noRecords": "Aún no hay registros de cálculo",
+    "emptyStateAlt": "Estado Vacío",
+    "clearAll": "Limpiar Todo",
+    "close": "Cerrar",
+    "confirmClearMessage": "¿Estás seguro de que quieres limpiar todos los registros del historial? Esta operación no se puede deshacer",
+    "allRecordsCleared": "Todos los registros eliminados",
+    "clearFailed": "Error al limpiar",
+    "loadRecordsFailed": "Error al cargar registros del historial",
+    "basicInfo": "Información Básica",
+    "calculationTime": "Tiempo de Cálculo:",
+    "petName": "Nombre de la Mascota:",
+    "feedName": "Nombre del Alimento:",
+    "feedBrand": "Marca del Alimento:",
+    "calculationResult": "Resultado del Cálculo",
+    "dailyRequirement": "Requerimiento Diario",
+    "dailyCaloriesNeed": "Requerimiento Calórico Diario:",
+    "dailyFeedRecommendation": "Recomendación de Alimento Diario:",
+    "actualNutritionIntake": "Ingesta Nutricional Real",
+    "nutritionistAdvice": "Consejo del Nutricionista"
+  },
+  "historyPreview": {
+    "historyRecord": "Registro del Historial",
+    "pet": "Mascota:",
+    "feed": "Alimento:",
+    "monthDay": "{{month}}/{{day}}"
+  }
+}

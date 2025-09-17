@@ -1,0 +1,154 @@
+{
+  "title": "我的寵物",
+  "addPet": "新增寵物",
+  "noPets": "您還沒有新增任何寵物",
+  "form": {
+    "name": "寵物名稱",
+    "species": "種類",
+    "breed": "品種",
+    "age": "年齡",
+    "gender": "性別",
+    "weight": "體重",
+    "description": "描述",
+    "photo": "照片"
+  },
+  "species": {
+    "dog": "狗",
+    "cat": "貓",
+    "bird": "鳥",
+    "rabbit": "兔子",
+    "hamster": "倉鼠",
+    "other": "其他"
+  },
+  "gender": {
+    "male": "公",
+    "female": "母",
+    "unknown": "未知"
+  },
+  "health": {
+    "title": "健康記錄",
+    "vaccination": "疫苗接種",
+    "checkup": "健康檢查",
+    "medication": "用藥記錄",
+    "weight": "體重記錄"
+  },
+  "page": {
+    "loading": "載入中...",
+    "noData": "您目前沒有寵物資料",
+    "noDataSubtitle": "馬上新增您的寵物以使用寵物頁面",
+    "defaultDescription": "這隻寵物很可愛，主人還沒有添加描述。",
+    "functions": {
+      "editData": "編輯資料",
+      "relatedPosts": "相關貼文",
+      "feedArea": "飼料專區",
+      "diseaseArchive": "疾病檔案",
+      "abnormalRecord": "異常紀錄",
+      "healthReport": "健康報告"
+    },
+    "switcher": {
+      "title": "切換目前寵物",
+      "addButton": "新增寵物"
+    },
+    "messages": {
+      "fetchError": "獲取寵物資料失敗，請稍後再試",
+      "selectPetFirst": "請先選擇一隻寵物",
+      "selectPetToEdit": "請選擇要編輯的寵物",
+      "featureInDevelopment": "功能開發中"
+    },
+    "ageUnit": "歲"
+  },
+  "addPage": {
+    "phase1": {
+      "title": "我的寵物是...",
+      "catAlt": "貓",
+      "dogAlt": "狗",
+      "catButton": "貓",
+      "dogButton": "狗"
+    },
+    "phase2": {
+      "uploadAvatar": "上傳大頭照",
+      "avatarAlt": "寵物大頭照",
+      "titleCat": "貓咪基本資料",
+      "titleDog": "狗狗基本資料",
+      "labels": {
+        "name": "名字",
+        "breed": "品種",
+        "age": "年齡",
+        "weight": "體重",
+        "height": "身高"
+      },
+      "placeholders": {
+        "name": "請輸入寵物名字",
+        "breedCat": "選擇貓",
+        "breedDog": "選擇狗",
+        "age": "請輸入年齡（歲）",
+        "weight": "請輸入體重（公斤）",
+        "height": "請輸入身高（公分）",
+        "description": "請簡單介紹你的寵物"
+      },
+      "buttons": {
+        "back": "返回",
+        "submit": "完成",
+        "processing": "處理中..."
+      }
+    },
+    "breeds": {
+      "cat": [
+        "米克斯貓", "美國短毛貓", "英國短毛貓", "蘇格蘭摺耳貓", "布偶貓",
+        "暹羅貓", "波斯貓", "孟加拉貓", "緬因貓", "異國短毛貓", "其他"
+      ],
+      "dog": [
+        "米克斯犬", "柴犬", "貴賓犬", "黃金獵犬", "拉布拉多", "哈士奇",
+        "法國鬥牛犬", "博美犬", "約克夏", "馬爾濟斯", "其他"
+      ]
+    },
+    "imageProcessing": {
+      "starting": "開始處理...",
+      "processing": "處理中...",
+      "error": "圖片處理失敗，請重試"
+    },
+    "messages": {
+      "requiredFields": "請填寫所有必填欄位",
+      "addSuccess": "新增寵物成功！",
+      "addError": "新增寵物失敗，請稍後再試",
+      "validationError": "資料驗證錯誤："
+    }
+  },
+  "editPage": {
+    "loading": "載入中...",
+    "uploadAvatar": "上傳大頭照",
+    "avatarAlt": "寵物大頭照",
+    "titleCat": "編輯貓咪資料",
+    "titleDog": "編輯狗狗資料",
+    "labels": {
+      "name": "名字",
+      "breed": "品種",
+      "age": "年齡",
+      "weight": "體重",
+      "height": "身高"
+    },
+    "placeholders": {
+      "name": "請輸入寵物名字",
+      "breedCat": "選擇貓品種",
+      "breedDog": "選擇狗品種",
+      "age": "請輸入年齡（歲）",
+      "weight": "請輸入體重（公斤）",
+      "height": "請輸入身高（公分）",
+      "description": "請簡單介紹你的寵物"
+    },
+    "buttons": {
+      "back": "返回",
+      "save": "儲存",
+      "processing": "處理中..."
+    },
+    "messages": {
+      "petNotFound": "找不到寵物資料",
+      "loadError": "載入寵物資料失敗",
+      "imageProcessError": "圖片處理失敗，請重試",
+      "requiredFields": "請填寫所有必填欄位",
+      "updateSuccess": "更新寵物資料成功！",
+      "updateError": "更新寵物失敗，請稍後再試",
+      "validationError": "資料驗證錯誤："
+    }
+  }
+}

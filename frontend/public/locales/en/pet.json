@@ -1,0 +1,154 @@
+{
+  "title": "My Pets",
+  "addPet": "Add Pet",
+  "noPets": "You haven't added any pets yet",
+  "form": {
+    "name": "Pet Name",
+    "species": "Species",
+    "breed": "Breed",
+    "age": "Age",
+    "gender": "Gender",
+    "weight": "Weight",
+    "description": "Description",
+    "photo": "Photo"
+  },
+  "species": {
+    "dog": "Dog",
+    "cat": "Cat",
+    "bird": "Bird",
+    "rabbit": "Rabbit",
+    "hamster": "Hamster",
+    "other": "Other"
+  },
+  "gender": {
+    "male": "Male",
+    "female": "Female",
+    "unknown": "Unknown"
+  },
+  "health": {
+    "title": "Health Records",
+    "vaccination": "Vaccination",
+    "checkup": "Health Checkup",
+    "medication": "Medication Records",
+    "weight": "Weight Records"
+  },
+  "page": {
+    "loading": "Loading...",
+    "noData": "You currently have no pet data",
+    "noDataSubtitle": "Add your pet now to use the pet page",
+    "defaultDescription": "This pet is lovely, the owner hasn't added a description yet.",
+    "functions": {
+      "editData": "Edit Data",
+      "relatedPosts": "Related Posts",
+      "feedArea": "Feed Area",
+      "diseaseArchive": "Disease Archive",
+      "abnormalRecord": "Abnormal Record",
+      "healthReport": "Health Report"
+    },
+    "switcher": {
+      "title": "Switch Current Pet",
+      "addButton": "Add Pet"
+    },
+    "messages": {
+      "fetchError": "Failed to fetch pet data, please try again later",
+      "selectPetFirst": "Please select a pet first",
+      "selectPetToEdit": "Please select a pet to edit",
+      "featureInDevelopment": "Feature in development"
+    },
+    "ageUnit": "years old"
+  },
+  "addPage": {
+    "phase1": {
+      "title": "My pet is...",
+      "catAlt": "Cat",
+      "dogAlt": "Dog",
+      "catButton": "Cat",
+      "dogButton": "Dog"
+    },
+    "phase2": {
+      "uploadAvatar": "Upload Avatar",
+      "avatarAlt": "Pet Avatar",
+      "titleCat": "Cat Basic Information",
+      "titleDog": "Dog Basic Information",
+      "labels": {
+        "name": "Name",
+        "breed": "Breed",
+        "age": "Age",
+        "weight": "Weight",
+        "height": "Height"
+      },
+      "placeholders": {
+        "name": "Enter pet name",
+        "breedCat": "Select Cat",
+        "breedDog": "Select Dog",
+        "age": "Enter age (years)",
+        "weight": "Enter weight (kg)",
+        "height": "Enter height (cm)",
+        "description": "Briefly introduce your pet"
+      },
+      "buttons": {
+        "back": "Back",
+        "submit": "Complete",
+        "processing": "Processing..."
+      }
+    },
+    "breeds": {
+      "cat": [
+        "Mixed Cat", "American Shorthair", "British Shorthair", "Scottish Fold", "Ragdoll",
+        "Siamese", "Persian", "Bengal", "Maine Coon", "Exotic Shorthair", "Other"
+      ],
+      "dog": [
+        "Mixed Breed", "Shiba Inu", "Poodle", "Golden Retriever", "Labrador", "Husky",
+        "French Bulldog", "Pomeranian", "Yorkshire Terrier", "Maltese", "Other"
+      ]
+    },
+    "imageProcessing": {
+      "starting": "Starting processing...",
+      "processing": "Processing...",
+      "error": "Image processing failed, please try again"
+    },
+    "messages": {
+      "requiredFields": "Please fill in all required fields",
+      "addSuccess": "Pet added successfully!",
+      "addError": "Failed to add pet, please try again later",
+      "validationError": "Data validation error: "
+    }
+  },
+  "editPage": {
+    "loading": "Loading...",
+    "uploadAvatar": "Upload Avatar",
+    "avatarAlt": "Pet Avatar",
+    "titleCat": "Edit Cat Information",
+    "titleDog": "Edit Dog Information",
+    "labels": {
+      "name": "Name",
+      "breed": "Breed",
+      "age": "Age",
+      "weight": "Weight",
+      "height": "Height"
+    },
+    "placeholders": {
+      "name": "Enter pet name",
+      "breedCat": "Select Cat Breed",
+      "breedDog": "Select Dog Breed",
+      "age": "Enter age (years)",
+      "weight": "Enter weight (kg)",
+      "height": "Enter height (cm)",
+      "description": "Briefly introduce your pet"
+    },
+    "buttons": {
+      "back": "Back",
+      "save": "Save",
+      "processing": "Processing..."
+    },
+    "messages": {
+      "petNotFound": "Pet data not found",
+      "loadError": "Failed to load pet data",
+      "imageProcessError": "Image processing failed, please try again",
+      "requiredFields": "Please fill in all required fields",
+      "updateSuccess": "Pet data updated successfully!",
+      "updateError": "Failed to update pet, please try again later",
+      "validationError": "Data validation error: "
+    }
+  }
+}

@@ -1,7 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import styles from '../styles/TodoSection.module.css';
 
 const TimeDisplay = React.memo(({ schedule }) => {
+  const { t } = useTranslation('main');
+
   // 計算時間差
   const getTimeRemaining = useCallback((schedule) => {
     const now = new Date();
@@ -21,40 +24,40 @@ const TimeDisplay = React.memo(({ schedule }) => {
       if (remainingHours > 0) {
         return {
           value: days,
-          unit: '天',
+          unit: t('timeDisplay.days'),
           subValue: remainingHours,
-          subUnit: '小時',
+          subUnit: t('timeDisplay.hours'),
           isPast
         };
       }
       return {
         value: days,
-        unit: '天',
+        unit: t('timeDisplay.days'),
         isPast
       };
     } else if (remainingHours > 0) {
       if (remainingMinutes > 0) {
         return {
           value: remainingHours,
-          unit: '小時',
+          unit: t('timeDisplay.hours'),
           subValue: remainingMinutes,
-          subUnit: '分',
+          subUnit: t('timeDisplay.minutes'),
           isPast
         };
       }
       return {
         value: remainingHours,
-        unit: '小時',
+        unit: t('timeDisplay.hours'),
         isPast
       };
     } else {
       return {
         value: remainingMinutes || 1,
-        unit: '分鐘',
+        unit: t('timeDisplay.minutes'),
         isPast
       };
     }
-  }, []);
+  }, [t]);
 
   const [timeInfo, setTimeInfo] = useState(() => getTimeRemaining(schedule));
 
@@ -84,7 +87,7 @@ const TimeDisplay = React.memo(({ schedule }) => {
           </>
         )}
         <span className={styles.timeSuffix}>
-          {timeInfo.isPast ? '前' : '後'}
+          {timeInfo.isPast ? t('timeDisplay.ago') : t('timeDisplay.later')}
         </span>
       </div>
     </div>

@@ -1,7 +1,10 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import styles from '../styles/PastNotifications.module.css';
 
 const PastNotifications = ({ notifications }) => {
+  const { t } = useTranslation('social');
+
   // 處理頭像載入失敗
   const handleImageError = (e) => {
     e.target.src = '/assets/icon/DefaultAvatar.jpg';
@@ -18,10 +21,10 @@ const PastNotifications = ({ notifications }) => {
   if (!notifications || notifications.length === 0) {
     return (
       <div className={styles.container}>
-        <h3 className={styles.sectionTitle}>過去訊息</h3>
+        <h3 className={styles.sectionTitle}>{t('notifications.pastTitle')}</h3>
         <div className={styles.divider}></div>
         <div className={styles.emptyMessage}>
-          目前沒有過去訊息
+          {t('notifications.noPast')}
         </div>
       </div>
     );
@@ -29,15 +32,15 @@ const PastNotifications = ({ notifications }) => {
 
   return (
     <div className={styles.container}>
-      <h3 className={styles.sectionTitle}>過去訊息</h3>
+      <h3 className={styles.sectionTitle}>{t('notifications.pastTitle')}</h3>
       <div className={styles.divider}></div>
       <div className={styles.notificationList}>
         {notifications.map((notification) => (
           <div key={notification.id} className={styles.notificationItem}>
             <div className={styles.avatar}>
-              <img 
+              <img
                 src={getAvatarUrl(notification)}
-                alt="頭像"
+                alt={t('notifications.avatar')}
                 onError={handleImageError}
               />
             </div>
@@ -51,7 +54,7 @@ const PastNotifications = ({ notifications }) => {
                 // 其他類型通知顯示用戶名和內容
                 <>
                   <span className={styles.username}>
-                    {notification.follow_request_from_info?.username || '未知用戶'}
+                    {notification.follow_request_from_info?.username || t('notifications.unknownUser')}
                   </span>
                   <span className={styles.message}>
                     {notification.content}

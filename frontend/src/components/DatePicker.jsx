@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import styles from '../styles/DatePicker.module.css';
 
 const DatePicker = ({ isOpen, onClose, selectedDate, onDateSelect }) => {
+  const { t, i18n } = useTranslation('posts');
   const today = new Date();
   const [selectedYear, setSelectedYear] = useState(selectedDate ? selectedDate.getFullYear() : today.getFullYear());
   const [selectedMonth, setSelectedMonth] = useState(selectedDate ? selectedDate.getMonth() + 1 : today.getMonth() + 1);
@@ -46,9 +48,22 @@ const DatePicker = ({ isOpen, onClose, selectedDate, onDateSelect }) => {
   // 格式化完整日期顯示
   const formatSelectedDate = () => {
     const date = new Date(selectedYear, selectedMonth - 1, selectedDay);
-    const weekDays = ['日', '一', '二', '三', '四', '五', '六'];
+    const weekDays = t('datePicker.weekDays', { returnObjects: true });
     const weekDay = weekDays[date.getDay()];
-    return `${selectedYear}/${String(selectedMonth).padStart(2, '0')}/${String(selectedDay).padStart(2, '0')} (${weekDay})`;
+
+    // Use abbreviated month name for English
+    let monthDisplay = String(selectedMonth).padStart(2, '0');
+    if (i18n.language === 'en') {
+      const monthNames = t('datePicker.monthNames', { returnObjects: true });
+      monthDisplay = monthNames[selectedMonth - 1];
+    }
+
+    return t('datePicker.dateFormat', {
+      year: selectedYear,
+      month: monthDisplay,
+      day: String(selectedDay).padStart(2, '0'),
+      weekDay: weekDay
+    });
   };
 
   // 確認選擇
@@ -96,7 +111,7 @@ const DatePicker = ({ isOpen, onClose, selectedDate, onDateSelect }) => {
       {/* 日曆彈窗 */}
       <div className={styles.modalContainer} onClick={(e) => e.stopPropagation()}>
         <div className={styles.header}>
-          <h3 className={styles.title}>選擇日期</h3>
+          <h3 className={styles.title}>{t('datePicker.title')}</h3>
         </div>
 
         <div className={styles.selectorContainer}>
@@ -104,42 +119,56 @@ const DatePicker = ({ isOpen, onClose, selectedDate, onDateSelect }) => {
           <div className={styles.dateSelectors}>
             {/* 年份選擇 */}
             <div className={styles.selectorGroup}>
-              <label className={styles.selectorLabel}>年份</label>
+              <label className={styles.selectorLabel}>{t('datePicker.yearLabel')}</label>
               <select
                 className={styles.selector}
                 value={selectedYear}
                 onChange={(e) => setSelectedYear(parseInt(e.target.value))}
               >
                 {generateYears().map(year => (
-                  <option key={year} value={year}>{year}年</option>
+                  <option key={year} value={year}>{t('datePicker.yearOption', { year })}</option>
                 ))}
               </select>
             </div>
 
             {/* 月份選擇 */}
             <div className={styles.selectorGroup}>
-              <label className={styles.selectorLabel}>月份</label>
+              <label className={styles.selectorLabel}>{t('datePicker.monthLabel')}</label>
               <select
                 className={styles.selector}
                 value={selectedMonth}
                 onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
               >
-                {generateMonths().map(month => (
-                  <option key={month} value={month}>{month}月</option>
-                ))}
+                {generateMonths().map(month => {
+                  // Use abbreviated month names for English
+                  if (i18n.language === 'en') {
+                    const monthNames = t('datePicker.monthNames', { returnObjects: true });
+                    return (
+                      <option key={month} value={month}>
+                        {monthNames[month - 1]}
+                      </option>
+                    );
+                  } else {
+                    return (
+                      <option key={month} value={month}>
+                        {t('datePicker.monthOption', { month })}
+                      </option>
+                    );
+                  }
+                })}
               </select>
             </div>
 
             {/* 日期選擇 */}
             <div className={styles.selectorGroup}>
-              <label className={styles.selectorLabel}>日期</label>
+              <label className={styles.selectorLabel}>{t('datePicker.dayLabel')}</label>
               <select
                 className={styles.selector}
                 value={selectedDay}
                 onChange={(e) => setSelectedDay(parseInt(e.target.value))}
               >
                 {generateDays().map(day => (
-                  <option key={day} value={day}>{day}日</option>
+                  <option key={day} value={day}>{t('datePicker.dayOption', { day })}</option>
                 ))}
               </select>
             </div>
@@ -147,17 +176,17 @@ const DatePicker = ({ isOpen, onClose, selectedDate, onDateSelect }) => {
 
           {/* 選中日期預覽 */}
           <div className={styles.selectedDateDisplay}>
-            選中日期: {formatSelectedDate()}
+            {t('datePicker.selectedDateLabel')}: {formatSelectedDate()}
           </div>
         </div>
 
         {/* 操作按鈕 */}
         <div className={styles.footer}>
           <button className={styles.cancelButton} onClick={handleCancel}>
-            取消
+            {t('common.cancel')}
           </button>
           <button className={styles.confirmButton} onClick={handleConfirm}>
-            確認
+            {t('common.confirm')}
           </button>
         </div>
       </div>

@@ -1,8 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import styles from '../styles/CreateFeedModal.module.css';
 import NotificationComponent from './Notification';
 
 const CreateFeedModal = ({ isOpen, onClose, onConfirm, defaultPetType = 'cat' }) => {
+  const { t } = useTranslation('feed');
   const [frontImage, setFrontImage] = useState(null);
   const [nutritionImage, setNutritionImage] = useState(null);
   const [frontPreview, setFrontPreview] = useState(null);
@@ -37,12 +39,12 @@ const CreateFeedModal = ({ isOpen, onClose, onConfirm, defaultPetType = 'cat' })
     const file = e.target.files[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
-        showNotification('圖片大小不能超過 5MB');
+        showNotification(t('createModal.messages.imageTooLarge'));
         return;
       }
       
       if (!file.type.startsWith('image/')) {
-        showNotification('請選擇圖片檔案');
+        showNotification(t('createModal.messages.selectImageFile'));
         return;
       }
       
@@ -57,12 +59,12 @@ const CreateFeedModal = ({ isOpen, onClose, onConfirm, defaultPetType = 'cat' })
     const file = e.target.files[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
-        showNotification('圖片大小不能超過 5MB');
+        showNotification(t('createModal.messages.imageTooLarge'));
         return;
       }
       
       if (!file.type.startsWith('image/')) {
-        showNotification('請選擇圖片檔案');
+        showNotification(t('createModal.messages.selectImageFile'));
         return;
       }
       
@@ -93,47 +95,47 @@ const CreateFeedModal = ({ isOpen, onClose, onConfirm, defaultPetType = 'cat' })
   // 驗證表單
   const validateForm = () => {
     if (!feedName.trim()) {
-      showNotification('請輸入飼料名稱');
+      showNotification(t('createModal.messages.enterFeedName'));
       return false;
     }
     
     if (!feedBrand.trim()) {
-      showNotification('請輸入飼料品牌');
+      showNotification(t('createModal.messages.enterFeedBrand'));
       return false;
     }
     
     if (feedName.trim().length > 100) {
-      showNotification('飼料名稱不能超過100字元');
+      showNotification(t('createModal.messages.feedNameTooLong'));
       return false;
     }
     
     if (feedBrand.trim().length > 100) {
-      showNotification('品牌名稱不能超過100字元');
+      showNotification(t('createModal.messages.brandNameTooLong'));
       return false;
     }
     
     if (!feedPrice || feedPrice.trim() === '') {
-      showNotification('請輸入飼料價格');
+      showNotification(t('createModal.messages.enterFeedPrice'));
       return false;
     }
     
     if (isNaN(feedPrice)) {
-      showNotification('價格必須是數字');
+      showNotification(t('createModal.messages.invalidPrice'));
       return false;
     }
     
     if (parseFloat(feedPrice) < 0) {
-      showNotification('價格不能是負數');
+      showNotification(t('createModal.messages.invalidPrice'));
       return false;
     }
     
     if (!frontImage) {
-      showNotification('請上傳飼料正面圖片');
+      showNotification(t('createModal.messages.uploadFrontImage'));
       return false;
     }
     
     if (!nutritionImage) {
-      showNotification('請上傳營養成分表圖片');
+      showNotification(t('createModal.messages.uploadNutritionImage'));
       return false;
     }
     
@@ -158,8 +160,8 @@ const CreateFeedModal = ({ isOpen, onClose, onConfirm, defaultPetType = 'cat' })
       });
       handleClose();
     } catch (error) {
-      console.error('建立飼料失敗:', error);
-      showNotification('建立飼料失敗，請稍後再試');
+      console.error('Create feed failed:', error);
+      showNotification(t('page.messages.addFeedFailed'));
     } finally {
       setLoading(false);
     }
@@ -205,33 +207,33 @@ const CreateFeedModal = ({ isOpen, onClose, onConfirm, defaultPetType = 'cat' })
       )}
       <div className={styles.modalContainer}>
         <div className={styles.modalHeader}>
-          <h2>新增飼料</h2>
+          <h2>{t('createModal.title')}</h2>
         </div>
         
         <div className={styles.modalBody}>
           {/* 寵物類型選擇區域 */}
           <div className={styles.selectSection}>
-            <label className={styles.selectLabel}>寵物類型</label>
+            <label className={styles.selectLabel}>{t('createModal.labels.petType')}</label>
             <select 
               className={styles.petTypeSelect}
               value={petType}
               onChange={(e) => setPetType(e.target.value)}
               disabled={loading}
             >
-              <option value="cat">貓咪飼料</option>
-              <option value="dog">狗狗飼料</option>
+              <option value="cat">{t('createModal.petType.cat')}</option>
+              <option value="dog">{t('createModal.petType.dog')}</option>
             </select>
           </div>
 
           {/* 飼料名稱輸入區域 */}
           <div className={styles.inputSection}>
-            <label className={styles.inputLabel}>飼料名稱</label>
+            <label className={styles.inputLabel}>{t('createModal.labels.feedName')}</label>
             <input
               type="text"
               className={styles.textInput}
               value={feedName}
               onChange={(e) => setFeedName(e.target.value)}
-              placeholder="請輸入飼料名稱"
+              placeholder={t('createModal.placeholders.feedName')}
               maxLength="100"
               disabled={loading}
             />
@@ -239,13 +241,13 @@ const CreateFeedModal = ({ isOpen, onClose, onConfirm, defaultPetType = 'cat' })
 
           {/* 飼料品牌輸入區域 */}
           <div className={styles.inputSection}>
-            <label className={styles.inputLabel}>飼料品牌</label>
+            <label className={styles.inputLabel}>{t('createModal.labels.feedBrand')}</label>
             <input
               type="text"
               className={styles.textInput}
               value={feedBrand}
               onChange={(e) => setFeedBrand(e.target.value)}
-              placeholder="請輸入飼料品牌"
+              placeholder={t('createModal.placeholders.feedBrand')}
               maxLength="100"
               disabled={loading}
             />
@@ -253,13 +255,13 @@ const CreateFeedModal = ({ isOpen, onClose, onConfirm, defaultPetType = 'cat' })
 
           {/* 飼料價格輸入區域 */}
           <div className={styles.inputSection}>
-            <label className={styles.inputLabel}>飼料價格</label>
+            <label className={styles.inputLabel}>{t('createModal.labels.feedPrice')}</label>
             <input
               type="number"
               className={styles.textInput}
               value={feedPrice}
               onChange={(e) => setFeedPrice(e.target.value)}
-              placeholder="請輸入飼料價格"
+              placeholder={t('createModal.placeholders.feedPrice')}
               min="0"
               step="0.01"
               disabled={loading}
@@ -268,22 +270,22 @@ const CreateFeedModal = ({ isOpen, onClose, onConfirm, defaultPetType = 'cat' })
 
           {/* 正面圖片上傳區域 */}
           <div className={styles.uploadSection}>
-            <label className={styles.uploadLabel}>飼料正面圖片</label>
+            <label className={styles.uploadLabel}>{t('createModal.labels.frontImage')}</label>
             <div className={styles.imageSection}>
               {!frontPreview ? (
                 <div className={styles.noImageState}>
-                  <button 
+                  <button
                     className={styles.uploadButton}
                     onClick={() => frontInputRef.current?.click()}
                     disabled={loading}
                   >
-                    選擇圖片
+                    {t('createModal.buttons.uploadFront')}
                   </button>
-                  <p className={styles.uploadHint}>請上傳飼料包裝正面圖片</p>
+                  <p className={styles.uploadHint}>{t('createModal.messages.uploadFrontImage')}</p>
                 </div>
               ) : (
                 <div className={styles.imagePreview}>
-                  <img src={frontPreview} alt="飼料正面" />
+                  <img src={frontPreview} alt={t('createModal.alt.frontImage')} />
                   <button 
                     className={styles.removeImageBtn}
                     onClick={handleRemoveFrontImage}
@@ -305,22 +307,22 @@ const CreateFeedModal = ({ isOpen, onClose, onConfirm, defaultPetType = 'cat' })
 
           {/* 營養標示圖片上傳區域 */}
           <div className={styles.uploadSection}>
-            <label className={styles.uploadLabel}>營養成分表圖片</label>
+            <label className={styles.uploadLabel}>{t('createModal.labels.nutritionImage')}</label>
             <div className={styles.imageSection}>
               {!nutritionPreview ? (
                 <div className={styles.noImageState}>
-                  <button 
+                  <button
                     className={styles.uploadButton}
                     onClick={() => nutritionInputRef.current?.click()}
                     disabled={loading}
                   >
-                    選擇圖片
+                    {t('createModal.buttons.uploadNutrition')}
                   </button>
-                  <p className={styles.uploadHint}>請上傳營養成分表圖片</p>
+                  <p className={styles.uploadHint}>{t('createModal.messages.uploadNutritionImage')}</p>
                 </div>
               ) : (
                 <div className={styles.imagePreview}>
-                  <img src={nutritionPreview} alt="營養成分表" />
+                  <img src={nutritionPreview} alt={t('createModal.alt.nutritionImage')} />
                   <button 
                     className={styles.removeImageBtn}
                     onClick={handleRemoveNutritionImage}
@@ -347,14 +349,14 @@ const CreateFeedModal = ({ isOpen, onClose, onConfirm, defaultPetType = 'cat' })
             onClick={handleClose}
             disabled={loading}
           >
-            取消
+            {t('createModal.buttons.cancel')}
           </button>
           <button 
             className={styles.confirmButton} 
             onClick={handleConfirm}
             disabled={loading}
           >
-            {loading ? '處理中...' : '確認'}
+            {loading ? t('createModal.buttons.processing') : t('createModal.buttons.confirm')}
           </button>
         </div>
       </div>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import ReactDOM from 'react-dom';
 import { useLocation } from 'react-router-dom';
 import Post from './Post';
@@ -20,7 +21,7 @@ const PostList = ({
   onDelete = null, // 新增刪除回調
   onUserClick = null,
   onHashtagClick = null,
-  emptyMessage = '目前沒有貼文',
+  emptyMessage = null,
   className = '',
   style = {},
   // 新增 user 相關 props
@@ -30,6 +31,7 @@ const PostList = ({
   fetchUserPosts = false,
   ...props
 }) => {
+  const { t } = useTranslation('posts');
   const location = useLocation();
   const [notification, setNotification] = useState('');
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -65,7 +67,7 @@ const PostList = ({
         const userProfile = await getUserProfile();
         setCurrentUser(userProfile);
       } catch (error) {
-        console.error('獲取用戶資料失敗:', error);
+        console.error(t('postList.messages.fetchUserDataFailed'), error);
       }
     };
     
@@ -112,7 +114,7 @@ const PostList = ({
         
         // 確保rawPosts是陣列
         if (!Array.isArray(rawPosts)) {
-          console.warn('API回傳的貼文資料不是陣列格式:', rawPosts);
+          console.warn(t('postList.messages.apiDataNotArray'), rawPosts);
           rawPosts = [];
         }
         
@@ -146,10 +148,10 @@ const PostList = ({
         }
         setPage(pageNum);
       } else {
-        throw new Error(result.error || '載入用戶貼文失敗');
+        throw new Error(result.error || t('postList.messages.loadUserPostsFailed'));
       }
     } catch (error) {
-      console.error('載入用戶貼文失敗:', error);
+      console.error(t('postList.messages.loadUserPostsError'), error);
       if (!isLoadMore) {
         setUserError(error.message);
         setUserPosts([]);
@@ -171,7 +173,7 @@ const PostList = ({
   // 監聽貼文更新
   useEffect(() => {
     if (location.state?.postUpdated && fetchUserPosts && userId) {
-      console.log('PostList 檢測到貼文更新，重新載入用戶貼文');
+      console.log(t('postList.messages.postUpdateDetected'));
       // 重新載入用戶貼文
       loadUserPosts(0, false);
     }
@@ -185,7 +187,7 @@ const PostList = ({
     }
     
     const currentPosts = fetchUserPosts ? userPosts : posts;
-    console.log('PostList - 檢查是否需要滾動到指定貼文:', {
+    console.log(t('postList.messages.checkScrollToPost'), {
       targetPostId,
       targetPostIndex,
       fetchUserPosts,
@@ -214,7 +216,7 @@ const PostList = ({
           const postElement = postRefs.current[targetIndex] || 
                             document.querySelector(`[data-post-id="${currentPosts[targetIndex].id || currentPosts[targetIndex].post_id}"]`);
           
-          console.log('PostList - 執行滾動到貼文:', {
+          console.log(t('postList.messages.executeScrollToPost'), {
             targetIndex,
             targetPostId: currentPosts[targetIndex]?.id || currentPosts[targetIndex]?.post_id,
             postElement
@@ -227,7 +229,7 @@ const PostList = ({
             });
             // 高亮顯示該貼文
             postElement.style.animation = 'highlight 2s ease-in-out';
-            console.log('PostList - 滾動和高亮完成');
+            console.log(t('postList.messages.scrollAndHighlightComplete'));
           }
         }, 500);
       }
@@ -275,7 +277,7 @@ const PostList = ({
 
   // 處理按讚 - 可選的通知回調
   const handleLike = (postId, isLiked) => {
-    console.log('PostList 收到按讚通知:', { postId, isLiked });
+    console.log(t('postList.messages.likeNotificationReceived'), { postId, isLiked });
     // Post 組件已經處理了所有邏輯，這裡只做可選的處理
     if (onLike) {
       onLike(postId, isLiked);
@@ -326,7 +328,7 @@ const PostList = ({
 
   // 處理刪除 - 從列表移除已刪除的貼文
   const handleDelete = (postId) => {
-    console.log('PostList 收到刪除通知:', { postId });
+    console.log(t('postList.messages.deleteNotificationReceived'), { postId });
     
     if (fetchUserPosts) {
       // 從本地用戶貼文狀態中移除
@@ -334,7 +336,7 @@ const PostList = ({
         const currentPostId = post.id || post.post_id;
         return currentPostId !== postId;
       }));
-      showNotification('貼文已成功刪除');
+      showNotification(t('postList.messages.postDeletedSuccessfully'));
     } else {
       // 通知父組件處理刪除
       if (onDelete) {
@@ -345,7 +347,7 @@ const PostList = ({
 
   // 處理收藏 - 可選的通知回調
   const handleSave = (postId, isSaved) => {
-    console.log('PostList 收到收藏通知:', { postId, isSaved });
+    console.log(t('postList.messages.saveNotificationReceived'), { postId, isSaved });
     // Post 組件已經處理了所有邏輯，這裡只做可選的處理
     if (onSave) {
       onSave(postId, isSaved);
@@ -371,7 +373,7 @@ const PostList = ({
       <div className={`${styles.container} ${className}`} style={style}>
         <div className={styles.loading}>
           <div className={styles.spinner}></div>
-          <p>載入貼文中...</p>
+          <p>{t('postList.loading')}</p>
         </div>
       </div>
     );
@@ -385,7 +387,7 @@ const PostList = ({
           <Notification message={notification} onClose={hideNotification} />
         )}
         <div className={styles.error}>
-          <p>載入失敗: {currentError}</p>
+          <p>{t('postList.loadError', { error: currentError })}</p>
           <button 
             className={styles.retryButton}
             onClick={() => {
@@ -396,7 +398,7 @@ const PostList = ({
               }
             }}
           >
-            重試
+            {t('postList.retry')}
           </button>
         </div>
       </div>
@@ -413,10 +415,10 @@ const PostList = ({
         <div className={styles.empty}>
           <img 
             src="/assets/icon/SearchNoResult.png" 
-            alt="空狀態" 
+            alt={t('postList.emptyStateAlt')} 
             className={styles.emptyIcon}
           />
-          <p>{fetchUserPosts ? '該用戶尚未發布任何貼文' : emptyMessage}</p>
+          <p>{fetchUserPosts ? t('postList.userNoPostsYet') : (emptyMessage || t('postList.defaultEmptyMessage'))}</p>
         </div>
       </div>
     );
@@ -436,7 +438,7 @@ const PostList = ({
 
             // 簡化調試輸出
             if (!hasImages) {
-              console.log(`🚫 PostList 過濾掉沒有圖片的項目 (ID: ${post.id || post.post_id})`);
+              console.log(t('postList.messages.filterOutNoImagePost', { postId: post.id || post.post_id }));
             }
 
             return hasImages;
@@ -466,14 +468,14 @@ const PostList = ({
       {(isLoadingMore || (currentLoading && currentPosts.length > 0)) && (
         <div className={styles.loadingMore}>
           <div className={styles.spinner}></div>
-          <p>載入更多...</p>
+          <p>{t('postList.loadingMore')}</p>
         </div>
       )}
 
       {/* 沒有更多內容提示 */}
       {!currentHasMore && currentPosts.length > 0 && (
         <div className={styles.noMore}>
-          <p>- 沒有更多貼文了 -</p>
+          <p>{t('postList.noMorePosts')}</p>
         </div>
       )}
 

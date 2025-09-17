@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import ArchivePreviewForPublic from './ArchivePreviewForPublic';
 import Notification from './Notification';
 import PostComments from './PostComments';
@@ -29,6 +30,7 @@ const ArchiveList = ({
   fetchUserArchives = false,
   ...props
 }) => {
+  const { t } = useTranslation('profile');
   const location = useLocation();
   const [notification, setNotification] = useState('');
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -324,7 +326,7 @@ const ArchiveList = ({
       <div className={`${styles.container} ${className}`} style={style}>
         <div className={styles.loading}>
           <div className={styles.spinner}></div>
-          <p>載入檔案中...</p>
+          <p>{t('common.loading')}</p>
         </div>
       </div>
     );
@@ -338,8 +340,8 @@ const ArchiveList = ({
           <Notification message={notification} onClose={hideNotification} />
         )}
         <div className={styles.error}>
-          <p>載入失敗: {currentError}</p>
-          <button 
+          <p>{t('archiveList.loadFailed')}: {currentError}</p>
+          <button
             className={styles.retryButton}
             onClick={() => {
               if (fetchUserArchives) {
@@ -349,7 +351,7 @@ const ArchiveList = ({
               }
             }}
           >
-            重試
+            {t('archiveList.retry')}
           </button>
         </div>
       </div>
@@ -364,12 +366,12 @@ const ArchiveList = ({
           <Notification message={notification} onClose={hideNotification} />
         )}
         <div className={styles.empty}>
-          <img 
-            src="/assets/icon/SearchNoResult.png" 
-            alt="空狀態" 
+          <img
+            src="/assets/icon/SearchNoResult.png"
+            alt={t('archiveList.emptyStateAlt')}
             className={styles.emptyIcon}
           />
-          <p>{fetchUserArchives ? '該用戶尚未發布任何疾病檔案' : emptyMessage}</p>
+          <p>{fetchUserArchives ? t('archiveList.noUserArchives') : emptyMessage}</p>
         </div>
       </div>
     );
@@ -408,14 +410,14 @@ const ArchiveList = ({
       {(isLoadingMore || (currentLoading && currentArchives.length > 0)) && (
         <div className={styles.loadingMore}>
           <div className={styles.spinner}></div>
-          <p>載入更多...</p>
+          <p>{t('archiveList.loadingMore')}</p>
         </div>
       )}
 
       {/* 沒有更多內容提示 */}
       {!currentHasMore && currentArchives.length > 0 && (
         <div className={styles.noMore}>
-          <p>- 沒有更多檔案了 -</p>
+          <p>- {t('archiveList.noMoreArchives')} -</p>
         </div>
       )}
 

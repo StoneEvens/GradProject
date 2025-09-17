@@ -1,0 +1,140 @@
+{
+  "title": "營養計算機",
+  "functions": {
+    "reset": "重置計算機",
+    "quickCalculate": "快速計算",
+    "history": "歷史紀錄"
+  },
+  "sections": {
+    "pet": "選擇寵物",
+    "condition": "寵物狀況",
+    "feed": "選擇飼料",
+    "calculate": "開始計算",
+    "calculateResult": "計算結果"
+  },
+  "petSection": {
+    "selectPet": "選擇寵物",
+    "addTempPet": "新增臨時寵物",
+    "name": "名字：",
+    "speciesLabel": "物種：",
+    "weight": "體重：",
+    "height": "身高：",
+    "stage": "階段：",
+    "weightUnit": "公斤",
+    "heightUnit": "公分",
+    "createTempPet": "創建臨時寵物",
+    "cancelSelection": "取消選擇",
+    "placeholders": {
+      "petName": "請輸入寵物名字",
+      "weight": "請輸入體重",
+      "height": "請輸入身高"
+    },
+    "species": {
+      "cat": "貓",
+      "dog": "狗"
+    },
+    "stages": {
+      "kitten": "幼貓",
+      "puppy": "幼犬",
+      "adult": "成年",
+      "pregnant": "懷孕",
+      "lactating": "哺乳"
+    }
+  },
+  "conditionSection": {
+    "other": "其他：",
+    "otherPlaceholder": "請輸入",
+    "conditions": {
+      "chronicKidneyDisease": "慢性腎臟病",
+      "liverDisease": "肝臟疾病",
+      "arthritisObesity": "關節炎/肥胖",
+      "heartDisease": "心臟病",
+      "diabetes": "糖尿病",
+      "urinaryStones": "泌尿道結石",
+      "pancreatitis": "胰臟炎",
+      "foodAllergyGISensitivity": "食物過敏/腸胃敏感",
+      "skinProblems": "皮膚問題"
+    }
+  },
+  "feedSection": {
+    "selectFeed": "選擇飼料",
+    "addFeed": "新增飼料",
+    "noFeedSelected": "請選擇或新增飼料",
+    "nutritionTitle": "營養成分（每100g）",
+    "nutrients": {
+      "protein": "蛋白質",
+      "fat": "脂肪",
+      "carbohydrate": "碳水化合物",
+      "calcium": "鈣",
+      "phosphorus": "磷",
+      "magnesium": "鎂",
+      "sodium": "鈉"
+    },
+    "units": {
+      "g": "g",
+      "mg": "mg"
+    }
+  },
+  "calculationSection": {
+    "calculating": "計算中，請稍候...",
+    "noResult": "點擊上方「開始計算」按鈕開始營養計算",
+    "dailyCalories": "每日熱量需求：",
+    "dailyFeedAmount": "每日飼料建議量：",
+    "kcalUnit": "kcal",
+    "gramUnit": "公克"
+  },
+  "messages": {
+    "loading": "載入中...",
+    "noLastUsedData": "沒有上次使用的資料",
+    "petNotFound": "上次使用的寵物已不存在",
+    "dataLoaded": "已載入上次使用的資料",
+    "loadFailed": "載入上次使用資料失敗",
+    "calculatorReset": "計算機已重置",
+    "selectPetFirst": "請先選擇寵物",
+    "selectFeedFirst": "請先選擇飼料",
+    "enterPetName": "請輸入寵物名字",
+    "enterWeight": "請輸入體重",
+    "enterHeight": "請輸入身高",
+    "tempPetCreated": "臨時寵物已創建並鎖定",
+    "tempPetCanceled": "已取消選擇臨時寵物",
+    "calculateFailed": "計算失敗，請稍後再試",
+    "feedCreated": "飼料建立成功",
+    "feedCreateFailed": "建立飼料失敗，請稍後再試",
+    "quickCalculateInDevelopment": "快速計算功能正在開發中",
+    "loadingPetsFailed": "載入寵物失敗：",
+    "loadingLastUsedDataFailed": "載入上次使用資料失敗:",
+    "createFeedFailed": "建立飼料失敗：",
+    "selectPetAndFeed": "請先選擇寵物和飼料",
+    "enterPetWeight": "請輸入寵物體重"
+  },
+  "historyModal": {
+    "title": "歷史紀錄",
+    "backToList": "❮ 返回列表",
+    "loading": "載入中...",
+    "noRecords": "尚無計算紀錄",
+    "emptyStateAlt": "空狀態",
+    "clearAll": "清空",
+    "close": "關閉",
+    "confirmClearMessage": "確定要清空所有歷史紀錄嗎？此操作無法復原",
+    "allRecordsCleared": "所有紀錄已清空",
+    "clearFailed": "清空失敗",
+    "loadRecordsFailed": "載入歷史紀錄失敗",
+    "basicInfo": "基本資訊",
+    "calculationTime": "計算時間：",
+    "petName": "寵物名稱：",
+    "feedName": "飼料名稱：",
+    "feedBrand": "飼料品牌：",
+    "calculationResult": "計算結果",
+    "dailyRequirement": "每日需求",
+    "dailyCaloriesNeed": "每日熱量需求：",
+    "dailyFeedRecommendation": "每日飼料建議量：",
+    "actualNutritionIntake": "實際營養攝取",
+    "nutritionistAdvice": "營養師建議"
+  },
+  "historyPreview": {
+    "historyRecord": "歷史紀錄",
+    "pet": "寵物：",
+    "feed": "飼料：",
+    "monthDay": "{{month}}月{{day}}日"
+  }
+}

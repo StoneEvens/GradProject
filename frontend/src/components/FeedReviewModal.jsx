@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import styles from '../styles/EditProfileModal.module.css';
 import Notification from './Notification';
 import FeedErrorReportModal from './FeedErrorReportModal';
 import LongNotification from './LongNotification';
 
 const FeedReviewModal = ({ feed, isOpen, onClose, onConfirm, onReportError, onErrorReportSuccess }) => {
+  const { t } = useTranslation('feed');
   const [loading, setLoading] = useState(false);
   const [notification, setNotification] = useState('');
   const [showErrorReportModal, setShowErrorReportModal] = useState(false);
@@ -28,7 +30,7 @@ const FeedReviewModal = ({ feed, isOpen, onClose, onConfirm, onReportError, onEr
       onClose();
     } catch (error) {
       console.error('審核失敗:', error);
-      showNotification('審核失敗，請稍後再試');
+      showNotification(t('reviewModal.messages.reviewFailed'));
     } finally {
       setLoading(false);
     }
@@ -92,9 +94,9 @@ const FeedReviewModal = ({ feed, isOpen, onClose, onConfirm, onReportError, onEr
             <div className={styles.avatarSection}>
               <div className={styles.avatarContainer}>
                 {feed.frontImage || feed.front_image_url ? (
-                  <img 
-                    src={feed.frontImage || feed.front_image_url} 
-                    alt="飼料圖片" 
+                  <img
+                    src={feed.frontImage || feed.front_image_url}
+                    alt={t('reviewModal.alt.feedImage')}
                     className={styles.avatarPreview}
                   />
                 ) : (
@@ -106,7 +108,7 @@ const FeedReviewModal = ({ feed, isOpen, onClose, onConfirm, onReportError, onEr
                     color: '#89350c',
                     fontSize: '14px'
                   }}>
-                    無圖片
+                    {t('page.feedCard.noImage')}
                   </div>
                 )}
               </div>
@@ -115,50 +117,50 @@ const FeedReviewModal = ({ feed, isOpen, onClose, onConfirm, onReportError, onEr
             {/* 飼料資訊區塊 */}
             <div className={styles.formSection}>
               <div className={styles.inputGroup}>
-                <label>新增使用者名稱</label>
+                <label>{t('reviewModal.labels.createdBy')}</label>
                 <div className={styles.readOnlyField}>
-                  {feed.created_by_name || feed.createdByName || '未知使用者'}
+                  {feed.created_by_name || feed.createdByName || t('reviewModal.labels.unknownUser')}
                 </div>
               </div>
 
               <div className={styles.inputGroup}>
-                <label>新增日期</label>
+                <label>{t('reviewModal.labels.createdDate')}</label>
                 <div className={styles.readOnlyField}>
-                  {feed.created_at ? new Date(feed.created_at).toLocaleDateString('zh-TW') : '未知日期'}
+                  {feed.created_at ? new Date(feed.created_at).toLocaleDateString('zh-TW') : t('reviewModal.labels.unknownDate')}
                 </div>
               </div>
 
               <div className={styles.inputGroup}>
-                <label>飼料品牌</label>
+                <label>{t('detailPage.labels.brand')}</label>
                 <div className={styles.readOnlyField}>
-                  {feed.brand || '未提供'}
+                  {feed.brand || t('detailPage.info.noPrice')}
                 </div>
               </div>
 
               <div className={styles.inputGroup}>
-                <label>飼料價錢</label>
+                <label>{t('detailPage.labels.price')}</label>
                 <div className={styles.readOnlyField}>
-                  {feed.price ? `NT$ ${feed.price}` : '未提供'}
+                  {feed.price ? `${t('detailPage.info.pricePrefix')}${feed.price}` : t('detailPage.info.noPrice')}
                 </div>
               </div>
 
               <div className={styles.inputGroup}>
-                <label>營養成分</label>
+                <label>{t('detailPage.labels.nutrition')}</label>
                 <div className={styles.nutritionInfo}>
                   <div className={styles.nutritionRow}>
-                    <span>蛋白質: {feed.protein || 0}%</span>
-                    <span>脂肪: {feed.fat || 0}%</span>
+                    <span>{t('detailPage.labels.protein')}: {feed.protein || 0}{t('detailPage.info.unit')}</span>
+                    <span>{t('detailPage.labels.fat')}: {feed.fat || 0}{t('detailPage.info.unit')}</span>
                   </div>
                   <div className={styles.nutritionRow}>
-                    <span>碳水化合物: {feed.carbohydrate || 0}%</span>
-                    <span>鈣: {feed.calcium || 0}%</span>
+                    <span>{t('detailPage.labels.carbohydrate')}: {feed.carbohydrate || 0}{t('detailPage.info.unit')}</span>
+                    <span>{t('detailPage.labels.calcium')}: {feed.calcium || 0}{t('detailPage.info.unit')}</span>
                   </div>
                   <div className={styles.nutritionRow}>
-                    <span>磷: {feed.phosphorus || 0}%</span>
-                    <span>鎂: {feed.magnesium || 0}%</span>
+                    <span>{t('detailPage.labels.phosphorus')}: {feed.phosphorus || 0}{t('detailPage.info.unit')}</span>
+                    <span>{t('detailPage.labels.magnesium')}: {feed.magnesium || 0}{t('detailPage.info.unit')}</span>
                   </div>
                   <div className={styles.nutritionRow}>
-                    <span>鈉: {feed.sodium || 0}%</span>
+                    <span>{t('detailPage.labels.sodium')}: {feed.sodium || 0}{t('detailPage.info.unit')}</span>
                   </div>
                 </div>
               </div>
@@ -166,19 +168,19 @@ const FeedReviewModal = ({ feed, isOpen, onClose, onConfirm, onReportError, onEr
           </div>
 
           <div className={styles.modalFooter}>
-            <button 
-              className={styles.cancelButton} 
+            <button
+              className={styles.cancelButton}
               onClick={handleReportError}
               disabled={loading}
             >
-              回報錯誤
+              {t('reviewModal.buttons.reportError')}
             </button>
-            <button 
-              className={styles.saveButton} 
+            <button
+              className={styles.saveButton}
               onClick={handleConfirm}
               disabled={loading}
             >
-              {loading ? '處理中...' : '確認'}
+              {loading ? t('reviewModal.buttons.processing') : t('reviewModal.buttons.confirm')}
             </button>
           </div>
         </div>
@@ -195,7 +197,7 @@ const FeedReviewModal = ({ feed, isOpen, onClose, onConfirm, onReportError, onEr
       {/* 長通知 */}
       {showLongNotification && (
         <LongNotification
-          message="感謝您的回報，請靜待系統審核錯誤。您目前可以自由使用此飼料，錯誤的資訊麻煩您手動於營養計算機處更新"
+          message={t('reviewModal.messages.errorReportSuccess')}
           onClose={() => {
             setShowLongNotification(false);
             onClose();

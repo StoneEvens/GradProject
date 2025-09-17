@@ -1,0 +1,212 @@
+{
+  "title": "社群",
+  "tabs": {
+    "myPosts": "我的貼文",
+    "allPosts": "所有貼文",
+    "following": "追蹤中"
+  },
+  "post": {
+    "create": "發布貼文",
+    "edit": "編輯貼文",
+    "delete": "刪除貼文",
+    "like": "按讚",
+    "unlike": "取消按讚",
+    "comment": "留言",
+    "share": "分享",
+    "save": "收藏",
+    "unsave": "取消收藏",
+    "report": "檢舉",
+    "noContent": "暫無貼文內容",
+    "loadMore": "載入更多",
+    "loading": "載入中...",
+    "postedBy": "發布者",
+    "postedAt": "發布於",
+    "edited": "已編輯",
+    "viewDetails": "查看詳情"
+  },
+  "comment": {
+    "title": "留言",
+    "placeholder": "寫下你的留言...",
+    "submit": "送出",
+    "cancel": "取消",
+    "edit": "編輯",
+    "delete": "刪除",
+    "reply": "回覆",
+    "loadMore": "載入更多留言",
+    "noComments": "還沒有留言，成為第一個留言的人吧！"
+  },
+  "follow": {
+    "follow": "追蹤",
+    "unfollow": "取消追蹤",
+    "followers": "粉絲",
+    "following": "追蹤中",
+    "followersCount": "{{count}} 位粉絲",
+    "followingCount": "追蹤 {{count}} 人"
+  },
+  "search": {
+    "placeholder": "搜尋貼文、使用者或標籤",
+    "noResults": "找不到相關結果",
+    "filters": "篩選條件",
+    "sortBy": "排序方式",
+    "newest": "最新",
+    "oldest": "最舊",
+    "mostLiked": "最多讚"
+  },
+  "common": {
+    "loading": "載入中...",
+    "cancel": "取消",
+    "confirm": "確認",
+    "close": "關閉",
+    "accept": "接受",
+    "reject": "拒絕",
+    "remove": "移除",
+    "retry": "重試"
+  },
+  "followPage": {
+    "followers": "位粉絲",
+    "following": "人追蹤中",
+    "noFollowers": "還沒有粉絲",
+    "noFollowing": "還沒有追蹤任何人",
+    "removeFollower": "移除粉絲",
+    "follow": "追蹤",
+    "following": "追蹤中",
+    "requested": "已要求",
+    "requestFollow": "要求追蹤",
+    "messages": {
+      "loadDataFailed": "載入數據失敗，請稍後再試",
+      "operationFailed": "操作失敗，請稍後再試",
+      "followerRemoved": "已成功移除粉絲 @{{username}}",
+      "removeFollowerFailed": "移除粉絲失敗",
+      "removeFollowerFailedRetry": "移除粉絲失敗，請稍後再試"
+    }
+  },
+  "notifications": {
+    "title": "通知",
+    "unreadTitle": "未讀訊息與追蹤請求",
+    "pastTitle": "過去的訊息",
+    "noUnread": "目前沒有未讀訊息與追蹤請求",
+    "noPast": "目前沒有過去的訊息",
+    "loadFailed": "載入通知失敗",
+    "actionSuccess": {
+      "accepted": "已接受",
+      "rejected": "已拒絕",
+      "followRequest": "追蹤請求"
+    },
+    "actionFailed": "操作失敗，請稍後再試",
+    "unknownUser": "未知用戶",
+    "avatar": "頭像"
+  },
+  "confirmFollowModal": {
+    "title": "確定要送出{{action}}?",
+    "actions": {
+      "follow": "追蹤",
+      "requestFollow": "要求追蹤"
+    },
+    "cancel": "算了"
+  },
+  "confirmRemoveFollowerModal": {
+    "title": "是否確定移除粉絲?",
+    "description": "移除 @{{username}} 的追蹤"
+  },
+  "confirmNotification": {
+    "cancel": "取消",
+    "confirm": "確認"
+  },
+  "likedArchives": {
+    "title": "按讚的檔案",
+    "emptyMessage": "尚未按讚任何檔案",
+    "sortOptions": {
+      "archiveDateDesc": "按建立日期：近到遠",
+      "archiveDateAsc": "按建立日期：遠到近",
+      "likeDateDesc": "按按讚日期：近到遠",
+      "likeDateAsc": "按按讚日期：遠到近"
+    },
+    "messages": {
+      "loadFailed": "獲取按讚檔案失敗",
+      "loadErrorRetry": "載入按讚檔案失敗，請稍後再試"
+    },
+    "console": {
+      "loadError": "載入按讚檔案失敗:"
+    }
+  },
+  "likedPosts": {
+    "title": "按讚的貼文",
+    "emptyMessage": "尚未按讚任何貼文",
+    "messages": {
+      "fetchFailed": "獲取按讚貼文失敗",
+      "loadErrorRetry": "載入按讚貼文列表失敗，請稍後再試",
+      "removedFromList": "已從按讚列表移除",
+      "commentInDevelopment": "評論功能開發中"
+    },
+    "console": {
+      "loadError": "載入按讚貼文列表失敗:",
+      "likeNotification": "LikedPostsListPage 收到按讚通知:",
+      "saveNotification": "LikedPostsListPage 收到收藏通知:"
+    }
+  },
+  "savedArchives": {
+    "title": "收藏的論壇文章",
+    "emptyMessage": "尚未收藏任何論壇文章",
+    "sortOptions": {
+      "archiveDateDesc": "按建立日期：近到遠",
+      "archiveDateAsc": "按建立日期：遠到近",
+      "saveDateDesc": "按收藏日期：近到遠",
+      "saveDateAsc": "按收藏日期：遠到近"
+    },
+    "messages": {
+      "loadFailed": "獲取收藏的論壇文章失敗",
+      "loadErrorRetry": "載入收藏的論壇文章失敗，請稍後再試"
+    },
+    "console": {
+      "loadError": "載入收藏的論壇文章失敗:"
+    }
+  },
+  "savedPosts": {
+    "title": "收藏的貼文",
+    "emptyMessage": "尚未收藏任何貼文",
+    "messages": {
+      "fetchFailed": "獲取收藏貼文失敗",
+      "loadErrorRetry": "載入收藏貼文列表失敗，請稍後再試",
+      "commentInDevelopment": "評論功能開發中"
+    },
+    "console": {
+      "loadError": "載入收藏貼文列表失敗:",
+      "likeNotification": "SavedPostsListPage 收到按讚通知:",
+      "saveNotification": "SavedPostsListPage 收到收藏通知:"
+    }
+  },
+  "savedPostsPage": {
+    "title": "收藏的貼文",
+    "emptyMessage": "尚未收藏任何貼文",
+    "sortOptions": {
+      "postDateDesc": "按發布日期：近到遠",
+      "postDateAsc": "按發布日期：遠到近",
+      "saveDateDesc": "按收藏日期：近到遠",
+      "saveDateAsc": "按收藏日期：遠到近"
+    },
+    "messages": {
+      "loadFailed": "獲取收藏貼文失敗",
+      "loadErrorRetry": "載入收藏貼文失敗，請稍後再試"
+    },
+    "console": {
+      "loadError": "載入收藏貼文失敗:"
+    }
+  },
+  "likedPostsPage": {
+    "title": "按讚的貼文",
+    "emptyMessage": "尚未按讚任何貼文",
+    "sortOptions": {
+      "postDateDesc": "按發布日期：近到遠",
+      "postDateAsc": "按發布日期：遠到近",
+      "likeDateDesc": "按點讚日期：近到遠",
+      "likeDateAsc": "按點讚日期：遠到近"
+    },
+    "messages": {
+      "loadFailed": "獲取按讚貼文失敗",
+      "loadErrorRetry": "載入按讚貼文失敗，請稍後再試"
+    },
+    "console": {
+      "loadError": "載入按讚貼文失敗:"
+    }
+  }
+}

@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import styles from '../styles/AddSchedule.module.css';
 import { formatDate } from '../services/scheduleService';
 import ConfirmNotification from './ConfirmNotification';
 
 const AddSchedule = ({ onClose, onSave, initialData, onDelete, onMarkCompleted, selectedDate }) => {
+  const { t } = useTranslation('main');
   // 是否為編輯模式
   const isEditMode = !!initialData;
   
@@ -53,8 +55,8 @@ const AddSchedule = ({ onClose, onSave, initialData, onDelete, onMarkCompleted, 
   // 取得日期標題
   const getDateTitle = () => {
     const date = new Date(selectedScheduleDate);
-    if (date.toDateString() === new Date().toDateString()) return '今日';
-    
+    if (date.toDateString() === new Date().toDateString()) return t('addSchedule.today');
+
     return `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`;
   };
 
@@ -101,7 +103,7 @@ const AddSchedule = ({ onClose, onSave, initialData, onDelete, onMarkCompleted, 
     const endTimeValue = parseInt(endHour) * 60 + parseInt(endMinute);
     
     if (endTimeValue <= startTimeValue) {
-      setTimeError('結束時間必須晚於開始時間');
+      setTimeError(t('addSchedule.timeError'));
     } else {
       setTimeError('');
     }
@@ -177,8 +179,8 @@ const AddSchedule = ({ onClose, onSave, initialData, onDelete, onMarkCompleted, 
   // 獲取狀態按鈕文字
   const getStatusButtonText = () => {
     if (!initialData) return null;
-    if (initialData.is_completed) return '已完成';
-    return '完成';
+    if (initialData.is_completed) return t('addSchedule.completed');
+    return t('addSchedule.complete');
   };
 
   // 獲取狀態按鈕樣式
@@ -193,22 +195,22 @@ const AddSchedule = ({ onClose, onSave, initialData, onDelete, onMarkCompleted, 
       <div className={styles.modal}>
         <div className={styles.headerSection}>
           <div className={styles.headerTitle}>
-            {isEditMode ? '修改行程' : '新增行程'}
+            {isEditMode ? t('addSchedule.editMode') : t('addSchedule.addMode')}
           </div>
           {isEditMode && (
             <div className={styles.headerButtons}>
-              <button 
+              <button
                 className={styles.deleteButton}
                 onClick={handleDelete}
-                title="刪除行程"
+                title={t('addSchedule.deleteTitle')}
               >
-                刪除
+                {t('addSchedule.delete')}
               </button>
-              <button 
+              <button
                 className={getStatusButtonClass()}
                 onClick={handleStatusChange}
                 disabled={initialData?.is_completed}
-                title={initialData?.is_completed ? '已完成' : '標記為已完成'}
+                title={initialData?.is_completed ? t('addSchedule.completed') : t('addSchedule.markCompletedTitle')}
               >
                 {getStatusButtonText()}
               </button>
@@ -217,7 +219,7 @@ const AddSchedule = ({ onClose, onSave, initialData, onDelete, onMarkCompleted, 
         </div>
         
         <div className={styles.timeSection}>
-          <div className={styles.timeLabel}>日期</div>
+          <div className={styles.timeLabel}>{t('addSchedule.date')}</div>
           <div className={styles.timeInputContainer}>
             <input
               type="date"
@@ -229,7 +231,7 @@ const AddSchedule = ({ onClose, onSave, initialData, onDelete, onMarkCompleted, 
         </div>
         
         <div className={styles.timeSection}>
-          <div className={styles.timeLabel}>開始</div>
+          <div className={styles.timeLabel}>{t('addSchedule.startTime')}</div>
           <div className={styles.timeInputContainer}>
             <div className={styles.timeInput} ref={startHourRef}>
               <div 
@@ -278,7 +280,7 @@ const AddSchedule = ({ onClose, onSave, initialData, onDelete, onMarkCompleted, 
         </div>
         
         <div className={styles.timeSection}>
-          <div className={styles.timeLabel}>結束</div>
+          <div className={styles.timeLabel}>{t('addSchedule.endTime')}</div>
           <div className={styles.timeInputContainer}>
             <div className={styles.timeInput} ref={endHourRef}>
               <div 
@@ -333,34 +335,34 @@ const AddSchedule = ({ onClose, onSave, initialData, onDelete, onMarkCompleted, 
           className={styles.titleInput}
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          placeholder="請輸入行程事項"
+          placeholder={t('addSchedule.titlePlaceholder')}
         />
         
         <textarea
           className={styles.descriptionInput}
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          placeholder="備註..."
+          placeholder={t('addSchedule.descriptionPlaceholder')}
           rows={4}
         />
         
         <div className={styles.buttonSection}>
           <button className={styles.cancelButton} onClick={onClose}>
-            取消
+            {t('addSchedule.cancel')}
           </button>
-          <button 
-            className={styles.saveButton} 
+          <button
+            className={styles.saveButton}
             onClick={handleSubmit}
             disabled={!title.trim() || !!timeError}
           >
-            儲存
+            {t('addSchedule.save')}
           </button>
         </div>
       </div>
       
       {showConfirmNotification && (
         <ConfirmNotification 
-          message="確定要刪除此行程嗎？"
+          message={t('addSchedule.deleteConfirm')}
           onConfirm={handleConfirmDelete}
           onCancel={handleCancelDelete}
         />

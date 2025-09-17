@@ -1,0 +1,84 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "edit": "Edit",
+    "save": "Save",
+    "saving": "Saving...",
+    "close": "Close"
+  },
+  "profilePage": {
+    "editButton": "Edit Profile",
+    "tabs": {
+      "community": "Community",
+      "forum": "Forum"
+    },
+    "followStats": {
+      "followers": "Followers",
+      "following": "Following"
+    },
+    "defaultIntro": "This person hasn't written anything.",
+    "emptyMessages": {
+      "noPosts": "No daily posts published yet",
+      "noArchives": "No disease records published yet"
+    },
+    "messages": {
+      "loadProfileFailed": "Failed to load profile, please try again later",
+      "profileUpdateSuccess": "Profile updated successfully!",
+      "profileUpdateFailed": "Failed to update profile, please try again later"
+    }
+  },
+  "otherProfilePage": {
+    "followButton": {
+      "follow": "Follow",
+      "following": "Following",
+      "requested": "Requested",
+      "requestFollow": "Request Follow"
+    },
+    "privateAccount": {
+      "title": "This account is private",
+      "followToViewPosts": "Follow to see their posts",
+      "followToViewForum": "Follow to see their forum"
+    },
+    "messages": {
+      "loadUserDataFailed": "Failed to load user data, please try again later",
+      "operationFailed": "Operation failed, please try again later"
+    }
+  },
+  "editModal": {
+    "title": "Edit Profile",
+    "form": {
+      "account": "Account",
+      "fullname": "Full Name",
+      "intro": "User Introduction",
+      "required": "*"
+    },
+    "avatar": {
+      "preview": "Avatar Preview"
+    },
+    "validation": {
+      "enterAccount": "Please enter account name",
+      "enterFullname": "Please enter full name",
+      "accountExists": "This account is already taken, please try another one",
+      "checkAccountFailed": "Account check failed, please try again later"
+    },
+    "messages": {
+      "imageProcessFailed": "Avatar processing failed, please try again",
+      "saveFailed": "Failed to save profile, please try again later"
+    }
+  },
+  "confirmFollowModal": {
+    "title": "Confirm Follow",
+    "privateAccountMessage": "This is a private account, you need to send a follow request.",
+    "publicAccountMessage": "Are you sure you want to follow this user?"
+  },
+  "archiveList": {
+    "loadFailed": "Load failed",
+    "retry": "Retry",
+    "emptyStateAlt": "Empty State",
+    "noUserArchives": "This user hasn't published any archives yet",
+    "loadingMore": "Loading more...",
+    "noMoreArchives": "No more archives"
+  }
+}

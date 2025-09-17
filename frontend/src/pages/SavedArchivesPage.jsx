@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import TopNavbar from '../components/TopNavbar';
 import BottomNavbar from '../components/BottomNavigationbar';
 import ArchiveList from '../components/ArchiveList';
@@ -8,19 +9,20 @@ import { getUserSavedArchives } from '../services/socialService';
 import styles from '../styles/InteractionPostsPage.module.css';
 
 const SavedArchivesPage = () => {
+  const { t } = useTranslation('social');
   const navigate = useNavigate();
   const [savedArchives, setSavedArchives] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [notification, setNotification] = useState('');
-  const [sortOption, setSortOption] = useState('archive_date_desc'); // 預設按檔案建立日期排序：近到遠
+  const [sortOption, setSortOption] = useState('archive_date_desc'); // Default sort: archive creation date desc
 
-  // 排序選項
+  // Sort options
   const sortOptions = [
-    { value: 'archive_date_desc', label: '按建立日期：近到遠' },
-    { value: 'archive_date_asc', label: '按建立日期：遠到近' },
-    { value: 'save_date_desc', label: '按收藏日期：近到遠' },
-    { value: 'save_date_asc', label: '按收藏日期：遠到近' }
+    { value: 'archive_date_desc', label: t('savedArchives.sortOptions.archiveDateDesc') },
+    { value: 'archive_date_asc', label: t('savedArchives.sortOptions.archiveDateAsc') },
+    { value: 'save_date_desc', label: t('savedArchives.sortOptions.saveDateDesc') },
+    { value: 'save_date_asc', label: t('savedArchives.sortOptions.saveDateAsc') }
   ];
 
   useEffect(() => {
@@ -32,21 +34,21 @@ const SavedArchivesPage = () => {
       setLoading(true);
       setError(null);
       
-      // 調用真實的 API
+      // Call real API
       const response = await getUserSavedArchives({ sort: sortOption });
-      
+
       if (response.success) {
-        // 處理 API 回應數據
+        // Process API response data
         const archives = response.data.archives || response.data || [];
         setSavedArchives(archives);
       } else {
-        throw new Error(response.error || '獲取收藏的論壇文章失敗');
+        throw new Error(response.error || t('savedArchives.messages.loadFailed'));
       }
-      
+
     } catch (err) {
-      console.error('載入收藏的論壇文章失敗:', err);
-      setError(err.message || '載入收藏的論壇文章失敗，請稍後再試');
-      setSavedArchives([]); // 清空數據
+      console.error(t('savedArchives.console.loadError'), err);
+      setError(err.message || t('savedArchives.messages.loadErrorRetry'));
+      setSavedArchives([]); // Clear data
     } finally {
       setLoading(false);
     }
@@ -68,20 +70,20 @@ const SavedArchivesPage = () => {
     setNotification('');
   };
 
-  // 處理收藏（取消收藏時需要從列表中移除）
+  // Handle save (remove from list when unsaved)
   const handleSave = (archiveId, isSaved) => {
     if (!isSaved) {
-      // 如果取消收藏，從列表中移除該檔案
-      setSavedArchives(prevArchives => 
+      // If unsaved, remove from list
+      setSavedArchives(prevArchives =>
         prevArchives.filter(archive => archive.id !== archiveId)
       );
     }
   };
 
-  // 處理留言
+  // Handle comment
   const handleComment = (archiveId, increment = 0) => {
     if (increment !== 0) {
-      // 更新留言數
+      // Update comment count
       setSavedArchives(prevArchives => 
         prevArchives.map(archive => {
           if (archive.id === archiveId) {
@@ -106,19 +108,19 @@ const SavedArchivesPage = () => {
       <TopNavbar />
       
       <div className={styles.content}>
-        {/* 標題列 */}
+        {/* Header row */}
         <div className={styles.header}>
           <div className={styles.headerLeft}>
-            <button 
+            <button
               className={styles.backButton}
               onClick={handleBackClick}
             >
               ❯
             </button>
-            <h1 className={styles.title}>收藏的論壇文章</h1>
+            <h1 className={styles.title}>{t('savedArchives.title')}</h1>
           </div>
-          
-          {/* 排序下拉選單 */}
+
+          {/* Sort dropdown */}
           <div className={styles.headerRight}>
             <select 
               className={styles.sortSelect}
@@ -134,16 +136,16 @@ const SavedArchivesPage = () => {
           </div>
         </div>
 
-        {/* 分隔線 */}
+        {/* Divider */}
         <div className={styles.divider}></div>
 
-        {/* 檔案預覽列表 */}
+        {/* Archive preview list */}
         <div className={styles.postsContainer}>
           <ArchiveList
             archives={savedArchives}
             loading={loading}
             error={error}
-            emptyMessage="尚未收藏任何論壇文章"
+            emptyMessage={t('savedArchives.emptyMessage')}
             onSave={handleSave}
             onComment={handleComment}
             className={styles.archiveList}

@@ -1,0 +1,493 @@
+{
+  "common": {
+    "loading": "読み込み中...",
+    "cancel": "キャンセル",
+    "confirm": "確認",
+    "save": "保存",
+    "back": "戻る",
+    "create": "作成",
+    "creating": "作成中...",
+    "add": "追加",
+    "remove": "削除",
+    "edit": "編集",
+    "delete": "削除",
+    "preview": "プレビュー",
+    "selectDate": "日付を選択",
+    "draftSaved": "下書きが保存されました",
+    "next": "次のステップ"
+  },
+  "createPost": {
+    "title": "投稿を公開",
+    "sections": {
+      "images": "画像",
+      "description": "説明",
+      "hashtags": "タグ"
+    },
+    "placeholders": {
+      "description": "説明を入力",
+      "hashtag": "タグを入力"
+    },
+    "imageUpload": {
+      "noImageSelected": "まだ画像が追加されていません",
+      "addImage": "画像を追加",
+      "imageCounter": "選択した画像：{{count}}/10",
+      "noImageAlt": "画像未選択"
+    },
+    "hashtags": {
+      "counter": "追加済みタグ：{{count}}/10"
+    },
+    "messages": {
+      "maxImagesReached": "最大10枚の画像まで選択できます",
+      "imageTooLarge": "画像サイズは5MBを超えることはできません",
+      "invalidFileType": "画像ファイルを選択してください",
+      "loadImagesFailed": "保存された画像を読み込めません",
+      "loadImagesError": "画像の読み込み中にエラーが発生しました",
+      "loadDraftError": "下書きの読み込み中にエラーが発生しました",
+      "draftTooLarge": "下書きが大きすぎます、テキストコンテンツのみ保存します",
+      "storageQuotaExceeded": "ストレージ容量不足、テキストコンテンツのみ保存します",
+      "enterHashtagContent": "タグの内容を入力してください",
+      "hashtagExists": "このタグは既に存在します",
+      "maxHashtagsReached": "最大10個のタグまで追加できます",
+      "requireContent": "少なくとも1枚の画像を選択するか説明を入力してください"
+    }
+  },
+  "createAbnormalPost": {
+    "title": "異常記録を作成",
+    "sections": {
+      "selectPet": "ペットを選択",
+      "date": "日付",
+      "symptoms": "ペットの症状",
+      "bodyStats": "身体数値記録",
+      "images": "画像記録",
+      "description": "補足説明"
+    },
+    "petSelection": {
+      "selectPet": "ペットを選択:"
+    },
+    "dateSelection": {
+      "date": "日付:",
+      "emergency": "受診記録"
+    },
+    "symptoms": {
+      "title": "ペットの症状:",
+      "selectSymptom": "症状を選択",
+      "counter": "選択した症状：{{count}}/10"
+    },
+    "bodyStats": {
+      "title": "身体数値記録:",
+      "weight": "体重",
+      "waterIntake": "水分摂取量",
+      "temperature": "体温",
+      "units": {
+        "kg": "kg",
+        "liters": "L",
+        "celsius": "度"
+      }
+    },
+    "imageUpload": {
+      "title": "画像記録:",
+      "noImageSelected": "まだ画像が追加されていません",
+      "addImage": "画像を追加",
+      "imageCounter": "選択した画像：{{count}}/10"
+    },
+    "description": {
+      "title": "補足説明:",
+      "placeholder": "テキスト説明"
+    },
+    "messages": {
+      "selectPet": "ペットを選択してください",
+      "selectDate": "日付を選択してください",
+      "selectSymptom": "症状を選択してください",
+      "symptomExists": "この症状は既に存在します",
+      "maxSymptomsReached": "最大10個の症状まで追加できます",
+      "selectAtLeastOneSymptom": "少なくとも1つの症状を選択してください",
+      "petDataLoadFailed": "ペットデータの取得に失敗しました、後でもう一度お試しください",
+      "existingRecordFound": "{{petName}}は{{date}}に既に異常記録があります、1日1匹のペットにつき1つの異常記録のみ作成できます",
+      "existingRecordFoundSelectOther": "{{petName}}は{{date}}に既に異常記録があります、他の日付またはペットを選択してください",
+      "selectPetFirst": "まずペットを選択してください",
+      "maxImagesReached": "最大10枚の画像まで選択できます",
+      "imageTooLarge": "画像サイズは5MBを超えることはできません",
+      "invalidFileType": "画像ファイルを選択してください",
+      "recordCreated": "異常記録が作成されました",
+      "createFailed": "異常記録の作成に失敗しました、後でもう一度お試しください",
+      "invalidData": "データ形式に誤りがあります、入力内容を確認してください",
+      "loginRequired": "先にログインしてください",
+      "petNotFound": "指定されたペットが見つかりません",
+      "serverError": "サーバーエラー、後でもう一度お試しください",
+      "draftTooLarge": "下書きが大きすぎます、最初の3枚の画像のみ保存します",
+      "draftTextOnly": "下書きが大きすぎます、テキストコンテンツのみ保存します",
+      "storageQuotaExceeded": "ストレージ容量不足、テキストコンテンツのみ保存します"
+    },
+    "defaultSymptoms": [
+      "くしゃみ", "脱毛", "嘔吐", "下痢", "食欲不振", "元気がない",
+      "発熱", "咳", "皮膚のかゆみ", "呼吸が荒い", "鼻水", "目の充血"
+    ]
+  },
+  "editPost": {
+    "title": "投稿を編集",
+    "messages": {
+      "loadPostFailed": "投稿の取得に失敗しました",
+      "loadPostError": "投稿の読み込みに失敗しました: {{error}}",
+      "loadUserDataFailed": "ユーザーデータの取得に失敗しました",
+      "selectLocation": "場所を選択してください",
+      "minOneImageRequired": "投稿には少なくとも1枚の画像を残す必要があります",
+      "updating": "投稿を更新中...",
+      "deleteImageError": "画像の削除に失敗しました: {{error}}",
+      "reorderImageError": "画像順序の更新に失敗しました: {{error}}",
+      "deleteAnnotationError": "注釈の削除に失敗しました: {{error}}",
+      "deleteOldAnnotationError": "古い注釈の削除に失敗しました: {{error}}",
+      "createNewAnnotationError": "新しい注釈の作成に失敗しました: {{error}}",
+      "updateAnnotationError": "注釈の更新に失敗しました: {{error}}",
+      "createAnnotationError": "注釈の作成に失敗しました: {{error}}",
+      "updateSuccess": "投稿が正常に更新されました！",
+      "updateFailed": "更新に失敗しました",
+      "networkError": "ネットワーク接続エラー、ネットワーク接続を確認後に再試行してください",
+      "timeoutError": "リクエストがタイムアウトしました、後でもう一度お試しください",
+      "permissionError": "この投稿を編集する権限がありません",
+      "postNotFound": "指定された投稿が見つかりません",
+      "updateError": "更新に失敗しました: {{error}}"
+    },
+    "ui": {
+      "selectLocation": "場所を選択",
+      "clickToEditAnnotations": "画像をクリックして注釈を編集",
+      "deleteImage": "画像を削除",
+      "addImage": "画像を追加",
+      "writePostContent": "投稿内容を作成...",
+      "cancel": "キャンセル",
+      "updatePost": "投稿を更新",
+      "updating": "更新中...",
+      "deleteConfirmMessage": "この画像を削除してもよろしいですか？画像は「投稿を更新」をクリックした時に削除され、画像内の注釈も一緒に削除されます。",
+      "leaveConfirmMessage": "編集ページを離れてもよろしいですか？保存されていない変更は失われます。"
+    },
+    "locationOptions": [
+      "東京都", "大阪府", "神奈川県", "愛知県", "埼玉県", "千葉県",
+      "兵庫県", "北海道", "福岡県", "静岡県", "茨城県", "広島県",
+      "京都府", "宮城県", "新潟県", "長野県", "岐阜県", "栃木県",
+      "群馬県", "岡山県", "福島県", "三重県", "熊本県", "鹿児島県"
+    ]
+  },
+  "postPreview": {
+    "title": "投稿プレビュー",
+    "messages": {
+      "processingImages": "画像と注釈を処理中...",
+      "imageProcessError": "画像{{index}}の処理に失敗しました",
+      "uploading": "サーバーにアップロード中...",
+      "publishSuccess": "投稿が正常に公開されました！",
+      "publishFailed": "公開に失敗しました",
+      "networkError": "ネットワーク接続エラー、ネットワーク接続を確認後に再試行してください",
+      "timeoutError": "アップロードがタイムアウトしました、後でもう一度お試しください",
+      "fileSizeError": "画像ファイルが大きすぎます、小さい画像を選択してください",
+      "publishError": "公開に失敗しました: {{error}}"
+    },
+    "ui": {
+      "annotationsCount": "{{count}}個の注釈",
+      "like": "いいね",
+      "comment": "コメント",
+      "save": "保存",
+      "justNow": "1秒前",
+      "publish": "公開",
+      "publishing": "公開中..."
+    },
+    "locationOptions": [
+      "東京都", "大阪府", "神奈川県", "愛知県", "埼玉県", "千葉県",
+      "兵庫県", "北海道", "福岡県", "静岡県", "茨城県", "広島県",
+      "京都府", "宮城県", "新潟県", "長野県", "岐阜県", "栃木県",
+      "群馬県", "岡山県", "福島県", "三重県", "熊本県", "鹿児島県"
+    ]
+  },
+  "abnormalPostDetail": {
+    "messages": {
+      "publicPostNotFound": "指定された公開異常記録が見つかりません",
+      "postNotFound": "指定された異常記録が見つかりません",
+      "deleteSuccess": "異常記録が正常に削除されました",
+      "deleteFailed": "異常記録の削除に失敗しました、後でもう一度お試しください",
+      "noPermission": "この記録を削除する権限がありません"
+    },
+    "ui": {
+      "dateTitle": "{{year}}年{{month}}月{{day}}日異常記録",
+      "moreOptions": "その他のオプション",
+      "editRecord": "記録を編集",
+      "deleteRecord": "記録を削除",
+      "deleteConfirmMessage": "この異常記録を削除してもよろしいですか？この操作は元に戻せません。",
+      "noDescription": "補足説明なし",
+      "imageAlt": "異常記録画像{{index}}"
+    }
+  },
+  "editAbnormalPost": {
+    "title": "異常記録を編集",
+    "messages": {
+      "loadPostFailed": "異常記録の読み込みに失敗しました",
+      "updateSuccess": "異常記録が更新されました",
+      "confirmAbandonEdit": "編集を破棄してもよろしいですか？",
+      "confirmSwitchPet": "記録対象を切り替えてもよろしいですか？",
+      "updateFailed": "異常記録の更新に失敗しました、後でもう一度お試しください",
+      "invalidData": "データ形式に誤りがあります、入力内容を確認してください",
+      "pleaseLogin": "先にログインしてください",
+      "postNotFound": "指定された異常記録が見つかりません",
+      "serverError": "サーバーエラー、後でもう一度お試しください"
+    }
+  },
+  "petRelatedPosts": {
+    "title": "の関連投稿",
+    "defaultPetName": "ペット",
+    "sortOptions": {
+      "dateDescending": "公開日順：新しい順",
+      "dateAscending": "公開日順：古い順"
+    },
+    "messages": {
+      "loadPostsFailed": "関連投稿の取得に失敗しました",
+      "loadPostsError": "関連投稿の読み込みに失敗しました、後でもう一度お試しください",
+      "noRelatedPosts": "{{petName}}の関連投稿はまだありません"
+    }
+  },
+  "abnormalPostFilter": {
+    "dateFormat": "{{year}}年{{month}}月{{day}}日",
+    "filterByLabel": "で",
+    "filterLabel": "フィルター",
+    "filterOptions": {
+      "symptom": "症状",
+      "date": "日付",
+      "both": "症状 + 日付"
+    },
+    "selectOption": "選択",
+    "addButton": "追加",
+    "removeSymptomButton": "X",
+    "resetButton": "リセット",
+    "filterButton": "フィルター",
+    "defaultStartDate": "2025年1月1日",
+    "defaultEndDate": "2025年1月22日"
+  },
+  "abnormalPostPreview": {
+    "dateFormat": "{{month}}月{{day}}日",
+    "noSymptoms": "症状記録なし",
+    "emergencyRecordAlt": "緊急記録",
+    "abnormalRecordAlt": "異常記録",
+    "emergencyBadge": "緊急",
+    "symptomsLabel": "症状"
+  },
+  "petAbnormalPosts": {
+    "title": "の異常記録",
+    "resultLabel": "フィルター結果",
+    "sortOptions": {
+      "newest": "新しい順",
+      "oldest": "古い順"
+    },
+    "emptyStateAlt": "空の状態",
+    "noRecords": "異常記録がまだありません",
+    "noFilteredRecords": "条件に合う異常記録が見つかりません",
+    "abnormalRecordAlt": "異常記録",
+    "emergencyLabel": "受診記録",
+    "symptomsLabel": "症状"
+  },
+  "datePicker": {
+    "title": "日付を選択",
+    "yearLabel": "年",
+    "monthLabel": "月",
+    "dayLabel": "日",
+    "yearOption": "{{year}}年",
+    "monthOption": "{{month}}月",
+    "dayOption": "{{day}}日",
+    "selectedDateLabel": "選択した日付",
+    "dateFormat": "{{year}}/{{month}}/{{day}} ({{weekDay}})",
+    "weekDays": ["日", "月", "火", "水", "木", "金", "土"]
+  },
+  "post": {
+    "justNow": "たった今",
+    "minutesAgo": "{{minutes}}分前",
+    "hoursAgo": "{{hours}}時間前",
+    "daysAgo": "{{days}}日前",
+    "deleteFailedAlert": "投稿の削除に失敗しました、後でもう一度お試しください",
+    "userAvatarAlt": "ユーザーアバター",
+    "unknownUser": "不明なユーザー",
+    "moreOptionsAlt": "その他のオプション",
+    "editPost": "投稿を編集",
+    "deletePost": "投稿を削除",
+    "copyLink": "リンクをコピー",
+    "reportPost": "投稿を報告",
+    "postImageAlt": "投稿画像{{index}}",
+    "annotationsCount": "{{count}}個の注釈",
+    "annotationAlt": "注釈",
+    "likeAlt": "いいね",
+    "commentAlt": "コメント",
+    "saveAlt": "保存",
+    "showMore": "もっと見る",
+    "deleteConfirmMessage": "この投稿を削除してもよろしいですか？"
+  },
+  "postComments": {
+    "title": "コメント欄",
+    "noComments": "現在コメントがありません",
+    "maxImagesAlert": "最大3枚の画像まで選択できます",
+    "imageSlotLimitAlert": "あと{{availableSlots}}枚の画像しか選択できません、自動的に最初の{{availableSlots}}枚を選択しました",
+    "deletedComment": "[このコメントは削除されました]",
+    "deleteErrorAlert": "コメントの削除中にエラーが発生しました、後でもう一度お試しください",
+    "reportNotImplemented": "報告機能はまだ実装されていません",
+    "replyingTo": "{{username}}に返信中",
+    "user": "ユーザー",
+    "previewAlt": "プレビュー",
+    "removeImageTitle": "画像を削除",
+    "replyPlaceholder": "返信を作成...",
+    "commentPlaceholder": "コメントを作成...",
+    "imageUploadLimitTitle": "画像上限に達しました（3枚）",
+    "addImageTitle": "画像を追加（{{count}}/3）",
+    "addImageAlt": "画像を追加",
+    "sendReplyTitle": "返信を送信",
+    "sendCommentTitle": "コメントを送信",
+    "sendReplyAlt": "返信を送信",
+    "sendCommentAlt": "コメントを送信",
+    "deleteConfirmMessage": "このコメントを削除してもよろしいですか？"
+  },
+  "postPreviewList": {
+    "loading": "投稿プレビューを読み込み中...",
+    "loadError": "読み込みに失敗しました: {{error}}",
+    "retry": "再試行",
+    "emptyStateAlt": "空の状態",
+    "defaultEmptyMessage": "まだ投稿が公開されていません",
+    "postImageAlt": "投稿-{{index}}",
+    "noContent": "内容なし",
+    "loadingMore": "さらに投稿を読み込み中...",
+    "allLoaded": "すべての投稿を読み込みました"
+  },
+  "comment": {
+    "imageLoadError": "画像の読み込みに失敗しました",
+    "likeAlt": "いいね",
+    "unlikeAlt": "いいねを取り消し",
+    "replyTitle": "返信",
+    "replyAlt": "返信",
+    "commentImageAlt": "コメント画像{{index}}",
+    "hideReplies": "返信を非表示",
+    "showReplies": "返信を展開",
+    "deleteComment": "コメントを削除",
+    "reportComment": "コメントを報告"
+  },
+  "socialPage": {
+    "tabs": {
+      "daily": "日常投稿",
+      "forum": "ペットフォーラム"
+    },
+    "messages": {
+      "fetchUserFailed": "現在のユーザー情報の取得に失敗しました",
+      "loadPostsFailed": "投稿の読み込みに失敗しました",
+      "loadArchivesFailed": "疾病ファイルの読み込みに失敗しました",
+      "postUpdatedDetected": "投稿更新を検出しました、投稿リストを再読み込みします",
+      "noPosts": "現在投稿がありません、最初の投稿を公開しましょう！",
+      "noArchives": "現在疾病ファイルがありません、最初の記事をシェアしましょう！"
+    }
+  },
+  "searchPostsPage": {
+    "emptyMessage": "検索結果が空です"
+  },
+  "feedSearchResultPage": {
+    "title": "検索結果",
+    "loading": "検索中...",
+    "noImage": "画像なし",
+    "marked": "マーク済み",
+    "mark": "マーク",
+    "verifying": "審査中",
+    "noResultAlt": "結果なし",
+    "searchInfo": "「{{searchQuery}}」を検索",
+    "searchInfoWithCount": "「{{searchQuery}}」を検索して{{totalCount}}件の結果を発見",
+    "noResultsFound": "「{{searchQuery}}」に関連するフードが見つかりません",
+    "messages": {
+      "enterSearchKeyword": "検索キーワードを入力してください",
+      "searchFailed": "検索に失敗しました",
+      "feedMarked": "フードがお気に入りに追加されました",
+      "toggleMarkFailed": "マーク切り替えに失敗しました",
+      "reviewFailed": "審査に失敗しました",
+      "reportErrorFailed": "エラー報告に失敗しました"
+    }
+  },
+  "imageEditor": {
+    "title": "画像を編集",
+    "imageAlt": "編集画像",
+    "annotationsCount": "{{count}}個の注釈",
+    "annotationsAlt": "注釈",
+    "instructions": "画像の任意の場所をクリックして注釈を追加、既存の注釈をクリックして編集",
+    "buttons": {
+      "annotations": "注釈",
+      "stickers": "ステッカー",
+      "cancel": "キャンセル",
+      "done": "完了",
+      "delete": "削除",
+      "update": "更新",
+      "add": "追加"
+    },
+    "form": {
+      "annotationType": "注釈タイプ",
+      "otherUser": "他のユーザー",
+      "pet": "ペット",
+      "annotationContent": "注釈内容",
+      "enterUsername": "ユーザー名を入力",
+      "loading": "読み込み中...",
+      "selectPet": "ペットを選択"
+    },
+    "petTypes": {
+      "dog": "犬",
+      "cat": "猫"
+    },
+    "messages": {
+      "localStorageCleanupError": "ImageEditorのlocalStorage清理中にエラーが発生しました",
+      "loadAnnotationsFailed": "注釈データの読み込みに失敗しました",
+      "loadedPetsData": "読み込まれたペットデータ",
+      "loadPetsFailed": "ペットデータの読み込みに失敗しました",
+      "saveAnnotationsFailed": "注釈データの保存に失敗しました",
+      "petNotFoundAdd": "ペットが見つかりません（追加）",
+      "petNotFoundUpdate": "ペットが見つかりません（更新）"
+    }
+  },
+  "socialSearchResults": {
+    "loading": "検索中...",
+    "error": "エラー: {{error}}",
+    "noResultsAlt": "結果が見つかりません",
+    "noUsersFound": "一致するユーザーが見つかりません",
+    "noPostsFound": "一致する投稿が見つかりません",
+    "noTagsFound": "一致するタグが見つかりません",
+    "noTagPostsFound": "タグ\"{{searchQuery}}\"の関連投稿が見つかりません",
+    "noForumsFound": "一致するフォーラム記事が見つかりません",
+    "tabs": {
+      "accounts": "アカウント",
+      "posts": "投稿",
+      "tags": "タグ",
+      "forums": "フォーラム"
+    },
+    "buttons": {
+      "follow": "フォロー",
+      "requestFollow": "フォローリクエスト",
+      "following": "フォロー中",
+      "requested": "リクエスト済み"
+    },
+    "messages": {
+      "fetchCurrentUserFailed": "現在のユーザー情報の取得に失敗しました",
+      "searchFailed": "検索に失敗しました",
+      "searchError": "検索エラー",
+      "searchErrorOccurred": "検索中にエラーが発生しました",
+      "loadFollowStatesFailed": "フォロー状態の読み込みに失敗しました",
+      "getUserFollowStatusFailed": "ユーザー{{userId}}のフォロー状態の取得に失敗しました",
+      "followOperationFailed": "フォロー操作に失敗しました"
+    }
+  },
+  "postList": {
+    "loading": "投稿を読み込み中...",
+    "loadError": "読み込みに失敗しました: {{error}}",
+    "retry": "再試行",
+    "emptyStateAlt": "空の状態",
+    "userNoPostsYet": "このユーザーはまだ投稿を公開していません",
+    "defaultEmptyMessage": "現在投稿がありません",
+    "loadingMore": "さらに読み込み中...",
+    "noMorePosts": "- これ以上投稿がありません -",
+    "messages": {
+      "fetchUserDataFailed": "ユーザーデータの取得に失敗しました",
+      "apiDataNotArray": "APIから返された投稿データが配列形式ではありません",
+      "loadUserPostsFailed": "ユーザー投稿の読み込みに失敗しました",
+      "loadUserPostsError": "ユーザー投稿の読み込みに失敗しました",
+      "postUpdateDetected": "PostList 投稿更新を検出、ユーザー投稿を再読み込みします",
+      "checkScrollToPost": "PostList - 指定された投稿にスクロールする必要があるかチェック",
+      "executeScrollToPost": "PostList - 投稿へのスクロールを実行",
+      "scrollAndHighlightComplete": "PostList - スクロールとハイライト完了",
+      "likeNotificationReceived": "PostList いいね通知を受信",
+      "deleteNotificationReceived": "PostList 削除通知を受信",
+      "postDeletedSuccessfully": "投稿が正常に削除されました",
+      "saveNotificationReceived": "PostList 保存通知を受信",
+      "filterOutNoImagePost": "🚫 PostList 画像のないアイテムをフィルターアウト（ID: {{postId}}）"
+    }
+  }
+}

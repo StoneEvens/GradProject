@@ -1,0 +1,255 @@
+{
+  "page": {
+    "title": "よく使用するフード",
+    "loading": "読み込み中...",
+    "buttons": {
+      "addFeed": "フードを追加",
+      "viewMore": "もっと見る",
+      "back": "❮"
+    },
+    "sections": {
+      "marked": "マイお気に入りフード:",
+      "recent": "前回使用:",
+      "all": "すべてのフード:"
+    },
+    "messages": {
+      "loadError": "フードデータの読み込みに失敗しました",
+      "loadFailed": "読み込みに失敗しました",
+      "noMarkedFeeds": "関連するお気に入りフードが見つかりません",
+      "noRecentFeeds": "関連する使用記録が見つかりません",
+      "noAllFeeds": "関連フードが見つかりません",
+      "feedMarked": "フードがお気に入りに追加されました",
+      "feedUnmarked": "マークを取り消しました",
+      "operationFailed": "操作に失敗しました、後でもう一度お試しください",
+      "systemDetected": "システムが同じフードを識別しました",
+      "newFeedCreated": "新しいフードの作成に成功しました",
+      "reviewCompleted": "審査完了、フードがお気に入りに追加されました",
+      "errorReported": "エラーを報告しました、フィードバックありがとうございます",
+      "errorReportFailed": "報告に失敗しました、後でもう一度お試しください",
+      "imageTooLarge": "画像ファイルが大きすぎます、小さい画像を選択するか管理者にお問い合わせください",
+      "dataFormatError": "データ形式エラー、入力を確認してください",
+      "addFeedFailed": "フードの追加に失敗しました、後でもう一度お試しください",
+      "noResponse": "サーバーからの応答がありません、ネットワーク接続を確認してください",
+      "unknownError": "不明なエラーが発生しました、後でもう一度お試しください",
+      "markFailed": "マーク切り替えに失敗しました",
+      "reviewFailed": "審査に失敗しました、後でもう一度お試しください"
+    },
+    "feedCard": {
+      "noImage": "画像なし",
+      "marked": "マーク済み",
+      "mark": "マーク",
+      "verifying": "審査中"
+    },
+    "emptyState": {
+      "noResult": "結果なし"
+    }
+  },
+  "allPage": {
+    "title": "すべてのフード",
+    "loading": "読み込み中...",
+    "messages": {
+      "loadError": "すべてのフードの読み込みに失敗しました",
+      "loadFailed": "読み込みに失敗しました",
+      "noFeeds": "関連フードが見つかりません",
+      "feedMarked": "フードがお気に入りに追加されました"
+    }
+  },
+  "markedPage": {
+    "title": "マイお気に入りフード",
+    "loading": "読み込み中...",
+    "messages": {
+      "loadError": "お気に入りフードの読み込みに失敗しました",
+      "loadFailed": "読み込みに失敗しました",
+      "noMarkedFeeds": "関連するお気に入りフードが見つかりません",
+      "markToggleFailed": "マーク切り替えに失敗しました",
+      "reviewFailed": "審査に失敗しました"
+    }
+  },
+  "detailPage": {
+    "title": "フード詳細",
+    "loading": "読み込み中...",
+    "loadError": "フード詳細の読み込みに失敗しました",
+    "feedNotFound": "フードが存在しません",
+    "messages": {
+      "feedMarked": "フードがお気に入りに追加されました",
+      "feedUnmarked": "マークを取り消しました",
+      "operationFailed": "操作に失敗しました、後でもう一度お試しください",
+      "reviewCompleted": "審査完了、フードがお気に入りに追加されました",
+      "reviewFailed": "審査に失敗しました、後でもう一度お試しください",
+      "errorReported": "エラーを報告しました、フィードバックありがとうございます",
+      "errorReportFailed": "報告に失敗しました、後でもう一度お試しください"
+    },
+    "labels": {
+      "feedName": "フード名:",
+      "brand": "ブランド:",
+      "price": "価格:",
+      "nutrition": "栄養成分:",
+      "protein": "タンパク質",
+      "fat": "脂肪",
+      "carbohydrate": "炭水化物",
+      "calcium": "カルシウム",
+      "phosphorus": "リン",
+      "magnesium": "マグネシウム",
+      "sodium": "ナトリウム"
+    },
+    "buttons": {
+      "marked": "マーク済み",
+      "mark": "マーク",
+      "back": "❮"
+    },
+    "verification": {
+      "title": "このフード情報はまだ審査を通過していません",
+      "progress": "審査進度: {{count}}/5人が確認済み",
+      "note": "5人のユーザーが情報の正確性を確認する必要があります",
+      "alt": "審査中"
+    },
+    "image": {
+      "noImage": "画像なし",
+      "frontAlt": "{{name}} - 正面画像",
+      "nutritionAlt": "{{name}} - 栄養成分表",
+      "unknownFeed": "フード",
+      "indicator": "{{current}}/{{total}}",
+      "prev": "❮",
+      "next": "❯"
+    },
+    "info": {
+      "unknownFeed": "不明なフード",
+      "unknownBrand": "不明なブランド",
+      "pricePrefix": "¥",
+      "noPrice": "提供されていません",
+      "unit": "%"
+    }
+  },
+  "createModal": {
+    "title": "フードを追加",
+    "petType": {
+      "cat": "猫",
+      "dog": "犬"
+    },
+    "labels": {
+      "petType": "ペットタイプ",
+      "feedName": "フード名",
+      "feedBrand": "フードブランド",
+      "feedPrice": "フード価格",
+      "frontImage": "フード正面",
+      "nutritionImage": "栄養成分表"
+    },
+    "placeholders": {
+      "feedName": "フード名を入力してください",
+      "feedBrand": "フードブランドを入力してください",
+      "feedPrice": "フード価格を入力してください"
+    },
+    "buttons": {
+      "uploadFront": "正面画像をアップロード",
+      "uploadNutrition": "栄養成分表をアップロード",
+      "removeFront": "正面画像を削除",
+      "removeNutrition": "栄養成分表を削除",
+      "cancel": "キャンセル",
+      "confirm": "追加確認",
+      "processing": "処理中..."
+    },
+    "alt": {
+      "frontImage": "フード正面",
+      "nutritionImage": "栄養成分表"
+    },
+    "messages": {
+      "imageTooLarge": "画像サイズは5MBを超えることはできません",
+      "selectImageFile": "画像ファイルを選択してください",
+      "enterFeedName": "フード名を入力してください",
+      "enterFeedBrand": "フードブランドを入力してください",
+      "feedNameTooLong": "フード名は100文字を超えることはできません",
+      "brandNameTooLong": "ブランド名は100文字を超えることはできません",
+      "enterFeedPrice": "フード価格を入力してください",
+      "invalidPrice": "正しい価格の数字を入力してください",
+      "uploadFrontImage": "フード正面画像をアップロードしてください",
+      "uploadNutritionImage": "栄養成分表画像をアップロードしてください"
+    }
+  },
+  "reviewModal": {
+    "labels": {
+      "createdBy": "追加ユーザー名",
+      "createdDate": "追加日",
+      "unknownUser": "不明なユーザー",
+      "unknownDate": "不明な日付"
+    },
+    "buttons": {
+      "reportError": "エラーを報告",
+      "confirm": "確認",
+      "processing": "処理中..."
+    },
+    "messages": {
+      "reviewFailed": "審査に失敗しました、後でもう一度お試しください",
+      "errorReportSuccess": "ご報告ありがとうございます、システムエラーの審査をお待ちください。現在このフードを自由に使用できます、間違った情報については栄養計算機で手動更新してください"
+    },
+    "alt": {
+      "feedImage": "フード画像"
+    }
+  },
+  "reviewConfirmModal": {
+    "title": "フードの審査にご協力ください",
+    "description": "このフードはまだ審査を通過していません、審査後にこのフードをご利用ください",
+    "buttons": {
+      "cancel": "キャンセル",
+      "confirm": "確定"
+    }
+  },
+  "errorReportModal": {
+    "title": "フードエラーを報告",
+    "labels": {
+      "errorType": "エラータイプ（複数選択可）",
+      "errorDescription": "エラー説明",
+      "correctedData": "修正データ",
+      "nutritionCorrection": "栄養成分修正"
+    },
+    "errorTypes": {
+      "name": "名前エラー",
+      "brand": "ブランドエラー",
+      "price": "価格エラー",
+      "nutrition": "栄養成分エラー",
+      "image": "画像エラー",
+      "other": "その他のエラー"
+    },
+    "placeholders": {
+      "description": "発見されたエラーを説明してください..."
+    },
+    "buttons": {
+      "cancel": "キャンセル",
+      "submit": "報告を提出",
+      "submitting": "提出中..."
+    },
+    "messages": {
+      "selectErrorType": "少なくとも1つのエラータイプを選択してください",
+      "enterDescription": "エラー内容を説明してください",
+      "correctDataRequired": "エラータイプを選択しましたが、以下のデータを修正していません：{{fields}}。データを修正するか「その他のエラー」を選択してください。",
+      "modifyDataRequired": "少なくとも1つのデータを修正するか、「その他のエラー」タイプを選択してください",
+      "submitFailed": "エラー報告に失敗しました、後でもう一度お試しください"
+    },
+    "fields": {
+      "feedName": "フード名",
+      "feedBrand": "フードブランド",
+      "feedPrice": "フード価格",
+      "nutrition": "栄養成分"
+    }
+  },
+  "selectModal": {
+    "title": "フードを選択",
+    "loading": "読み込み中...",
+    "sections": {
+      "marked": "マイお気に入りフード:",
+      "recent": "前回使用:"
+    },
+    "messages": {
+      "loadFailed": "読み込みに失敗しました",
+      "noMarkedFeeds": "お気に入りフードがありません",
+      "noRecentFeeds": "使用記録がありません",
+      "loadError": "フードデータの読み込みに失敗しました",
+      "noMarkedFeedsWithLink": "お気に入りフードがありません、すぐにペットページ-フード専用エリアに移動して追加してください"
+    },
+    "buttons": {
+      "close": "✕"
+    },
+    "alt": {
+      "feedSection": "フード専用エリア"
+    }
+  }
+}

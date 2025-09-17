@@ -1,0 +1,212 @@
+{
+  "title": "Social",
+  "tabs": {
+    "myPosts": "Mis Publicaciones",
+    "allPosts": "Todas las Publicaciones",
+    "following": "Siguiendo"
+  },
+  "post": {
+    "create": "Crear Publicación",
+    "edit": "Editar Publicación",
+    "delete": "Eliminar Publicación",
+    "like": "Me Gusta",
+    "unlike": "No Me Gusta",
+    "comment": "Comentar",
+    "share": "Compartir",
+    "save": "Guardar",
+    "unsave": "No Guardar",
+    "report": "Reportar",
+    "noContent": "No hay publicaciones disponibles",
+    "loadMore": "Cargar Más",
+    "loading": "Cargando...",
+    "postedBy": "Publicado por",
+    "postedAt": "Publicado en",
+    "edited": "Editado",
+    "viewDetails": "Ver Detalles"
+  },
+  "comment": {
+    "title": "Comentarios",
+    "placeholder": "Escribe un comentario...",
+    "submit": "Enviar",
+    "cancel": "Cancelar",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "reply": "Responder",
+    "loadMore": "Cargar más comentarios",
+    "noComments": "Aún no hay comentarios. ¡Sé el primero en comentar!"
+  },
+  "follow": {
+    "follow": "Seguir",
+    "unfollow": "Dejar de Seguir",
+    "followers": "Seguidores",
+    "following": "Siguiendo",
+    "followersCount": "{{count}} seguidores",
+    "followingCount": "Siguiendo {{count}}"
+  },
+  "search": {
+    "placeholder": "Buscar publicaciones, usuarios o etiquetas",
+    "noResults": "No se encontraron resultados",
+    "filters": "Filtros",
+    "sortBy": "Ordenar por",
+    "newest": "Más Reciente",
+    "oldest": "Más Antiguo",
+    "mostLiked": "Más Gustado"
+  },
+  "common": {
+    "loading": "Cargando...",
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "close": "Cerrar",
+    "accept": "Aceptar",
+    "reject": "Rechazar",
+    "remove": "Eliminar",
+    "retry": "Reintentar"
+  },
+  "followPage": {
+    "followers": "Seguidores",
+    "following": "Siguiendo",
+    "noFollowers": "Aún no hay seguidores",
+    "noFollowing": "Aún no sigue a nadie",
+    "removeFollower": "Eliminar seguidor",
+    "follow": "Seguir",
+    "following": "Siguiendo",
+    "requested": "Solicitado",
+    "requestFollow": "Solicitar Seguir",
+    "messages": {
+      "loadDataFailed": "Error al cargar datos, inténtalo de nuevo más tarde",
+      "operationFailed": "Operación fallida, inténtalo de nuevo más tarde",
+      "followerRemoved": "Seguidor @{{username}} eliminado exitosamente",
+      "removeFollowerFailed": "Error al eliminar seguidor",
+      "removeFollowerFailedRetry": "Error al eliminar seguidor, inténtalo de nuevo más tarde"
+    }
+  },
+  "notifications": {
+    "title": "Notificaciones",
+    "unreadTitle": "Mensajes No Leídos y Solicitudes de Seguimiento",
+    "pastTitle": "Mensajes Pasados",
+    "noUnread": "No hay mensajes no leídos o solicitudes de seguimiento",
+    "noPast": "No hay mensajes pasados",
+    "loadFailed": "Error al cargar notificaciones",
+    "actionSuccess": {
+      "accepted": "Aceptado",
+      "rejected": "Rechazado",
+      "followRequest": "solicitud de seguimiento"
+    },
+    "actionFailed": "Operación fallida, inténtalo de nuevo más tarde",
+    "unknownUser": "Usuario desconocido",
+    "avatar": "Avatar"
+  },
+  "confirmFollowModal": {
+    "title": "¿Enviar {{action}}?",
+    "actions": {
+      "follow": "seguir",
+      "requestFollow": "solicitud de seguimiento"
+    },
+    "cancel": "No importa"
+  },
+  "confirmRemoveFollowerModal": {
+    "title": "¿Eliminar seguidor?",
+    "description": "Eliminar el seguimiento de @{{username}}"
+  },
+  "confirmNotification": {
+    "cancel": "Cancelar",
+    "confirm": "Confirmar"
+  },
+  "likedArchives": {
+    "title": "Archivos que Me Gustan",
+    "emptyMessage": "Aún no hay archivos que me gusten",
+    "sortOptions": {
+      "archiveDateDesc": "Fecha de Creación: Nuevo a Antiguo",
+      "archiveDateAsc": "Fecha de Creación: Antiguo a Nuevo",
+      "likeDateDesc": "Fecha que Me Gustó: Nuevo a Antiguo",
+      "likeDateAsc": "Fecha que Me Gustó: Antiguo a Nuevo"
+    },
+    "messages": {
+      "loadFailed": "Error al obtener archivos que me gustan",
+      "loadErrorRetry": "Error al cargar archivos que me gustan, inténtalo de nuevo más tarde"
+    },
+    "console": {
+      "loadError": "Error al cargar archivos que me gustan:"
+    }
+  },
+  "likedPosts": {
+    "title": "Publicaciones que Me Gustan",
+    "emptyMessage": "Aún no hay publicaciones que me gusten",
+    "messages": {
+      "fetchFailed": "Error al obtener publicaciones que me gustan",
+      "loadErrorRetry": "Error al cargar lista de publicaciones que me gustan, inténtalo de nuevo más tarde",
+      "removedFromList": "Eliminado de la lista de me gusta",
+      "commentInDevelopment": "Función de comentarios en desarrollo"
+    },
+    "console": {
+      "loadError": "Error al cargar lista de publicaciones que me gustan:",
+      "likeNotification": "LikedPostsListPage recibió notificación de me gusta:",
+      "saveNotification": "LikedPostsListPage recibió notificación de guardar:"
+    }
+  },
+  "savedArchives": {
+    "title": "Artículos Guardados",
+    "emptyMessage": "Aún no hay artículos de foro guardados",
+    "sortOptions": {
+      "archiveDateDesc": "Fecha de Creación: Reciente a Antiguo",
+      "archiveDateAsc": "Fecha de Creación: Antiguo a Reciente",
+      "saveDateDesc": "Fecha Guardado: Reciente a Antiguo",
+      "saveDateAsc": "Fecha Guardado: Antiguo a Reciente"
+    },
+    "messages": {
+      "loadFailed": "Error al obtener artículos de foro guardados",
+      "loadErrorRetry": "Error al cargar artículos de foro guardados, inténtalo de nuevo más tarde"
+    },
+    "console": {
+      "loadError": "Error al cargar artículos de foro guardados:"
+    }
+  },
+  "savedPosts": {
+    "title": "Publicaciones Guardadas",
+    "emptyMessage": "Aún no hay publicaciones guardadas",
+    "messages": {
+      "fetchFailed": "Error al obtener publicaciones guardadas",
+      "loadErrorRetry": "Error al cargar lista de publicaciones guardadas, inténtalo de nuevo más tarde",
+      "commentInDevelopment": "Función de comentarios en desarrollo"
+    },
+    "console": {
+      "loadError": "Error al cargar lista de publicaciones guardadas:",
+      "likeNotification": "SavedPostsListPage recibió notificación de me gusta:",
+      "saveNotification": "SavedPostsListPage recibió notificación de guardar:"
+    }
+  },
+  "savedPostsPage": {
+    "title": "Publicaciones Guardadas",
+    "emptyMessage": "Aún no hay publicaciones guardadas",
+    "sortOptions": {
+      "postDateDesc": "Por Fecha de Publicación: Reciente a Antiguo",
+      "postDateAsc": "Por Fecha de Publicación: Antiguo a Reciente",
+      "saveDateDesc": "Por Fecha Guardado: Reciente a Antiguo",
+      "saveDateAsc": "Por Fecha Guardado: Antiguo a Reciente"
+    },
+    "messages": {
+      "loadFailed": "Error al obtener publicaciones guardadas",
+      "loadErrorRetry": "Error al cargar publicaciones guardadas, inténtalo de nuevo más tarde"
+    },
+    "console": {
+      "loadError": "Error al cargar publicaciones guardadas:"
+    }
+  },
+  "likedPostsPage": {
+    "title": "Publicaciones que Me Gustan",
+    "emptyMessage": "Aún no hay publicaciones que me gusten",
+    "sortOptions": {
+      "postDateDesc": "Por Fecha de Publicación: Reciente a Antiguo",
+      "postDateAsc": "Por Fecha de Publicación: Antiguo a Reciente",
+      "likeDateDesc": "Por Fecha que Me Gustó: Reciente a Antiguo",
+      "likeDateAsc": "Por Fecha que Me Gustó: Antiguo a Reciente"
+    },
+    "messages": {
+      "loadFailed": "Error al obtener publicaciones que me gustan",
+      "loadErrorRetry": "Error al cargar publicaciones que me gustan, inténtalo de nuevo más tarde"
+    },
+    "console": {
+      "loadError": "Error al cargar publicaciones que me gustan:"
+    }
+  }
+}

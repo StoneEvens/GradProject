@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import axios from '../utils/axios';
 import styles from '../styles/FeedSelectModal.module.css';
 import { useUser } from '../context/UserContext';
 
 const FeedSelectModal = ({ isOpen, onClose, onSelectFeed, petType }) => {
   const navigate = useNavigate();
+  const { t } = useTranslation('feed');
   const { userData } = useUser();
   const [loading, setLoading] = useState(true);
   const [markedFeeds, setMarkedFeeds] = useState([]);
@@ -60,8 +62,7 @@ const FeedSelectModal = ({ isOpen, onClose, onSelectFeed, petType }) => {
           pet_type: item.feed.pet_type
         }));
       setMarkedFeeds(markedData);
-      // 如果過濾後沒有資料，顯示空狀態訊息
-      setMarkedMessage(markedData.length > 0 ? markedResponse.data.message : '暫無精選飼料');
+      setMarkedMessage(markedData.length > 0 ? markedResponse.data.message : t('selectModal.messages.noMarkedFeeds'));
       
       // 處理最近使用飼料，並根據寵物類型過濾
       const recentData = recentResponse.data.data
@@ -92,15 +93,14 @@ const FeedSelectModal = ({ isOpen, onClose, onSelectFeed, petType }) => {
           pet_type: item.pet_type
         }));
       setRecentFeeds(recentData);
-      // 如果過濾後沒有資料，顯示空狀態訊息
-      setRecentMessage(recentData.length > 0 ? recentResponse.data.message : '暫無使用記錄');
+      setRecentMessage(recentData.length > 0 ? recentResponse.data.message : t('selectModal.messages.noRecentFeeds'));
       
     } catch (error) {
-      console.error('載入飼料數據失敗:', error);
+      console.error(t('selectModal.messages.loadError'), error);
       setMarkedFeeds([]);
       setRecentFeeds([]);
-      setMarkedMessage('載入失敗');
-      setRecentMessage('載入失敗');
+      setMarkedMessage(t('selectModal.messages.loadFailed'));
+      setRecentMessage(t('selectModal.messages.loadFailed'));
     } finally {
       setLoading(false);
     }
@@ -144,13 +144,13 @@ const FeedSelectModal = ({ isOpen, onClose, onSelectFeed, petType }) => {
             <img src={feed.frontImage} alt={feed.name} className={styles.feedImage} />
           ) : (
             <div className={styles.feedImagePlaceholder}>
-              <span>無圖片</span>
+              <span>{t('page.feedCard.noImage')}</span>
             </div>
           )}
           {/* 審核中標示 */}
           {!feed.isVerified && (
             <div className={styles.verifyingBadge}>
-              <img src="/assets/icon/Verifying.png" alt="審核中" />
+              <img src="/assets/icon/Verifying.png" alt={t('page.feedCard.verifying')} />
             </div>
           )}
         </div>
@@ -171,22 +171,22 @@ const FeedSelectModal = ({ isOpen, onClose, onSelectFeed, petType }) => {
     <div className={styles.modalOverlay} onClick={handleOverlayClick}>
       <div className={styles.modalContainer}>
         <div className={styles.modalHeader}>
-          <h2>選擇飼料</h2>
+          <h2>{t('selectModal.title')}</h2>
           <button className={styles.closeButton} onClick={onClose}>
-            ✕
+            {t('selectModal.buttons.close')}
           </button>
         </div>
         
         <div className={styles.modalBody}>
           {loading ? (
             <div className={styles.loadingContainer}>
-              <span>載入中...</span>
+              <span>{t('selectModal.loading')}</span>
             </div>
           ) : (
             <>
               {/* 精選飼料區域 */}
               <div className={styles.section}>
-                <label className={styles.sectionLabel}>我的精選飼料:</label>
+                <label className={styles.sectionLabel}>{t('selectModal.sections.marked')}</label>
                 <div className={styles.sectionContent}>
                   {markedFeeds.length > 0 ? (
                     <div className={styles.feedGrid}>
@@ -194,18 +194,18 @@ const FeedSelectModal = ({ isOpen, onClose, onSelectFeed, petType }) => {
                     </div>
                   ) : (
                     <div className={styles.emptyState}>
-                      <img src="/assets/icon/SearchNoResult.png" alt="無結果" className={styles.noResultImage} />
+                      <img src="/assets/icon/SearchNoResult.png" alt={t('page.emptyState.noResult')} className={styles.noResultImage} />
                       <p>
-                        {markedMessage === '暫無精選飼料' ? (
+                        {markedMessage === t('selectModal.messages.noMarkedFeeds') ? (
                           <>
-                            暫無精選飼料，馬上前往寵物頁面-
-                            <span 
-                              className={styles.feedLink} 
+                            {t('selectModal.messages.noMarkedFeedsWithLink').split('-')[0]}-
+                            <span
+                              className={styles.feedLink}
                               onClick={() => navigate('/feeds')}
                             >
-                              飼料專區
+                              {t('selectModal.alt.feedSection')}
                             </span>
-                            新增
+                            {t('selectModal.messages.noMarkedFeedsWithLink').split('-')[1] || '新增'}
                           </>
                         ) : markedMessage}
                       </p>
@@ -216,7 +216,7 @@ const FeedSelectModal = ({ isOpen, onClose, onSelectFeed, petType }) => {
               
               {/* 最近使用區域 */}
               <div className={styles.section}>
-                <label className={styles.sectionLabel}>上次使用:</label>
+                <label className={styles.sectionLabel}>{t('selectModal.sections.recent')}</label>
                 <div className={styles.sectionContent}>
                   {recentFeeds.length > 0 ? (
                     <div className={styles.feedGrid}>
@@ -224,7 +224,7 @@ const FeedSelectModal = ({ isOpen, onClose, onSelectFeed, petType }) => {
                     </div>
                   ) : (
                     <div className={styles.emptyState}>
-                      <img src="/assets/icon/SearchNoResult.png" alt="無結果" className={styles.noResultImage} />
+                      <img src="/assets/icon/SearchNoResult.png" alt={t('page.emptyState.noResult')} className={styles.noResultImage} />
                       <p>{recentMessage}</p>
                     </div>
                   )}

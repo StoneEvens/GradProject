@@ -1,12 +1,14 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import styles from '../styles/PetSwitcher.module.css';
 
-const PetSwitcher = ({ 
-  allPets, 
-  currentPet, 
-  onPetSwitch, 
+const PetSwitcher = ({
+  allPets,
+  currentPet,
+  onPetSwitch,
   onAddPet
 }) => {
+  const { t } = useTranslation('pet');
   
   const handlePetClick = (pet) => {
     if (pet.id !== currentPet?.id) {
@@ -23,9 +25,9 @@ const PetSwitcher = ({
     <div className={styles.petSwitcherContainer}>
       {/* 標題區域 */}
       <div className={styles.header}>
-        <span className={styles.title}>切換目前寵物</span>
+        <span className={styles.title}>{t('page.switcher.title')}</span>
         <button className={styles.addButton} onClick={onAddPet}>
-          新增寵物
+          {t('page.switcher.addButton')}
         </button>
       </div>
       

@@ -1,0 +1,97 @@
+{
+  "reports": {
+    "title": "Reportes de Salud de ",
+    "upload": "Subir",
+    "noReports": "No hay reportes de salud disponibles",
+    "loading": "Cargando...",
+    "backToList": "Volver a la Lista",
+    "notFound": "Datos del reporte no encontrados",
+    "loadFailed": "Error al cargar reporte",
+    "petDataFailed": "No se pueden cargar los datos de la mascota",
+    "readDataFailed": "Error al leer datos"
+  },
+  "detail": {
+    "title": "Reporte de Salud",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "confirmDelete": "¿Estás seguro de que quieres eliminar este reporte de salud?",
+    "deleteSuccess": "Eliminado exitosamente",
+    "deleteFailed": "Error al eliminar, inténtalo de nuevo más tarde",
+    "viewPartial": "Ver Parcial",
+    "viewAll": "Ver Todo",
+    "noNotes": "Sin notas"
+  },
+  "edit": {
+    "title": "Editar",
+    "update": "Actualizar",
+    "back": "Atrás",
+    "updateSuccess": "Actualizado exitosamente",
+    "updateFailed": "Error de actualización, verifica el servidor o formato de datos",
+    "enterValue": "Por favor ingresa valor",
+    "enterLocation": "Por favor ingresa ubicación",
+    "enterNotes": "Por favor ingresa descripción adicional"
+  },
+  "upload": {
+    "title": "Agregar Reporte de Salud",
+    "cancel": "Volver a la Lista",
+    "submit": "Confirmar Subida",
+    "uploadSuccess": "Subida exitosa",
+    "uploadFailed": "Error de subida, verifica el formulario o estado del servidor",
+    "selectDate": "Por favor selecciona fecha de chequeo",
+    "ocrSuccess": "Reconocimiento de imagen exitoso",
+    "ocrFailed": "Error de reconocimiento, verifica si la imagen es clara o el formato es correcto",
+    "uploading": "Reconociendo...",
+    "uploadReport": "Subir Reporte"
+  },
+  "fields": {
+    "checkType": "Tipo de Chequeo",
+    "checkDate": "Fecha de Chequeo",
+    "checkLocation": "Ubicación de Chequeo",
+    "notes": "Notas",
+    "ocrUpload": "Reconocimiento de Imagen OCR",
+    "unknownDate": "Fecha Desconocida",
+    "notFilled": "No Completado"
+  },
+  "checkTypes": {
+    "cbc": "Conteo Sanguíneo Completo",
+    "biochemistry": "Bioquímica Sanguínea",
+    "urinalysis": "Análisis de Orina",
+    "other": "Otras Pruebas",
+    "unknown": "Chequeo de Salud"
+  },
+  "bloodFields": {
+    "紅血球計數": "Conteo de Glóbulos Rojos",
+    "白血球計數": "Conteo de Glóbulos Blancos",
+    "血紅蛋白": "Hemoglobina",
+    "血比容": "Hematocrito",
+    "平均紅血球體積": "Volumen Corpuscular Medio",
+    "平均紅血球血紅蛋白量": "Hemoglobina Corpuscular Media",
+    "平均紅血球血紅蛋白濃度": "Concentración de Hemoglobina Corpuscular Media",
+    "紅血球分布寬度": "Ancho de Distribución de Glóbulos Rojos",
+    "嗜中性球計數": "Conteo de Neutrófilos",
+    "淋巴球計數": "Conteo de Linfocitos",
+    "單核球計數": "Conteo de Monocitos",
+    "嗜酸性球計數": "Conteo de Eosinófilos",
+    "嗜鹼性球計數": "Conteo de Basófilos",
+    "血小板計數": "Conteo de Plaquetas",
+    "網狀紅血球計數": "Conteo de Reticulocitos",
+    "白蛋白": "Albúmina",
+    "球蛋白": "Globulina",
+    "總蛋白": "Proteína Total",
+    "丙氨酸轉氨酶": "Alanina Aminotransferasa",
+    "天門冬酸轉氨酶": "Aspartato Aminotransferasa",
+    "鹼性磷酸酶": "Fosfatasa Alcalina",
+    "血中尿素氮": "Nitrógeno Ureico en Sangre",
+    "肌酸酐": "Creatinina",
+    "葡萄糖": "Glucosa",
+    "磷": "Fósforo",
+    "尿比重": "Gravedad Específica de Orina",
+    "尿液酸鹼值": "pH de Orina",
+    "尿中紅血球": "Glóbulos Rojos en Orina",
+    "尿中白血球": "Glóbulos Blancos en Orina",
+    "尿蛋白／肌酐比值": "Relación Proteína/Creatinina en Orina"
+  },
+  "common": {
+    "selectDate": "Seleccionar Fecha"
+  }
+}

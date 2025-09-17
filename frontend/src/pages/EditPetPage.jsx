@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import styles from '../styles/EditPetPage.module.css';
 import TopNavbar from '../components/TopNavbar';
 import BottomNavbar from '../components/BottomNavigationbar';
@@ -9,6 +10,7 @@ import petService from '../services/petService';
 import { handleImageSelection, revokeImagePreview, createProgressCallback } from '../utils/imageUtils';
 
 const EditPetPage = () => {
+  const { t } = useTranslation('pet');
   const navigate = useNavigate();
   const { petId } = useParams();
   const fileInputRef = useRef(null);
@@ -38,15 +40,9 @@ const EditPetPage = () => {
     setNotification('');
   };
 
-  const catBreeds = [
-    '米克斯貓', '美國短毛貓', '英國短毛貓', '蘇格蘭摺耳貓', '布偶貓',
-    '暹羅貓', '波斯貓', '孟加拉貓', '緬因貓', '異國短毛貓', '其他'
-  ];
-
-  const dogBreeds = [
-    '米克斯犬', '柴犬', '貴賓犬', '黃金獵犬', '拉布拉多', '哈士奇',
-    '法國鬥牛犬', '博美犬', '約克夏', '馬爾濟斯', '其他'
-  ];
+  // 從翻譯檔案獲取品種列表
+  const catBreeds = t('addPage.breeds.cat', { returnObjects: true });
+  const dogBreeds = t('addPage.breeds.dog', { returnObjects: true });
 
   // 載入寵物資料
   useEffect(() => {
@@ -57,7 +53,7 @@ const EditPetPage = () => {
         const currentPet = pets.find(pet => pet.pet_id.toString() === petId);
         
         if (!currentPet) {
-          showNotification('找不到寵物資料');
+          showNotification(t('editPage.messages.petNotFound'));
           navigate('/pet');
           return;
         }
@@ -79,8 +75,8 @@ const EditPetPage = () => {
         }
 
       } catch (error) {
-        console.error('載入寵物資料失敗:', error);
-        showNotification('載入寵物資料失敗');
+        console.error('Load pet data failed:', error);
+        showNotification(t('editPage.messages.loadError'));
         navigate('/pet');
       } finally {
         setPageLoading(false);
@@ -130,14 +126,14 @@ const EditPetPage = () => {
         showNotification(result.error);
       }
     } catch (error) {
-      console.error('圖片處理失敗:', error);
-      showNotification('圖片處理失敗，請重試');
+      console.error('Image processing failed:', error);
+      showNotification(t('editPage.messages.imageProcessError'));
     }
   };
 
   const handleSubmit = async () => {
     if (!petData.name || !petData.breed || !petData.age || !petData.weight || !petData.height) {
-      showNotification('請填寫所有必填欄位');
+      showNotification(t('editPage.messages.requiredFields'));
       return;
     }
 
@@ -169,21 +165,21 @@ const EditPetPage = () => {
       }
 
       await petService.updatePet(petId, updateData);
-      showNotification('更新寵物資料成功！');
+      showNotification(t('editPage.messages.updateSuccess'));
       setTimeout(() => {
         navigate('/pet');
       }, 1500);
     } catch (error) {
-      console.error('更新寵物失敗:', error);
+      console.error('Update pet failed:', error);
       
-      let errorMessage = '更新寵物失敗，請稍後再試';
+      let errorMessage = t('editPage.messages.updateError');
       if (error.response?.data?.message) {
         errorMessage = error.response.data.message;
       } else if (error.response?.data?.errors) {
         const errors = error.response.data.errors;
         const errorFields = Object.keys(errors);
         if (errorFields.length > 0) {
-          errorMessage = `資料驗證錯誤：${errorFields.join(', ')}`;
+          errorMessage = `${t('editPage.messages.validationError')}${errorFields.join(', ')}`;
         }
       }
       
@@ -198,7 +194,7 @@ const EditPetPage = () => {
       <NotificationProvider>
         <div className={styles.container}>
           <TopNavbar />
-          <div className={styles.loadingContainer}>載入中...</div>
+          <div className={styles.loadingContainer}>{t('editPage.loading')}</div>
           <BottomNavbar />
         </div>
       </NotificationProvider>
@@ -224,9 +220,9 @@ const EditPetPage = () => {
                     onClick={() => fileInputRef.current?.click()}
                   >
                     {imagePreview ? (
-                      <img src={imagePreview} alt="寵物大頭照" />
+                      <img src={imagePreview} alt={t('editPage.avatarAlt')} />
                     ) : (
-                      <span>上傳大頭照</span>
+                      <span>{t('editPage.uploadAvatar')}</span>
                     )}
                   </div>
                   <input
@@ -241,7 +237,7 @@ const EditPetPage = () => {
               
               <div className={styles.titleContainer}>
                 <h2 className={styles.title}>
-                  編輯{petData.type === 'cat' ? '貓咪' : '狗狗'}資料
+                  {petData.type === 'cat' ? t('editPage.titleCat') : t('editPage.titleDog')}
                 </h2>
               </div>
             </div>
@@ -251,24 +247,24 @@ const EditPetPage = () => {
             
             <div className={styles.formFields}>
               <div className={styles.formGroup}>
-                <label>名字</label>
+                <label>{t('editPage.labels.name')}</label>
                 <input
                   type="text"
                   name="name"
                   value={petData.name}
                   onChange={handleInputChange}
-                  placeholder="請輸入寵物名字"
+                  placeholder={t('editPage.placeholders.name')}
                 />
               </div>
               
               <div className={styles.formGroup}>
-                <label>品種</label>
+                <label>{t('editPage.labels.breed')}</label>
                 <select
                   name="breed"
                   value={petData.breed}
                   onChange={handleInputChange}
                 >
-                  <option value="">選擇{petData.type === 'cat' ? '貓' : '狗'}品種</option>
+                  <option value="">{petData.type === 'cat' ? t('editPage.placeholders.breedCat') : t('editPage.placeholders.breedDog')}</option>
                   {(petData.type === 'cat' ? catBreeds : dogBreeds).map(breed => (
                     <option key={breed} value={breed}>{breed}</option>
                   ))}
@@ -276,39 +272,39 @@ const EditPetPage = () => {
               </div>
               
               <div className={styles.formGroup}>
-                <label>年齡</label>
+                <label>{t('editPage.labels.age')}</label>
                 <input
                   type="number"
                   name="age"
                   value={petData.age}
                   onChange={handleInputChange}
-                  placeholder="請輸入年齡（歲）"
+                  placeholder={t('editPage.placeholders.age')}
                   min="0"
                   step="0.1"
                 />
               </div>
               
               <div className={styles.formGroup}>
-                <label>體重</label>
+                <label>{t('editPage.labels.weight')}</label>
                 <input
                   type="number"
                   name="weight"
                   value={petData.weight}
                   onChange={handleInputChange}
-                  placeholder="請輸入體重（公斤）"
+                  placeholder={t('editPage.placeholders.weight')}
                   min="0"
                   step="0.1"
                 />
               </div>
               
               <div className={styles.formGroup}>
-                <label>身高</label>
+                <label>{t('editPage.labels.height')}</label>
                 <input
                   type="number"
                   name="height"
                   value={petData.height}
                   onChange={handleInputChange}
-                  placeholder="請輸入身高（公分）"
+                  placeholder={t('editPage.placeholders.height')}
                   min="0"
                   step="0.1"
                 />
@@ -322,25 +318,25 @@ const EditPetPage = () => {
                 name="description"
                 value={petData.description}
                 onChange={handleInputChange}
-                placeholder="請簡單介紹你的寵物"
+                placeholder={t('editPage.placeholders.description')}
                 rows="4"
               />
             </div>
             
             <div className={styles.actionButtons}>
-              <button 
-                className={styles.backButton} 
+              <button
+                className={styles.backButton}
                 onClick={handleBack}
                 disabled={loading}
               >
-                返回
+                {t('editPage.buttons.back')}
               </button>
-              <button 
-                className={styles.submitButton} 
+              <button
+                className={styles.submitButton}
                 onClick={handleSubmit}
                 disabled={loading}
               >
-                {loading ? '處理中...' : '儲存'}
+                {loading ? t('editPage.buttons.processing') : t('editPage.buttons.save')}
               </button>
             </div>
           </div>

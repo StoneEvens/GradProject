@@ -1,0 +1,494 @@
+{
+  "common": {
+    "loading": "Cargando...",
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "save": "Guardar",
+    "back": "Atrás",
+    "create": "Crear",
+    "creating": "Creando...",
+    "add": "Agregar",
+    "remove": "Eliminar",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "preview": "Vista Previa",
+    "selectDate": "Seleccionar Fecha",
+    "draftSaved": "Borrador guardado",
+    "next": "Siguiente"
+  },
+  "createPost": {
+    "title": "Crear Publicación",
+    "sections": {
+      "images": "Imágenes",
+      "description": "Descripción",
+      "hashtags": "Hashtags"
+    },
+    "placeholders": {
+      "description": "Ingresa descripción",
+      "hashtag": "Ingresa hashtag"
+    },
+    "imageUpload": {
+      "noImageSelected": "Aún no se han agregado imágenes",
+      "addImage": "Agregar Imagen",
+      "imageCounter": "Imágenes seleccionadas: {{count}}/10",
+      "noImageAlt": "No hay imagen seleccionada"
+    },
+    "hashtags": {
+      "counter": "Hashtags agregados: {{count}}/10"
+    },
+    "messages": {
+      "maxImagesReached": "Máximo 10 imágenes permitidas",
+      "imageTooLarge": "El tamaño de la imagen no puede exceder 5MB",
+      "invalidFileType": "Por favor selecciona archivos de imagen",
+      "loadImagesFailed": "No se pueden cargar las imágenes guardadas",
+      "loadImagesError": "Error al cargar imágenes",
+      "loadDraftError": "Error al cargar borrador",
+      "draftTooLarge": "Borrador muy grande, guardando solo contenido de texto",
+      "storageQuotaExceeded": "Cuota de almacenamiento excedida, guardando solo contenido de texto",
+      "enterHashtagContent": "Por favor ingresa contenido del hashtag",
+      "hashtagExists": "Este hashtag ya existe",
+      "maxHashtagsReached": "Máximo 10 hashtags permitidos",
+      "requireContent": "Por favor selecciona al menos una imagen o ingresa descripción"
+    }
+  },
+  "createAbnormalPost": {
+    "title": "Crear Registro Anormal",
+    "sections": {
+      "selectPet": "Seleccionar Mascota",
+      "date": "Fecha",
+      "symptoms": "Síntomas de la Mascota",
+      "bodyStats": "Registro de Estadísticas Corporales",
+      "images": "Registro de Imágenes",
+      "description": "Descripción Adicional"
+    },
+    "petSelection": {
+      "selectPet": "Seleccionar Mascota:"
+    },
+    "dateSelection": {
+      "date": "Fecha:",
+      "emergency": "Registro Médico"
+    },
+    "symptoms": {
+      "title": "Síntomas de la Mascota:",
+      "selectSymptom": "Seleccionar Síntoma",
+      "counter": "Síntomas seleccionados: {{count}}/10"
+    },
+    "bodyStats": {
+      "title": "Registro de Estadísticas Corporales:",
+      "weight": "Peso",
+      "waterIntake": "Ingesta de Agua",
+      "temperature": "Temperatura",
+      "units": {
+        "kg": "kg",
+        "liters": "litros",
+        "celsius": "°C"
+      }
+    },
+    "imageUpload": {
+      "title": "Registro de Imágenes:",
+      "noImageSelected": "Aún no se han agregado imágenes",
+      "addImage": "Agregar Imagen",
+      "imageCounter": "Imágenes seleccionadas: {{count}}/10"
+    },
+    "description": {
+      "title": "Descripción Adicional:",
+      "placeholder": "Descripción de texto"
+    },
+    "messages": {
+      "selectPet": "Por favor selecciona una mascota",
+      "selectDate": "Por favor selecciona una fecha",
+      "selectSymptom": "Por favor selecciona un síntoma",
+      "symptomExists": "Este síntoma ya existe",
+      "maxSymptomsReached": "Máximo 10 síntomas permitidos",
+      "selectAtLeastOneSymptom": "Por favor selecciona al menos un síntoma",
+      "petDataLoadFailed": "Error al cargar datos de mascota, inténtalo de nuevo más tarde",
+      "existingRecordFound": "{{petName}} ya tiene un registro anormal en {{date}}, solo se permite un registro por mascota por día",
+      "existingRecordFoundSelectOther": "{{petName}} ya tiene un registro anormal en {{date}}, selecciona otra fecha o mascota",
+      "selectPetFirst": "Por favor selecciona una mascota primero",
+      "maxImagesReached": "Máximo 10 imágenes permitidas",
+      "imageTooLarge": "El tamaño de la imagen no puede exceder 5MB",
+      "invalidFileType": "Por favor selecciona archivos de imagen",
+      "recordCreated": "Registro anormal creado",
+      "createFailed": "Error al crear registro anormal, inténtalo de nuevo más tarde",
+      "invalidData": "Formato de datos inválido, verifica tu entrada",
+      "loginRequired": "Por favor inicia sesión primero",
+      "petNotFound": "Mascota no encontrada",
+      "serverError": "Error del servidor, inténtalo de nuevo más tarde",
+      "draftTooLarge": "Borrador muy grande, guardando solo las primeras 3 imágenes",
+      "draftTextOnly": "Borrador muy grande, guardando solo contenido de texto",
+      "storageQuotaExceeded": "Cuota de almacenamiento excedida, guardando solo contenido de texto"
+    },
+    "defaultSymptoms": [
+      "Estornudos", "Pérdida de pelo", "Vómitos", "Diarrea", "Pérdida de apetito", "Letargo",
+      "Fiebre", "Tos", "Picazón en la piel", "Respiración rápida", "Secreción nasal", "Ojos rojos"
+    ]
+  },
+  "editPost": {
+    "title": "Editar Publicación",
+    "messages": {
+      "loadPostFailed": "Error al cargar publicación",
+      "loadPostError": "Error al cargar publicación: {{error}}",
+      "loadUserDataFailed": "Error al cargar datos del usuario",
+      "selectLocation": "Por favor selecciona ubicación",
+      "minOneImageRequired": "La publicación debe tener al menos una imagen",
+      "updating": "Actualizando publicación...",
+      "deleteImageError": "Error al eliminar imagen: {{error}}",
+      "reorderImageError": "Error al reordenar imágenes: {{error}}",
+      "deleteAnnotationError": "Error al eliminar anotación: {{error}}",
+      "deleteOldAnnotationError": "Error al eliminar anotación antigua: {{error}}",
+      "createNewAnnotationError": "Error al crear nueva anotación: {{error}}",
+      "updateAnnotationError": "Error al actualizar anotación: {{error}}",
+      "createAnnotationError": "Error al crear anotación: {{error}}",
+      "updateSuccess": "¡Publicación actualizada exitosamente!",
+      "updateFailed": "Error de actualización",
+      "networkError": "Error de conexión de red, verifica tu conexión e inténtalo de nuevo",
+      "timeoutError": "Tiempo de espera agotado, inténtalo de nuevo más tarde",
+      "permissionError": "No tienes permiso para editar esta publicación",
+      "postNotFound": "Publicación no encontrada",
+      "updateError": "Error de actualización: {{error}}"
+    },
+    "ui": {
+      "selectLocation": "Seleccionar ubicación",
+      "clickToEditAnnotations": "Haz clic en la imagen para editar anotaciones",
+      "deleteImage": "Eliminar imagen",
+      "addImage": "Agregar imagen",
+      "writePostContent": "Escribir contenido de la publicación...",
+      "cancel": "Cancelar",
+      "updatePost": "Actualizar",
+      "updating": "Actualizando...",
+      "deleteConfirmMessage": "¿Estás seguro de que quieres eliminar esta imagen? La imagen se eliminará cuando hagas clic en 'Actualizar', y todas las anotaciones en esta imagen también se eliminarán.",
+      "leaveConfirmMessage": "¿Estás seguro de que quieres salir de la página de edición? Los cambios no guardados se perderán."
+    },
+    "locationOptions": [
+      "Ciudad de Taipei", "Nueva Ciudad de Taipei", "Ciudad de Taoyuan", "Ciudad de Taichung", "Ciudad de Tainan", "Ciudad de Kaohsiung",
+      "Ciudad de Keelung", "Ciudad de Hsinchu", "Ciudad de Chiayi", "Condado de Hsinchu", "Condado de Miaoli", "Condado de Changhua",
+      "Condado de Nantou", "Condado de Yunlin", "Condado de Chiayi", "Condado de Pingtung", "Condado de Yilan", "Condado de Hualien",
+      "Condado de Taitung", "Condado de Penghu", "Condado de Kinmen", "Condado de Lienchiang"
+    ]
+  },
+  "postPreview": {
+    "title": "Vista Previa de Publicación",
+    "messages": {
+      "processingImages": "Procesando imágenes y anotaciones...",
+      "imageProcessError": "Error al procesar imagen {{index}}",
+      "uploading": "Subiendo al servidor...",
+      "publishSuccess": "¡Publicación publicada exitosamente!",
+      "publishFailed": "Error al publicar",
+      "networkError": "Error de conexión de red, verifica tu conexión e inténtalo de nuevo",
+      "timeoutError": "Tiempo de subida agotado, inténtalo de nuevo más tarde",
+      "fileSizeError": "El archivo de imagen es muy grande, selecciona una imagen más pequeña",
+      "publishError": "Error al publicar: {{error}}"
+    },
+    "ui": {
+      "annotationsCount": "{{count}} anotaciones",
+      "like": "Me Gusta",
+      "comment": "Comentar",
+      "save": "Guardar",
+      "justNow": "Justo ahora",
+      "publish": "Publicar",
+      "publishing": "Publicando..."
+    },
+    "locationOptions": [
+      "Ciudad de Taipei", "Nueva Ciudad de Taipei", "Ciudad de Taoyuan", "Ciudad de Taichung", "Ciudad de Tainan", "Ciudad de Kaohsiung",
+      "Ciudad de Keelung", "Ciudad de Hsinchu", "Ciudad de Chiayi", "Condado de Hsinchu", "Condado de Miaoli", "Condado de Changhua",
+      "Condado de Nantou", "Condado de Yunlin", "Condado de Chiayi", "Condado de Pingtung", "Condado de Yilan", "Condado de Hualien",
+      "Condado de Taitung", "Condado de Penghu", "Condado de Kinmen", "Condado de Lienchiang"
+    ]
+  },
+  "abnormalPostDetail": {
+    "messages": {
+      "publicPostNotFound": "Registro anormal público no encontrado",
+      "postNotFound": "Registro anormal no encontrado",
+      "deleteSuccess": "Registro anormal eliminado exitosamente",
+      "deleteFailed": "Error al eliminar registro anormal, inténtalo de nuevo más tarde",
+      "noPermission": "No tienes permiso para eliminar este registro"
+    },
+    "ui": {
+      "dateTitle": "Registro Anormal {{year}}/{{month}}/{{day}}",
+      "moreOptions": "Más opciones",
+      "editRecord": "Editar",
+      "deleteRecord": "Eliminar",
+      "deleteConfirmMessage": "¿Estás seguro de que quieres eliminar este registro anormal? Esta acción no se puede deshacer.",
+      "noDescription": "Sin descripción adicional",
+      "imageAlt": "Imagen de registro anormal {{index}}"
+    }
+  },
+  "editAbnormalPost": {
+    "title": "Editar Registro Anormal",
+    "messages": {
+      "loadPostFailed": "Error al cargar registro anormal",
+      "updateSuccess": "Registro anormal actualizado exitosamente",
+      "confirmAbandonEdit": "¿Estás seguro de que quieres abandonar la edición?",
+      "confirmSwitchPet": "¿Estás seguro de que quieres cambiar el sujeto del registro?",
+      "updateFailed": "Error al actualizar registro anormal, inténtalo de nuevo más tarde",
+      "invalidData": "Formato de datos inválido, verifica tu entrada",
+      "pleaseLogin": "Por favor inicia sesión primero",
+      "postNotFound": "No se puede encontrar el registro anormal especificado",
+      "serverError": "Error del servidor, inténtalo de nuevo más tarde"
+    }
+  },
+  "petRelatedPosts": {
+    "title": "Publicaciones Relacionadas de ",
+    "defaultPetName": "Mascota",
+    "sortOptions": {
+      "dateDescending": "Más Reciente Primero",
+      "dateAscending": "Más Antiguo Primero"
+    },
+    "messages": {
+      "loadPostsFailed": "Error al obtener publicaciones relacionadas",
+      "loadPostsError": "Error al cargar publicaciones relacionadas, inténtalo de nuevo más tarde",
+      "noRelatedPosts": "{{petName}} aún no tiene publicaciones relacionadas"
+    }
+  },
+  "abnormalPostFilter": {
+    "dateFormat": "{{year}}/{{month}}/{{day}}",
+    "filterByLabel": "Por",
+    "filterLabel": "Filtro",
+    "filterOptions": {
+      "symptom": "Síntoma",
+      "date": "Fecha",
+      "both": "Síntoma + Fecha"
+    },
+    "selectOption": "Seleccionar",
+    "addButton": "Agregar",
+    "removeSymptomButton": "X",
+    "resetButton": "Restablecer",
+    "filterButton": "Filtro",
+    "defaultStartDate": "2025/1/1",
+    "defaultEndDate": "2025/1/22"
+  },
+  "abnormalPostPreview": {
+    "dateFormat": "{{month}}/{{day}}",
+    "noSymptoms": "No hay síntomas registrados",
+    "emergencyRecordAlt": "Registro de emergencia",
+    "abnormalRecordAlt": "Registro anormal",
+    "emergencyBadge": "Emergencia",
+    "symptomsLabel": "Síntomas"
+  },
+  "petAbnormalPosts": {
+    "title": "Registros Anormales de ",
+    "resultLabel": "Resultados del Filtro",
+    "sortOptions": {
+      "newest": "Más Reciente Primero",
+      "oldest": "Más Antiguo Primero"
+    },
+    "emptyStateAlt": "Estado vacío",
+    "noRecords": "Aún no hay registros anormales",
+    "noFilteredRecords": "No se encontraron registros anormales que coincidan con los criterios",
+    "abnormalRecordAlt": "Registro anormal",
+    "emergencyLabel": "Registro Médico",
+    "symptomsLabel": "Síntomas"
+  },
+  "datePicker": {
+    "title": "Seleccionar Fecha",
+    "yearLabel": "Año",
+    "monthLabel": "Mes",
+    "dayLabel": "Día",
+    "yearOption": "{{year}}",
+    "monthOption": "{{month}}",
+    "dayOption": "{{day}}",
+    "selectedDateLabel": "Fecha Seleccionada",
+    "dateFormat": "{{year}}/{{month}}/{{day}} ({{weekDay}})",
+    "weekDays": ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"],
+    "monthNames": ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]
+  },
+  "post": {
+    "justNow": "Justo ahora",
+    "minutesAgo": "hace {{minutes}} min",
+    "hoursAgo": "hace {{hours}} hrs",
+    "daysAgo": "hace {{days}} días",
+    "deleteFailedAlert": "Error al eliminar publicación, inténtalo de nuevo más tarde",
+    "userAvatarAlt": "Avatar del usuario",
+    "unknownUser": "Usuario desconocido",
+    "moreOptionsAlt": "Más opciones",
+    "editPost": "Editar Publicación",
+    "deletePost": "Eliminar Publicación",
+    "copyLink": "Copiar Enlace",
+    "reportPost": "Reportar Publicación",
+    "postImageAlt": "Imagen de publicación {{index}}",
+    "annotationsCount": "{{count}} anotaciones",
+    "annotationAlt": "Anotación",
+    "likeAlt": "Me gusta",
+    "commentAlt": "Comentar",
+    "saveAlt": "Guardar",
+    "showMore": "Mostrar más",
+    "deleteConfirmMessage": "¿Estás seguro de que quieres eliminar esta publicación?"
+  },
+  "postComments": {
+    "title": "Comentarios",
+    "noComments": "Aún no hay comentarios",
+    "maxImagesAlert": "Máximo 3 imágenes permitidas",
+    "imageSlotLimitAlert": "Solo puedes seleccionar {{availableSlots}} más imágenes, se seleccionaron automáticamente las primeras {{availableSlots}} imágenes",
+    "deletedComment": "[Este comentario ha sido eliminado]",
+    "deleteErrorAlert": "Error al eliminar comentario, inténtalo de nuevo más tarde",
+    "reportNotImplemented": "Función de reporte aún no implementada",
+    "replyingTo": "Respondiendo a {{username}}",
+    "user": "Usuario",
+    "previewAlt": "Vista previa",
+    "removeImageTitle": "Eliminar imagen",
+    "replyPlaceholder": "Escribe una respuesta...",
+    "commentPlaceholder": "Escribe un comentario...",
+    "imageUploadLimitTitle": "Límite de imágenes alcanzado (3 imágenes)",
+    "addImageTitle": "Agregar imagen ({{count}}/3)",
+    "addImageAlt": "Agregar imagen",
+    "sendReplyTitle": "Enviar respuesta",
+    "sendCommentTitle": "Enviar comentario",
+    "sendReplyAlt": "Enviar respuesta",
+    "sendCommentAlt": "Enviar comentario",
+    "deleteConfirmMessage": "¿Estás seguro de que quieres eliminar este comentario?"
+  },
+  "postPreviewList": {
+    "loading": "Cargando vistas previas de publicaciones...",
+    "loadError": "Error de carga: {{error}}",
+    "retry": "Reintentar",
+    "emptyStateAlt": "Estado vacío",
+    "defaultEmptyMessage": "Aún no se han publicado publicaciones",
+    "postImageAlt": "Publicación-{{index}}",
+    "noContent": "Sin contenido",
+    "loadingMore": "Cargando más publicaciones...",
+    "allLoaded": "Todas las publicaciones cargadas"
+  },
+  "comment": {
+    "imageLoadError": "Error al cargar imagen",
+    "likeAlt": "Me gusta",
+    "unlikeAlt": "No me gusta",
+    "replyTitle": "Responder",
+    "replyAlt": "Responder",
+    "commentImageAlt": "Imagen de comentario {{index}}",
+    "hideReplies": "Ocultar respuestas",
+    "showReplies": "Mostrar respuestas",
+    "deleteComment": "Eliminar comentario",
+    "reportComment": "Reportar comentario"
+  },
+  "socialPage": {
+    "tabs": {
+      "daily": "Publicaciones Diarias",
+      "forum": "Foro de Mascotas"
+    },
+    "messages": {
+      "fetchUserFailed": "Error al obtener información del usuario actual",
+      "loadPostsFailed": "Error al cargar publicaciones",
+      "loadArchivesFailed": "Error al cargar archivos de enfermedades",
+      "postUpdatedDetected": "Actualización de publicación detectada, recargando lista de publicaciones",
+      "noPosts": "Aún no hay publicaciones, ¡sé el primero en publicar!",
+      "noArchives": "Aún no hay archivos, ¡sé el primero en compartir!"
+    }
+  },
+  "searchPostsPage": {
+    "emptyMessage": "No se encontraron resultados de búsqueda"
+  },
+  "feedSearchResultPage": {
+    "title": "Resultados de Búsqueda",
+    "loading": "Buscando...",
+    "noImage": "Sin imagen",
+    "marked": "Marcado",
+    "mark": "Marcar",
+    "verifying": "Verificando",
+    "noResultAlt": "Sin resultados",
+    "searchInfo": "Buscar \"{{searchQuery}}\"",
+    "searchInfoWithCount": "Buscar \"{{searchQuery}}\" encontró {{totalCount}} resultados",
+    "noResultsFound": "No se encontró alimento relacionado con \"{{searchQuery}}\"",
+    "messages": {
+      "enterSearchKeyword": "Por favor ingresa palabras clave de búsqueda",
+      "searchFailed": "Error de búsqueda",
+      "feedMarked": "Alimento agregado a favoritos",
+      "toggleMarkFailed": "Error al alternar marca",
+      "reviewFailed": "Error de revisión",
+      "reportErrorFailed": "Error al reportar error"
+    }
+  },
+  "imageEditor": {
+    "title": "Editar Imagen",
+    "imageAlt": "Editar imagen",
+    "annotationsCount": "{{count}} anotaciones",
+    "annotationsAlt": "Anotaciones",
+    "instructions": "Haz clic en cualquier lugar de la imagen para agregar anotación, haz clic en anotación existente para editar",
+    "buttons": {
+      "annotations": "Anotaciones",
+      "stickers": "Pegatinas",
+      "cancel": "Cancelar",
+      "done": "Listo",
+      "delete": "Eliminar",
+      "update": "Actualizar",
+      "add": "Agregar"
+    },
+    "form": {
+      "annotationType": "Tipo de Anotación",
+      "otherUser": "Otro Usuario",
+      "pet": "Mascota",
+      "annotationContent": "Contenido de Anotación",
+      "enterUsername": "Ingresa nombre de usuario",
+      "loading": "Cargando...",
+      "selectPet": "Seleccionar Mascota"
+    },
+    "petTypes": {
+      "dog": "Perro",
+      "cat": "Gato"
+    },
+    "messages": {
+      "localStorageCleanupError": "Error de limpieza de localStorage en ImageEditor",
+      "loadAnnotationsFailed": "Error al cargar anotaciones",
+      "loadedPetsData": "Datos de mascotas cargados",
+      "loadPetsFailed": "Error al cargar mascotas",
+      "saveAnnotationsFailed": "Error al guardar anotaciones",
+      "petNotFoundAdd": "Mascota no encontrada (agregar)",
+      "petNotFoundUpdate": "Mascota no encontrada (actualizar)"
+    }
+  },
+  "socialSearchResults": {
+    "loading": "Buscando...",
+    "error": "Error: {{error}}",
+    "noResultsAlt": "No se encontraron resultados",
+    "noUsersFound": "No se encontraron usuarios coincidentes",
+    "noPostsFound": "No se encontraron publicaciones coincidentes",
+    "noTagsFound": "No se encontraron etiquetas coincidentes",
+    "noTagPostsFound": "No se encontraron publicaciones para la etiqueta \"{{searchQuery}}\"",
+    "noForumsFound": "No se encontraron archivos coincidentes",
+    "tabs": {
+      "accounts": "Usuarios",
+      "posts": "Publicaciones",
+      "tags": "Etiquetas",
+      "forums": "Archivos"
+    },
+    "buttons": {
+      "follow": "Seguir",
+      "requestFollow": "Solicitar Seguir",
+      "following": "Siguiendo",
+      "requested": "Solicitado"
+    },
+    "messages": {
+      "fetchCurrentUserFailed": "Error al obtener información del usuario actual",
+      "searchFailed": "Error de búsqueda",
+      "searchError": "Error de búsqueda",
+      "searchErrorOccurred": "Ocurrió un error durante la búsqueda",
+      "loadFollowStatesFailed": "Error al cargar estados de seguimiento",
+      "getUserFollowStatusFailed": "Error al obtener estado de seguimiento del usuario {{userId}}",
+      "followOperationFailed": "Operación de seguimiento fallida"
+    }
+  },
+  "postList": {
+    "loading": "Cargando publicaciones...",
+    "loadError": "Error de carga: {{error}}",
+    "retry": "Reintentar",
+    "emptyStateAlt": "Estado vacío",
+    "userNoPostsYet": "Este usuario aún no ha publicado ninguna publicación",
+    "defaultEmptyMessage": "Aún no hay publicaciones",
+    "loadingMore": "Cargando más...",
+    "noMorePosts": "- No hay más publicaciones -",
+    "messages": {
+      "fetchUserDataFailed": "Error al obtener datos del usuario",
+      "apiDataNotArray": "Los datos de publicación devueltos por la API no están en formato de matriz",
+      "loadUserPostsFailed": "Error al cargar publicaciones del usuario",
+      "loadUserPostsError": "Error al cargar publicaciones del usuario",
+      "postUpdateDetected": "PostList detectó actualización de publicación, recargando publicaciones del usuario",
+      "checkScrollToPost": "PostList - Verificar si necesita desplazarse a publicación específica",
+      "executeScrollToPost": "PostList - Ejecutar desplazamiento a publicación",
+      "scrollAndHighlightComplete": "PostList - Desplazamiento y resaltado completo",
+      "likeNotificationReceived": "PostList recibió notificación de me gusta",
+      "deleteNotificationReceived": "PostList recibió notificación de eliminación",
+      "postDeletedSuccessfully": "Publicación eliminada exitosamente",
+      "saveNotificationReceived": "PostList recibió notificación de guardado",
+      "filterOutNoImagePost": "PostList filtró publicación sin imágenes (ID: {{postId}})"
+    }
+  }
+}

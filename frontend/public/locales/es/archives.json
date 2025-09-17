@@ -1,0 +1,293 @@
+{
+  "archiveCard": {
+    "status": {
+      "diagnosed": "Diagnosticado",
+      "undiagnosed": "No Diagnosticado",
+      "cured": "Curado",
+      "notCured": "No Curado",
+      "treating": "En Tratamiento"
+    },
+    "noContent": "No hay contenido disponible",
+    "noSymptoms": "No hay síntomas registrados",
+    "abnormalRecordAlt": "Registro anormal",
+    "symptoms": "Síntomas",
+    "validatingRecords": "Validando registros anormales...",
+    "unknownUser": "Usuario Desconocido",
+    "pet": "Mascota",
+    "unknownPet": "Mascota Desconocida",
+    "unknownBreed": "Raza Desconocida",
+    "mainCause": "Causa Principal",
+    "relatedSymptoms": "Síntomas Relacionados",
+    "createdAt": "Creado el",
+    "messages": {
+      "foundDeletedRecords": "Se encontraron {{count}} registros anormales eliminados, preparando para remover...",
+      "archiveUpdated": "Archivo de enfermedad actualizado, se removieron registros anormales eliminados",
+      "autoRemovedRecords": "Se removieron automáticamente {{count}} registros anormales eliminados",
+      "updateArchiveFailed": "Error al actualizar archivo de enfermedad",
+      "validateRecordsError": "Error al validar registros anormales",
+      "userClicked": "Usuario hizo clic en ArchiveCard",
+      "navigateToOwnProfile": "ArchiveCard - Navegar a página de perfil propio",
+      "navigateToUserProfile": "ArchiveCard - Navegar a página de perfil de otro usuario",
+      "cannotGetPetId": "No se puede obtener ID de mascota",
+      "cannotFindPetInfo": "No se puede encontrar información de mascota"
+    }
+  },
+  "archivePreviewForPublic": {
+    "userAvatarAlt": "Avatar del Usuario",
+    "defaultArchiveTitle": "Archivo de Enfermedad",
+    "moreOptionsAlt": "Más Opciones",
+    "likeButtonAlt": "Me Gusta",
+    "commentButtonAlt": "Comentar",
+    "saveButtonAlt": "Guardar",
+    "likeStatus": {
+      "liked": "Me Gusta",
+      "notLiked": "No Me Gusta"
+    },
+    "saveStatus": {
+      "saved": "Guardado",
+      "notSaved": "No Guardado"
+    },
+    "menuItems": {
+      "deleteArticle": "Eliminar Artículo",
+      "makePrivate": "Hacer Privado",
+      "copyLink": "Copiar Enlace"
+    },
+    "confirmMessages": {
+      "deleteArticle": "¿Estás seguro de que quieres eliminar este artículo? Esta acción no se puede deshacer.",
+      "makePrivateArticle": "¿Estás seguro de que quieres hacer este artículo privado? Otros usuarios no podrán verlo."
+    },
+    "messages": {
+      "archiveInitStatus": "Estado de inicialización del archivo",
+      "commentCountUpdated": "Conteo de comentarios actualizado desde el padre",
+      "likeAction": "Acción de me gusta del archivo",
+      "likeActionFailed": "Acción de me gusta fallida",
+      "likeActionSuccess": "Acción de me gusta exitosa",
+      "likeApiError": "Error en llamada API de me gusta",
+      "saveAction": "Acción de guardar archivo",
+      "saveActionFailed": "Acción de guardar fallida",
+      "saveActionSuccess": "Acción de guardar exitosa",
+      "saveApiError": "Error en llamada API de guardar",
+      "linkCopied": "Enlace copiado al portapapeles",
+      "copyLinkFailed": "Error al copiar enlace",
+      "articleDeleted": "Artículo eliminado",
+      "deleteFailed": "Error al eliminar",
+      "deleteArticleFailed": "Error al eliminar artículo",
+      "deleteFailedRetry": "Error al eliminar, inténtalo de nuevo más tarde",
+      "articleMadePrivate": "Artículo hecho privado",
+      "makePrivateFailed": "Error al hacer privado",
+      "makePrivateFailedError": "Error al hacer privado",
+      "makePrivateFailedRetry": "Error al hacer privado, inténtalo de nuevo más tarde",
+      "userAvatarClicked": "Avatar de usuario del archivo clickeado",
+      "navigateToOwnProfile": "Archivo - Navegar a página de perfil propio",
+      "navigateToUserProfile": "Archivo - Navegar a página de perfil de otro usuario"
+    }
+  },
+  "createDiseaseArchive": {
+    "title": "Crear Archivo de Enfermedad",
+    "draftSaved": "Borrador Guardado",
+    "symptomsData": "Datos de Síntomas",
+    "abnormalRecord": "Registro Anormal",
+    "abnormalRecordAlt": "Registro Anormal",
+    "searchingRecords": "Buscando registros anormales...",
+    "symptomsLabel": "Síntomas",
+    "form": {
+      "archiveTitle": "Título del Archivo",
+      "undiagnosed": "No Diagnosticado",
+      "diagnosed": "Diagnosticado",
+      "untreated": "No Curado",
+      "treated": "Curado",
+      "mainCause": "Causa Principal",
+      "symptomsLabel": "Síntomas al Inicio:",
+      "selectSymptom": "Seleccionar Síntoma",
+      "addSymptom": "Agregar",
+      "selectDateRange": "Seleccionar Rango de Fechas:",
+      "reincludeRecord": "Volver a Incluir Este Registro",
+      "excludeRecord": "Excluir Este Registro",
+      "cancel": "Cancelar",
+      "nextStep": "Siguiente Paso"
+    },
+    "validation": {
+      "archiveTitleRequired": "Por favor ingresa título del archivo",
+      "diagnosisStatusRequired": "Por favor selecciona estado de diagnóstico",
+      "treatmentStatusRequired": "Por favor selecciona estado de tratamiento",
+      "atLeastOneRecordRequired": "Por favor selecciona al menos un registro anormal"
+    },
+    "messages": {
+      "startValidatingRecords": "Iniciando validación de datos de registro anormal en CreateDiseaseArchivePage",
+      "realAbnormalPosts": "realAbnormalPosts:",
+      "abnormalPostsForDates": "abnormalPostsForDates:",
+      "collectedRecordIds": "IDs de registros anormales recopilados:",
+      "noRecordsToValidate": "No hay registros anormales que necesiten validación",
+      "recordsDeletedAndUpdated": "Se detectó que {{count}} registros anormales fueron eliminados, datos actualizados automáticamente",
+      "validationFailed": "Error al validar datos de registro anormal:",
+      "saveDraftFailed": "Error al guardar borrador:",
+      "loadDraftFailed": "Error al cargar borrador:",
+      "clearDraftFailed": "Error al limpiar borrador:",
+      "loadDataFailed": "Error al cargar datos",
+      "searchRecordsFailed": "Error al buscar registros anormales, inténtalo de nuevo más tarde"
+    }
+  },
+  "diseaseArchiveDetail": {
+    "title": {
+      "publicView": "Viendo Archivo",
+      "privateView": "Archivo de Enfermedad"
+    },
+    "buttons": {
+      "publish": "Publicar",
+      "published": "Publicado",
+      "deleteArchive": "Eliminar Archivo de Enfermedad",
+      "like": "Me Gusta",
+      "comment": "Comentar",
+      "save": "Guardar"
+    },
+    "errorPage": {
+      "title": "Archivo de Enfermedad No Encontrado",
+      "description": "Este archivo puede haber sido eliminado o no existe",
+      "retry": "Recargar",
+      "back": "Atrás"
+    },
+    "likeStatus": {
+      "liked": "Me Gusta",
+      "notLiked": "No Me Gusta"
+    },
+    "saveStatus": {
+      "saved": "Guardado",
+      "notSaved": "No Guardado",
+      "save": "Guardar"
+    },
+    "confirmMessages": {
+      "deleteArchive": "¿Estás seguro de que quieres eliminar este artículo? Esta acción no se puede deshacer.",
+      "publishArchive": "¿Estás seguro de que quieres publicar este artículo públicamente? Los registros anormales relacionados también se harán públicos.",
+      "makePrivateArchive": "¿Estás seguro de que quieres hacer este artículo privado? Otros usuarios no podrán verlo."
+    },
+    "messages": {
+      "getUserDataFailed": "Error al obtener datos del usuario:",
+      "archiveNotFound": "No se puede encontrar el archivo de enfermedad especificado",
+      "loadDataFailed": "Error al cargar datos:",
+      "archiveDetailInitStatus": "Estado de inicialización de página de detalle de archivo",
+      "archiveDeleted": "Archivo de enfermedad eliminado",
+      "deleteFailed": "Error al eliminar, inténtalo de nuevo más tarde",
+      "deleteError": "Error al eliminar:",
+      "operationSuccess": "¡Operación exitosa!",
+      "operationFailed": "Operación fallida, inténtalo de nuevo más tarde",
+      "toggleStatusError": "Error al alternar estado del archivo de enfermedad:",
+      "likeAction": "Acción de me gusta en página de detalle de archivo",
+      "likeActionFailed": "Acción de me gusta fallida:",
+      "likeActionFailedRetry": "Acción de me gusta fallida, inténtalo de nuevo más tarde",
+      "likeActionSuccess": "Acción de me gusta exitosa:",
+      "likeApiError": "Error en llamada API de me gusta:",
+      "likeNetworkError": "Acción de me gusta fallida, verifica la conexión de red",
+      "cannotOpenComments": "No se puede abrir función de comentarios",
+      "commentCountUpdate": "Actualización de conteo de comentarios en DiseaseArchiveDetailPage:",
+      "saveAction": "Acción de guardar en página de detalle de archivo",
+      "saveActionFailed": "Acción de guardar fallida:",
+      "saveActionFailedRetry": "Acción de guardar fallida, inténtalo de nuevo más tarde",
+      "saveActionSuccess": "Acción de guardar exitosa:",
+      "saveApiError": "Error en llamada API de guardar:",
+      "saveNetworkError": "Acción de guardar fallida, verifica la conexión de red"
+    }
+  },
+  "diseaseArchiveEditContent": {
+    "aiSection": {
+      "title": "Resumen de Contenido de IA"
+    },
+    "buttons": {
+      "edit": "Editar",
+      "cancel": "Cancelar",
+      "save": "Guardar",
+      "previous": "Anterior",
+      "preview": "Vista Previa del Archivo"
+    },
+    "form": {
+      "contentPlaceholder": "Por favor ingresa contenido del archivo de enfermedad..."
+    },
+    "editingTips": {
+      "title": "Consejos de Edición:",
+      "tip1": "Puedes editar libremente el contenido generado por IA",
+      "tip2": "Se recomiendan formatos de fecha (como \"3 de Dic\") al inicio de párrafos para que el sistema asocie automáticamente registros anormales correspondientes",
+      "tip3": "Mantén la estructura del contenido clara para fácil referencia futura"
+    },
+    "generating": {
+      "analyzing": "La IA está analizando los datos de tu mascota...",
+      "pleaseWait": "Por favor espera, esto puede tomar algún tiempo"
+    },
+    "noContent": "No hay contenido disponible",
+    "treating": "En Tratamiento",
+    "validation": {
+      "contentEmpty": "El contenido no puede estar vacío",
+      "contentTooShort": "El contenido es muy corto, proporciona una descripción más detallada"
+    },
+    "confirmMessages": {
+      "returnToPrevious": "¿Confirmar regreso al paso anterior? Este registro de resumen de IA se descartará.",
+      "leavePageWarning": "¿Confirmar salida? Este registro de resumen de IA se descartará."
+    },
+    "messages": {
+      "missingData": "Faltan datos requeridos, regresando al primer paso",
+      "missingDataReturning": "Faltan datos requeridos, regresando al primer paso...",
+      "generateContentFailed": "Error al generar contenido",
+      "generateArchiveContentError": "Error al generar contenido del archivo:",
+      "aiGenerateTimeout": "Tiempo de generación de IA agotado, inténtalo de nuevo más tarde",
+      "aiServiceUnavailable": "Servicio de IA temporalmente no disponible, inténtalo de nuevo más tarde",
+      "generateFailedManualEdit": "Error en generación de contenido, edita manualmente o inténtalo de nuevo.",
+      "dateFormatTip": "Consejo: Se recomiendan formatos de fecha al inicio de párrafos para mejor asociación del sistema con registros anormales",
+      "contentFormatError": "Error de formato de contenido: {{error}}",
+      "editContentSaved": "Contenido editado guardado",
+      "setLeaveWarning": "Configurar advertencia de salida",
+      "beforeUnloadTriggered": "beforeunload activado, archiveData:",
+      "popstateTriggered": "popstate activado, archiveData:",
+      "interceptNavigation": "Interceptar navegación",
+      "loadDataError": "Error al cargar datos:",
+      "loadDataFailed": "Error al cargar datos"
+    }
+  },
+  "diseaseArchivePreview": {
+    "title": "Vista Previa del Archivo de Enfermedad",
+    "buttons": {
+      "previous": "Anterior",
+      "confirmCreate": "Confirmar Crear"
+    },
+    "messages": {
+      "skipValidationNoData": "Omitir validación: no hay datos de registro anormal",
+      "startValidatingData": "Iniciar validación de datos de registro anormal:",
+      "extractedRecordIds": "IDs de registros anormales extraídos:",
+      "noValidRecordIds": "No hay IDs de registros anormales válidos",
+      "updateLocalStorageFailed": "Error al actualizar localStorage:",
+      "recordsDeletedAndUpdated": "Se detectó que {{count}} registros anormales fueron eliminados, vista previa actualizada automáticamente",
+      "validationFailed": "Error al validar datos de registro anormal:",
+      "missingDataReturnEdit": "Faltan datos requeridos, regresando a página de edición",
+      "missingDataReturningEdit": "Faltan datos requeridos, regresando a página de edición...",
+      "getRecordsFromLocalStorageFailed": "Error al obtener registros anormales de localStorage:",
+      "loadDataError": "Error al cargar datos:",
+      "loadDataFailed": "Error al cargar datos",
+      "preparingToCreateArchive": "Preparando para crear archivo de enfermedad:",
+      "archiveCreatedSuccess": "Archivo de enfermedad creado exitosamente:",
+      "archiveCreatedSuccessNotification": "¡Archivo de enfermedad creado exitosamente!",
+      "createArchiveError": "Error al crear archivo de enfermedad:",
+      "createArchiveFailed": "Error al crear archivo de enfermedad, inténtalo de nuevo más tarde"
+    }
+  },
+  "petDiseaseArchive": {
+    "title": "Archivos de Enfermedad de ",
+    "buttons": {
+      "new": "Nuevo"
+    },
+    "emptyStateAlt": "Estado Vacío",
+    "emptyStateText": "Aún No Hay Archivos de Enfermedad",
+    "archiveIconAlt": "Archivo de Enfermedad",
+    "recoveredBadge": "Recuperado",
+    "createdDateLabel": "Fecha de Creación: ",
+    "messages": {
+      "loadDataFailed": "Error al cargar datos:"
+    }
+  },
+  "symptomCalendar": {
+    "title": "Calendario de Síntomas",
+    "subtitle": "",
+    "selectSymptom": "Síntoma",
+    "add": "Agregar",
+    "reset": "Restablecer"
+  },
+  "common": {
+    "loading": "Cargando..."
+  }
+}

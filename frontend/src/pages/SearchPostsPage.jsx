@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import TopNavbar from '../components/TopNavbar';
 import BottomNavbar from '../components/BottomNavigationbar';
@@ -8,6 +9,7 @@ import { NotificationProvider } from '../context/NotificationContext';
 import styles from '../styles/PostList.module.css';
 
 const SearchPostsPage = () => {
+  const { t } = useTranslation('posts');
   const location = useLocation();
   const navigate = useNavigate();
   
@@ -104,7 +106,7 @@ const SearchPostsPage = () => {
             onSave={handleSave}
             onUserClick={handleUserClick}
             onHashtagClick={handleHashtagClick}
-            emptyMessage="搜尋結果為空"
+            emptyMessage={t('searchPostsPage.emptyMessage')}
             targetPostId={targetPostId}
             style={{ marginTop: '100px' }}
           />

@@ -1,0 +1,212 @@
+{
+  "title": "Social",
+  "tabs": {
+    "myPosts": "My Posts",
+    "allPosts": "All Posts",
+    "following": "Following"
+  },
+  "post": {
+    "create": "Create Post",
+    "edit": "Edit Post",
+    "delete": "Delete Post",
+    "like": "Like",
+    "unlike": "Unlike",
+    "comment": "Comment",
+    "share": "Share",
+    "save": "Save",
+    "unsave": "Unsave",
+    "report": "Report",
+    "noContent": "No posts available",
+    "loadMore": "Load More",
+    "loading": "Loading...",
+    "postedBy": "Posted by",
+    "postedAt": "Posted at",
+    "edited": "Edited",
+    "viewDetails": "View Details"
+  },
+  "comment": {
+    "title": "Comments",
+    "placeholder": "Write a comment...",
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "reply": "Reply",
+    "loadMore": "Load more comments",
+    "noComments": "No comments yet. Be the first to comment!"
+  },
+  "follow": {
+    "follow": "Follow",
+    "unfollow": "Unfollow",
+    "followers": "Followers",
+    "following": "Following",
+    "followersCount": "{{count}} followers",
+    "followingCount": "Following {{count}}"
+  },
+  "search": {
+    "placeholder": "Search posts, users or tags",
+    "noResults": "No results found",
+    "filters": "Filters",
+    "sortBy": "Sort by",
+    "newest": "Newest",
+    "oldest": "Oldest",
+    "mostLiked": "Most Liked"
+  },
+  "common": {
+    "loading": "Loading...",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "close": "Close",
+    "accept": "Accept",
+    "reject": "Reject",
+    "remove": "Remove",
+    "retry": "Retry"
+  },
+  "followPage": {
+    "followers": "Followers",
+    "following": "Following",
+    "noFollowers": "No followers yet",
+    "noFollowing": "Not following anyone yet",
+    "removeFollower": "Remove follower",
+    "follow": "Follow",
+    "following": "Following",
+    "requested": "Requested",
+    "requestFollow": "Request Follow",
+    "messages": {
+      "loadDataFailed": "Failed to load data, please try again later",
+      "operationFailed": "Operation failed, please try again later",
+      "followerRemoved": "Successfully removed follower @{{username}}",
+      "removeFollowerFailed": "Failed to remove follower",
+      "removeFollowerFailedRetry": "Failed to remove follower, please try again later"
+    }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "unreadTitle": "Unread Messages & Follow Requests",
+    "pastTitle": "Past Messages",
+    "noUnread": "No unread messages or follow requests",
+    "noPast": "No past messages",
+    "loadFailed": "Failed to load notifications",
+    "actionSuccess": {
+      "accepted": "Accepted",
+      "rejected": "Rejected",
+      "followRequest": "follow request"
+    },
+    "actionFailed": "Operation failed, please try again later",
+    "unknownUser": "Unknown user",
+    "avatar": "Avatar"
+  },
+  "confirmFollowModal": {
+    "title": "Send {{action}}?",
+    "actions": {
+      "follow": "follow",
+      "requestFollow": "follow request"
+    },
+    "cancel": "Never mind"
+  },
+  "confirmRemoveFollowerModal": {
+    "title": "Remove follower?",
+    "description": "Remove @{{username}}'s follow"
+  },
+  "confirmNotification": {
+    "cancel": "Cancel",
+    "confirm": "Confirm"
+  },
+  "likedArchives": {
+    "title": "Liked Archives",
+    "emptyMessage": "No liked archives yet",
+    "sortOptions": {
+      "archiveDateDesc": "Created Date: New to Old",
+      "archiveDateAsc": "Created Date: Old to New",
+      "likeDateDesc": "Liked Date: New to Old",
+      "likeDateAsc": "Liked Date: Old to New"
+    },
+    "messages": {
+      "loadFailed": "Failed to fetch liked archives",
+      "loadErrorRetry": "Failed to load liked archives, please try again later"
+    },
+    "console": {
+      "loadError": "Failed to load liked archives:"
+    }
+  },
+  "likedPosts": {
+    "title": "Liked Posts",
+    "emptyMessage": "No liked posts yet",
+    "messages": {
+      "fetchFailed": "Failed to fetch liked posts",
+      "loadErrorRetry": "Failed to load liked posts list, please try again later",
+      "removedFromList": "Removed from liked list",
+      "commentInDevelopment": "Comment feature in development"
+    },
+    "console": {
+      "loadError": "Failed to load liked posts list:",
+      "likeNotification": "LikedPostsListPage received like notification:",
+      "saveNotification": "LikedPostsListPage received save notification:"
+    }
+  },
+  "savedArchives": {
+    "title": "Saved Articles",
+    "emptyMessage": "No saved forum articles yet",
+    "sortOptions": {
+      "archiveDateDesc": "Created Date: Recent to Old",
+      "archiveDateAsc": "Created Date: Old to Recent",
+      "saveDateDesc": "Saved Date: Recent to Old",
+      "saveDateAsc": "Saved Date: Old to Recent"
+    },
+    "messages": {
+      "loadFailed": "Failed to fetch saved forum articles",
+      "loadErrorRetry": "Failed to load saved forum articles, please try again later"
+    },
+    "console": {
+      "loadError": "Failed to load saved forum articles:"
+    }
+  },
+  "savedPosts": {
+    "title": "Saved Posts",
+    "emptyMessage": "No saved posts yet",
+    "messages": {
+      "fetchFailed": "Failed to fetch saved posts",
+      "loadErrorRetry": "Failed to load saved posts list, please try again later",
+      "commentInDevelopment": "Comment feature in development"
+    },
+    "console": {
+      "loadError": "Failed to load saved posts list:",
+      "likeNotification": "SavedPostsListPage received like notification:",
+      "saveNotification": "SavedPostsListPage received save notification:"
+    }
+  },
+  "savedPostsPage": {
+    "title": "Saved Posts",
+    "emptyMessage": "No saved posts yet",
+    "sortOptions": {
+      "postDateDesc": "By Post Date: Recent to Old",
+      "postDateAsc": "By Post Date: Old to Recent",
+      "saveDateDesc": "By Save Date: Recent to Old",
+      "saveDateAsc": "By Save Date: Old to Recent"
+    },
+    "messages": {
+      "loadFailed": "Failed to fetch saved posts",
+      "loadErrorRetry": "Failed to load saved posts, please try again later"
+    },
+    "console": {
+      "loadError": "Failed to load saved posts:"
+    }
+  },
+  "likedPostsPage": {
+    "title": "Liked Posts",
+    "emptyMessage": "No liked posts yet",
+    "sortOptions": {
+      "postDateDesc": "By Post Date: Recent to Old",
+      "postDateAsc": "By Post Date: Old to Recent",
+      "likeDateDesc": "By Like Date: Recent to Old",
+      "likeDateAsc": "By Like Date: Old to Recent"
+    },
+    "messages": {
+      "loadFailed": "Failed to fetch liked posts",
+      "loadErrorRetry": "Failed to load liked posts, please try again later"
+    },
+    "console": {
+      "loadError": "Failed to load liked posts:"
+    }
+  }
+}

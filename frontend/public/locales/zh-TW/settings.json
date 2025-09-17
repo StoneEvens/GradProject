@@ -1,0 +1,25 @@
+{
+  "title": "個人設定",
+  "account": {
+    "title": "帳號設定",
+    "editProfile": "編輯個人檔案",
+    "accountPrivacy": "帳號隱私",
+    "privacyPublic": "公開",
+    "privacyPrivate": "私密",
+    "privacyDescription": "設為私密時，只有追蹤者可以看到您的貼文"
+  },
+  "interaction": {
+    "title": "我的互動",
+    "likedPosts": "按讚的貼文",
+    "savedPosts": "收藏的貼文",
+    "likedArchives": "按讚的論壇文章",
+    "savedArchives": "收藏的論壇文章"
+  },
+  "language": {
+    "title": "語言設定",
+    "systemLanguage": "系統語言",
+    "changeLanguageInfo": "選擇您偏好的顯示語言，變更會立即生效。"
+  },
+  "logout": "登出",
+  "loggingOut": "登出中..."
+}

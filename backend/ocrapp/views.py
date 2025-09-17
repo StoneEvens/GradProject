@@ -9,6 +9,8 @@ from .models import HealthReport
 from pets.models import Pet
 import io
 from pdf2image import convert_from_bytes
+import os
+from pathlib import Path
 
 from google.cloud import vision
 from google.oauth2 import service_account
@@ -114,8 +116,9 @@ class HealthReportUploadView(APIView):
 
             # 解析日期
             try:
-                check_date = datetime.strptime(check_date_str, "%Y-%m-%d")
-            except ValueError:
+                from datetime import datetime
+                check_date = datetime.strptime(check_date_str, '%Y-%m-%d').date()
+            except (ValueError, TypeError):
                 return Response({'error': '日期格式錯誤，應為 YYYY-MM-DD'}, status=status.HTTP_400_BAD_REQUEST)
 
             # 解析 JSON data
@@ -223,11 +226,20 @@ class OCRUploadView(APIView):
         if not uploaded_file:
             return Response({'error': '沒有上傳檔案（image 或 file）'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # ===== 保留你原本的金鑰寫法（可改為 .env，但這裡照舊）=====
-        credentials_path = r"C:\Users\lxzhe\GradProject\backend\ocrapp\ai-project-454107-a1e8b881803e.json"
-        credentials = service_account.Credentials.from_service_account_file(credentials_path)
+        # 使用相對路徑或環境變數來設定憑證檔案
+        # 方法1: 使用相對路徑（基於當前檔案位置）
+        current_dir = Path(__file__).parent
+        credentials_path = current_dir / "ai-project-454107-a1e8b881803e.json"
+
+        # 方法2: 也可以從環境變數讀取（如果有設定的話）
+        # credentials_path = os.getenv('GOOGLE_CLOUD_CREDENTIALS', credentials_path)
+
+        if not credentials_path.exists():
+            return Response({'error': f'找不到憑證檔案，請確認檔案存在於: {credentials_path}'},
+                          status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        credentials = service_account.Credentials.from_service_account_file(str(credentials_path))
         client = vision.ImageAnnotatorClient(credentials=credentials)
-        # ========================================================
 
         content_type = (uploaded_file.content_type or "").lower()
         filename = (uploaded_file.name or "").lower()
@@ -370,6 +382,28 @@ class HealthReportDetailView(APIView):
     permission_classes = [AllowAny]
 
     @swagger_auto_schema(
+        operation_description="獲取指定健康報告詳細資料",
+        responses={200: "獲取成功", 404: "找不到報告"}
+    )
+    def get(self, request, report_id):
+        try:
+            report = HealthReport.objects.get(id=report_id)
+            data = {
+                "id": report.id,
+                "pet_id": report.pet.id,
+                "pet_name": report.pet.pet_name,
+                "check_date": report.check_date.strftime("%Y-%m-%d") if report.check_date else "",
+                "check_type": report.check_type,
+                "check_location": report.check_location or "",
+                "notes": report.notes or "",
+                "created_at": report.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+                "data": report.data or {}
+            }
+            return Response(data, status=status.HTTP_200_OK)
+        except HealthReport.DoesNotExist:
+            return Response({'error': '找不到健康報告'}, status=status.HTTP_404_NOT_FOUND)
+
+    @swagger_auto_schema(
         operation_description="更新指定健康報告",
         manual_parameters=[
             openapi.Parameter('check_date', openapi.IN_FORM, type=openapi.TYPE_STRING, required=False, description='檢查日期 (YYYY-MM-DD)'),
@@ -390,8 +424,10 @@ class HealthReportDetailView(APIView):
         check_date_str = request.data.get('check_date')
         if check_date_str:
             try:
-                report.check_date = datetime.strptime(check_date_str, "%Y-%m-%d")
-            except ValueError:
+                from datetime import datetime
+                # 直接解析 YYYY-MM-DD 格式的日期字串
+                report.check_date = datetime.strptime(check_date_str, '%Y-%m-%d').date()
+            except (ValueError, TypeError):
                 return Response({'error': '日期格式錯誤，應為 YYYY-MM-DD'}, status=status.HTTP_400_BAD_REQUEST)
 
         if 'check_type' in request.data:

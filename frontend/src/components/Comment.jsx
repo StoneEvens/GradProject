@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import styles from '../styles/Comment.module.css';
 import ContextMenu from './ContextMenu';
 
@@ -20,6 +21,7 @@ const Comment = ({
   isReplying = false,
   hasReplies = false
 }) => {
+  const { t } = useTranslation('posts');
   const navigate = useNavigate();
   const [contextMenu, setContextMenu] = useState({ visible: false, x: 0, y: 0 });
   const commentRef = useRef(null);
@@ -122,14 +124,14 @@ const Comment = ({
   const menuItems = isOwnComment
     ? [
         {
-          label: '刪除留言',
+          label: t('comment.deleteComment'),
           danger: true,
           onClick: () => onDelete && onDelete(comment.id)
         }
       ]
     : [
         {
-          label: '檢舉留言',
+          label: t('comment.reportComment'),
           onClick: () => onReport && onReport(comment.id)
         }
       ];
@@ -171,7 +173,7 @@ const Comment = ({
                   >
                     <img 
                       src={comment.isLiked ? HeartFilledIcon : HeartIcon} 
-                      alt={comment.isLiked ? '取消點讚' : '點讚'} 
+                      alt={comment.isLiked ? t('comment.unlikeAlt') : t('comment.likeAlt')} 
                       className={styles.heartIcon} 
                     />
                     <span className={styles.likeCount}>{comment.likes || 0}</span>
@@ -180,11 +182,11 @@ const Comment = ({
                     <button 
                       className={styles.replyButton} 
                       onClick={() => onReply(comment.id)}
-                      title="回覆"
+                      title={t('comment.replyTitle')}
                     >
                       <img 
                         src="/assets/icon/CommentReplyIcon.png" 
-                        alt="回覆" 
+                        alt={t('comment.replyAlt')} 
                         className={styles.replyIcon} 
                       />
                     </button>
@@ -197,7 +199,7 @@ const Comment = ({
           {/* 留言內容 - 區分已刪除和正常留言 */}
           {comment.content === "[此評論已刪除]" ? (
             <div className={styles.commentContent}>
-              <p className={styles.deletedCommentText}>{comment.content}</p>
+              <p className={styles.deletedCommentText}>{t('postComments.deletedComment')}</p>
             </div>
           ) : comment.content && comment.content.trim() !== "" ? (
             <div className={styles.commentContent}>
@@ -213,10 +215,10 @@ const Comment = ({
                   <div key={image.id || index} className={styles.imageItem}>
                     <img 
                       src={image.url || image.img_url} 
-                      alt={image.alt_text || `留言圖片 ${index + 1}`}
+                      alt={image.alt_text || t('comment.commentImageAlt', { index: index + 1 })}
                       onError={(e) => {
                         e.target.style.display = 'none';
-                        e.target.parentNode.innerHTML = '<div class="' + styles.imageError + '">圖片載入失敗</div>';
+                        e.target.parentNode.innerHTML = '<div class="' + styles.imageError + '">' + t('comment.imageLoadError') + '</div>';
                       }}
                       onClick={() => handleImageClick(image)}
                     />
@@ -233,7 +235,7 @@ const Comment = ({
       {isNormalType && hasReplies && (
         <div className={styles.commentActions}>
           <button className={styles.actionButton} onClick={() => onShowReplies(comment.id)}>
-            {showingReplies ? '隱藏回覆' : '展開回覆'}
+            {showingReplies ? t('comment.hideReplies') : t('comment.showReplies')}
           </button>
         </div>
       )}

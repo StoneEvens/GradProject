@@ -1,0 +1,493 @@
+{
+  "common": {
+    "loading": "載入中...",
+    "cancel": "取消",
+    "confirm": "確認",
+    "save": "儲存",
+    "back": "返回",
+    "create": "建立",
+    "creating": "建立中...",
+    "add": "新增",
+    "remove": "移除",
+    "edit": "編輯",
+    "delete": "刪除",
+    "preview": "預覽",
+    "selectDate": "選擇日期",
+    "draftSaved": "草稿已保存",
+    "next": "下一步"
+  },
+  "createPost": {
+    "title": "發布貼文",
+    "sections": {
+      "images": "圖片",
+      "description": "描述",
+      "hashtags": "標籤"
+    },
+    "placeholders": {
+      "description": "輸入描述",
+      "hashtag": "輸入標籤"
+    },
+    "imageUpload": {
+      "noImageSelected": "還沒有新增任何圖片",
+      "addImage": "新增圖片",
+      "imageCounter": "選擇的圖片：{{count}}/10",
+      "noImageAlt": "未選擇圖片"
+    },
+    "hashtags": {
+      "counter": "已新增標籤：{{count}}/10"
+    },
+    "messages": {
+      "maxImagesReached": "最多只能選擇10張圖片",
+      "imageTooLarge": "圖片大小不能超過 5MB",
+      "invalidFileType": "請選擇圖片檔案",
+      "loadImagesFailed": "無法載入已保存的圖片",
+      "loadImagesError": "載入圖片時發生錯誤",
+      "loadDraftError": "載入草稿時發生錯誤",
+      "draftTooLarge": "草稿過大，僅保存文字內容",
+      "storageQuotaExceeded": "儲存空間不足，僅保存文字內容",
+      "enterHashtagContent": "請輸入標籤內容",
+      "hashtagExists": "此標籤已存在",
+      "maxHashtagsReached": "最多只能新增10個標籤",
+      "requireContent": "請至少選擇一張圖片或輸入描述"
+    }
+  },
+  "createAbnormalPost": {
+    "title": "建立異常紀錄",
+    "sections": {
+      "selectPet": "選擇寵物",
+      "date": "日期",
+      "symptoms": "寵物症狀",
+      "bodyStats": "身體數值紀錄",
+      "images": "圖片紀錄",
+      "description": "補充描述"
+    },
+    "petSelection": {
+      "selectPet": "選擇寵物:"
+    },
+    "dateSelection": {
+      "date": "日期:",
+      "emergency": "為就醫紀錄"
+    },
+    "symptoms": {
+      "title": "寵物症狀:",
+      "selectSymptom": "選擇症狀",
+      "counter": "已選擇症狀：{{count}}/10"
+    },
+    "bodyStats": {
+      "title": "身體數值紀錄:",
+      "weight": "體重",
+      "waterIntake": "喝水量",
+      "temperature": "體溫",
+      "units": {
+        "kg": "公斤",
+        "liters": "公升",
+        "celsius": "度"
+      }
+    },
+    "imageUpload": {
+      "title": "圖片紀錄:",
+      "noImageSelected": "還沒有新增任何圖片",
+      "addImage": "新增圖片",
+      "imageCounter": "選擇的圖片：{{count}}/10"
+    },
+    "description": {
+      "title": "補充描述:",
+      "placeholder": "文字描述"
+    },
+    "messages": {
+      "selectPet": "請選擇寵物",
+      "selectDate": "請選擇日期",
+      "selectSymptom": "請選擇症狀",
+      "symptomExists": "此症狀已存在",
+      "maxSymptomsReached": "最多只能新增10個症狀",
+      "selectAtLeastOneSymptom": "請至少選擇一個症狀",
+      "petDataLoadFailed": "獲取寵物資料失敗，請稍後再試",
+      "existingRecordFound": "{{petName}} 在 {{date}} 已經有異常記錄，每天每隻寵物只能建立一則異常記錄",
+      "existingRecordFoundSelectOther": "{{petName}} 在 {{date}} 已經有異常記錄，請選擇其他日期或寵物",
+      "selectPetFirst": "請先選擇寵物",
+      "maxImagesReached": "最多只能選擇10張圖片",
+      "imageTooLarge": "圖片大小不能超過 5MB",
+      "invalidFileType": "請選擇圖片檔案",
+      "recordCreated": "異常記錄已建立",
+      "createFailed": "創建異常記錄失敗，請稍後再試",
+      "invalidData": "資料格式有誤，請檢查輸入內容",
+      "loginRequired": "請先登入",
+      "petNotFound": "找不到指定的寵物",
+      "serverError": "伺服器錯誤，請稍後再試",
+      "draftTooLarge": "草稿過大，僅保存前3張圖片",
+      "draftTextOnly": "草稿過大，僅保存文字內容",
+      "storageQuotaExceeded": "儲存空間不足，僅保存文字內容"
+    },
+    "defaultSymptoms": [
+      "打噴嚏", "掉毛", "嘔吐", "腹瀉", "食慾不振", "精神萎靡",
+      "發燒", "咳嗽", "皮膚搔癢", "呼吸急促", "流鼻水", "眼睛紅腫"
+    ]
+  },
+  "editPost": {
+    "title": "編輯貼文",
+    "messages": {
+      "loadPostFailed": "獲取貼文失敗",
+      "loadPostError": "載入貼文失敗: {{error}}",
+      "loadUserDataFailed": "獲取用戶資料失敗",
+      "selectLocation": "請選擇位置",
+      "minOneImageRequired": "貼文至少需要保留一張圖片",
+      "updating": "正在更新貼文...",
+      "deleteImageError": "刪除圖片失敗: {{error}}",
+      "reorderImageError": "更新圖片順序失敗: {{error}}",
+      "deleteAnnotationError": "刪除標註失敗: {{error}}",
+      "deleteOldAnnotationError": "刪除舊標註失敗: {{error}}",
+      "createNewAnnotationError": "創建新標註失敗: {{error}}",
+      "updateAnnotationError": "更新標註失敗: {{error}}",
+      "createAnnotationError": "創建標註失敗: {{error}}",
+      "updateSuccess": "貼文更新成功！",
+      "updateFailed": "更新失敗",
+      "networkError": "網路連線錯誤，請檢查網路連線後重試",
+      "timeoutError": "請求逾時，請稍後重試",
+      "permissionError": "您沒有權限編輯此貼文",
+      "postNotFound": "找不到指定的貼文",
+      "updateError": "更新失敗: {{error}}"
+    },
+    "ui": {
+      "selectLocation": "選擇位置",
+      "clickToEditAnnotations": "點擊圖片編輯標註",
+      "deleteImage": "刪除圖片",
+      "addImage": "新增圖片",
+      "writePostContent": "撰寫貼文內容...",
+      "cancel": "取消",
+      "updatePost": "更新貼文",
+      "updating": "更新中...",
+      "deleteConfirmMessage": "確定要刪除此圖片嗎？圖片將在點擊「更新貼文」時刪除，圖片中的標註也會一併刪除。",
+      "leaveConfirmMessage": "確定要離開編輯頁面嗎？未保存的修改將會遺失。"
+    },
+    "locationOptions": [
+      "台北市", "新北市", "桃園市", "台中市", "台南市", "高雄市",
+      "基隆市", "新竹市", "嘉義市", "新竹縣", "苗栗縣", "彰化縣",
+      "南投縣", "雲林縣", "嘉義縣", "屏東縣", "宜蘭縣", "花蓮縣",
+      "台東縣", "澎湖縣", "金門縣", "連江縣"
+    ]
+  },
+  "postPreview": {
+    "title": "貼文預覽",
+    "messages": {
+      "processingImages": "正在處理圖片和標註...",
+      "imageProcessError": "圖片 {{index}} 處理失敗",
+      "uploading": "正在上傳到伺服器...",
+      "publishSuccess": "貼文發布成功！",
+      "publishFailed": "發布失敗",
+      "networkError": "網路連線錯誤，請檢查網路連線後重試",
+      "timeoutError": "上傳逾時，請稍後重試",
+      "fileSizeError": "圖片檔案過大，請選擇較小的圖片",
+      "publishError": "發布失敗: {{error}}"
+    },
+    "ui": {
+      "annotationsCount": "{{count}} 個標註",
+      "like": "按讚",
+      "comment": "留言",
+      "save": "收藏",
+      "justNow": "一秒前",
+      "publish": "發布",
+      "publishing": "發布中..."
+    },
+    "locationOptions": [
+      "台北市", "新北市", "桃園市", "台中市", "台南市", "高雄市",
+      "基隆市", "新竹市", "嘉義市", "新竹縣", "苗栗縣", "彰化縣",
+      "南投縣", "雲林縣", "嘉義縣", "屏東縣", "宜蘭縣", "花蓮縣",
+      "台東縣", "澎湖縣", "金門縣", "連江縣"
+    ]
+  },
+  "abnormalPostDetail": {
+    "messages": {
+      "publicPostNotFound": "找不到指定的公開異常記錄",
+      "postNotFound": "找不到指定的異常記錄",
+      "deleteSuccess": "異常記錄已成功刪除",
+      "deleteFailed": "刪除異常記錄失敗，請稍後再試",
+      "noPermission": "您沒有權限刪除此記錄"
+    },
+    "ui": {
+      "dateTitle": "{{year}}年{{month}}月{{day}}日異常紀錄",
+      "moreOptions": "更多選項",
+      "editRecord": "編輯紀錄",
+      "deleteRecord": "刪除紀錄",
+      "deleteConfirmMessage": "確定要刪除這筆異常記錄嗎？此操作無法復原。",
+      "noDescription": "無補充描述",
+      "imageAlt": "異常記錄圖片 {{index}}"
+    }
+  },
+  "editAbnormalPost": {
+    "title": "編輯異常紀錄",
+    "messages": {
+      "loadPostFailed": "載入異常記錄失敗",
+      "updateSuccess": "異常記錄已更新",
+      "confirmAbandonEdit": "確定放棄編輯?",
+      "confirmSwitchPet": "確定要切換記錄對象嗎？",
+      "updateFailed": "更新異常記錄失敗，請稍後再試",
+      "invalidData": "資料格式有誤，請檢查輸入內容",
+      "pleaseLogin": "請先登入",
+      "postNotFound": "找不到指定的異常記錄",
+      "serverError": "伺服器錯誤，請稍後再試"
+    }
+  },
+  "petRelatedPosts": {
+    "title": "的相關貼文",
+    "defaultPetName": "寵物",
+    "sortOptions": {
+      "dateDescending": "按發布日期：近到遠",
+      "dateAscending": "按發布日期：遠到近"
+    },
+    "messages": {
+      "loadPostsFailed": "獲取相關貼文失敗",
+      "loadPostsError": "載入相關貼文失敗，請稍後再試",
+      "noRelatedPosts": "{{petName}}還沒有相關貼文"
+    }
+  },
+  "abnormalPostFilter": {
+    "dateFormat": "{{year}} 年 {{month}} 月 {{day}} 日",
+    "filterByLabel": "依",
+    "filterLabel": "篩選",
+    "filterOptions": {
+      "symptom": "症狀",
+      "date": "日期",
+      "both": "症狀 + 日期"
+    },
+    "selectOption": "選擇",
+    "addButton": "加入",
+    "removeSymptomButton": "X",
+    "resetButton": "重置",
+    "filterButton": "篩選",
+    "defaultStartDate": "2025 年 1 月 1 日",
+    "defaultEndDate": "2025 年 1 月 22 日"
+  },
+  "abnormalPostPreview": {
+    "dateFormat": "{{month}}月{{day}}日",
+    "noSymptoms": "無症狀記錄",
+    "emergencyRecordAlt": "緊急記錄",
+    "abnormalRecordAlt": "異常記錄",
+    "emergencyBadge": "緊急",
+    "symptomsLabel": "症狀"
+  },
+  "petAbnormalPosts": {
+    "title": "的異常紀錄",
+    "resultLabel": "篩選結果",
+    "sortOptions": {
+      "newest": "由新到舊",
+      "oldest": "由舊到新"
+    },
+    "emptyStateAlt": "空狀態",
+    "noRecords": "尚無異常紀錄",
+    "noFilteredRecords": "沒有找到符合條件的異常紀錄",
+    "abnormalRecordAlt": "異常紀錄",
+    "emergencyLabel": "就醫紀錄",
+    "symptomsLabel": "症狀"
+  },
+  "datePicker": {
+    "title": "選擇日期",
+    "yearLabel": "年份",
+    "monthLabel": "月份",
+    "dayLabel": "日期",
+    "yearOption": "{{year}}年",
+    "monthOption": "{{month}}月",
+    "dayOption": "{{day}}日",
+    "selectedDateLabel": "選中日期",
+    "dateFormat": "{{year}}/{{month}}/{{day}} ({{weekDay}})",
+    "weekDays": ["日", "一", "二", "三", "四", "五", "六"]
+  },
+  "post": {
+    "justNow": "剛剛",
+    "minutesAgo": "{{minutes}}分鐘前",
+    "hoursAgo": "{{hours}}小時前",
+    "daysAgo": "{{days}}天前",
+    "deleteFailedAlert": "刪除貼文失敗，請稍後再試",
+    "userAvatarAlt": "用戶頭像",
+    "unknownUser": "未知用戶",
+    "moreOptionsAlt": "更多選項",
+    "editPost": "編輯貼文",
+    "deletePost": "刪除貼文",
+    "copyLink": "複製連結",
+    "reportPost": "檢舉貼文",
+    "postImageAlt": "貼文圖片 {{index}}",
+    "annotationsCount": "{{count}} 個標註",
+    "annotationAlt": "標註",
+    "likeAlt": "按讚",
+    "commentAlt": "留言",
+    "saveAlt": "收藏",
+    "showMore": "查看更多",
+    "deleteConfirmMessage": "確定要刪除這篇貼文嗎？"
+  },
+  "postComments": {
+    "title": "留言區",
+    "noComments": "目前沒有任何留言",
+    "maxImagesAlert": "最多只能選擇 3 張圖片",
+    "imageSlotLimitAlert": "只能再選擇 {{availableSlots}} 張圖片，已自動選取前 {{availableSlots}} 張",
+    "deletedComment": "[此評論已刪除]",
+    "deleteErrorAlert": "刪除留言時發生錯誤，請稍後再試",
+    "reportNotImplemented": "檢舉功能尚未實作",
+    "replyingTo": "正在回覆 {{username}}",
+    "user": "用戶",
+    "previewAlt": "預覽",
+    "removeImageTitle": "移除圖片",
+    "replyPlaceholder": "撰寫回覆...",
+    "commentPlaceholder": "撰寫留言...",
+    "imageUploadLimitTitle": "已達圖片上限 (3張)",
+    "addImageTitle": "新增圖片 ({{count}}/3)",
+    "addImageAlt": "新增圖片",
+    "sendReplyTitle": "送出回覆",
+    "sendCommentTitle": "送出留言",
+    "sendReplyAlt": "送出回覆",
+    "sendCommentAlt": "送出留言",
+    "deleteConfirmMessage": "確定要刪除這則留言嗎？"
+  },
+  "postPreviewList": {
+    "loading": "載入貼文預覽中...",
+    "loadError": "載入失敗: {{error}}",
+    "retry": "重試",
+    "emptyStateAlt": "空狀態",
+    "defaultEmptyMessage": "尚未發布任何貼文",
+    "postImageAlt": "貼文-{{index}}",
+    "noContent": "無內容",
+    "loadingMore": "載入更多貼文中...",
+    "allLoaded": "已載入所有貼文"
+  },
+  "comment": {
+    "imageLoadError": "圖片載入失敗",
+    "likeAlt": "點讚",
+    "unlikeAlt": "取消點讚",
+    "replyTitle": "回覆",
+    "replyAlt": "回覆",
+    "commentImageAlt": "留言圖片 {{index}}",
+    "hideReplies": "隱藏回覆",
+    "showReplies": "展開回覆",
+    "deleteComment": "刪除留言",
+    "reportComment": "檢舉留言"
+  },
+  "socialPage": {
+    "tabs": {
+      "daily": "日常貼文",
+      "forum": "寵物論壇"
+    },
+    "messages": {
+      "fetchUserFailed": "獲取當前用戶資訊失敗",
+      "loadPostsFailed": "載入貼文失敗",
+      "loadArchivesFailed": "載入疾病檔案失敗",
+      "postUpdatedDetected": "檢測到貼文更新，重新載入貼文列表",
+      "noPosts": "目前沒有貼文，快來發布第一篇吧！",
+      "noArchives": "目前沒有疾病檔案，快來分享第一篇吧！"
+    }
+  },
+  "searchPostsPage": {
+    "emptyMessage": "搜尋結果為空"
+  },
+  "feedSearchResultPage": {
+    "title": "搜尋結果",
+    "loading": "搜尋中...",
+    "noImage": "無圖片",
+    "marked": "已標記",
+    "mark": "標記",
+    "verifying": "審核中",
+    "noResultAlt": "無結果",
+    "searchInfo": "搜尋「{{searchQuery}}」",
+    "searchInfoWithCount": "搜尋「{{searchQuery}}」找到 {{totalCount}} 筆結果",
+    "noResultsFound": "找不到與「{{searchQuery}}」相關的飼料",
+    "messages": {
+      "enterSearchKeyword": "請輸入搜尋關鍵字",
+      "searchFailed": "搜尋失敗",
+      "feedMarked": "飼料已加入精選",
+      "toggleMarkFailed": "切換標記失敗",
+      "reviewFailed": "審核失敗",
+      "reportErrorFailed": "錯誤回報失敗"
+    }
+  },
+  "imageEditor": {
+    "title": "編輯圖片",
+    "imageAlt": "編輯圖片",
+    "annotationsCount": "{{count}} 個標註",
+    "annotationsAlt": "標註",
+    "instructions": "點擊圖片任意位置新增標註，點擊現有標註進行編輯",
+    "buttons": {
+      "annotations": "標註",
+      "stickers": "貼圖",
+      "cancel": "取消",
+      "done": "完成",
+      "delete": "刪除",
+      "update": "更新",
+      "add": "新增"
+    },
+    "form": {
+      "annotationType": "標註類型",
+      "otherUser": "其他使用者",
+      "pet": "寵物",
+      "annotationContent": "標註內容",
+      "enterUsername": "輸入使用者名稱",
+      "loading": "載入中...",
+      "selectPet": "選擇寵物"
+    },
+    "petTypes": {
+      "dog": "狗",
+      "cat": "貓"
+    },
+    "messages": {
+      "localStorageCleanupError": "ImageEditor清理localStorage時出錯",
+      "loadAnnotationsFailed": "載入標註資料失敗",
+      "loadedPetsData": "載入的寵物資料",
+      "loadPetsFailed": "載入寵物資料失敗",
+      "saveAnnotationsFailed": "保存標註資料失敗",
+      "petNotFoundAdd": "找不到寵物 (新增)",
+      "petNotFoundUpdate": "找不到寵物 (更新)"
+    }
+  },
+  "socialSearchResults": {
+    "loading": "搜尋中...",
+    "error": "錯誤: {{error}}",
+    "noResultsAlt": "找不到結果",
+    "noUsersFound": "找不到符合的用戶",
+    "noPostsFound": "找不到符合的貼文",
+    "noTagsFound": "找不到符合的標籤",
+    "noTagPostsFound": "找不到標籤 \"{{searchQuery}}\" 的相關貼文",
+    "noForumsFound": "找不到符合的論壇文章",
+    "tabs": {
+      "accounts": "帳號",
+      "posts": "貼文",
+      "tags": "標籤",
+      "forums": "論壇"
+    },
+    "buttons": {
+      "follow": "追蹤",
+      "requestFollow": "要求追蹤",
+      "following": "追蹤中",
+      "requested": "已要求"
+    },
+    "messages": {
+      "fetchCurrentUserFailed": "獲取當前用戶資訊失敗",
+      "searchFailed": "搜尋失敗",
+      "searchError": "搜尋錯誤",
+      "searchErrorOccurred": "搜尋時發生錯誤",
+      "loadFollowStatesFailed": "載入追蹤狀態失敗",
+      "getUserFollowStatusFailed": "獲取用戶 {{userId}} 追蹤狀態失敗",
+      "followOperationFailed": "追蹤操作失敗"
+    }
+  },
+  "postList": {
+    "loading": "載入貼文中...",
+    "loadError": "載入失敗: {{error}}",
+    "retry": "重試",
+    "emptyStateAlt": "空狀態",
+    "userNoPostsYet": "該用戶尚未發布任何貼文",
+    "defaultEmptyMessage": "目前沒有貼文",
+    "loadingMore": "載入更多...",
+    "noMorePosts": "- 沒有更多貼文了 -",
+    "messages": {
+      "fetchUserDataFailed": "獲取用戶資料失敗",
+      "apiDataNotArray": "API回傳的貼文資料不是陣列格式",
+      "loadUserPostsFailed": "載入用戶貼文失敗",
+      "loadUserPostsError": "載入用戶貼文失敗",
+      "postUpdateDetected": "PostList 檢測到貼文更新，重新載入用戶貼文",
+      "checkScrollToPost": "PostList - 檢查是否需要滾動到指定貼文",
+      "executeScrollToPost": "PostList - 執行滾動到貼文",
+      "scrollAndHighlightComplete": "PostList - 滾動和高亮完成",
+      "likeNotificationReceived": "PostList 收到按讚通知",
+      "deleteNotificationReceived": "PostList 收到刪除通知",
+      "postDeletedSuccessfully": "貼文已成功刪除",
+      "saveNotificationReceived": "PostList 收到收藏通知",
+      "filterOutNoImagePost": "🚫 PostList 過濾掉沒有圖片的項目 (ID: {{postId}})"
+    }
+  }
+}

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import TopNavbar from '../components/TopNavbar';
 import BottomNavbar from '../components/BottomNavigationbar';
 import PostPreviewList from '../components/PostPreviewList';
@@ -9,20 +10,20 @@ import { getUserPets } from '../services/petService';
 import styles from '../styles/PetRelatedPostsPage.module.css';
 
 const PetRelatedPostsPage = () => {
+  const { t } = useTranslation('posts');
   const navigate = useNavigate();
   const { petId } = useParams();
   const [relatedPosts, setRelatedPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [notification, setNotification] = useState('');
-  const [sortOption, setSortOption] = useState('post_date_desc'); // 預設按發布日期排序：近到遠
-  const [petName, setPetName] = useState('寵物'); // 預設寵物名稱
+  const [sortOption, setSortOption] = useState('post_date_desc');
+  const [petName, setPetName] = useState(t('petRelatedPosts.defaultPetName'));
   const [petAvatar, setPetAvatar] = useState('/assets/icon/DefaultAvatar.jpg'); // 預設寵物頭像
 
-  // 排序選項 - 只有按發布日期排序
   const sortOptions = [
-    { value: 'post_date_desc', label: '按發布日期：近到遠' },
-    { value: 'post_date_asc', label: '按發布日期：遠到近' }
+    { value: 'post_date_desc', label: t('petRelatedPosts.sortOptions.dateDescending') },
+    { value: 'post_date_asc', label: t('petRelatedPosts.sortOptions.dateAscending') }
   ];
 
   useEffect(() => {
@@ -44,24 +45,21 @@ const PetRelatedPostsPage = () => {
         }
       } catch (petErr) {
         console.warn('載入寵物資料失敗:', petErr);
-        // 繼續執行，使用預設值
       }
       
-      // 調用真實的 API 獲取相關貼文
       const response = await getPetRelatedPosts(petId, { sort: sortOption });
       
       if (response.success) {
-        // 處理 API 回應數據
         const posts = response.data.posts || response.data || [];
         setRelatedPosts(posts);
       } else {
-        throw new Error(response.error || '獲取相關貼文失敗');
+        throw new Error(response.error || t('petRelatedPosts.messages.loadPostsFailed'));
       }
       
     } catch (err) {
       console.error('載入相關貼文失敗:', err);
-      setError(err.message || '載入相關貼文失敗，請稍後再試');
-      setRelatedPosts([]); // 清空數據
+      setError(err.message || t('petRelatedPosts.messages.loadPostsError'));
+      setRelatedPosts([]);
     } finally {
       setLoading(false);
     }
@@ -95,7 +93,7 @@ const PetRelatedPostsPage = () => {
                 e.target.src = '/assets/icon/DefaultAvatar.jpg';
               }}
             />
-            <h1 className={styles.title}>的相關貼文</h1>
+            <h1 className={styles.title}>{t('petRelatedPosts.title')}</h1>
           </div>
           
           {/* 排序下拉選單 */}
@@ -121,7 +119,7 @@ const PetRelatedPostsPage = () => {
             posts={relatedPosts}
             loading={loading}
             error={error}
-            emptyMessage={`${petName}還沒有相關貼文`}
+            emptyMessage={t('petRelatedPosts.messages.noRelatedPosts', { petName })}
             isSearchResult={false}
             isPetRelatedPosts={true}
             petId={petId}

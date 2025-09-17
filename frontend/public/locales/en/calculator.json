@@ -1,0 +1,140 @@
+{
+  "title": "Nutrition Calculator",
+  "functions": {
+    "reset": "Reset",
+    "quickCalculate": "Quick Calculate",
+    "history": "History"
+  },
+  "sections": {
+    "pet": "Select Pet",
+    "condition": "Pet Condition",
+    "feed": "Select Feed",
+    "calculate": "Start",
+    "calculateResult": "Result"
+  },
+  "petSection": {
+    "selectPet": "Select Pet",
+    "addTempPet": "Add Temporary Pet",
+    "name": "Name:",
+    "speciesLabel": "Species:",
+    "weight": "Weight:",
+    "height": "Height:",
+    "stage": "Stage:",
+    "weightUnit": "kg",
+    "heightUnit": "cm",
+    "createTempPet": "Create Temporary Pet",
+    "cancelSelection": "Cancel Selection",
+    "placeholders": {
+      "petName": "Enter pet name",
+      "weight": "Enter weight",
+      "height": "Enter height"
+    },
+    "species": {
+      "cat": "Cat",
+      "dog": "Dog"
+    },
+    "stages": {
+      "kitten": "Kitten",
+      "puppy": "Puppy",
+      "adult": "Adult",
+      "pregnant": "Pregnant",
+      "lactating": "Lactating"
+    }
+  },
+  "conditionSection": {
+    "other": "Other:",
+    "otherPlaceholder": "Please enter",
+    "conditions": {
+      "chronicKidneyDisease": "Chronic Kidney Disease",
+      "liverDisease": "Liver Disease",
+      "arthritisObesity": "Arthritis",
+      "heartDisease": "Heart Disease",
+      "diabetes": "Diabetes",
+      "urinaryStones": "Urinary Stones",
+      "pancreatitis": "Pancreatitis",
+      "foodAllergyGISensitivity": "GI Sensitivity",
+      "skinProblems": "Skin Problems"
+    }
+  },
+  "feedSection": {
+    "selectFeed": "Select Feed",
+    "addFeed": "Add Feed",
+    "noFeedSelected": "Please select or add feed",
+    "nutritionTitle": "Nutrition (per 100g)",
+    "nutrients": {
+      "protein": "Protein",
+      "fat": "Fat",
+      "carbohydrate": "Carbohydrate",
+      "calcium": "Calcium",
+      "phosphorus": "Phosphorus",
+      "magnesium": "Magnesium",
+      "sodium": "Sodium"
+    },
+    "units": {
+      "g": "g",
+      "mg": "mg"
+    }
+  },
+  "calculationSection": {
+    "calculating": "Calculating, please wait...",
+    "noResult": "Click the 'Start Calculation' button above to begin nutrition calculation",
+    "dailyCalories": "Daily Calorie Requirement:",
+    "dailyFeedAmount": "Daily Feed Recommendation:",
+    "kcalUnit": "kcal",
+    "gramUnit": "grams"
+  },
+  "messages": {
+    "loading": "Loading...",
+    "noLastUsedData": "No previous data available",
+    "petNotFound": "Previously used pet no longer exists",
+    "dataLoaded": "Previous data loaded successfully",
+    "loadFailed": "Failed to load previous data",
+    "calculatorReset": "Calculator has been reset",
+    "selectPetFirst": "Please select a pet first",
+    "selectFeedFirst": "Please select a feed first",
+    "enterPetName": "Please enter pet name",
+    "enterWeight": "Please enter weight",
+    "enterHeight": "Please enter height",
+    "tempPetCreated": "Temporary pet created and locked",
+    "tempPetCanceled": "Temporary pet selection canceled",
+    "calculateFailed": "Calculation failed, please try again later",
+    "feedCreated": "Feed created successfully",
+    "feedCreateFailed": "Failed to create feed, please try again later",
+    "quickCalculateInDevelopment": "Quick calculation feature is under development",
+    "loadingPetsFailed": "Failed to load pets:",
+    "loadingLastUsedDataFailed": "Failed to load last used data:",
+    "createFeedFailed": "Failed to create feed:",
+    "selectPetAndFeed": "Please select pet and feed first",
+    "enterPetWeight": "Please enter pet weight"
+  },
+  "historyModal": {
+    "title": "History Records",
+    "backToList": "❮ Back to List",
+    "loading": "Loading...",
+    "noRecords": "No calculation records yet",
+    "emptyStateAlt": "Empty State",
+    "clearAll": "Clear All",
+    "close": "Close",
+    "confirmClearMessage": "Are you sure you want to clear all history records? This operation cannot be undone",
+    "allRecordsCleared": "All records cleared",
+    "clearFailed": "Clear failed",
+    "loadRecordsFailed": "Failed to load history records",
+    "basicInfo": "Basic Information",
+    "calculationTime": "Calculation Time:",
+    "petName": "Pet Name:",
+    "feedName": "Feed Name:",
+    "feedBrand": "Feed Brand:",
+    "calculationResult": "Calculation Result",
+    "dailyRequirement": "Daily Requirement",
+    "dailyCaloriesNeed": "Daily Calorie Requirement:",
+    "dailyFeedRecommendation": "Daily Feed Recommendation:",
+    "actualNutritionIntake": "Actual Nutrition Intake",
+    "nutritionistAdvice": "Nutritionist Advice"
+  },
+  "historyPreview": {
+    "historyRecord": "History Record",
+    "pet": "Pet:",
+    "feed": "Feed:",
+    "monthDay": "{{month}}/{{day}}"
+  }
+}

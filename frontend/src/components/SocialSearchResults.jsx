@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import styles from '../styles/SocialSearchResults.module.css';
 import ConfirmFollowModal from './ConfirmFollowModal';
@@ -8,6 +9,7 @@ import { searchUsers, getUserFollowStatus, followUser, getUserFollowStatusBatch 
 import { getUserProfile } from '../services/userService';
 
 const SocialSearchResults = ({ searchQuery, onUserClick }) => {
+  const { t, i18n } = useTranslation('posts');
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('accounts');
   const [users, setUsers] = useState([]);
@@ -28,7 +30,7 @@ const SocialSearchResults = ({ searchQuery, onUserClick }) => {
         const user = await getUserProfile();
         setCurrentUser(user);
       } catch (error) {
-        console.error('獲取當前用戶資訊失敗:', error);
+        console.error(t('socialSearchResults.messages.fetchCurrentUserFailed'), error);
       }
     };
     fetchCurrentUser();
@@ -77,15 +79,15 @@ const SocialSearchResults = ({ searchQuery, onUserClick }) => {
           }
         }
       } else {
-        setError(result.error || '搜尋失敗');
+        setError(result.error || t('socialSearchResults.messages.searchFailed'));
         setUsers([]);
         setPosts([]);
         setHashtagPosts([]);
         setForums([]);
       }
     } catch (error) {
-      console.error('搜尋錯誤:', error);
-      setError('搜尋時發生錯誤');
+      console.error(t('socialSearchResults.messages.searchError'), error);
+      setError(t('socialSearchResults.messages.searchErrorOccurred'));
       setUsers([]);
       setPosts([]);
       setHashtagPosts([]);
@@ -108,7 +110,7 @@ const SocialSearchResults = ({ searchQuery, onUserClick }) => {
       
       setFollowStates(followStatus);
     } catch (error) {
-      console.error('載入追蹤狀態失敗:', error);
+      console.error(t('socialSearchResults.messages.loadFollowStatesFailed'), error);
       // 如果批量獲取失敗，fallback到逐個獲取
       const states = {};
       for (const user of users) {
@@ -119,7 +121,7 @@ const SocialSearchResults = ({ searchQuery, onUserClick }) => {
             is_requested: statusInfo.is_requested || false
           };
         } catch (singleError) {
-          console.error(`獲取用戶 ${user.id} 追蹤狀態失敗:`, singleError);
+          console.error(t('socialSearchResults.messages.getUserFollowStatusFailed', { userId: user.id }), singleError);
           states[user.id] = {
             is_following: false,
             is_requested: false
@@ -133,10 +135,10 @@ const SocialSearchResults = ({ searchQuery, onUserClick }) => {
   };
 
   const tabs = [
-    { id: 'accounts', label: '帳號' },
-    { id: 'posts', label: '貼文' },
-    { id: 'tags', label: '標籤' },
-    { id: 'forums', label: '論壇' }
+    { id: 'accounts', label: t('socialSearchResults.tabs.accounts') },
+    { id: 'posts', label: t('socialSearchResults.tabs.posts') },
+    { id: 'tags', label: t('socialSearchResults.tabs.tags') },
+    { id: 'forums', label: t('socialSearchResults.tabs.forums') }
   ];
 
   // 處理追蹤按鈕點擊
@@ -189,25 +191,25 @@ const SocialSearchResults = ({ searchQuery, onUserClick }) => {
         }));
       }
     } catch (error) {
-      console.error('追蹤操作失敗:', error);
+      console.error(t('socialSearchResults.messages.followOperationFailed'), error);
     }
   };
 
   // 根據用戶隱私設定和追蹤狀態獲取按鈕文字
   const getFollowButtonText = (user, userFollowState) => {
     if (!userFollowState) {
-      return user.account_privacy === 'private' ? '要求追蹤' : '追蹤';
+      return user.account_privacy === 'private' ? t('socialSearchResults.buttons.requestFollow') : t('socialSearchResults.buttons.follow');
     }
     
     if (userFollowState.is_following) {
-      return user.account_privacy === 'private' ? '追蹤中' : '追蹤中';
+      return t('socialSearchResults.buttons.following');
     }
     
     if (userFollowState.is_requested) {
-      return '已要求';
+      return t('socialSearchResults.buttons.requested');
     }
     
-    return user.account_privacy === 'private' ? '要求追蹤' : '追蹤';
+    return user.account_privacy === 'private' ? t('socialSearchResults.buttons.requestFollow') : t('socialSearchResults.buttons.follow');
   };
 
   // 根據追蹤狀態獲取按鈕樣式
@@ -256,11 +258,11 @@ const SocialSearchResults = ({ searchQuery, onUserClick }) => {
   return (
     <div className={styles.container}>
       {/* 標籤切換 */}
-      <div className={styles.tabContainer}>
+      <div className={`${styles.tabContainer} ${['en', 'ja', 'es'].includes(i18n.language) ? styles.tabContainerEn : ''}`}>
         {tabs.map(tab => (
           <button
             key={tab.id}
-            className={`${styles.tab} ${activeTab === tab.id ? styles.activeTab : ''}`}
+            className={`${styles.tab} ${activeTab === tab.id ? styles.activeTab : ''} ${['en', 'ja', 'es'].includes(i18n.language) ? styles.tabEn : ''}`}
             onClick={() => setActiveTab(tab.id)}
           >
             {tab.label}
@@ -272,13 +274,13 @@ const SocialSearchResults = ({ searchQuery, onUserClick }) => {
       <div className={styles.resultsContainer}>
         {isLoading && (
           <div className={styles.loading}>
-            <p>搜尋中...</p>
+            <p>{t('socialSearchResults.loading')}</p>
           </div>
         )}
 
         {error && (
           <div className={styles.error}>
-            <p>錯誤: {error}</p>
+            <p>{t('socialSearchResults.error', { error })}</p>
           </div>
         )}
 
@@ -327,10 +329,10 @@ const SocialSearchResults = ({ searchQuery, onUserClick }) => {
               <div className={styles.noResults}>
                 <img 
                   src="/assets/icon/SearchNoResult.png" 
-                  alt="找不到結果" 
+                  alt={t('socialSearchResults.noResultsAlt')} 
                   className={styles.noResultsIcon}
                 />
-                <p>找不到符合的用戶</p>
+                <p>{t('socialSearchResults.noUsersFound')}</p>
               </div>
             )}
           </div>
@@ -341,7 +343,7 @@ const SocialSearchResults = ({ searchQuery, onUserClick }) => {
             posts={posts}
             loading={isLoading}
             error={error}
-            emptyMessage="找不到符合的貼文"
+            emptyMessage={t('socialSearchResults.noPostsFound')}
             isSearchResult={true}
             style={{ padding: '16px' }}
           />
@@ -352,7 +354,7 @@ const SocialSearchResults = ({ searchQuery, onUserClick }) => {
             posts={hashtagPosts}
             loading={isLoading}
             error={error}
-            emptyMessage={searchQuery?.startsWith('#') ? `找不到標籤 "${searchQuery}" 的相關貼文` : '找不到符合的標籤'}
+            emptyMessage={searchQuery?.startsWith('#') ? t('socialSearchResults.noTagPostsFound', { searchQuery }) : t('socialSearchResults.noTagsFound')}
             isSearchResult={true}
             style={{ padding: '16px' }}
           />
@@ -363,7 +365,7 @@ const SocialSearchResults = ({ searchQuery, onUserClick }) => {
             archives={forums}
             loading={isLoading}
             error={error}
-            emptyMessage="找不到符合的論壇文章"
+            emptyMessage={t('socialSearchResults.noForumsFound')}
             hasMore={false}
             onLoadMore={null}
             style={{ backgroundColor: 'transparent' }}

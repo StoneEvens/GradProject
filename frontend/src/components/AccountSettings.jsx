@@ -1,7 +1,9 @@
 import React, { useState, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import styles from '../styles/AccountSettings.module.css';
 
 const AccountSettings = ({ onPrivacyToggle, isPrivacyPublic }) => {
+  const { t } = useTranslation('settings');
   const [isExpanded, setIsExpanded] = useState(true);
 
   const handleToggleExpand = () => {
@@ -22,7 +24,7 @@ const AccountSettings = ({ onPrivacyToggle, isPrivacyPublic }) => {
             alt="設定圖示" 
             className={styles.pawIcon}
           />
-          <span className={styles.accountText}>帳號</span>
+          <span className={styles.accountText}>{t('account.title')}</span>
         </div>
         <div className={styles.headerRight}>
           <span className={`${styles.arrowIcon} ${isExpanded ? styles.expanded : styles.collapsed}`}>
@@ -37,7 +39,7 @@ const AccountSettings = ({ onPrivacyToggle, isPrivacyPublic }) => {
           <div className={styles.settingItem}>
             <div className={styles.settingLeft}>
               <div className={styles.settingTextContainer}>
-                <span className={styles.settingText}>帳號隱私設定</span>
+                <span className={styles.settingText}>{t('account.accountPrivacy')}</span>
               </div>
             </div>
             <div className={styles.settingRight}>
@@ -49,7 +51,7 @@ const AccountSettings = ({ onPrivacyToggle, isPrivacyPublic }) => {
                   <div className={styles.toggleSlider}></div>
                 </div>
                 <span className={styles.toggleLabel}>
-                  {isPrivacyPublic ? '公開' : '私人'}
+                  {isPrivacyPublic ? t('account.privacyPublic') : t('account.privacyPrivate')}
                 </span>
               </div>
             </div>

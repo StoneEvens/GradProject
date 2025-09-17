@@ -209,24 +209,32 @@ export const checkAbnormalPostExists = async (petId, date) => {
 export const searchAbnormalPostsByConditions = async (petId, symptoms, startDate, endDate) => {
   try {
     const params = {};
-    
-    // 加入日期範圍參數
+
+    // 加入日期範圍參數 - 使用本地日期避免時區轉換問題
     if (startDate) {
-      params.start_date = startDate.toISOString().split('T')[0]; // YYYY-MM-DD 格式
+      // 使用本地日期格式，避免 toISOString() 的時區轉換問題
+      const year = startDate.getFullYear();
+      const month = String(startDate.getMonth() + 1).padStart(2, '0');
+      const day = String(startDate.getDate()).padStart(2, '0');
+      params.start_date = `${year}-${month}-${day}`;
     }
     if (endDate) {
-      params.end_date = endDate.toISOString().split('T')[0]; // YYYY-MM-DD 格式
+      // 使用本地日期格式，避免 toISOString() 的時區轉換問題
+      const year = endDate.getFullYear();
+      const month = String(endDate.getMonth() + 1).padStart(2, '0');
+      const day = String(endDate.getDate()).padStart(2, '0');
+      params.end_date = `${year}-${month}-${day}`;
     }
-    
+
     // 加入症狀參數 (如果有選擇症狀的話)
     if (symptoms && symptoms.length > 0) {
       params.symptoms = symptoms.join(','); // 用逗號分隔的症狀字串
     }
-    
+
     const res = await axios.get(`/pets/${petId}/abnormal-posts/`, {
       params
     });
-    
+
     return res.data.data || [];
   } catch (error) {
     console.error('搜尋異常記錄失敗:', {

@@ -1,0 +1,255 @@
+{
+  "page": {
+    "title": "常用飼料",
+    "loading": "載入中...",
+    "buttons": {
+      "addFeed": "新增飼料",
+      "viewMore": "查看更多",
+      "back": "❮"
+    },
+    "sections": {
+      "marked": "我的精選飼料:",
+      "recent": "上次使用:",
+      "all": "所有飼料:"
+    },
+    "messages": {
+      "loadError": "載入飼料數據失敗",
+      "loadFailed": "載入失敗",
+      "noMarkedFeeds": "未找到相關的精選飼料",
+      "noRecentFeeds": "未找到相關的使用記錄",
+      "noAllFeeds": "未找到相關飼料",
+      "feedMarked": "飼料已加入精選",
+      "feedUnmarked": "已取消標記",
+      "operationFailed": "操作失敗，請稍後再試",
+      "systemDetected": "系統已識別到同樣飼料",
+      "newFeedCreated": "新飼料建立成功",
+      "reviewCompleted": "審核完成，飼料已加入精選",
+      "errorReported": "已回報錯誤，感謝您的反饋",
+      "errorReportFailed": "回報失敗，請稍後再試",
+      "imageTooLarge": "圖片檔案過大，請選擇較小的圖片或聯繫管理員",
+      "dataFormatError": "資料格式錯誤，請檢查輸入",
+      "addFeedFailed": "新增飼料失敗，請稍後再試",
+      "noResponse": "伺服器無回應，請檢查網路連線",
+      "unknownError": "發生未知錯誤，請稍後再試",
+      "markFailed": "切換標記失敗",
+      "reviewFailed": "審核失敗，請稍後再試"
+    },
+    "feedCard": {
+      "noImage": "無圖片",
+      "marked": "已標記",
+      "mark": "標記",
+      "verifying": "審核中"
+    },
+    "emptyState": {
+      "noResult": "無結果"
+    }
+  },
+  "allPage": {
+    "title": "所有飼料",
+    "loading": "載入中...",
+    "messages": {
+      "loadError": "載入所有飼料失敗",
+      "loadFailed": "載入失敗",
+      "noFeeds": "未找到相關飼料",
+      "feedMarked": "飼料已加入精選"
+    }
+  },
+  "markedPage": {
+    "title": "我的精選飼料",
+    "loading": "載入中...",
+    "messages": {
+      "loadError": "載入精選飼料失敗",
+      "loadFailed": "載入失敗",
+      "noMarkedFeeds": "未找到相關的精選飼料",
+      "markToggleFailed": "切換標記失敗",
+      "reviewFailed": "審核失敗"
+    }
+  },
+  "detailPage": {
+    "title": "飼料詳情",
+    "loading": "載入中...",
+    "loadError": "載入飼料詳情失敗",
+    "feedNotFound": "飼料不存在",
+    "messages": {
+      "feedMarked": "飼料已加入精選",
+      "feedUnmarked": "已取消標記",
+      "operationFailed": "操作失敗，請稍後再試",
+      "reviewCompleted": "審核完成，飼料已加入精選",
+      "reviewFailed": "審核失敗，請稍後再試",
+      "errorReported": "已回報錯誤，感謝您的反饋",
+      "errorReportFailed": "回報失敗，請稍後再試"
+    },
+    "labels": {
+      "feedName": "飼料名稱:",
+      "brand": "品牌:",
+      "price": "價格:",
+      "nutrition": "營養成分:",
+      "protein": "蛋白質",
+      "fat": "脂肪",
+      "carbohydrate": "碳水化合物",
+      "calcium": "鈣",
+      "phosphorus": "磷",
+      "magnesium": "鎂",
+      "sodium": "鈉"
+    },
+    "buttons": {
+      "marked": "已標記",
+      "mark": "標記",
+      "back": "❮"
+    },
+    "verification": {
+      "title": "此飼料資訊尚未通過審核",
+      "progress": "審核進度: {{count}}/5 人已確認",
+      "note": "需要5位使用者確認資訊正確才能通過審核",
+      "alt": "審核中"
+    },
+    "image": {
+      "noImage": "無圖片",
+      "frontAlt": "{{name}} - 正面圖片",
+      "nutritionAlt": "{{name}} - 營養成分表",
+      "unknownFeed": "飼料",
+      "indicator": "{{current}}/{{total}}",
+      "prev": "❮",
+      "next": "❯"
+    },
+    "info": {
+      "unknownFeed": "未知飼料",
+      "unknownBrand": "未知品牌",
+      "pricePrefix": "NT$ ",
+      "noPrice": "未提供",
+      "unit": "%"
+    }
+  },
+  "createModal": {
+    "title": "新增飼料",
+    "petType": {
+      "cat": "貓",
+      "dog": "狗"
+    },
+    "labels": {
+      "petType": "寵物類型",
+      "feedName": "飼料名稱",
+      "feedBrand": "飼料品牌",
+      "feedPrice": "飼料價格",
+      "frontImage": "飼料正面",
+      "nutritionImage": "營養成分表"
+    },
+    "placeholders": {
+      "feedName": "請輸入飼料名稱",
+      "feedBrand": "請輸入飼料品牌",
+      "feedPrice": "請輸入飼料價格"
+    },
+    "buttons": {
+      "uploadFront": "上傳正面圖片",
+      "uploadNutrition": "上傳營養成分表",
+      "removeFront": "移除正面圖片",
+      "removeNutrition": "移除營養成分表",
+      "cancel": "取消",
+      "confirm": "確認新增",
+      "processing": "處理中..."
+    },
+    "alt": {
+      "frontImage": "飼料正面",
+      "nutritionImage": "營養成分表"
+    },
+    "messages": {
+      "imageTooLarge": "圖片大小不能超過 5MB",
+      "selectImageFile": "請選擇圖片檔案",
+      "enterFeedName": "請輸入飼料名稱",
+      "enterFeedBrand": "請輸入飼料品牌",
+      "feedNameTooLong": "飼料名稱不能超過100字元",
+      "brandNameTooLong": "品牌名稱不能超過100字元",
+      "enterFeedPrice": "請輸入飼料價格",
+      "invalidPrice": "請輸入正確的價格數字",
+      "uploadFrontImage": "請上傳飼料正面圖片",
+      "uploadNutritionImage": "請上傳營養成分表圖片"
+    }
+  },
+  "reviewModal": {
+    "labels": {
+      "createdBy": "新增使用者名稱",
+      "createdDate": "新增日期",
+      "unknownUser": "未知使用者",
+      "unknownDate": "未知日期"
+    },
+    "buttons": {
+      "reportError": "回報錯誤",
+      "confirm": "確認",
+      "processing": "處理中..."
+    },
+    "messages": {
+      "reviewFailed": "審核失敗，請稍後再試",
+      "errorReportSuccess": "感謝您的回報，請靜待系統審核錯誤。您目前可以自由使用此飼料，錯誤的資訊麻煩您手動於營養計算機處更新"
+    },
+    "alt": {
+      "feedImage": "飼料圖片"
+    }
+  },
+  "reviewConfirmModal": {
+    "title": "請協助審核飼料",
+    "description": "此飼料尚未通過審核，請您協助審核後再使用此飼料",
+    "buttons": {
+      "cancel": "取消",
+      "confirm": "確定"
+    }
+  },
+  "errorReportModal": {
+    "title": "回報飼料錯誤",
+    "labels": {
+      "errorType": "錯誤類型（可多選）",
+      "errorDescription": "錯誤描述",
+      "correctedData": "修正資料",
+      "nutritionCorrection": "營養成分修正"
+    },
+    "errorTypes": {
+      "name": "名稱錯誤",
+      "brand": "品牌錯誤",
+      "price": "價格錯誤",
+      "nutrition": "營養成分錯誤",
+      "image": "圖片錯誤",
+      "other": "其他錯誤"
+    },
+    "placeholders": {
+      "description": "請描述您發現的錯誤..."
+    },
+    "buttons": {
+      "cancel": "取消",
+      "submit": "提交回報",
+      "submitting": "提交中..."
+    },
+    "messages": {
+      "selectErrorType": "請選擇至少一個錯誤類型",
+      "enterDescription": "請描述錯誤內容",
+      "correctDataRequired": "您選擇了錯誤類型，但未修正以下資料：{{fields}}。請修正資料或選擇「其他錯誤」。",
+      "modifyDataRequired": "請至少修正一項資料，或選擇「其他錯誤」類型",
+      "submitFailed": "回報錯誤失敗，請稍後再試"
+    },
+    "fields": {
+      "feedName": "飼料名稱",
+      "feedBrand": "飼料品牌",
+      "feedPrice": "飼料價錢",
+      "nutrition": "營養成分"
+    }
+  },
+  "selectModal": {
+    "title": "選擇飼料",
+    "loading": "載入中...",
+    "sections": {
+      "marked": "我的精選飼料:",
+      "recent": "上次使用:"
+    },
+    "messages": {
+      "loadFailed": "載入失敗",
+      "noMarkedFeeds": "暫無精選飼料",
+      "noRecentFeeds": "暫無使用記錄",
+      "loadError": "載入飼料數據失敗",
+      "noMarkedFeedsWithLink": "暫無精選飼料，馬上前往寵物頁面-飼料專區新增"
+    },
+    "buttons": {
+      "close": "✕"
+    },
+    "alt": {
+      "feedSection": "飼料專區"
+    }
+  }
+}

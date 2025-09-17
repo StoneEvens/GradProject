@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useSymptomTranslation } from '../hooks/useSymptomTranslation';
 import styles from '../styles/SymptomCalendar.module.css';
 
 const SymptomCalendar = ({ abnormalPostsData = [], symptoms = [] }) => {
+  const { t, i18n } = useTranslation('archives');
+  const { translateSingleSymptom, formatSymptomsForDisplay } = useSymptomTranslation();
   const [selectedSymptomOption, setSelectedSymptomOption] = useState('');
   const [selectedSymptoms, setSelectedSymptoms] = useState([]);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [highlightedDates, setHighlightedDates] = useState(new Set());
 
-  // 更新高亮日期
+  // Update highlighted dates
   useEffect(() => {
     if (!selectedSymptoms.length || !abnormalPostsData.length) {
       setHighlightedDates(new Set());
@@ -26,12 +30,12 @@ const SymptomCalendar = ({ abnormalPostsData = [], symptoms = [] }) => {
         let hasMatchingSymptoms;
         
         if (selectedSymptoms.length === 1) {
-          // 單一症狀：只要包含該症狀即可
+          // Single symptom: just need to contain that symptom
           hasMatchingSymptoms = postSymptomNames.some(symptomName => 
             selectedSymptomTexts.includes(symptomName)
           );
         } else {
-          // 多個症狀：必須同時包含所有選中的症狀
+          // Multiple symptoms: must contain all selected symptoms
           hasMatchingSymptoms = selectedSymptomTexts.every(selectedSymptom => 
             postSymptomNames.includes(selectedSymptom)
           );
@@ -48,16 +52,16 @@ const SymptomCalendar = ({ abnormalPostsData = [], symptoms = [] }) => {
     setHighlightedDates(matchingDates);
   }, [selectedSymptoms, abnormalPostsData]);
 
-  // 添加症狀按鈕處理
+  // Handle add symptom button
   const handleAddSymptom = () => {
     if (!selectedSymptomOption) return;
     
-    // 檢查症狀是否已存在
+    // Check if symptom already exists
     if (selectedSymptoms.some(symptom => symptom.text === selectedSymptomOption)) {
       return;
     }
     
-    // 添加新症狀
+    // Add new symptom
     const newSymptom = {
       id: Date.now() + Math.random(),
       text: selectedSymptomOption
@@ -67,19 +71,19 @@ const SymptomCalendar = ({ abnormalPostsData = [], symptoms = [] }) => {
     setSelectedSymptomOption('');
   };
 
-  // 移除症狀
+  // Remove symptom
   const handleRemoveSymptom = (symptomId) => {
     setSelectedSymptoms(prev => prev.filter(s => s.id !== symptomId));
   };
 
-  // 重置選擇
+  // Reset selection
   const handleReset = () => {
     setSelectedSymptomOption('');
     setSelectedSymptoms([]);
     setHighlightedDates(new Set());
   };
 
-  // 獲取月份的所有日期
+  // Get all dates in the month
   const getDaysInMonth = (date) => {
     const year = date.getFullYear();
     const month = date.getMonth();
@@ -90,12 +94,12 @@ const SymptomCalendar = ({ abnormalPostsData = [], symptoms = [] }) => {
 
     const days = [];
     
-    // 添加上個月的末尾日期（空白）
+    // Add end dates of previous month (blank)
     for (let i = 0; i < startingDayOfWeek; i++) {
       days.push(null);
     }
     
-    // 添加本月的日期
+    // Add dates of current month
     for (let i = 1; i <= daysInMonth; i++) {
       days.push(i);
     }
@@ -103,7 +107,7 @@ const SymptomCalendar = ({ abnormalPostsData = [], symptoms = [] }) => {
     return days;
   };
 
-  // 檢查日期是否高亮
+  // Check if date is highlighted
   const isDateHighlighted = (day) => {
     if (!day) return false;
     const year = currentDate.getFullYear();
@@ -112,12 +116,12 @@ const SymptomCalendar = ({ abnormalPostsData = [], symptoms = [] }) => {
     return highlightedDates.has(dateKey);
   };
 
-  // 導航到上個月
+  // Navigate to previous month
   const goToPreviousMonth = () => {
     setCurrentDate(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1));
   };
 
-  // 導航到下個月
+  // Navigate to next month
   const goToNextMonth = () => {
     setCurrentDate(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1));
   };
@@ -125,13 +129,46 @@ const SymptomCalendar = ({ abnormalPostsData = [], symptoms = [] }) => {
   const formatMonthYear = (date) => {
     const year = date.getFullYear();
     const month = date.getMonth() + 1;
-    return `${year}年${month}月`;
+
+    if (i18n.language === 'en') {
+      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                          'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      return `${monthNames[date.getMonth()]} ${year}`;
+    } else if (i18n.language === 'es') {
+      const monthNames = ['ene', 'feb', 'mar', 'abr', 'may', 'jun',
+                          'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+      return `${monthNames[date.getMonth()]} ${year}`;
+    } else if (i18n.language === 'ja') {
+      return `${year}年${month}月`;
+    } else if (i18n.language === 'ko') {
+      return `${year}년 ${month}월`;
+    } else {
+      // Default to Chinese
+      return `${year}年${month}月`;
+    }
   };
 
   const days = getDaysInMonth(currentDate);
-  const weekDays = ['日', '一', '二', '三', '四', '五', '六'];
 
-  // 獲取唯一症狀列表
+  // Multi-language weekday names
+  const getWeekDays = () => {
+    if (i18n.language === 'en') {
+      return ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    } else if (i18n.language === 'es') {
+      return ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+    } else if (i18n.language === 'ja') {
+      return ['日', '月', '火', '水', '木', '金', '土'];
+    } else if (i18n.language === 'ko') {
+      return ['일', '월', '화', '수', '목', '금', '토'];
+    } else {
+      // Default to Chinese
+      return ['日', '一', '二', '三', '四', '五', '六'];
+    }
+  };
+
+  const weekDays = getWeekDays();
+
+  // Get unique symptoms list
   const uniqueSymptoms = [...new Set(
     abnormalPostsData.flatMap(post => 
       (post.symptoms || []).map(symptom => 
@@ -143,18 +180,18 @@ const SymptomCalendar = ({ abnormalPostsData = [], symptoms = [] }) => {
   return (
     <div className={styles.symptomCalendar}>
       <div className={styles.header}>
-        <h3 className={styles.title}>症狀日曆</h3>
-        <span className={styles.subtitle}>在這裡查看各症狀持續時間</span>
+        <h3 className={styles.title}>{t('symptomCalendar.title')}</h3>
+        <span className={styles.subtitle}>{t('symptomCalendar.subtitle')}</span>
       </div>
 
-      {/* 症狀篩選區域 */}
+      {/* Symptom filter section */}
       <div className={styles.filterSection}>
-        {/* 已選擇的症狀顯示 */}
+        {/* Selected symptoms display */}
         {selectedSymptoms.length > 0 && (
           <div className={styles.selectedSymptomsContainer}>
             {selectedSymptoms.map((symptom) => (
               <div key={symptom.id} className={styles.selectedSymptom}>
-                <span className={styles.symptomText}>{symptom.text}</span>
+                <span className={styles.symptomText}>{translateSingleSymptom(symptom.text)}</span>
                 <button 
                   className={styles.removeSymptomBtn}
                   onClick={() => handleRemoveSymptom(symptom.id)}
@@ -172,12 +209,12 @@ const SymptomCalendar = ({ abnormalPostsData = [], symptoms = [] }) => {
             value={selectedSymptomOption}
             onChange={(e) => setSelectedSymptomOption(e.target.value)}
           >
-            <option value="">症狀</option>
+            <option value="">{t('symptomCalendar.selectSymptom')}</option>
             {uniqueSymptoms
               .filter(symptom => !selectedSymptoms.some(s => s.text === symptom))
               .map((symptom, index) => (
                 <option key={index} value={symptom}>
-                  {symptom}
+                  {translateSingleSymptom(symptom)}
                 </option>
               ))
             }
@@ -187,18 +224,18 @@ const SymptomCalendar = ({ abnormalPostsData = [], symptoms = [] }) => {
             onClick={handleAddSymptom}
             disabled={!selectedSymptomOption}
           >
-            加入
+{t('symptomCalendar.add')}
           </button>
           <button 
             className={styles.resetButton}
             onClick={handleReset}
           >
-            重設
+{t('symptomCalendar.reset')}
           </button>
         </div>
       </div>
 
-      {/* 日曆區域 */}
+      {/* Calendar section */}
       <div className={styles.calendarContainer}>
         <div className={styles.calendarHeader}>
           <button 

@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { toggleArchiveLike, toggleArchiveSave } from '../services/socialService';
 import { deleteDiseaseArchive, publishDiseaseArchive } from '../services/petService';
 import ConfirmNotification from './ConfirmNotification';
 import styles from '../styles/ArchivePreviewForPublic.module.css';
 
-const ArchivePreviewForPublic = ({ 
+const ArchivePreviewForPublic = ({
   archiveData,
   user,
   pet,
@@ -17,6 +18,7 @@ const ArchivePreviewForPublic = ({
   onDelete,  // 新增：刪除回調
   onShowNotification  // 新增：顯示通知
 }) => {
+  const { t } = useTranslation('archives');
   const navigate = useNavigate();
   const [isLiked, setIsLiked] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
@@ -40,7 +42,7 @@ const ArchivePreviewForPublic = ({
       const newLikeCount = interactionStats.likes ?? archiveData.like_count ?? 0;
       const newCommentCount = interactionStats.comments ?? archiveData.comment_count ?? 0;
       
-      console.log('Archive 初始化狀態:', {
+      console.log(t('archivePreviewForPublic.messages.archiveInitStatus'), {
         archiveId: archiveData.id,
         newIsLiked,
         newIsSaved,
@@ -63,7 +65,7 @@ const ArchivePreviewForPublic = ({
   useEffect(() => {
     if (archiveData?.interaction_stats?.comments !== undefined) {
       const newCommentCount = archiveData.interaction_stats.comments;
-      console.log('Comment count updated from parent:', {
+      console.log(t('archivePreviewForPublic.messages.commentCountUpdated'), {
         archiveId: archiveData.id,
         newCommentCount,
         currentCommentCount: commentCount
@@ -103,11 +105,11 @@ const ArchivePreviewForPublic = ({
     const newIsLiked = !isLiked;
     const newLikeCount = newIsLiked ? likeCount + 1 : Math.max(0, likeCount - 1);
     
-    console.log('Archive 按讚操作:', {
+    console.log(t('archivePreviewForPublic.messages.likeAction'), {
       archiveId: archiveData.id,
-      從: originalIsLiked ? '已按讚' : '未按讚',
-      到: newIsLiked ? '已按讚' : '未按讚',
-      讚數變化: `${originalLikeCount} → ${newLikeCount}`
+      from: originalIsLiked ? t('archivePreviewForPublic.likeStatus.liked') : t('archivePreviewForPublic.likeStatus.notLiked'),
+      to: newIsLiked ? t('archivePreviewForPublic.likeStatus.liked') : t('archivePreviewForPublic.likeStatus.notLiked'),
+      likeCountChange: `${originalLikeCount} → ${newLikeCount}`
     });
     
     // 樂觀更新 UI - 立即反映用戶操作
@@ -122,11 +124,11 @@ const ArchivePreviewForPublic = ({
         // API 失敗，還原 UI 狀態
         setIsLiked(originalIsLiked);
         setLikeCount(originalLikeCount);
-        console.error('按讚操作失敗:', result.error);
+        console.error(t('archivePreviewForPublic.messages.likeActionFailed'), result.error);
         return;
       }
       
-      console.log('按讚操作成功:', result.message);
+      console.log(t('archivePreviewForPublic.messages.likeActionSuccess'), result.message);
       
       // 可選：通知父組件（用於統計等目的）
       if (onLike) {
@@ -134,7 +136,7 @@ const ArchivePreviewForPublic = ({
       }
     } catch (error) {
       // 網路錯誤，還原 UI 狀態
-      console.error('按讚 API 調用異常:', error);
+      console.error(t('archivePreviewForPublic.messages.likeApiError'), error);
       setIsLiked(originalIsLiked);
       setLikeCount(originalLikeCount);
     }
@@ -152,10 +154,10 @@ const ArchivePreviewForPublic = ({
     const originalIsSaved = isSaved;
     const newIsSaved = !isSaved;
     
-    console.log('Archive 收藏操作:', {
+    console.log(t('archivePreviewForPublic.messages.saveAction'), {
       archiveId: archiveData.id,
-      從: originalIsSaved ? '已收藏' : '未收藏',
-      到: newIsSaved ? '已收藏' : '未收藏'
+      from: originalIsSaved ? t('archivePreviewForPublic.saveStatus.saved') : t('archivePreviewForPublic.saveStatus.notSaved'),
+      to: newIsSaved ? t('archivePreviewForPublic.saveStatus.saved') : t('archivePreviewForPublic.saveStatus.notSaved')
     });
     
     // 樂觀更新 UI - 立即反映用戶操作
@@ -168,11 +170,11 @@ const ArchivePreviewForPublic = ({
       if (!result.success) {
         // API 失敗，還原 UI 狀態
         setIsSaved(originalIsSaved);
-        console.error('收藏操作失敗:', result.error);
+        console.error(t('archivePreviewForPublic.messages.saveActionFailed'), result.error);
         return;
       }
       
-      console.log('收藏操作成功:', result.message);
+      console.log(t('archivePreviewForPublic.messages.saveActionSuccess'), result.message);
       
       // 可選：通知父組件（用於統計等目的）
       if (onSave) {
@@ -180,7 +182,7 @@ const ArchivePreviewForPublic = ({
       }
     } catch (error) {
       // 網路錯誤，還原 UI 狀態
-      console.error('收藏 API 調用異常:', error);
+      console.error(t('archivePreviewForPublic.messages.saveApiError'), error);
       setIsSaved(originalIsSaved);
     }
   };
@@ -211,12 +213,12 @@ const ArchivePreviewForPublic = ({
     try {
       await navigator.clipboard.writeText(url);
       if (onShowNotification) {
-        onShowNotification('連結已複製到剪貼簿');
+        onShowNotification(t('archivePreviewForPublic.messages.linkCopied'));
       }
     } catch (err) {
-      console.error('複製連結失敗:', err);
+      console.error(t('archivePreviewForPublic.messages.copyLinkFailed'), err);
       if (onShowNotification) {
-        onShowNotification('複製連結失敗');
+        onShowNotification(t('archivePreviewForPublic.messages.copyLinkFailed'));
       }
     }
   };
@@ -227,9 +229,9 @@ const ArchivePreviewForPublic = ({
     setShowMenu(false);
     setConfirmAction(action);
     if (action === 'delete') {
-      setConfirmMessage('確定要刪除這篇文章嗎？此操作無法復原。');
+      setConfirmMessage(t('archivePreviewForPublic.confirmMessages.deleteArticle'));
     } else if (action === 'private') {
-      setConfirmMessage('確定要將這篇文章轉為私人嗎？其他用戶將無法查看。');
+      setConfirmMessage(t('archivePreviewForPublic.confirmMessages.makePrivateArticle'));
     }
   };
 
@@ -239,20 +241,20 @@ const ArchivePreviewForPublic = ({
       const result = await deleteDiseaseArchive(archiveData.id);
       if (result.success) {
         if (onShowNotification) {
-          onShowNotification('文章已刪除');
+          onShowNotification(t('archivePreviewForPublic.messages.articleDeleted'));
         }
         if (onDelete) {
           onDelete(archiveData.id);
         }
       } else {
         if (onShowNotification) {
-          onShowNotification(result.error || '刪除失敗');
+          onShowNotification(result.error || t('archivePreviewForPublic.messages.deleteFailed'));
         }
       }
     } catch (error) {
-      console.error('刪除文章失敗:', error);
+      console.error(t('archivePreviewForPublic.messages.deleteArticleFailed'), error);
       if (onShowNotification) {
-        onShowNotification('刪除失敗，請稍後再試');
+        onShowNotification(t('archivePreviewForPublic.messages.deleteFailedRetry'));
       }
     }
     setConfirmAction(null);
@@ -265,20 +267,20 @@ const ArchivePreviewForPublic = ({
       const result = await publishDiseaseArchive(archiveData.id);
       if (result.success) {
         if (onShowNotification) {
-          onShowNotification('文章已轉為私人');
+          onShowNotification(t('archivePreviewForPublic.messages.articleMadePrivate'));
         }
         if (onDelete) {
           onDelete(archiveData.id);  // 從公開列表中移除
         }
       } else {
         if (onShowNotification) {
-          onShowNotification(result.error || '轉為私人失敗');
+          onShowNotification(result.error || t('archivePreviewForPublic.messages.makePrivateFailed'));
         }
       }
     } catch (error) {
-      console.error('轉為私人失敗:', error);
+      console.error(t('archivePreviewForPublic.messages.makePrivateFailedError'), error);
       if (onShowNotification) {
-        onShowNotification('轉為私人失敗，請稍後再試');
+        onShowNotification(t('archivePreviewForPublic.messages.makePrivateFailedRetry'));
       }
     }
     setConfirmAction(null);
@@ -334,7 +336,7 @@ const ArchivePreviewForPublic = ({
     
     if (!userInfo || !currentUser) return;
     
-    console.log('Archive 用戶頭像點擊:', {
+    console.log(t('archivePreviewForPublic.messages.userAvatarClicked'), {
       clickedUser: userInfo,
       currentUser: currentUser
     });
@@ -347,13 +349,13 @@ const ArchivePreviewForPublic = ({
     
     if (isCurrentUser) {
       // 如果是當前用戶，導向自己的個人資料頁面
-      console.log('Archive - 導航到自己的個人資料頁面');
+      console.log(t('archivePreviewForPublic.messages.navigateToOwnProfile'));
       navigate('/user-profile');
     } else {
       // 預設行為：跳轉到其他用戶個人資料頁面
       const userAccount = userInfo.user_account || userInfo.username;
       if (userAccount) {
-        console.log('Archive - 導航到其他用戶個人資料頁面:', `/user/${userAccount}`);
+        console.log(t('archivePreviewForPublic.messages.navigateToUserProfile'), `/user/${userAccount}`);
         navigate(`/user/${userAccount}`);
       }
     }
@@ -365,12 +367,12 @@ const ArchivePreviewForPublic = ({
       <div className={styles.header}>
         <img 
           src={userInfo.headshot_url || '/assets/icon/DefaultAvatar.jpg'} 
-          alt="用戶頭像" 
+          alt={t('archivePreviewForPublic.userAvatarAlt')} 
           className={styles.userAvatar}
           onClick={handleUserAvatarClick}
         />
         <h3 className={styles.archiveTitle}>
-          {archiveData?.archive_title || archiveData?.archiveTitle || '疾病檔案'}
+          {archiveData?.archive_title || archiveData?.archiveTitle || t('archivePreviewForPublic.defaultArchiveTitle')}
         </h3>
         
         {/* 菜單按鈕 */}
@@ -381,7 +383,7 @@ const ArchivePreviewForPublic = ({
           >
             <img 
               src="/assets/icon/PostMoreInfo.png" 
-              alt="更多選項" 
+              alt={t('archivePreviewForPublic.moreOptionsAlt')} 
               className={styles.menuIcon}
             />
           </button>
@@ -399,7 +401,7 @@ const ArchivePreviewForPublic = ({
                       showConfirmation('delete');
                     }}
                   >
-                    刪除文章
+                    {t('archivePreviewForPublic.menuItems.deleteArticle')}
                   </button>
                   <button 
                     className={styles.dropdownItem}
@@ -408,7 +410,7 @@ const ArchivePreviewForPublic = ({
                       showConfirmation('private');
                     }}
                   >
-                    轉為私人
+                    {t('archivePreviewForPublic.menuItems.makePrivate')}
                   </button>
                 </>
               ) : (
@@ -417,7 +419,7 @@ const ArchivePreviewForPublic = ({
                   className={styles.dropdownItem}
                   onClick={handleCopyLink}
                 >
-                  複製連結
+                  {t('archivePreviewForPublic.menuItems.copyLink')}
                 </button>
               )}
             </div>
@@ -440,7 +442,7 @@ const ArchivePreviewForPublic = ({
         >
           <img 
             src={isLiked ? "/assets/icon/PostLiked.png" : "/assets/icon/PostHeart.png"} 
-            alt="按讚" 
+            alt={t('archivePreviewForPublic.likeButtonAlt')} 
             className={styles.interactionIcon} 
           />
           <span>{likeCount}</span>
@@ -452,7 +454,7 @@ const ArchivePreviewForPublic = ({
         >
           <img 
             src="/assets/icon/PostComment.png" 
-            alt="留言" 
+            alt={t('archivePreviewForPublic.commentButtonAlt')} 
             className={styles.interactionIcon} 
           />
           <span>{commentCount}</span>
@@ -464,7 +466,7 @@ const ArchivePreviewForPublic = ({
         >
           <img 
             src={isSaved ? "/assets/icon/PostSaved.png" : "/assets/icon/PostSave.png"} 
-            alt="收藏" 
+            alt={t('archivePreviewForPublic.saveButtonAlt')} 
             className={styles.interactionIcon} 
           />
         </button>

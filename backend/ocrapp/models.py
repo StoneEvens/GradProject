@@ -12,7 +12,7 @@ class HealthReport(models.Model):
     pet = models.ForeignKey(Pet, on_delete=models.CASCADE, related_name='health_reports')
     data = models.JSONField()  # 儲存 OCR 擷取到的完整結果
     created_at = models.DateTimeField(auto_now_add=True)
-    check_date = models.DateTimeField(null=True, blank=True)
+    check_date = models.DateField(null=True, blank=True)
     check_type = models.CharField(max_length=50, choices=CHECK_TYPE_CHOICES, null=True, blank=True)
     check_location = models.CharField(max_length=100, null=True, blank=True)
     notes = models.TextField(null=True, blank=True)

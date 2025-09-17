@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import styles from '../styles/ConfirmFollowModal.module.css';
 
 const ConfirmFollowModal = ({ 
@@ -8,6 +9,8 @@ const ConfirmFollowModal = ({
   username,
   isPrivateAccount = true 
 }) => {
+  const { t } = useTranslation('social');
+
   if (!isVisible) return null;
 
   const handleBackgroundClick = (e) => {
@@ -21,21 +24,23 @@ const ConfirmFollowModal = ({
       <div className={styles.modal}>
         <div className={styles.content}>
           <h3 className={styles.title}>
-            確定要送出{isPrivateAccount ? '要求追蹤' : '追蹤'} ?
+            {t('confirmFollowModal.title', {
+              action: isPrivateAccount ? t('confirmFollowModal.actions.requestFollow') : t('confirmFollowModal.actions.follow')
+            })}
           </h3>
-          
+
           <div className={styles.buttons}>
-            <button 
+            <button
               className={styles.cancelButton}
               onClick={onClose}
             >
-              算了
+              {t('confirmFollowModal.cancel')}
             </button>
-            <button 
+            <button
               className={styles.confirmButton}
               onClick={onConfirm}
             >
-              確認
+              {t('common.confirm')}
             </button>
           </div>
         </div>

@@ -665,17 +665,71 @@ class PetAbnormalPostsAPIView(generics.ListAPIView):
     
     @log_queries
     def get_queryset(self):
+        from datetime import datetime
+        from django.db.models import Q
+
         pet_id = self.kwargs.get('pet_id')
         user = self.request.user
-        
-        # 優化查詢 - 使用 select_related 減少數據庫查詢
+
+        # 優化查詢 - 使用 select_related 和 prefetch_related 減少數據庫查詢
         queryset = AbnormalPost.objects.filter(
             pet_id=pet_id,
             pet__owner=user  # 確保只能獲取自己寵物的記錄
         ).select_related(
             'pet', 'user'
-        ).order_by('-created_at')  # 按創建時間降序排列（最新的先顯示）
-        
+        ).prefetch_related(
+            'symptoms__symptom'  # 預載症狀關聯
+        ).order_by('-record_date')  # 按記錄日期降序排列
+
+        # 處理日期範圍篩選
+        start_date = self.request.query_params.get('start_date')
+        end_date = self.request.query_params.get('end_date')
+
+
+        if start_date:
+            try:
+                from django.utils import timezone
+                from django.utils.dateparse import parse_date
+
+                start_date_obj = parse_date(start_date)
+                if start_date_obj:
+                    # 將日期轉換為當地時區的開始時間 (00:00:00)
+                    start_datetime = timezone.make_aware(
+                        datetime.combine(start_date_obj, datetime.min.time())
+                    )
+
+                    queryset = queryset.filter(record_date__gte=start_datetime)
+
+            except Exception as e:
+                pass
+
+        if end_date:
+            try:
+                from django.utils import timezone
+                from django.utils.dateparse import parse_date
+
+                end_date_obj = parse_date(end_date)
+                if end_date_obj:
+                    # 將日期轉換為當地時區的結束時間 (23:59:59.999999)
+                    end_datetime = timezone.make_aware(
+                        datetime.combine(end_date_obj, datetime.max.time())
+                    )
+
+                    queryset = queryset.filter(record_date__lte=end_datetime)
+
+            except Exception as e:
+                pass
+
+        # 處理症狀篩選
+        symptoms_param = self.request.query_params.get('symptoms')
+        if symptoms_param:
+            symptom_names = [s.strip() for s in symptoms_param.split(',') if s.strip()]
+            if symptom_names:
+                # 篩選包含任一指定症狀的記錄
+                queryset = queryset.filter(
+                    symptoms__symptom__symptom_name__in=symptom_names
+                ).distinct()
+
         # 隱私控制：如果不是記錄的建立者，則過濾掉私人記錄
         if hasattr(self.request, 'viewing_other_user') and self.request.viewing_other_user:
             queryset = queryset.filter(is_private=False)
@@ -688,7 +742,7 @@ class PetAbnormalPostsAPIView(generics.ListAPIView):
                     queryset = queryset.filter(is_private=False)
             except Pet.DoesNotExist:
                 queryset = queryset.none()
-        
+
         return queryset
     
     def list(self, request, *args, **kwargs):
@@ -1353,6 +1407,7 @@ class GenerateDiseaseArchiveContentAPIView(APIView):
             main_cause = data.get('mainCause', '').strip()
             symptoms = data.get('symptoms', [])
             included_post_ids = data.get('includedAbnormalPostIds', [])
+            language = data.get('language', 'zh-TW')
             
             if not pet_id:
                 return APIResponse(
@@ -1393,9 +1448,9 @@ class GenerateDiseaseArchiveContentAPIView(APIView):
             
             # 準備GPT輸入數據
             gpt_input_data = self._prepare_gpt_input(pet, abnormal_posts, symptoms, main_cause)
-            
-            # 呼叫GPT生成疾病檔案內容
-            generated_content = self._generate_disease_archive_content(gpt_input_data)
+
+            # 呼叫GPT生成疾病檔案內容，傳遞語言參數
+            generated_content = self._generate_disease_archive_content(gpt_input_data, language)
             
             if not generated_content:
                 return APIResponse(
@@ -1463,7 +1518,7 @@ class GenerateDiseaseArchiveContentAPIView(APIView):
             'duration': f"從{posts_data[0]['date']}到{posts_data[-1]['date']}" if len(posts_data) > 1 else posts_data[0]['date']
         }
     
-    def _generate_disease_archive_content(self, input_data):
+    def _generate_disease_archive_content(self, input_data, language='zh-TW'):
         """
         使用GPT生成疾病檔案內容
         """
@@ -1482,32 +1537,74 @@ class GenerateDiseaseArchiveContentAPIView(APIView):
                 for post in input_data['posts_data']
             ])
             
-            prompt = f"""
-請幫我整理以下寵物的疾病檔案資料：
+            # 根據語言設定語言名稱和日期格式
+            language_config = {
+                'zh-TW': {
+                    'name': '繁體中文',
+                    'date_format': '「X月X日」',
+                    'date_example': '12月3日',
+                    'transition_examples': '「期間」、「接下來幾天」、「症狀持續」'
+                },
+                'zh-CN': {
+                    'name': '简体中文',
+                    'date_format': '「X月X日」',
+                    'date_example': '12月3日',
+                    'transition_examples': '「期间」、「接下来几天」、「症状持续」'
+                },
+                'en': {
+                    'name': 'English',
+                    'date_format': '"Dec X" format',
+                    'date_example': 'Dec 3',
+                    'transition_examples': '"during this period", "over the next few days", "symptoms continued"'
+                },
+                'ja': {
+                    'name': '日本語',
+                    'date_format': '「X月X日」',
+                    'date_example': '12月3日',
+                    'transition_examples': '「期間中」、「その後数日間」、「症状が続く」'
+                },
+                'ko': {
+                    'name': '한국어',
+                    'date_format': '「X월 X일」',
+                    'date_example': '12월 3일',
+                    'transition_examples': '「기간 중」、「이후 며칠간」、「증상이 계속됨」'
+                },
+                'es': {
+                    'name': 'Español',
+                    'date_format': '"X de mes" format',
+                    'date_example': '3 de diciembre',
+                    'transition_examples': '"durante este período", "en los días siguientes", "los síntomas continuaron"'
+                }
+            }
 
-寵物資訊: {input_data['pet_info']}
-主要病因: {input_data['main_cause']}
-主要症狀: {input_data['main_symptoms']}
-病程時長: {input_data['duration']}
+            config = language_config.get(language, language_config['zh-TW'])
 
-詳細異常記錄:
+            # 根據語言配置建立 prompt
+            prompt = f"""請幫我整理以下寵物的疾病檔案資料：
+
+寵物基本資訊：
+{input_data['pet_info']}
+
+主要病因：{input_data['main_cause']}
+主要症狀：{input_data['main_symptoms']}
+病程時間：{input_data['duration']}
+
+詳細異常記錄：
 {posts_detail}
 
-請按照以下格式整理：
+請按照以下要求整理這些資料：
 
-1. 開頭概述：簡要描述疾病檔案的整體情況，包含病程時長、主要症狀等
-2. 日期分段記錄：按日期順序整理每筆異常記錄，每個日期段落必須以「X月X日」格式開頭，格式如「X月X日我發現XXX出現XXX症狀，XXXX。我覺得這是整個病程的XXX，XXX為此後幾日主要的不適表現。」
-3. 總結與回顧：對整個生病時期進行總結，包含病程發展、症狀變化、康復情況等
+1. 使用{config['name']}撰寫
+2. 以時間順序整理病程發展
+3. 日期格式使用{config['date_format']}格式（例如：{config['date_example']}）
+4. 在描述不同時期的症狀變化時，可使用過渡詞如{config['transition_examples']}等
+5. 以第一人稱主人視角撰寫，就像寵物主人在記錄觀察
+6. 語調親切自然，充滿關愛
+7. 內容要詳細但簡潔，避免重複
+8. 不使用markdown格式，使用純文字
+9. 直接開始內容，不加標題前綴
 
-重要注意事項：
-- 每個日期段落都必須以「X月X日」格式作為段落開頭，這是前端系統識別和插入異常記錄預覽的關鍵標識
-- 若異常記錄超過10筆，請自行判斷選出最重要的10個日期作為獨立段落（每段都以「X月X日」開頭）
-- 其他日期的資訊請整合成不含具體日期的過渡段落，用於描述病程發展和症狀變化趨勢
-- 過渡段落請避免使用任何日期格式（如「X月X日」、「X年X月X日」），改用「期間」、「接下來幾天」、「症狀持續」等描述方式
-- 這樣設計是為了確保前端系統能正確識別日期段落並插入對應的異常記錄預覽
-
-請務必使用第一人稱主人視角撰寫，以「我」的角度描述觀察到的寵物狀況和感受。語調親切自然，就像主人在記錄自己寵物的病程日記一樣。請直接開始內容，不要加上任何標題前綴。
-"""
+請用{config['name']}回覆。"""
             
             if not client:
                 logger.error("OpenAI client not initialized. Please check API key configuration.")
@@ -1515,12 +1612,24 @@ class GenerateDiseaseArchiveContentAPIView(APIView):
             
             logger.info("正在調用 GPT API...")
             
+            # 根據語言設定 system message
+            system_messages = {
+                'zh-TW': "你是一名專業的寵物醫療記錄整理師。請用繁體中文提供清楚、詳細的內容整理。內容必須使用第一人稱主人視角撰寫，以「我」的角度描述觀察到的寵物狀況，就像主人在寫寵物的日記。語調要親切自然，充滿關愛之情。請不要使用markdown格式，使用純文字格式即可。請直接開始內容，不要加上任何標題前綴如'xxx的病程記錄'等。",
+                'zh-CN': "你是一名专业的宠物医疗记录整理师。请用简体中文提供清楚、详细的内容整理。内容必须使用第一人称主人视角撰写，以「我」的角度描述观察到的宠物状况，就像主人在写宠物的日记。语调要亲切自然，充满关爱之情。请不要使用markdown格式，使用纯文字格式即可。请直接开始内容，不要加上任何标题前缀如'xxx的病程记录'等。",
+                'en': "You are a professional pet medical record organizer. Please provide clear and detailed content organization in English. The content must be written from the first-person owner's perspective, describing the observed pet conditions from 'my' point of view, like an owner writing their pet's diary. The tone should be warm, natural, and full of love. Please do not use markdown format, use plain text format. Please start the content directly without any title prefix like 'xxx's medical record'.",
+                'ja': "あなたは専門のペット医療記録整理師です。日本語で明確で詳細な内容整理を提供してください。内容は第一人称の飼い主の視点で書き、観察したペットの状況を「私」の角度から描写し、飼い主がペットの日記を書いているような感じにしてください。口調は親しみやすく自然で、愛情に満ちたものにしてください。マークダウン形式は使わず、プレーンテキスト形式を使用してください。「xxxの病歴記録」などのタイトル接頭辞を付けずに、直接内容を開始してください。",
+                'ko': "당신은 전문적인 반려동물 의료 기록 정리사입니다. 한국어로 명확하고 상세한 내용 정리를 제공해 주세요. 내용은 반드시 1인칭 주인의 시각으로 작성하여, '내'가 관찰한 반려동물의 상황을 묘사하며, 주인이 반려동물의 일기를 쓰는 것처럼 해주세요. 어조는 친근하고 자연스러우며 사랑이 넘치도록 해주세요. 마크다운 형식을 사용하지 말고 순수 텍스트 형식을 사용해 주세요. 'xxx의 병력 기록' 등의 제목 접두사를 붙이지 말고 바로 내용을 시작해 주세요.",
+                'es': "Eres un organizador profesional de registros médicos de mascotas. Por favor, proporciona una organización clara y detallada del contenido en español. El contenido debe estar escrito desde la perspectiva del dueño en primera persona, describiendo las condiciones observadas de la mascota desde 'mi' punto de vista, como si el dueño estuviera escribiendo el diario de su mascota. El tono debe ser cálido, natural y lleno de amor. Por favor, no uses formato markdown, usa formato de texto plano. Comienza el contenido directamente sin ningún prefijo de título como 'registro médico de xxx'."
+            }
+
+            system_message = system_messages.get(language, system_messages['zh-TW'])
+
             response = client.chat.completions.create(
                 model="gpt-4o",
                 messages=[
                     {
-                        "role": "system", 
-                        "content": "你是一名專業的寵物醫療記錄整理師。請用中文提供清楚、詳細的內容整理。內容必須使用第一人稱主人視角撰寫，以「我」的角度描述觀察到的寵物狀況，就像主人在寫寵物的日記。語調要親切自然，充滿關愛之情。請不要使用markdown格式，使用純文字格式即可。請直接開始內容，不要加上任何標題前綴如'xxx的病程記錄'等。"
+                        "role": "system",
+                        "content": system_message
                     },
                     {"role": "user", "content": prompt}
                 ],

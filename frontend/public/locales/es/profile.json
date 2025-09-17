@@ -1,0 +1,84 @@
+{
+  "common": {
+    "loading": "Cargando...",
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "edit": "Editar",
+    "save": "Guardar",
+    "saving": "Guardando...",
+    "close": "Cerrar"
+  },
+  "profilePage": {
+    "editButton": "Editar Perfil",
+    "tabs": {
+      "community": "Comunidad",
+      "forum": "Foro"
+    },
+    "followStats": {
+      "followers": "Seguidores",
+      "following": "Siguiendo"
+    },
+    "defaultIntro": "Esta persona no ha escrito nada.",
+    "emptyMessages": {
+      "noPosts": "Aún no se han publicado publicaciones diarias",
+      "noArchives": "Aún no se han publicado registros de enfermedades"
+    },
+    "messages": {
+      "loadProfileFailed": "Error al cargar perfil, inténtalo de nuevo más tarde",
+      "profileUpdateSuccess": "¡Perfil actualizado exitosamente!",
+      "profileUpdateFailed": "Error al actualizar perfil, inténtalo de nuevo más tarde"
+    }
+  },
+  "otherProfilePage": {
+    "followButton": {
+      "follow": "Seguir",
+      "following": "Siguiendo",
+      "requested": "Solicitado",
+      "requestFollow": "Solicitar Seguir"
+    },
+    "privateAccount": {
+      "title": "Esta cuenta es privada",
+      "followToViewPosts": "Síguelo para ver sus publicaciones",
+      "followToViewForum": "Síguelo para ver su foro"
+    },
+    "messages": {
+      "loadUserDataFailed": "Error al cargar datos del usuario, inténtalo de nuevo más tarde",
+      "operationFailed": "Operación fallida, inténtalo de nuevo más tarde"
+    }
+  },
+  "editModal": {
+    "title": "Editar Perfil",
+    "form": {
+      "account": "Cuenta",
+      "fullname": "Nombre Completo",
+      "intro": "Introducción del Usuario",
+      "required": "*"
+    },
+    "avatar": {
+      "preview": "Vista Previa del Avatar"
+    },
+    "validation": {
+      "enterAccount": "Por favor ingresa el nombre de cuenta",
+      "enterFullname": "Por favor ingresa el nombre completo",
+      "accountExists": "Esta cuenta ya está tomada, prueba con otra",
+      "checkAccountFailed": "Error en verificación de cuenta, inténtalo de nuevo más tarde"
+    },
+    "messages": {
+      "imageProcessFailed": "Error en procesamiento de avatar, inténtalo de nuevo",
+      "saveFailed": "Error al guardar perfil, inténtalo de nuevo más tarde"
+    }
+  },
+  "confirmFollowModal": {
+    "title": "Confirmar Seguir",
+    "privateAccountMessage": "Esta es una cuenta privada, necesitas enviar una solicitud de seguimiento.",
+    "publicAccountMessage": "¿Estás seguro de que quieres seguir a este usuario?"
+  },
+  "archiveList": {
+    "loadFailed": "Error de carga",
+    "retry": "Reintentar",
+    "emptyStateAlt": "Estado Vacío",
+    "noUserArchives": "Este usuario aún no ha publicado ningún archivo",
+    "loadingMore": "Cargando más...",
+    "noMoreArchives": "No hay más archivos"
+  }
+}

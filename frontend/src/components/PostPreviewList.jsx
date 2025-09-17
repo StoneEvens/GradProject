@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import styles from '../styles/PostPreviewList.module.css';
 
-const PostPreviewList = ({ 
-  posts = [], 
-  loading = false, 
-  error = null, 
-  emptyMessage = '尚未發布任何貼文',
+const PostPreviewList = ({
+  posts = [],
+  loading = false,
+  error = null,
+  emptyMessage = null,
   userId = null,
   userAccount = null,
   isSearchResult = false,
@@ -20,6 +21,7 @@ const PostPreviewList = ({
   onLoadMore = null,
   enableProgressiveLoading = false
 }) => {
+  const { t, i18n } = useTranslation('posts');
   const navigate = useNavigate();
   const [isLoadingMore, setIsLoadingMore] = useState(false);
 
@@ -111,7 +113,7 @@ const PostPreviewList = ({
       <div className={styles.container} style={style}>
         <div className={styles.loading}>
           <div className={styles.spinner}></div>
-          <p>載入貼文預覽中...</p>
+          <p>{t('postPreviewList.loading')}</p>
         </div>
       </div>
     );
@@ -122,12 +124,12 @@ const PostPreviewList = ({
     return (
       <div className={styles.container} style={style}>
         <div className={styles.error}>
-          <p>載入失敗: {error}</p>
+          <p>{t('postPreviewList.loadError', { error })}</p>
           <button 
             className={styles.retryButton}
             onClick={() => window.location.reload()}
           >
-            重試
+            {t('postPreviewList.retry')}
           </button>
         </div>
       </div>
@@ -141,10 +143,10 @@ const PostPreviewList = ({
         <div className={styles.empty}>
           <img 
             src="/assets/icon/SearchNoResult.png" 
-            alt="空狀態" 
+            alt={t('postPreviewList.emptyStateAlt')} 
             className={styles.emptyIcon}
           />
-          <p>{emptyMessage}</p>
+          <p>{emptyMessage || t('postPreviewList.defaultEmptyMessage')}</p>
         </div>
       </div>
     );
@@ -167,7 +169,7 @@ const PostPreviewList = ({
                      post.images?.[0]?.firebase_url || 
                      post.images?.[0]?.url || 
                      post.firebase_url} 
-                alt={`貼文-${index + 1}`} 
+                alt={t('postPreviewList.postImageAlt', { index: index + 1 })} 
                 className={styles.postImage}
                 loading="lazy"
               />
@@ -180,7 +182,7 @@ const PostPreviewList = ({
                    post.description || 
                    post.caption ||
                    post.text ||
-                   '無內容'}
+                   t('postPreviewList.noContent')}
                 </div>
               </div>
             )}
@@ -189,10 +191,16 @@ const PostPreviewList = ({
             <div className={styles.postIndicator}>
               <div className={styles.postInfo}>
                 <span className={styles.postDate}>
-                  {new Date(post.created_at).toLocaleDateString('zh-TW', {
-                    month: 'short',
-                    day: 'numeric'
-                  })}
+                  {i18n.language === 'en'
+                    ? new Date(post.created_at).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric'
+                      })
+                    : new Date(post.created_at).toLocaleDateString('zh-TW', {
+                        month: 'short',
+                        day: 'numeric'
+                      })
+                  }
                 </span>
               </div>
             </div>
@@ -204,14 +212,14 @@ const PostPreviewList = ({
       {enableProgressiveLoading && hasMore && (isLoadingMore || loading) && (
         <div className={styles.loadingMore}>
           <div className={styles.spinner}></div>
-          <p>載入更多貼文中...</p>
+          <p>{t('postPreviewList.loadingMore')}</p>
         </div>
       )}
       
       {/* 沒有更多內容指示器 */}
       {enableProgressiveLoading && !hasMore && posts.length > 0 && (
         <div className={styles.noMore}>
-          <p>已載入所有貼文</p>
+          <p>{t('postPreviewList.allLoaded')}</p>
         </div>
       )}
     </div>

@@ -1,0 +1,72 @@
+{
+  "aiNavigator": {
+    "greeting": "Hi! I'm PETer Peter",
+    "description": "I majored in PETer pet research in university and know this app inside out. Feel free to ask me if you have any questions about using it!"
+  },
+  "todoSection": {
+    "title": "My To-Do List",
+    "loading": "Loading...",
+    "noTodos": "No pending tasks",
+    "addNew": "Tap to add",
+    "newItem": "Add new item",
+    "errors": {
+      "fetchTodos": "Failed to fetch to-do items",
+      "updateSchedule": "Failed to update schedule",
+      "addSchedule": "Failed to add schedule",
+      "deleteSchedule": "Failed to delete schedule",
+      "markCompleted": "Failed to mark as completed"
+    }
+  },
+  "dailyTasks": {
+    "title": "My Daily Tasks",
+    "tasks": {
+      "createPost": "Create a post",
+      "useCalculator": "Use nutrition calculator"
+    },
+    "completeButton": "Complete"
+  },
+  "topNavbar": {
+    "home": "Home",
+    "interactiveCity": "Interactive City",
+    "notification": "Notification",
+    "userAvatar": "User Avatar",
+    "search": "Search",
+    "searchPlaceholder": "Search...",
+    "feedSearchPlaceholder": "Search feed name or brand..."
+  },
+  "addSchedule": {
+    "editMode": "Edit Schedule",
+    "addMode": "Add Schedule",
+    "delete": "Delete",
+    "completed": "Completed",
+    "complete": "Complete",
+    "date": "Date",
+    "startTime": "Start",
+    "endTime": "End",
+    "titlePlaceholder": "Enter schedule item",
+    "descriptionPlaceholder": "Notes...",
+    "cancel": "Cancel",
+    "save": "Save",
+    "today": "Today",
+    "timeError": "End time must be later than start time",
+    "deleteConfirm": "Are you sure you want to delete this schedule?",
+    "deleteTitle": "Delete Schedule",
+    "markCompletedTitle": "Mark as Completed"
+  },
+  "chatWindow": {
+    "title": "PETer Specialist Peter",
+    "status": "Online",
+    "welcomeMessage": "Hi! I'm PETer specialist Peter, glad to serve you! Feel free to ask me any questions～",
+    "errorMessage": "Sorry, I'm unable to respond to your question right now. Please try again later.",
+    "inputPlaceholder": "Enter your question...",
+    "sendButton": "Send Message",
+    "close": "Close"
+  },
+  "timeDisplay": {
+    "days": "days",
+    "hours": "hr",
+    "minutes": "min",
+    "ago": "ago",
+    "later": "later"
+  }
+}

@@ -670,6 +670,7 @@ class PetNutritionCalculator(APIView):
         expected_adult_weight = data.get('expected_adult_weight')
         litter_size = data.get('litter_size')
         weeks_of_lactation = data.get('weeks_of_lactation')
+        language = data.get('language', 'zh-TW')  # 預設為繁體中文
         # conditions_raw = data.get('conditions')
         # conditions = []
         # if isinstance(conditions_raw, (list, tuple)):
@@ -747,11 +748,11 @@ class PetNutritionCalculator(APIView):
             'sodium': round(feed_g_per_day * sodium / 100, 2),
         }
 
-        # GPT 中文建議
+        # GPT 建議（支援多語言）
         description = self.generate_description(
             pet_type, life_stage, weight, daily_ME, ME_feed,
             feed_g_per_day, adjusted_rec, actual, abnormal_items,
-            conditions=conditions
+            conditions=conditions, language=language
         )
 
         return Response({
@@ -899,10 +900,30 @@ class PetNutritionCalculator(APIView):
         return rec
     
 
-    def generate_description(self, pet_type, life_stage, weight, daily_ME, ME_feed, feed_amount, rec, actual, abnormal_items, conditions=None):
+    def generate_description(self, pet_type, life_stage, weight, daily_ME, ME_feed, feed_amount, rec, actual, abnormal_items, conditions=None, language='zh-TW'):
         try:
-            abn_txt = "異常健康指標：\n" + "\n".join([f"- {k}: {v}" for k, v in abnormal_items.items()]) if abnormal_items else "無明顯異常指標。"
-            cond_txt = "慢性病/照護重點：\n" + "\n".join([f"- {c}" for c in (conditions or [])]) if conditions else "慢性病/照護重點：無"
+            # 根據語言設定文字
+            if language == 'en':
+                abn_txt = "Abnormal Health Indicators:\n" + "\n".join([f"- {k}: {v}" for k, v in abnormal_items.items()]) if abnormal_items else "No significant abnormal indicators."
+                cond_txt = "Chronic Conditions/Care Focus:\n" + "\n".join([f"- {c}" for c in (conditions or [])]) if conditions else "Chronic Conditions/Care Focus: None"
+                diet_label = "Dietary Reminders (text suggestions only, no value adjustments):"
+                no_reminder = "- No special reminders"
+                rec_label = "Recommended intake:"
+                actual_label = "Actual intake:"
+            elif language == 'ja':
+                abn_txt = "異常な健康指標：\n" + "\n".join([f"- {k}: {v}" for k, v in abnormal_items.items()]) if abnormal_items else "明らかな異常指標はありません。"
+                cond_txt = "慢性疾患/ケアの重点：\n" + "\n".join([f"- {c}" for c in (conditions or [])]) if conditions else "慢性疾患/ケアの重点：なし"
+                diet_label = "食事の注意事項（文字による提案のみ、数値調整なし）:"
+                no_reminder = "- 特別な注意事項なし"
+                rec_label = "推奨摂取量:"
+                actual_label = "実際の摂取量:"
+            else:  # zh-TW
+                abn_txt = "異常健康指標：\n" + "\n".join([f"- {k}: {v}" for k, v in abnormal_items.items()]) if abnormal_items else "無明顯異常指標。"
+                cond_txt = "慢性病/照護重點：\n" + "\n".join([f"- {c}" for c in (conditions or [])]) if conditions else "慢性病/照護重點：無"
+                diet_label = "飲食提醒（僅文字建議，不調整數值）："
+                no_reminder = "- 無特別提醒"
+                rec_label = "建議攝取量:"
+                actual_label = "實際攝取量:"
 
             # 可選：給模型一些病況對應的飲食提醒（純文字，不改數值）
             DIET_HINTS = {
@@ -920,29 +941,57 @@ class PetNutritionCalculator(APIView):
                 hints = DIET_HINTS.get(c)
                 if hints:
                     diet_notes.extend([f"- {c}：{h}" for h in hints])
-            diet_txt = "飲食提醒（僅文字建議，不調整數值）：\n" + ("\n".join(diet_notes) if diet_notes else "- 無特別提醒")
+            diet_txt = f"{diet_label}\n" + ("\n".join(diet_notes) if diet_notes else no_reminder)
 
 
-            message = (
-                f"這是一隻{pet_type}，處於{life_stage}階段，體重{weight}公斤。\n"
-                f"每日建議攝取 {round(daily_ME, 2)} kcal，飼料代謝能為 {round(ME_feed, 2)} kcal/100g。\n"
-                f"建議每日餵食飼料 {round(feed_amount, 2)} 公克。\n\n"
-                f"{abn_txt}\n\n"
-                f"{abn_txt}\n\n{cond_txt}\n\n{diet_txt}\n\n"
-                + "\n".join([f"- {k}: {v}g" for k, v in rec.items()]) +
-                "\n實際攝取量:\n"
-                + "\n".join([f"- {k}: {v}g" for k, v in actual.items()]) +
-                "\n請先列出你的計算結果，包含一天飼料建議攝取量、各項營養素建議攝取量、和與飼料提供營養素量對比，若有健康報告，再根據健康報告給出微調建議，然後根據『慢性病/照護重點』與『飲食提醒』給出照護建議。"
+            # 根據語言調整訊息內容
+            if language == 'en':
+                message = (
+                    f"This is a {pet_type} in the {life_stage} stage, weighing {weight} kg.\n"
+                    f"Daily recommended intake is {round(daily_ME, 2)} kcal, feed metabolizable energy is {round(ME_feed, 2)} kcal/100g.\n"
+                    f"Recommended daily feed amount is {round(feed_amount, 2)} grams.\n\n"
+                    f"{abn_txt}\n\n{cond_txt}\n\n{diet_txt}\n\n"
+                    f"{rec_label}\n" + "\n".join([f"- {k}: {v}g" for k, v in rec.items()]) +
+                    f"\n{actual_label}\n" + "\n".join([f"- {k}: {v}g" for k, v in actual.items()]) +
+                    "\nPlease first list your calculation results, including daily feed recommendations, nutrient recommendations vs actual feed nutrients, provide health report-based adjustments if available, then give care advice based on 'Chronic Conditions/Care Focus' and 'Dietary Reminders'. Please respond in English."
+                )
+            elif language == 'ja':
+                message = (
+                    f"これは{life_stage}段階の{pet_type}で、体重は{weight}kgです。\n"
+                    f"1日の推奨摂取量は{round(daily_ME, 2)} kcal、飼料の代謝エネルギーは{round(ME_feed, 2)} kcal/100gです。\n"
+                    f"1日の推奨飼料量は{round(feed_amount, 2)}グラムです。\n\n"
+                    f"{abn_txt}\n\n{cond_txt}\n\n{diet_txt}\n\n"
+                    f"{rec_label}\n" + "\n".join([f"- {k}: {v}g" for k, v in rec.items()]) +
+                    f"\n{actual_label}\n" + "\n".join([f"- {k}: {v}g" for k, v in actual.items()]) +
+                    "\nまず計算結果をリストし、1日の飼料推奨量、栄養素推奨量と実際の飼料栄養素の比較を含め、健康報告がある場合は調整提案を行い、『慢性疾患/ケアの重点』と『食事の注意事項』に基づいてケアアドバイスを提供してください。日本語で回答してください。"
+                )
+            else:  # zh-TW
+                message = (
+                    f"這是一隻{pet_type}，處於{life_stage}階段，體重{weight}公斤。\n"
+                    f"每日建議攝取 {round(daily_ME, 2)} kcal，飼料代謝能為 {round(ME_feed, 2)} kcal/100g。\n"
+                    f"建議每日餵食飼料 {round(feed_amount, 2)} 公克。\n\n"
+                    f"{abn_txt}\n\n{cond_txt}\n\n{diet_txt}\n\n"
+                    f"{rec_label}\n" + "\n".join([f"- {k}: {v}g" for k, v in rec.items()]) +
+                    f"\n{actual_label}\n" + "\n".join([f"- {k}: {v}g" for k, v in actual.items()]) +
+                    "\n請先列出你的計算結果，包含一天飼料建議攝取量、各項營養素建議攝取量、和與飼料提供營養素量對比，若有健康報告，再根據健康報告給出微調建議，然後根據『慢性病/照護重點』與『飲食提醒』給出照護建議。用繁體中文回答。"
+                )
                 # "\n注意：以上數值已計算好，**不要修改數值，只做文字建議**。"
-            )
             print(message)
             if not client:
                 return "無法產生建議：OpenAI API 未設定，請聯絡系統管理員"
             
+            # 根據語言調整系統提示
+            if language == 'en':
+                system_prompt = "You are a professional pet nutritionist. Please provide a clear and concise analysis report in English.\n\nFormat requirements:\n1. Use simple paragraph format with one blank line between topics\n2. Use '-' at the beginning for listing nutritional values\n3. Do not use **bold**, *italic*, tables, or code blocks\n4. Use appropriate units (grams, kcal)\n5. Content should include: daily feed amount, comparison of recommended vs actual nutrient intake, health recommendations"
+            elif language == 'ja':
+                system_prompt = "あなたはプロのペット栄養士です。明確で簡潔な分析レポートを日本語で提供してください。\n\nフォーマット要件:\n1. トピック間に空白行を入れたシンプルな段落形式を使用\n2. 栄養値をリストする際は「-」で始める\n3. **太字**、*斜体*、表、コードブロックは使用しない\n4. 適切な単位（グラム、kcal）を使用\n5. 内容には以下を含める：1日の飼料量、推奨栄養素摂取量と実際の摂取量の比較、健康に関する提案"
+            else:  # zh-TW
+                system_prompt = "你是一名專業的寵物營養師。請用繁體中文提供清楚、簡潔的分析報告。\n\n格式要求：\n1. 使用簡單的段落格式，每個主題間空一行\n2. 使用 '-' 開頭的條列式來列出營養數值\n3. 不要使用 **粗體**、*斜體*、表格或代碼區塊\n4. 數值資訊請用中文單位（公克、大卡）\n5. 內容應包含：每日飼料量、各項營養素建議量與實際量對比、健康建議"
+
             response = client.chat.completions.create(
                 model="gpt-4o",
                 messages=[
-                    {"role": "system", "content": "你是一名專業的寵物營養師。請用中文提供清楚、簡潔的分析報告。\n\n格式要求：\n1. 使用簡單的段落格式，每個主題間空一行\n2. 使用 '-' 開頭的條列式來列出營養數值\n3. 不要使用 **粗體**、*斜體*、表格或代碼區塊\n4. 數值資訊請用中文單位（公克、大卡）\n5. 內容應包含：每日飼料量、各項營養素建議量與實際量對比、健康建議"},
+                    {"role": "system", "content": system_prompt},
                     {"role": "user", "content": message}
                 ],
                 max_tokens=1500,
