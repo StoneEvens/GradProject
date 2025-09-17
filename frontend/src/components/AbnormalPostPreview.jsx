@@ -1,25 +1,32 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
+import { useSymptomTranslation } from '../hooks/useSymptomTranslation';
 import styles from '../styles/AbnormalPostPreview.module.css';
 
 const AbnormalPostPreview = ({ date, isEmergency, symptoms, onClick }) => {
+  const { t, i18n } = useTranslation('posts');
+  const { formatSymptomsForDisplay } = useSymptomTranslation();
   const formatDate = (dateString) => {
     if (!dateString) return '';
     const date = new Date(dateString);
-    const month = date.getMonth() + 1;
-    const day = date.getDate();
-    return `${month}月${day}日`;
+
+    if (i18n.language === 'en') {
+      // English format: "Jan 15", "Feb 3", etc.
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    } else if (i18n.language === 'ja') {
+      // Japanese format: "1月15日", "2月3日", etc.
+      return date.toLocaleDateString('ja-JP', { month: 'short', day: 'numeric' });
+    } else {
+      // Chinese format: "1月15日", "2月3日", etc.
+      return date.toLocaleDateString('zh-TW', { month: 'short', day: 'numeric' });
+    }
   };
 
   const formatSymptoms = (symptomsArray) => {
-    if (!symptomsArray || symptomsArray.length === 0) return '無症狀記錄';
-    
-    // 如果是字串陣列
-    if (typeof symptomsArray[0] === 'string') {
-      return symptomsArray.join('、');
-    }
-    
-    // 如果是物件陣列
-    return symptomsArray.map(symptom => symptom.symptom_name || symptom.text || symptom).join('、');
+    if (!symptomsArray || symptomsArray.length === 0) return t('abnormalPostPreview.noSymptoms');
+
+    // 使用症狀翻譯工具
+    return formatSymptomsForDisplay(symptomsArray) || t('abnormalPostPreview.noSymptoms');
   };
 
   return (
@@ -30,7 +37,7 @@ const AbnormalPostPreview = ({ date, isEmergency, symptoms, onClick }) => {
       <div className={styles.postPreviewIcon}>
         <img 
           src={isEmergency ? "/assets/icon/EmergencyIcon.png" : "/assets/icon/PetpagePetAbnormalPostButton.png"}
-          alt={isEmergency ? "緊急記錄" : "異常記錄"} 
+          alt={isEmergency ? t('abnormalPostPreview.emergencyRecordAlt') : t('abnormalPostPreview.abnormalRecordAlt')} 
         />
       </div>
       
@@ -40,12 +47,12 @@ const AbnormalPostPreview = ({ date, isEmergency, symptoms, onClick }) => {
             {formatDate(date)}
           </span>
           {isEmergency && (
-            <span className={styles.emergencyBadge}>緊急</span>
+            <span className={styles.emergencyBadge}>{t('abnormalPostPreview.emergencyBadge')}</span>
           )}
         </div>
         
         <div className={styles.postPreviewSymptoms}>
-          症狀：{formatSymptoms(symptoms)}
+          {t('abnormalPostPreview.symptomsLabel')}：{formatSymptoms(symptoms)}
         </div>
       </div>
       

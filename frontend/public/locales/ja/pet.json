@@ -1,0 +1,154 @@
+{
+  "title": "私のペット",
+  "addPet": "ペットを追加",
+  "noPets": "まだペットを追加していません",
+  "form": {
+    "name": "ペット名",
+    "species": "種類",
+    "breed": "品種",
+    "age": "年齢",
+    "gender": "性別",
+    "weight": "体重",
+    "description": "説明",
+    "photo": "写真"
+  },
+  "species": {
+    "dog": "犬",
+    "cat": "猫",
+    "bird": "鳥",
+    "rabbit": "うさぎ",
+    "hamster": "ハムスター",
+    "other": "その他"
+  },
+  "gender": {
+    "male": "オス",
+    "female": "メス",
+    "unknown": "不明"
+  },
+  "health": {
+    "title": "健康記録",
+    "vaccination": "ワクチン接種",
+    "checkup": "健康診断",
+    "medication": "投薬記録",
+    "weight": "体重記録"
+  },
+  "page": {
+    "loading": "読み込み中...",
+    "noData": "現在ペットデータがありません",
+    "noDataSubtitle": "すぐにペットを追加してペットページを使用してください",
+    "defaultDescription": "このペットはとても可愛く、飼い主はまだ説明を追加していません。",
+    "functions": {
+      "editData": "データ編集",
+      "relatedPosts": "関連投稿",
+      "feedArea": "フード専門区",
+      "diseaseArchive": "疾患アーカイブ",
+      "abnormalRecord": "異常記録",
+      "healthReport": "健康レポート"
+    },
+    "switcher": {
+      "title": "現在のペットを切り替え",
+      "addButton": "ペットを追加"
+    },
+    "messages": {
+      "fetchError": "ペットデータの取得に失敗しました。しばらくしてから再試行してください",
+      "selectPetFirst": "まずペットを選択してください",
+      "selectPetToEdit": "編集するペットを選択してください",
+      "featureInDevelopment": "機能開発中"
+    },
+    "ageUnit": "歳"
+  },
+  "addPage": {
+    "phase1": {
+      "title": "私のペットは...",
+      "catAlt": "猫",
+      "dogAlt": "犬",
+      "catButton": "猫",
+      "dogButton": "犬"
+    },
+    "phase2": {
+      "uploadAvatar": "プロフィール写真をアップロード",
+      "avatarAlt": "ペットプロフィール写真",
+      "titleCat": "猫の基本データ",
+      "titleDog": "犬の基本データ",
+      "labels": {
+        "name": "名前",
+        "breed": "品種",
+        "age": "年齢",
+        "weight": "体重",
+        "height": "身長"
+      },
+      "placeholders": {
+        "name": "ペットの名前を入力してください",
+        "breedCat": "猫を選択",
+        "breedDog": "犬を選択",
+        "age": "年齢を入力してください（歳）",
+        "weight": "体重を入力してください（kg）",
+        "height": "身長を入力してください（cm）",
+        "description": "あなたのペットを簡単に紹介してください"
+      },
+      "buttons": {
+        "back": "戻る",
+        "submit": "完了",
+        "processing": "処理中..."
+      }
+    },
+    "breeds": {
+      "cat": [
+        "ミックス猫", "アメリカンショートヘア", "ブリティッシュショートヘア", "スコティッシュフォールド", "ラグドール",
+        "シャム猫", "ペルシャ猫", "ベンガル猫", "メインクーン", "エキゾチックショートヘア", "その他"
+      ],
+      "dog": [
+        "ミックス犬", "柴犬", "プードル", "ゴールデンレトリーバー", "ラブラドール", "ハスキー",
+        "フレンチブルドッグ", "ポメラニアン", "ヨークシャーテリア", "マルチーズ", "その他"
+      ]
+    },
+    "imageProcessing": {
+      "starting": "処理を開始しています...",
+      "processing": "処理中...",
+      "error": "画像処理に失敗しました。再試行してください"
+    },
+    "messages": {
+      "requiredFields": "すべての必須項目を入力してください",
+      "addSuccess": "ペットの追加に成功しました！",
+      "addError": "ペットの追加に失敗しました。しばらくしてから再試行してください",
+      "validationError": "データ検証エラー："
+    }
+  },
+  "editPage": {
+    "loading": "読み込み中...",
+    "uploadAvatar": "プロフィール写真をアップロード",
+    "avatarAlt": "ペットプロフィール写真",
+    "titleCat": "猫のデータを編集",
+    "titleDog": "犬のデータを編集",
+    "labels": {
+      "name": "名前",
+      "breed": "品種",
+      "age": "年齢",
+      "weight": "体重",
+      "height": "身長"
+    },
+    "placeholders": {
+      "name": "ペットの名前を入力してください",
+      "breedCat": "猫の品種を選択",
+      "breedDog": "犬の品種を選択",
+      "age": "年齢を入力してください（歳）",
+      "weight": "体重を入力してください（kg）",
+      "height": "身長を入力してください（cm）",
+      "description": "あなたのペットを簡単に紹介してください"
+    },
+    "buttons": {
+      "back": "戻る",
+      "save": "保存",
+      "processing": "処理中..."
+    },
+    "messages": {
+      "petNotFound": "ペットデータが見つかりません",
+      "loadError": "ペットデータの読み込みに失敗しました",
+      "imageProcessError": "画像処理に失敗しました。再試行してください",
+      "requiredFields": "すべての必須項目を入力してください",
+      "updateSuccess": "ペットデータの更新に成功しました！",
+      "updateError": "ペットの更新に失敗しました。しばらくしてから再試行してください",
+      "validationError": "データ検証エラー："
+    }
+  }
+}

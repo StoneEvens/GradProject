@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import styles from '../styles/UserFollowConditionPage.module.css';
 import TopNavbar from '../components/TopNavbar';
 import BottomNavbar from '../components/BottomNavigationbar';
@@ -12,6 +13,7 @@ import { getUserFollowStatus, followUser, getUserFollowStatusBatch } from '../se
 import { getUserProfile } from '../services/userService';
 
 const UserFollowConditionPage = () => {
+  const { t } = useTranslation('social');
   const { userAccount, type } = useParams(); // type 可以是 'followers' 或 'following'
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState(type || 'followers');
@@ -74,7 +76,7 @@ const UserFollowConditionPage = () => {
       }
     } catch (error) {
       console.error('載入追蹤數據失敗:', error);
-      setNotification('載入數據失敗，請稍後再試');
+      setNotification(t('followPage.messages.loadDataFailed'));
     } finally {
       setLoading(false);
     }
@@ -206,7 +208,7 @@ const UserFollowConditionPage = () => {
       }
     } catch (error) {
       console.error('追蹤操作失敗:', error);
-      showNotification('操作失敗，請稍後再試');
+      showNotification(t('followPage.messages.operationFailed'));
     }
   };
 
@@ -216,16 +218,16 @@ const UserFollowConditionPage = () => {
       const result = await removeFollower(userAccount);
       
       if (result.success) {
-        showNotification(`已成功移除粉絲 @${userAccount}`);
-        
+        showNotification(t('followPage.messages.followerRemoved', { username: userAccount }));
+
         // 立即重新載入數據以確保頁面資訊最新
         await fetchData();
       } else {
-        showNotification(result.error || '移除粉絲失敗');
+        showNotification(result.error || t('followPage.messages.removeFollowerFailed'));
       }
     } catch (error) {
       console.error('移除粉絲失敗:', error);
-      showNotification('移除粉絲失敗，請稍後再試');
+      showNotification(t('followPage.messages.removeFollowerFailedRetry'));
     }
   };
 
@@ -233,23 +235,23 @@ const UserFollowConditionPage = () => {
   const getButtonText = (user, userFollowState) => {
     // 如果是查看自己的粉絲列表，顯示移除粉絲按鈕
     if (isViewingOwnProfile && activeTab === 'followers') {
-      return '移除粉絲';
+      return t('followPage.removeFollower');
     }
-    
+
     // 其他情況顯示追蹤相關按鈕
     if (!userFollowState) {
-      return user.account_privacy === 'private' ? '要求追蹤' : '追蹤';
+      return user.account_privacy === 'private' ? t('followPage.requestFollow') : t('followPage.follow');
     }
-    
+
     if (userFollowState.is_following) {
-      return '追蹤中';
+      return t('followPage.following');
     }
-    
+
     if (userFollowState.is_requested) {
-      return '已要求';
+      return t('followPage.requested');
     }
-    
-    return user.account_privacy === 'private' ? '要求追蹤' : '追蹤';
+
+    return user.account_privacy === 'private' ? t('followPage.requestFollow') : t('followPage.follow');
   };
 
   // 根據追蹤狀態獲取按鈕樣式
@@ -300,13 +302,13 @@ const UserFollowConditionPage = () => {
               className={`${styles.tab} ${activeTab === 'followers' ? styles.activeTab : ''}`}
               onClick={() => handleTabChange('followers')}
             >
-              {followers.length} 位粉絲
+              {followers.length} {t('followPage.followers')}
             </button>
             <button
               className={`${styles.tab} ${activeTab === 'following' ? styles.activeTab : ''}`}
               onClick={() => handleTabChange('following')}
             >
-              {following.length} 人追蹤中
+              {following.length} {t('followPage.following')}
             </button>
           </div>
 
@@ -316,13 +318,13 @@ const UserFollowConditionPage = () => {
           <div className={styles.resultsContainer}>
             {loading ? (
               <div className={styles.loading}>
-                <p>載入中...</p>
+                <p>{t('common.loading')}</p>
               </div>
             ) : (
               <div className={styles.userList}>
                 {getCurrentUserList().length === 0 ? (
                   <div className={styles.noResults}>
-                    <p>{activeTab === 'followers' ? '還沒有粉絲' : '還沒有追蹤任何人'}</p>
+                    <p>{activeTab === 'followers' ? t('followPage.noFollowers') : t('followPage.noFollowing')}</p>
                   </div>
                 ) : (
                   getCurrentUserList().map((user) => {

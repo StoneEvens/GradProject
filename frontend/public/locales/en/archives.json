@@ -1,0 +1,293 @@
+{
+  "archiveCard": {
+    "status": {
+      "diagnosed": "Diagnosed",
+      "undiagnosed": "Not Diagnosed",
+      "cured": "Cured",
+      "notCured": "Not Cured",
+      "treating": "Under Treatment"
+    },
+    "noContent": "No content available",
+    "noSymptoms": "No symptoms recorded",
+    "abnormalRecordAlt": "Abnormal record",
+    "symptoms": "Symptoms",
+    "validatingRecords": "Validating abnormal records...",
+    "unknownUser": "Unknown User",
+    "pet": "Pet",
+    "unknownPet": "Unknown Pet",
+    "unknownBreed": "Unknown Breed",
+    "mainCause": "Main Cause",
+    "relatedSymptoms": "Related Symptoms",
+    "createdAt": "Created on",
+    "messages": {
+      "foundDeletedRecords": "Found {{count}} deleted abnormal records, preparing to remove...",
+      "archiveUpdated": "Disease archive updated, removed deleted abnormal records",
+      "autoRemovedRecords": "Automatically removed {{count}} deleted abnormal records",
+      "updateArchiveFailed": "Failed to update disease archive",
+      "validateRecordsError": "Error occurred while validating abnormal records",
+      "userClicked": "ArchiveCard user clicked",
+      "navigateToOwnProfile": "ArchiveCard - Navigate to own profile page",
+      "navigateToUserProfile": "ArchiveCard - Navigate to other user's profile page",
+      "cannotGetPetId": "Unable to get pet ID",
+      "cannotFindPetInfo": "Unable to find pet information"
+    }
+  },
+  "archivePreviewForPublic": {
+    "userAvatarAlt": "User Avatar",
+    "defaultArchiveTitle": "Disease Archive",
+    "moreOptionsAlt": "More Options",
+    "likeButtonAlt": "Like",
+    "commentButtonAlt": "Comment",
+    "saveButtonAlt": "Save",
+    "likeStatus": {
+      "liked": "Liked",
+      "notLiked": "Not Liked"
+    },
+    "saveStatus": {
+      "saved": "Saved",
+      "notSaved": "Not Saved"
+    },
+    "menuItems": {
+      "deleteArticle": "Delete Article",
+      "makePrivate": "Make Private",
+      "copyLink": "Copy Link"
+    },
+    "confirmMessages": {
+      "deleteArticle": "Are you sure you want to delete this article? This action cannot be undone.",
+      "makePrivateArticle": "Are you sure you want to make this article private? Other users will not be able to view it."
+    },
+    "messages": {
+      "archiveInitStatus": "Archive initialization status",
+      "commentCountUpdated": "Comment count updated from parent",
+      "likeAction": "Archive like action",
+      "likeActionFailed": "Like action failed",
+      "likeActionSuccess": "Like action successful",
+      "likeApiError": "Like API call error",
+      "saveAction": "Archive save action",
+      "saveActionFailed": "Save action failed",
+      "saveActionSuccess": "Save action successful",
+      "saveApiError": "Save API call error",
+      "linkCopied": "Link copied to clipboard",
+      "copyLinkFailed": "Failed to copy link",
+      "articleDeleted": "Article deleted",
+      "deleteFailed": "Delete failed",
+      "deleteArticleFailed": "Failed to delete article",
+      "deleteFailedRetry": "Delete failed, please try again later",
+      "articleMadePrivate": "Article made private",
+      "makePrivateFailed": "Failed to make private",
+      "makePrivateFailedError": "Failed to make private",
+      "makePrivateFailedRetry": "Failed to make private, please try again later",
+      "userAvatarClicked": "Archive user avatar clicked",
+      "navigateToOwnProfile": "Archive - Navigate to own profile page",
+      "navigateToUserProfile": "Archive - Navigate to other user's profile page"
+    }
+  },
+  "createDiseaseArchive": {
+    "title": "Create Disease Archive",
+    "draftSaved": "Draft Saved",
+    "symptomsData": "Symptoms Data",
+    "abnormalRecord": "Abnormal Record",
+    "abnormalRecordAlt": "Abnormal Record",
+    "searchingRecords": "Searching for abnormal records...",
+    "symptomsLabel": "Symptoms",
+    "form": {
+      "archiveTitle": "Archive Title",
+      "undiagnosed": "Not Diagnosed",
+      "diagnosed": "Diagnosed",
+      "untreated": "Not Cured",
+      "treated": "Cured",
+      "mainCause": "Main Cause",
+      "symptomsLabel": "Symptoms at Onset:",
+      "selectSymptom": "Select Symptom",
+      "addSymptom": "Add",
+      "selectDateRange": "Select Date Range:",
+      "reincludeRecord": "Re-include This Record",
+      "excludeRecord": "Exclude This Record",
+      "cancel": "Cancel",
+      "nextStep": "Next Step"
+    },
+    "validation": {
+      "archiveTitleRequired": "Please enter archive title",
+      "diagnosisStatusRequired": "Please select diagnosis status",
+      "treatmentStatusRequired": "Please select treatment status",
+      "atLeastOneRecordRequired": "Please select at least one abnormal record"
+    },
+    "messages": {
+      "startValidatingRecords": "Starting validation of abnormal record data in CreateDiseaseArchivePage",
+      "realAbnormalPosts": "realAbnormalPosts:",
+      "abnormalPostsForDates": "abnormalPostsForDates:",
+      "collectedRecordIds": "Collected abnormal record IDs:",
+      "noRecordsToValidate": "No abnormal records need validation",
+      "recordsDeletedAndUpdated": "Detected {{count}} abnormal records have been deleted, automatically updated data",
+      "validationFailed": "Failed to validate abnormal record data:",
+      "saveDraftFailed": "Failed to save draft:",
+      "loadDraftFailed": "Failed to load draft:",
+      "clearDraftFailed": "Failed to clear draft:",
+      "loadDataFailed": "Failed to load data",
+      "searchRecordsFailed": "Failed to search abnormal records, please try again later"
+    }
+  },
+  "diseaseArchiveDetail": {
+    "title": {
+      "publicView": "Viewing Archive",
+      "privateView": "Disease Archive"
+    },
+    "buttons": {
+      "publish": "Publish",
+      "published": "Published",
+      "deleteArchive": "Delete Disease Archive",
+      "like": "Like",
+      "comment": "Comment",
+      "save": "Save"
+    },
+    "errorPage": {
+      "title": "Disease Archive Not Found",
+      "description": "This archive may have been deleted or does not exist",
+      "retry": "Reload",
+      "back": "Back"
+    },
+    "likeStatus": {
+      "liked": "Liked",
+      "notLiked": "Not Liked"
+    },
+    "saveStatus": {
+      "saved": "Saved",
+      "notSaved": "Not Saved",
+      "save": "Save"
+    },
+    "confirmMessages": {
+      "deleteArchive": "Are you sure you want to delete this article? This action cannot be undone.",
+      "publishArchive": "Are you sure you want to publish this article publicly? Related abnormal records will also become public.",
+      "makePrivateArchive": "Are you sure you want to make this article private? Other users will not be able to view it."
+    },
+    "messages": {
+      "getUserDataFailed": "Failed to get user data:",
+      "archiveNotFound": "Cannot find the specified disease archive",
+      "loadDataFailed": "Failed to load data:",
+      "archiveDetailInitStatus": "Archive detail page initialization status",
+      "archiveDeleted": "Disease archive deleted",
+      "deleteFailed": "Delete failed, please try again later",
+      "deleteError": "Delete failed:",
+      "operationSuccess": "Operation successful!",
+      "operationFailed": "Operation failed, please try again later",
+      "toggleStatusError": "Failed to toggle disease archive status:",
+      "likeAction": "Archive detail page like action",
+      "likeActionFailed": "Like action failed:",
+      "likeActionFailedRetry": "Like action failed, please try again later",
+      "likeActionSuccess": "Like action successful:",
+      "likeApiError": "Like API call error:",
+      "likeNetworkError": "Like action failed, please check network connection",
+      "cannotOpenComments": "Cannot open comment function",
+      "commentCountUpdate": "DiseaseArchiveDetailPage comment count update:",
+      "saveAction": "Archive detail page save action",
+      "saveActionFailed": "Save action failed:",
+      "saveActionFailedRetry": "Save action failed, please try again later",
+      "saveActionSuccess": "Save action successful:",
+      "saveApiError": "Save API call error:",
+      "saveNetworkError": "Save action failed, please check network connection"
+    }
+  },
+  "diseaseArchiveEditContent": {
+    "aiSection": {
+      "title": "AI Content Summary"
+    },
+    "buttons": {
+      "edit": "Edit",
+      "cancel": "Cancel",
+      "save": "Save",
+      "previous": "Previous",
+      "preview": "Preview Archive"
+    },
+    "form": {
+      "contentPlaceholder": "Please enter disease archive content..."
+    },
+    "editingTips": {
+      "title": "Editing Tips:",
+      "tip1": "You can freely edit AI-generated content",
+      "tip2": "Date formats (like \"Dec 3\") are recommended at the beginning of paragraphs for the system to automatically associate corresponding abnormal records",
+      "tip3": "Keep content structure clear for easy future reference"
+    },
+    "generating": {
+      "analyzing": "AI is analyzing your pet data...",
+      "pleaseWait": "Please wait, this may take some time"
+    },
+    "noContent": "No content available",
+    "treating": "Under Treatment",
+    "validation": {
+      "contentEmpty": "Content cannot be empty",
+      "contentTooShort": "Content is too short, please provide more detailed description"
+    },
+    "confirmMessages": {
+      "returnToPrevious": "Confirm return to previous step? This AI summary record will be discarded.",
+      "leavePageWarning": "Confirm leaving? This AI summary record will be discarded."
+    },
+    "messages": {
+      "missingData": "Missing required data, returning to first step",
+      "missingDataReturning": "Missing required data, returning to first step...",
+      "generateContentFailed": "Failed to generate content",
+      "generateArchiveContentError": "Failed to generate archive content:",
+      "aiGenerateTimeout": "AI generation timeout, please try again later",
+      "aiServiceUnavailable": "AI service temporarily unavailable, please try again later",
+      "generateFailedManualEdit": "Content generation failed, please edit manually or try again.",
+      "dateFormatTip": "Tip: Date formats are recommended at the beginning of paragraphs for better system association with abnormal records",
+      "contentFormatError": "Content format error: {{error}}",
+      "editContentSaved": "Edited content saved",
+      "setLeaveWarning": "Set leave warning",
+      "beforeUnloadTriggered": "beforeunload triggered, archiveData:",
+      "popstateTriggered": "popstate triggered, archiveData:",
+      "interceptNavigation": "Intercept navigation",
+      "loadDataError": "Failed to load data:",
+      "loadDataFailed": "Failed to load data"
+    }
+  },
+  "diseaseArchivePreview": {
+    "title": "Disease Archive Preview",
+    "buttons": {
+      "previous": "Previous",
+      "confirmCreate": "Confirm Create"
+    },
+    "messages": {
+      "skipValidationNoData": "Skip validation: no abnormal record data",
+      "startValidatingData": "Start validating abnormal record data:",
+      "extractedRecordIds": "Extracted abnormal record IDs:",
+      "noValidRecordIds": "No valid abnormal record IDs",
+      "updateLocalStorageFailed": "Failed to update localStorage:",
+      "recordsDeletedAndUpdated": "Detected {{count}} abnormal records have been deleted, automatically updated preview",
+      "validationFailed": "Failed to validate abnormal record data:",
+      "missingDataReturnEdit": "Missing required data, returning to edit page",
+      "missingDataReturningEdit": "Missing required data, returning to edit page...",
+      "getRecordsFromLocalStorageFailed": "Failed to get abnormal records from localStorage:",
+      "loadDataError": "Failed to load data:",
+      "loadDataFailed": "Failed to load data",
+      "preparingToCreateArchive": "Preparing to create disease archive:",
+      "archiveCreatedSuccess": "Disease archive created successfully:",
+      "archiveCreatedSuccessNotification": "Disease archive created successfully!",
+      "createArchiveError": "Failed to create disease archive:",
+      "createArchiveFailed": "Failed to create disease archive, please try again later"
+    }
+  },
+  "petDiseaseArchive": {
+    "title": "'s Disease Archives",
+    "buttons": {
+      "new": "New"
+    },
+    "emptyStateAlt": "Empty State",
+    "emptyStateText": "No Disease Archives Yet",
+    "archiveIconAlt": "Disease Archive",
+    "recoveredBadge": "Recovered",
+    "createdDateLabel": "Created Date: ",
+    "messages": {
+      "loadDataFailed": "Failed to load data:"
+    }
+  },
+  "symptomCalendar": {
+    "title": "Symptom Calendar",
+    "subtitle": "",
+    "selectSymptom": "Symptom",
+    "add": "Add",
+    "reset": "Reset"
+  },
+  "common": {
+    "loading": "Loading..."
+  }
+}

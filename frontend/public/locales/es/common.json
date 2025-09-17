@@ -1,0 +1,48 @@
+{
+  "nav": {
+    "home": "Inicio",
+    "social": "Social",
+    "pets": "Mascotas",
+    "feed": "Alimento",
+    "calculator": "Calculadora",
+    "profile": "Perfil",
+    "settings": "Configuración",
+    "logout": "Cerrar sesión",
+    "post": "Publicar",
+    "dailyRecord": "Publicación diaria",
+    "abnormalRecord": "Registro anormal"
+  },
+  "button": {
+    "submit": "Enviar",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "back": "Atrás",
+    "next": "Siguiente",
+    "previous": "Anterior",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "upload": "Subir",
+    "download": "Descargar",
+    "share": "Compartir",
+    "like": "Me gusta",
+    "comment": "Comentar",
+    "follow": "Seguir",
+    "unfollow": "Dejar de seguir"
+  },
+  "message": {
+    "loading": "Cargando...",
+    "success": "Éxito",
+    "error": "Ocurrió un error",
+    "noData": "No hay datos disponibles",
+    "confirmDelete": "¿Estás seguro de que quieres eliminar?",
+    "welcome": "Bienvenido",
+    "goodbye": "Adiós"
+  },
+  "language": {
+    "zh-TW": "繁體中文",
+    "en": "English",
+    "es": "Español"
+  }
+}

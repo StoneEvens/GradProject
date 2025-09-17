@@ -1,9 +1,11 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import styles from '../styles/BottomNavbar.module.css';
 import PostMenu from './PostMenu';
 
 const BottomNavbar = () => {
+  const { t } = useTranslation('common');
   const [isPostMenuOpen, setIsPostMenuOpen] = useState(false);
   const postButtonRef = useRef(null);
   const navigate = useNavigate();
@@ -13,11 +15,11 @@ const BottomNavbar = () => {
     // 在所有頁面都提供相同的基本紀錄功能
     return [
       {
-        label: '日常紀錄',
+        label: t('nav.dailyRecord'),
         path: '/create-post'
       },
       {
-        label: '異常紀錄',
+        label: t('nav.abnormalRecord'),
         path: '/create-abnormal-post'
       }
     ];
@@ -74,7 +76,7 @@ const BottomNavbar = () => {
         <div className={styles.navItem}>
           <img 
             src="/assets/icon/BottomButton_Forum.png" 
-            alt="社群"
+            alt={t('nav.social')}
             className={styles.icon}
             onClick={() => handleNavItemClick('social')}
           />
@@ -82,7 +84,7 @@ const BottomNavbar = () => {
         <div className={styles.navItem}>
           <img 
             src="/assets/icon/BottomButton_PetPage.png" 
-            alt="寵物"
+            alt={t('nav.pets')}
             className={styles.icon}
             onClick={() => handleNavItemClick('pet')}
           />
@@ -90,7 +92,7 @@ const BottomNavbar = () => {
         <div className={styles.navItem}>
           <img 
             src="/assets/icon/BottomButton_CreatePost.png" 
-            alt="發文"
+            alt={t('nav.post')}
             className={`${styles.icon} ${styles.createPost}`}
             onClick={() => handleNavItemClick('post')}
             ref={postButtonRef}
@@ -99,7 +101,7 @@ const BottomNavbar = () => {
         <div className={styles.navItem}>
           <img 
             src="/assets/icon/BottomButton_Calculator.png" 
-            alt="計算機"
+            alt={t('nav.calculator')}
             className={styles.icon}
             onClick={() => handleNavItemClick('calculator')}
           />
@@ -107,7 +109,7 @@ const BottomNavbar = () => {
         <div className={styles.navItem}>
           <img 
             src="/assets/icon/BottomButton_Setting.png" 
-            alt="設定"
+            alt={t('nav.settings')}
             className={styles.icon}
             onClick={() => handleNavItemClick('settings')}
           />

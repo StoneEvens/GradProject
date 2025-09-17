@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import TopNavbar from '../components/TopNavbar';
 import BottomNavbar from '../components/BottomNavigationbar';
@@ -11,6 +12,7 @@ import styles from '../styles/FeedSearchResultPage.module.css';
 import { useUser } from '../context/UserContext';
 
 const FeedSearchResultPage = () => {
+  const { t } = useTranslation('posts');
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { userData } = useUser();
@@ -34,7 +36,7 @@ const FeedSearchResultPage = () => {
       performSearch(query);
     } else {
       setLoading(false);
-      setMessage('請輸入搜尋關鍵字');
+      setMessage(t('feedSearchResultPage.messages.enterSearchKeyword'));
     }
   }, [searchParams]);
 
@@ -71,9 +73,9 @@ const FeedSearchResultPage = () => {
       setTotalCount(response.data.total_count);
       
     } catch (error) {
-      console.error('搜尋飼料失敗:', error);
+      console.error(t('feedSearchResultPage.messages.searchFailed'), error);
       setSearchResults([]);
-      setMessage('搜尋失敗');
+      setMessage(t('feedSearchResultPage.messages.searchFailed'));
       setTotalCount(0);
     } finally {
       setLoading(false);
@@ -107,7 +109,7 @@ const FeedSearchResultPage = () => {
           if (currentQuery) {
             performSearch(currentQuery);
           }
-          setNotification('飼料已加入精選');
+          setNotification(t('feedSearchResultPage.messages.feedMarked'));
           return;
         } else {
           // 如果不是創建者，檢查使用者是否已審核過此飼料或提交過錯誤回報
@@ -146,7 +148,7 @@ const FeedSearchResultPage = () => {
       }
       
     } catch (error) {
-      console.error('切換標記失敗:', error);
+      console.error(t('feedSearchResultPage.messages.toggleMarkFailed'), error);
     }
   };
 
@@ -186,7 +188,7 @@ const FeedSearchResultPage = () => {
       }
       
     } catch (error) {
-      console.error('審核失敗:', error);
+      console.error(t('feedSearchResultPage.messages.reviewFailed'), error);
       throw error; // 讓 modal 組件處理錯誤
     }
   };
@@ -198,7 +200,7 @@ const FeedSearchResultPage = () => {
       const response = await axios.post('/feeds/error-report/', errorData);
       
     } catch (error) {
-      console.error('錯誤回報失敗:', error);
+      console.error(t('feedSearchResultPage.messages.reportErrorFailed'), error);
       throw error; // 讓 modal 組件處理錯誤
     }
   };
@@ -219,7 +221,7 @@ const FeedSearchResultPage = () => {
           <img src={feed.frontImage} alt={feed.name} className={styles.feedImage} />
         ) : (
           <div className={styles.feedImagePlaceholder}>
-            <span>無圖片</span>
+            <span>{t('feedSearchResultPage.noImage')}</span>
           </div>
         )}
         <button 
@@ -231,13 +233,13 @@ const FeedSearchResultPage = () => {
         >
           <img 
             src={feed.isMarked ? "/assets/icon/IsmarkedIcon.png" : "/assets/icon/MarkIcon.png"} 
-            alt={feed.isMarked ? "已標記" : "標記"} 
+            alt={feed.isMarked ? t('feedSearchResultPage.marked') : t('feedSearchResultPage.mark')} 
           />
         </button>
         {/* 審核中標示 - 顯示在左下角 */}
         {!feed.isVerified && (
           <div className={styles.verifyingBadge}>
-            <img src="/assets/icon/Verifying.png" alt="審核中" />
+            <img src="/assets/icon/Verifying.png" alt={t('feedSearchResultPage.verifying')} />
           </div>
         )}
       </div>
@@ -259,7 +261,7 @@ const FeedSearchResultPage = () => {
             <button className={styles.backButton} onClick={handleBack}>
               ❮
             </button>
-            <h1 className={styles.title}>搜尋結果</h1>
+            <h1 className={styles.title}>{t('feedSearchResultPage.title')}</h1>
             <div className={styles.spacer}></div>
           </div>
           
@@ -268,13 +270,13 @@ const FeedSearchResultPage = () => {
           {/* 搜尋資訊 */}
           {searchQuery && (
             <div className={styles.searchInfo}>
-              <p>搜尋「<span className={styles.searchKeyword}>{searchQuery}</span>」{totalCount > 0 && `找到 ${totalCount} 筆結果`}</p>
+              <p>{totalCount > 0 ? t('feedSearchResultPage.searchInfoWithCount', { searchQuery, totalCount }) : t('feedSearchResultPage.searchInfo', { searchQuery })}</p>
             </div>
           )}
 
           {loading ? (
             <div className={styles.loadingContainer}>
-              <span>搜尋中...</span>
+              <span>{t('feedSearchResultPage.loading')}</span>
             </div>
           ) : (
             <div className={styles.feedSection}>
@@ -284,8 +286,8 @@ const FeedSearchResultPage = () => {
                 </div>
               ) : (
                 <div className={styles.emptyState}>
-                  <img src="/assets/icon/SearchNoResult.png" alt="無結果" className={styles.noResultImage} />
-                  <p>{searchQuery ? `找不到與「${searchQuery}」相關的飼料` : '請輸入搜尋關鍵字'}</p>
+                  <img src="/assets/icon/SearchNoResult.png" alt={t('feedSearchResultPage.noResultAlt')} className={styles.noResultImage} />
+                  <p>{searchQuery ? t('feedSearchResultPage.noResultsFound', { searchQuery }) : t('feedSearchResultPage.messages.enterSearchKeyword')}</p>
                 </div>
               )}
             </div>

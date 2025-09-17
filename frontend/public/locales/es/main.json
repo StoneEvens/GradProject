@@ -1,0 +1,72 @@
+{
+  "aiNavigator": {
+    "greeting": "¡Hola! Soy PETer Peter",
+    "description": "¡Siéntete libre de preguntarme si tienes alguna duda sobre cómo usarla!"
+  },
+  "todoSection": {
+    "title": "Mi Lista de Tareas",
+    "loading": "Cargando...",
+    "noTodos": "No hay tareas pendientes",
+    "addNew": "Tocar para agregar",
+    "newItem": "Agregar nuevo elemento",
+    "errors": {
+      "fetchTodos": "Error al obtener elementos de la lista",
+      "updateSchedule": "Error al actualizar horario",
+      "addSchedule": "Error al agregar horario",
+      "deleteSchedule": "Error al eliminar horario",
+      "markCompleted": "Error al marcar como completado"
+    }
+  },
+  "dailyTasks": {
+    "title": "Mis Tareas Diarias",
+    "tasks": {
+      "createPost": "Crear una publicación",
+      "useCalculator": "Usar calculadora nutricional"
+    },
+    "completeButton": "Completar"
+  },
+  "topNavbar": {
+    "home": "Inicio",
+    "interactiveCity": "Ciudad Interactiva",
+    "notification": "Notificación",
+    "userAvatar": "Avatar del Usuario",
+    "search": "Buscar",
+    "searchPlaceholder": "Buscar...",
+    "feedSearchPlaceholder": "Buscar nombre o marca de alimento..."
+  },
+  "addSchedule": {
+    "editMode": "Editar Horario",
+    "addMode": "Agregar Horario",
+    "delete": "Eliminar",
+    "completed": "Completado",
+    "complete": "Completar",
+    "date": "Fecha",
+    "startTime": "Inicio",
+    "endTime": "Fin",
+    "titlePlaceholder": "Ingresa elemento del horario",
+    "descriptionPlaceholder": "Notas...",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "today": "Hoy",
+    "timeError": "La hora de fin debe ser posterior a la hora de inicio",
+    "deleteConfirm": "¿Estás seguro de que quieres eliminar este horario?",
+    "deleteTitle": "Eliminar Horario",
+    "markCompletedTitle": "Marcar como Completado"
+  },
+  "chatWindow": {
+    "title": "Especialista PETer Peter",
+    "status": "En línea",
+    "welcomeMessage": "¡Hola! Soy el especialista PETer Peter, ¡encantado de servirte! Siéntete libre de hacerme cualquier pregunta～",
+    "errorMessage": "Lo siento, no puedo responder a tu pregunta en este momento. Por favor, inténtalo de nuevo más tarde.",
+    "inputPlaceholder": "Ingresa tu pregunta...",
+    "sendButton": "Enviar Mensaje",
+    "close": "Cerrar"
+  },
+  "timeDisplay": {
+    "days": "días",
+    "hours": "hr",
+    "minutes": "min",
+    "ago": "hace",
+    "later": "después"
+  }
+}

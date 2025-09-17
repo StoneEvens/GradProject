@@ -1,0 +1,219 @@
+/* LanguageSettings 組件樣式 */
+.languageContainer {
+  margin-bottom: 20px;
+}
+
+/* 語言設定標題列 */
+.languageHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: transparent;
+  border-radius: 12px;
+  padding: 0px 0 0 0;
+  cursor: pointer;
+  min-height: 60px;
+  margin-bottom: 2px;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 7.5px;
+}
+
+.languageIcon {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+.languageText {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+}
+
+.arrowIcon {
+  color: #FFB370;
+  font-size: 1.2rem;
+  transition: transform 0.3s ease;
+}
+
+.arrowIcon.expanded {
+  transform: rotate(0deg);
+}
+
+.arrowIcon.collapsed {
+  transform: rotate(-90deg);
+}
+
+/* 摺疊內容區域 */
+.languageContent {
+  background: transparent;
+  border-radius: 0 0 12px 12px;
+  padding: 0;
+  margin-top: 0;
+  border-top: 1px solid #FFB370;
+  padding-top: 8px;
+}
+
+.languageItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 10px 12px 0px;
+  min-height: 50px;
+  background: transparent;
+  border-radius: 8px;
+}
+
+.itemLeft {
+  display: flex;
+  align-items: center;
+}
+
+.itemText {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #333;
+}
+
+.itemRight {
+  display: flex;
+  align-items: center;
+}
+
+/* 語言選擇下拉選單 */
+.languageSelect {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #FFB370;
+  background-color: #fff;
+  color: #333;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s ease;
+  min-width: 120px;
+}
+
+.languageSelect:hover {
+  border-color: #ff9f4a;
+  background-color: rgba(255, 179, 112, 0.05);
+}
+
+.languageSelect:focus {
+  border-color: #ff9f4a;
+  box-shadow: 0 0 0 2px rgba(255, 179, 112, 0.15);
+}
+
+.languageSelect option {
+  padding: 8px;
+  background-color: #fff;
+  color: #333;
+}
+
+.languageSelect.changing {
+  animation: pulse 0.3s ease;
+  background-color: rgba(255, 179, 112, 0.1);
+}
+
+.languageSelect:disabled {
+  opacity: 0.8;
+  cursor: not-allowed;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* 語言說明區塊 */
+.languageInfo {
+  padding: 12px 10px 8px 0px;
+  background: rgba(255, 179, 112, 0.05);
+  border-radius: 8px;
+  margin-top: 8px;
+}
+
+.infoText {
+  font-size: 0.9rem;
+  color: #666;
+  line-height: 1.4;
+  margin: 0;
+}
+
+/* 手機版優化 */
+@media (max-width: 480px) {
+  .languageHeader {
+    padding: 14px 0 0 0;
+    min-height: 55px;
+  }
+
+  .languageText {
+    font-size: 1rem;
+  }
+
+  .languageIcon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .languageItem {
+    padding: 10px 0;
+    min-height: 45px;
+  }
+
+  .itemText {
+    font-size: 0.95rem;
+  }
+
+  .languageSelect {
+    font-size: 0.9rem;
+    padding: 6px 10px;
+    min-width: 100px;
+  }
+
+  .infoText {
+    font-size: 0.85rem;
+  }
+}
+
+/* 小屏手機優化 */
+@media (max-width: 360px) {
+  .languageHeader {
+    padding: 12px 0 0 0;
+  }
+
+  .languageItem {
+    padding: 8px 0;
+  }
+
+  .itemText {
+    font-size: 0.9rem;
+  }
+
+  .languageSelect {
+    font-size: 0.85rem;
+    padding: 5px 8px;
+    min-width: 90px;
+  }
+
+  .infoText {
+    font-size: 0.8rem;
+  }
+}

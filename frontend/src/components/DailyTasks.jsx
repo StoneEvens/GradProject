@@ -1,21 +1,23 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import styles from '../styles/DailyTasks.module.css';
 
 const DailyTasks = () => {
+  const { t } = useTranslation('main');
   const navigate = useNavigate();
 
   const tasks = [
     {
       id: 1,
-      title: '發布一篇貼文',
+      titleKey: 'dailyTasks.tasks.createPost',
       icon: '/assets/icon/SettingIcon.png',
       route: '/create-post',
       completed: false
     },
     {
       id: 2,
-      title: '使用一次營養計算機',
+      titleKey: 'dailyTasks.tasks.useCalculator',
       icon: '/assets/icon/SettingIcon.png',
       route: '/calculator',
       completed: false
@@ -28,7 +30,7 @@ const DailyTasks = () => {
 
   return (
     <div className={styles.dailyTasksContainer}>
-      <h3 className={styles.sectionTitle}>我的每日任務</h3>
+      <h3 className={styles.sectionTitle}>{t('dailyTasks.title')}</h3>
 
       <div className={styles.tasksGrid}>
         {tasks.map((task) => (
@@ -40,14 +42,14 @@ const DailyTasks = () => {
                   alt="task icon"
                   className={styles.taskIcon}
                 />
-                <span className={styles.taskTitle}>{task.title}</span>
+                <span className={styles.taskTitle}>{t(task.titleKey)}</span>
               </div>
 
               <button
                 className={styles.completeButton}
                 onClick={() => handleTaskClick(task.route)}
               >
-                去完成
+                {t('dailyTasks.completeButton')}
               </button>
             </div>
           </div>

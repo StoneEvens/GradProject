@@ -138,6 +138,11 @@
   gap: 10px;
 }
 
+.dateInputWrapper {
+  position: relative;
+  display: inline-block;
+}
+
 .dateLabel {
   font-size: 16px;
   color: #89350c;
@@ -145,25 +150,54 @@
   margin: 0;
 }
 
-.dateButton {
+.dateInput {
   background-color: #FFB370;
-  color: white;
+  color: transparent;
   border: none;
   border-radius: 8px;
-  padding: 6px 16px;
+  padding: 6px 12px;
   font-size: 14px;
   font-weight: bold;
   cursor: pointer;
   transition: background-color 0.2s ease;
   height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  text-align: center;
+  outline: none;
+  width: auto;
+  min-width: 80px;
 }
 
-.dateButton.active,
-.dateButton:hover {
+.dateInput:hover,
+.dateInput:focus {
   background-color: #F08651;
+}
+
+/* 日期顯示文字（包括提示和選中的日期） */
+.datePlaceholder {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+  pointer-events: none;
+  z-index: 2;
+  white-space: nowrap;
+}
+
+/* 隱藏原生日期輸入框的箭頭和圖標 */
+.dateInput::-webkit-calendar-picker-indicator {
+  background: transparent;
+  bottom: 0;
+  color: transparent;
+  cursor: pointer;
+  height: auto;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: auto;
 }
 
 .emergencyCheckbox {
@@ -798,7 +832,7 @@
     font-size: 14px;
   }
 
-  .dateButton {
+  .dateInput {
     padding: 4px 10px;
     font-size: 12px;
     height: 26px;

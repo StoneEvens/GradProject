@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import axios from '../utils/axios';
 import styles from '../styles/HealthReportPage.module.css';
 import TopNavbar from '../components/TopNavbar';
@@ -9,30 +10,37 @@ import { NotificationProvider } from '../context/NotificationContext';
 import { getUserPets } from '../services/petService';
 
 const CATEGORIES = {
-  CBC: {
-    label: '全血計數',
-    fields: ['紅血球計數', '白血球計數', '血紅蛋白']
+  cbc: {
+    key: 'cbc',
+    fields: ['紅血球計數', '白血球計數', '血紅蛋白', '血比容', '平均紅血球體積', '平均紅血球血紅蛋白量', '平均紅血球血紅蛋白濃度', '紅血球分布寬度', '嗜中性球計數', '淋巴球計數', '單核球計數', '嗜酸性球計數', '嗜鹼性球計數', '血小板計數', '網狀紅血球計數']
   },
-  BIO: {
-    label: '血液生化檢查',
-    fields: ['血比容', '平均紅血球體積', '紅血球分布寬度']
+  biochemistry: {
+    key: 'biochemistry',
+    fields: ['白蛋白', '球蛋白', '總蛋白', '丙氨酸轉氨酶', '天門冬酸轉氨酶', '鹼性磷酸酶', '血中尿素氮', '肌酸酐', '葡萄糖', '磷']
   },
-  URINE: {
-    label: '尿液分析',
-    fields: ['尿比重', '尿液酸鹼值', '尿中紅血球']
+  urinalysis: {
+    key: 'urinalysis',
+    fields: ['尿比重', '尿液酸鹼值', '尿中紅血球', '尿中白血球', '尿蛋白／肌酐比值']
+  },
+  other: {
+    key: 'other',
+    fields: []
   }
 };
 
 const HealthReportUploadPage = () => {
+  const { t, i18n } = useTranslation('health');
+  const { petId } = useParams();
   const navigate = useNavigate();
   const [notification, setNotification] = useState('');
-  const [currentPetId, setCurrentPetId] = useState(null);
+  const [pet, setPet] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [ocrData, setOcrData] = useState(null);
-  
+  const [loading, setLoading] = useState(true);
+
   // 表單資料
   const [formData, setFormData] = useState({
-    category: 'CBC',
+    category: 'cbc',
     date: '',
     location: '',
     values: {},
@@ -49,21 +57,40 @@ const HealthReportUploadPage = () => {
     setNotification('');
   };
 
-  // 獲取當前寵物ID
+  // 翻譯血液檢測項目
+  const translateFieldName = (fieldName) => {
+    return t(`bloodFields.${fieldName}`, { defaultValue: fieldName });
+  };
+
+  // 格式化日期顯示
+  const formatDateDisplay = (dateStr) => {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${month}/${day}`;
+  };
+
+  // 載入寵物資料
   useEffect(() => {
-    const fetchCurrentPet = async () => {
-      try {
-        const pets = await getUserPets();
-        if (pets && pets.length > 0) {
-          setCurrentPetId(pets[0].pet_id);
-        }
-      } catch (error) {
-        console.error('獲取寵物資料失敗:', error);
-        showNotification('無法獲取寵物資料');
+    loadPetData();
+  }, [petId]);
+
+  const loadPetData = async () => {
+    try {
+      setLoading(true);
+      const pets = await getUserPets();
+      const currentPet = pets.find(p => p.pet_id === parseInt(petId));
+      if (currentPet) {
+        setPet(currentPet);
       }
-    };
-    fetchCurrentPet();
-  }, []);
+    } catch (error) {
+      console.error('載入寵物資料失敗', error);
+      showNotification(t('reports.petDataFailed'));
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // 處理 OCR 上傳
   const handleOCRUpload = async (e) => {
@@ -73,7 +100,7 @@ const HealthReportUploadPage = () => {
     setUploading(true);
     try {
       const uploadFormData = new FormData();
-      uploadFormData.append('pet_id', currentPetId || 1);
+      uploadFormData.append('pet_id', petId);
       uploadFormData.append('image', selectedFile);
 
       const res = await axios.post('/ocr/report/upload/', uploadFormData, {
@@ -86,18 +113,18 @@ const HealthReportUploadPage = () => {
       // 更新表單數值
       const fields = CATEGORIES[formData.category].fields;
       const newValues = { ...formData.values };
-      
+
       for (let field of fields) {
         if (extracted[field]?.result) {
           newValues[field] = `${extracted[field].result} ${extracted[field].unit || ''}`;
         }
       }
-      
+
       setFormData({ ...formData, values: newValues });
-      showNotification('圖片辨識成功');
+      showNotification(t('upload.ocrSuccess'));
     } catch (err) {
       console.error('OCR 辨識失敗', err);
-      showNotification('辨識失敗，請檢查圖片是否清晰或格式正確');
+      showNotification(t('upload.ocrFailed'));
     } finally {
       setUploading(false);
     }
@@ -126,12 +153,7 @@ const HealthReportUploadPage = () => {
   // 提交表單
   const handleSubmit = async () => {
     if (!formData.date) {
-      showNotification('請選擇檢查日期');
-      return;
-    }
-    
-    if (!currentPetId) {
-      showNotification('無法獲取寵物資料，請稍後再試');
+      showNotification(t('upload.selectDate'));
       return;
     }
 
@@ -139,9 +161,9 @@ const HealthReportUploadPage = () => {
       const mergedValues = { ...ocrData, ...formData.values };
 
       const payload = {
-        pet_id: currentPetId,
+        pet_id: petId,
         check_date: formData.date,
-        check_type: formData.category.toLowerCase(),
+        check_type: formData.category,
         check_location: formData.location || '',
         notes: formData.note || '',
         data: JSON.stringify(mergedValues),
@@ -151,133 +173,176 @@ const HealthReportUploadPage = () => {
         headers: { 'Content-Type': 'application/json' },
       });
 
-      showNotification('上傳成功');
-      
+      showNotification(t('upload.uploadSuccess'));
+
       // 延遲後返回列表頁
       setTimeout(() => {
-        navigate('/health-reports');
+        navigate(`/pet/${petId}/health-reports`);
       }, 1500);
     } catch (error) {
       console.error('上傳失敗', error);
-      showNotification('上傳失敗，請檢查表單或伺服器狀態');
+      showNotification(t('upload.uploadFailed'));
     }
   };
 
   // 返回列表頁
   const handleCancel = () => {
-    navigate('/health-reports');
+    navigate(`/pet/${petId}/health-reports`);
   };
 
   const currentFields = CATEGORIES[formData.category].fields;
+
+  if (loading) {
+    return (
+      <NotificationProvider>
+        <div className={styles.container}>
+          <TopNavbar />
+          <div className={styles.loadingContainer}>
+            {t('reports.loading')}
+          </div>
+          <BottomNavbar />
+        </div>
+      </NotificationProvider>
+    );
+  }
 
   return (
     <NotificationProvider>
       <div className={styles.container}>
         <TopNavbar />
         <div className={styles.content}>
-          {/* 標題列 */}
+          {/* 標題列 - 仿照 CreateDiseaseArchivePage */}
           <div className={styles.header}>
             <div className={styles.titleSection}>
-              <h1 className={styles.title}>上傳健康報告</h1>
+              <img
+                src={pet?.headshot_url || '/assets/icon/DefaultAvatar.jpg'}
+                alt={pet?.pet_name}
+                className={styles.petAvatar}
+              />
+              <span className={styles.title}>{t('upload.title')}</span>
             </div>
           </div>
-          
+
           <div className={styles.divider}></div>
 
           <div className={styles.uploadContainer}>
-            
-            <div className={styles.formGroup}>
-              <label className={styles.label}>檢查類型</label>
-              <select
-                className={styles.select}
-                value={formData.category}
-                onChange={handleCategoryChange}
-              >
-                {Object.entries(CATEGORIES).map(([key, obj]) => (
-                  <option value={key} key={key}>{obj.label}</option>
-                ))}
-              </select>
-            </div>
 
-            <div className={styles.formGroup}>
-              <label className={styles.label}>檢查時間</label>
-              <input
-                type="date"
-                className={styles.input}
-                value={formData.date}
-                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-              />
-            </div>
+            {/* 基本資訊區塊 - 每個欄位一行，標籤和輸入框在同一行 */}
+            <div className={styles.formInlineContainer}>
+              <div className={`${styles.formInlineGroup} ${i18n.language === 'en' ? styles.formStackedGroup : ''}`}>
+                <label className={styles.inlineLabel}>{t('fields.checkType')}</label>
+                <select
+                  className={styles.inlineSelect}
+                  value={formData.category}
+                  onChange={handleCategoryChange}
+                >
+                  {Object.entries(CATEGORIES).map(([key, obj]) => (
+                    <option value={key} key={key}>{t(`checkTypes.${obj.key}`)}</option>
+                  ))}
+                </select>
+              </div>
 
-            <div className={styles.formGroup}>
-              <label className={styles.label}>檢查地點</label>
-              <input
-                type="text"
-                className={styles.input}
-                value={formData.location}
-                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                placeholder="請輸入檢查地點"
-              />
-            </div>
-
-            <div className={styles.ocrUploadSection}>
-              <input
-                id="ocr-upload-input"
-                type="file"
-                accept="image/*"
-                style={{ display: 'none' }}
-                onChange={handleOCRUpload}
-              />
-              <button
-                type="button"
-                className={styles.ocrButton}
-                onClick={() => document.getElementById('ocr-upload-input').click()}
-                disabled={uploading}
-              >
-                {uploading ? '辨識中...' : '上傳健康報告圖片辨識'}
-              </button>
-            </div>
-
-            <div className={styles.section}>
-              <h3 className={styles.sectionTitle}>數值記錄</h3>
-              {currentFields.map((field) => (
-                <div className={styles.formGroup} key={field}>
-                  <label className={styles.label}>{field}</label>
+              <div className={`${styles.formInlineGroup} ${i18n.language === 'en' ? styles.formStackedGroup : ''}`}>
+                <label className={styles.inlineLabel}>{t('fields.checkDate')}</label>
+                <div className={styles.dateInputWrapper}>
                   <input
-                    className={styles.input}
-                    value={formData.values[field] || ''}
-                    onChange={(e) => handleValueChange(field, e.target.value)}
-                    placeholder="請輸入數值"
+                    type="date"
+                    className={styles.inlineInput}
+                    value={formData.date}
+                    onChange={(e) => setFormData({ ...formData, date: e.target.value })}
                   />
+                  <span className={styles.datePlaceholder}>
+                    {formData.date ? formatDateDisplay(formData.date) : t('common.selectDate')}
+                  </span>
                 </div>
-              ))}
+              </div>
+
+              <div className={`${styles.formInlineGroup} ${i18n.language === 'en' ? styles.formStackedGroup : ''}`}>
+                <label className={styles.inlineLabel}>{t('fields.checkLocation')}</label>
+                <input
+                  type="text"
+                  className={styles.inlineInput}
+                  value={formData.location}
+                  onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                  placeholder={t('edit.enterLocation')}
+                />
+              </div>
             </div>
 
-            <div className={styles.section}>
-              <h3 className={styles.sectionTitle}>備註</h3>
-              <textarea
-                className={styles.textarea}
-                placeholder="請輸入您想補充的描述"
-                value={formData.note}
-                onChange={(e) => setFormData({ ...formData, note: e.target.value })}
-              />
+            {/* OCR 上傳區域與數值記錄合併 */}
+            <div className={styles.ocrContainer}>
+              <div className={`${styles.ocrInlineGroup} ${i18n.language === 'en' ? styles.formStackedGroup : ''}`}>
+                <label className={styles.ocrLabel}>{t('fields.ocrUpload')}</label>
+                <div className={styles.ocrButtonWrapper}>
+                  <input
+                    id="ocr-upload-input"
+                    type="file"
+                    accept="image/*,application/pdf"
+                    style={{ display: 'none' }}
+                    onChange={handleOCRUpload}
+                  />
+                  <button
+                    type="button"
+                    className={styles.ocrButton}
+                    onClick={() => document.getElementById('ocr-upload-input').click()}
+                    disabled={uploading}
+                  >
+                    <span className={styles.ocrButtonText}>
+                      {uploading ? t('upload.uploading') : t('upload.uploadReport')}
+                    </span>
+                  </button>
+                </div>
+              </div>
+
+              {/* 數值記錄區域（保持標籤） */}
+              {currentFields.length > 0 && (
+                <div className={styles.valuesInlineContainer}>
+                  {currentFields.map((field) => {
+                    const isEnglish = i18n.language === 'en';
+
+                    return (
+                      <div className={`${styles.formInlineGroup} ${isEnglish ? styles.formStackedGroup : ''}`} key={field}>
+                        <label className={styles.valueLabel}>{translateFieldName(field)}</label>
+                        <input
+                          className={styles.valueInput}
+                          value={formData.values[field] || ''}
+                          onChange={(e) => handleValueChange(field, e.target.value)}
+                          placeholder={t('edit.enterValue')}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
-            <div className={styles.buttonContainer}>
-              <button className={styles.confirmButton} onClick={handleSubmit}>
-                確認上傳
-              </button>
+            {/* 備註區域 */}
+            <div className={styles.notesContainer}>
+              <div className={styles.notesInlineGroup}>
+                <textarea
+                  className={styles.notesTextarea}
+                  placeholder={t('edit.enterNotes')}
+                  value={formData.note}
+                  onChange={(e) => setFormData({ ...formData, note: e.target.value })}
+                />
+              </div>
+            </div>
+
+            <div className={styles.actionButtons}>
               <button className={styles.cancelButton} onClick={handleCancel}>
-                返回列表
+                {t('upload.cancel')}
+              </button>
+              <button className={styles.createButton} onClick={handleSubmit}>
+                {t('upload.submit')}
               </button>
             </div>
           </div>
         </div>
         <BottomNavbar />
         {notification && (
-          <Notification 
-            message={notification} 
-            onClose={hideNotification} 
+          <Notification
+            message={notification}
+            onClose={hideNotification}
           />
         )}
       </div>

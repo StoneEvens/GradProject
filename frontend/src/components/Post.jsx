@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import Annotation from './Annotation';
 import ConfirmNotification from './ConfirmNotification';
 import styles from '../styles/Post.module.css';
@@ -19,6 +20,7 @@ const Post = ({
   showFullDescription = false, // 是否顯示完整描述
   className = '' // 額外的 CSS 類名
 }) => {
+  const { t } = useTranslation('posts');
   const navigate = useNavigate();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showAnnotationDots, setShowAnnotationDots] = useState(false);
@@ -114,17 +116,17 @@ const Post = ({
 
   // 格式化時間顯示
   const formatTimeDisplay = (timestamp) => {
-    if (!timestamp) return '剛剛';
-    
+    if (!timestamp) return t('post.justNow');
+
     const now = new Date();
     const postTime = new Date(timestamp);
     const diffInSeconds = Math.floor((now - postTime) / 1000);
-    
-    if (diffInSeconds < 60) return '剛剛';
-    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}分鐘前`;
-    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}小時前`;
-    if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)}天前`;
-    
+
+    if (diffInSeconds < 60) return t('post.justNow');
+    if (diffInSeconds < 3600) return t('post.minutesAgo', { minutes: Math.floor(diffInSeconds / 60) });
+    if (diffInSeconds < 86400) return t('post.hoursAgo', { hours: Math.floor(diffInSeconds / 3600) });
+    if (diffInSeconds < 2592000) return t('post.daysAgo', { days: Math.floor(diffInSeconds / 86400) });
+
     return postTime.toLocaleDateString('zh-TW');
   };
 
@@ -375,11 +377,11 @@ const Post = ({
       } else {
         console.error('刪除貼文失敗:', result.error);
         // 可以顯示錯誤提示
-        alert(result.error || '刪除貼文失敗，請稍後再試');
+        alert(result.error || t('post.deleteFailedAlert'));
       }
     } catch (error) {
       console.error('刪除貼文時發生錯誤:', error);
-      alert('刪除貼文失敗，請稍後再試');
+      alert(t('post.deleteFailedAlert'));
     }
   };
 
@@ -448,14 +450,14 @@ const Post = ({
       <div className={styles.userInfo}>
         <img 
           src={userInfo.headshot_url || '/assets/icon/DefaultAvatar.jpg'} 
-          alt="用戶頭像" 
+          alt={t('post.userAvatarAlt')} 
           className={styles.userAvatar}
           onClick={handleUserClick}
           onError={handleImageError}
         />
         <div className={styles.userDetails}>
           <h3 className={styles.userName} onClick={handleUserClick}>
-            {userInfo.user_account || userInfo.username || '未知用戶'}
+            {userInfo.user_account || userInfo.username || t('post.unknownUser')}
           </h3>
           <div className={styles.postMeta}>
             {location && (
@@ -472,7 +474,7 @@ const Post = ({
           <button className={styles.moreOptionsButton} onClick={handleMoreOptions}>
             <img 
               src="/assets/icon/PostMoreInfo.png" 
-              alt="更多選項" 
+              alt={t('post.moreOptionsAlt')} 
               className={styles.moreOptionsIcon}
             />
           </button>
@@ -482,19 +484,19 @@ const Post = ({
               {isPostAuthor() ? (
                 <>
                   <button className={styles.menuItem} onClick={handleEditPost}>
-                    編輯貼文
+                    {t('post.editPost')}
                   </button>
                   <button className={styles.menuItem} onClick={handleDeletePost}>
-                    刪除貼文
+                    {t('post.deletePost')}
                   </button>
                 </>
               ) : (
                 <>
                   <button className={styles.menuItem} onClick={handleCopyLink}>
-                    複製連結
+                    {t('post.copyLink')}
                   </button>
                   <button className={styles.menuItem} onClick={handleReportPost}>
-                    檢舉貼文
+                    {t('post.reportPost')}
                   </button>
                 </>
               )}
@@ -524,7 +526,7 @@ const Post = ({
             <div className={styles.mainImageContainer}>
               <img 
                 src={currentImage?.dataUrl || currentImage?.url || currentImage?.firebase_url} 
-                alt={`貼文圖片 ${currentImageIndex + 1}`}
+                alt={t('post.postImageAlt', { index: currentImageIndex + 1 })}
                 className={styles.postImage}
                 onError={(e) => {
                   console.error('圖片載入失敗:', e.target.src);
@@ -537,11 +539,11 @@ const Post = ({
                 <div 
                   className={styles.annotationIcon}
                   onClick={toggleAnnotationDots}
-                  title={`${currentImageAnnotations.length} 個標註`}
+                  title={t('post.annotationsCount', { count: currentImageAnnotations.length })}
                 >
                   <img 
                     src="/assets/icon/PostAnnotation.png" 
-                    alt="標註" 
+                    alt={t('post.annotationAlt')} 
                     className={styles.annotationIconImage}
                     onError={(e) => {
                       e.target.style.display = 'none';
@@ -586,13 +588,13 @@ const Post = ({
           >
             <img 
               src={isLiked ? "/assets/icon/PostLiked.png" : "/assets/icon/PostHeart.png"} 
-              alt="按讚" 
+              alt={t('post.likeAlt')} 
               className={styles.interactionIcon} 
             />
             <span>{likeCount}</span>
           </button>
           <button className={styles.commentButton} onClick={handleComment}>
-            <img src="/assets/icon/PostComment.png" alt="留言" className={styles.interactionIcon} />
+            <img src="/assets/icon/PostComment.png" alt={t('post.commentAlt')} className={styles.interactionIcon} />
             <span>{commentCount}</span>
           </button>
           <button 
@@ -601,7 +603,7 @@ const Post = ({
           >
             <img 
               src={isSaved ? "/assets/icon/PostSaved.png" : "/assets/icon/PostSave.png"} 
-              alt="收藏" 
+              alt={t('post.saveAlt')} 
               className={styles.interactionIcon} 
             />
           </button>
@@ -614,7 +616,7 @@ const Post = ({
           {getDisplayDescription()}
           {!showFullDescription && (postData.content?.content_text || postData.description || '').length > 100 && (
             <span className={styles.showMore} onClick={() => handleComment()}>
-              查看更多
+              {t('post.showMore')}
             </span>
           )}
         </div>
@@ -643,7 +645,7 @@ const Post = ({
       {/* 刪除確認對話框 */}
       {showDeleteConfirm && (
         <ConfirmNotification
-          message="確定要刪除這篇貼文嗎？"
+          message={t('post.deleteConfirmMessage')}
           onConfirm={confirmDeletePost}
           onCancel={cancelDeletePost}
         />

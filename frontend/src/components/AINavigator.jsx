@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import styles from '../styles/AINavigator.module.css';
 import ChatWindow from './ChatWindow';
 
 const AINavigator = ({ user }) => {
+  const { t } = useTranslation('main');
   const [isChatOpen, setIsChatOpen] = useState(false);
 
   const handleAIClick = () => {
@@ -28,9 +30,9 @@ const AINavigator = ({ user }) => {
             </div>
           </div>
           <div className={styles.aiContent}>
-            <h2 className={styles.greeting}>Hi！我是 PETer 專員 Peter</h2>
+            <h2 className={styles.greeting}>{t('aiNavigator.greeting')}</h2>
             <p className={styles.description}>
-              我大學時主修 PETer 寵兒研究，對這個 app 瞭如指掌，如果有任何操作上問題都可以問我！
+              {t('aiNavigator.description')}
             </p>
           </div>
         </div>

@@ -1,0 +1,25 @@
+{
+  "title": "個人設定",
+  "account": {
+    "title": "アカウント設定",
+    "editProfile": "プロフィール編集",
+    "accountPrivacy": "アカウントプライバシー",
+    "privacyPublic": "公開",
+    "privacyPrivate": "非公開",
+    "privacyDescription": "非公開に設定すると、フォロワーのみがあなたの投稿を見ることができます"
+  },
+  "interaction": {
+    "title": "私のインタラクション",
+    "likedPosts": "いいねした投稿",
+    "savedPosts": "保存した投稿",
+    "likedArchives": "気に入った記事",
+    "savedArchives": "保存された記事"
+  },
+  "language": {
+    "title": "言語設定",
+    "systemLanguage": "システム言語",
+    "changeLanguageInfo": "お好みの表示言語を選択してください。変更はすぐに反映されます。"
+  },
+  "logout": "ログアウト",
+  "loggingOut": "ログアウト中..."
+}

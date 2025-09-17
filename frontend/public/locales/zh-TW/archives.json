@@ -1,0 +1,293 @@
+{
+  "archiveCard": {
+    "status": {
+      "diagnosed": "已就醫",
+      "undiagnosed": "未就醫",
+      "cured": "已痊癒",
+      "notCured": "未痊癒",
+      "treating": "治療中"
+    },
+    "noContent": "暫無內容",
+    "noSymptoms": "無症狀記錄",
+    "abnormalRecordAlt": "異常記錄",
+    "symptoms": "症狀",
+    "validatingRecords": "正在驗證異常記錄...",
+    "unknownUser": "未知用戶",
+    "pet": "寵物",
+    "unknownPet": "未知寵物",
+    "unknownBreed": "未知品種",
+    "mainCause": "主要病因",
+    "relatedSymptoms": "相關症狀",
+    "createdAt": "建立於",
+    "messages": {
+      "foundDeletedRecords": "發現 {{count}} 個已刪除的異常記錄，準備移除...",
+      "archiveUpdated": "疾病檔案已更新，移除了已刪除的異常記錄",
+      "autoRemovedRecords": "已自動移除 {{count}} 個已刪除的異常記錄",
+      "updateArchiveFailed": "更新疾病檔案失敗",
+      "validateRecordsError": "驗證異常記錄時發生錯誤",
+      "userClicked": "ArchiveCard 用戶點擊",
+      "navigateToOwnProfile": "ArchiveCard - 導航到自己的個人資料頁面",
+      "navigateToUserProfile": "ArchiveCard - 導航到其他用戶個人資料頁面",
+      "cannotGetPetId": "無法獲取寵物ID",
+      "cannotFindPetInfo": "無法找到寵物資訊"
+    }
+  },
+  "archivePreviewForPublic": {
+    "userAvatarAlt": "用戶頭像",
+    "defaultArchiveTitle": "疾病檔案",
+    "moreOptionsAlt": "更多選項",
+    "likeButtonAlt": "按讚",
+    "commentButtonAlt": "留言",
+    "saveButtonAlt": "收藏",
+    "likeStatus": {
+      "liked": "已按讚",
+      "notLiked": "未按讚"
+    },
+    "saveStatus": {
+      "saved": "已收藏",
+      "notSaved": "未收藏"
+    },
+    "menuItems": {
+      "deleteArticle": "刪除文章",
+      "makePrivate": "轉為私人",
+      "copyLink": "複製連結"
+    },
+    "confirmMessages": {
+      "deleteArticle": "確定要刪除這篇文章嗎？此操作無法復原。",
+      "makePrivateArticle": "確定要將這篇文章轉為私人嗎？其他用戶將無法查看。"
+    },
+    "messages": {
+      "archiveInitStatus": "Archive 初始化狀態",
+      "commentCountUpdated": "Comment count updated from parent",
+      "likeAction": "Archive 按讚操作",
+      "likeActionFailed": "按讚操作失敗",
+      "likeActionSuccess": "按讚操作成功",
+      "likeApiError": "按讚 API 調用異常",
+      "saveAction": "Archive 收藏操作",
+      "saveActionFailed": "收藏操作失敗",
+      "saveActionSuccess": "收藏操作成功",
+      "saveApiError": "收藏 API 調用異常",
+      "linkCopied": "連結已複製到剪貼簿",
+      "copyLinkFailed": "複製連結失敗",
+      "articleDeleted": "文章已刪除",
+      "deleteFailed": "刪除失敗",
+      "deleteArticleFailed": "刪除文章失敗",
+      "deleteFailedRetry": "刪除失敗，請稍後再試",
+      "articleMadePrivate": "文章已轉為私人",
+      "makePrivateFailed": "轉為私人失敗",
+      "makePrivateFailedError": "轉為私人失敗",
+      "makePrivateFailedRetry": "轉為私人失敗，請稍後再試",
+      "userAvatarClicked": "Archive 用戶頭像點擊",
+      "navigateToOwnProfile": "Archive - 導航到自己的個人資料頁面",
+      "navigateToUserProfile": "Archive - 導航到其他用戶個人資料頁面"
+    }
+  },
+  "createDiseaseArchive": {
+    "title": "製作疾病檔案",
+    "draftSaved": "草稿已保存",
+    "symptomsData": "症狀資料",
+    "abnormalRecord": "異常記錄",
+    "abnormalRecordAlt": "異常記錄",
+    "searchingRecords": "搜尋異常記錄中...",
+    "symptomsLabel": "症狀",
+    "form": {
+      "archiveTitle": "檔案標題",
+      "undiagnosed": "未就醫",
+      "diagnosed": "已就醫",
+      "untreated": "未痊癒",
+      "treated": "已痊癒",
+      "mainCause": "主要病因",
+      "symptomsLabel": "病發時症狀:",
+      "selectSymptom": "選擇症狀",
+      "addSymptom": "新增",
+      "selectDateRange": "選擇持續日期:",
+      "reincludeRecord": "重新加回此紀錄",
+      "excludeRecord": "不需要這筆資料",
+      "cancel": "取消",
+      "nextStep": "下一步"
+    },
+    "validation": {
+      "archiveTitleRequired": "請輸入檔案標題",
+      "diagnosisStatusRequired": "請選擇就醫狀態",
+      "treatmentStatusRequired": "請選擇痊癒狀態",
+      "atLeastOneRecordRequired": "請選擇至少一筆異常記錄"
+    },
+    "messages": {
+      "startValidatingRecords": "開始驗證CreateDiseaseArchivePage中的異常記錄數據",
+      "realAbnormalPosts": "realAbnormalPosts:",
+      "abnormalPostsForDates": "abnormalPostsForDates:",
+      "collectedRecordIds": "收集到的異常記錄ID:",
+      "noRecordsToValidate": "沒有異常記錄需要驗證",
+      "recordsDeletedAndUpdated": "檢測到 {{count}} 筆異常記錄已被刪除，已自動更新數據",
+      "validationFailed": "驗證異常記錄數據失敗:",
+      "saveDraftFailed": "保存草稿失敗:",
+      "loadDraftFailed": "載入草稿失敗:",
+      "clearDraftFailed": "清除草稿失敗:",
+      "loadDataFailed": "載入資料失敗",
+      "searchRecordsFailed": "搜尋異常記錄失敗，請稍後再試"
+    }
+  },
+  "diseaseArchiveDetail": {
+    "title": {
+      "publicView": "正在瀏覽檔案",
+      "privateView": "疾病檔案詳情"
+    },
+    "buttons": {
+      "publish": "公開發布",
+      "published": "已公開",
+      "deleteArchive": "刪除疾病檔案",
+      "like": "按讚",
+      "comment": "留言",
+      "save": "收藏"
+    },
+    "errorPage": {
+      "title": "找不到疾病檔案",
+      "description": "該檔案可能已被刪除或不存在",
+      "retry": "重新載入",
+      "back": "返回"
+    },
+    "likeStatus": {
+      "liked": "已按讚",
+      "notLiked": "未按讚"
+    },
+    "saveStatus": {
+      "saved": "已收藏",
+      "notSaved": "未收藏",
+      "save": "收藏"
+    },
+    "confirmMessages": {
+      "deleteArchive": "確定要刪除這篇文章嗎？此操作無法復原。",
+      "publishArchive": "確定要公開發布這篇文章嗎？發布後相關的異常記錄也會變為公開。",
+      "makePrivateArchive": "確定要將這篇文章轉為私人嗎？其他用戶將無法查看。"
+    },
+    "messages": {
+      "getUserDataFailed": "獲取用戶資料失敗:",
+      "archiveNotFound": "找不到指定的疾病檔案",
+      "loadDataFailed": "載入資料失敗:",
+      "archiveDetailInitStatus": "Archive 詳情頁初始化狀態",
+      "archiveDeleted": "疾病檔案已刪除",
+      "deleteFailed": "刪除失敗，請稍後再試",
+      "deleteError": "刪除失敗:",
+      "operationSuccess": "操作成功！",
+      "operationFailed": "操作失敗，請稍後再試",
+      "toggleStatusError": "切換疾病檔案狀態失敗:",
+      "likeAction": "Archive 詳情頁按讚操作",
+      "likeActionFailed": "按讚操作失敗:",
+      "likeActionFailedRetry": "按讚操作失敗，請稍後再試",
+      "likeActionSuccess": "按讚操作成功:",
+      "likeApiError": "按讚 API 調用異常:",
+      "likeNetworkError": "按讚操作失敗，請檢查網路連線",
+      "cannotOpenComments": "無法開啟留言功能",
+      "commentCountUpdate": "DiseaseArchiveDetailPage 留言數更新:",
+      "saveAction": "Archive 詳情頁收藏操作",
+      "saveActionFailed": "收藏操作失敗:",
+      "saveActionFailedRetry": "收藏操作失敗，請稍後再試",
+      "saveActionSuccess": "收藏操作成功:",
+      "saveApiError": "收藏 API 調用異常:",
+      "saveNetworkError": "收藏操作失敗，請檢查網路連線"
+    }
+  },
+  "diseaseArchiveEditContent": {
+    "aiSection": {
+      "title": "AI內容統整"
+    },
+    "buttons": {
+      "edit": "編輯",
+      "cancel": "取消",
+      "save": "儲存",
+      "previous": "上一步",
+      "preview": "預覽檔案"
+    },
+    "form": {
+      "contentPlaceholder": "請輸入疾病檔案內容..."
+    },
+    "editingTips": {
+      "title": "編輯提示：",
+      "tip1": "您可以自由編輯AI生成的內容",
+      "tip2": "日期格式（如「12月3日」）建議放在段落開頭，系統會自動關聯對應的異常記錄",
+      "tip3": "保持內容結構清晰，有助於日後查閱"
+    },
+    "generating": {
+      "analyzing": "AI 正在分析您的寵物資料...",
+      "pleaseWait": "請稍候，這可能需要一些時間"
+    },
+    "noContent": "暫無內容",
+    "treating": "治療中",
+    "validation": {
+      "contentEmpty": "內容不能為空",
+      "contentTooShort": "內容過短，請提供更詳細的描述"
+    },
+    "confirmMessages": {
+      "returnToPrevious": "確認返回上一步？此份AI統整紀錄將會被捨棄。",
+      "leavePageWarning": "確認離開？此份AI統整紀錄將會被捨棄。"
+    },
+    "messages": {
+      "missingData": "缺少必要數據，返回第一步驟",
+      "missingDataReturning": "缺少必要數據，正在返回第一步驟...",
+      "generateContentFailed": "生成內容失敗",
+      "generateArchiveContentError": "生成檔案內容失敗:",
+      "aiGenerateTimeout": "AI 生成超時，請稍後再試",
+      "aiServiceUnavailable": "AI 服務暫時不可用，請稍後再試",
+      "generateFailedManualEdit": "內容生成失敗，請手動編輯或重新嘗試。",
+      "dateFormatTip": "提示：日期格式建議放在段落開頭，以便系統更好地關聯異常記錄",
+      "contentFormatError": "內容格式錯誤：{{error}}",
+      "editContentSaved": "編輯內容已保存",
+      "setLeaveWarning": "設置離開提醒",
+      "beforeUnloadTriggered": "beforeunload 觸發, archiveData:",
+      "popstateTriggered": "popstate 觸發, archiveData:",
+      "interceptNavigation": "攔截返回導航",
+      "loadDataError": "載入資料失敗:",
+      "loadDataFailed": "載入資料失敗"
+    }
+  },
+  "diseaseArchivePreview": {
+    "title": "疾病檔案預覽",
+    "buttons": {
+      "previous": "上一步",
+      "confirmCreate": "確認建立"
+    },
+    "messages": {
+      "skipValidationNoData": "跳過驗證：沒有異常記錄數據",
+      "startValidatingData": "開始驗證異常記錄數據:",
+      "extractedRecordIds": "提取到的異常記錄ID:",
+      "noValidRecordIds": "沒有有效的異常記錄ID",
+      "updateLocalStorageFailed": "更新localStorage失敗:",
+      "recordsDeletedAndUpdated": "檢測到 {{count}} 筆異常記錄已被刪除，已自動更新預覽",
+      "validationFailed": "驗證異常記錄數據失敗:",
+      "missingDataReturnEdit": "缺少必要數據，返回編輯頁面",
+      "missingDataReturningEdit": "缺少必要數據，正在返回編輯頁面...",
+      "getRecordsFromLocalStorageFailed": "從localStorage獲取異常記錄失敗:",
+      "loadDataError": "載入資料失敗:",
+      "loadDataFailed": "載入資料失敗",
+      "preparingToCreateArchive": "準備建立疾病檔案:",
+      "archiveCreatedSuccess": "疾病檔案建立成功:",
+      "archiveCreatedSuccessNotification": "疾病檔案建立成功！",
+      "createArchiveError": "建立疾病檔案失敗:",
+      "createArchiveFailed": "建立疾病檔案失敗，請稍後再試"
+    }
+  },
+  "petDiseaseArchive": {
+    "title": "的疾病檔案",
+    "buttons": {
+      "new": "新增"
+    },
+    "emptyStateAlt": "空狀態",
+    "emptyStateText": "尚無疾病檔案",
+    "archiveIconAlt": "疾病檔案",
+    "recoveredBadge": "已康復",
+    "createdDateLabel": "建立日期：",
+    "messages": {
+      "loadDataFailed": "載入資料失敗:"
+    }
+  },
+  "symptomCalendar": {
+    "title": "症狀日曆",
+    "subtitle": "在這裡查看各症狀持續時間",
+    "selectSymptom": "症狀",
+    "add": "加入",
+    "reset": "重設"
+  },
+  "common": {
+    "loading": "載入中..."
+  }
+}

@@ -1,26 +1,28 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import TopNavbar from '../components/TopNavbar';
 import BottomNavbar from '../components/BottomNavigationbar';
 import Notification from '../components/Notification';
 import ConfirmNotification from '../components/ConfirmNotification';
-import DatePicker from '../components/DatePicker';
 import { NotificationProvider } from '../context/NotificationContext';
 import { getUserPets, getSymptoms, getAbnormalPostDetail, updateAbnormalPost } from '../services/petService';
+import { useSymptomTranslation } from '../hooks/useSymptomTranslation';
 import styles from '../styles/CreateAbnormalPostPage.module.css';
 
 const EditAbnormalPostPage = () => {
+  const { t } = useTranslation('posts');
+  const { translateSymptomList, translateSingleSymptom, reverseTranslateSymptoms } = useSymptomTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const { petId, postId } = useParams();
   const fileInputRef = useRef(null);
   
-  // 狀態管理
+  // State management
   const [allPets, setAllPets] = useState([]);
   const [selectedPet, setSelectedPet] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState(null);
-  const [showDatePicker, setShowDatePicker] = useState(false);
   const [isEmergency, setIsEmergency] = useState(false);
   const [selectedSymptoms, setSelectedSymptoms] = useState([]);
   const [selectedSymptomOption, setSelectedSymptomOption] = useState('');
@@ -39,9 +41,9 @@ const EditAbnormalPostPage = () => {
   const [cancelAction, setCancelAction] = useState(null);
   const [hasChanges, setHasChanges] = useState(false);
   
-  // 追蹤變更的狀態 (參考 EditPostPage)
+  // Track change state (reference EditPostPage)
   const [pendingChanges, setPendingChanges] = useState({
-    deletedImageIds: [] // 要刪除的原始圖片 ID
+    deletedImageIds: [] // Original image IDs to delete
   });
   const [originalData, setOriginalData] = useState(null);
   
@@ -49,13 +51,14 @@ const EditAbnormalPostPage = () => {
   const symptomContainerRef = useRef(null);
   const imagePreviewContainerRef = useRef(null);
   const isInitialLoad = useRef(true);
+  const hiddenDateInputRef = useRef(null);
 
-  // 載入異常記錄資料
+  // Load abnormal post data
   useEffect(() => {
     loadAbnormalPostData();
   }, [petId, postId]);
 
-  // 獲取寵物資料
+  // Get pet data
   useEffect(() => {
     const fetchPets = async () => {
       try {
@@ -72,43 +75,44 @@ const EditAbnormalPostPage = () => {
           
           setAllPets(formattedPets);
           
-          // 在寵物列表載入後，設置原始選中的寵物
+          // After pet list is loaded, set originally selected pet
           const originalPet = formattedPets.find(p => p.id === parseInt(petId));
           if (originalPet) {
             setSelectedPet(originalPet);
           }
         }
       } catch (error) {
-        console.error('獲取寵物資料失敗:', error);
-        showNotification('獲取寵物資料失敗，請稍後再試');
+        console.error('Failed to get pet data:', error);
+        showNotification(t('createAbnormalPost.messages.petDataLoadFailed'));
       }
     };
 
     fetchPets();
   }, []);
 
-  // 獲取症狀列表
+  // Get symptom list
   useEffect(() => {
     const fetchSymptoms = async () => {
       try {
         const symptoms = await getSymptoms();
-        setAvailableSymptoms(symptoms.map(symptom => 
+        const symptomNames = symptoms.map(symptom =>
           typeof symptom === 'string' ? symptom : symptom.symptom_name
-        ).filter(name => typeof name === 'string'));
+        ).filter(name => typeof name === 'string');
+
+        // Translate symptom names to current interface language
+        const translatedSymptomNames = translateSymptomList(symptomNames);
+        setAvailableSymptoms(translatedSymptomNames);
       } catch (error) {
-        console.error('獲取症狀列表失敗:', error);
-        // 如果 API 失敗，使用預設症狀列表
-        setAvailableSymptoms([
-          '打噴嚏', '掉毛', '嘔吐', '腹瀉', '食慾不振', '精神萎靡', 
-          '發燒', '咳嗽', '皮膚搔癢', '呼吸急促', '流鼻水', '眼睛紅腫'
-        ]);
+        console.error('Failed to get symptom list:', error);
+        // If API fails, use default symptom list
+        setAvailableSymptoms(t('createAbnormalPost.defaultSymptoms', { returnObjects: true }));
       }
     };
 
     fetchSymptoms();
-  }, []);
+  }, [translateSymptomList, t]);
 
-  // 處理滑鼠滾輪橫向滾動 - 症狀容器
+  // Handle mouse wheel horizontal scrolling - symptom container
   React.useEffect(() => {
     const container = symptomContainerRef.current;
     if (!container || selectedSymptoms.length === 0) return;
@@ -126,7 +130,7 @@ const EditAbnormalPostPage = () => {
     };
   });
 
-  // 處理滑鼠滾輪橫向滾動 - 圖片容器
+  // Handle mouse wheel horizontal scrolling - image container
   React.useEffect(() => {
     const container = imagePreviewContainerRef.current;
     if (!container || selectedImages.length === 0) return;
@@ -144,22 +148,22 @@ const EditAbnormalPostPage = () => {
     };
   });
 
-  // 載入異常記錄資料
+  // Load abnormal post data
   const loadAbnormalPostData = async () => {
     try {
       setLoading(true);
       const postData = await getAbnormalPostDetail(petId, postId);
       
       if (postData) {
-        // 設置日期
+        // Set date
         if (postData.record_date) {
           setSelectedDate(new Date(postData.record_date));
         }
         
-        // 設置是否為緊急記錄
+        // Set whether it's an emergency record
         setIsEmergency(postData.is_emergency || false);
         
-        // 設置症狀
+        // Set symptoms
         if (postData.symptoms && Array.isArray(postData.symptoms)) {
           const formattedSymptoms = postData.symptoms.map((symptom, index) => ({
             id: Date.now() + index,
@@ -168,17 +172,17 @@ const EditAbnormalPostPage = () => {
           setSelectedSymptoms(formattedSymptoms);
         }
         
-        // 設置身體數值
+        // Set body stats
         setBodyStats({
           weight: postData.weight || '',
-          waterIntake: postData.water_amount ? (postData.water_amount / 1000).toString() : '', // 從毫升轉換為公升
+          waterIntake: postData.water_amount ? (postData.water_amount / 1000).toString() : '', // Convert from milliliters to liters
           temperature: postData.body_temperature || ''
         });
         
-        // 設置描述
+        // Set description
         setDescription(postData.content || '');
         
-        // 儲存原始資料以供比較
+        // Save original data for comparison
         setOriginalData({
           petId: parseInt(petId),
           date: postData.record_date,
@@ -193,26 +197,26 @@ const EditAbnormalPostPage = () => {
           imageIds: postData.images ? postData.images.map(img => img.id) : []
         });
         
-        // 設置圖片 - 轉換為預覽格式
+        // Set images - convert to preview format
         if (postData.images && Array.isArray(postData.images)) {
           const imagePromises = postData.images.map(async (image, index) => {
             try {
               const imageUrl = image.url || image.firebase_url;
               if (!imageUrl) return null;
               
-              // 使用現有URL作為預覽
+              // Use existing URL as preview
               const imageData = {
                 id: image.id, // 使用真實的資料庫 ID
                 preview: imageUrl,
                 dataUrl: imageUrl,
-                file: null, // 編輯模式下，現有圖片沒有File對象
-                isNew: false, // 標記為原始圖片 (參考 EditPostPage)
-                existingId: image.id // 保留向後相容性
+                file: null, // In edit mode, existing images don't have File objects
+                isNew: false, // Mark as original image (reference EditPostPage)
+                existingId: image.id // Maintain backward compatibility
               };
-              console.log('載入現有圖片:', { id: image.id, type: typeof image.id, imageData });
+              console.log('Loading existing image:', { id: image.id, type: typeof image.id, imageData });
               return imageData;
             } catch (error) {
-              console.error('處理圖片失敗:', error);
+              console.error('Failed to process image:', error);
               return null;
             }
           });
@@ -222,23 +226,23 @@ const EditAbnormalPostPage = () => {
           setSelectedImages(validImages);
         }
       } else {
-        showNotification('找不到指定的異常記錄');
+        showNotification(t('abnormalPostDetail.messages.postNotFound'));
         navigate(`/pet/${petId}/abnormal-posts`);
       }
     } catch (error) {
-      console.error('載入異常記錄失敗:', error);
-      showNotification('載入異常記錄失敗');
+      console.error('Failed to load abnormal post:', error);
+      showNotification(t('editAbnormalPost.messages.loadPostFailed'));
       navigate(`/pet/${petId}/abnormal-posts`);
     } finally {
       setLoading(false);
-      // 初次載入完成後，稍後開始監控變更
+      // After initial load completes, start monitoring changes later
       setTimeout(() => {
         isInitialLoad.current = false;
       }, 1000);
     }
   };
 
-  // 檢查是否有變更
+  // Check if there are changes
   const checkForChanges = () => {
     if (!originalData || isInitialLoad.current) return false;
     
@@ -272,19 +276,19 @@ const EditAbnormalPostPage = () => {
       currentData.bodyStats.temperature !== originalData.bodyStats.temperature ||
       currentData.description !== originalData.description ||
       JSON.stringify(currentData.imageIds.sort()) !== JSON.stringify(originalData.imageIds.sort()) ||
-      selectedImages.some(img => img.isNew) || // 有新圖片
-      pendingChanges.deletedImageIds.length > 0; // 有刪除圖片
+      selectedImages.some(img => img.isNew) || // Has new images
+      pendingChanges.deletedImageIds.length > 0; // Has deleted images
     
     return changed;
   };
   
-  // 監控資料變更
+  // Monitor data changes
   useEffect(() => {
     const changed = checkForChanges();
     setHasChanges(changed);
   }, [selectedDate, isEmergency, selectedSymptoms, bodyStats, description, selectedImages, originalData, pendingChanges]);
   
-  // 處理頁面離開確認 (瀏覽器關閉/重新整理)
+  // Handle page leave confirmation (browser close/refresh)
   useEffect(() => {
     const handleBeforeUnload = (e) => {
       if (hasChanges) {
@@ -300,34 +304,34 @@ const EditAbnormalPostPage = () => {
     };
   }, [hasChanges]);
   
-  // 處理路由導航放棄確認 - 攻節瀏覽器返回按鈕
+  // Handle route navigation abandon confirmation - intercept browser back button
   useEffect(() => {
     let isConfirming = false;
     
     const handlePopState = (event) => {
       if (hasChanges && !isConfirming) {
-        // 防止預設的返回行為
+        // Prevent default back behavior
         window.history.pushState(null, '', window.location.pathname + window.location.search);
         
         isConfirming = true;
         
         showConfirmDialog(
-          '確定放棄編輯?',
+          t('editAbnormalPost.messages.confirmAbandonEdit'),
           () => {
             isConfirming = false;
-            // 直接跳轉到目標頁面
+            // Jump directly to target page
             navigate(`/pet/${petId}/abnormal-post/${postId}`, { replace: true });
           },
           () => {
             isConfirming = false;
-            // 留在當前頁面
+            // Stay on current page
           }
         );
       }
     };
     
     if (hasChanges) {
-      // 新增一個歷史狀態以便攻節
+      // Add a history state for interception
       window.history.pushState(null, '', window.location.pathname + window.location.search);
       window.addEventListener('popstate', handlePopState);
       
@@ -337,17 +341,17 @@ const EditAbnormalPostPage = () => {
     }
   }, [hasChanges, navigate, petId, postId]);
 
-  // 顯示通知
+  // Show notification
   const showNotification = (msg) => {
     setNotification(msg);
   };
 
-  // 隱藏通知
+  // Hide notification
   const hideNotification = () => {
     setNotification('');
   };
 
-  // 顯示確認通知
+  // Show confirmation notification
   const showConfirmDialog = (message, onConfirm, onCancel = null) => {
     setConfirmMessage(message);
     setConfirmAction(() => onConfirm);
@@ -355,7 +359,7 @@ const EditAbnormalPostPage = () => {
     setShowConfirmNotification(true);
   };
 
-  // 處理確認通知的確認按鈕
+  // Handle confirmation notification confirm button
   const handleConfirmAction = () => {
     if (confirmAction) {
       confirmAction();
@@ -365,7 +369,7 @@ const EditAbnormalPostPage = () => {
     setCancelAction(null);
   };
 
-  // 處理確認通知的取消按鈕
+  // Handle confirmation notification cancel button
   const handleCancelAction = () => {
     if (cancelAction) {
       cancelAction();
@@ -375,20 +379,20 @@ const EditAbnormalPostPage = () => {
     setCancelAction(null);
   };
 
-  // 處理症狀新增
+  // Handle symptom addition
   const handleAddSymptom = () => {
     if (!selectedSymptomOption) {
-      showNotification('請選擇症狀');
+      showNotification(t('createAbnormalPost.messages.selectSymptom'));
       return;
     }
     
     if (selectedSymptoms.some(symptom => symptom.text === selectedSymptomOption)) {
-      showNotification('此症狀已存在');
+      showNotification(t('createAbnormalPost.messages.symptomExists'));
       return;
     }
     
     if (selectedSymptoms.length >= 10) {
-      showNotification('最多只能新增10個症狀');
+      showNotification(t('createAbnormalPost.messages.maxSymptomsReached'));
       return;
     }
     
@@ -401,59 +405,66 @@ const EditAbnormalPostPage = () => {
     setSelectedSymptomOption('');
   };
 
-  // 移除症狀
+  // Remove symptom
   const handleRemoveSymptom = (symptomId) => {
     setSelectedSymptoms(prev => prev.filter(s => s.id !== symptomId));
   };
 
-  // 處理寵物選擇
+  // Handle pet selection
   const handlePetSelect = (pet) => {
     if (selectedPet?.id !== pet.id) {
-      // 如果要切換寵物，先確認
+      // If switching pet, confirm first
       showConfirmDialog(
-        `確定要切換記錄對象嗎？`,
+        t('editAbnormalPost.messages.confirmSwitchPet'),
         () => {
           setSelectedPet(pet);
         },
         () => {
-          // 取消切換，保持原始寵物
+          // Cancel switch, keep original pet
         }
       );
     }
   };
 
-  // 處理日期選擇
-  const handleDateSelect = (date) => {
+  // 格式化日期為 input[type="date"] 格式
+  const formatDateForInput = (date) => {
+    if (!date) return '';
+    return date.getFullYear() + '-' +
+           String(date.getMonth() + 1).padStart(2, '0') + '-' +
+           String(date.getDate()).padStart(2, '0');
+  };
+
+  // 處理日期變更
+  const handleDateChange = (e) => {
+    const dateValue = e.target.value; // YYYY-MM-DD format
+    if (!dateValue) {
+      setSelectedDate(null);
+      return;
+    }
+    const date = new Date(dateValue);
     setSelectedDate(date);
   };
 
-  // 打開日期選擇器
-  const handleOpenDatePicker = () => {
-    setShowDatePicker(true);
-  };
-
-  // 關閉日期選擇器
-  const handleCloseDatePicker = () => {
-    setShowDatePicker(false);
+  // 處理日期輸入框點擊前的驗證
+  const handleDateInputClick = (e) => {
+    // 編輯模式下不需要特別驗證
+    return true;
   };
 
   // 格式化日期顯示
   const formatDateDisplay = (date) => {
-    if (!date) return '選擇日期';
-    const weekDays = ['日', '一', '二', '三', '四', '五', '六'];
-    const year = date.getFullYear();
+    if (!date) return t('common.selectDate');
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
-    const weekDay = weekDays[date.getDay()];
-    return `${month}/${day} (${weekDay})`;
+    return `${month}/${day}`;
   };
 
-  // 處理身體數值變更
+  // Handle body stats change
   const handleBodyStatChange = (stat, value) => {
-    // 確保數值不為負數
+    // Ensure value is not negative
     const numericValue = parseFloat(value);
     if (value !== '' && (isNaN(numericValue) || numericValue < 0)) {
-      return; // 忽略無效或負數輸入
+      return; // Ignore invalid or negative input
     }
     
     setBodyStats(prev => ({
@@ -462,29 +473,29 @@ const EditAbnormalPostPage = () => {
     }));
   };
 
-  // 處理圖片選擇
+  // Handle image selection
   const handleImageSelect = (e) => {
     const files = Array.from(e.target.files);
     
     if (selectedImages.length + files.length > 10) {
-      showNotification('最多只能選擇10張圖片');
+      showNotification(t('createAbnormalPost.messages.maxImagesReached'));
       return;
     }
 
-    // 檢查每個檔案
+    // Check each file
     for (let file of files) {
       if (file.size > 5 * 1024 * 1024) {
-        showNotification('圖片大小不能超過 5MB');
+        showNotification(t('createAbnormalPost.messages.imageTooLarge'));
         return;
       }
       
       if (!file.type.startsWith('image/')) {
-        showNotification('請選擇圖片檔案');
+        showNotification(t('createAbnormalPost.messages.invalidFileType'));
         return;
       }
     }
 
-    // 創建預覽圖片
+    // Create preview images
     const newImagePromises = files.map(file => {
       return new Promise((resolve) => {
         const reader = new FileReader();
@@ -493,12 +504,12 @@ const EditAbnormalPostPage = () => {
             file,
             preview: e.target.result,
             dataUrl: e.target.result,
-            id: Date.now() + Math.random(), // 臨時 ID (參考 EditPostPage)
-            isNew: true // 標記為新圖片 (參考 EditPostPage)
+            id: Date.now() + Math.random(), // Temporary ID (reference EditPostPage)
+            isNew: true // Mark as new image (reference EditPostPage)
           });
         };
         reader.onerror = () => {
-          console.error('讀取圖片失敗:', file.name);
+          console.error('Failed to read image:', file.name);
           resolve(null);
         };
         reader.readAsDataURL(file);
@@ -511,16 +522,16 @@ const EditAbnormalPostPage = () => {
     });
   };
 
-  // 移除圖片 (參考 EditPostPage 邏輯)
+  // Remove image (reference EditPostPage logic)
   const handleRemoveImage = (imageId) => {
     const imageToDelete = selectedImages.find(img => img.id === imageId);
     if (!imageToDelete) return;
     
-    // 前端立即移除顯示
+    // Frontend immediately removes display
     const updatedImages = selectedImages.filter(img => img.id !== imageId);
     setSelectedImages(updatedImages);
     
-    // 只有原始圖片才加入待刪除列表
+    // Only original images are added to delete list
     if (!imageToDelete.isNew) {
       setPendingChanges(prev => ({
         ...prev,
@@ -529,20 +540,20 @@ const EditAbnormalPostPage = () => {
     }
   };
 
-  // 新增圖片按鈕點擊
+  // Add image button click
   const handleAddImage = () => {
     if (selectedImages.length >= 10) {
-      showNotification('最多只能選擇10張圖片');
+      showNotification(t('createAbnormalPost.messages.maxImagesReached'));
       return;
     }
     fileInputRef.current?.click();
   };
 
-  // 處理返回按鈕
+  // Handle back button
   const handleBack = () => {
     if (hasChanges) {
       showConfirmDialog(
-        '確定放棄編輯?',
+        t('editAbnormalPost.messages.confirmAbandonEdit'),
         () => {
           navigate(`/pet/${petId}/abnormal-post/${postId}`);
         }
@@ -552,32 +563,32 @@ const EditAbnormalPostPage = () => {
     }
   };
 
-  // 處理更新按鈕
+  // Handle update button
   const handleUpdate = () => {
-    // 表單驗證
+    // Form validation
     if (!selectedPet) {
-      showNotification('請選擇寵物');
+      showNotification(t('createAbnormalPost.messages.selectPet'));
       return;
     }
     if (!selectedDate) {
-      showNotification('請選擇日期');
+      showNotification(t('createAbnormalPost.messages.selectDate'));
       return;
     }
     if (selectedSymptoms.length === 0) {
-      showNotification('請至少選擇一個症狀');
+      showNotification(t('createAbnormalPost.messages.selectAtLeastOneSymptom'));
       return;
     }
     
-    // 更新貼文
+    // Update post
     handleUpdatePost();
   };
 
-  // 更新貼文
+  // Update post
   const handleUpdatePost = async () => {
     try {
       setLoading(true);
       
-      // 準備貼文資料
+      // Prepare post data
       const postData = {
         pet: {
           id: selectedPet.id
@@ -586,7 +597,7 @@ const EditAbnormalPostPage = () => {
           `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}T12:00:00Z` 
           : null,
         isEmergency,
-        symptoms: selectedSymptoms.map(symptom => ({
+        symptoms: reverseTranslateSymptoms(selectedSymptoms).map(symptom => ({
           text: typeof symptom === 'string' ? symptom : symptom.text
         })),
         bodyStats: {
@@ -596,13 +607,13 @@ const EditAbnormalPostPage = () => {
         },
         images: selectedImages.map(img => {
           if (!img.isNew) {
-            // 現有圖片 (參考 EditPostPage)
+            // Existing image (reference EditPostPage)
             return {
               id: img.id,
               isExisting: true
             };
           } else {
-            // 新圖片 (參考 EditPostPage)
+            // New image (reference EditPostPage)
             return {
               dataUrl: img.dataUrl,
               name: img.file?.name || `image_${Date.now()}.jpg`,
@@ -613,29 +624,29 @@ const EditAbnormalPostPage = () => {
         description
       };
       
-      console.log('準備發送的 postData:', JSON.stringify(postData, null, 2));
-      console.log('selectedImages 詳細:', selectedImages.map(img => ({
+      console.log('Prepared postData to send:', JSON.stringify(postData, null, 2));
+      console.log('selectedImages details:', selectedImages.map(img => ({
         id: img.id,
         isNew: img.isNew,
         preview: img.preview?.substring(0, 50) + '...',
         hasFile: !!img.file
       })));
       
-      // 呼叫更新API - 使用選中的寵物ID
+      // Call update API - use selected pet ID
       const result = await updateAbnormalPost(selectedPet.id, postId, postData);
-      console.log('更新異常記錄成功:', result);
+      console.log('Successfully updated abnormal post:', result);
       
-      // 更新成功後清除變更狀態 (參考 EditPostPage)
+      // Clear change state after successful update (reference EditPostPage)
       setHasChanges(false);
       setPendingChanges({
         deletedImageIds: []
       });
       
-      showNotification('異常記錄已更新');
+      showNotification(t('editAbnormalPost.messages.updateSuccess'));
       
-      // 根據是否切換了寵物來決定導航目標
+      // Decide navigation target based on whether pet was switched
       setTimeout(() => {
-        // 準備導航狀態
+        // Prepare navigation state
         const navigationState = {
           fromEdit: true,
           fromDiseaseArchive: location.state?.fromDiseaseArchive,
@@ -643,13 +654,13 @@ const EditAbnormalPostPage = () => {
         };
         
         if (selectedPet.id !== parseInt(petId)) {
-          // 切換了寵物，導航到新寵物的該異常記錄詳細頁面
+          // Switched pet, navigate to the new pet's abnormal post detail page
           navigate(`/pet/${selectedPet.id}/abnormal-post/${postId}`, { 
             replace: true,
             state: navigationState
           });
         } else {
-          // 沒有切換寵物，返回原詳細頁面
+          // No pet switch, return to original detail page
           navigate(`/pet/${petId}/abnormal-post/${postId}`, { 
             replace: true,
             state: navigationState
@@ -658,21 +669,21 @@ const EditAbnormalPostPage = () => {
       }, 1500);
       
     } catch (error) {
-      console.error('更新異常記錄失敗:', error);
+      console.error('Failed to update abnormal post:', error);
       
-      // 處理不同類型的錯誤
-      let errorMessage = '更新異常記錄失敗，請稍後再試';
+      // Handle different types of errors
+      let errorMessage = t('editAbnormalPost.messages.updateFailed');
       
       if (error.response?.data?.message) {
         errorMessage = error.response.data.message;
       } else if (error.response?.status === 400) {
-        errorMessage = '資料格式有誤，請檢查輸入內容';
+        errorMessage = t('editAbnormalPost.messages.invalidData');
       } else if (error.response?.status === 401) {
-        errorMessage = '請先登入';
+        errorMessage = t('editAbnormalPost.messages.pleaseLogin');
       } else if (error.response?.status === 404) {
-        errorMessage = '找不到指定的異常記錄';
+        errorMessage = t('editAbnormalPost.messages.postNotFound');
       } else if (error.response?.status >= 500) {
-        errorMessage = '伺服器錯誤，請稍後再試';
+        errorMessage = t('editAbnormalPost.messages.serverError');
       }
       
       showNotification(errorMessage);
@@ -681,17 +692,17 @@ const EditAbnormalPostPage = () => {
     }
   };
 
-  // 渲染頁面內容
+  // Render page content
   const renderContent = () => (
     <>
       <div className={styles.titleSection}>
-        <h2 className={styles.title}>編輯異常紀錄</h2>
+        <h2 className={styles.title}>{t('editAbnormalPost.title')}</h2>
       </div>
       <div className={styles.divider}></div>
       
-      {/* 選擇寵物區塊 */}
+      {/* Pet selection section */}
       <div className={styles.section}>
-        <label className={styles.sectionLabel}>寵物:</label>
+        <label className={styles.sectionLabel}>{t('createAbnormalPost.sections.selectPet')}:</label>
         <div className={styles.petSwitcher}>
           {allPets.map((pet) => (
             <div
@@ -709,17 +720,24 @@ const EditAbnormalPostPage = () => {
         </div>
       </div>
 
-      {/* 日期選擇 */}
+      {/* Date selection */}
       <div className={styles.section}>
         <div className={styles.dateRow}>
           <div className={styles.dateSection}>
-            <label className={styles.dateLabel}>日期:</label>
-            <button 
-              className={`${styles.dateButton} ${selectedDate ? styles.active : ''}`}
-              onClick={handleOpenDatePicker}
-            >
-              {formatDateDisplay(selectedDate)}
-            </button>
+            <label className={styles.dateLabel}>{t('createAbnormalPost.dateSelection.date')}</label>
+            <div className={styles.dateInputWrapper}>
+              <input
+                ref={hiddenDateInputRef}
+                type="date"
+                className={styles.dateInput}
+                value={formatDateForInput(selectedDate)}
+                onChange={handleDateChange}
+                onClick={handleDateInputClick}
+              />
+              <span className={styles.datePlaceholder}>
+                {selectedDate ? formatDateDisplay(selectedDate) : t('common.selectDate')}
+              </span>
+            </div>
           </div>
           <div className={styles.emergencyCheckbox}>
             <input 
@@ -730,22 +748,22 @@ const EditAbnormalPostPage = () => {
               id="emergency"
             />
             <label htmlFor="emergency" className={styles.checkboxLabel}>
-              為就醫紀錄
+              {t('createAbnormalPost.dateSelection.emergency')}
             </label>
           </div>
         </div>
       </div>
 
-      {/* 症狀選擇 */}
+      {/* Symptom selection */}
       <div className={styles.section}>
-        <label className={styles.sectionLabel}>寵物症狀:</label>
+        <label className={styles.sectionLabel}>{t('createAbnormalPost.symptoms.title')}</label>
         <div className={styles.symptomSection}>
-          {/* 已選擇的症狀顯示 */}
+          {/* Selected symptoms display */}
           {selectedSymptoms.length > 0 && (
             <div className={styles.selectedSymptomsContainer}>
               {selectedSymptoms.map((symptom) => (
                 <div key={symptom.id} className={styles.selectedSymptom}>
-                  <span className={styles.symptomText}>{symptom.text}</span>
+                  <span className={styles.symptomText}>{translateSingleSymptom(symptom.text)}</span>
                   <button 
                     className={styles.removeSymptomBtn}
                     onClick={() => handleRemoveSymptom(symptom.id)}
@@ -757,7 +775,7 @@ const EditAbnormalPostPage = () => {
             </div>
           )}
           
-          {/* 症狀選擇輸入區域 */}
+          {/* Symptom selection input area */}
           <div className={styles.symptomInputSection}>
             <div className={styles.symptomSelectContainer}>
               <select
@@ -765,7 +783,7 @@ const EditAbnormalPostPage = () => {
                 onChange={(e) => setSelectedSymptomOption(e.target.value)}
                 className={styles.symptomSelect}
               >
-                <option value="">選擇症狀</option>
+                <option value="">{t('createAbnormalPost.symptoms.selectSymptom')}</option>
                 {availableSymptoms
                   .filter(symptom => {
                     const symptomText = typeof symptom === 'string' ? symptom : symptom.text || symptom;
@@ -783,26 +801,26 @@ const EditAbnormalPostPage = () => {
                 }
               </select>
             </div>
-            <button 
+            <button
               className={styles.addSymptomBtn}
               onClick={handleAddSymptom}
             >
-              新增
+              {t('common.add')}
             </button>
           </div>
           
           <span className={styles.symptomCounter}>
-            已選擇症狀：{selectedSymptoms.length}/10
+            {t('createAbnormalPost.symptoms.counter', { count: selectedSymptoms.length })}
           </span>
         </div>
       </div>
 
-      {/* 身體數值記錄 */}
+      {/* Body statistics record */}
       <div className={styles.section}>
-        <label className={styles.sectionLabel}>身體數值紀錄:</label>
+        <label className={styles.sectionLabel}>{t('createAbnormalPost.bodyStats.title')}:</label>
         <div className={styles.bodyStatsContainer}>
           <div className={styles.statRow}>
-            <span className={styles.statLabel}>體重</span>
+            <span className={styles.statLabel}>{t('createAbnormalPost.bodyStats.weight')}</span>
             <div className={styles.statInputWrapper}>
               <input 
                 type="number"
@@ -813,11 +831,11 @@ const EditAbnormalPostPage = () => {
                 min="0"
                 step="0.1"
               />
-              <span className={styles.statUnit}>公斤</span>
+              <span className={styles.statUnit}>{t('createAbnormalPost.bodyStats.units.kg')}</span>
             </div>
           </div>
           <div className={styles.statRow}>
-            <span className={styles.statLabel}>喝水量</span>
+            <span className={styles.statLabel}>{t('createAbnormalPost.bodyStats.waterIntake')}</span>
             <div className={styles.statInputWrapper}>
               <input 
                 type="number"
@@ -828,11 +846,11 @@ const EditAbnormalPostPage = () => {
                 min="0"
                 step="0.01"
               />
-              <span className={styles.statUnit}>公升</span>
+              <span className={styles.statUnit}>{t('createAbnormalPost.bodyStats.units.liters')}</span>
             </div>
           </div>
           <div className={styles.statRow}>
-            <span className={styles.statLabel}>體溫</span>
+            <span className={styles.statLabel}>{t('createAbnormalPost.bodyStats.temperature')}</span>
             <div className={styles.statInputWrapper}>
               <input 
                 type="number"
@@ -843,30 +861,30 @@ const EditAbnormalPostPage = () => {
                 min="0"
                 step="0.1"
               />
-              <span className={styles.statUnit}>度</span>
+              <span className={styles.statUnit}>{t('createAbnormalPost.bodyStats.units.celsius')}</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* 圖片上傳區域 */}
+      {/* Image upload area */}
       <div className={styles.section}>
-        <label className={styles.sectionLabel}>圖片紀錄:</label>
+        <label className={styles.sectionLabel}>{t('createAbnormalPost.imageUpload.title')}:</label>
         <div className={styles.imageSection}>
           {selectedImages.length === 0 ? (
             <div className={styles.noImageState}>
               <img 
                 src="/assets/icon/RegisterPage_NotCheckIcon.png" 
-                alt="未選擇圖片" 
+                alt={t('createAbnormalPost.imageUpload.noImageSelected')} 
                 className={styles.warningIcon}
               />
-              <p className={styles.noImageText}>還沒有新增任何圖片</p>
+              <p className={styles.noImageText}>{t('createAbnormalPost.imageUpload.noImageSelected')}</p>
             </div>
           ) : (
             <div ref={imagePreviewContainerRef} className={styles.imagePreviewContainer}>
               {selectedImages.map((image) => (
                 <div key={image.id} className={styles.imagePreview}>
-                  <img src={image.preview} alt="預覽" />
+                  <img src={image.preview} alt={t('createAbnormalPost.imageUpload.previewAlt')} />
                   <button 
                     className={styles.removeImageBtn}
                     onClick={() => handleRemoveImage(image.id)}
@@ -879,14 +897,14 @@ const EditAbnormalPostPage = () => {
           )}
           
           <div className={styles.imageControls}>
-            <button 
+            <button
               className={styles.addImageBtn}
               onClick={handleAddImage}
             >
-              新增圖片
+              {t('createAbnormalPost.imageUpload.addImage')}
             </button>
             <span className={styles.imageCounter}>
-              選擇的圖片：{selectedImages.length}/10
+              {t('createAbnormalPost.imageUpload.imageCounter', { count: selectedImages.length })}
             </span>
           </div>
           
@@ -901,14 +919,14 @@ const EditAbnormalPostPage = () => {
         </div>
       </div>
 
-      {/* 文字描述區域 */}
+      {/* Text description area */}
       <div className={styles.section}>
-        <label className={styles.sectionLabel}>補充描述:</label>
+        <label className={styles.sectionLabel}>{t('createAbnormalPost.description.title')}</label>
         <div className={styles.descriptionSection}>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="文字描述"
+            placeholder={t('createAbnormalPost.description.placeholder')}
             className={styles.descriptionInput}
             rows="6"
           />
@@ -935,38 +953,31 @@ const EditAbnormalPostPage = () => {
         
         <div className={styles.content}>
           {loading ? (
-            <div className={styles.loadingContainer}>載入中...</div>
+            <div className={styles.loadingContainer}>{t('common.loading')}</div>
           ) : (
             <>
               {renderContent()}
               
-              {/* 操作按鈕 */}
+              {/* Action buttons */}
               <div className={styles.actionButtons}>
                 <button 
                   className={styles.cancelButton}
                   onClick={handleBack}
                 >
-                  取消
+                  {t('common.cancel')}
                 </button>
                 <button 
                   className={styles.createButton}
                   onClick={handleUpdate}
                   disabled={loading}
                 >
-                  {loading ? '更新中...' : '更新'}
+                  {loading ? t('editPost.ui.updating') : t('editPost.ui.updatePost')}
                 </button>
               </div>
             </>
           )}
         </div>
 
-        {/* 日期選擇器 */}
-        <DatePicker
-          isOpen={showDatePicker}
-          onClose={handleCloseDatePicker}
-          selectedDate={selectedDate}
-          onDateSelect={handleDateSelect}
-        />
         
         <BottomNavbar />
       </div>

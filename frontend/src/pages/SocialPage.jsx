@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import TopNavbar from '../components/TopNavbar';
 import BottomNavbar from '../components/BottomNavigationbar';
@@ -11,6 +12,7 @@ import { getPublicDiseaseArchivesPreview } from '../services/petService';
 import styles from '../styles/SocialPage.module.css';
 
 const SocialPage = () => {
+  const { t } = useTranslation('posts');
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const location = useLocation();
@@ -41,7 +43,7 @@ const SocialPage = () => {
         const user = await getUserProfile();
         setCurrentUser(user);
       } catch (error) {
-        console.error('獲取當前用戶資訊失敗:', error);
+        console.error(t('socialPage.messages.fetchUserFailed'), error);
       }
     };
     fetchCurrentUser();
@@ -96,7 +98,7 @@ const SocialPage = () => {
         setHasMore(result.data.has_more || false);
         setPage(pageNum);
       } else {
-        throw new Error(result.error || '載入貼文失敗');
+        throw new Error(result.error || t('socialPage.messages.loadPostsFailed'));
       }
     } catch (error) {
       console.error('載入貼文失敗:', error);
@@ -136,7 +138,7 @@ const SocialPage = () => {
         setArchivesHasMore(result.data.has_more || false);
         setArchivesPage(pageNum);
       } else {
-        throw new Error(result.error || '載入疾病檔案失敗');
+        throw new Error(result.error || t('socialPage.messages.loadArchivesFailed'));
       }
     } catch (error) {
       console.error('載入疾病檔案失敗:', error);
@@ -165,7 +167,7 @@ const SocialPage = () => {
   // 監聽貼文更新
   useEffect(() => {
     if (location.state?.postUpdated) {
-      console.log('檢測到貼文更新，重新載入貼文列表');
+      console.log(t('socialPage.messages.postUpdatedDetected'));
       // 清除更新標記並重新載入
       window.history.replaceState({}, document.title);
       if (!showSearchResults) {
@@ -414,7 +416,7 @@ const SocialPage = () => {
               setSearchParams({ tab: 'daily' });
             }}
           >
-            日常貼文
+{t('socialPage.tabs.daily')}
           </button>
           <button
             className={`${styles.tab} ${activeTab === 'forum' ? styles.active : ''}`}
@@ -423,7 +425,7 @@ const SocialPage = () => {
               setSearchParams({ tab: 'forum' });
             }}
           >
-            寵物論壇
+{t('socialPage.tabs.forum')}
           </button>
         </div>
       )}
@@ -449,7 +451,7 @@ const SocialPage = () => {
                 onDelete={handleDelete}
                 onUserClick={handlePostUserClick}
                 onHashtagClick={handleHashtagClick}
-                emptyMessage="目前沒有貼文，快來發布第一篇吧！"
+                emptyMessage={t('socialPage.messages.noPosts')}
                 className={styles.postList}
               />
             ) : (
@@ -465,7 +467,7 @@ const SocialPage = () => {
                 onUserClick={handleUserClick}
                 onMenuClick={handleArchiveMenu}
                 onArchiveDelete={handleArchiveDelete}
-                emptyMessage="目前沒有疾病檔案，快來分享第一篇吧！"
+                emptyMessage={t('socialPage.messages.noArchives')}
                 className={styles.archiveList}
               />
             )}

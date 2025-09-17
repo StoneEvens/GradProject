@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import axios from '../utils/axios';
 import styles from '../styles/PostComments.module.css';
 import { useNavigate } from 'react-router-dom';
@@ -16,6 +17,7 @@ const HeartFilledIcon = '/assets/icon/PostLiked.png';
 //提供postID就會自動抓取貼文留言
 
 const PostComments = ({user, postID, handleClose, onCommentCountChange}) => {
+    const { t } = useTranslation('posts');
     const navigate = useNavigate();
     //React自動幫忙生成的function
     const [comments, setComments] = useState([]);
@@ -55,7 +57,7 @@ const PostComments = ({user, postID, handleClose, onCommentCountChange}) => {
         const availableSlots = 3 - currentImageCount;
         
         if (availableSlots <= 0) {
-          alert('最多只能選擇 3 張圖片');
+          alert(t('postComments.maxImagesAlert'));
           // 清空 input 的值，以便下次選擇
           event.target.value = '';
           return;
@@ -65,7 +67,7 @@ const PostComments = ({user, postID, handleClose, onCommentCountChange}) => {
         const limitedImageFiles = imageFiles.slice(0, availableSlots);
         
         if (imageFiles.length > availableSlots) {
-          alert(`只能再選擇 ${availableSlots} 張圖片，已自動選取前 ${availableSlots} 張`);
+          alert(t('postComments.imageSlotLimitAlert', { availableSlots }));
         }
         
         // Create preview URLs for the selected images
@@ -273,7 +275,7 @@ const PostComments = ({user, postID, handleClose, onCommentCountChange}) => {
           prevComments.map((comment) =>
           comment.id === commentID ? { 
             ...comment, 
-            content: "[此評論已刪除]",
+            content: t('postComments.deletedComment'),
             images: [] // 清空圖片數據
           } : comment
           )
@@ -287,7 +289,7 @@ const PostComments = ({user, postID, handleClose, onCommentCountChange}) => {
               if (reply.id === commentID) {
                 return { 
                   ...reply, 
-                  content: "[此評論已刪除]",
+                  content: t('postComments.deletedComment'),
                   images: [] // 清空圖片數據
                 };
               }
@@ -304,7 +306,7 @@ const PostComments = ({user, postID, handleClose, onCommentCountChange}) => {
         setDeleteConfirm({ show: false, commentId: null });
         
         // 顯示錯誤訊息給使用者
-        alert('刪除留言時發生錯誤，請稍後再試');
+        alert(t('postComments.deleteErrorAlert'));
       }
     };
 
@@ -485,7 +487,7 @@ const PostComments = ({user, postID, handleClose, onCommentCountChange}) => {
       <div className={styles.modalContainer} onClick={(e) => e.stopPropagation()}>
         <div className={styles.modalHeader}>
           <div className={styles.modalTitle}>
-            <h2>留言區</h2>
+            <h2>{t('postComments.title')}</h2>
           </div>
           <button className={styles.closeButton} onClick={() => handleClose()}>
             ×
@@ -495,7 +497,7 @@ const PostComments = ({user, postID, handleClose, onCommentCountChange}) => {
           <div className={`${styles.commentsContainer} ${comments.length === 0 ? styles.empty : ''}`}>
             {comments.length === 0 ? (
               <div className={styles.commentBlock}>
-                <p>目前沒有任何留言</p>
+                <p>{t('postComments.noComments')}</p>
               </div>
             ) : (
               comments.map((comment) => (
@@ -509,7 +511,7 @@ const PostComments = ({user, postID, handleClose, onCommentCountChange}) => {
                     onDelete={handleDeleteClick}
                     onReport={(commentId) => {
                       console.log('檢舉留言:', commentId);
-                      alert('檢舉功能尚未實作');
+                      alert(t('postComments.reportNotImplemented'));
                     }}
                     currentUser={user}
                     showingReplies={clickedCommentID === comment.id}
@@ -528,7 +530,7 @@ const PostComments = ({user, postID, handleClose, onCommentCountChange}) => {
                           onDelete={handleDeleteClick}
                           onReport={(commentId) => {
                             console.log('檢舉留言:', commentId);
-                            alert('檢舉功能尚未實作');
+                            alert(t('postComments.reportNotImplemented'));
                           }}
                           currentUser={user}
                         />
@@ -544,7 +546,7 @@ const PostComments = ({user, postID, handleClose, onCommentCountChange}) => {
           {replyingCommentID && (
             <div className={styles.replyingIndicator}>
               <span className={styles.replyingText}>
-                正在回覆 {comments.find(c => c.id === replyingCommentID)?.user?.username || '用戶'}
+                {t('postComments.replyingTo', { username: comments.find(c => c.id === replyingCommentID)?.user?.username || t('postComments.user') })}
               </span>
               <button 
                 className={styles.cancelReplyBtn}
@@ -564,11 +566,11 @@ const PostComments = ({user, postID, handleClose, onCommentCountChange}) => {
             <div className={styles.imagePreviewContainer}>
               {selectedImages.map((image) => (
                 <div key={image.id} className={styles.imagePreviewItem}>
-                  <img src={image.preview} alt="預覽" className={styles.previewImage} />
+                  <img src={image.preview} alt={t('postComments.previewAlt')} className={styles.previewImage} />
                   <button 
                     className={styles.removeImageBtn}
                     onClick={() => removeImage(image.id)}
-                    title="移除圖片"
+                    title={t('postComments.removeImageTitle')}
                   >
                     ×
                   </button>
@@ -594,7 +596,7 @@ const PostComments = ({user, postID, handleClose, onCommentCountChange}) => {
               />
             </div>
             <textarea
-              placeholder={replyingCommentID ? '撰寫回覆...' : '撰寫留言...'}
+              placeholder={replyingCommentID ? t('postComments.replyPlaceholder') : t('postComments.commentPlaceholder')}
               className={styles.inputTextarea}
               value={commentText}
               onChange={handleCommentChange}
@@ -604,16 +606,16 @@ const PostComments = ({user, postID, handleClose, onCommentCountChange}) => {
                 className={`${styles.photoBtn} ${selectedImages.length >= 3 ? styles.disabled : ''}`}
                 onClick={selectedImages.length >= 3 ? undefined : handleImageSelect}
                 disabled={selectedImages.length >= 3}
-                title={selectedImages.length >= 3 ? "已達圖片上限 (3張)" : `新增圖片 (${selectedImages.length}/3)`}
+                title={selectedImages.length >= 3 ? t('postComments.imageUploadLimitTitle') : t('postComments.addImageTitle', { count: selectedImages.length })}
               >
-                <img src="/assets/icon/CommentPhotoIcon.png" alt="新增圖片" />
+                <img src="/assets/icon/CommentPhotoIcon.png" alt={t('postComments.addImageAlt')} />
               </button>
               <button 
                 className={styles.sendBtn} 
                 onClick={replyingCommentID ? submitReply : submitComment}
-                title={replyingCommentID ? "送出回覆" : "送出留言"}
+                title={replyingCommentID ? t('postComments.sendReplyTitle') : t('postComments.sendCommentTitle')}
               >
-                <img src="/assets/icon/CommentSendIcon.png" alt={replyingCommentID ? "送出回覆" : "送出留言"} />
+                <img src="/assets/icon/CommentSendIcon.png" alt={replyingCommentID ? t('postComments.sendReplyAlt') : t('postComments.sendCommentAlt')} />
               </button>
             </div>
           </div>
@@ -631,7 +633,7 @@ const PostComments = ({user, postID, handleClose, onCommentCountChange}) => {
       </div>
       {deleteConfirm.show && (
         <ConfirmNotification
-          message="確定要刪除這則留言嗎？"
+          message={t('postComments.deleteConfirmMessage')}
           onConfirm={deleteComment}
           onCancel={() => setDeleteConfirm({ show: false, commentId: null })}
         />

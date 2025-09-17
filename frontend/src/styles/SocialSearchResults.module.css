@@ -336,4 +336,33 @@
   .postContent {
     font-size: 14px;
   }
+}
+
+/* 英文版本的特定樣式 */
+.tabContainerEn {
+  padding: 16px 8px; /* 減少左右padding */
+  gap: 4px; /* 減少間距 */
+}
+
+.tabEn {
+  padding: 8px 4px; /* 減少水平padding，因為我們設定固定寬度 */
+  font-size: 13.5px; /* 稍微增大字體 */
+  width: 87.5px; /* 固定寬度，增加四分之一 (70 * 1.25) */
+  text-align: center; /* 文字置中 */
+  white-space: nowrap; /* 防止文字換行 */
+}
+
+/* 英文版在小螢幕上的額外調整 */
+@media (max-width: 380px) {
+  .tabContainerEn {
+    padding: 12px 6px;
+    gap: 2px;
+  }
+
+  .tabEn {
+    padding: 6px 2px;
+    font-size: 12.5px;
+    width: 77.5px; /* 小螢幕的固定寬度，增加四分之一 (62 * 1.25) */
+    text-align: center;
+  }
 } 

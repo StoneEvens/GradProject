@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import styles from '../styles/AddPetPage.module.css';
 import TopNavbar from '../components/TopNavbar';
 import BottomNavbar from '../components/BottomNavigationbar';
@@ -9,6 +10,7 @@ import petService from '../services/petService';
 import { handleImageSelection, revokeImagePreview, createProgressCallback } from '../utils/imageUtils';
 
 const AddPetPage = () => {
+  const { t } = useTranslation('pet');
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
   const [phase, setPhase] = useState(1);
@@ -39,15 +41,9 @@ const AddPetPage = () => {
     setNotification('');
   };
 
-  const catBreeds = [
-    '米克斯貓', '美國短毛貓', '英國短毛貓', '蘇格蘭摺耳貓', '布偶貓',
-    '暹羅貓', '波斯貓', '孟加拉貓', '緬因貓', '異國短毛貓', '其他'
-  ];
-
-  const dogBreeds = [
-    '米克斯犬', '柴犬', '貴賓犬', '黃金獵犬', '拉布拉多', '哈士奇',
-    '法國鬥牛犬', '博美犬', '約克夏', '馬爾濟斯', '其他'
-  ];
+  // 從翻譯檔案獲取品種列表
+  const catBreeds = t('addPage.breeds.cat', { returnObjects: true });
+  const dogBreeds = t('addPage.breeds.dog', { returnObjects: true });
 
   const handlePetTypeSelect = (type) => {
     setPetType(type);
@@ -89,7 +85,7 @@ const AddPetPage = () => {
 
     setImageProcessing(true);
     setProcessProgress(0);
-    setProcessMessage('開始處理...');
+    setProcessMessage(t('addPage.imageProcessing.starting'));
 
     try {
       const result = await handleImageSelection(e, {
@@ -113,7 +109,7 @@ const AddPetPage = () => {
       }
     } catch (error) {
       console.error('圖片處理失敗:', error);
-      showNotification('圖片處理失敗，請重試');
+      showNotification(t('addPage.imageProcessing.error'));
     } finally {
       setImageProcessing(false);
       setProcessProgress(0);
@@ -123,7 +119,7 @@ const AddPetPage = () => {
 
   const handleSubmit = async () => {
     if (!petData.name || !petData.breed || !petData.age || !petData.weight || !petData.height) {
-      showNotification('請填寫所有必填欄位');
+      showNotification(t('addPage.messages.requiredFields'));
       return;
     }
 
@@ -155,7 +151,7 @@ const AddPetPage = () => {
       }
 
       await petService.createPet(formData);
-      showNotification('新增寵物成功！');
+      showNotification(t('addPage.messages.addSuccess'));
       setTimeout(() => {
         navigate('/pet');
       }, 1500); // 顯示成功訊息後再導航
@@ -163,7 +159,7 @@ const AddPetPage = () => {
       console.error('新增寵物失敗:', error);
       
       // 改善錯誤訊息顯示
-      let errorMessage = '新增寵物失敗，請稍後再試';
+      let errorMessage = t('addPage.messages.addError');
       if (error.response?.data?.message) {
         errorMessage = error.response.data.message;
       } else if (error.response?.data?.errors) {
@@ -171,7 +167,7 @@ const AddPetPage = () => {
         const errors = error.response.data.errors;
         const errorFields = Object.keys(errors);
         if (errorFields.length > 0) {
-          errorMessage = `資料驗證錯誤：${errorFields.join(', ')}`;
+          errorMessage = `${t('addPage.messages.validationError')}${errorFields.join(', ')}`;
         }
       }
       
@@ -192,22 +188,22 @@ const AddPetPage = () => {
         <div className={styles.content}>
         {phase === 1 ? (
           <div className={styles.phaseOne}>
-            <h2 className={styles.title}>我的寵物是...</h2>
+            <h2 className={styles.title}>{t('addPage.phase1.title')}</h2>
             
             <div className={styles.petTypeSection}>
               <div className={styles.iconsAndDivider}>
                 <div className={styles.petTypeIcons}>
                   <div className={styles.petIconWrapper}>
-                    <img 
-                      src="/assets/icon/PetpageTypeCat.png" 
-                      alt="貓" 
+                    <img
+                      src="/assets/icon/PetpageTypeCat.png"
+                      alt={t('addPage.phase1.catAlt')}
                       className={styles.petIcon}
                     />
                   </div>
                   <div className={styles.petIconWrapper}>
-                    <img 
-                      src="/assets/icon/PetpageTypeDog.png" 
-                      alt="狗" 
+                    <img
+                      src="/assets/icon/PetpageTypeDog.png"
+                      alt={t('addPage.phase1.dogAlt')}
                       className={styles.petIcon}
                     />
                   </div>
@@ -216,17 +212,17 @@ const AddPetPage = () => {
               </div>
               
               <div className={styles.petTypeButtons}>
-                <button 
+                <button
                   className={styles.petTypeButton}
                   onClick={() => handlePetTypeSelect('cat')}
                 >
-                  貓
+                  {t('addPage.phase1.catButton')}
                 </button>
-                <button 
+                <button
                   className={styles.petTypeButton}
                   onClick={() => handlePetTypeSelect('dog')}
                 >
-                  狗
+                  {t('addPage.phase1.dogButton')}
                 </button>
               </div>
             </div>
@@ -253,9 +249,9 @@ const AddPetPage = () => {
                         <span className={styles.processMessage}>{processMessage}</span>
                       </div>
                     ) : imagePreview ? (
-                      <img src={imagePreview} alt="寵物大頭照" />
+                      <img src={imagePreview} alt={t('addPage.phase2.avatarAlt')} />
                     ) : (
-                      <span>上傳大頭照</span>
+                      <span>{t('addPage.phase2.uploadAvatar')}</span>
                     )}
                   </div>
                   <input
@@ -270,7 +266,7 @@ const AddPetPage = () => {
               
               <div className={styles.titleContainer}>
                 <h2 className={styles.title}>
-                  {petType === 'cat' ? '貓咪' : '狗狗'}基本資料
+                  {petType === 'cat' ? t('addPage.phase2.titleCat') : t('addPage.phase2.titleDog')}
                 </h2>
               </div>
             </div>
@@ -280,24 +276,24 @@ const AddPetPage = () => {
             
             <div className={styles.formFields}>
               <div className={styles.formGroup}>
-                <label>名字</label>
+                <label>{t('addPage.phase2.labels.name')}</label>
                 <input
                   type="text"
                   name="name"
                   value={petData.name}
                   onChange={handleInputChange}
-                  placeholder="請輸入寵物名字"
+                  placeholder={t('addPage.phase2.placeholders.name')}
                 />
               </div>
               
               <div className={styles.formGroup}>
-                <label>品種</label>
+                <label>{t('addPage.phase2.labels.breed')}</label>
                 <select
                   name="breed"
                   value={petData.breed}
                   onChange={handleInputChange}
                 >
-                  <option value="">選擇{petType === 'cat' ? '貓' : '狗'}</option>
+                  <option value="">{petType === 'cat' ? t('addPage.phase2.placeholders.breedCat') : t('addPage.phase2.placeholders.breedDog')}</option>
                   {(petType === 'cat' ? catBreeds : dogBreeds).map(breed => (
                     <option key={breed} value={breed}>{breed}</option>
                   ))}
@@ -305,39 +301,39 @@ const AddPetPage = () => {
               </div>
               
               <div className={styles.formGroup}>
-                <label>年齡</label>
+                <label>{t('addPage.phase2.labels.age')}</label>
                 <input
                   type="number"
                   name="age"
                   value={petData.age}
                   onChange={handleInputChange}
-                  placeholder="請輸入年齡（歲）"
+                  placeholder={t('addPage.phase2.placeholders.age')}
                   min="0"
                   step="0.1"
                 />
               </div>
               
               <div className={styles.formGroup}>
-                <label>體重</label>
+                <label>{t('addPage.phase2.labels.weight')}</label>
                 <input
                   type="number"
                   name="weight"
                   value={petData.weight}
                   onChange={handleInputChange}
-                  placeholder="請輸入體重（公斤）"
+                  placeholder={t('addPage.phase2.placeholders.weight')}
                   min="0"
                   step="0.1"
                 />
               </div>
               
               <div className={styles.formGroup}>
-                <label>身高</label>
+                <label>{t('addPage.phase2.labels.height')}</label>
                 <input
                   type="number"
                   name="height"
                   value={petData.height}
                   onChange={handleInputChange}
-                  placeholder="請輸入身高（公分）"
+                  placeholder={t('addPage.phase2.placeholders.height')}
                   min="0"
                   step="0.1"
                 />
@@ -351,25 +347,25 @@ const AddPetPage = () => {
                 name="description"
                 value={petData.description}
                 onChange={handleInputChange}
-                placeholder="請簡單介紹你的寵物"
+                placeholder={t('addPage.phase2.placeholders.description')}
                 rows="4"
               />
             </div>
             
             <div className={styles.actionButtons}>
-              <button 
-                className={styles.backButton} 
+              <button
+                className={styles.backButton}
                 onClick={handleBack}
                 disabled={loading}
               >
-                返回
+                {t('addPage.phase2.buttons.back')}
               </button>
-              <button 
-                className={styles.submitButton} 
+              <button
+                className={styles.submitButton}
                 onClick={handleSubmit}
                 disabled={loading}
               >
-                {loading ? '處理中...' : '完成'}
+                {loading ? t('addPage.phase2.buttons.processing') : t('addPage.phase2.buttons.submit')}
               </button>
             </div>
           </div>

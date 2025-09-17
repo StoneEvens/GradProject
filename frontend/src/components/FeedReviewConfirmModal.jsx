@@ -1,11 +1,14 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import styles from '../styles/ConfirmFollowModal.module.css';
 
-const FeedReviewConfirmModal = ({ 
-  isVisible, 
-  onClose, 
+const FeedReviewConfirmModal = ({
+  isVisible,
+  onClose,
   onConfirm
 }) => {
+  const { t } = useTranslation('feed');
+
   if (!isVisible) return null;
 
   const handleBackgroundClick = (e) => {
@@ -19,24 +22,24 @@ const FeedReviewConfirmModal = ({
       <div className={styles.modal}>
         <div className={styles.content}>
           <h3 className={styles.title}>
-            請協助審核飼料
+            {t('reviewConfirmModal.title')}
           </h3>
           <p className={styles.description}>
-            此飼料尚未通過審核，請您協助審核後再使用此飼料
+            {t('reviewConfirmModal.description')}
           </p>
           
           <div className={styles.buttons}>
-            <button 
+            <button
               className={styles.cancelButton}
               onClick={onClose}
             >
-              取消
+              {t('reviewConfirmModal.buttons.cancel')}
             </button>
-            <button 
+            <button
               className={styles.confirmButton}
               onClick={onConfirm}
             >
-              確定
+              {t('reviewConfirmModal.buttons.confirm')}
             </button>
           </div>
         </div>

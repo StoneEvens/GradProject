@@ -1,24 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import axios from '../utils/axios';
 import styles from '../styles/HealthReportPage.module.css';
 import TopNavbar from '../components/TopNavbar';
 import BottomNavbar from '../components/BottomNavigationBar';
 import Notification from '../components/Notification';
+import ConfirmNotification from '../components/ConfirmNotification';
 import { NotificationProvider } from '../context/NotificationContext';
+import { getUserPets } from '../services/petService';
 
 const HealthReportDetailPage = () => {
+  const { t, i18n } = useTranslation('health');
   const navigate = useNavigate();
-  const { id } = useParams();
+  const { id, petId } = useParams();
   const [notification, setNotification] = useState('');
   const [loading, setLoading] = useState(true);
   const [reportData, setReportData] = useState(null);
-  
-  // 編輯狀態
-  const [values, setValues] = useState({});
-  const [note, setNote] = useState('');
-  const [checkLocation, setCheckLocation] = useState('');
+  const [pet, setPet] = useState(null);
+  const [showMenu, setShowMenu] = useState(false);
   const [showAll, setShowAll] = useState(false);
+  const [showConfirmNotification, setShowConfirmNotification] = useState(false);
+  const [confirmMessage, setConfirmMessage] = useState('');
+  const [confirmAction, setConfirmAction] = useState(null);
 
   // 顯示通知
   const showNotification = (msg) => {
@@ -30,20 +34,73 @@ const HealthReportDetailPage = () => {
     setNotification('');
   };
 
+  // 顯示確認對話框
+  const showConfirmDialog = (message, onConfirm) => {
+    setConfirmMessage(message);
+    setConfirmAction(() => onConfirm);
+    setShowConfirmNotification(true);
+  };
+
+  // 處理確認對話框的確認按鈕
+  const handleConfirmAction = () => {
+    if (confirmAction) {
+      confirmAction();
+    }
+    setShowConfirmNotification(false);
+    setConfirmAction(null);
+  };
+
+  // 處理確認對話框的取消按鈕
+  const handleCancelAction = () => {
+    setShowConfirmNotification(false);
+    setConfirmAction(null);
+  };
+
+  // 點擊外部關閉菜單
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showMenu && !event.target.closest(`.${styles.menuContainer}`)) {
+        setShowMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showMenu]);
+
+  // 載入寵物資料
+  useEffect(() => {
+    const loadPetData = async () => {
+      try {
+        const pets = await getUserPets();
+        const currentPet = pets.find(p => p.pet_id === parseInt(petId));
+        if (currentPet) {
+          setPet(currentPet);
+        }
+      } catch (error) {
+        console.error('載入寵物資料失敗', error);
+        showNotification(t('reports.petDataFailed'));
+      }
+    };
+
+    if (petId) {
+      loadPetData();
+    }
+  }, [petId]);
+
   // 載入報告資料
   useEffect(() => {
     const loadReportData = async () => {
       try {
         setLoading(true);
-        
+
         // 先嘗試從 sessionStorage 獲取資料
         const cachedData = sessionStorage.getItem('currentReport');
         if (cachedData) {
           const data = JSON.parse(cachedData);
           setReportData(data);
-          setValues(data.data || {});
-          setNote(data.notes || '');
-          setCheckLocation(data.check_location || '');
           setLoading(false);
           return;
         }
@@ -52,13 +109,10 @@ const HealthReportDetailPage = () => {
         const res = await axios.get(`/ocr/health-reports/${id}/`);
         const data = res.data;
         setReportData(data);
-        setValues(data.data || {});
-        setNote(data.notes || '');
-        setCheckLocation(data.check_location || '');
       } catch (err) {
         console.error('載入報告失敗', err);
-        showNotification('載入報告失敗');
-        navigate('/health-reports');
+        showNotification(t('reports.loadFailed'));
+        navigate(`/pet/${petId}/health-reports`);
       } finally {
         setLoading(false);
       }
@@ -67,19 +121,24 @@ const HealthReportDetailPage = () => {
     if (id) {
       loadReportData();
     }
-  }, [id, navigate]);
+  }, [id, petId, navigate]);
 
   // 把後端回來的 check_type 中文轉成顯示名稱
   const getCheckTypeName = (type) => {
-    if (type.includes('全血') || type === 'cbc') return '全血計數';
-    if (type.includes('生化') || type === 'bio') return '血液生化檢查';
-    if (type.includes('尿液') || type === 'urine') return '尿液分析';
+    if (type.includes('全血') || type === 'cbc') return t('checkTypes.cbc');
+    if (type.includes('生化') || type === 'bio') return t('checkTypes.biochemistry');
+    if (type.includes('尿液') || type === 'urine') return t('checkTypes.urinalysis');
     return type;
   };
 
-  const defaultFields = ['紅血球計數', '白血球計數', '血紅蛋白'];
+  const defaultFields = ['紅血球計數', '白血球計數', '血紅蛋白', '血比容', '平均紅血球體積', '平均紅血球血紅蛋白量', '平均紅血球血紅蛋白濃度', '紅血球分布寬度', '嗜中性球計數', '淋巴球計數', '單核球計數', '嗜酸性球計數', '嗜鹼性球計數', '血小板計數', '網狀紅血球計數'];
 
-  const extraFields = Object.entries(values || {})
+  // 翻譯血液檢測項目
+  const translateFieldName = (fieldName) => {
+    return t(`bloodFields.${fieldName}`, { defaultValue: fieldName });
+  };
+
+  const extraFields = Object.entries(reportData?.data || {})
     .filter(([key, val]) => !defaultFields.includes(key) && val !== null && val !== '')
     .map(([key, val]) => ({ key, val }));
 
@@ -87,73 +146,63 @@ const HealthReportDetailPage = () => {
     setShowAll((prev) => !prev);
   };
 
-  const handleInputChange = (key, newValue) => {
-    setValues((prev) => ({ ...prev, [key]: newValue }));
+  // 格式化日期為 MM/DD 格式
+  const formatDate = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${month}/${day}`;
   };
 
-  const handleEdit = async () => {
-    if (!reportData) return;
-
-    try {
-      const payload = {
-        check_date: reportData.check_date,
-        check_type: reportData.check_type,
-        check_location: checkLocation || '',
-        notes: note || '',
-        data: JSON.stringify(values),
-      };
-
-      await axios.put(`/ocr/health-reports/${id}/`, payload, {
-        headers: { 'Content-Type': 'application/json' },
-      });
-
-      showNotification('更新成功');
-      
-      // 延遲後返回列表頁
-      setTimeout(() => {
-        sessionStorage.removeItem('currentReport');
-        navigate('/health-reports');
-      }, 1500);
-    } catch (err) {
-      console.error('更新失敗', err);
-      showNotification('更新失敗，請檢查伺服器或資料格式');
-    }
+  const toggleMenu = () => {
+    setShowMenu(!showMenu);
   };
 
-  const handleDelete = async () => {
-    if (!window.confirm('確定要刪除此健康報告嗎？')) return;
+  const handleEdit = () => {
+    setShowMenu(false);
+    navigate(`/pet/${petId}/health-report/${id}/edit`);
+  };
 
-    try {
-      await axios.delete(`/ocr/health-reports/${id}/`);
-      showNotification('刪除成功');
-      
-      // 延遲後返回列表頁
-      setTimeout(() => {
-        sessionStorage.removeItem('currentReport');
-        navigate('/health-reports');
-      }, 1500);
-    } catch (err) {
-      console.error('刪除失敗', err);
-      showNotification('刪除失敗，請稍後再試');
-    }
+  const handleDelete = () => {
+    setShowMenu(false);
+    showConfirmDialog(
+      t('detail.confirmDelete'),
+      async () => {
+        try {
+          await axios.delete(`/ocr/health-reports/${id}/`);
+          showNotification(t('detail.deleteSuccess'));
+
+          // 延遲後返回列表頁
+          setTimeout(() => {
+            sessionStorage.removeItem('currentReport');
+            navigate(`/pet/${petId}/health-reports`);
+          }, 1500);
+        } catch (err) {
+          console.error('刪除失敗', err);
+          showNotification(t('detail.deleteFailed'));
+        }
+      }
+    );
   };
 
   const handleBack = () => {
     sessionStorage.removeItem('currentReport');
-    navigate('/health-reports');
+    navigate(`/pet/${petId}/health-reports`);
   };
 
-  const renderEditableField = (label, value, key) => (
-    <div className={styles.formGroup} key={key}>
-      <label className={styles.label}>{label}</label>
-      <input
-        className={styles.input}
-        value={typeof value === 'object' ? `${value?.result || ''} ${value?.unit || ''}` : value || ''}
-        onChange={(e) => handleInputChange(key, e.target.value)}
-        placeholder="請輸入數值"
-      />
-    </div>
-  );
+  const renderValueField = (label, value, key) => {
+    const isEnglish = i18n.language === 'en';
+
+    return (
+      <div className={`${styles.formInlineGroup} ${isEnglish ? styles.formStackedGroup : ''}`} key={key}>
+        <label className={styles.valueLabel}>{translateFieldName(label)}</label>
+        <span className={styles.inlineValue}>
+          {typeof value === 'object' ? `${value?.result || ''} ${value?.unit || ''}` : value || ''}
+        </span>
+      </div>
+    );
+  };
 
   if (loading) {
     return (
@@ -162,7 +211,7 @@ const HealthReportDetailPage = () => {
           <TopNavbar />
           <div className={styles.content}>
             <div className={styles.loadingContainer}>
-              <p>載入中...</p>
+              <p>{t('reports.loading')}</p>
             </div>
           </div>
           <BottomNavbar />
@@ -178,9 +227,9 @@ const HealthReportDetailPage = () => {
           <TopNavbar />
           <div className={styles.content}>
             <div className={styles.errorContainer}>
-              <p>找不到報告資料</p>
+              <p>{t('reports.notFound')}</p>
               <button onClick={handleBack} className={styles.cancelButton}>
-                返回列表
+                {t('reports.backToList')}
               </button>
             </div>
           </div>
@@ -194,45 +243,81 @@ const HealthReportDetailPage = () => {
     <NotificationProvider>
       <div className={styles.container}>
         <TopNavbar />
+
+        {/* 通知組件 */}
+        {notification && (
+          <Notification message={notification} onClose={hideNotification} />
+        )}
+
+        {/* 確認對話框 */}
+        {showConfirmNotification && (
+          <ConfirmNotification
+            message={confirmMessage}
+            onConfirm={handleConfirmAction}
+            onCancel={handleCancelAction}
+          />
+        )}
+
         <div className={styles.content}>
-          {/* 標題列 */}
+          {/* 標題區域 */}
           <div className={styles.header}>
+            <button className={styles.backButton} onClick={handleBack}>
+              ❮
+            </button>
             <div className={styles.titleSection}>
-              <h1 className={styles.title}>編輯健康報告</h1>
+              <span className={styles.title}>{formatDate(reportData.check_date)} {t('detail.title')}</span>
+            </div>
+            <div className={styles.menuContainer}>
+              <button className={styles.menuButton} onClick={toggleMenu}>
+                <img src="/assets/icon/PostMoreInfo.png" alt={t('button.more', { defaultValue: '更多選項' })} />
+              </button>
+              {showMenu && (
+                <div className={styles.menuDropdown}>
+                  <button className={styles.menuItem} onClick={handleEdit}>
+                    {t('detail.edit')}
+                  </button>
+                  <button className={styles.menuItem} onClick={handleDelete}>
+                    {t('detail.delete')}
+                  </button>
+                </div>
+              )}
             </div>
           </div>
-          
+
           <div className={styles.divider}></div>
 
-          <div className={styles.viewContainer}>
-            
-            <div className={styles.infoSection}>
-              <div className={styles.infoRow}>
-                <span className={styles.infoLabel}>檢查類型：</span>
-                <span className={styles.infoValue}>{getCheckTypeName(reportData.check_type)}</span>
+          <div className={styles.uploadContainer}>
+            {/* 基本資訊區塊 */}
+            <div className={styles.formInlineContainer}>
+              <div className={`${styles.formInlineGroup} ${i18n.language === 'en' ? styles.formStackedGroup : ''}`}>
+                <label className={styles.inlineLabel}>{t('fields.checkType')}</label>
+                <span className={styles.inlineValue}>{getCheckTypeName(reportData.check_type)}</span>
               </div>
-              <div className={styles.infoRow}>
-                <span className={styles.infoLabel}>檢查時間：</span>
-                <span className={styles.infoValue}>{reportData.check_date}</span>
+
+              <div className={`${styles.formInlineGroup} ${i18n.language === 'en' ? styles.formStackedGroup : ''}`}>
+                <label className={styles.inlineLabel}>{t('fields.checkDate')}</label>
+                <span className={styles.inlineValue}>{reportData.check_date}</span>
               </div>
-              <div className={styles.formGroup}>
-                <label className={styles.label}>檢查地點</label>
-                <input
-                  className={styles.input}
-                  value={checkLocation}
-                  onChange={(e) => setCheckLocation(e.target.value)}
-                  placeholder="請輸入檢查地點"
-                />
+
+              <div className={`${styles.formInlineGroup} ${i18n.language === 'en' ? styles.formStackedGroup : ''}`}>
+                <label className={styles.inlineLabel}>{t('fields.checkLocation')}</label>
+                <span className={styles.inlineValue}>{reportData.check_location || t('fields.notFilled')}</span>
               </div>
             </div>
 
-            <div className={styles.section}>
-              <h3 className={styles.sectionTitle}>數值記錄</h3>
-              
-              {defaultFields.map((field) => renderEditableField(field, values[field], field))}
+            {/* 數值記錄區域 */}
+            <div className={styles.valuesContainer}>
+              <div className={styles.valuesInlineContainer}>
+                {defaultFields
+                  .filter((field) => {
+                    const value = reportData.data?.[field];
+                    return value !== null && value !== undefined && value !== '';
+                  })
+                  .map((field) => renderValueField(field, reportData.data?.[field], field))}
 
-              {showAll &&
-                extraFields.map(({ key, val }) => renderEditableField(key, val, key))}
+                {showAll &&
+                  extraFields.map(({ key, val }) => renderValueField(key, val, key))}
+              </div>
 
               {extraFields.length > 0 && (
                 <div className={styles.toggleContainer}>
@@ -240,36 +325,24 @@ const HealthReportDetailPage = () => {
                     onClick={handleToggle}
                     className={styles.toggleButton}
                   >
-                    {showAll ? '▲ 查看部分' : '▼ 查看全部'}
+                    <span>{showAll ? t('detail.viewPartial') : t('detail.viewAll')}</span>
+                    <span>{showAll ? '▲' : '▼'}</span>
                   </button>
                 </div>
               )}
             </div>
 
-            <div className={styles.section}>
-              <h3 className={styles.sectionTitle}>備註</h3>
-              <textarea
-                className={styles.textarea}
-                value={note}
-                onChange={(e) => setNote(e.target.value)}
-                placeholder="請輸入您想補充的描述"
-              />
-            </div>
-
-            <div className={styles.buttonRow}>
-              <button className={styles.editButton} onClick={handleEdit}>修改</button>
-              <button className={styles.deleteButton} onClick={handleDelete}>刪除</button>
-              <button className={styles.cancelButton} onClick={handleBack}>取消</button>
+            {/* 備註區域 */}
+            <div className={styles.notesContainer}>
+              <div className={styles.notesInlineGroup}>
+                <div className={styles.notesDisplay}>
+                  {reportData.notes || t('detail.noNotes')}
+                </div>
+              </div>
             </div>
           </div>
         </div>
         <BottomNavbar />
-        {notification && (
-          <Notification 
-            message={notification} 
-            onClose={hideNotification} 
-          />
-        )}
       </div>
     </NotificationProvider>
   );

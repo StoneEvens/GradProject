@@ -1,16 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import styles from '../styles/ChatWindow.module.css';
 import aiChatService from '../services/aiChatService';
 
 const ChatWindow = ({ isOpen, onClose, user }) => {
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      text: "Hi！我是 PETer 專員 Peter，很高興為您服務！有什麼問題都可以問我喔～",
-      isUser: false,
-      timestamp: new Date()
-    }
-  ]);
+  const { t, ready } = useTranslation('main');
+  const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [userAvatarError, setUserAvatarError] = useState(false);
@@ -25,6 +20,20 @@ const ChatWindow = ({ isOpen, onClose, user }) => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // 當翻譯準備好時初始化歡迎訊息
+  useEffect(() => {
+    if (ready && messages.length === 0) {
+      setMessages([
+        {
+          id: 1,
+          text: t('chatWindow.welcomeMessage'),
+          isUser: false,
+          timestamp: new Date()
+        }
+      ]);
+    }
+  }, [ready, t, messages.length]);
 
   // 當用戶改變時重置頭像錯誤狀態
   useEffect(() => {
@@ -103,7 +112,7 @@ const ChatWindow = ({ isOpen, onClose, user }) => {
       setTimeout(() => {
         const errorMessage = {
           id: Date.now() + 1,
-          text: "抱歉，我暫時無法回應您的問題。請稍後再試。",
+          text: t('chatWindow.errorMessage'),
           isUser: false,
           timestamp: new Date()
         };
@@ -137,8 +146,8 @@ const ChatWindow = ({ isOpen, onClose, user }) => {
               className={styles.aiAvatar}
             />
             <div className={styles.headerText}>
-              <h3>PETer 專員 Peter</h3>
-              <span className={styles.status}>線上</span>
+              <h3>{t('chatWindow.title')}</h3>
+              <span className={styles.status}>{t('chatWindow.status')}</span>
             </div>
           </div>
           <button className={styles.closeButton} onClick={onClose}>
@@ -222,7 +231,7 @@ const ChatWindow = ({ isOpen, onClose, user }) => {
             </div>
             <textarea
               ref={textareaRef}
-              placeholder="輸入您的問題..."
+              placeholder={t('chatWindow.inputPlaceholder')}
               className={styles.inputTextarea}
               value={inputText}
               onChange={handleInputChange}
@@ -234,9 +243,9 @@ const ChatWindow = ({ isOpen, onClose, user }) => {
                 className={styles.sendBtn}
                 onClick={handleSendMessage}
                 disabled={!inputText.trim()}
-                title="送出訊息"
+                title={t('chatWindow.sendButton')}
               >
-                <img src="/assets/icon/CommentSendIcon.png" alt="送出訊息" />
+                <img src="/assets/icon/CommentSendIcon.png" alt={t('chatWindow.sendButton')} />
               </button>
             </div>
           </div>

@@ -1,0 +1,72 @@
+{
+  "aiNavigator": {
+    "greeting": "Hi！我是 PETer 專員 Peter",
+    "description": "我大學時主修 PETer 寵兒研究，對這個 app 瞭如指掌，如果有任何操作上問題都可以問我！"
+  },
+  "todoSection": {
+    "title": "我的待辦事項",
+    "loading": "載入中...",
+    "noTodos": "無待辦事項",
+    "addNew": "點此新增",
+    "newItem": "新增事項",
+    "errors": {
+      "fetchTodos": "無法獲取待辦事項",
+      "updateSchedule": "更新行程失敗",
+      "addSchedule": "新增行程失敗",
+      "deleteSchedule": "刪除行程失敗",
+      "markCompleted": "標記完成失敗"
+    }
+  },
+  "dailyTasks": {
+    "title": "我的每日任務",
+    "tasks": {
+      "createPost": "發布一篇貼文",
+      "useCalculator": "使用一次營養計算機"
+    },
+    "completeButton": "去完成"
+  },
+  "topNavbar": {
+    "home": "首頁",
+    "interactiveCity": "互動城市",
+    "notification": "通知",
+    "userAvatar": "用戶頭像",
+    "search": "搜尋",
+    "searchPlaceholder": "搜尋...",
+    "feedSearchPlaceholder": "搜尋飼料名稱或品牌..."
+  },
+  "addSchedule": {
+    "editMode": "修改行程",
+    "addMode": "新增行程",
+    "delete": "刪除",
+    "completed": "已完成",
+    "complete": "完成",
+    "date": "日期",
+    "startTime": "開始",
+    "endTime": "結束",
+    "titlePlaceholder": "請輸入行程事項",
+    "descriptionPlaceholder": "備註...",
+    "cancel": "取消",
+    "save": "儲存",
+    "today": "今日",
+    "timeError": "結束時間必須晚於開始時間",
+    "deleteConfirm": "確定要刪除此行程嗎？",
+    "deleteTitle": "刪除行程",
+    "markCompletedTitle": "標記為已完成"
+  },
+  "chatWindow": {
+    "title": "PETer 專員 Peter",
+    "status": "線上",
+    "welcomeMessage": "Hi！我是 PETer 專員 Peter，很高興為您服務！有什麼問題都可以問我喔～",
+    "errorMessage": "抱歉，我暫時無法回應您的問題。請稍後再試。",
+    "inputPlaceholder": "輸入您的問題...",
+    "sendButton": "送出訊息",
+    "close": "關閉"
+  },
+  "timeDisplay": {
+    "days": "天",
+    "hours": "小時",
+    "minutes": "分",
+    "ago": "前",
+    "later": "後"
+  }
+}

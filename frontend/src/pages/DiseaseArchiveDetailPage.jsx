@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import TopNavbar from '../components/TopNavbar';
 import BottomNavbar from '../components/BottomNavigationBar';
 import ArchiveCard from '../components/ArchiveCard';
@@ -14,6 +15,7 @@ import PostComments from '../components/PostComments';
 import styles from '../styles/DiseaseArchiveDetailPage.module.css';
 
 const DiseaseArchiveDetailPage = () => {
+  const { t } = useTranslation('archives');
   const { petId, archiveId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
@@ -88,7 +90,7 @@ const DiseaseArchiveDetailPage = () => {
             const userProfile = await getUserProfile();
             setCurrentUser(userProfile);
           } catch (error) {
-            console.error('獲取用戶資料失敗:', error);
+            console.error(t('diseaseArchiveDetail.messages.getUserDataFailed'), error);
           }
           
           // 從檔案資料中提取用戶和寵物資訊
@@ -155,7 +157,7 @@ const DiseaseArchiveDetailPage = () => {
           setLikeCount(interactionStats.likes ?? 0);
           setCommentCount(interactionStats.comments ?? 0);
           
-          console.log('Archive 詳情頁初始化狀態:', {
+          console.log(t('diseaseArchiveDetail.messages.archiveDetailInitStatus'), {
             archiveId: archiveData.id,
             isLiked: userInteraction.is_liked,
             isSaved: userInteraction.is_saved,
@@ -165,7 +167,7 @@ const DiseaseArchiveDetailPage = () => {
           });
         }
       } else {
-        console.error('找不到指定的疾病檔案');
+        console.error(t('diseaseArchiveDetail.messages.archiveNotFound'));
         setLoadError(true); // 設定載入錯誤狀態
       }
       
@@ -176,7 +178,7 @@ const DiseaseArchiveDetailPage = () => {
       }
       
     } catch (error) {
-      console.error('載入資料失敗:', error);
+      console.error(t('diseaseArchiveDetail.messages.loadDataFailed'), error);
       setLoadError(true); // 設定載入錯誤狀態
       
       // 確保最小載入時間即使在錯誤情況下也要滿足
@@ -205,7 +207,7 @@ const DiseaseArchiveDetailPage = () => {
   };
 
   const handleDelete = () => {
-    setConfirmMessage('確定要刪除這篇文章嗎？此操作無法復原。');
+    setConfirmMessage(t('diseaseArchiveDetail.confirmMessages.deleteArchive'));
     setConfirmAction(() => confirmDelete);
     setShowConfirmNotification(true);
     setShowMenu(false);
@@ -216,7 +218,7 @@ const DiseaseArchiveDetailPage = () => {
       const result = await deleteDiseaseArchive(archiveId);
       
       if (result.success) {
-        showNotification(result.message || '疾病檔案已刪除');
+        showNotification(result.message || t('diseaseArchiveDetail.messages.archiveDeleted'));
         setTimeout(() => {
           if (isPublicView) {
             navigate('/social');
@@ -225,21 +227,21 @@ const DiseaseArchiveDetailPage = () => {
           }
         }, 1500);
       } else {
-        showNotification(result.error || '刪除失敗，請稍後再試');
+        showNotification(result.error || t('diseaseArchiveDetail.messages.deleteFailed'));
       }
     } catch (error) {
-      console.error('刪除失敗:', error);
-      showNotification('刪除失敗，請稍後再試');
+      console.error(t('diseaseArchiveDetail.messages.deleteError'), error);
+      showNotification(t('diseaseArchiveDetail.messages.deleteFailed'));
     }
   };
 
   const handlePublish = () => {
     if (archive?.isPrivate) {
       // 當前是私人，要發布為公開
-      setConfirmMessage('確定要公開發布這篇文章嗎？發布後相關的異常記錄也會變為公開。');
+      setConfirmMessage(t('diseaseArchiveDetail.confirmMessages.publishArchive'));
     } else {
       // 當前是公開，要轉為私人
-      setConfirmMessage('確定要將這篇文章轉為私人嗎？其他用戶將無法查看。');
+      setConfirmMessage(t('diseaseArchiveDetail.confirmMessages.makePrivateArchive'));
     }
     setConfirmAction(() => confirmPublish);
     setShowConfirmNotification(true);
@@ -251,7 +253,7 @@ const DiseaseArchiveDetailPage = () => {
       
       if (result.success) {
         const newIsPrivate = result.data?.is_private;
-        showNotification(result.message || '操作成功！');
+        showNotification(result.message || t('diseaseArchiveDetail.messages.operationSuccess'));
         
         // 立即更新本地狀態，避免重新載入
         if (archive) {
@@ -261,11 +263,11 @@ const DiseaseArchiveDetailPage = () => {
           }));
         }
       } else {
-        showNotification(result.error || '操作失敗，請稍後再試');
+        showNotification(result.error || t('diseaseArchiveDetail.messages.operationFailed'));
       }
     } catch (error) {
-      console.error('切換疾病檔案狀態失敗:', error);
-      showNotification('操作失敗，請稍後再試');
+      console.error(t('diseaseArchiveDetail.messages.toggleStatusError'), error);
+      showNotification(t('diseaseArchiveDetail.messages.operationFailed'));
     }
   };
 
@@ -289,11 +291,11 @@ const DiseaseArchiveDetailPage = () => {
     const newIsLiked = !isLiked;
     const newLikeCount = newIsLiked ? likeCount + 1 : Math.max(0, likeCount - 1);
     
-    console.log('Archive 詳情頁按讚操作:', {
+    console.log(t('diseaseArchiveDetail.messages.likeAction'), {
       archiveId: archiveId,
-      從: originalIsLiked ? '已按讚' : '未按讚',
-      到: newIsLiked ? '已按讚' : '未按讚',
-      讚數變化: `${originalLikeCount} → ${newLikeCount}`
+      from: originalIsLiked ? t('diseaseArchiveDetail.likeStatus.liked') : t('diseaseArchiveDetail.likeStatus.notLiked'),
+      to: newIsLiked ? t('diseaseArchiveDetail.likeStatus.liked') : t('diseaseArchiveDetail.likeStatus.notLiked'),
+      likeCountChange: `${originalLikeCount} → ${newLikeCount}`
     });
     
     // 樂觀更新 UI
@@ -307,19 +309,19 @@ const DiseaseArchiveDetailPage = () => {
         // API 失敗，還原 UI 狀態
         setIsLiked(originalIsLiked);
         setLikeCount(originalLikeCount);
-        console.error('按讚操作失敗:', result.error);
-        showNotification('按讚操作失敗，請稍後再試');
+        console.error(t('diseaseArchiveDetail.messages.likeActionFailed'), result.error);
+        showNotification(t('diseaseArchiveDetail.messages.likeActionFailedRetry'));
         return;
       }
       
-      console.log('按讚操作成功:', result.message);
+      console.log(t('diseaseArchiveDetail.messages.likeActionSuccess'), result.message);
       
     } catch (error) {
       // 網路錯誤，還原 UI 狀態
-      console.error('按讚 API 調用異常:', error);
+      console.error(t('diseaseArchiveDetail.messages.likeApiError'), error);
       setIsLiked(originalIsLiked);
       setLikeCount(originalLikeCount);
-      showNotification('按讚操作失敗，請檢查網路連線');
+      showNotification(t('diseaseArchiveDetail.messages.likeNetworkError'));
     }
   };
 
@@ -330,7 +332,7 @@ const DiseaseArchiveDetailPage = () => {
     if (archive && archive.postFrame) {
       setShowComments(true);
     } else {
-      showNotification('無法開啟留言功能');
+      showNotification(t('diseaseArchiveDetail.messages.cannotOpenComments'));
     }
   };
 
@@ -343,7 +345,7 @@ const DiseaseArchiveDetailPage = () => {
   const handleCommentCountChange = (increment) => {
     setCommentCount(prevCount => {
       const newCount = prevCount + increment;
-      console.log('DiseaseArchiveDetailPage 留言數更新:', {
+      console.log(t('diseaseArchiveDetail.messages.commentCountUpdate'), {
         archiveId,
         increment,
         oldCount: prevCount,
@@ -360,10 +362,10 @@ const DiseaseArchiveDetailPage = () => {
     const originalIsSaved = isSaved;
     const newIsSaved = !isSaved;
     
-    console.log('Archive 詳情頁收藏操作:', {
+    console.log(t('diseaseArchiveDetail.messages.saveAction'), {
       archiveId: archiveId,
-      從: originalIsSaved ? '已收藏' : '未收藏',
-      到: newIsSaved ? '已收藏' : '未收藏'
+      from: originalIsSaved ? t('diseaseArchiveDetail.saveStatus.saved') : t('diseaseArchiveDetail.saveStatus.notSaved'),
+      to: newIsSaved ? t('diseaseArchiveDetail.saveStatus.saved') : t('diseaseArchiveDetail.saveStatus.notSaved')
     });
     
     // 樂觀更新 UI
@@ -375,18 +377,18 @@ const DiseaseArchiveDetailPage = () => {
       if (!result.success) {
         // API 失敗，還原 UI 狀態
         setIsSaved(originalIsSaved);
-        console.error('收藏操作失敗:', result.error);
-        showNotification('收藏操作失敗，請稍後再試');
+        console.error(t('diseaseArchiveDetail.messages.saveActionFailed'), result.error);
+        showNotification(t('diseaseArchiveDetail.messages.saveActionFailedRetry'));
         return;
       }
       
-      console.log('收藏操作成功:', result.message);
+      console.log(t('diseaseArchiveDetail.messages.saveActionSuccess'), result.message);
       
     } catch (error) {
       // 網路錯誤，還原 UI 狀態
-      console.error('收藏 API 調用異常:', error);
+      console.error(t('diseaseArchiveDetail.messages.saveApiError'), error);
       setIsSaved(originalIsSaved);
-      showNotification('收藏操作失敗，請檢查網路連線');
+      showNotification(t('diseaseArchiveDetail.messages.saveNetworkError'));
     }
   };
 
@@ -420,8 +422,8 @@ const DiseaseArchiveDetailPage = () => {
             <div className={styles.content}>
               <div className={styles.errorContainer}>
                 <div className={styles.errorMessage}>
-                  <h3>找不到疾病檔案</h3>
-                  <p>該檔案可能已被刪除或不存在</p>
+                  <h3>{t('diseaseArchiveDetail.errorPage.title')}</h3>
+                  <p>{t('diseaseArchiveDetail.errorPage.description')}</p>
                   <div className={styles.errorButtons}>
                     <button 
                       className={styles.retryButton} 
@@ -430,7 +432,7 @@ const DiseaseArchiveDetailPage = () => {
                         loadData();
                       }}
                     >
-                      重新載入
+                      {t('diseaseArchiveDetail.errorPage.retry')}
                     </button>
                     <button 
                       className={styles.backButton} 
@@ -442,7 +444,7 @@ const DiseaseArchiveDetailPage = () => {
                         }
                       }}
                     >
-                      返回
+                      {t('diseaseArchiveDetail.errorPage.back')}
                     </button>
                   </div>
                 </div>
@@ -474,7 +476,7 @@ const DiseaseArchiveDetailPage = () => {
                 ❮
               </button>
               <span className={styles.title}>
-                {isPublicView ? '正在瀏覽檔案' : '疾病檔案詳情'}
+                {isPublicView ? t('diseaseArchiveDetail.title.publicView') : t('diseaseArchiveDetail.title.privateView')}
               </span>
             </div>
             
@@ -484,7 +486,7 @@ const DiseaseArchiveDetailPage = () => {
                 className={styles.publishButton} 
                 onClick={handlePublish}
               >
-                公開發布
+                {t('diseaseArchiveDetail.buttons.publish')}
               </button>
             )}
             
@@ -494,7 +496,7 @@ const DiseaseArchiveDetailPage = () => {
                 className={styles.publishedStatus}
                 onClick={handlePublish}
               >
-                已公開
+                {t('diseaseArchiveDetail.buttons.published')}
               </button>
             )}
           </div>
@@ -518,7 +520,7 @@ const DiseaseArchiveDetailPage = () => {
               className={styles.deleteButtonInline}
               onClick={handleDelete}
             >
-              刪除疾病檔案
+              {t('diseaseArchiveDetail.buttons.deleteArchive')}
             </button>
           )}
           
@@ -533,7 +535,7 @@ const DiseaseArchiveDetailPage = () => {
                 >
                   <img 
                     src={isLiked ? "/assets/icon/PostLiked.png" : "/assets/icon/PostHeart.png"} 
-                    alt="按讚" 
+                    alt={t('diseaseArchiveDetail.buttons.like')} 
                     className={styles.interactionIcon} 
                   />
                   <span>{likeCount}</span>
@@ -545,7 +547,7 @@ const DiseaseArchiveDetailPage = () => {
                 >
                   <img 
                     src="/assets/icon/PostComment.png" 
-                    alt="留言" 
+                    alt={t('diseaseArchiveDetail.buttons.comment')} 
                     className={styles.interactionIcon} 
                   />
                   <span>{commentCount}</span>
@@ -557,10 +559,10 @@ const DiseaseArchiveDetailPage = () => {
                 >
                   <img 
                     src={isSaved ? "/assets/icon/PostSaved.png" : "/assets/icon/PostSave.png"} 
-                    alt="收藏" 
+                    alt={t('diseaseArchiveDetail.buttons.save')} 
                     className={styles.interactionIcon} 
                   />
-                  <span>{isSaved ? '已收藏' : '收藏'}</span>
+                  <span>{isSaved ? t('diseaseArchiveDetail.saveStatus.saved') : t('diseaseArchiveDetail.saveStatus.save')}</span>
                 </button>
               </div>
             </div>

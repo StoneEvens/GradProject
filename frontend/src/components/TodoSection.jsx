@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import styles from '../styles/TodoSection.module.css';
 import AddSchedule from './AddSchedule';
 import TodoCard from './TodoCard';
-import { 
+import {
   getUserSchedules,
   addUserSchedule,
   updateSchedule,
@@ -12,6 +13,7 @@ import {
 } from '../services/scheduleService';
 
 const TodoSection = () => {
+  const { t } = useTranslation('main');
   const [schedules, setSchedules] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -38,8 +40,8 @@ const TodoSection = () => {
       
       setSchedules(uncompletedSchedules);
     } catch (err) {
-      setError('無法獲取待辦事項');
-      console.error('獲取待辦事項失敗', err);
+      setError(t('todoSection.errors.fetchTodos'));
+      console.error('Failed to fetch todos', err);
     } finally {
       setLoading(false);
     }
@@ -62,8 +64,8 @@ const TodoSection = () => {
       }
       await fetchTodos();
     } catch (err) {
-      setError(scheduleId ? '更新行程失敗' : '新增行程失敗');
-      console.error(scheduleId ? '更新行程失敗' : '新增行程失敗', err);
+      setError(scheduleId ? t('todoSection.errors.updateSchedule') : t('todoSection.errors.addSchedule'));
+      console.error(scheduleId ? 'Update schedule failed' : 'Add schedule failed', err);
     } finally {
       setLoading(false);
       setEditingSchedule(null);
@@ -78,8 +80,8 @@ const TodoSection = () => {
       await deleteSchedule(scheduleId);
       await fetchTodos();
     } catch (err) {
-      setError('刪除行程失敗');
-      console.error('刪除行程失敗', err);
+      setError(t('todoSection.errors.deleteSchedule'));
+      console.error('Delete schedule failed', err);
     } finally {
       setLoading(false);
       setEditingSchedule(null);
@@ -94,8 +96,8 @@ const TodoSection = () => {
       await markScheduleAsCompleted(scheduleId);
       await fetchTodos();
     } catch (err) {
-      setError('標記完成失敗');
-      console.error('標記完成失敗', err);
+      setError(t('todoSection.errors.markCompleted'));
+      console.error('Mark completed failed', err);
     } finally {
       setLoading(false);
       setEditingSchedule(null);
@@ -141,14 +143,14 @@ const TodoSection = () => {
   return (
     <div className={styles.todoContainer}>
       <div className={styles.titleRow}>
-        <h3 className={styles.sectionTitle}>我的待辦事項</h3>
+        <h3 className={styles.sectionTitle}>{t('todoSection.title')}</h3>
       </div>
       
       <div
         className={`${styles.todoGrid} ${schedules.length > 2 ? styles.horizontal : styles.grid}`}
         ref={todoGridRef}
       >
-        {loading && <div className={styles.loadingMessage}>載入中...</div>}
+        {loading && <div className={styles.loadingMessage}>{t('todoSection.loading')}</div>}
         {error && <div className={styles.errorMessage}>{error}</div>}
         
         {schedules.map((schedule) => (
@@ -165,8 +167,8 @@ const TodoSection = () => {
             <div key={`empty-${index}`} className={styles.emptyCard} onClick={handleAddSchedule}>
               <div className={styles.tapeLine}></div>
               <div className={styles.emptyContent}>
-                <span className={styles.emptyText}>無待辦事項</span>
-                <span className={styles.addText}>點此新增</span>
+                <span className={styles.emptyText}>{t('todoSection.noTodos')}</span>
+                <span className={styles.addText}>{t('todoSection.addNew')}</span>
               </div>
             </div>
           ))
@@ -178,9 +180,9 @@ const TodoSection = () => {
             <div className={styles.tapeLine}></div>
             <div className={styles.emptyContent}>
               <span className={styles.emptyText}>
-                {schedules.length === 0 ? '無待辦事項' : '新增事項'}
+                {schedules.length === 0 ? t('todoSection.noTodos') : t('todoSection.newItem')}
               </span>
-              <span className={styles.addText}>點此新增</span>
+              <span className={styles.addText}>{t('todoSection.addNew')}</span>
             </div>
           </div>
         )}

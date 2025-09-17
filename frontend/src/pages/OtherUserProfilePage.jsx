@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import styles from '../styles/UserProfilePage.module.css';
 import TopNavbar from '../components/TopNavbar';
 import BottomNavbar from '../components/BottomNavigationbar';
@@ -12,6 +13,7 @@ import { getOtherUserProfile, getUserPostsPreview, getUserArchives, getUserSumma
 import { getUserFollowStatus, followUser } from '../services/socialService';
 
 const OtherUserProfilePage = () => {
+  const { t } = useTranslation('profile');
   const { userAccount } = useParams();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -78,7 +80,7 @@ const OtherUserProfilePage = () => {
       }
     } catch (err) {
       console.error('載入用戶資料失敗:', err);
-      setNotification('載入用戶資料失敗，請稍後再試');
+      setNotification(t('otherProfilePage.messages.loadUserDataFailed'));
       // 如果是因為用戶不存在，返回上一頁
       if (err.response?.status === 404) {
         setTimeout(() => navigate(-1), 2000);
@@ -225,23 +227,23 @@ const OtherUserProfilePage = () => {
       }
     } catch (error) {
       console.error('追蹤操作失敗:', error);
-      showNotification('操作失敗，請稍後再試');
+      showNotification(t('otherProfilePage.messages.operationFailed'));
     }
   };
 
   // 根據用戶隱私設定和追蹤狀態獲取按鈕文字
   const getFollowButtonText = () => {
-    if (!user) return '追蹤';
-    
+    if (!user) return t('otherProfilePage.followButton.follow');
+
     if (followState.is_following) {
-      return '追蹤中';
+      return t('otherProfilePage.followButton.following');
     }
-    
+
     if (followState.is_requested) {
-      return '已要求';
+      return t('otherProfilePage.followButton.requested');
     }
-    
-    return user.account_privacy === 'private' ? '要求追蹤' : '追蹤';
+
+    return user.account_privacy === 'private' ? t('otherProfilePage.followButton.requestFollow') : t('otherProfilePage.followButton.follow');
   };
 
   // 根據追蹤狀態獲取按鈕樣式
@@ -275,7 +277,7 @@ const OtherUserProfilePage = () => {
         )}
         <main className={styles.content}>
           {loading ? (
-            <div style={{textAlign: 'center', margin: '40px 0'}}>載入中...</div>
+            <div style={{textAlign: 'center', margin: '40px 0'}}>{t('common.loading')}</div>
           ) : user && (
             <>
               {/* 頭像與簡介區塊 */}
@@ -298,21 +300,21 @@ const OtherUserProfilePage = () => {
                   <div className={styles.realname}>{user.user_fullname}</div>
                   {userSummary && (
                     <div className={styles.followStats}>
-                      <span 
+                      <span
                         className={`${styles.followStatItem} ${user.account_privacy === 'private' && !followState.is_following ? styles.disabled : ''}`}
                         onClick={() => handleFollowStatClick('followers')}
                       >
-                        粉絲: {userSummary.followers_count}
+                        {t('profilePage.followStats.followers')}: {userSummary.followers_count}
                       </span>
-                      <span 
+                      <span
                         className={`${styles.followStatItem} ${user.account_privacy === 'private' && !followState.is_following ? styles.disabled : ''}`}
                         onClick={() => handleFollowStatClick('following')}
                       >
-                        追蹤中: {userSummary.following_count}
+                        {t('profilePage.followStats.following')}: {userSummary.following_count}
                       </span>
                     </div>
                   )}
-                  <div className={styles.desc}>{user.user_intro || '這個人很低調，什麼都沒寫。'}</div>
+                  <div className={styles.desc}>{user.user_intro || t('profilePage.defaultIntro')}</div>
                 </div>
               </div>
 
@@ -322,13 +324,13 @@ const OtherUserProfilePage = () => {
                   className={`${styles.tab} ${activeTab === 'community' ? styles.active : ''}`}
                   onClick={() => handleTabChange('community')}
                 >
-                  社群
+                  {t('profilePage.tabs.community')}
                 </button>
                 <button
                   className={`${styles.tab} ${activeTab === 'forum' ? styles.active : ''}`}
                   onClick={() => handleTabChange('forum')}
                 >
-                  論壇
+                  {t('profilePage.tabs.forum')}
                 </button>
               </div>
 
@@ -337,8 +339,8 @@ const OtherUserProfilePage = () => {
                 user.account_privacy === 'private' && !canViewContent ? (
                   <div className={styles.photoGrid}>
                     <div style={{gridColumn: '1/4', textAlign: 'center', color: '#666', padding: '40px 20px'}}>
-                      <div style={{fontSize: '1.1rem', marginBottom: '8px'}}>此帳號為私人帳號</div>
-                      <div style={{fontSize: '0.9rem', color: '#999'}}>追蹤以查看他的貼文</div>
+                      <div style={{fontSize: '1.1rem', marginBottom: '8px'}}>{t('otherProfilePage.privateAccount.title')}</div>
+                      <div style={{fontSize: '0.9rem', color: '#999'}}>{t('otherProfilePage.privateAccount.followToViewPosts')}</div>
                     </div>
                   </div>
                 ) : (
@@ -346,7 +348,7 @@ const OtherUserProfilePage = () => {
                     posts={postsPreview}
                     loading={postsLoading}
                     error={postsError}
-                    emptyMessage="尚未發布任何日常貼文"
+                    emptyMessage={t('profilePage.emptyMessages.noPosts')}
                     userId={user?.id}
                     userAccount={user?.user_account}
                     hasMore={postsHasMore}
@@ -357,14 +359,14 @@ const OtherUserProfilePage = () => {
               ) : (
                 user.account_privacy === 'private' && !canViewContent ? (
                   <div style={{textAlign: 'center', color: '#666', padding: '40px 20px'}}>
-                    <div style={{fontSize: '1.1rem', marginBottom: '8px'}}>此帳號為私人帳號</div>
-                    <div style={{fontSize: '0.9rem', color: '#999'}}>追蹤以查看他的論壇</div>
+                    <div style={{fontSize: '1.1rem', marginBottom: '8px'}}>{t('otherProfilePage.privateAccount.title')}</div>
+                    <div style={{fontSize: '0.9rem', color: '#999'}}>{t('otherProfilePage.privateAccount.followToViewForum')}</div>
                   </div>
                 ) : (
                   <ArchiveList
                     fetchUserArchives={true}
                     userId={user?.id}
-                    emptyMessage="尚未發布任何疾病檔案"
+                    emptyMessage={t('profilePage.emptyMessages.noArchives')}
                     onLike={(archiveId, isLiked) => console.log('疾病檔案按讚功能暫未實作')}
                     onComment={(archiveId) => console.log('Archive comment:', archiveId)}
                     onSave={(archiveId, isSaved) => console.log('疾病檔案收藏功能暫未實作')}

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import TopNavbar from '../components/TopNavbar.jsx';
 import BottomNavbar from '../components/BottomNavigationbar';
 import styles from '../styles/CalculatorPageV2.module.css';
@@ -15,23 +16,24 @@ import mockFeed3 from '../MockPicture/mockFeed3.png';
 import { useUser } from '../context/UserContext';
 import { saveHistoryRecord } from '../utils/historyRecordStorage';
 
-const CONDITION_OPTIONS = [
-  '慢性腎臟病', '肝臟疾病', '關節炎/肥胖', '心臟病', '糖尿病',
-  '泌尿道結石', '胰臟炎', '食物過敏/腸胃敏感', '皮膚問題'
-];
-
-const speciesMap = {
-  cat: '貓',
-  dog: '狗',
-};
-
-const speciesReverseMap = {
-  '貓': 'cat',
-  '狗': 'dog',
-};
-
 function CalculatorPageV2() {
+  const { t, i18n } = useTranslation('calculator');
   const { userData } = useUser();
+
+  const CONDITION_OPTIONS = [
+    'chronicKidneyDisease', 'liverDisease', 'arthritisObesity', 'heartDisease', 'diabetes',
+    'urinaryStones', 'pancreatitis', 'foodAllergyGISensitivity', 'skinProblems'
+  ];
+
+  const speciesMap = {
+    cat: '貓',
+    dog: '狗',
+  };
+
+  const speciesReverseMap = {
+    '貓': 'cat',
+    '狗': 'dog',
+  };
   const [activeSection, setActiveSection] = useState('pet'); // pet, condition, feed, calculate
   const [pets, setPets] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -115,7 +117,7 @@ function CalculatorPageV2() {
           });
         }
       } catch (error) {
-        console.error('載入寵物失敗：', error);
+        console.error(t('messages.loadingPetsFailed'), error);
         setPets([]);
       } finally {
         setLoading(false);
@@ -132,7 +134,7 @@ function CalculatorPageV2() {
       try {
         setLastUsedData(JSON.parse(savedData));
       } catch (error) {
-        console.error('載入上次使用資料失敗:', error);
+        console.error(t('messages.loadingLastUsedDataFailed'), error);
       }
     }
   }, []);
@@ -164,7 +166,7 @@ function CalculatorPageV2() {
   // 快速載入上次使用的資料
   const quickLoadLastUsed = () => {
     if (!lastUsedData) {
-      setNotification('沒有上次使用的資料');
+      setNotification(t('messages.noLastUsedData'));
       return;
     }
 
@@ -174,7 +176,7 @@ function CalculatorPageV2() {
       // 檢查寵物是否還存在
       const existingPet = pets.find(p => p.id === pet.id);
       if (!existingPet) {
-        setNotification('上次使用的寵物已不存在');
+        setNotification(t('messages.petNotFound'));
         return;
       }
 
@@ -203,11 +205,11 @@ function CalculatorPageV2() {
       // 跳轉到飼料選擇頁面
       setActiveSection('feed');
       
-      setNotification('已載入上次使用的資料');
+      setNotification(t('messages.dataLoaded'));
       
     } catch (error) {
-      console.error('載入失敗:', error);
-      setNotification('載入上次使用資料失敗');
+      console.error(t('messages.loadFailed'), error);
+      setNotification(t('messages.loadFailed'));
     }
   };
 
@@ -269,7 +271,7 @@ function CalculatorPageV2() {
     setCalculating(false);
     setHasCalculated(false);
     
-    setNotification('計算機已重置');
+    setNotification(t('messages.calculatorReset'));
   };
 
   // 按鈕點擊處理
@@ -282,20 +284,20 @@ function CalculatorPageV2() {
     
     // 驗證前置條件
     if (section === 'condition' && !selectedPet) {
-      setNotification('請先選擇寵物');
+      setNotification(t('messages.selectPetFirst'));
       return;
     }
     if (section === 'feed' && !selectedPet) {
-      setNotification('請先選擇寵物');
+      setNotification(t('messages.selectPetFirst'));
       return;
     }
     if (section === 'calculate') {
       if (!selectedPet) {
-        setNotification('請先選擇寵物');
+        setNotification(t('messages.selectPetFirst'));
         return;
       }
       if (!selectedFeed) {
-        setNotification('請先選擇飼料');
+        setNotification(t('messages.selectFeedFirst'));
         return;
       }
       // 開始計算
@@ -358,7 +360,7 @@ function CalculatorPageV2() {
         weight: '',
         height: '',
       });
-      setNotification('已取消選擇臨時寵物');
+      setNotification(t('messages.tempPetCanceled'));
     } else {
       // 如果不是鎖定狀態，驗證並創建臨時寵物
       if (createTempPet()) {
@@ -371,15 +373,15 @@ function CalculatorPageV2() {
   const createTempPet = () => {
     // 驗證必填欄位
     if (!tempPet.pet_name.trim()) {
-      setNotification('請輸入寵物名字');
+      setNotification(t('messages.enterPetName'));
       return false;
     }
     if (!tempPet.weight) {
-      setNotification('請輸入體重');
+      setNotification(t('messages.enterWeight'));
       return false;
     }
     if (!tempPet.height) {
-      setNotification('請輸入身高');
+      setNotification(t('messages.enterHeight'));
       return false;
     }
 
@@ -402,7 +404,7 @@ function CalculatorPageV2() {
       height: newTempPet.height,
     });
 
-    setNotification('臨時寵物已創建並鎖定');
+    setNotification(t('messages.tempPetCreated'));
     return true;
   };
 
@@ -470,10 +472,10 @@ function CalculatorPageV2() {
       // 建立飼料
       const parseNumber = (val) => typeof val === 'number' ? val : 0;
       const parseMgToG = (val) => (typeof val === 'number' ? val/1000 : 0);
-      
+
       const createFeedPayload = {
-        name: feedName || '自訂飼料',
-        brand: feedBrand || '未知品牌',
+        name: feedName || t('feedSection.customFeed', { defaultValue: '自訂飼料' }),
+        brand: feedBrand || t('feedSection.unknownBrand', { defaultValue: '未知品牌' }),
         pet_type: petType,
         pet_id: selectedPet?.id,
         protein: parseNumber(nutrients.protein),
@@ -494,8 +496,8 @@ function CalculatorPageV2() {
       // 處理回應
       const newFeed = {
         id: responseData.feed_id || responseData.data?.id,
-        name: feedName || '自訂飼料',
-        brand: feedBrand || '未知品牌',
+        name: feedName || t('feedSection.customFeed', { defaultValue: '自訂飼料' }),
+        brand: feedBrand || t('feedSection.unknownBrand', { defaultValue: '未知品牌' }),
         img: frontImageBase64 || mockFeed1,
         carbohydrate: parseNumber(nutrients.carbohydrate),
         protein: parseNumber(nutrients.protein),
@@ -508,23 +510,23 @@ function CalculatorPageV2() {
       };
       
       handleSelectFeed(newFeed);
-      setNotification(responseData.message || '飼料建立成功');
+      setNotification(responseData.message || t('messages.feedCreated'));
       
     } catch (error) {
-      console.error("建立飼料失敗：", error);
-      setNotification('建立飼料失敗，請稍後再試');
+      console.error(t('messages.createFeedFailed'), error);
+      setNotification(t('messages.feedCreateFailed'));
     }
   };
 
   // 執行計算
   const handleCalculate = async () => {
     if (!selectedPet || !selectedFeed) {
-      setNotification('請先選擇寵物和飼料');
+      setNotification(t('messages.selectPetAndFeed'));
       return;
     }
 
     if (!editInfo.weight) {
-      setNotification('請輸入寵物體重');
+      setNotification(t('messages.enterPetWeight'));
       return;
     }
 
@@ -580,6 +582,9 @@ function CalculatorPageV2() {
         conditions.forEach(c => formData.append('conditions', c));
       }
 
+      // 加入目前使用的語言
+      formData.append('language', i18n.language);
+
       // 執行計算
       const res = await axios.post('/calculator/calculation/', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
@@ -594,8 +599,8 @@ function CalculatorPageV2() {
       // 不在這裡儲存歷史記錄，而是在重置時才儲存
 
     } catch (error) {
-      console.error('計算失敗：', error);
-      setNotification('計算失敗，請稍後再試');
+      console.error(t('messages.calculateFailed'), error);
+      setNotification(t('messages.calculateFailed'));
     } finally {
       setCalculating(false);
     }
@@ -616,7 +621,7 @@ function CalculatorPageV2() {
     <div className={styles.container}>
       <TopNavbar />
       <div className={styles.content}>
-        <h2 className={styles.title}>營養計算機</h2>
+        <h2 className={styles.title}>{t('title')}</h2>
         
         {/* 功能區域 */}
         <div className={styles.functionArea}>
@@ -624,21 +629,21 @@ function CalculatorPageV2() {
             className={styles.functionButton}
             onClick={resetCalculator}
           >
-            重置計算機
+            {t('functions.reset')}
           </button>
           
           <button 
             className={styles.functionButton}
-            onClick={() => setNotification('快速計算功能正在開發中')}
+            onClick={() => setNotification(t('messages.quickCalculateInDevelopment'))}
           >
-            快速計算
+            {t('functions.quickCalculate')}
           </button>
           
           <button 
             className={styles.functionButton}
             onClick={() => setShowHistoryModal(true)}
           >
-            歷史紀錄
+            {t('functions.history')}
           </button>
         </div>
         
@@ -648,8 +653,8 @@ function CalculatorPageV2() {
             className={`${styles.navButton} ${activeSection === 'pet' ? styles.active : ''}`}
             onClick={() => handleSectionChange('pet')}
           >
-            <img src="/assets/icon/CalculatorChoosePetIcon.png" alt="選擇寵物" />
-            <span>選擇寵物</span>
+            <img src="/assets/icon/CalculatorChoosePetIcon.png" alt={t('sections.pet')} />
+            <span>{t('sections.pet')}</span>
           </button>
           
           <span className={styles.operatorSymbol}>+</span>
@@ -658,8 +663,8 @@ function CalculatorPageV2() {
             className={`${styles.navButton} ${activeSection === 'condition' ? styles.active : ''}`}
             onClick={() => handleSectionChange('condition')}
           >
-            <img src="/assets/icon/CalculatorPetConditionIcon.png" alt="寵物狀況" />
-            <span>寵物狀況</span>
+            <img src="/assets/icon/CalculatorPetConditionIcon.png" alt={t('sections.condition')} />
+            <span>{t('sections.condition')}</span>
           </button>
           
           <span className={styles.operatorSymbol}>+</span>
@@ -668,8 +673,8 @@ function CalculatorPageV2() {
             className={`${styles.navButton} ${activeSection === 'feed' ? styles.active : ''}`}
             onClick={() => handleSectionChange('feed')}
           >
-            <img src="/assets/icon/PetpageFeedButton.png" alt="選擇飼料" />
-            <span>選擇飼料</span>
+            <img src="/assets/icon/PetpageFeedButton.png" alt={t('sections.feed')} />
+            <span>{t('sections.feed')}</span>
           </button>
           
           <span className={styles.operatorSymbol}>=</span>
@@ -678,15 +683,15 @@ function CalculatorPageV2() {
             className={`${styles.navButton} ${activeSection === 'calculate' ? styles.active : ''}`}
             onClick={() => handleSectionChange('calculate')}
           >
-            <img src="/assets/icon/CalculatorCalculateIcon.png" alt={hasCalculated ? "計算結果" : "開始計算"} />
-            <span>{hasCalculated ? "計算結果" : "開始計算"}</span>
+            <img src="/assets/icon/CalculatorCalculateIcon.png" alt={hasCalculated ? t('sections.calculateResult') : t('sections.calculate')} />
+            <span>{hasCalculated ? t('sections.calculateResult') : t('sections.calculate')}</span>
           </button>
         </div>
 
         {/* 內容區域 */}
         <div className={styles.contentArea}>
           {loading ? (
-            <div className={styles.loadingContainer}>載入中...</div>
+            <div className={styles.loadingContainer}>{t('messages.loading')}</div>
           ) : (
             <>
               {/* 選擇寵物區域 */}
@@ -699,13 +704,13 @@ function CalculatorPageV2() {
                         onClick={() => handlePetModeChange('select')}
                         disabled={isLocked}
                       >
-                        選擇寵物
+                        {t('petSection.selectPet')}
                       </button>
                       <button
                         className={`${styles.modeButton} ${petMode === 'add' ? styles.activeModeButton : ''}`}
                         onClick={() => handlePetModeChange('add')}
                       >
-                        新增臨時寵物
+                        {t('petSection.addTempPet')}
                       </button>
                     </div>
                   </div>
@@ -728,32 +733,34 @@ function CalculatorPageV2() {
                       {selectedPet && (
                         <div className={styles.petInfoSection}>
                           <div className={styles.infoRow}>
-                            <span className={styles.label}>名字：</span>
+                            <span className={styles.label}>{t('petSection.name')}</span>
                             <span className={styles.value}>{selectedPet.pet_name}</span>
                           </div>
                           <div className={styles.infoRow}>
-                            <span className={styles.label}>物種：</span>
-                            <span className={styles.value}>{selectedPet.species}</span>
+                            <span className={styles.label}>{t('petSection.speciesLabel')}</span>
+                            <span className={styles.value}>
+                              {selectedPet.species === '貓' ? t('petSection.species.cat') : t('petSection.species.dog')}
+                            </span>
                           </div>
                           <div className={styles.infoRow}>
-                            <span className={styles.label}>體重：</span>
+                            <span className={styles.label}>{t('petSection.weight')}</span>
                             <input
                               type="number"
                               value={editInfo.weight}
                               onChange={(e) => handleInfoChange('weight', e.target.value)}
                               className={styles.input}
                             />
-                            <span className={styles.unit}>公斤</span>
+                            <span className={styles.unit}>{t('petSection.weightUnit')}</span>
                           </div>
                           <div className={styles.infoRow}>
-                            <span className={styles.label}>身高：</span>
+                            <span className={styles.label}>{t('petSection.height')}</span>
                             <input
                               type="number"
                               value={editInfo.height}
                               onChange={(e) => handleInfoChange('height', e.target.value)}
                               className={styles.input}
                             />
-                            <span className={styles.unit}>公分</span>
+                            <span className={styles.unit}>{t('petSection.heightUnit')}</span>
                           </div>
                         </div>
                       )}
@@ -762,60 +769,60 @@ function CalculatorPageV2() {
                     <div className={styles.tempPetForm}>
                       <div className={styles.petInfoSection}>
                         <div className={styles.infoRow}>
-                          <span className={styles.label}>名字：</span>
+                          <span className={styles.label}>{t('petSection.name')}</span>
                           <input
                             type="text"
                             value={tempPet.pet_name}
                             onChange={(e) => handleTempPetChange('pet_name', e.target.value)}
                             className={styles.input}
-                            placeholder="請輸入寵物名字"
+                            placeholder={t('petSection.placeholders.petName')}
                           />
                         </div>
                         <div className={styles.infoRow}>
-                          <span className={styles.label}>物種：</span>
+                          <span className={styles.label}>{t('petSection.speciesLabel')}</span>
                           <select
                             value={tempPet.species}
                             onChange={(e) => handleTempPetChange('species', e.target.value)}
                             className={styles.select}
                           >
-                            <option value="貓">貓</option>
-                            <option value="狗">狗</option>
+                            <option value="貓">{t('petSection.species.cat')}</option>
+                            <option value="狗">{t('petSection.species.dog')}</option>
                           </select>
                         </div>
                         <div className={styles.infoRow}>
-                          <span className={styles.label}>體重：</span>
+                          <span className={styles.label}>{t('petSection.weight')}</span>
                           <input
                             type="number"
                             value={tempPet.weight}
                             onChange={(e) => handleTempPetChange('weight', e.target.value)}
                             className={styles.input}
-                            placeholder="請輸入體重"
+                            placeholder={t('petSection.placeholders.weight')}
                           />
                           <span className={styles.unit}>公斤</span>
                         </div>
                         <div className={styles.infoRow}>
-                          <span className={styles.label}>身高：</span>
+                          <span className={styles.label}>{t('petSection.height')}</span>
                           <input
                             type="number"
                             value={tempPet.height}
                             onChange={(e) => handleTempPetChange('height', e.target.value)}
                             className={styles.input}
-                            placeholder="請輸入身高"
+                            placeholder={t('petSection.placeholders.height')}
                           />
                           <span className={styles.unit}>公分</span>
                         </div>
                         <div className={styles.infoRow}>
-                          <span className={styles.label}>階段：</span>
+                          <span className={styles.label}>{t('petSection.stage')}</span>
                           <select
                             value={tempPet.pet_stage}
                             onChange={(e) => handleTempPetChange('pet_stage', e.target.value)}
                             className={styles.select}
                           >
-                            <option value="kitten">幼貓</option>
-                            <option value="puppy">幼犬</option>
-                            <option value="adult">成年</option>
-                            <option value="pregnant">懷孕</option>
-                            <option value="lactating">哺乳</option>
+                            <option value="kitten">{t('petSection.stages.kitten')}</option>
+                            <option value="puppy">{t('petSection.stages.puppy')}</option>
+                            <option value="adult">{t('petSection.stages.adult')}</option>
+                            <option value="pregnant">{t('petSection.stages.pregnant')}</option>
+                            <option value="lactating">{t('petSection.stages.lactating')}</option>
                           </select>
                         </div>
                       </div>
@@ -825,7 +832,7 @@ function CalculatorPageV2() {
                           className={`${styles.createTempPetButton} ${isLocked ? styles.locked : ''}`}
                           onClick={handleCreateTempPetClick}
                         >
-                          {isLocked ? '取消選擇' : '創建臨時寵物'}
+                          {isLocked ? t('petSection.cancelSelection') : t('petSection.createTempPet')}
                         </button>
                       </div>
                     </div>
@@ -839,8 +846,8 @@ function CalculatorPageV2() {
                   <div className={styles.conditionPanel}>
                     <div className={styles.conditionGrid}>
                       {CONDITION_OPTIONS.map(c => (
-                        <label 
-                          key={c} 
+                        <label
+                          key={c}
                           className={`${styles.conditionItem} ${selectedConditions.includes(c) ? styles.selected : ''}`}
                         >
                           <input
@@ -848,7 +855,7 @@ function CalculatorPageV2() {
                             checked={selectedConditions.includes(c)}
                             onChange={() => toggleCondition(c)}
                           />
-                          <span>{c}</span>
+                          <span>{t(`conditionSection.conditions.${c}`)}</span>
                         </label>
                       ))}
                       
@@ -860,12 +867,12 @@ function CalculatorPageV2() {
                           checked={otherChecked || !!otherText}
                           onChange={(e) => setOtherChecked(e.target.checked)}
                         />
-                        <span>其他：</span>
+                        <span>{t('conditionSection.other')}</span>
                         <input
                           type="text"
                           value={otherText}
                           onChange={(e) => setOtherText(e.target.value)}
-                          placeholder="請輸入"
+                          placeholder={t('conditionSection.otherPlaceholder')}
                           className={styles.otherInput}
                           maxLength={50}
                         />
@@ -883,13 +890,13 @@ function CalculatorPageV2() {
                       className={styles.feedActionBtn}
                       onClick={() => setShowFeedSelectModal(true)}
                     >
-                      選擇飼料
+                      {t('feedSection.selectFeed')}
                     </button>
                     <button 
                       className={styles.feedActionBtn}
                       onClick={() => setShowCreateFeedModal(true)}
                     >
-                      新增飼料
+                      {t('feedSection.addFeed')}
                     </button>
                   </div>
 
@@ -908,23 +915,23 @@ function CalculatorPageV2() {
                       </div>
                     ) : (
                       <div className={styles.noFeedSelected}>
-                        請選擇或新增飼料
+                        {t('feedSection.noFeedSelected')}
                       </div>
                     )}
                   </div>
 
                   {selectedFeed && (
                     <div className={styles.feedInfoSection}>
-                      <h4>營養成分（每100g）</h4>
+                      <h4>{t('feedSection.nutritionTitle')}</h4>
                       <div className={styles.nutrientGrid}>
                         {[
-                          ['蛋白質', 'protein', 'g'],
-                          ['脂肪', 'fat', 'g'],
-                          ['碳水化合物', 'carb', 'g'],
-                          ['鈣', 'ca', 'g'],
-                          ['磷', 'p', 'g'],
-                          ['鎂', 'mg', 'mg'],
-                          ['鈉', 'na', 'mg'],
+                          [t('feedSection.nutrients.protein'), 'protein', t('feedSection.units.g')],
+                          [t('feedSection.nutrients.fat'), 'fat', t('feedSection.units.g')],
+                          [t('feedSection.nutrients.carbohydrate'), 'carb', t('feedSection.units.g')],
+                          [t('feedSection.nutrients.calcium'), 'ca', t('feedSection.units.g')],
+                          [t('feedSection.nutrients.phosphorus'), 'p', t('feedSection.units.g')],
+                          [t('feedSection.nutrients.magnesium'), 'mg', t('feedSection.units.mg')],
+                          [t('feedSection.nutrients.sodium'), 'na', t('feedSection.units.mg')],
                         ].map(([label, key, unit]) => (
                           <div className={styles.nutrientRow} key={key}>
                             <span className={styles.nutrientLabel}>{label}：</span>
@@ -949,18 +956,18 @@ function CalculatorPageV2() {
                   {calculating ? (
                     <div className={styles.calculatingContainer}>
                       <div className={styles.spinner}></div>
-                      <p>計算中，請稍候...</p>
+                      <p>{t('calculationSection.calculating')}</p>
                     </div>
                   ) : calculationResult ? (
                     <div className={styles.resultContainer}>
                       <div className={styles.resultItem}>
                         <div className={styles.resultRow}>
-                          <span className={styles.resultLabel}>每日熱量需求：</span>
-                          <span className={styles.resultValue}>{calculationResult.daily_ME_kcal} kcal</span>
+                          <span className={styles.resultLabel}>{t('calculationSection.dailyCalories')}</span>
+                          <span className={styles.resultValue}>{calculationResult.daily_ME_kcal} {t('calculationSection.kcalUnit')}</span>
                         </div>
                         <div className={styles.resultRow}>
-                          <span className={styles.resultLabel}>每日飼料建議量：</span>
-                          <span className={styles.resultValue}>{calculationResult.daily_feed_amount_g} 公克</span>
+                          <span className={styles.resultLabel}>{t('calculationSection.dailyFeedAmount')}</span>
+                          <span className={styles.resultValue}>{calculationResult.daily_feed_amount_g} {t('calculationSection.gramUnit')}</span>
                         </div>
                       </div>
 
@@ -974,7 +981,7 @@ function CalculatorPageV2() {
                     </div>
                   ) : (
                     <div className={styles.noResultContainer}>
-                      <p>點擊上方「開始計算」按鈕開始營養計算</p>
+                      <p>{t('calculationSection.noResult')}</p>
                     </div>
                   )}
                 </div>

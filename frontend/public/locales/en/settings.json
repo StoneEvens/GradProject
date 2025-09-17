@@ -1,0 +1,25 @@
+{
+  "title": "Settings",
+  "account": {
+    "title": "Account Settings",
+    "editProfile": "Edit Profile",
+    "accountPrivacy": "Account Privacy",
+    "privacyPublic": "Public",
+    "privacyPrivate": "Private",
+    "privacyDescription": "When set to private, only your followers can see your posts"
+  },
+  "interaction": {
+    "title": "My Interactions",
+    "likedPosts": "Liked Posts",
+    "savedPosts": "Saved Posts",
+    "likedArchives": "Liked Forum Articles",
+    "savedArchives": "Saved Forum Articles"
+  },
+  "language": {
+    "title": "Language Settings",
+    "systemLanguage": "System Language",
+    "changeLanguageInfo": "Choose your preferred display language. Changes will take effect immediately."
+  },
+  "logout": "Logout",
+  "loggingOut": "Logging out..."
+}

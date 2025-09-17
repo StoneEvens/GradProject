@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import styles from '../styles/ConfirmFollowModal.module.css';
 
 const ConfirmRemoveFollowerModal = ({ 
@@ -7,6 +8,8 @@ const ConfirmRemoveFollowerModal = ({
   onConfirm, 
   username 
 }) => {
+  const { t } = useTranslation('social');
+
   if (!isVisible) return null;
 
   const handleBackgroundClick = (e) => {
@@ -20,24 +23,24 @@ const ConfirmRemoveFollowerModal = ({
       <div className={styles.modal}>
         <div className={styles.content}>
           <h3 className={styles.title}>
-            是否確定移除粉絲?
+            {t('confirmRemoveFollowerModal.title')}
           </h3>
           <p className={styles.description}>
-            移除 @{username} 的追蹤
+            {t('confirmRemoveFollowerModal.description', { username })}
           </p>
-          
+
           <div className={styles.buttons}>
-            <button 
+            <button
               className={styles.cancelButton}
               onClick={onClose}
             >
-              取消
+              {t('common.cancel')}
             </button>
-            <button 
+            <button
               className={styles.confirmButton}
               onClick={onConfirm}
             >
-              移除
+              {t('common.remove')}
             </button>
           </div>
         </div>

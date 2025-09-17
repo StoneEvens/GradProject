@@ -1,0 +1,47 @@
+{
+  "nav": {
+    "home": "Home",
+    "social": "Social",
+    "pets": "Pets",
+    "feed": "Feed",
+    "calculator": "Calculator",
+    "profile": "Profile",
+    "settings": "Settings",
+    "logout": "Logout",
+    "post": "Post",
+    "dailyRecord": "Daily Post",
+    "abnormalRecord": "Abnormal Record"
+  },
+  "button": {
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "search": "Search",
+    "filter": "Filter",
+    "upload": "Upload",
+    "download": "Download",
+    "share": "Share",
+    "like": "Like",
+    "comment": "Comment",
+    "follow": "Follow",
+    "unfollow": "Unfollow"
+  },
+  "message": {
+    "loading": "Loading...",
+    "success": "Success",
+    "error": "An error occurred",
+    "noData": "No data available",
+    "confirmDelete": "Are you sure you want to delete?",
+    "welcome": "Welcome",
+    "goodbye": "Goodbye"
+  },
+  "language": {
+    "zh-TW": "繁體中文",
+    "en": "English"
+  }
+}

@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import TopNavbar from '../components/TopNavbar';
 import BottomNavbar from '../components/BottomNavigationbar';
 import Notification from '../components/Notification';
 import AccountSettings from '../components/AccountSettings';
 import MyInteractionSettings from '../components/MyInteractionSettings';
+import LanguageSettings from '../components/LanguageSettings';
 import { logout } from '../services/authService';
 import { getUserProfile, updateAccountPrivacy } from '../services/userService';
 import styles from '../styles/SettingsPage.module.css';
 
 const SettingsPage = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation('settings');
   const [notification, setNotification] = useState('');
   const [isPrivacyPublic, setIsPrivacyPublic] = useState(true);
   const [isLoading, setIsLoading] = useState(false); // 用於登出按鈕
@@ -82,7 +85,7 @@ const SettingsPage = () => {
       
       <div className={styles.content}>
         <div className={styles.header}>
-          <h1 className={styles.title}>個人設定</h1>
+          <h1 className={styles.title}>{t('title')}</h1>
         </div>
 
         <div className={styles.settingsSection}>
@@ -90,13 +93,16 @@ const SettingsPage = () => {
           <div className={styles.divider}></div>
           
           {/* 帳號設定組件 */}
-          <AccountSettings 
+          <AccountSettings
             onPrivacyToggle={handlePrivacyToggle}
             isPrivacyPublic={isPrivacyPublic}
           />
 
           {/* 我的互動設定組件 */}
           <MyInteractionSettings />
+
+          {/* 語言設定組件 */}
+          <LanguageSettings />
         </div>
 
         {/* 登出按鈕 */}
@@ -106,7 +112,7 @@ const SettingsPage = () => {
             onClick={handleLogout}
             disabled={isLoading}
           >
-            {isLoading ? '登出中...' : '登出'}
+            {isLoading ? t('loggingOut') : t('logout')}
           </button>
         </div>
       </div>

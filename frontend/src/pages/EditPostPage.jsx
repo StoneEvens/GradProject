@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import TopNavbar from '../components/TopNavbar';
 import BottomNavbar from '../components/BottomNavigationbar';
 import Notification from '../components/Notification';
@@ -11,6 +12,7 @@ import { getUserProfile } from '../services/userService';
 import styles from '../styles/EditPostPage.module.css';
 
 const EditPostPage = () => {
+  const { t } = useTranslation('posts');
   const navigate = useNavigate();
   const location = useLocation();
   const { postId } = useParams();
@@ -105,13 +107,7 @@ const EditPostPage = () => {
     hasContentChanges: false // 是否有內容變更
   });
 
-  // 預設位置選項
-  const locationOptions = [
-    '台北市', '新北市', '桃園市', '台中市', '台南市', '高雄市',
-    '基隆市', '新竹市', '嘉義市', '新竹縣', '苗栗縣', '彰化縣',
-    '南投縣', '雲林縣', '嘉義縣', '屏東縣', '宜蘭縣', '花蓮縣',
-    '台東縣', '澎湖縣', '金門縣', '連江縣'
-  ];
+  const locationOptions = t('editPost.locationOptions', { returnObjects: true });
 
   // 檢查是否有未保存的變更
   const hasUnsavedChanges = () => {
@@ -192,7 +188,7 @@ const EditPostPage = () => {
         
         // 如果沒有傳入資料，從 API 獲取
         if (postId) {
-          showNotification('正在載入貼文資料...');
+          showNotification(t('common.loading'));
           
           const { getPost } = await import('../services/socialService');
           const result = await getPost(postId);
@@ -253,7 +249,7 @@ const EditPostPage = () => {
             
             hideNotification();
           } else {
-            throw new Error(result.error || '獲取貼文失敗');
+            throw new Error(result.error || t('editPost.messages.loadPostFailed'));
           }
         } else {
           // 沒有 postId，使用預設資料
@@ -265,7 +261,7 @@ const EditPostPage = () => {
         }
       } catch (error) {
         console.error('載入貼文資料失敗:', error);
-        showNotification(`載入貼文失敗: ${error.message}`);
+        showNotification(t('editPost.messages.loadPostError', { error: error.message }));
         
         // 失敗時使用預設資料
         setPostData({
@@ -320,7 +316,7 @@ const EditPostPage = () => {
         setUser(userProfile);
       } catch (error) {
         console.error('獲取用戶資料失敗:', error);
-        showNotification('獲取用戶資料失敗');
+        showNotification(t('editPost.messages.loadUserDataFailed'));
       }
     };
 
@@ -714,7 +710,7 @@ const EditPostPage = () => {
     }
     
     if (finalImageCount < 1) {
-      showNotification('貼文至少需要保留一張圖片');
+      showNotification(t('editPost.messages.minOneImageRequired'));
       setDeleteImageIndex(null);
       setShowDeleteConfirm(false);
       return;
@@ -759,7 +755,7 @@ const EditPostPage = () => {
     const tagText = hashtagInput.trim();
     
     if (!tagText) {
-      showNotification('請輸入標籤內容');
+      showNotification(t('createPost.messages.enterHashtagContent'));
       return;
     }
     
@@ -767,12 +763,12 @@ const EditPostPage = () => {
       const existingTagText = tag.tag || tag.text || (typeof tag === 'string' ? tag : '');
       return existingTagText === tagText;
     })) {
-      showNotification('此標籤已存在');
+      showNotification(t('createPost.messages.hashtagExists'));
       return;
     }
     
     if (hashtags.length >= 10) {
-      showNotification('最多只能新增10個標籤');
+      showNotification(t('createPost.messages.maxHashtagsReached'));
       return;
     }
     
@@ -990,7 +986,7 @@ const EditPostPage = () => {
   // 更新貼文
   const handleUpdate = async () => {
     if (!selectedLocation) {
-      showNotification('請選擇位置');
+      showNotification(t('editPost.messages.selectLocation'));
       return;
     }
     
@@ -1000,7 +996,7 @@ const EditPostPage = () => {
     
     try {
       setIsUpdating(true);
-      showNotification('正在更新貼文...');
+      showNotification(t('editPost.messages.updating'));
       
       const { updatePost, deletePostImage, reorderPostImages, createAnnotation, updateAnnotation, deleteAnnotation } = await import('../services/socialService');
       
@@ -1011,7 +1007,7 @@ const EditPostPage = () => {
         const finalImageCount = postData.images.length;
         
         if (finalImageCount < 1) {
-          throw new Error('貼文至少需要保留一張圖片');
+          throw new Error(t('editPost.messages.minOneImageRequired'));
         }
         
         // 檢查是否有新圖片，如果有則允許刪除最後的原始圖片
@@ -1020,7 +1016,7 @@ const EditPostPage = () => {
         for (const imageId of pendingChanges.deletedImageIds) {
           const deleteResult = await deletePostImage(postId, imageId, hasNewImages);
           if (!deleteResult.success) {
-            throw new Error(`刪除圖片失敗: ${deleteResult.error}`);
+            throw new Error(t('editPost.messages.deleteImageError', { error: deleteResult.error }));
           }
         }
       }
@@ -1054,7 +1050,7 @@ const EditPostPage = () => {
         if (existingImageOrders.length > 0) {
           const reorderResult = await reorderPostImages(postId, existingImageOrders);
           if (!reorderResult.success) {
-            throw new Error(`更新圖片順序失敗: ${reorderResult.error}`);
+            throw new Error(t('editPost.messages.reorderImageError', { error: reorderResult.error }));
           }
         }
       }
@@ -1090,7 +1086,7 @@ const EditPostPage = () => {
             if (!newAnnotationMap.has(originalAnnotation.id)) {
               const deleteResult = await deleteAnnotation(originalAnnotation.id);
               if (!deleteResult.success) {
-                console.error(`刪除標註失敗: ${deleteResult.error}`);
+                console.error(t('editPost.messages.deleteAnnotationError', { error: deleteResult.error }));
               }
             }
           }
@@ -1119,7 +1115,7 @@ const EditPostPage = () => {
                   // 刪除舊標註
                   const deleteResult = await deleteAnnotation(newAnnotation.id);
                   if (!deleteResult.success) {
-                    console.error(`刪除舊標註失敗: ${deleteResult.error}`);
+                    console.error(t('editPost.messages.deleteOldAnnotationError', { error: deleteResult.error }));
                   }
                   
                   // 創建新標註
@@ -1131,13 +1127,13 @@ const EditPostPage = () => {
                     target_id: newAnnotation.target_id
                   });
                   if (!createResult.success) {
-                    console.error(`創建新標註失敗: ${createResult.error}`);
+                    console.error(t('editPost.messages.createNewAnnotationError', { error: createResult.error }));
                   }
                 } else {
                   // 只更新位置
                   const updateResult = await updateAnnotation(newAnnotation.id, updateData);
                   if (!updateResult.success) {
-                    console.error(`更新標註失敗: ${updateResult.error}`);
+                    console.error(t('editPost.messages.updateAnnotationError', { error: updateResult.error }));
                   }
                 }
               }
@@ -1252,7 +1248,7 @@ const EditPostPage = () => {
             hasContentChanges: false
           });
           
-          showNotification('貼文更新成功！');
+          showNotification(t('editPost.messages.updateSuccess'));
           setTimeout(() => {
             navigate(-1, { 
               state: { 
@@ -1263,7 +1259,7 @@ const EditPostPage = () => {
             }); // 返回上一頁並傳遞更新標記
           }, 1500);
         } else {
-          throw new Error(result.error || '更新失敗');
+          throw new Error(result.error || t('editPost.messages.updateFailed'));
         }
       } else {
         // 沒有新圖片，使用普通 JSON 更新
@@ -1290,7 +1286,7 @@ const EditPostPage = () => {
           // 清理 localStorage 中的相關資料
           clearAllCachedData();
           
-          showNotification('貼文更新成功！');
+          showNotification(t('editPost.messages.updateSuccess'));
           setTimeout(() => {
             navigate(-1, { 
               state: { 
@@ -1301,7 +1297,7 @@ const EditPostPage = () => {
             }); // 返回上一頁並傳遞更新標記
           }, 1500);
         } else {
-          throw new Error(result.error || '更新失敗');
+          throw new Error(result.error || t('editPost.messages.updateFailed'));
         }
       }
       
@@ -1320,7 +1316,7 @@ const EditPostPage = () => {
         errorMsg = '找不到指定的貼文';
       }
       
-      showNotification(`更新失敗: ${errorMsg}`);
+      showNotification(t('editPost.messages.updateError', { error: errorMsg }));
     } finally {
       setIsUpdating(false);
     }
@@ -1331,7 +1327,7 @@ const EditPostPage = () => {
       <NotificationProvider>
         <div className={styles.container}>
           <TopNavbar />
-          <div className={styles.loading}>載入中...</div>
+          <div className={styles.loading}>{t('common.loading')}</div>
           <BottomNavbar />
         </div>
       </NotificationProvider>
@@ -1347,7 +1343,7 @@ const EditPostPage = () => {
         )}
         
         <div className={styles.content}>
-          <h2 className={styles.title}>編輯貼文</h2>
+          <h2 className={styles.title}>{t('editPost.title')}</h2>
           <div className={styles.divider}></div>
           
           {/* 貼文編輯卡片 */}
@@ -1365,7 +1361,7 @@ const EditPostPage = () => {
                   className={styles.locationButton}
                   onClick={() => setShowLocationModal(true)}
                 >
-                  {selectedLocation || '選擇位置'}
+                  {selectedLocation || t('editPost.ui.selectLocation')}
                 </button>
               </div>
             </div>
@@ -1390,7 +1386,7 @@ const EditPostPage = () => {
                     
                     {/* 編輯提示 */}
                     <div className={styles.editHint}>
-                      點擊圖片編輯標註
+                      {t('editPost.ui.clickToEditAnnotations')}
                     </div>
                     
                     {/* 標註圖示 */}
@@ -1463,7 +1459,7 @@ const EditPostPage = () => {
                             setDeleteImageIndex(index);
                             setShowDeleteConfirm(true);
                           }}
-                          title="刪除圖片"
+                          title={t('editPost.ui.deleteImage')}
                         >
                           ×
                         </button>
@@ -1477,7 +1473,7 @@ const EditPostPage = () => {
                         alt="新增圖片" 
                         className={styles.addImageIcon}
                       />
-                      <span className={styles.addImageLabel}>新增圖片</span>
+                      <span className={styles.addImageLabel}>{t('editPost.ui.addImage')}</span>
                     </div>
                   </div>
                 )}
@@ -1491,7 +1487,7 @@ const EditPostPage = () => {
                 className={styles.descriptionInput}
                 value={postData.description}
                 onChange={handleDescriptionChange}
-                placeholder="撰寫貼文內容..."
+                placeholder={t('editPost.ui.writePostContent')}
                 rows={4}
                 maxLength={500}
               />
@@ -1528,7 +1524,7 @@ const EditPostPage = () => {
                     value={hashtagInput}
                     onChange={(e) => setHashtagInput(e.target.value)}
                     onKeyDown={handleHashtagKeyDown}
-                    placeholder="輸入標籤"
+                    placeholder={t('createPost.placeholders.hashtag')}
                     className={styles.hashtagInput}
                   />
                 </div>
@@ -1536,30 +1532,30 @@ const EditPostPage = () => {
                   className={styles.addHashtagBtn}
                   onClick={handleAddHashtag}
                 >
-                  新增
+                  {t('common.add')}
                 </button>
               </div>
               
               <span className={styles.hashtagCounter}>
-                標籤數量：{hashtags.length}/10
+                {t('createPost.hashtags.counter', { count: hashtags.length })}
               </span>
             </div>
           </div>
 
           {/* 操作按鈕 */}
           <div className={styles.actionButtons}>
-            <button 
+            <button
               className={styles.cancelButton}
               onClick={handleCancel}
             >
-              取消
+              {t('common.cancel')}
             </button>
             <button 
               className={`${styles.updateButton} ${isUpdating ? styles.updating : ''}`}
               onClick={handleUpdate}
               disabled={isUpdating}
             >
-              {isUpdating ? '更新中...' : '更新貼文'}
+              {isUpdating ? t('editPost.ui.updating') : t('editPost.ui.updatePost')}
             </button>
           </div>
         </div>
@@ -1568,7 +1564,7 @@ const EditPostPage = () => {
         {showLocationModal && (
           <div className={styles.modalOverlay} onClick={() => setShowLocationModal(false)}>
             <div className={styles.locationModal} onClick={(e) => e.stopPropagation()}>
-              <h3 className={styles.modalTitle}>選擇位置</h3>
+              <h3 className={styles.modalTitle}>{t('editPost.ui.selectLocation')}</h3>
               <div className={styles.locationList}>
                 {locationOptions.map((location) => (
                   <button
@@ -1586,7 +1582,7 @@ const EditPostPage = () => {
                 className={styles.modalCloseButton}
                 onClick={() => setShowLocationModal(false)}
               >
-                取消
+                {t('common.cancel')}
               </button>
             </div>
           </div>
@@ -1612,7 +1608,7 @@ const EditPostPage = () => {
         {/* 刪除確認對話框 */}
         {showDeleteConfirm && (
           <ConfirmNotification
-            message="確定要刪除此圖片嗎？圖片將在點擊「更新貼文」時刪除，圖片中的標註也會一併刪除。"
+            message={t('editPost.ui.deleteConfirmMessage')}
             onConfirm={handleDeleteImage}
             onCancel={handleCancelDelete}
           />
@@ -1621,7 +1617,7 @@ const EditPostPage = () => {
         {/* 離開頁面確認對話框 */}
         {showLeaveConfirm && (
           <ConfirmNotification
-            message="確定要離開編輯頁面嗎？未保存的修改將會遺失。"
+            message={t('editPost.ui.leaveConfirmMessage')}
             onConfirm={handleConfirmLeave}
             onCancel={handleCancelLeave}
           />

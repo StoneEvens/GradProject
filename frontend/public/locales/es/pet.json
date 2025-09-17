@@ -1,0 +1,154 @@
+{
+  "title": "Mis Mascotas",
+  "addPet": "Agregar Mascota",
+  "noPets": "Aún no has agregado ninguna mascota",
+  "form": {
+    "name": "Nombre de la Mascota",
+    "species": "Especie",
+    "breed": "Raza",
+    "age": "Edad",
+    "gender": "Género",
+    "weight": "Peso",
+    "description": "Descripción",
+    "photo": "Foto"
+  },
+  "species": {
+    "dog": "Perro",
+    "cat": "Gato",
+    "bird": "Ave",
+    "rabbit": "Conejo",
+    "hamster": "Hámster",
+    "other": "Otro"
+  },
+  "gender": {
+    "male": "Macho",
+    "female": "Hembra",
+    "unknown": "Desconocido"
+  },
+  "health": {
+    "title": "Registros de Salud",
+    "vaccination": "Vacunación",
+    "checkup": "Chequeo de Salud",
+    "medication": "Registros de Medicación",
+    "weight": "Registros de Peso"
+  },
+  "page": {
+    "loading": "Cargando...",
+    "noData": "Actualmente no tienes datos de mascotas",
+    "noDataSubtitle": "Agrega tu mascota ahora para usar la página de mascotas",
+    "defaultDescription": "Esta mascota es adorable, el dueño aún no ha agregado una descripción.",
+    "functions": {
+      "editData": "Editar Datos",
+      "relatedPosts": "Publicaciones Relacionadas",
+      "feedArea": "Área de Alimento",
+      "diseaseArchive": "Archivo de Enfermedades",
+      "abnormalRecord": "Registro Anormal",
+      "healthReport": "Reporte de Salud"
+    },
+    "switcher": {
+      "title": "Cambiar Mascota Actual",
+      "addButton": "Agregar Mascota"
+    },
+    "messages": {
+      "fetchError": "Error al obtener datos de la mascota, inténtalo de nuevo más tarde",
+      "selectPetFirst": "Por favor selecciona una mascota primero",
+      "selectPetToEdit": "Por favor selecciona una mascota para editar",
+      "featureInDevelopment": "Función en desarrollo"
+    },
+    "ageUnit": "años"
+  },
+  "addPage": {
+    "phase1": {
+      "title": "Mi mascota es...",
+      "catAlt": "Gato",
+      "dogAlt": "Perro",
+      "catButton": "Gato",
+      "dogButton": "Perro"
+    },
+    "phase2": {
+      "uploadAvatar": "Subir Avatar",
+      "avatarAlt": "Avatar de la Mascota",
+      "titleCat": "Información Básica del Gato",
+      "titleDog": "Información Básica del Perro",
+      "labels": {
+        "name": "Nombre",
+        "breed": "Raza",
+        "age": "Edad",
+        "weight": "Peso",
+        "height": "Altura"
+      },
+      "placeholders": {
+        "name": "Ingresa el nombre de la mascota",
+        "breedCat": "Seleccionar Gato",
+        "breedDog": "Seleccionar Perro",
+        "age": "Ingresa la edad (años)",
+        "weight": "Ingresa el peso (kg)",
+        "height": "Ingresa la altura (cm)",
+        "description": "Describe brevemente a tu mascota"
+      },
+      "buttons": {
+        "back": "Atrás",
+        "submit": "Completar",
+        "processing": "Procesando..."
+      }
+    },
+    "breeds": {
+      "cat": [
+        "Gato Mestizo", "Pelo Corto Americano", "Pelo Corto Británico", "Scottish Fold", "Ragdoll",
+        "Siamés", "Persa", "Bengalí", "Maine Coon", "Pelo Corto Exótico", "Otro"
+      ],
+      "dog": [
+        "Raza Mixta", "Shiba Inu", "Caniche", "Golden Retriever", "Labrador", "Husky",
+        "Bulldog Francés", "Pomerania", "Yorkshire Terrier", "Maltés", "Otro"
+      ]
+    },
+    "imageProcessing": {
+      "starting": "Iniciando procesamiento...",
+      "processing": "Procesando...",
+      "error": "Error en el procesamiento de imagen, inténtalo de nuevo"
+    },
+    "messages": {
+      "requiredFields": "Por favor completa todos los campos obligatorios",
+      "addSuccess": "¡Mascota agregada exitosamente!",
+      "addError": "Error al agregar mascota, inténtalo de nuevo más tarde",
+      "validationError": "Error de validación de datos: "
+    }
+  },
+  "editPage": {
+    "loading": "Cargando...",
+    "uploadAvatar": "Subir Avatar",
+    "avatarAlt": "Avatar de la Mascota",
+    "titleCat": "Editar Información del Gato",
+    "titleDog": "Editar Información del Perro",
+    "labels": {
+      "name": "Nombre",
+      "breed": "Raza",
+      "age": "Edad",
+      "weight": "Peso",
+      "height": "Altura"
+    },
+    "placeholders": {
+      "name": "Ingresa el nombre de la mascota",
+      "breedCat": "Seleccionar Raza de Gato",
+      "breedDog": "Seleccionar Raza de Perro",
+      "age": "Ingresa la edad (años)",
+      "weight": "Ingresa el peso (kg)",
+      "height": "Ingresa la altura (cm)",
+      "description": "Describe brevemente a tu mascota"
+    },
+    "buttons": {
+      "back": "Atrás",
+      "save": "Guardar",
+      "processing": "Procesando..."
+    },
+    "messages": {
+      "petNotFound": "Datos de mascota no encontrados",
+      "loadError": "Error al cargar datos de la mascota",
+      "imageProcessError": "Error en el procesamiento de imagen, inténtalo de nuevo",
+      "requiredFields": "Por favor completa todos los campos obligatorios",
+      "updateSuccess": "¡Datos de mascota actualizados exitosamente!",
+      "updateError": "Error al actualizar mascota, inténtalo de nuevo más tarde",
+      "validationError": "Error de validación de datos: "
+    }
+  }
+}

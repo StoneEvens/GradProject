@@ -1,0 +1,293 @@
+{
+  "archiveCard": {
+    "status": {
+      "diagnosed": "受診済み",
+      "undiagnosed": "未受診",
+      "cured": "完治",
+      "notCured": "未完治",
+      "treating": "治療中"
+    },
+    "noContent": "コンテンツがありません",
+    "noSymptoms": "症状の記録がありません",
+    "abnormalRecordAlt": "異常記録",
+    "symptoms": "症状",
+    "validatingRecords": "異常記録を検証中...",
+    "unknownUser": "不明なユーザー",
+    "pet": "ペット",
+    "unknownPet": "不明なペット",
+    "unknownBreed": "不明な品種",
+    "mainCause": "主な病因",
+    "relatedSymptoms": "関連症状",
+    "createdAt": "作成日",
+    "messages": {
+      "foundDeletedRecords": "{{count}}件の削除された異常記録を発見しました、削除の準備をしています...",
+      "archiveUpdated": "疾病ファイルが更新されました、削除された異常記録を削除しました",
+      "autoRemovedRecords": "{{count}}件の削除された異常記録を自動的に削除しました",
+      "updateArchiveFailed": "疾病ファイルの更新に失敗しました",
+      "validateRecordsError": "異常記録の検証中にエラーが発生しました",
+      "userClicked": "ArchiveCardユーザークリック",
+      "navigateToOwnProfile": "ArchiveCard - 自分のプロフィールページに移動",
+      "navigateToUserProfile": "ArchiveCard - 他のユーザープロフィールページに移動",
+      "cannotGetPetId": "ペットIDを取得できません",
+      "cannotFindPetInfo": "ペット情報を見つけることができません"
+    }
+  },
+  "archivePreviewForPublic": {
+    "userAvatarAlt": "ユーザーアバター",
+    "defaultArchiveTitle": "疾病ファイル",
+    "moreOptionsAlt": "その他のオプション",
+    "likeButtonAlt": "いいね",
+    "commentButtonAlt": "コメント",
+    "saveButtonAlt": "保存",
+    "likeStatus": {
+      "liked": "いいね済み",
+      "notLiked": "いいねしていません"
+    },
+    "saveStatus": {
+      "saved": "保存済み",
+      "notSaved": "未保存"
+    },
+    "menuItems": {
+      "deleteArticle": "記事を削除",
+      "makePrivate": "プライベートに変更",
+      "copyLink": "リンクをコピー"
+    },
+    "confirmMessages": {
+      "deleteArticle": "この記事を削除してもよろしいですか？この操作は元に戻せません。",
+      "makePrivateArticle": "この記事をプライベートにしてもよろしいですか？他のユーザーは閲覧できなくなります。"
+    },
+    "messages": {
+      "archiveInitStatus": "Archive初期化状態",
+      "commentCountUpdated": "親からコメント数が更新されました",
+      "likeAction": "Archiveいいね操作",
+      "likeActionFailed": "いいね操作に失敗しました",
+      "likeActionSuccess": "いいね操作が成功しました",
+      "likeApiError": "いいねAPI呼び出しエラー",
+      "saveAction": "Archive保存操作",
+      "saveActionFailed": "保存操作に失敗しました",
+      "saveActionSuccess": "保存操作が成功しました",
+      "saveApiError": "保存API呼び出しエラー",
+      "linkCopied": "リンクをクリップボードにコピーしました",
+      "copyLinkFailed": "リンクのコピーに失敗しました",
+      "articleDeleted": "記事が削除されました",
+      "deleteFailed": "削除に失敗しました",
+      "deleteArticleFailed": "記事の削除に失敗しました",
+      "deleteFailedRetry": "削除に失敗しました、後でもう一度お試しください",
+      "articleMadePrivate": "記事がプライベートになりました",
+      "makePrivateFailed": "プライベート化に失敗しました",
+      "makePrivateFailedError": "プライベート化に失敗しました",
+      "makePrivateFailedRetry": "プライベート化に失敗しました、後でもう一度お試しください",
+      "userAvatarClicked": "Archiveユーザーアバタークリック",
+      "navigateToOwnProfile": "Archive - 自分のプロフィールページに移動",
+      "navigateToUserProfile": "Archive - 他のユーザープロフィールページに移動"
+    }
+  },
+  "createDiseaseArchive": {
+    "title": "疾病ファイルを作成",
+    "draftSaved": "下書きが保存されました",
+    "symptomsData": "症状データ",
+    "abnormalRecord": "異常記録",
+    "abnormalRecordAlt": "異常記録",
+    "searchingRecords": "異常記録を検索中...",
+    "symptomsLabel": "症状",
+    "form": {
+      "archiveTitle": "ファイルタイトル",
+      "undiagnosed": "未受診",
+      "diagnosed": "受診済み",
+      "untreated": "未完治",
+      "treated": "完治",
+      "mainCause": "主な病因",
+      "symptomsLabel": "発症時の症状:",
+      "selectSymptom": "症状を選択",
+      "addSymptom": "追加",
+      "selectDateRange": "継続期間を選択:",
+      "reincludeRecord": "この記録を再度追加",
+      "excludeRecord": "このデータは不要",
+      "cancel": "キャンセル",
+      "nextStep": "次のステップ"
+    },
+    "validation": {
+      "archiveTitleRequired": "ファイルタイトルを入力してください",
+      "diagnosisStatusRequired": "受診状況を選択してください",
+      "treatmentStatusRequired": "完治状況を選択してください",
+      "atLeastOneRecordRequired": "最低1件の異常記録を選択してください"
+    },
+    "messages": {
+      "startValidatingRecords": "CreateDiseaseArchivePageの異常記録データの検証を開始します",
+      "realAbnormalPosts": "realAbnormalPosts:",
+      "abnormalPostsForDates": "abnormalPostsForDates:",
+      "collectedRecordIds": "収集された異常記録ID:",
+      "noRecordsToValidate": "検証する異常記録がありません",
+      "recordsDeletedAndUpdated": "{{count}}件の異常記録が削除されたことを検出し、データを自動更新しました",
+      "validationFailed": "異常記録データの検証に失敗しました:",
+      "saveDraftFailed": "下書きの保存に失敗しました:",
+      "loadDraftFailed": "下書きの読み込みに失敗しました:",
+      "clearDraftFailed": "下書きの削除に失敗しました:",
+      "loadDataFailed": "データの読み込みに失敗しました",
+      "searchRecordsFailed": "異常記録の検索に失敗しました、後でもう一度お試しください"
+    }
+  },
+  "diseaseArchiveDetail": {
+    "title": {
+      "publicView": "ファイルを閲覧中",
+      "privateView": "疾病ファイル詳細"
+    },
+    "buttons": {
+      "publish": "公開投稿",
+      "published": "公開済み",
+      "deleteArchive": "疾病ファイルを削除",
+      "like": "いいね",
+      "comment": "コメント",
+      "save": "保存"
+    },
+    "errorPage": {
+      "title": "疾病ファイルが見つかりません",
+      "description": "このファイルは削除されたか、存在しません",
+      "retry": "再読み込み",
+      "back": "戻る"
+    },
+    "likeStatus": {
+      "liked": "いいね済み",
+      "notLiked": "いいねしていません"
+    },
+    "saveStatus": {
+      "saved": "保存済み",
+      "notSaved": "未保存",
+      "save": "保存"
+    },
+    "confirmMessages": {
+      "deleteArchive": "この記事を削除してもよろしいですか？この操作は元に戻せません。",
+      "publishArchive": "この記事を公開投稿してもよろしいですか？投稿後、関連する異常記録も公開されます。",
+      "makePrivateArchive": "この記事をプライベートにしてもよろしいですか？他のユーザーは閲覧できなくなります。"
+    },
+    "messages": {
+      "getUserDataFailed": "ユーザーデータの取得に失敗しました:",
+      "archiveNotFound": "指定された疾病ファイルが見つかりません",
+      "loadDataFailed": "データの読み込みに失敗しました:",
+      "archiveDetailInitStatus": "Archive詳細ページ初期化状態",
+      "archiveDeleted": "疾病ファイルが削除されました",
+      "deleteFailed": "削除に失敗しました、後でもう一度お試しください",
+      "deleteError": "削除に失敗しました:",
+      "operationSuccess": "操作が成功しました！",
+      "operationFailed": "操作に失敗しました、後でもう一度お試しください",
+      "toggleStatusError": "疾病ファイル状態の切り替えに失敗しました:",
+      "likeAction": "Archive詳細ページいいね操作",
+      "likeActionFailed": "いいね操作に失敗しました:",
+      "likeActionFailedRetry": "いいね操作に失敗しました、後でもう一度お試しください",
+      "likeActionSuccess": "いいね操作が成功しました:",
+      "likeApiError": "いいねAPI呼び出しエラー:",
+      "likeNetworkError": "いいね操作に失敗しました、ネットワーク接続を確認してください",
+      "cannotOpenComments": "コメント機能を開けません",
+      "commentCountUpdate": "DiseaseArchiveDetailPageコメント数更新:",
+      "saveAction": "Archive詳細ページ保存操作",
+      "saveActionFailed": "保存操作に失敗しました:",
+      "saveActionFailedRetry": "保存操作に失敗しました、後でもう一度お試しください",
+      "saveActionSuccess": "保存操作が成功しました:",
+      "saveApiError": "保存API呼び出しエラー:",
+      "saveNetworkError": "保存操作に失敗しました、ネットワーク接続を確認してください"
+    }
+  },
+  "diseaseArchiveEditContent": {
+    "aiSection": {
+      "title": "AIコンテンツ統合"
+    },
+    "buttons": {
+      "edit": "編集",
+      "cancel": "キャンセル",
+      "save": "保存",
+      "previous": "前のステップ",
+      "preview": "ファイルプレビュー"
+    },
+    "form": {
+      "contentPlaceholder": "疾病ファイルの内容を入力してください..."
+    },
+    "editingTips": {
+      "title": "編集のヒント:",
+      "tip1": "AI生成コンテンツを自由に編集できます",
+      "tip2": "日付形式（「12月3日」など）は段落の先頭に配置することをお勧めします。システムが対応する異常記録を自動的に関連付けます",
+      "tip3": "コンテンツ構造を明確に保つことで、今後の閲覧に役立ちます"
+    },
+    "generating": {
+      "analyzing": "AIがあなたのペットデータを分析しています...",
+      "pleaseWait": "しばらくお待ちください、時間がかかる場合があります"
+    },
+    "noContent": "コンテンツがありません",
+    "treating": "治療中",
+    "validation": {
+      "contentEmpty": "コンテンツを空にすることはできません",
+      "contentTooShort": "コンテンツが短すぎます、より詳細な説明を提供してください"
+    },
+    "confirmMessages": {
+      "returnToPrevious": "前のステップに戻りますか？このAI統合記録は破棄されます。",
+      "leavePageWarning": "ページを離れますか？このAI統合記録は破棄されます。"
+    },
+    "messages": {
+      "missingData": "必要なデータが不足しています、最初のステップに戻ります",
+      "missingDataReturning": "必要なデータが不足しています、最初のステップに戻っています...",
+      "generateContentFailed": "コンテンツの生成に失敗しました",
+      "generateArchiveContentError": "ファイルコンテンツの生成に失敗しました:",
+      "aiGenerateTimeout": "AI生成がタイムアウトしました、後でもう一度お試しください",
+      "aiServiceUnavailable": "AIサービスが一時的に利用できません、後でもう一度お試しください",
+      "generateFailedManualEdit": "コンテンツの生成に失敗しました、手動で編集するか再試行してください。",
+      "dateFormatTip": "ヒント：日付形式は段落の先頭に配置することをお勧めします、システムがより良く異常記録を関連付けることができます",
+      "contentFormatError": "コンテンツ形式エラー：{{error}}",
+      "editContentSaved": "編集コンテンツが保存されました",
+      "setLeaveWarning": "離脱警告を設定",
+      "beforeUnloadTriggered": "beforeunload発動, archiveData:",
+      "popstateTriggered": "popstate発動, archiveData:",
+      "interceptNavigation": "戻るナビゲーションを傍受",
+      "loadDataError": "データの読み込みに失敗しました:",
+      "loadDataFailed": "データの読み込みに失敗しました"
+    }
+  },
+  "diseaseArchivePreview": {
+    "title": "疾病ファイルプレビュー",
+    "buttons": {
+      "previous": "前のステップ",
+      "confirmCreate": "作成確認"
+    },
+    "messages": {
+      "skipValidationNoData": "検証をスキップ：異常記録データがありません",
+      "startValidatingData": "異常記録データの検証を開始:",
+      "extractedRecordIds": "抽出された異常記録ID:",
+      "noValidRecordIds": "有効な異常記録IDがありません",
+      "updateLocalStorageFailed": "localStorageの更新に失敗しました:",
+      "recordsDeletedAndUpdated": "{{count}}件の異常記録が削除されたことを検出し、プレビューを自動更新しました",
+      "validationFailed": "異常記録データの検証に失敗しました:",
+      "missingDataReturnEdit": "必要なデータが不足しています、編集ページに戻ります",
+      "missingDataReturningEdit": "必要なデータが不足しています、編集ページに戻っています...",
+      "getRecordsFromLocalStorageFailed": "localStorageから異常記録を取得できませんでした:",
+      "loadDataError": "データの読み込みに失敗しました:",
+      "loadDataFailed": "データの読み込みに失敗しました",
+      "preparingToCreateArchive": "疾病ファイルの作成準備:",
+      "archiveCreatedSuccess": "疾病ファイルの作成が成功しました:",
+      "archiveCreatedSuccessNotification": "疾病ファイルが正常に作成されました！",
+      "createArchiveError": "疾病ファイルの作成に失敗しました:",
+      "createArchiveFailed": "疾病ファイルの作成に失敗しました、後でもう一度お試しください"
+    }
+  },
+  "petDiseaseArchive": {
+    "title": "の疾病ファイル",
+    "buttons": {
+      "new": "新規追加"
+    },
+    "emptyStateAlt": "空の状態",
+    "emptyStateText": "疾病ファイルがまだありません",
+    "archiveIconAlt": "疾病ファイル",
+    "recoveredBadge": "回復済み",
+    "createdDateLabel": "作成日:",
+    "messages": {
+      "loadDataFailed": "データの読み込みに失敗しました:"
+    }
+  },
+  "symptomCalendar": {
+    "title": "症状カレンダー",
+    "subtitle": "ここで各症状の継続時間を確認できます",
+    "selectSymptom": "症状",
+    "add": "追加",
+    "reset": "リセット"
+  },
+  "common": {
+    "loading": "読み込み中..."
+  }
+}

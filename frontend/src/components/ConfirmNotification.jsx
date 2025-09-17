@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import styles from '../styles/ConfirmNotification.module.css';
 import { useNotification } from '../context/NotificationContext';
 
 const ConfirmNotification = ({ message, onConfirm, onCancel }) => {
+  const { t } = useTranslation('social');
   const [isFading, setIsFading] = useState(false);
   
   // 嘗試使用 context，如果不存在則不使用
@@ -53,10 +55,10 @@ const ConfirmNotification = ({ message, onConfirm, onCancel }) => {
       <span className={styles.message}>{message}</span>
       <div className={styles.buttonContainer}>
         <button className={styles.cancelButton} onClick={handleCancel}>
-          取消
+          {t('confirmNotification.cancel')}
         </button>
         <button className={styles.confirmButton} onClick={handleConfirm}>
-          確認
+          {t('confirmNotification.confirm')}
         </button>
       </div>
     </div>

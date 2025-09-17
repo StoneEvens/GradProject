@@ -1,12 +1,15 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import styles from '../styles/HistoryRecordPreview.module.css';
 
 const HistoryRecordPreview = ({ record, onClick }) => {
+  const { t } = useTranslation('calculator');
+
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     const month = date.getMonth() + 1;
     const day = date.getDate();
-    return `${month}月${day}日`;
+    return t('historyPreview.monthDay', { month, day });
   };
 
   return (
@@ -17,7 +20,7 @@ const HistoryRecordPreview = ({ record, onClick }) => {
       <div className={styles.previewIcon}>
         <img 
           src="/assets/icon/HistoryRecordIcon.png" 
-          alt="歷史紀錄"
+          alt={t('historyPreview.historyRecord')}
         />
       </div>
       
@@ -26,11 +29,11 @@ const HistoryRecordPreview = ({ record, onClick }) => {
           <span className={styles.previewDate}>{formatDate(record.date)}</span>
         </div>
         <div className={styles.previewInfo}>
-          <span className={styles.previewLabel}>寵物：</span>
+          <span className={styles.previewLabel}>{t('historyPreview.pet')}</span>
           <span className={styles.previewPet}>{record.petName}</span>
         </div>
         <div className={styles.previewInfo}>
-          <span className={styles.previewLabel}>飼料：</span>
+          <span className={styles.previewLabel}>{t('historyPreview.feed')}</span>
           <span className={styles.previewFeed}>{record.feedName}</span>
         </div>
       </div>

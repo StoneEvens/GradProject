@@ -1,0 +1,84 @@
+{
+  "common": {
+    "loading": "載入中...",
+    "cancel": "取消",
+    "confirm": "確認",
+    "edit": "編輯",
+    "save": "儲存",
+    "saving": "儲存中...",
+    "close": "關閉"
+  },
+  "profilePage": {
+    "editButton": "編輯個人資料",
+    "tabs": {
+      "community": "社群",
+      "forum": "論壇"
+    },
+    "followStats": {
+      "followers": "粉絲",
+      "following": "追蹤中"
+    },
+    "defaultIntro": "這個人很低調，什麼都沒寫。",
+    "emptyMessages": {
+      "noPosts": "尚未發布任何日常貼文",
+      "noArchives": "尚未發布任何疾病檔案"
+    },
+    "messages": {
+      "loadProfileFailed": "載入個人資料失敗，請稍後再試",
+      "profileUpdateSuccess": "個人資料更新成功！",
+      "profileUpdateFailed": "個人資料更新失敗，請稍後再試"
+    }
+  },
+  "otherProfilePage": {
+    "followButton": {
+      "follow": "追蹤",
+      "following": "追蹤中",
+      "requested": "已要求",
+      "requestFollow": "要求追蹤"
+    },
+    "privateAccount": {
+      "title": "此帳號為私人帳號",
+      "followToViewPosts": "追蹤以查看他的貼文",
+      "followToViewForum": "追蹤以查看他的論壇"
+    },
+    "messages": {
+      "loadUserDataFailed": "載入用戶資料失敗，請稍後再試",
+      "operationFailed": "操作失敗，請稍後再試"
+    }
+  },
+  "editModal": {
+    "title": "編輯個人資料",
+    "form": {
+      "account": "帳號",
+      "fullname": "真實姓名",
+      "intro": "使用者簡介",
+      "required": "*"
+    },
+    "avatar": {
+      "preview": "頭像預覽"
+    },
+    "validation": {
+      "enterAccount": "請輸入帳號名稱",
+      "enterFullname": "請輸入真實姓名",
+      "accountExists": "此帳號已被使用，請嘗試其他帳號",
+      "checkAccountFailed": "帳號檢查失敗，請稍後再試"
+    },
+    "messages": {
+      "imageProcessFailed": "頭像處理失敗，請重試",
+      "saveFailed": "儲存個人資料失敗，請稍後再試"
+    }
+  },
+  "confirmFollowModal": {
+    "title": "確認追蹤",
+    "privateAccountMessage": "這是一個私人帳號，您需要發送追蹤請求。",
+    "publicAccountMessage": "您確定要追蹤這個用戶嗎？"
+  },
+  "archiveList": {
+    "loadFailed": "載入失敗",
+    "retry": "重試",
+    "emptyStateAlt": "空狀態",
+    "noUserArchives": "該用戶尚未發布任何疾病檔案",
+    "loadingMore": "載入更多...",
+    "noMoreArchives": "沒有更多檔案了"
+  }
+}

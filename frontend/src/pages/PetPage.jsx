@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import styles from '../styles/PetPage.module.css';
 import TopNavbar from '../components/TopNavbar';
 import BottomNavbar from '../components/BottomNavigationbar';
@@ -9,6 +10,7 @@ import { NotificationProvider } from '../context/NotificationContext';
 import { getUserPets } from '../services/petService';
 
 const PetPage = () => {
+  const { t } = useTranslation('pet');
   const navigate = useNavigate();
   const [notification, setNotification] = useState('');
   const [currentPet, setCurrentPet] = useState(null);
@@ -50,7 +52,7 @@ const PetPage = () => {
           predicted_adult_weight: pet.predicted_adult_weight,
           illnesses: pet.illnesses,
           description: pet.description || '',
-          basicInfo: `${pet.age ? pet.age + '歲' : ''}${pet.breed ? '，' + pet.breed : ''}${pet.pet_stage ? '，' + pet.pet_stage : ''}`,
+          basicInfo: `${pet.age ? pet.age + t('page.ageUnit') : ''}${pet.breed ? '，' + pet.breed : ''}${pet.pet_stage ? '，' + pet.pet_stage : ''}`,
           avatarUrl: pet.headshot_url
         }));
         
@@ -59,8 +61,8 @@ const PetPage = () => {
         setNoPets(false);
       }
     } catch (error) {
-      console.error('獲取寵物資料失敗:', error);
-      showNotification('獲取寵物資料失敗，請稍後再試');
+      console.error('Failed to fetch pet data:', error);
+      showNotification(t('page.messages.fetchError'));
       setNoPets(true);
       setAllPets([]);
       setCurrentPet(null);
@@ -81,7 +83,7 @@ const PetPage = () => {
 
   // 功能按鈕點擊處理
   const handleFunctionClick = (functionName) => {
-    showNotification(`${functionName} 功能開發中`);
+    showNotification(`${functionName} ${t('page.messages.featureInDevelopment')}`);
   };
 
   // 新增寵物
@@ -94,7 +96,7 @@ const PetPage = () => {
     if (currentPet) {
       navigate(`/pet/${currentPet.id}/edit`);
     } else {
-      showNotification('請選擇要編輯的寵物');
+      showNotification(t('page.messages.selectPetToEdit'));
     }
   };
 
@@ -103,7 +105,7 @@ const PetPage = () => {
     if (currentPet) {
       navigate(`/pet/${currentPet.id}/posts`);
     } else {
-      showNotification('請先選擇一隻寵物');
+      showNotification(t('page.messages.selectPetFirst'));
     }
   };
 
@@ -118,7 +120,7 @@ const PetPage = () => {
       // TODO: 導航到異常記錄列表頁面
       navigate(`/pet/${currentPet.id}/abnormal-posts`);
     } else {
-      showNotification('請先選擇一隻寵物');
+      showNotification(t('page.messages.selectPetFirst'));
     }
   };
 
@@ -131,23 +133,23 @@ const PetPage = () => {
         )}
         <main className={styles.content}>
           {loading ? (
-            <div className={styles.loadingContainer}>載入中...</div>
+            <div className={styles.loadingContainer}>{t('page.loading')}</div>
           ) : noPets ? (
             /* 沒有寵物時的界面 */
             <div className={styles.noPetsContainer}>
               <div className={styles.noPetsIcon}>
                 <img 
                   src="/assets/icon/PetpageNopetButton.png" 
-                  alt="沒有寵物" 
+                  alt={t('page.noData')} 
                   className={styles.noPetImage}
                 />
               </div>
               <div className={styles.noPetsText}>
-                <div className={styles.noPetsTitle}>您目前沒有寵物資料</div>
-                <div className={styles.noPetsSubtitle}>馬上新增您的寵物以使用寵物頁面</div>
+                <div className={styles.noPetsTitle}>{t('page.noData')}</div>
+                <div className={styles.noPetsSubtitle}>{t('page.noDataSubtitle')}</div>
               </div>
               <button className={styles.addFirstPetButton} onClick={handleAddPet}>
-                新增寵物
+                {t('addPet')}
               </button>
             </div>
           ) : currentPet && (
@@ -165,7 +167,7 @@ const PetPage = () => {
                   <div className={styles.petName}>{currentPet.pet_name}</div>
                   <div className={styles.petBreed}>{currentPet.breed}</div>
                   <div className={styles.petDescription}>
-                    {currentPet.description || currentPet.basicInfo || '這隻寵物很可愛，主人還沒有添加描述。'}
+                    {currentPet.description || currentPet.basicInfo || t('page.defaultDescription')}
                   </div>
                 </div>
               </div>
@@ -176,16 +178,16 @@ const PetPage = () => {
               {/* 功能按鈕區域 - 統一顯示所有功能 */}
               <div className={styles.functionGrid}>
                 <div className={styles.functionCell} onClick={handleEditPet}>
-                  <img src="/assets/icon/PetpageEditButton.png" alt="編輯資料" className={styles.functionIcon} />
-                  <span className={styles.functionLabel}>編輯資料</span>
+                  <img src="/assets/icon/PetpageEditButton.png" alt={t('page.functions.editData')} className={styles.functionIcon} />
+                  <span className={styles.functionLabel}>{t('page.functions.editData')}</span>
                 </div>
                 <div className={styles.functionCell} onClick={() => handleRelatedPostsClick()}>
-                  <img src="/assets/icon/PetpagePastPostButton.png" alt="相關貼文" className={styles.functionIcon} />
-                  <span className={styles.functionLabel}>相關貼文</span>
+                  <img src="/assets/icon/PetpagePastPostButton.png" alt={t('page.functions.relatedPosts')} className={styles.functionIcon} />
+                  <span className={styles.functionLabel}>{t('page.functions.relatedPosts')}</span>
                 </div>
                 <div className={styles.functionCell} onClick={() => navigate('/feeds')}>
-                  <img src="/assets/icon/PetpageFeedButton.png" alt="飼料專區" className={styles.functionIcon} />
-                  <span className={styles.functionLabel}>飼料專區</span>
+                  <img src="/assets/icon/PetpageFeedButton.png" alt={t('page.functions.feedArea')} className={styles.functionIcon} />
+                  <span className={styles.functionLabel}>{t('page.functions.feedArea')}</span>
                 </div>
                 <div className={styles.functionCell} onClick={() => {
                   if (currentPet) {
@@ -194,16 +196,22 @@ const PetPage = () => {
                     showNotification('請先選擇一隻寵物');
                   }
                 }}>
-                  <img src="/assets/icon/PetpageIllnessArchiveButton.png" alt="疾病檔案" className={styles.functionIcon} />
-                  <span className={styles.functionLabel}>疾病檔案</span>
+                  <img src="/assets/icon/PetpageIllnessArchiveButton.png" alt={t('page.functions.diseaseArchive')} className={styles.functionIcon} />
+                  <span className={styles.functionLabel}>{t('page.functions.diseaseArchive')}</span>
                 </div>
                 <div className={styles.functionCell} onClick={handleAbnormalPostClick}>
-                  <img src="/assets/icon/PetpagePetAbnormalPostButton.png" alt="異常紀錄" className={styles.functionIcon} />
-                  <span className={styles.functionLabel}>異常紀錄</span>
+                  <img src="/assets/icon/PetpagePetAbnormalPostButton.png" alt={t('page.functions.abnormalRecord')} className={styles.functionIcon} />
+                  <span className={styles.functionLabel}>{t('page.functions.abnormalRecord')}</span>
                 </div>
-                <div className={styles.functionCell} onClick={() => navigate('/health-reports')}>
-                  <img src="/assets/icon/PetpageHealthReportButton.png" alt="健康報告" className={styles.functionIcon} />
-                  <span className={styles.functionLabel}>健康報告</span>
+                <div className={styles.functionCell} onClick={() => {
+                  if (currentPet) {
+                    navigate(`/pet/${currentPet.id}/health-reports`);
+                  } else {
+                    showNotification(t('page.messages.selectPetFirst'));
+                  }
+                }}>
+                  <img src="/assets/icon/PetpageHealthReportButton.png" alt={t('page.functions.healthReport')} className={styles.functionIcon} />
+                  <span className={styles.functionLabel}>{t('page.functions.healthReport')}</span>
                 </div>
               </div>
 

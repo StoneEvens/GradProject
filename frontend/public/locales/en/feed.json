@@ -1,0 +1,255 @@
+{
+  "page": {
+    "title": "Common Feeds",
+    "loading": "Loading...",
+    "buttons": {
+      "addFeed": "Add Feed",
+      "viewMore": "View More",
+      "back": "❮"
+    },
+    "sections": {
+      "marked": "My Favorite Feeds:",
+      "recent": "Recently Used:",
+      "all": "All Feeds:"
+    },
+    "messages": {
+      "loadError": "Failed to load feed data",
+      "loadFailed": "Load failed",
+      "noMarkedFeeds": "No relevant favorite feeds found",
+      "noRecentFeeds": "No relevant usage records found",
+      "noAllFeeds": "No relevant feeds found",
+      "feedMarked": "Feed added to favorites",
+      "feedUnmarked": "Bookmark removed",
+      "operationFailed": "Operation failed, please try again later",
+      "systemDetected": "System detected the same feed",
+      "newFeedCreated": "New feed created successfully",
+      "reviewCompleted": "Review completed, feed added to favorites",
+      "errorReported": "Error reported, thank you for your feedback",
+      "errorReportFailed": "Report failed, please try again later",
+      "imageTooLarge": "Image file too large, please select a smaller image or contact administrator",
+      "dataFormatError": "Data format error, please check input",
+      "addFeedFailed": "Failed to add feed, please try again later",
+      "noResponse": "Server not responding, please check network connection",
+      "unknownError": "Unknown error occurred, please try again later",
+      "markFailed": "Failed to toggle bookmark",
+      "reviewFailed": "Review failed, please try again later"
+    },
+    "feedCard": {
+      "noImage": "No Image",
+      "marked": "Marked",
+      "mark": "Mark",
+      "verifying": "Verifying"
+    },
+    "emptyState": {
+      "noResult": "No Results"
+    }
+  },
+  "allPage": {
+    "title": "All Feeds",
+    "loading": "Loading...",
+    "messages": {
+      "loadError": "Failed to load all feeds",
+      "loadFailed": "Load failed",
+      "noFeeds": "No relevant feeds found",
+      "feedMarked": "Feed added to favorites"
+    }
+  },
+  "markedPage": {
+    "title": "My Favorite Feeds",
+    "loading": "Loading...",
+    "messages": {
+      "loadError": "Failed to load favorite feeds",
+      "loadFailed": "Load failed",
+      "noMarkedFeeds": "No relevant favorite feeds found",
+      "markToggleFailed": "Failed to toggle bookmark",
+      "reviewFailed": "Review failed"
+    }
+  },
+  "detailPage": {
+    "title": "Feed Details",
+    "loading": "Loading...",
+    "loadError": "Failed to load feed details",
+    "feedNotFound": "Feed does not exist",
+    "messages": {
+      "feedMarked": "Feed added to favorites",
+      "feedUnmarked": "Bookmark removed",
+      "operationFailed": "Operation failed, please try again later",
+      "reviewCompleted": "Review completed, feed added to favorites",
+      "reviewFailed": "Review failed, please try again later",
+      "errorReported": "Error reported, thank you for your feedback",
+      "errorReportFailed": "Report failed, please try again later"
+    },
+    "labels": {
+      "feedName": "Feed Name:",
+      "brand": "Brand:",
+      "price": "Price:",
+      "nutrition": "Nutrition:",
+      "protein": "Protein",
+      "fat": "Fat",
+      "carbohydrate": "Carbohydrate",
+      "calcium": "Calcium",
+      "phosphorus": "Phosphorus",
+      "magnesium": "Magnesium",
+      "sodium": "Sodium"
+    },
+    "buttons": {
+      "marked": "Marked",
+      "mark": "Mark",
+      "back": "❮"
+    },
+    "verification": {
+      "title": "This feed information has not yet passed verification",
+      "progress": "Review progress: {{count}}/5 people confirmed",
+      "note": "Requires 5 users to confirm information accuracy before approval",
+      "alt": "Verifying"
+    },
+    "image": {
+      "noImage": "No Image",
+      "frontAlt": "{{name}} - Front Image",
+      "nutritionAlt": "{{name}} - Nutrition Label",
+      "unknownFeed": "Feed",
+      "indicator": "{{current}}/{{total}}",
+      "prev": "❮",
+      "next": "❯"
+    },
+    "info": {
+      "unknownFeed": "Unknown Feed",
+      "unknownBrand": "Unknown Brand",
+      "pricePrefix": "NT$ ",
+      "noPrice": "Not Provided",
+      "unit": "%"
+    }
+  },
+  "createModal": {
+    "title": "Add Feed",
+    "petType": {
+      "cat": "Cat",
+      "dog": "Dog"
+    },
+    "labels": {
+      "petType": "Pet Type",
+      "feedName": "Feed Name",
+      "feedBrand": "Feed Brand",
+      "feedPrice": "Feed Price",
+      "frontImage": "Front Image",
+      "nutritionImage": "Nutrition Label"
+    },
+    "placeholders": {
+      "feedName": "Enter feed name",
+      "feedBrand": "Enter feed brand",
+      "feedPrice": "Enter feed price"
+    },
+    "buttons": {
+      "uploadFront": "Upload Front Image",
+      "uploadNutrition": "Upload Nutrition Label",
+      "removeFront": "Remove Front Image",
+      "removeNutrition": "Remove Nutrition Label",
+      "cancel": "Cancel",
+      "confirm": "Confirm Add",
+      "processing": "Processing..."
+    },
+    "alt": {
+      "frontImage": "Feed Front",
+      "nutritionImage": "Nutrition Label"
+    },
+    "messages": {
+      "imageTooLarge": "Image size cannot exceed 5MB",
+      "selectImageFile": "Please select an image file",
+      "enterFeedName": "Please enter feed name",
+      "enterFeedBrand": "Please enter feed brand",
+      "feedNameTooLong": "Feed name cannot exceed 100 characters",
+      "brandNameTooLong": "Brand name cannot exceed 100 characters",
+      "enterFeedPrice": "Please enter feed price",
+      "invalidPrice": "Please enter a valid price number",
+      "uploadFrontImage": "Please upload front image of feed",
+      "uploadNutritionImage": "Please upload nutrition label image"
+    }
+  },
+  "reviewModal": {
+    "labels": {
+      "createdBy": "Added by User",
+      "createdDate": "Date Added",
+      "unknownUser": "Unknown User",
+      "unknownDate": "Unknown Date"
+    },
+    "buttons": {
+      "reportError": "Report Error",
+      "confirm": "Confirm",
+      "processing": "Processing..."
+    },
+    "messages": {
+      "reviewFailed": "Review failed, please try again later",
+      "errorReportSuccess": "Thank you for your report. Please wait for the system to review the error. You can currently use this feed freely, but please manually update any incorrect information in the nutrition calculator."
+    },
+    "alt": {
+      "feedImage": "Feed Image"
+    }
+  },
+  "reviewConfirmModal": {
+    "title": "Please Help Review Feed",
+    "description": "This feed has not yet passed review. Please help review it before using this feed.",
+    "buttons": {
+      "cancel": "Cancel",
+      "confirm": "Confirm"
+    }
+  },
+  "errorReportModal": {
+    "title": "Report Feed Error",
+    "labels": {
+      "errorType": "Error Type (Multiple Selection Allowed)",
+      "errorDescription": "Error Description",
+      "correctedData": "Corrected Data",
+      "nutritionCorrection": "Nutrition Correction"
+    },
+    "errorTypes": {
+      "name": "Name Error",
+      "brand": "Brand Error",
+      "price": "Price Error",
+      "nutrition": "Nutrition Error",
+      "image": "Image Error",
+      "other": "Other Error"
+    },
+    "placeholders": {
+      "description": "Please describe the error you found..."
+    },
+    "buttons": {
+      "cancel": "Cancel",
+      "submit": "Submit Report",
+      "submitting": "Submitting..."
+    },
+    "messages": {
+      "selectErrorType": "Please select at least one error type",
+      "enterDescription": "Please describe the error",
+      "correctDataRequired": "You selected error types but did not correct the following data: {{fields}}. Please correct the data or select 'Other Error'.",
+      "modifyDataRequired": "Please correct at least one item, or select 'Other Error' type",
+      "submitFailed": "Failed to report error, please try again later"
+    },
+    "fields": {
+      "feedName": "Feed Name",
+      "feedBrand": "Feed Brand",
+      "feedPrice": "Feed Price",
+      "nutrition": "Nutrition"
+    }
+  },
+  "selectModal": {
+    "title": "Select Feed",
+    "loading": "Loading...",
+    "sections": {
+      "marked": "My Favorite Feeds:",
+      "recent": "Recently Used:"
+    },
+    "messages": {
+      "loadFailed": "Load failed",
+      "noMarkedFeeds": "No favorite feeds yet",
+      "noRecentFeeds": "No usage records yet",
+      "loadError": "Failed to load feed data",
+      "noMarkedFeedsWithLink": "No favorite feeds yet, go to Pet Page - Feed Section to add"
+    },
+    "buttons": {
+      "close": "✕"
+    },
+    "alt": {
+      "feedSection": "Feed Section"
+    }
+  }
+}

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import TopNavbar from '../components/TopNavbar';
 import BottomNavbar from '../components/BottomNavigationbar';
 import ImageViewer from '../components/ImageViewer';
@@ -8,9 +9,12 @@ import { getAbnormalPostDetail, getPublicAbnormalPostDetail, getUserPets, delete
 import { getUserProfile } from '../services/userService';
 import Notification from '../components/Notification';
 import ConfirmNotification from '../components/ConfirmNotification';
+import { useSymptomTranslation } from '../hooks/useSymptomTranslation';
 import styles from '../styles/AbnormalPostDetailPage.module.css';
 
 const AbnormalPostDetailPage = () => {
+  const { t } = useTranslation('posts');
+  const { translateSingleSymptom } = useSymptomTranslation();
   const { petId, postId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
@@ -87,7 +91,7 @@ const AbnormalPostDetailPage = () => {
             setCurrentUser(postData.user_info);
           }
         } else {
-          console.error('找不到指定的公開異常記錄');
+          console.error(t('abnormalPostDetail.messages.publicPostNotFound'));
           navigate('/social?tab=forum');
         }
       } else {
@@ -108,7 +112,7 @@ const AbnormalPostDetailPage = () => {
         if (postData) {
           setPost(postData);
         } else {
-          console.error('找不到指定的異常記錄');
+          console.error(t('abnormalPostDetail.messages.postNotFound'));
           navigate(`/pet/${petId}/abnormal-posts`);
         }
       }
@@ -166,26 +170,26 @@ const AbnormalPostDetailPage = () => {
   const handleDelete = () => {
     setShowMenu(false);
     showConfirmDialog(
-      `確定要刪除這筆異常記錄嗎？此操作無法復原。`,
+      t('abnormalPostDetail.ui.deleteConfirmMessage'),
       async () => {
         try {
           setLoading(true);
           await deleteAbnormalPost(petId, postId);
-          showNotification('異常記錄已成功刪除');
+          showNotification(t('abnormalPostDetail.messages.deleteSuccess'));
           // 延遲跳轉讓用戶看到成功訊息
           setTimeout(() => {
             navigate(`/pet/${petId}/abnormal-posts`);
           }, 1500);
         } catch (error) {
           console.error('刪除失敗:', error);
-          let errorMessage = '刪除異常記錄失敗，請稍後再試';
-          
+          let errorMessage = t('abnormalPostDetail.messages.deleteFailed');
+
           if (error.response?.data?.message) {
             errorMessage = error.response.data.message;
           } else if (error.response?.status === 404) {
-            errorMessage = '找不到指定的異常記錄';
+            errorMessage = t('abnormalPostDetail.messages.postNotFound');
           } else if (error.response?.status === 403) {
-            errorMessage = '您沒有權限刪除此記錄';
+            errorMessage = t('abnormalPostDetail.messages.noPermission');
           }
           
           showNotification(errorMessage);
@@ -246,12 +250,12 @@ const AbnormalPostDetailPage = () => {
     const year = date.getFullYear();
     const month = date.getMonth() + 1;
     const day = date.getDate();
-    return `${year}年${month}月${day}日異常紀錄`;
+    return t('abnormalPostDetail.ui.dateTitle', { year, month, day });
   };
 
   const formatSymptoms = (symptoms) => {
     if (!symptoms || symptoms.length === 0) return [];
-    return symptoms.map(s => s.symptom_name);
+    return symptoms.map(s => translateSingleSymptom(s.symptom_name));
   };
 
   if (loading) {
@@ -260,7 +264,7 @@ const AbnormalPostDetailPage = () => {
         <div className={styles.container}>
           <TopNavbar />
           <div className={styles.loadingContainer}>
-            載入中...
+            {t('common.loading')}
           </div>
           <BottomNavbar />
         </div>
@@ -274,7 +278,7 @@ const AbnormalPostDetailPage = () => {
         <div className={styles.container}>
           <TopNavbar />
           <div className={styles.errorContainer}>
-            找不到指定的異常記錄
+            {t('abnormalPostDetail.messages.postNotFound')}
           </div>
           <BottomNavbar />
         </div>
@@ -312,15 +316,15 @@ const AbnormalPostDetailPage = () => {
             {!isPublicView && currentUser && pet && currentUser.id === pet.owner && (
               <div className={styles.menuContainer}>
                 <button className={styles.menuButton} onClick={toggleMenu}>
-                  <img src="/assets/icon/PostMoreInfo.png" alt="更多選項" />
+                  <img src="/assets/icon/PostMoreInfo.png" alt={t('abnormalPostDetail.ui.moreOptions')} />
                 </button>
                 {showMenu && (
                   <div className={styles.menuDropdown}>
                     <button className={styles.menuItem} onClick={handleEdit}>
-                      編輯紀錄
+                      {t('abnormalPostDetail.ui.editRecord')}
                     </button>
                     <button className={styles.menuItem} onClick={handleDelete}>
-                      刪除紀錄
+                      {t('abnormalPostDetail.ui.deleteRecord')}
                     </button>
                   </div>
                 )}
@@ -332,7 +336,7 @@ const AbnormalPostDetailPage = () => {
 
           {/* 寵物資訊區域 */}
           <div className={styles.section}>
-            <label className={styles.sectionLabel}>寵物:</label>
+            <label className={styles.sectionLabel}>{t('createAbnormalPost.sections.selectPet')}:</label>
             <div className={styles.petRow}>
               <div className={styles.petInfo}>
                 <img
@@ -350,7 +354,7 @@ const AbnormalPostDetailPage = () => {
                   id="emergency"
                 />
                 <label htmlFor="emergency" className={styles.checkboxLabel}>
-                  為就醫紀錄
+                  {t('createAbnormalPost.dateSelection.emergency')}
                 </label>
               </div>
             </div>
@@ -358,12 +362,12 @@ const AbnormalPostDetailPage = () => {
 
           {/* 症狀區域 */}
           <div className={styles.section}>
-            <label className={styles.sectionLabel}>寵物症狀:</label>
+            <label className={styles.sectionLabel}>{t('createAbnormalPost.symptoms.title')}</label>
             <div className={styles.symptomSection}>
               <div className={styles.symptomsContainer}>
                 {formatSymptoms(post.symptoms).map((symptom, index) => (
                   <div key={index} className={styles.symptomTag}>
-                    <span className={styles.symptomText}>{symptom}</span>
+                    <span className={styles.symptomText}>{translateSingleSymptom(symptom)}</span>
                   </div>
                 ))}
               </div>
@@ -372,10 +376,10 @@ const AbnormalPostDetailPage = () => {
 
           {/* 身體數值區域 */}
           <div className={styles.section}>
-            <label className={styles.sectionLabel}>身體數值紀錄:</label>
+            <label className={styles.sectionLabel}>{t('createAbnormalPost.bodyStats.title')}</label>
             <div className={styles.bodyStatsContainer}>
               <div className={styles.statRow}>
-                <span className={styles.statLabel}>體重</span>
+                <span className={styles.statLabel}>{t('createAbnormalPost.bodyStats.weight')}</span>
                 <div className={styles.statInputWrapper}>
                   <input 
                     type="text"
@@ -383,11 +387,11 @@ const AbnormalPostDetailPage = () => {
                     readOnly
                     className={styles.statInput}
                   />
-                  <span className={styles.statUnit}>公斤</span>
+                  <span className={styles.statUnit}>{t('createAbnormalPost.bodyStats.units.kg')}</span>
                 </div>
               </div>
               <div className={styles.statRow}>
-                <span className={styles.statLabel}>喝水量</span>
+                <span className={styles.statLabel}>{t('createAbnormalPost.bodyStats.waterIntake')}</span>
                 <div className={styles.statInputWrapper}>
                   <input 
                     type="text"
@@ -395,11 +399,11 @@ const AbnormalPostDetailPage = () => {
                     readOnly
                     className={styles.statInput}
                   />
-                  <span className={styles.statUnit}>公升</span>
+                  <span className={styles.statUnit}>{t('createAbnormalPost.bodyStats.units.liters')}</span>
                 </div>
               </div>
               <div className={styles.statRow}>
-                <span className={styles.statLabel}>體溫</span>
+                <span className={styles.statLabel}>{t('createAbnormalPost.bodyStats.temperature')}</span>
                 <div className={styles.statInputWrapper}>
                   <input 
                     type="text"
@@ -407,7 +411,7 @@ const AbnormalPostDetailPage = () => {
                     readOnly
                     className={styles.statInput}
                   />
-                  <span className={styles.statUnit}>度</span>
+                  <span className={styles.statUnit}>{t('createAbnormalPost.bodyStats.units.celsius')}</span>
                 </div>
               </div>
             </div>
@@ -415,10 +419,10 @@ const AbnormalPostDetailPage = () => {
 
           {/* 補充描述區域 */}
           <div className={styles.section}>
-            <label className={styles.sectionLabel}>補充描述:</label>
+            <label className={styles.sectionLabel}>{t('createAbnormalPost.description.title')}</label>
             <div className={styles.descriptionSection}>
               <div className={styles.descriptionContent}>
-                {post.content || '無補充描述'}
+                {post.content || t('abnormalPostDetail.ui.noDescription')}
               </div>
             </div>
           </div>
@@ -426,7 +430,7 @@ const AbnormalPostDetailPage = () => {
           {/* 圖片區域 */}
           {post.images && post.images.length > 0 && (
             <div className={styles.section}>
-              <label className={styles.sectionLabel}>圖片紀錄:</label>
+              <label className={styles.sectionLabel}>{t('createAbnormalPost.imageUpload.title')}</label>
               <div className={styles.imageSection}>
                 <div ref={imageContainerRef} className={styles.imagePreviewContainer}>
                   {post.images.map((image, index) => (
@@ -438,7 +442,7 @@ const AbnormalPostDetailPage = () => {
                     >
                       <img 
                         src={image.url || image.firebase_url}
-                        alt={`異常記錄圖片 ${index + 1}`}
+                        alt={t('abnormalPostDetail.ui.imageAlt', { index: index + 1 })}
                         className={styles.postImage}
                       />
                     </div>

@@ -1,13 +1,17 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import TopNavbar from '../components/TopNavbar';
 import BottomNavbar from '../components/BottomNavigationbar';
 import AbnormalPostFilter from '../components/AbnormalPostFilter';
 import { NotificationProvider } from '../context/NotificationContext';
 import { getPetAbnormalPostsPreview, getUserPets, getSymptoms } from '../services/petService';
+import { useSymptomTranslation } from '../hooks/useSymptomTranslation';
 import styles from '../styles/PetAbnormalPostsPage.module.css';
 
 const PetAbnormalPostsPage = () => {
+  const { t, i18n } = useTranslation('posts');
+  const { translateSymptomList, formatSymptomsForDisplay, reverseTranslateSymptom } = useSymptomTranslation();
   const { petId } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -31,7 +35,7 @@ const PetAbnormalPostsPage = () => {
   // 載入症狀列表
   useEffect(() => {
     loadSymptoms();
-  }, []);
+  }, [translateSymptomList, t]);
 
   // 根據篩選條件更新顯示的貼文
   useEffect(() => {
@@ -42,8 +46,9 @@ const PetAbnormalPostsPage = () => {
       if ((filters.type === 'symptom' || filters.type === 'both') && filters.symptoms && filters.symptoms.length > 0) {
         filtered = filtered.filter(post => {
           if (!post.symptoms || !Array.isArray(post.symptoms)) return false;
-          // 檢查貼文是否包含任一選中的症狀（新API返回字符串數組）
-          return filters.symptoms.some(filterSymptom => 
+          // 檢查貼文是否包含任一選中的症狀
+          // filters.symptoms 已經是反向翻譯後的中文症狀，可以直接比對
+          return filters.symptoms.some(filterSymptom =>
             post.symptoms.includes(filterSymptom.text)
           );
         });
@@ -98,7 +103,6 @@ const PetAbnormalPostsPage = () => {
       
     } catch (error) {
       console.error('載入資料失敗:', error);
-      // 如果載入失敗，設置空陣列以避免錯誤
       setAbnormalPosts([]);
       setFilteredPosts([]);
     } finally {
@@ -110,17 +114,17 @@ const PetAbnormalPostsPage = () => {
   const loadSymptoms = async () => {
     try {
       const symptoms = await getSymptoms();
-      const formattedSymptoms = symptoms.map(symptom => 
+      const formattedSymptoms = symptoms.map(symptom =>
         typeof symptom === 'string' ? symptom : symptom.symptom_name
       ).filter(name => typeof name === 'string');
-      setAllSymptoms(formattedSymptoms.sort());
+
+      // 翻譯症狀名稱為當前界面語言
+      const translatedSymptoms = translateSymptomList(formattedSymptoms);
+      // 根據當前語言進行排序
+      setAllSymptoms(translatedSymptoms.sort((a, b) => a.localeCompare(b)));
     } catch (error) {
       console.error('載入症狀列表失敗:', error);
-      // 如果 API 失敗，使用預設症狀列表
-      setAllSymptoms([
-        '打噴嚏', '掉毛', '嘔吐', '腹瀉', '食慾不振', '精神萎靡', 
-        '發燒', '咳嗽', '皮膚搔癢', '呼吸急促', '流鼻水', '眼睛紅腫'
-      ]);
+      setAllSymptoms(t('createAbnormalPost.defaultSymptoms', { returnObjects: true }));
     }
   };
 
@@ -136,18 +140,25 @@ const PetAbnormalPostsPage = () => {
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return `${date.getMonth() + 1}月${date.getDate()}日`;
+
+    if (i18n.language === 'en') {
+      // English format: "Jan 15", "Feb 3", etc.
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    } else {
+      // Chinese format: "1月15日", "2月3日", etc.
+      return date.toLocaleDateString('zh-TW', { month: 'short', day: 'numeric' });
+    }
   };
 
   const formatSymptoms = (symptoms) => {
     if (!symptoms || symptoms.length === 0) return '';
-    // 新API返回字符串數組，直接使用
-    return Array.isArray(symptoms) ? symptoms.join('、') : '';
+    // 使用症狀翻譯工具來格式化症狀顯示
+    return formatSymptomsForDisplay(symptoms) || '';
   };
 
   const getEmergencyTag = (isEmergency) => {
     return isEmergency ? (
-      <span className={styles.emergencyTag}>就醫紀錄</span>
+      <span className={styles.emergencyTag}>{t('petAbnormalPosts.emergencyLabel')}</span>
     ) : null;
   };
 
@@ -157,7 +168,7 @@ const PetAbnormalPostsPage = () => {
         <div className={styles.container}>
           <TopNavbar />
           <div className={styles.loadingContainer}>
-            載入中...
+            {t('common.loading')}
           </div>
           <BottomNavbar />
         </div>
@@ -179,7 +190,7 @@ const PetAbnormalPostsPage = () => {
                 alt={pet?.pet_name}
                 className={styles.petAvatar}
               />
-              <span className={styles.title}>的異常紀錄</span>
+              <span className={styles.title}>{t('petAbnormalPosts.title')}</span>
             </div>
           </div>
           
@@ -193,14 +204,14 @@ const PetAbnormalPostsPage = () => {
 
           {/* 篩選結果資訊 */}
           <div className={styles.resultInfo}>
-            <span className={styles.resultLabel}>篩選結果</span>
+            <span className={styles.resultLabel}>{t('petAbnormalPosts.resultLabel')}</span>
             <select 
               value={sortOrder} 
               onChange={(e) => setSortOrder(e.target.value)}
               className={styles.sortSelect}
             >
-              <option value="newest">由新到舊</option>
-              <option value="oldest">由舊到新</option>
+              <option value="newest">{t('petAbnormalPosts.sortOptions.newest')}</option>
+              <option value="oldest">{t('petAbnormalPosts.sortOptions.oldest')}</option>
             </select>
           </div>
           
@@ -212,10 +223,10 @@ const PetAbnormalPostsPage = () => {
               <div className={styles.emptyState}>
                 <img 
                   src="/assets/icon/SearchNoResult.png" 
-                  alt="空狀態" 
+                  alt={t('petAbnormalPosts.emptyStateAlt')} 
                   className={styles.emptyIcon}
                 />
-                <p>{abnormalPosts.length === 0 ? '尚無異常紀錄' : '沒有找到符合條件的異常紀錄'}</p>
+                <p>{abnormalPosts.length === 0 ? t('petAbnormalPosts.noRecords') : t('petAbnormalPosts.noFilteredRecords')}</p>
               </div>
             ) : (
               filteredPosts.map(post => (
@@ -227,7 +238,7 @@ const PetAbnormalPostsPage = () => {
                   <div className={styles.previewIcon}>
                     <img 
                       src="/assets/icon/PetpagePetAbnormalPostButton.png" 
-                      alt="異常紀錄"
+                      alt={t('petAbnormalPosts.abnormalRecordAlt')}
                     />
                   </div>
                   
@@ -235,11 +246,11 @@ const PetAbnormalPostsPage = () => {
                     <div className={styles.previewDateRow}>
                       <span className={styles.previewDate}>{formatDate(post.record_date)}</span>
                       {post.is_emergency && (
-                        <span className={styles.emergencyLabel}>就醫紀錄</span>
+                        <span className={styles.emergencyLabel}>{t('petAbnormalPosts.emergencyLabel')}</span>
                       )}
                     </div>
                     <div className={styles.previewInfo}>
-                      <span className={styles.previewLabel}>症狀：</span>
+                      <span className={styles.previewLabel}>{t('petAbnormalPosts.symptomsLabel')}：</span>
                       <span className={styles.previewSymptoms}>{formatSymptoms(post.symptoms)}</span>
                     </div>
                   </div>

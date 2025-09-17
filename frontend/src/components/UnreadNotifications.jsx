@@ -1,8 +1,11 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import styles from '../styles/UnreadNotifications.module.css';
 import { respondToFollowRequest } from '../services/notificationService';
 
 const UnreadNotifications = ({ notifications, onNotificationUpdate }) => {
+  const { t } = useTranslation('social');
+
   // 處理追蹤請求回應
   const handleFollowRequestResponse = async (notificationId, action) => {
     try {
@@ -13,19 +16,19 @@ const UnreadNotifications = ({ notifications, onNotificationUpdate }) => {
         
         // 顯示操作成功訊息
         if (window.showNotification) {
-          const actionText = action === 'accept' ? '已接受' : '已拒絕';
-          window.showNotification(`${actionText}追蹤請求`);
+          const actionText = action === 'accept' ? t('notifications.actionSuccess.accepted') : t('notifications.actionSuccess.rejected');
+          window.showNotification(`${actionText}${t('notifications.actionSuccess.followRequest')}`);
         }
       } else {
         // 顯示錯誤訊息
         if (window.showNotification) {
-          window.showNotification('操作失敗，請稍後再試');
+          window.showNotification(t('notifications.actionFailed'));
         }
       }
     } catch (error) {
       console.error('處理追蹤請求失敗:', error);
       if (window.showNotification) {
-        window.showNotification('操作失敗，請稍後再試');
+        window.showNotification(t('notifications.actionFailed'));
       }
     }
   };
@@ -44,10 +47,10 @@ const UnreadNotifications = ({ notifications, onNotificationUpdate }) => {
   if (!notifications || notifications.length === 0) {
     return (
       <div className={styles.container}>
-        <h3 className={styles.sectionTitle}>未讀訊息與追蹤請求</h3>
+        <h3 className={styles.sectionTitle}>{t('notifications.unreadTitle')}</h3>
         <div className={styles.divider}></div>
         <div className={styles.emptyMessage}>
-          目前沒有未讀訊息與追蹤請求
+          {t('notifications.noUnread')}
         </div>
       </div>
     );
@@ -55,15 +58,15 @@ const UnreadNotifications = ({ notifications, onNotificationUpdate }) => {
 
   return (
     <div className={styles.container}>
-      <h3 className={styles.sectionTitle}>未讀訊息與追蹤請求</h3>
+      <h3 className={styles.sectionTitle}>{t('notifications.unreadTitle')}</h3>
       <div className={styles.divider}></div>
       <div className={styles.notificationList}>
         {notifications.map((notification) => (
           <div key={notification.id} className={styles.notificationItem}>
             <div className={styles.avatar}>
-              <img 
+              <img
                 src={getAvatarUrl(notification)}
-                alt="頭像"
+                alt={t('notifications.avatar')}
                 onError={handleImageError}
               />
             </div>
@@ -77,7 +80,7 @@ const UnreadNotifications = ({ notifications, onNotificationUpdate }) => {
                 // 其他類型通知顯示用戶名和內容
                 <>
                   <span className={styles.username}>
-                    {notification.follow_request_from_info?.username || '未知用戶'}
+                    {notification.follow_request_from_info?.username || t('notifications.unknownUser')}
                   </span>
                   <span className={styles.message}>
                     {notification.content}
@@ -88,17 +91,17 @@ const UnreadNotifications = ({ notifications, onNotificationUpdate }) => {
             <div className={styles.actions}>
               {notification.notification_type === 'follow_request' && (
                 <>
-                  <button 
+                  <button
                     className={styles.rejectButton}
                     onClick={() => handleFollowRequestResponse(notification.id, 'reject')}
                   >
-                    拒絕
+                    {t('common.reject')}
                   </button>
-                  <button 
+                  <button
                     className={styles.acceptButton}
                     onClick={() => handleFollowRequestResponse(notification.id, 'accept')}
                   >
-                    確認
+                    {t('common.confirm')}
                   </button>
                 </>
               )}

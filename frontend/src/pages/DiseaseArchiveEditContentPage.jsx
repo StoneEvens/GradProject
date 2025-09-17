@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import TopNavbar from '../components/TopNavbar';
 import BottomNavbar from '../components/BottomNavigationBar';
 import Notification from '../components/Notification';
@@ -9,6 +10,7 @@ import { getUserPets, generateDiseaseArchiveContent } from '../services/petServi
 import styles from '../styles/DiseaseArchiveEditContentPage.module.css';
 
 const DiseaseArchiveEditContentPage = () => {
+  const { t, i18n } = useTranslation('archives');
   const { petId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
@@ -70,7 +72,7 @@ const DiseaseArchiveEditContentPage = () => {
       
       // 檢查是否有從前一頁傳來的數據
       if (!location.state || !location.state.formData) {
-        showNotification('缺少必要數據，返回第一步驟');
+        showNotification(t('diseaseArchiveEditContent.messages.missingData'));
         setTimeout(() => {
           navigate(`/pet/${petId}/disease-archive/create`);
         }, 1500);
@@ -108,8 +110,8 @@ const DiseaseArchiveEditContentPage = () => {
       }
       
     } catch (error) {
-      console.error('載入資料失敗:', error);
-      showNotification('載入資料失敗');
+      console.error(t('diseaseArchiveEditContent.messages.loadDataError'), error);
+      showNotification(t('diseaseArchiveEditContent.messages.loadDataFailed'));
       setLoading(false);
     }
   };
@@ -127,7 +129,8 @@ const DiseaseArchiveEditContentPage = () => {
         treatmentStatus: formData.treatmentStatus,
         mainCause: formData.mainCause || '',
         symptoms: formData.symptoms,
-        includedAbnormalPostIds: formData.includedAbnormalPostIds
+        includedAbnormalPostIds: formData.includedAbnormalPostIds,
+        language: i18n.language // 添加當前語言參數
       };
       
       // 調用 API 生成內容
@@ -136,30 +139,30 @@ const DiseaseArchiveEditContentPage = () => {
       // 更新檔案數據
       const updatedData = {
         ...formData,
-        generated_content: response.generated_content || '生成內容失敗'
+        generated_content: response.generated_content || t('diseaseArchiveEditContent.messages.generateContentFailed')
       };
       
       setArchiveData(updatedData);
       setEditedContent(updatedData.generated_content);
       
     } catch (error) {
-      console.error('生成檔案內容失敗:', error);
-      
-      let errorMessage = '生成檔案內容失敗';
+      console.error(t('diseaseArchiveEditContent.messages.generateArchiveContentError'), error);
+
+      let errorMessage = t('diseaseArchiveEditContent.messages.generateContentFailed');
       if (error.code === 'ECONNABORTED') {
-        errorMessage = 'AI 生成超時，請稍後再試';
+        errorMessage = t('diseaseArchiveEditContent.messages.aiGenerateTimeout');
       } else if (error.response?.status === 500) {
-        errorMessage = 'AI 服務暫時不可用，請稍後再試';
+        errorMessage = t('diseaseArchiveEditContent.messages.aiServiceUnavailable');
       } else if (error.response?.data?.message) {
         errorMessage = error.response.data.message;
       }
-      
+
       showNotification(errorMessage);
-      
+
       // 設置預設內容
       const fallbackData = {
         ...formData,
-        generated_content: '內容生成失敗，請手動編輯或重新嘗試。'
+        generated_content: t('diseaseArchiveEditContent.messages.generateFailedManualEdit')
       };
       
       setArchiveData(fallbackData);
@@ -181,13 +184,13 @@ const DiseaseArchiveEditContentPage = () => {
     
     // 基本驗證：檢查內容是否為空
     if (!content || content.trim().length === 0) {
-      errors.push('內容不能為空');
+      errors.push(t('diseaseArchiveEditContent.validation.contentEmpty'));
       return errors;
     }
-    
+
     // 檢查內容長度（可選）
     if (content.length < 50) {
-      errors.push('內容過短，請提供更詳細的描述');
+      errors.push(t('diseaseArchiveEditContent.validation.contentTooShort'));
     }
     
     // 溫和提示：檢查日期格式的最佳實踐（不再強制限制）
@@ -208,7 +211,7 @@ const DiseaseArchiveEditContentPage = () => {
     
     // 只提供建議，不強制限制
     if (hasDateInMiddle && !isEditing) {
-      console.log('提示：日期格式建議放在段落開頭，以便系統更好地關聯異常記錄');
+      console.log(t('diseaseArchiveEditContent.messages.dateFormatTip'));
     }
     
     return errors;
@@ -220,17 +223,17 @@ const DiseaseArchiveEditContentPage = () => {
     const validationErrors = validateContent(editedContent);
     
     if (validationErrors.length > 0) {
-      showNotification(`內容格式錯誤：${validationErrors[0]}`);
+      showNotification(t('diseaseArchiveEditContent.messages.contentFormatError', { error: validationErrors[0] }));
       return;
     }
-    
+
     setIsEditing(false);
     // 更新檔案數據中的內容
     setArchiveData(prev => ({
       ...prev,
       generated_content: editedContent
     }));
-    showNotification('編輯內容已保存');
+    showNotification(t('diseaseArchiveEditContent.messages.editContentSaved'));
   };
 
   // 處理取消編輯
@@ -242,7 +245,7 @@ const DiseaseArchiveEditContentPage = () => {
   // 處理上一步按鈕
   const handlePreviousStep = () => {
     showConfirmNotification(
-      '確認返回上一步？此份AI統整紀錄將會被捨棄。',
+      t('diseaseArchiveEditContent.confirmMessages.returnToPrevious'),
       () => {
         navigate(`/pet/${petId}/disease-archive/create`);
       }
@@ -258,7 +261,7 @@ const DiseaseArchiveEditContentPage = () => {
       abnormalPostsData: [], // 預設空陣列，之後可以從API獲取
       // 轉換字段名稱以符合後端API期望
       goToDoctor: archiveData.diagnosisStatus === 'diagnosed',
-      healthStatus: archiveData.treatmentStatus === 'treated' ? '已痊癒' : '治療中'
+      healthStatus: archiveData.treatmentStatus === 'treated' ? t('archiveCard.status.cured') : t('diseaseArchiveEditContent.treating')
     };
     
     // 如果有異常記錄ID，可以在這裡獲取詳細資料
@@ -275,13 +278,13 @@ const DiseaseArchiveEditContentPage = () => {
   // 設置頁面離開提醒
   useEffect(() => {
     const handleBeforeUnload = (e) => {
-      console.log('beforeunload 觸發, archiveData:', archiveData);
+      console.log(t('diseaseArchiveEditContent.messages.beforeUnloadTriggered'), archiveData);
       // 只要進入了這個頁面就顯示提醒（簡化判斷條件）
       if (archiveData) {
-        console.log('設置離開提醒');
+        console.log(t('diseaseArchiveEditContent.messages.setLeaveWarning'));
         e.preventDefault();
-        e.returnValue = '確認離開？此份AI統整紀錄將會被捨棄。';
-        return '確認離開？此份AI統整紀錄將會被捨棄。';
+        e.returnValue = t('diseaseArchiveEditContent.confirmMessages.leavePageWarning');
+        return t('diseaseArchiveEditContent.confirmMessages.leavePageWarning');
       }
     };
 
@@ -295,16 +298,16 @@ const DiseaseArchiveEditContentPage = () => {
   // 攔截 React Router 導航 - 使用 popstate 事件
   useEffect(() => {
     const handlePopState = (e) => {
-      console.log('popstate 觸發, archiveData:', archiveData);
+      console.log(t('diseaseArchiveEditContent.messages.popstateTriggered'), archiveData);
       // 只要進入了這個頁面就攔截（簡化判斷條件）
       if (archiveData) {
-        console.log('攔截返回導航');
+        console.log(t('diseaseArchiveEditContent.messages.interceptNavigation'));
         e.preventDefault();
         // 恢復歷史狀態
         window.history.pushState(null, '', window.location.pathname);
-        
+
         showConfirmNotification(
-          '確認離開？此份AI統整紀錄將會被捨棄。',
+          t('diseaseArchiveEditContent.confirmMessages.leavePageWarning'),
           () => {
             // 用戶確認離開，執行實際的導航
             window.history.back();
@@ -334,7 +337,7 @@ const DiseaseArchiveEditContentPage = () => {
         <div className={styles.container}>
           <TopNavbar />
           <div className={styles.loadingContainer}>
-            載入中...
+            {t('common.loading')}
           </div>
           <BottomNavbar />
         </div>
@@ -348,7 +351,7 @@ const DiseaseArchiveEditContentPage = () => {
         <div className={styles.container}>
           <TopNavbar />
           <div className={styles.errorContainer}>
-            缺少必要數據，正在返回第一步驟...
+            {t('diseaseArchiveEditContent.messages.missingDataReturning')}
           </div>
           <BottomNavbar />
         </div>
@@ -370,7 +373,7 @@ const DiseaseArchiveEditContentPage = () => {
                 alt={pet?.pet_name}
                 className={styles.petAvatar}
               />
-              <span className={styles.title}>製作疾病檔案</span>
+              <span className={styles.title}>{t('createDiseaseArchive.title')}</span>
             </div>
           </div>
 
@@ -380,14 +383,14 @@ const DiseaseArchiveEditContentPage = () => {
           <div className={styles.aiSection}>
             {/* AI統整標題列 */}
             <div className={styles.aiHeader}>
-              <span className={styles.aiTitle}>AI內容統整</span>
+              <span className={styles.aiTitle}>{t('diseaseArchiveEditContent.aiSection.title')}</span>
               {!isEditing && (
-                <button 
+                <button
                   className={styles.aiEditButton}
                   onClick={handleEditClick}
                   disabled={isGenerating}
                 >
-                  編輯
+                  {t('diseaseArchiveEditContent.buttons.edit')}
                 </button>
               )}
             </div>
@@ -397,31 +400,31 @@ const DiseaseArchiveEditContentPage = () => {
             {isEditing ? (
               <div className={styles.editingContainer}>
                 <div className={styles.editingTips}>
-                  <p className={styles.tipTitle}>編輯提示：</p>
+                  <p className={styles.tipTitle}>{t('diseaseArchiveEditContent.editingTips.title')}</p>
                   <ul className={styles.tipList}>
-                    <li>您可以自由編輯AI生成的內容</li>
-                    <li>日期格式（如「12月3日」）建議放在段落開頭，系統會自動關聯對應的異常記錄</li>
-                    <li>保持內容結構清晰，有助於日後查閱</li>
+                    <li>{t('diseaseArchiveEditContent.editingTips.tip1')}</li>
+                    <li>{t('diseaseArchiveEditContent.editingTips.tip2')}</li>
+                    <li>{t('diseaseArchiveEditContent.editingTips.tip3')}</li>
                   </ul>
                 </div>
                 <textarea
                   className={styles.contentTextarea}
                   value={editedContent}
                   onChange={(e) => setEditedContent(e.target.value)}
-                  placeholder="請輸入疾病檔案內容..."
+                  placeholder={t('diseaseArchiveEditContent.form.contentPlaceholder')}
                 />
                 <div className={styles.editingActions}>
-                  <button 
+                  <button
                     className={styles.cancelEditButton}
                     onClick={handleCancelEdit}
                   >
-                    取消
+                    {t('diseaseArchiveEditContent.buttons.cancel')}
                   </button>
-                  <button 
+                  <button
                     className={styles.saveEditButton}
                     onClick={handleSaveEdit}
                   >
-                    儲存
+                    {t('diseaseArchiveEditContent.buttons.save')}
                   </button>
                 </div>
               </div>
@@ -430,12 +433,12 @@ const DiseaseArchiveEditContentPage = () => {
                 {isGenerating ? (
                   <div className={styles.generatingContainer}>
                     <div className={styles.generatingSpinner}></div>
-                    <div className={styles.generatingText}>AI 正在分析您的寵物資料...</div>
-                    <div className={styles.generatingSubText}>請稍候，這可能需要一些時間</div>
+                    <div className={styles.generatingText}>{t('diseaseArchiveEditContent.generating.analyzing')}</div>
+                    <div className={styles.generatingSubText}>{t('diseaseArchiveEditContent.generating.pleaseWait')}</div>
                   </div>
                 ) : (
                   <div className={styles.contentText}>
-                    {archiveData?.generated_content || '暫無內容'}
+                    {archiveData?.generated_content || t('diseaseArchiveEditContent.noContent')}
                   </div>
                 )}
               </div>
@@ -445,19 +448,19 @@ const DiseaseArchiveEditContentPage = () => {
 
           {/* 操作按鈕 */}
           <div className={styles.actionButtons}>
-            <button 
-              className={styles.previousButton} 
+            <button
+              className={styles.previousButton}
               onClick={handlePreviousStep}
               disabled={isGenerating}
             >
-              上一步
+              {t('diseaseArchiveEditContent.buttons.previous')}
             </button>
-            <button 
-              className={styles.confirmButton} 
+            <button
+              className={styles.confirmButton}
               onClick={handleConfirmArchive}
               disabled={isGenerating}
             >
-              預覽檔案
+              {t('diseaseArchiveEditContent.buttons.preview')}
             </button>
           </div>
         </div>

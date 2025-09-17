@@ -176,13 +176,18 @@
   gap: 8px;
 }
 
-.dateInput {
+.dateInputWrapper {
+  position: relative;
   flex: 1;
+}
+
+.dateInput {
+  width: 100%;
   background: #FFF;
   border: 1px solid #FFB370;
   border-radius: 6px;
   padding: 8px 12px;
-  color: #89350c;
+  color: transparent;
   font-size: 12px;
   text-align: left;
   cursor: pointer;
@@ -192,6 +197,32 @@
 
 .dateInput:hover {
   border-color: #FF8C42;
+}
+
+/* 隱藏原生日期輸入框的箭頭和圖標 */
+.dateInput::-webkit-calendar-picker-indicator {
+  background: transparent;
+  bottom: 0;
+  color: transparent;
+  cursor: pointer;
+  height: auto;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: auto;
+}
+
+/* 日期顯示文字（包括提示和選中的日期） */
+.datePlaceholder {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #89350c;
+  font-size: 12px;
+  pointer-events: none;
+  z-index: 2;
 }
 
 .dateSeparator {

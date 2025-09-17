@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import TopNavbar from '../components/TopNavbar';
 import BottomNavbar from '../components/BottomNavigationbar';
 // SearchBar 現在整合在 TopNavbar 中
@@ -14,6 +15,7 @@ import { useUser } from '../context/UserContext';
 // 圖片將使用 public 路徑引用
 
 const FeedPage = () => {
+  const { t } = useTranslation('feed');
   const navigate = useNavigate();
   const { userData } = useUser();
   const [loading, setLoading] = useState(true);
@@ -144,13 +146,13 @@ const FeedPage = () => {
       setAllHasMore(allResponse.data.has_more || false);
       
     } catch (error) {
-      console.error('載入飼料數據失敗:', error);
+      console.error('Failed to load feed data:', error);
       setMarkedFeeds([]);
       setRecentFeeds([]);
       setAllFeeds([]);
-      setMarkedMessage('載入失敗');
-      setRecentMessage('載入失敗');
-      setAllMessage('載入失敗');
+      setMarkedMessage(t('page.messages.loadFailed'));
+      setRecentMessage(t('page.messages.loadFailed'));
+      setAllMessage(t('page.messages.loadFailed'));
       setMarkedHasMore(false);
       setAllHasMore(false);
     } finally {
@@ -182,7 +184,7 @@ const FeedPage = () => {
           
           // 重新載入所有數據以确保一致性
           loadAllSections();
-          setNotification('飼料已加入精選');
+          setNotification(t('page.messages.feedMarked'));
           return;
         } else {
           // 如果不是創建者，檢查使用者是否已審核過此飼料或提交過錯誤回報
@@ -232,7 +234,7 @@ const FeedPage = () => {
     
     // 如果是新增飼料時的審核，也導向詳情頁
     if (pendingFeedForReview) {
-      setNotification("系統已識別到同樣飼料");
+      setNotification(t('page.messages.systemDetected'));
       setTimeout(() => {
         navigate(`/feeds/${pendingFeedForReview.id}`);
       }, 2000);
@@ -247,7 +249,7 @@ const FeedPage = () => {
     
     // 如果是新增飼料時的審核，也導向詳情頁
     if (pendingFeedForReview) {
-      setNotification("系統已識別到同樣飼料");
+      setNotification(t('page.messages.systemDetected'));
       setTimeout(() => {
         navigate(`/feeds/${pendingFeedForReview.id}`);
       }, 2000);
@@ -263,7 +265,7 @@ const FeedPage = () => {
       
       // 如果是新增飼料時的審核流程
       if (pendingFeedForReview && pendingFeedForReview.id === feed.id) {
-        setNotification("審核完成，系統已識別到同樣飼料");
+        setNotification(t('page.messages.reviewCompleted'));
         setTimeout(() => {
           navigate(`/feeds/${feed.id}`);
         }, 2000);
@@ -279,7 +281,7 @@ const FeedPage = () => {
       loadAllSections();
       
     } catch (error) {
-      console.error('審核失敗:', error);
+      console.error('Review failed:', error);
       throw error; // 讓 modal 組件處理錯誤
     }
   };
@@ -291,7 +293,7 @@ const FeedPage = () => {
       const response = await axios.post('/feeds/error-report/', errorData);
       
     } catch (error) {
-      console.error('錯誤回報失敗:', error);
+      console.error('Error report failed:', error);
       throw error; // 讓 modal 組件處理錯誤
     }
   };
@@ -384,7 +386,7 @@ const FeedPage = () => {
             
             if (reviewCheckResponse.data.can_use_feed) {
               // 如果可以使用（已審核過或已回報錯誤），直接顯示通知並導向
-              setNotification("系統已識別到同樣飼料");
+              setNotification(t('page.messages.systemDetected'));
               setTimeout(() => {
                 navigate(`/feeds/${feedId}`);
               }, 2000);
@@ -414,21 +416,21 @@ const FeedPage = () => {
           } catch (reviewCheckError) {
             console.error('檢查審核狀態失敗:', reviewCheckError);
             // 如果檢查失敗，預設為直接導向
-            setNotification("系統已識別到同樣飼料");
+            setNotification(t('page.messages.systemDetected'));
             setTimeout(() => {
               navigate(`/feeds/${feedId}`);
             }, 2000);
           }
         } else {
           // 已驗證飼料，直接顯示通知並導向
-          setNotification("系統已識別到同樣飼料");
+          setNotification(t('page.messages.systemDetected'));
           setTimeout(() => {
             navigate(`/feeds/${feedId}`);
           }, 2000);
         }
       } else {
         // 如果是新飼料，顯示成功通知並導向詳情頁面
-        setNotification("新飼料建立成功");
+        setNotification(t('page.messages.newFeedCreated'));
         setTimeout(() => {
           navigate(`/feeds/${feedId}`);
         }, 2000);
@@ -438,7 +440,7 @@ const FeedPage = () => {
       loadAllSections();
       
     } catch (error) {
-      console.error('新增飼料失敗:', error);
+      console.error('Failed to add feed:', error);
       
       // 詳細錯誤診斷
       if (error.response) {
@@ -446,18 +448,18 @@ const FeedPage = () => {
         console.error('錯誤訊息:', error.response.data);
         
         if (error.response.status === 413) {
-          setNotification('圖片檔案過大，請選擇較小的圖片或聯繫管理員');
+          setNotification(t('page.messages.imageTooLarge'));
         } else if (error.response.status === 400) {
-          setNotification(error.response.data?.message || '資料格式錯誤，請檢查輸入');
+          setNotification(error.response.data?.message || t('page.messages.dataFormatError'));
         } else {
-          setNotification('新增飼料失敗，請稍後再試');
+          setNotification(t('page.messages.addFeedFailed'));
         }
       } else if (error.request) {
         console.error('無回應:', error.request);
-        setNotification('伺服器無回應，請檢查網路連線');
+        setNotification(t('page.messages.noResponse'));
       } else {
         console.error('錯誤:', error.message);
-        setNotification('發生未知錯誤，請稍後再試');
+        setNotification(t('page.messages.unknownError'));
       }
       
       throw error; // 讓 modal 組件處理錯誤
@@ -486,7 +488,7 @@ const FeedPage = () => {
           <img src={feed.frontImage} alt={feed.name} className={styles.feedImage} />
         ) : (
           <div className={styles.feedImagePlaceholder}>
-            <span>無圖片</span>
+            <span>{t('page.feedCard.noImage')}</span>
           </div>
         )}
         <button 
@@ -498,13 +500,13 @@ const FeedPage = () => {
         >
           <img 
             src={feed.isMarked ? "/assets/icon/IsmarkedIcon.png" : "/assets/icon/MarkIcon.png"} 
-            alt={feed.isMarked ? "已標記" : "標記"} 
+            alt={feed.isMarked ? t('page.feedCard.marked') : t('page.feedCard.mark')} 
           />
         </button>
         {/* 審核中標示 - 顯示在左下角 */}
         {!feed.isVerified && (
           <div className={styles.verifyingBadge}>
-            <img src="/assets/icon/Verifying.png" alt="審核中" />
+            <img src="/assets/icon/Verifying.png" alt={t('page.feedCard.verifying')} />
           </div>
         )}
       </div>
@@ -524,12 +526,12 @@ const FeedPage = () => {
           
           {/* 標題區域 */}
           <div className={styles.titleSection}>
-            <h2 className={styles.title}>常用飼料</h2>
+            <h2 className={styles.title}>{t('page.title')}</h2>
             <button 
               className={styles.addFeedButton} 
               onClick={handleCreateFeedClick}
             >
-              新增飼料
+              {t('page.buttons.addFeed')}
             </button>
           </div>
           
@@ -537,17 +539,17 @@ const FeedPage = () => {
 
           {loading ? (
             <div className={styles.loadingContainer}>
-              <span>載入中...</span>
+              <span>{t('page.loading')}</span>
             </div>
           ) : (
             <>
               {/* 精選飼料區域 */}
               <div className={styles.section}>
                 <div className={styles.sectionHeader}>
-                  <label className={styles.sectionLabel}>我的精選飼料:</label>
+                  <label className={styles.sectionLabel}>{t('page.sections.marked')}</label>
                   {!searchQuery && (
                     <button className={styles.viewMoreLink} onClick={handleViewMoreMarked}>
-                      查看更多
+                      {t('page.buttons.viewMore')}
                     </button>
                   )}
                 </div>
@@ -558,8 +560,8 @@ const FeedPage = () => {
                     </div>
                   ) : (
                     <div className={styles.emptyState}>
-                      <img src="/assets/icon/SearchNoResult.png" alt="無結果" className={styles.noResultImage} />
-                      <p>{searchQuery ? '未找到相關的精選飼料' : markedMessage}</p>
+                      <img src="/assets/icon/SearchNoResult.png" alt={t('page.emptyState.noResult')} className={styles.noResultImage} />
+                      <p>{searchQuery ? t('page.messages.noMarkedFeeds') : t('page.messages.noMarkedFeeds')}</p>
                     </div>
                   )}
                 </div>
@@ -567,7 +569,7 @@ const FeedPage = () => {
               
               {/* 最近使用區域 */}
               <div className={styles.section}>
-                <label className={styles.sectionLabel}>上次使用:</label>
+                <label className={styles.sectionLabel}>{t('page.sections.recent')}</label>
                 <div className={styles.sectionContent}>
                   {getFilteredFeeds(recentFeeds).length > 0 ? (
                     <div className={styles.feedGrid}>
@@ -575,8 +577,8 @@ const FeedPage = () => {
                     </div>
                   ) : (
                     <div className={styles.emptyState}>
-                      <img src="/assets/icon/SearchNoResult.png" alt="無結果" className={styles.noResultImage} />
-                      <p>{searchQuery ? '未找到相關的使用記錄' : recentMessage}</p>
+                      <img src="/assets/icon/SearchNoResult.png" alt={t('page.emptyState.noResult')} className={styles.noResultImage} />
+                      <p>{searchQuery ? t('page.messages.noRecentFeeds') : t('page.messages.noRecentFeeds')}</p>
                     </div>
                   )}
                 </div>
@@ -585,10 +587,10 @@ const FeedPage = () => {
               {/* 所有飼料區域 */}
               <div className={styles.section}>
                 <div className={styles.sectionHeader}>
-                  <label className={styles.sectionLabel}>所有飼料:</label>
+                  <label className={styles.sectionLabel}>{t('page.sections.all')}</label>
                   {!searchQuery && (
                     <button className={styles.viewMoreLink} onClick={handleViewMoreAll}>
-                      查看更多
+                      {t('page.buttons.viewMore')}
                     </button>
                   )}
                 </div>
@@ -599,8 +601,8 @@ const FeedPage = () => {
                     </div>
                   ) : (
                     <div className={styles.emptyState}>
-                      <img src="/assets/icon/SearchNoResult.png" alt="無結果" className={styles.noResultImage} />
-                      <p>{searchQuery ? '未找到相關飼料' : allMessage}</p>
+                      <img src="/assets/icon/SearchNoResult.png" alt={t('page.emptyState.noResult')} className={styles.noResultImage} />
+                      <p>{searchQuery ? t('page.messages.noAllFeeds') : t('page.messages.noAllFeeds')}</p>
                     </div>
                   )}
                 </div>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import TopNavbar from '../components/TopNavbar';
 import BottomNavbar from '../components/BottomNavigationbar';
 import ArchiveList from '../components/ArchiveList';
@@ -8,19 +9,20 @@ import { getUserLikedArchives } from '../services/socialService';
 import styles from '../styles/InteractionPostsPage.module.css';
 
 const LikedArchivesPage = () => {
+  const { t } = useTranslation('social');
   const navigate = useNavigate();
   const [likedArchives, setLikedArchives] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [notification, setNotification] = useState('');
-  const [sortOption, setSortOption] = useState('archive_date_desc'); // 預設按檔案建立日期排序：近到遠
+  const [sortOption, setSortOption] = useState('archive_date_desc'); // Default sort: archive date desc
 
-  // 排序選項
+  // Sort options
   const sortOptions = [
-    { value: 'archive_date_desc', label: '按建立日期：近到遠' },
-    { value: 'archive_date_asc', label: '按建立日期：遠到近' },
-    { value: 'like_date_desc', label: '按按讚日期：近到遠' },
-    { value: 'like_date_asc', label: '按按讚日期：遠到近' }
+    { value: 'archive_date_desc', label: t('likedArchives.sortOptions.archiveDateDesc') },
+    { value: 'archive_date_asc', label: t('likedArchives.sortOptions.archiveDateAsc') },
+    { value: 'like_date_desc', label: t('likedArchives.sortOptions.likeDateDesc') },
+    { value: 'like_date_asc', label: t('likedArchives.sortOptions.likeDateAsc') }
   ];
 
   useEffect(() => {
@@ -32,21 +34,21 @@ const LikedArchivesPage = () => {
       setLoading(true);
       setError(null);
       
-      // 調用真實的 API
+      // Call real API
       const response = await getUserLikedArchives({ sort: sortOption });
       
       if (response.success) {
-        // 處理 API 回應數據
+        // Process API response data
         const archives = response.data.archives || response.data || [];
         setLikedArchives(archives);
       } else {
-        throw new Error(response.error || '獲取按讚的論壇文章失敗');
+        throw new Error(response.error || t('likedArchives.messages.loadFailed'));
       }
       
     } catch (err) {
-      console.error('載入按讚的論壇文章失敗:', err);
-      setError(err.message || '載入按讚的論壇文章失敗，請稍後再試');
-      setLikedArchives([]); // 清空數據
+      console.error(t('likedArchives.console.loadError'), err);
+      setError(err.message || t('likedArchives.messages.loadErrorRetry'));
+      setLikedArchives([]); // Clear data
     } finally {
       setLoading(false);
     }
@@ -68,20 +70,20 @@ const LikedArchivesPage = () => {
     setNotification('');
   };
 
-  // 處理按讚（取消按讚時需要從列表中移除）
+  // Handle like (remove from list when unliked)
   const handleLike = (archiveId, isLiked) => {
     if (!isLiked) {
-      // 如果取消按讚，從列表中移除該檔案
+      // If unliked, remove from list
       setLikedArchives(prevArchives => 
         prevArchives.filter(archive => archive.id !== archiveId)
       );
     }
   };
 
-  // 處理留言
+  // Handle comment
   const handleComment = (archiveId, increment = 0) => {
     if (increment !== 0) {
-      // 更新留言數
+      // Update comment count
       setLikedArchives(prevArchives => 
         prevArchives.map(archive => {
           if (archive.id === archiveId) {
@@ -106,7 +108,7 @@ const LikedArchivesPage = () => {
       <TopNavbar />
       
       <div className={styles.content}>
-        {/* 標題列 */}
+        {/* Header row */}
         <div className={styles.header}>
           <div className={styles.headerLeft}>
             <button 
@@ -115,10 +117,10 @@ const LikedArchivesPage = () => {
             >
               ❯
             </button>
-            <h1 className={styles.title}>按讚的論壇文章</h1>
+            <h1 className={styles.title}>{t('likedArchives.title')}</h1>
           </div>
           
-          {/* 排序下拉選單 */}
+          {/* Sort dropdown */}
           <div className={styles.headerRight}>
             <select 
               className={styles.sortSelect}
@@ -134,16 +136,16 @@ const LikedArchivesPage = () => {
           </div>
         </div>
 
-        {/* 分隔線 */}
+        {/* Divider */}
         <div className={styles.divider}></div>
 
-        {/* 檔案預覽列表 */}
+        {/* Archive preview list */}
         <div className={styles.postsContainer}>
           <ArchiveList
             archives={likedArchives}
             loading={loading}
             error={error}
-            emptyMessage="尚未按讚任何論壇文章"
+            emptyMessage={t('likedArchives.emptyMessage')}
             onLike={handleLike}
             onComment={handleComment}
             className={styles.archiveList}

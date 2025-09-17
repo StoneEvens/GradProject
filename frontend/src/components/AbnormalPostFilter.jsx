@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
-import DatePicker from './DatePicker';
+import { useTranslation } from 'react-i18next';
+import { useSymptomTranslation } from '../hooks/useSymptomTranslation';
 import styles from '../styles/AbnormalPostFilter.module.css';
 
 const AbnormalPostFilter = ({ onFilterChange, symptoms = [] }) => {
+  const { t } = useTranslation('posts');
+  const { translateSingleSymptom, reverseTranslateSymptom } = useSymptomTranslation();
   const [filterType, setFilterType] = useState('symptom'); // 'symptom', 'date', 'both'
   const [selectedSymptomOption, setSelectedSymptomOption] = useState('');
   const [selectedSymptoms, setSelectedSymptoms] = useState([]);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
-  const [showStartDatePicker, setShowStartDatePicker] = useState(false);
-  const [showEndDatePicker, setShowEndDatePicker] = useState(false);
 
   // 格式化日期顯示
   const formatDate = (date) => {
@@ -17,7 +18,52 @@ const AbnormalPostFilter = ({ onFilterChange, symptoms = [] }) => {
     const year = date.getFullYear();
     const month = date.getMonth() + 1;
     const day = date.getDate();
-    return `${year} 年 ${month} 月 ${day} 日`;
+    return t('abnormalPostFilter.dateFormat', { year, month, day });
+  };
+
+  // 將 Date 物件轉換為 YYYY-MM-DD 格式
+  const formatDateForInput = (date) => {
+    if (!date) return '';
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  // 處理開始日期變更
+  const handleStartDateChange = (e) => {
+    const dateValue = e.target.value;
+    if (dateValue) {
+      const newDate = new Date(dateValue);
+      setStartDate(newDate);
+      // 立即觸發篩選
+      const filters = {
+        type: filterType,
+        symptoms: (filterType === 'symptom' || filterType === 'both') ?
+          selectedSymptoms.map(s => ({ ...s, text: reverseTranslateSymptom(s.text) })) : [],
+        startDate: (filterType === 'date' || filterType === 'both') ? newDate : null,
+        endDate: (filterType === 'date' || filterType === 'both') ? endDate : null
+      };
+      onFilterChange(filters);
+    }
+  };
+
+  // 處理結束日期變更
+  const handleEndDateChange = (e) => {
+    const dateValue = e.target.value;
+    if (dateValue) {
+      const newDate = new Date(dateValue);
+      setEndDate(newDate);
+      // 立即觸發篩選
+      const filters = {
+        type: filterType,
+        symptoms: (filterType === 'symptom' || filterType === 'both') ?
+          selectedSymptoms.map(s => ({ ...s, text: reverseTranslateSymptom(s.text) })) : [],
+        startDate: (filterType === 'date' || filterType === 'both') ? startDate : null,
+        endDate: (filterType === 'date' || filterType === 'both') ? newDate : null
+      };
+      onFilterChange(filters);
+    }
   };
 
   // 重置篩選條件
@@ -39,7 +85,8 @@ const AbnormalPostFilter = ({ onFilterChange, symptoms = [] }) => {
   const handleFilter = () => {
     const filters = {
       type: filterType,
-      symptoms: (filterType === 'symptom' || filterType === 'both') ? selectedSymptoms : [],
+      symptoms: (filterType === 'symptom' || filterType === 'both') ?
+        selectedSymptoms.map(s => ({ ...s, text: reverseTranslateSymptom(s.text) })) : [],
       startDate: (filterType === 'date' || filterType === 'both') ? startDate : null,
       endDate: (filterType === 'date' || filterType === 'both') ? endDate : null
     };
@@ -68,7 +115,8 @@ const AbnormalPostFilter = ({ onFilterChange, symptoms = [] }) => {
     // 立即觸發篩選
     const filters = {
       type: filterType,
-      symptoms: (filterType === 'symptom' || filterType === 'both') ? newSymptoms : [],
+      symptoms: (filterType === 'symptom' || filterType === 'both') ?
+        newSymptoms.map(s => ({ ...s, text: reverseTranslateSymptom(s.text) })) : [],
       startDate: (filterType === 'date' || filterType === 'both') ? startDate : null,
       endDate: (filterType === 'date' || filterType === 'both') ? endDate : null
     };
@@ -83,7 +131,8 @@ const AbnormalPostFilter = ({ onFilterChange, symptoms = [] }) => {
     // 立即觸發篩選
     const filters = {
       type: filterType,
-      symptoms: (filterType === 'symptom' || filterType === 'both') ? newSymptoms : [],
+      symptoms: (filterType === 'symptom' || filterType === 'both') ?
+        newSymptoms.map(s => ({ ...s, text: reverseTranslateSymptom(s.text) })) : [],
       startDate: (filterType === 'date' || filterType === 'both') ? startDate : null,
       endDate: (filterType === 'date' || filterType === 'both') ? endDate : null
     };
@@ -94,17 +143,17 @@ const AbnormalPostFilter = ({ onFilterChange, symptoms = [] }) => {
     <div className={styles.filterContainer}>
       {/* 篩選類型選擇 */}
       <div className={styles.filterTypeRow}>
-        <span className={styles.filterLabel}>依</span>
+        <span className={styles.filterLabel}>{t('abnormalPostFilter.filterByLabel')}</span>
         <select 
           value={filterType} 
           onChange={(e) => setFilterType(e.target.value)}
           className={styles.filterTypeSelect}
         >
-          <option value="symptom">症狀</option>
-          <option value="date">日期</option>
-          <option value="both">症狀 + 日期</option>
+          <option value="symptom">{t('abnormalPostFilter.filterOptions.symptom')}</option>
+          <option value="date">{t('abnormalPostFilter.filterOptions.date')}</option>
+          <option value="both">{t('abnormalPostFilter.filterOptions.both')}</option>
         </select>
-        <span className={styles.filterLabel}>篩選</span>
+        <span className={styles.filterLabel}>{t('abnormalPostFilter.filterLabel')}</span>
       </div>
 
       {/* 症狀篩選區域 */}
@@ -115,12 +164,12 @@ const AbnormalPostFilter = ({ onFilterChange, symptoms = [] }) => {
             <div className={styles.selectedSymptomsContainer}>
               {selectedSymptoms.map((symptom) => (
                 <div key={symptom.id} className={styles.selectedSymptom}>
-                  <span className={styles.symptomText}>{symptom.text}</span>
+                  <span className={styles.symptomText}>{translateSingleSymptom(symptom.text)}</span>
                   <button 
                     className={styles.removeSymptomBtn}
                     onClick={() => handleRemoveSymptom(symptom.id)}
                   >
-                    X
+                    {t('abnormalPostFilter.removeSymptomButton')}
                   </button>
                 </div>
               ))}
@@ -133,11 +182,11 @@ const AbnormalPostFilter = ({ onFilterChange, symptoms = [] }) => {
               onChange={(e) => setSelectedSymptomOption(e.target.value)}
               className={styles.symptomSelect}
             >
-              <option value="">選擇</option>
+              <option value="">{t('abnormalPostFilter.selectOption')}</option>
               {symptoms
                 .filter(symptom => !selectedSymptoms.some(s => s.text === symptom))
                 .map((symptom, index) => (
-                  <option key={index} value={symptom}>{symptom}</option>
+                  <option key={index} value={symptom}>{translateSingleSymptom(symptom)}</option>
                 ))
               }
             </select>
@@ -146,7 +195,7 @@ const AbnormalPostFilter = ({ onFilterChange, symptoms = [] }) => {
               onClick={handleAddSymptom}
               disabled={!selectedSymptomOption}
             >
-              加入
+              {t('abnormalPostFilter.addButton')}
             </button>
           </div>
         </div>
@@ -156,19 +205,31 @@ const AbnormalPostFilter = ({ onFilterChange, symptoms = [] }) => {
       {(filterType === 'date' || filterType === 'both') && (
         <div className={styles.dateFilterSection}>
           <div className={styles.dateRangeRow}>
-            <button 
-              className={styles.dateInput}
-              onClick={() => setShowStartDatePicker(true)}
-            >
-              {formatDate(startDate) || '2025 年 1 月 1 日'}
-            </button>
+            <div className={styles.dateInputWrapper}>
+              <input
+                type="date"
+                className={styles.dateInput}
+                value={formatDateForInput(startDate)}
+                onChange={handleStartDateChange}
+                max={formatDateForInput(endDate) || undefined}
+              />
+              <span className={styles.datePlaceholder}>
+                {startDate ? formatDate(startDate) : t('common.selectDate')}
+              </span>
+            </div>
             <span className={styles.dateSeparator}>-</span>
-            <button 
-              className={styles.dateInput}
-              onClick={() => setShowEndDatePicker(true)}
-            >
-              {formatDate(endDate) || '2025 年 1 月 22 日'}
-            </button>
+            <div className={styles.dateInputWrapper}>
+              <input
+                type="date"
+                className={styles.dateInput}
+                value={formatDateForInput(endDate)}
+                onChange={handleEndDateChange}
+                min={formatDateForInput(startDate) || undefined}
+              />
+              <span className={styles.datePlaceholder}>
+                {endDate ? formatDate(endDate) : t('common.selectDate')}
+              </span>
+            </div>
           </div>
         </div>
       )}
@@ -176,34 +237,13 @@ const AbnormalPostFilter = ({ onFilterChange, symptoms = [] }) => {
       {/* 操作按鈕 */}
       <div className={styles.actionButtons}>
         <button className={styles.resetButton} onClick={handleReset}>
-          重置
+          {t('abnormalPostFilter.resetButton')}
         </button>
         <button className={styles.filterButton} onClick={handleFilter}>
-          篩選
+          {t('abnormalPostFilter.filterButton')}
         </button>
       </div>
 
-      {/* 日期選擇器 */}
-      <DatePicker
-        isOpen={showStartDatePicker}
-        onClose={() => setShowStartDatePicker(false)}
-        selectedDate={startDate}
-        onDateSelect={(date) => {
-          setStartDate(date);
-          setShowStartDatePicker(false);
-        }}
-      />
-      
-      <DatePicker
-        isOpen={showEndDatePicker}
-        onClose={() => setShowEndDatePicker(false)}
-        selectedDate={endDate}
-        onDateSelect={(date) => {
-          setEndDate(date);
-          setShowEndDatePicker(false);
-        }}
-        minDate={startDate}
-      />
     </div>
   );
 };

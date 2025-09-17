@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import TopNavbar from '../components/TopNavbar';
 import BottomNavbar from '../components/BottomNavigationbar';
 import { NotificationProvider, useNotification } from '../context/NotificationContext';
@@ -10,6 +11,7 @@ import styles from '../styles/AllFeedsPage.module.css';
 import { useUser } from '../context/UserContext';
 
 const AllFeedsPageContent = () => {
+  const { t } = useTranslation('feed');
   const navigate = useNavigate();
   const { showNotification } = useNotification();
   const { userData } = useUser();
@@ -60,9 +62,9 @@ const AllFeedsPageContent = () => {
       setMessage(response.data.message);
       
     } catch (error) {
-      console.error('載入所有飼料失敗:', error);
+      console.error('Failed to load all feeds:', error);
       setAllFeeds([]);
-      setMessage('載入失敗');
+      setMessage(t('allPage.messages.loadFailed'));
     } finally {
       setLoading(false);
     }
@@ -97,7 +99,7 @@ const AllFeedsPageContent = () => {
           
           // 重新載入數據
           loadAllFeeds();
-          showNotification('飼料已加入精選');
+          showNotification(t('allPage.messages.feedMarked'));
           return;
         } else {
           // 如果不是創建者，檢查使用者是否已審核過此飼料或提交過錯誤回報
@@ -130,7 +132,7 @@ const AllFeedsPageContent = () => {
       loadAllFeeds();
       
     } catch (error) {
-      console.error('切換標記失敗:', error);
+      console.error('Failed to toggle mark:', error);
     }
   };
 
@@ -167,7 +169,7 @@ const AllFeedsPageContent = () => {
       loadAllFeeds();
       
     } catch (error) {
-      console.error('審核失敗:', error);
+      console.error('Review failed:', error);
       throw error; // 讓 modal 組件處理錯誤
     }
   };
@@ -179,7 +181,7 @@ const AllFeedsPageContent = () => {
       const response = await axios.post('/feeds/error-report/', errorData);
       
     } catch (error) {
-      console.error('錯誤回報失敗:', error);
+      console.error('Error report failed:', error);
       throw error; // 讓 modal 組件處理錯誤
     }
   };
@@ -220,7 +222,7 @@ const AllFeedsPageContent = () => {
           <img src={feed.frontImage} alt={feed.name} className={styles.feedImage} />
         ) : (
           <div className={styles.feedImagePlaceholder}>
-            <span>無圖片</span>
+            <span>{t('page.feedCard.noImage')}</span>
           </div>
         )}
         <button 
@@ -232,13 +234,13 @@ const AllFeedsPageContent = () => {
         >
           <img 
             src={feed.isMarked ? "/assets/icon/IsmarkedIcon.png" : "/assets/icon/MarkIcon.png"} 
-            alt={feed.isMarked ? "已標記" : "標記"} 
+            alt={feed.isMarked ? t('page.feedCard.marked') : t('page.feedCard.mark')} 
           />
         </button>
         {/* 審核中標示 - 顯示在左下角 */}
         {!feed.isVerified && (
           <div className={styles.verifyingBadge}>
-            <img src="/assets/icon/Verifying.png" alt="審核中" />
+            <img src="/assets/icon/Verifying.png" alt={t('page.feedCard.verifying')} />
           </div>
         )}
       </div>
@@ -259,7 +261,7 @@ const AllFeedsPageContent = () => {
           <button className={styles.backButton} onClick={handleBack}>
             ❮
           </button>
-          <h1 className={styles.title}>所有飼料</h1>
+          <h1 className={styles.title}>{t('allPage.title')}</h1>
           <div className={styles.spacer}></div>
         </div>
         
@@ -267,7 +269,7 @@ const AllFeedsPageContent = () => {
 
         {loading ? (
           <div className={styles.loadingContainer}>
-            <span>載入中...</span>
+            <span>{t('allPage.loading')}</span>
           </div>
         ) : (
           <div className={styles.feedSection}>
@@ -277,8 +279,8 @@ const AllFeedsPageContent = () => {
               </div>
             ) : (
               <div className={styles.emptyState}>
-                <img src="/assets/icon/SearchNoResult.png" alt="無結果" className={styles.noResultImage} />
-                <p>{searchQuery ? '未找到相關飼料' : message}</p>
+                <img src="/assets/icon/SearchNoResult.png" alt={t('page.emptyState.noResult')} className={styles.noResultImage} />
+                <p>{searchQuery ? t('allPage.messages.noFeeds') : message}</p>
               </div>
             )}
           </div>

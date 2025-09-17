@@ -1,0 +1,140 @@
+{
+  "title": "栄養計算機",
+  "functions": {
+    "reset": "リセット",
+    "quickCalculate": "クイック計算",
+    "history": "履歴"
+  },
+  "sections": {
+    "pet": "ペット選択",
+    "condition": "ペットの状態",
+    "feed": "フード選択",
+    "calculate": "計算開始",
+    "calculateResult": "計算結果"
+  },
+  "petSection": {
+    "selectPet": "ペットを選択",
+    "addTempPet": "一時ペットを追加",
+    "name": "名前：",
+    "speciesLabel": "種類：",
+    "weight": "体重：",
+    "height": "身長：",
+    "stage": "段階：",
+    "weightUnit": "kg",
+    "heightUnit": "cm",
+    "createTempPet": "一時ペットを作成",
+    "cancelSelection": "選択をキャンセル",
+    "placeholders": {
+      "petName": "ペットの名前を入力してください",
+      "weight": "体重を入力してください",
+      "height": "身長を入力してください"
+    },
+    "species": {
+      "cat": "猫",
+      "dog": "犬"
+    },
+    "stages": {
+      "kitten": "子猫",
+      "puppy": "子犬",
+      "adult": "成年",
+      "pregnant": "妊娠",
+      "lactating": "授乳"
+    }
+  },
+  "conditionSection": {
+    "other": "その他：",
+    "otherPlaceholder": "入力してください",
+    "conditions": {
+      "chronicKidneyDisease": "慢性腎臓病",
+      "liverDisease": "肝臓疾患",
+      "arthritisObesity": "関節炎/肥満",
+      "heartDisease": "心臓病",
+      "diabetes": "糖尿病",
+      "urinaryStones": "尿路結石",
+      "pancreatitis": "膵炎",
+      "foodAllergyGISensitivity": "食物アレルギー/胃腸過敏",
+      "skinProblems": "皮膚問題"
+    }
+  },
+  "feedSection": {
+    "selectFeed": "フードを選択",
+    "addFeed": "フードを追加",
+    "noFeedSelected": "フードを選択または追加してください",
+    "nutritionTitle": "栄養成分（100gあたり）",
+    "nutrients": {
+      "protein": "タンパク質",
+      "fat": "脂質",
+      "carbohydrate": "炭水化物",
+      "calcium": "カルシウム",
+      "phosphorus": "リン",
+      "magnesium": "マグネシウム",
+      "sodium": "ナトリウム"
+    },
+    "units": {
+      "g": "g",
+      "mg": "mg"
+    }
+  },
+  "calculationSection": {
+    "calculating": "計算中です。しばらくお待ちください...",
+    "noResult": "上の「計算開始」ボタンをクリックして栄養計算を開始してください",
+    "dailyCalories": "1日のカロリー必要量：",
+    "dailyFeedAmount": "1日のフード推奨量：",
+    "kcalUnit": "kcal",
+    "gramUnit": "グラム"
+  },
+  "messages": {
+    "loading": "読み込み中...",
+    "noLastUsedData": "前回使用したデータがありません",
+    "petNotFound": "前回使用したペットが存在しません",
+    "dataLoaded": "前回使用したデータを読み込みました",
+    "loadFailed": "前回使用したデータの読み込みに失敗しました",
+    "calculatorReset": "計算機がリセットされました",
+    "selectPetFirst": "まずペットを選択してください",
+    "selectFeedFirst": "まずフードを選択してください",
+    "enterPetName": "ペットの名前を入力してください",
+    "enterWeight": "体重を入力してください",
+    "enterHeight": "身長を入力してください",
+    "tempPetCreated": "一時ペットが作成され、ロックされました",
+    "tempPetCanceled": "一時ペットの選択をキャンセルしました",
+    "calculateFailed": "計算に失敗しました。しばらくしてから再試行してください",
+    "feedCreated": "フードの作成に成功しました",
+    "feedCreateFailed": "フードの作成に失敗しました。しばらくしてから再試行してください",
+    "quickCalculateInDevelopment": "クイック計算機能は開発中です",
+    "loadingPetsFailed": "ペットの読み込みに失敗しました：",
+    "loadingLastUsedDataFailed": "前回使用データの読み込みに失敗しました：",
+    "createFeedFailed": "フードの作成に失敗しました：",
+    "selectPetAndFeed": "まずペットとフードを選択してください",
+    "enterPetWeight": "ペットの体重を入力してください"
+  },
+  "historyModal": {
+    "title": "履歴",
+    "backToList": "❮ リストに戻る",
+    "loading": "読み込み中...",
+    "noRecords": "計算記録がありません",
+    "emptyStateAlt": "空の状態",
+    "clearAll": "すべてクリア",
+    "close": "閉じる",
+    "confirmClearMessage": "すべての履歴を削除してもよろしいですか？この操作は元に戻せません",
+    "allRecordsCleared": "すべての記録がクリアされました",
+    "clearFailed": "クリアに失敗しました",
+    "loadRecordsFailed": "履歴の読み込みに失敗しました",
+    "basicInfo": "基本情報",
+    "calculationTime": "計算時間：",
+    "petName": "ペット名：",
+    "feedName": "フード名：",
+    "feedBrand": "フードブランド：",
+    "calculationResult": "計算結果",
+    "dailyRequirement": "1日の必要量",
+    "dailyCaloriesNeed": "1日のカロリー必要量：",
+    "dailyFeedRecommendation": "1日のフード推奨量：",
+    "actualNutritionIntake": "実際の栄養摂取",
+    "nutritionistAdvice": "栄養士のアドバイス"
+  },
+  "historyPreview": {
+    "historyRecord": "履歴",
+    "pet": "ペット：",
+    "feed": "フード：",
+    "monthDay": "{{month}}月{{day}}日"
+  }
+}

@@ -1,0 +1,212 @@
+{
+  "title": "コミュニティ",
+  "tabs": {
+    "myPosts": "マイ投稿",
+    "allPosts": "すべての投稿",
+    "following": "フォロー中"
+  },
+  "post": {
+    "create": "投稿を公開",
+    "edit": "投稿を編集",
+    "delete": "投稿を削除",
+    "like": "いいね",
+    "unlike": "いいねを取り消し",
+    "comment": "コメント",
+    "share": "シェア",
+    "save": "保存",
+    "unsave": "保存を取り消し",
+    "report": "報告",
+    "noContent": "投稿内容がありません",
+    "loadMore": "さらに読み込み",
+    "loading": "読み込み中...",
+    "postedBy": "投稿者",
+    "postedAt": "投稿日",
+    "edited": "編集済み",
+    "viewDetails": "詳細を見る"
+  },
+  "comment": {
+    "title": "コメント",
+    "placeholder": "コメントを書いてください...",
+    "submit": "送信",
+    "cancel": "キャンセル",
+    "edit": "編集",
+    "delete": "削除",
+    "reply": "返信",
+    "loadMore": "さらにコメントを読み込み",
+    "noComments": "まだコメントがありません、最初にコメントする人になりましょう！"
+  },
+  "follow": {
+    "follow": "フォロー",
+    "unfollow": "フォロー解除",
+    "followers": "フォロワー",
+    "following": "フォロー中",
+    "followersCount": "{{count}}人のフォロワー",
+    "followingCount": "{{count}}人をフォロー中"
+  },
+  "search": {
+    "placeholder": "投稿、ユーザー、タグを検索",
+    "noResults": "関連する結果が見つかりません",
+    "filters": "フィルター条件",
+    "sortBy": "並び順",
+    "newest": "最新",
+    "oldest": "最古",
+    "mostLiked": "最多いいね"
+  },
+  "common": {
+    "loading": "読み込み中...",
+    "cancel": "キャンセル",
+    "confirm": "確認",
+    "close": "閉じる",
+    "accept": "承認",
+    "reject": "拒否",
+    "remove": "削除",
+    "retry": "再試行"
+  },
+  "followPage": {
+    "followers": "人のフォロワー",
+    "following": "人をフォロー中",
+    "noFollowers": "まだフォロワーがいません",
+    "noFollowing": "まだ誰もフォローしていません",
+    "removeFollower": "フォロワーを削除",
+    "follow": "フォロー",
+    "following": "フォロー中",
+    "requested": "リクエスト済み",
+    "requestFollow": "フォローリクエスト",
+    "messages": {
+      "loadDataFailed": "データの読み込みに失敗しました、後でもう一度お試しください",
+      "operationFailed": "操作に失敗しました、後でもう一度お試しください",
+      "followerRemoved": "フォロワー@{{username}}を正常に削除しました",
+      "removeFollowerFailed": "フォロワーの削除に失敗しました",
+      "removeFollowerFailedRetry": "フォロワーの削除に失敗しました、後でもう一度お試しください"
+    }
+  },
+  "notifications": {
+    "title": "通知",
+    "unreadTitle": "未読メッセージとフォローリクエスト",
+    "pastTitle": "過去のメッセージ",
+    "noUnread": "現在未読メッセージとフォローリクエストはありません",
+    "noPast": "現在過去のメッセージはありません",
+    "loadFailed": "通知の読み込みに失敗しました",
+    "actionSuccess": {
+      "accepted": "承認済み",
+      "rejected": "拒否済み",
+      "followRequest": "フォローリクエスト"
+    },
+    "actionFailed": "操作に失敗しました、後でもう一度お試しください",
+    "unknownUser": "不明なユーザー",
+    "avatar": "アバター"
+  },
+  "confirmFollowModal": {
+    "title": "{{action}}を送信してもよろしいですか？",
+    "actions": {
+      "follow": "フォロー",
+      "requestFollow": "フォローリクエスト"
+    },
+    "cancel": "やめる"
+  },
+  "confirmRemoveFollowerModal": {
+    "title": "フォロワーを削除してもよろしいですか？",
+    "description": "@{{username}}のフォローを削除"
+  },
+  "confirmNotification": {
+    "cancel": "キャンセル",
+    "confirm": "確認"
+  },
+  "likedArchives": {
+    "title": "気に入った記事",
+    "emptyMessage": "まだファイルにいいねしていません",
+    "sortOptions": {
+      "archiveDateDesc": "作成日順：新しい順",
+      "archiveDateAsc": "作成日順：古い順",
+      "likeDateDesc": "いいね日順：新しい順",
+      "likeDateAsc": "いいね日順：古い順"
+    },
+    "messages": {
+      "loadFailed": "いいねファイルの取得に失敗しました",
+      "loadErrorRetry": "いいねファイルの読み込みに失敗しました、後でもう一度お試しください"
+    },
+    "console": {
+      "loadError": "いいねファイルの読み込みに失敗しました:"
+    }
+  },
+  "likedPosts": {
+    "title": "いいねした投稿",
+    "emptyMessage": "まだ投稿にいいねしていません",
+    "messages": {
+      "fetchFailed": "いいね投稿の取得に失敗しました",
+      "loadErrorRetry": "いいね投稿リストの読み込みに失敗しました、後でもう一度お試しください",
+      "removedFromList": "いいねリストから削除されました",
+      "commentInDevelopment": "コメント機能は開発中です"
+    },
+    "console": {
+      "loadError": "いいね投稿リストの読み込みに失敗しました:",
+      "likeNotification": "LikedPostsListPageがいいね通知を受信:",
+      "saveNotification": "LikedPostsListPageが保存通知を受信:"
+    }
+  },
+  "savedArchives": {
+    "title": "保存された記事",
+    "emptyMessage": "まだフォーラム記事を保存していません",
+    "sortOptions": {
+      "archiveDateDesc": "作成日順：新しい順",
+      "archiveDateAsc": "作成日順：古い順",
+      "saveDateDesc": "保存日順：新しい順",
+      "saveDateAsc": "保存日順：古い順"
+    },
+    "messages": {
+      "loadFailed": "保存したフォーラム記事の取得に失敗しました",
+      "loadErrorRetry": "保存したフォーラム記事の読み込みに失敗しました、後でもう一度お試しください"
+    },
+    "console": {
+      "loadError": "保存したフォーラム記事の読み込みに失敗しました:"
+    }
+  },
+  "savedPosts": {
+    "title": "保存した投稿",
+    "emptyMessage": "まだ投稿を保存していません",
+    "messages": {
+      "fetchFailed": "保存投稿の取得に失敗しました",
+      "loadErrorRetry": "保存投稿リストの読み込みに失敗しました、後でもう一度お試しください",
+      "commentInDevelopment": "コメント機能は開発中です"
+    },
+    "console": {
+      "loadError": "保存投稿リストの読み込みに失敗しました:",
+      "likeNotification": "SavedPostsListPageがいいね通知を受信:",
+      "saveNotification": "SavedPostsListPageが保存通知を受信:"
+    }
+  },
+  "savedPostsPage": {
+    "title": "保存した投稿",
+    "emptyMessage": "まだ投稿を保存していません",
+    "sortOptions": {
+      "postDateDesc": "公開日順：新しい順",
+      "postDateAsc": "公開日順：古い順",
+      "saveDateDesc": "保存日順：新しい順",
+      "saveDateAsc": "保存日順：古い順"
+    },
+    "messages": {
+      "loadFailed": "保存投稿の取得に失敗しました",
+      "loadErrorRetry": "保存投稿の読み込みに失敗しました、後でもう一度お試しください"
+    },
+    "console": {
+      "loadError": "保存投稿の読み込みに失敗しました:"
+    }
+  },
+  "likedPostsPage": {
+    "title": "いいねした投稿",
+    "emptyMessage": "まだ投稿にいいねしていません",
+    "sortOptions": {
+      "postDateDesc": "公開日順：新しい順",
+      "postDateAsc": "公開日順：古い順",
+      "likeDateDesc": "いいね日順：新しい順",
+      "likeDateAsc": "いいね日順：古い順"
+    },
+    "messages": {
+      "loadFailed": "いいね投稿の取得に失敗しました",
+      "loadErrorRetry": "いいね投稿の読み込みに失敗しました、後でもう一度お試しください"
+    },
+    "console": {
+      "loadError": "いいね投稿の読み込みに失敗しました:"
+    }
+  }
+}

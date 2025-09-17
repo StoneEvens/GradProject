@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import TopNavbar from '../components/TopNavbar';
 import BottomNavbar from '../components/BottomNavigationBar';
 import Notification from '../components/Notification';
-import DatePicker from '../components/DatePicker';
 import { NotificationProvider } from '../context/NotificationContext';
 import { getUserPets, getSymptoms, searchAbnormalPostsByConditions, generateDiseaseArchiveContent, validateAbnormalPostsExist } from '../services/petService';
+import { useSymptomTranslation } from '../hooks/useSymptomTranslation';
 import styles from '../styles/CreateDiseaseArchivePage.module.css';
 
 const CreateDiseaseArchivePage = () => {
+  const { t, i18n } = useTranslation('archives');
+  const { translateSymptomList, translateSingleSymptom, reverseTranslateSymptoms } = useSymptomTranslation();
   const { petId } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -31,8 +34,6 @@ const CreateDiseaseArchivePage = () => {
   // 日期範圍相關狀態
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
-  const [showStartDatePicker, setShowStartDatePicker] = useState(false);
-  const [showEndDatePicker, setShowEndDatePicker] = useState(false);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [highlightedDates, setHighlightedDates] = useState(new Set());
   const [selectedDate, setSelectedDate] = useState(null);
@@ -60,21 +61,21 @@ const CreateDiseaseArchivePage = () => {
   // 驗證異常記錄數據完整性
   const validateAbnormalPostData = async () => {
     try {
-      console.log('開始驗證CreateDiseaseArchivePage中的異常記錄數據');
+      console.log(t('createDiseaseArchive.messages.startValidatingRecords'));
       
       // 收集所有異常記錄ID
       const allPostIds = new Set();
       
       // 從realAbnormalPosts收集ID
-      console.log('realAbnormalPosts:', realAbnormalPosts);
+      console.log(t('createDiseaseArchive.messages.realAbnormalPosts'), realAbnormalPosts);
       realAbnormalPosts.forEach(post => {
         if (post && post.id) {
           allPostIds.add(post.id);
         }
       });
-      
+
       // 從abnormalPostsForDates收集ID
-      console.log('abnormalPostsForDates:', abnormalPostsForDates);
+      console.log(t('createDiseaseArchive.messages.abnormalPostsForDates'), abnormalPostsForDates);
       Object.values(abnormalPostsForDates).forEach(post => {
         if (post && post.id) {
           allPostIds.add(post.id);
@@ -82,10 +83,10 @@ const CreateDiseaseArchivePage = () => {
       });
       
       const postIdsArray = Array.from(allPostIds);
-      console.log('收集到的異常記錄ID:', postIdsArray);
-      
+      console.log(t('createDiseaseArchive.messages.collectedRecordIds'), postIdsArray);
+
       if (postIdsArray.length === 0) {
-        console.log('沒有異常記錄需要驗證');
+        console.log(t('createDiseaseArchive.messages.noRecordsToValidate'));
         return;
       }
       
@@ -123,14 +124,14 @@ const CreateDiseaseArchivePage = () => {
         setExcludedPostIds(newExcludedPostIds);
         
         // 顯示通知
-        showNotification(`檢測到 ${invalidIds.length} 筆異常記錄已被刪除，已自動更新數據`);
-        
+        showNotification(t('createDiseaseArchive.messages.recordsDeletedAndUpdated', { count: invalidIds.length }));
+
         // 保存更新後的草稿
         saveDraft();
       }
       
     } catch (error) {
-      console.error('驗證異常記錄數據失敗:', error);
+      console.error(t('createDiseaseArchive.messages.validationFailed'), error);
     }
   };
 
@@ -157,7 +158,7 @@ const CreateDiseaseArchivePage = () => {
         setDraftSaved(false);
       }, 3000);
     } catch (error) {
-      console.error('保存草稿失敗:', error);
+      console.error(t('createDiseaseArchive.messages.saveDraftFailed'), error);
     }
   };
 
@@ -212,7 +213,7 @@ const CreateDiseaseArchivePage = () => {
         return true; // 表示有載入草稿
       }
     } catch (error) {
-      console.error('載入草稿失敗:', error);
+      console.error(t('createDiseaseArchive.messages.loadDraftFailed'), error);
       // 如果草稿損壞，清除它
       localStorage.removeItem(DRAFT_KEY);
     }
@@ -224,7 +225,7 @@ const CreateDiseaseArchivePage = () => {
     try {
       localStorage.removeItem(DRAFT_KEY);
     } catch (error) {
-      console.error('清除草稿失敗:', error);
+      console.error(t('createDiseaseArchive.messages.clearDraftFailed'), error);
     }
   };
 
@@ -291,13 +292,15 @@ const CreateDiseaseArchivePage = () => {
       // 載入症狀列表
       const symptoms = await getSymptoms();
       const symptomNames = symptoms.map(symptom => symptom.symptom_name);
-      setAvailableSymptoms(symptomNames);
+      // 翻譯症狀名稱為當前界面語言
+      const translatedSymptomNames = translateSymptomList(symptomNames);
+      setAvailableSymptoms(translatedSymptomNames);
       
       // 載入草稿（在症狀列表載入完成後）
       loadDraft();
       
     } catch (error) {
-      showNotification('載入資料失敗');
+      showNotification(t('createDiseaseArchive.messages.loadDataFailed'));
     } finally {
       setLoading(false);
     }
@@ -326,14 +329,27 @@ const CreateDiseaseArchivePage = () => {
         id: Date.now(),
         text: selectedSymptomOption
       };
-      setSelectedSymptoms([...selectedSymptoms, newSymptom]);
+      const newSymptoms = [...selectedSymptoms, newSymptom];
+
+      setSelectedSymptoms(newSymptoms);
       setSelectedSymptomOption('');
+
+      // 如果有日期範圍，立即觸發搜索更新，傳遞更新後的症狀列表
+      if (startDate && endDate) {
+        updateHighlightedDates(startDate, endDate, newSymptoms);
+      }
     }
   };
 
   // 處理移除症狀
   const handleRemoveSymptom = (symptomId) => {
-    setSelectedSymptoms(selectedSymptoms.filter(s => s.id !== symptomId));
+    const newSymptoms = selectedSymptoms.filter(s => s.id !== symptomId);
+    setSelectedSymptoms(newSymptoms);
+
+    // 如果有日期範圍，立即觸發搜索更新，傳遞更新後的症狀列表
+    if (startDate && endDate) {
+      updateHighlightedDates(startDate, endDate, newSymptoms);
+    }
   };
 
   // 格式化日期顯示
@@ -342,18 +358,66 @@ const CreateDiseaseArchivePage = () => {
     const year = date.getFullYear();
     const month = date.getMonth() + 1;
     const day = date.getDate();
-    return `${year} 年 ${month} 月 ${day} 日`;
+
+    if (i18n.language === 'en') {
+      return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    } else {
+      return `${year} 年 ${month} 月 ${day} 日`;
+    }
+  };
+
+  // 格式化日期為 input[type="date"] 格式
+  const formatDateForInput = (date) => {
+    if (!date) return '';
+    return date.getFullYear() + '-' +
+           String(date.getMonth() + 1).padStart(2, '0') + '-' +
+           String(date.getDate()).padStart(2, '0');
+  };
+
+  // 處理開始日期變更
+  const handleStartDateChange = (e) => {
+    const dateValue = e.target.value;
+    if (!dateValue) {
+      setStartDate(null);
+      return;
+    }
+    const date = new Date(dateValue);
+    setStartDate(date);
+    // 如果結束日期已設定，立即更新日曆
+    if (endDate) {
+      updateHighlightedDates(date, endDate);
+    }
+  };
+
+  // 處理結束日期變更
+  const handleEndDateChange = (e) => {
+    const dateValue = e.target.value;
+    if (!dateValue) {
+      setEndDate(null);
+      return;
+    }
+    const date = new Date(dateValue);
+    setEndDate(date);
+    // 如果開始日期已設定，立即更新日曆
+    if (startDate) {
+      updateHighlightedDates(startDate, date);
+    }
   };
 
   // 更新高亮日期（根據症狀篩選異常記錄）
-  const updateHighlightedDates = async (start, end) => {
+  const updateHighlightedDates = async (start, end, symptomsToUse = null) => {
     if (!start || !end || !petId) return;
-    
+
     setIsSearching(true);
-    
+    // 重置 abnormalPostPreview 狀態
+    setSelectedAbnormalPost(null);
+
     try {
-      const selectedSymptomTexts = selectedSymptoms.map(s => s.text);
-      
+      // 使用傳入的症狀列表，如果沒有則使用當前狀態
+      const symptomsToSearch = symptomsToUse || selectedSymptoms;
+      const selectedSymptomTexts = symptomsToSearch.map(s => s.text);
+
+
       // 呼叫真實API搜尋異常記錄
       const apiResponse = await searchAbnormalPostsByConditions(
         petId, 
@@ -371,7 +435,8 @@ const CreateDiseaseArchivePage = () => {
       } else if (apiResponse && apiResponse.data && Array.isArray(apiResponse.data)) {
         abnormalPosts = apiResponse.data;
       }
-      
+
+
       // 儲存搜尋結果
       setRealAbnormalPosts(abnormalPosts);
       
@@ -389,11 +454,11 @@ const CreateDiseaseArchivePage = () => {
           // 處理症狀數據（可能是陣列或其他格式）
           let symptomsText = '';
           if (post.symptoms && Array.isArray(post.symptoms)) {
-            symptomsText = post.symptoms.map(s => s.symptom_name || s).join(' ');
+            symptomsText = post.symptoms.map(s => translateSingleSymptom(s.symptom_name || s)).join(' ');
           } else if (typeof post.symptoms === 'string') {
-            symptomsText = post.symptoms;
+            symptomsText = translateSingleSymptom(post.symptoms);
           } else {
-            symptomsText = '症狀資料';
+            symptomsText = t('createDiseaseArchive.symptomsData');
           }
           
           // 建立日期對應的異常記錄資料（用於點擊時顯示）
@@ -402,7 +467,7 @@ const CreateDiseaseArchivePage = () => {
               id: post.id,
               date: `${postDate.getMonth() + 1}月${postDate.getDate()}日`,
               symptoms: symptomsText,
-              description: post.content || '異常記錄',
+              description: post.content || t('createDiseaseArchive.abnormalRecord'),
               rawData: post // 保存原始數據
             };
           }
@@ -413,7 +478,7 @@ const CreateDiseaseArchivePage = () => {
       
       // 保存日期對應的異常記錄資料
       setAbnormalPostsForDates(postsForDates);
-      
+
       setHighlightedDates(newHighlightedDates);
       
       // 如果有異常記錄，將日曆移動到最早的記錄所在的月份
@@ -432,7 +497,7 @@ const CreateDiseaseArchivePage = () => {
       }
       
     } catch (error) {
-      showNotification('搜尋異常記錄失敗，請稍後再試');
+      showNotification(t('createDiseaseArchive.messages.searchRecordsFailed'));
       setHighlightedDates(new Set());
     } finally {
       setIsSearching(false);
@@ -443,8 +508,14 @@ const CreateDiseaseArchivePage = () => {
   React.useEffect(() => {
     if (startDate && endDate) {
       updateHighlightedDates(startDate, endDate);
+    } else {
+      // 清空高亮日期和異常記錄數據當沒有日期範圍時
+      setHighlightedDates(new Set());
+      setAbnormalPostsForDates({});
+      setRealAbnormalPosts([]);
+      setSelectedAbnormalPost(null); // 重置 abnormalPostPreview
     }
-  }, [startDate, endDate, selectedSymptoms]);
+  }, [startDate, endDate, selectedSymptoms, petId]); // 添加 petId 作為依賴
 
   // 自動保存草稿（當表單內容變化時）
   React.useEffect(() => {
@@ -503,7 +574,10 @@ const CreateDiseaseArchivePage = () => {
     const weekDays = ['日', '一', '二', '三', '四', '五', '六'];
 
     // 週標題
-    const weekHeaders = weekDays.map(day => (
+    const weekHeaders = (i18n.language === 'en'
+      ? ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+      : weekDays
+    ).map(day => (
       <div key={day} className={styles.weekDay}>{day}</div>
     ));
 
@@ -548,7 +622,12 @@ const CreateDiseaseArchivePage = () => {
           <button onClick={() => setCurrentDate(new Date(year, month - 1))} className={styles.navButton}>
             &#8249;
           </button>
-          <span className={styles.monthYear}>{year}年{month + 1}月</span>
+          <span className={styles.monthYear}>
+            {i18n.language === 'en'
+              ? new Date(year, month).toLocaleDateString('en-US', { year: 'numeric', month: 'short' })
+              : `${year}年${month + 1}月`
+            }
+          </span>
           <button onClick={() => setCurrentDate(new Date(year, month + 1))} className={styles.navButton}>
             &#8250;
           </button>
@@ -567,17 +646,17 @@ const CreateDiseaseArchivePage = () => {
   const handleSubmit = async () => {
     // 驗證必填欄位
     if (!formData.archiveTitle.trim()) {
-      showNotification('請輸入檔案標題');
+      showNotification(t('createDiseaseArchive.validation.archiveTitleRequired'));
       return;
     }
 
     if (!formData.diagnosisStatus) {
-      showNotification('請選擇就醫狀態');
+      showNotification(t('createDiseaseArchive.validation.diagnosisStatusRequired'));
       return;
     }
 
     if (!formData.treatmentStatus) {
-      showNotification('請選擇痊癒狀態');
+      showNotification(t('createDiseaseArchive.validation.treatmentStatusRequired'));
       return;
     }
 
@@ -586,7 +665,7 @@ const CreateDiseaseArchivePage = () => {
     const finalIncludedPostIds = allFoundPostIds.filter(id => !excludedPostIds.has(id));
     
     if (finalIncludedPostIds.length === 0) {
-      showNotification('請選擇至少一筆異常記錄');
+      showNotification(t('createDiseaseArchive.validation.atLeastOneRecordRequired'));
       return;
     }
 
@@ -596,7 +675,7 @@ const CreateDiseaseArchivePage = () => {
       diagnosisStatus: formData.diagnosisStatus,
       treatmentStatus: formData.treatmentStatus,
       mainCause: formData.mainCause,
-      symptoms: selectedSymptoms,
+      symptoms: reverseTranslateSymptoms(selectedSymptoms), // 轉換回中文供後端使用
       includedAbnormalPostIds: finalIncludedPostIds
     };
     
@@ -631,7 +710,7 @@ const CreateDiseaseArchivePage = () => {
         <div className={styles.container}>
           <TopNavbar />
           <div className={styles.loadingContainer}>
-            載入中...
+            {t('common.loading')}
           </div>
           <BottomNavbar />
         </div>
@@ -653,10 +732,10 @@ const CreateDiseaseArchivePage = () => {
                 alt={pet?.pet_name}
                 className={styles.petAvatar}
               />
-              <span className={styles.title}>製作疾病檔案</span>
+              <span className={styles.title}>{t('createDiseaseArchive.title')}</span>
             </div>
             {draftSaved && (
-              <span className={styles.draftIndicator}>草稿已保存</span>
+              <span className={styles.draftIndicator}>{t('createDiseaseArchive.draftSaved')}</span>
             )}
           </div>
           
@@ -665,7 +744,7 @@ const CreateDiseaseArchivePage = () => {
           {/* 檔案標題 */}
           <div className={styles.formSection}>
             <div className={styles.formGroupHorizontal}>
-              <label className={styles.label}>檔案標題</label>
+              <label className={styles.label}>{t('createDiseaseArchive.form.archiveTitle')}</label>
               <input
                 type="text"
                 className={styles.input}
@@ -683,13 +762,13 @@ const CreateDiseaseArchivePage = () => {
                 className={`${styles.statusButton} ${formData.diagnosisStatus === 'undiagnosed' ? styles.selected : styles.unselected}`}
                 onClick={() => handleButtonSelect('diagnosisStatus', 'undiagnosed')}
               >
-                未就醫
+                {t('createDiseaseArchive.form.undiagnosed')}
               </button>
               <button
                 className={`${styles.statusButton} ${formData.diagnosisStatus === 'diagnosed' ? styles.selected : styles.unselected}`}
                 onClick={() => handleButtonSelect('diagnosisStatus', 'diagnosed')}
               >
-                已就醫
+                {t('createDiseaseArchive.form.diagnosed')}
               </button>
             </div>
             <div className={styles.buttonGroup}>
@@ -697,13 +776,13 @@ const CreateDiseaseArchivePage = () => {
                 className={`${styles.statusButton} ${formData.treatmentStatus === 'untreated' ? styles.selected : styles.unselected}`}
                 onClick={() => handleButtonSelect('treatmentStatus', 'untreated')}
               >
-                未痊癒
+                {t('createDiseaseArchive.form.untreated')}
               </button>
               <button
                 className={`${styles.statusButton} ${formData.treatmentStatus === 'treated' ? styles.selected : styles.unselected}`}
                 onClick={() => handleButtonSelect('treatmentStatus', 'treated')}
               >
-                已痊癒
+                {t('createDiseaseArchive.form.treated')}
               </button>
             </div>
           </div>
@@ -711,7 +790,7 @@ const CreateDiseaseArchivePage = () => {
           {/* 主要病因 */}
           <div className={styles.formSection}>
             <div className={styles.formGroupHorizontal}>
-              <label className={styles.label}>主要病因</label>
+              <label className={styles.label}>{t('createDiseaseArchive.form.mainCause')}</label>
               <input
                 type="text"
                 className={styles.input}
@@ -724,14 +803,14 @@ const CreateDiseaseArchivePage = () => {
 
           {/* 症狀選擇 */}
           <div className={styles.formSection}>
-            <label className={styles.label}>病發時症狀:</label>
+            <label className={styles.label}>{t('createDiseaseArchive.form.symptomsLabel')}</label>
             <div className={styles.symptomSection}>
               {/* 已選擇的症狀顯示 */}
               {selectedSymptoms.length > 0 && (
                 <div className={styles.selectedSymptomsContainer}>
                   {selectedSymptoms.map((symptom) => (
                     <div key={symptom.id} className={styles.selectedSymptom}>
-                      <span className={styles.symptomText}>{symptom.text}</span>
+                      <span className={styles.symptomText}>{translateSingleSymptom(symptom.text)}</span>
                       <button 
                         className={styles.removeSymptomBtn}
                         onClick={() => handleRemoveSymptom(symptom.id)}
@@ -751,7 +830,7 @@ const CreateDiseaseArchivePage = () => {
                     onChange={(e) => setSelectedSymptomOption(e.target.value)}
                     className={styles.symptomSelect}
                   >
-                    <option value="">選擇症狀</option>
+                    <option value="">{t('createDiseaseArchive.form.selectSymptom')}</option>
                     {availableSymptoms
                       .filter(symptom => !selectedSymptoms.some(s => s.text === symptom))
                       .map((symptom, index) => (
@@ -764,7 +843,7 @@ const CreateDiseaseArchivePage = () => {
                   className={styles.addSymptomBtn}
                   onClick={handleAddSymptom}
                 >
-                  新增
+                  {t('createDiseaseArchive.form.addSymptom')}
                 </button>
               </div>
             </div>
@@ -772,23 +851,35 @@ const CreateDiseaseArchivePage = () => {
 
           {/* 持續日期選擇 */}
           <div className={styles.formSection}>
-            <label className={styles.label}>選擇持續日期:</label>
+            <label className={styles.label}>{t('createDiseaseArchive.form.selectDateRange')}</label>
             
             {/* 日期範圍輸入 */}
             <div className={styles.dateRangeInputs}>
-              <button 
-                className={styles.dateInput}
-                onClick={() => setShowStartDatePicker(true)}
-              >
-                {formatDate(startDate) || '2025 年 1 月 1 日'}
-              </button>
+              <div className={styles.dateInputWrapper}>
+                <input
+                  type="date"
+                  className={styles.dateInput}
+                  value={formatDateForInput(startDate)}
+                  onChange={handleStartDateChange}
+                  max={formatDateForInput(endDate) || undefined}
+                />
+                <span className={styles.datePlaceholder}>
+                  {startDate ? formatDate(startDate) : (i18n.language === 'en' ? 'Select Date' : '選擇日期')}
+                </span>
+              </div>
               <span className={styles.dateRangeSeparator}>—</span>
-              <button 
-                className={styles.dateInput}
-                onClick={() => setShowEndDatePicker(true)}
-              >
-                {formatDate(endDate) || '2025 年 1 月 22 日'}
-              </button>
+              <div className={styles.dateInputWrapper}>
+                <input
+                  type="date"
+                  className={styles.dateInput}
+                  value={formatDateForInput(endDate)}
+                  onChange={handleEndDateChange}
+                  min={formatDateForInput(startDate) || undefined}
+                />
+                <span className={styles.datePlaceholder}>
+                  {endDate ? formatDate(endDate) : (i18n.language === 'en' ? 'Select Date' : '選擇日期')}
+                </span>
+              </div>
             </div>
 
             {/* 日曆 */}
@@ -796,7 +887,7 @@ const CreateDiseaseArchivePage = () => {
               {isSearching && (
                 <div className={styles.searchingOverlay}>
                   <div className={styles.searchingSpinner}></div>
-                  <span className={styles.searchingText}>搜尋異常記錄中...</span>
+                  <span className={styles.searchingText}>{t('createDiseaseArchive.searchingRecords')}</span>
                 </div>
               )}
               {renderCalendar}
@@ -810,14 +901,14 @@ const CreateDiseaseArchivePage = () => {
                   onClick={() => navigate(`/pet/${petId}/abnormal-post/${selectedAbnormalPost.id}`)}
                 >
                   <div className={styles.previewIcon}>
-                    <img src="/assets/icon/PetpagePetAbnormalPostButton.png" alt="異常記錄" />
+                    <img src="/assets/icon/PetpagePetAbnormalPostButton.png" alt={t('createDiseaseArchive.abnormalRecordAlt')} />
                   </div>
                   <div className={styles.previewContent}>
                     <div className={styles.previewDateRow}>
                       <span className={styles.previewDate}>{selectedAbnormalPost.date}</span>
                     </div>
                     <div className={styles.previewInfo}>
-                      <span className={styles.previewLabel}>症狀：</span>
+                      <span className={styles.previewLabel}>{t('createDiseaseArchive.symptomsLabel')}：</span>
                       <span className={styles.previewSymptoms}>{selectedAbnormalPost.symptoms.replace('症狀: ', '')}</span>
                     </div>
                   </div>
@@ -828,49 +919,28 @@ const CreateDiseaseArchivePage = () => {
                     className={styles.includeButton}
                     onClick={() => handlePostSelection(selectedAbnormalPost.id, true)}
                   >
-                    重新加回此紀錄
+                    {t('createDiseaseArchive.form.reincludeRecord')}
                   </button>
                 ) : (
                   <button 
                     className={styles.excludeButton}
                     onClick={() => handlePostSelection(selectedAbnormalPost.id, false)}
                   >
-                    不需要這筆資料
+                    {t('createDiseaseArchive.form.excludeRecord')}
                   </button>
                 )}
               </div>
             )}
           </div>
 
-          {/* 日期選擇器 */}
-          <DatePicker
-            isOpen={showStartDatePicker}
-            onClose={() => setShowStartDatePicker(false)}
-            selectedDate={startDate}
-            onDateSelect={(date) => {
-              setStartDate(date);
-              setShowStartDatePicker(false);
-            }}
-          />
-          
-          <DatePicker
-            isOpen={showEndDatePicker}
-            onClose={() => setShowEndDatePicker(false)}
-            selectedDate={endDate}
-            onDateSelect={(date) => {
-              setEndDate(date);
-              setShowEndDatePicker(false);
-            }}
-            minDate={startDate}
-          />
 
           {/* 操作按鈕 */}
           <div className={styles.actionButtons}>
             <button className={styles.cancelButton} onClick={handleBack}>
-              取消
+              {t('createDiseaseArchive.form.cancel')}
             </button>
             <button className={styles.nextButton} onClick={handleSubmit}>
-              下一步
+              {t('createDiseaseArchive.form.nextStep')}
             </button>
           </div>
         </div>

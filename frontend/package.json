@@ -1,6 +1,6 @@
 {
     "name": "pet-app-demo",
-       "private": true,
+    "private": true,
     "version": "0.0.0",
     "type": "module",
     "scripts": {
@@ -15,9 +15,13 @@
         "@react-three/fiber": "^9.1.2",
         "axios": "^1.9.0",
         "firebase": "^11.9.1",
+        "i18next": "^25.5.2",
+        "i18next-browser-languagedetector": "^8.2.0",
+        "i18next-http-backend": "^3.0.2",
         "mapbox-gl": "^3.14.0",
         "react": "^19.1.0",
         "react-dom": "^19.1.0",
+        "react-i18next": "^15.7.3",
         "react-router-dom": "^7.5.0",
         "three": "^0.176.0"
     },

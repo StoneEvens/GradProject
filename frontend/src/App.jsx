@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import './App.css';
+import './i18n/i18n';
 import HomePage from './pages/HomePage';
 import RegisterPage from './pages/RegisterPage';
 import LoginPage from './pages/LoginPage';
@@ -43,6 +44,7 @@ import { isAuthenticated, refreshAccessToken } from './services/authService';
 import HealthReportsPage from './pages/HealthReportsPage';
 import HealthReportUploadPage from './pages/HealthReportUploadPage';
 import HealthReportDetailPage from './pages/HealthReportDetailPage';
+import HealthReportEditPage from './pages/HealthReportEditPage';
 import PetDiseaseArchivePage from './pages/PetDiseaseArchivePage';
 import CreateDiseaseArchivePage from './pages/CreateDiseaseArchivePage';
 import DiseaseArchiveEditContentPage from './pages/DiseaseArchiveEditContentPage';
@@ -50,6 +52,7 @@ import DiseaseArchivePreviewPage from './pages/DiseaseArchivePreviewPage';
 import DiseaseArchiveDetailPage from './pages/DiseaseArchiveDetailPage';
 import InteractiveCityPage from './pages/InteractiveCityPage';
 import CheckpointDetailPage from './pages/CheckpointDetailPage';
+import I18nDemoPage from './pages/I18nDemoPage';
 import { UserProvider } from './context/UserContext';
 
 const App = () => {
@@ -367,19 +370,24 @@ const App = () => {
           element={isUserAuthenticated ? <FeedSearchResultPage /> : <Navigate to="/" />} 
         />
         {/* 健康報告列表頁面 */}
-        <Route 
-          path="/health-reports" 
-          element={isUserAuthenticated ? <HealthReportsPage /> : <Navigate to="/" />} 
+        <Route
+          path="/pet/:petId/health-reports"
+          element={isUserAuthenticated ? <HealthReportsPage /> : <Navigate to="/" />}
         />
         {/* 健康報告上傳頁面 */}
-        <Route 
-          path="/health-report/upload" 
-          element={isUserAuthenticated ? <HealthReportUploadPage /> : <Navigate to="/" />} 
+        <Route
+          path="/pet/:petId/health-report/upload"
+          element={isUserAuthenticated ? <HealthReportUploadPage /> : <Navigate to="/" />}
+        />
+        {/* 健康報告編輯頁面 */}
+        <Route
+          path="/pet/:petId/health-report/:id/edit"
+          element={isUserAuthenticated ? <HealthReportEditPage /> : <Navigate to="/" />}
         />
         {/* 健康報告詳情頁面 */}
-        <Route 
-          path="/health-report/:id" 
-          element={isUserAuthenticated ? <HealthReportDetailPage /> : <Navigate to="/" />} 
+        <Route
+          path="/pet/:petId/health-report/:id"
+          element={isUserAuthenticated ? <HealthReportDetailPage /> : <Navigate to="/" />}
         />
         {/* 互動城市頁面 */}
         <Route 
@@ -387,9 +395,14 @@ const App = () => {
           element={isUserAuthenticated ? <InteractiveCityPage /> : <Navigate to="/" />} 
         />
         {/* 站點詳情頁面 */}
-        <Route 
-          path="/checkpoint/:id" 
-          element={isUserAuthenticated ? <CheckpointDetailPage /> : <Navigate to="/" />} 
+        <Route
+          path="/checkpoint/:id"
+          element={isUserAuthenticated ? <CheckpointDetailPage /> : <Navigate to="/" />}
+        />
+        {/* i18n 多語言示範頁面 */}
+        <Route
+          path="/i18n-demo"
+          element={<I18nDemoPage />}
         />
       </Routes>
     </BrowserRouter>

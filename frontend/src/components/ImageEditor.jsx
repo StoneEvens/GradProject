@@ -25,12 +25,14 @@
  * }
  */
 import React, { useState, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import styles from '../styles/ImageEditor.module.css';
 import Annotation from './Annotation';
 import { getUserPets } from '../services/petService';
 import { checkAnnotationPermission } from '../services/socialService';
 
 const ImageEditor = ({ image, isOpen, onClose, onSave, mode = 'create' }) => {
+  const { t } = useTranslation('posts');
   const [annotations, setAnnotations] = useState([]);
   const [showAnnotations, setShowAnnotations] = useState(false);
   const [showAnnotationDots, setShowAnnotationDots] = useState(false);
@@ -98,7 +100,7 @@ const ImageEditor = ({ image, isOpen, onClose, onSave, mode = 'create' }) => {
             }
           }
         } catch (error) {
-          console.error('ImageEditor清理localStorage時出錯:', error);
+          console.error(t('imageEditor.messages.localStorageCleanupError'), error);
         }
       }
     };
@@ -149,7 +151,7 @@ const ImageEditor = ({ image, isOpen, onClose, onSave, mode = 'create' }) => {
         }
       }
     } catch (error) {
-      console.error('載入標註資料失敗:', error);
+      console.error(t('imageEditor.messages.loadAnnotationsFailed'), error);
       setAnnotations([]);
     }
   };
@@ -176,10 +178,10 @@ const ImageEditor = ({ image, isOpen, onClose, onSave, mode = 'create' }) => {
     setIsLoadingPets(true);
     try {
       const pets = await getUserPets();
-      console.log('載入的寵物資料:', pets);
+      console.log(t('imageEditor.messages.loadedPetsData'), pets);
       setUserPets(pets);
     } catch (error) {
-      console.error('載入寵物資料失敗:', error);
+      console.error(t('imageEditor.messages.loadPetsFailed'), error);
     } finally {
       setIsLoadingPets(false);
     }
@@ -193,7 +195,7 @@ const ImageEditor = ({ image, isOpen, onClose, onSave, mode = 'create' }) => {
       allAnnotations[image.id] = newAnnotations;
       localStorage.setItem(ANNOTATIONS_KEY, JSON.stringify(allAnnotations));
     } catch (error) {
-      console.error('保存標註資料失敗:', error);
+      console.error(t('imageEditor.messages.saveAnnotationsFailed'), error);
     }
   };
 
@@ -265,7 +267,7 @@ const ImageEditor = ({ image, isOpen, onClose, onSave, mode = 'create' }) => {
       }
       const pet = userPets.find(p => String(p.pet_id) === String(selectedPet));
       if (!pet) {
-        console.error('找不到寵物 (新增):', selectedPet, 'userPets:', userPets.map(p => ({ pet_id: p.pet_id, name: p.pet_name, type: typeof p.pet_id })));
+        console.error(t('imageEditor.messages.petNotFoundAdd'), selectedPet, 'userPets:', userPets.map(p => ({ pet_id: p.pet_id, name: p.pet_name, type: typeof p.pet_id })));
         return;
       }
       displayName = pet.pet_name;
@@ -320,7 +322,7 @@ const ImageEditor = ({ image, isOpen, onClose, onSave, mode = 'create' }) => {
       }
       const pet = userPets.find(p => String(p.pet_id) === String(selectedPet));
       if (!pet) {
-        console.error('找不到寵物 (更新):', selectedPet, 'userPets:', userPets.map(p => ({ pet_id: p.pet_id, name: p.pet_name, type: typeof p.pet_id })));
+        console.error(t('imageEditor.messages.petNotFoundUpdate'), selectedPet, 'userPets:', userPets.map(p => ({ pet_id: p.pet_id, name: p.pet_name, type: typeof p.pet_id })));
         return;
       }
       displayName = pet.pet_name;
@@ -411,7 +413,7 @@ const ImageEditor = ({ image, isOpen, onClose, onSave, mode = 'create' }) => {
     <div className={styles.modalOverlay}>
       <div ref={modalRef} className={styles.modalContainer}>
         <div className={styles.modalHeader}>
-          <h2>編輯圖片</h2>
+          <h2>{t('imageEditor.title')}</h2>
         </div>
 
         <div className={styles.modalBody}>
@@ -420,7 +422,7 @@ const ImageEditor = ({ image, isOpen, onClose, onSave, mode = 'create' }) => {
             <img
               ref={imageRef}
               src={imageSrc}
-              alt="編輯圖片"
+              alt={t('imageEditor.imageAlt')}
               className={styles.editImage}
               onClick={handleImageClick}
               onError={(e) => {
@@ -441,11 +443,11 @@ const ImageEditor = ({ image, isOpen, onClose, onSave, mode = 'create' }) => {
               <div 
                 className={styles.annotationIcon}
                 onClick={toggleAnnotationDots}
-                title={`${annotations.length} 個標註`}
+                title={t('imageEditor.annotationsCount', { count: annotations.length })}
               >
                 <img 
                   src="/assets/icon/PostAnnotation.png" 
-                  alt="標註" 
+                  alt={t('imageEditor.annotationsAlt')} 
                   className={styles.annotationIconImage}
                   onError={(e) => {
                     console.error('Failed to load annotation icon:', e.target.src);
@@ -507,10 +509,10 @@ const ImageEditor = ({ image, isOpen, onClose, onSave, mode = 'create' }) => {
                 className={`${styles.toolButton} ${showAnnotations ? styles.active : ''}`}
                 onClick={toggleAnnotations}
               >
-                標註
+                {t('imageEditor.buttons.annotations')}
               </button>
               <button className={styles.toolButton}>
-                貼圖
+                {t('imageEditor.buttons.stickers')}
               </button>
             </div>
             <div className={styles.rightButtons}>
@@ -518,13 +520,13 @@ const ImageEditor = ({ image, isOpen, onClose, onSave, mode = 'create' }) => {
                 className={styles.cancelButton}
                 onClick={handleClose}
               >
-                取消
+                {t('imageEditor.buttons.cancel')}
               </button>
               <button 
                 className={styles.saveButton}
                 onClick={handleSaveAndClose}
               >
-                完成
+                {t('imageEditor.buttons.done')}
               </button>
             </div>
           </div>
@@ -534,7 +536,7 @@ const ImageEditor = ({ image, isOpen, onClose, onSave, mode = 'create' }) => {
             <div className={styles.editPanel}>
               <div className={styles.inputRow}>
                 <div className={styles.typeSelector}>
-                  <label>標註類型</label>
+                  <label>{t('imageEditor.form.annotationType')}</label>
                   <select
                     value={annotationType}
                     onChange={(e) => {
@@ -544,19 +546,19 @@ const ImageEditor = ({ image, isOpen, onClose, onSave, mode = 'create' }) => {
                     }}
                     className={styles.typeSelect}
                   >
-                    <option value="user">其他使用者</option>
-                    <option value="pet">寵物</option>
+                    <option value="user">{t('imageEditor.form.otherUser')}</option>
+                    <option value="pet">{t('imageEditor.form.pet')}</option>
                   </select>
                 </div>
                 
                 <div className={styles.inputGroup}>
-                  <label>標註內容</label>
+                  <label>{t('imageEditor.form.annotationContent')}</label>
                   {annotationType === 'user' ? (
                     <input
                       type="text"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder="輸入使用者名稱"
+                      placeholder={t('imageEditor.form.enterUsername')}
                       className={styles.searchInput}
                     />
                   ) : (
@@ -566,10 +568,10 @@ const ImageEditor = ({ image, isOpen, onClose, onSave, mode = 'create' }) => {
                       className={styles.searchInput}
                       disabled={isLoadingPets}
                     >
-                      <option value="">{isLoadingPets ? '載入中...' : '選擇寵物'}</option>
+                      <option value="">{isLoadingPets ? t('imageEditor.form.loading') : t('imageEditor.form.selectPet')}</option>
                       {userPets.map((pet, index) => (
                         <option key={`pet-${pet.pet_id || index}`} value={pet.pet_id}>
-                          {pet.pet_name} ({pet.pet_type === 'dog' ? '狗' : '貓'})
+                          {pet.pet_name} ({pet.pet_type === 'dog' ? t('imageEditor.petTypes.dog') : t('imageEditor.petTypes.cat')})
                         </option>
                       ))}
                     </select>
@@ -582,7 +584,7 @@ const ImageEditor = ({ image, isOpen, onClose, onSave, mode = 'create' }) => {
                   className={styles.editCancelButton}
                   onClick={handleCancelEdit}
                 >
-                  取消
+                  {t('imageEditor.buttons.cancel')}
                 </button>
                 
                 {editingAnnotation ? (
@@ -591,13 +593,13 @@ const ImageEditor = ({ image, isOpen, onClose, onSave, mode = 'create' }) => {
                       className={styles.deleteButton}
                       onClick={handleDeleteAnnotation}
                     >
-                      刪除
+                      {t('imageEditor.buttons.delete')}
                     </button>
                     <button 
                       className={styles.confirmButton}
                       onClick={handleUpdateAnnotation}
                     >
-                      更新
+                      {t('imageEditor.buttons.update')}
                     </button>
                   </>
                 ) : (
@@ -605,7 +607,7 @@ const ImageEditor = ({ image, isOpen, onClose, onSave, mode = 'create' }) => {
                     className={styles.confirmButton}
                     onClick={handleAddAnnotation}
                   >
-                    新增
+                    {t('imageEditor.buttons.add')}
                   </button>
                 )}
               </div>
@@ -615,7 +617,7 @@ const ImageEditor = ({ image, isOpen, onClose, onSave, mode = 'create' }) => {
           {/* 提示文字 */}
           {showAnnotations && !newAnnotation && !editingAnnotation && (
             <div className={styles.hintText}>
-              點擊圖片任意位置新增標註，點擊現有標註進行編輯
+              {t('imageEditor.instructions')}
             </div>
           )}
         </div>

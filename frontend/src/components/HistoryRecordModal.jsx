@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import styles from '../styles/HistoryRecordModal.module.css';
 import HistoryRecordPreview from './HistoryRecordPreview';
 import NotificationComponent from './Notification';
@@ -6,6 +7,7 @@ import ConfirmNotification from './ConfirmNotification';
 import { getHistoryRecords, clearAllHistoryRecords } from '../utils/historyRecordStorage';
 
 const HistoryRecordModal = ({ isOpen, onClose }) => {
+  const { t } = useTranslation('calculator');
   const [records, setRecords] = useState([]);
   const [loading, setLoading] = useState(false);
   const [notification, setNotification] = useState('');
@@ -27,8 +29,8 @@ const HistoryRecordModal = ({ isOpen, onClose }) => {
       const historyRecords = getHistoryRecords();
       setRecords(historyRecords);
     } catch (error) {
-      console.error('載入歷史紀錄失敗:', error);
-      setNotification('載入歷史紀錄失敗');
+      console.error(t('historyModal.loadRecordsFailed'), error);
+      setNotification(t('historyModal.loadRecordsFailed'));
     } finally {
       setLoading(false);
     }
@@ -46,10 +48,10 @@ const HistoryRecordModal = ({ isOpen, onClose }) => {
   const confirmClearAll = () => {
     const success = clearAllHistoryRecords();
     if (success) {
-      setNotification('所有紀錄已清空');
+      setNotification(t('historyModal.allRecordsCleared'));
       setRecords([]);
     } else {
-      setNotification('清空失敗');
+      setNotification(t('historyModal.clearFailed'));
     }
     setShowConfirmModal(false);
   };
@@ -85,15 +87,14 @@ const HistoryRecordModal = ({ isOpen, onClose }) => {
     return '-';
   };
 
-  // 營養素名稱對照
   const getNutrientName = (key) => {
     const names = {
-      protein: '蛋白質',
-      fat: '脂肪',
-      calcium: '鈣',
-      phosphorus: '磷',
-      magnesium: '鎂',
-      sodium: '鈉'
+      protein: t('feedSection.nutrients.protein'),
+      fat: t('feedSection.nutrients.fat'),
+      calcium: t('feedSection.nutrients.calcium'),
+      phosphorus: t('feedSection.nutrients.phosphorus'),
+      magnesium: t('feedSection.nutrients.magnesium'),
+      sodium: t('feedSection.nutrients.sodium')
     };
     return names[key] || key;
   };
@@ -120,10 +121,10 @@ const HistoryRecordModal = ({ isOpen, onClose }) => {
         <div className={styles.modalHeader}>
           {selectedRecord ? (
             <button className={styles.backButton} onClick={() => setSelectedRecord(null)}>
-              ❮ 返回列表
+              {t('historyModal.backToList')}
             </button>
           ) : (
-            <h2>歷史紀錄</h2>
+            <h2>{t('historyModal.title')}</h2>
           )}
         </div>
         
@@ -132,23 +133,23 @@ const HistoryRecordModal = ({ isOpen, onClose }) => {
             <div className={styles.recordDetail}>
               {/* 基本資訊 */}
               <div className={styles.detailSection}>
-                <h3 className={styles.detailSectionTitle}>基本資訊</h3>
+                <h3 className={styles.detailSectionTitle}>{t('historyModal.basicInfo')}</h3>
                 <div className={styles.detailInfoGrid}>
                   <div className={styles.detailInfoItem}>
-                    <span className={styles.detailLabel}>計算時間：</span>
+                    <span className={styles.detailLabel}>{t('historyModal.calculationTime')}</span>
                     <span className={styles.detailValue}>{formatDate(selectedRecord.date)}</span>
                   </div>
                   <div className={styles.detailInfoItem}>
-                    <span className={styles.detailLabel}>寵物名稱：</span>
+                    <span className={styles.detailLabel}>{t('historyModal.petName')}</span>
                     <span className={styles.detailValue}>{selectedRecord.petName}</span>
                   </div>
                   <div className={styles.detailInfoItem}>
-                    <span className={styles.detailLabel}>飼料名稱：</span>
+                    <span className={styles.detailLabel}>{t('historyModal.feedName')}</span>
                     <span className={styles.detailValue}>{selectedRecord.feedName}</span>
                   </div>
                   {selectedRecord.feedBrand && (
                     <div className={styles.detailInfoItem}>
-                      <span className={styles.detailLabel}>飼料品牌：</span>
+                      <span className={styles.detailLabel}>{t('historyModal.feedBrand')}</span>
                       <span className={styles.detailValue}>{selectedRecord.feedBrand}</span>
                     </div>
                   )}
@@ -158,20 +159,20 @@ const HistoryRecordModal = ({ isOpen, onClose }) => {
               {/* 計算結果 */}
               {selectedRecord.calculationResult && (
                 <div className={styles.detailSection}>
-                  <h3 className={styles.detailSectionTitle}>計算結果</h3>
+                  <h3 className={styles.detailSectionTitle}>{t('historyModal.calculationResult')}</h3>
                   
                   {/* 每日需求 */}
                   <div className={styles.resultBox}>
-                    <h4 className={styles.resultBoxTitle}>每日需求</h4>
+                    <h4 className={styles.resultBoxTitle}>{t('historyModal.dailyRequirement')}</h4>
                     <div className={styles.detailInfoGrid}>
                       <div className={styles.detailInfoItem}>
-                        <span className={styles.detailLabel}>每日熱量需求：</span>
+                        <span className={styles.detailLabel}>{t('historyModal.dailyCaloriesNeed')}</span>
                         <span className={styles.detailValue}>
                           {formatNutrientValue(selectedRecord.calculationResult.daily_ME_kcal, 'kcal')}
                         </span>
                       </div>
                       <div className={styles.detailInfoItem}>
-                        <span className={styles.detailLabel}>每日飼料建議量：</span>
+                        <span className={styles.detailLabel}>{t('historyModal.dailyFeedRecommendation')}</span>
                         <span className={styles.detailValue}>
                           {formatNutrientValue(selectedRecord.calculationResult.daily_feed_amount_g, 'g')}
                         </span>
@@ -182,7 +183,7 @@ const HistoryRecordModal = ({ isOpen, onClose }) => {
                   {/* 營養素攝取 */}
                   {selectedRecord.calculationResult.actual_intake && (
                     <div className={styles.resultBox}>
-                      <h4 className={styles.resultBoxTitle}>實際營養攝取</h4>
+                      <h4 className={styles.resultBoxTitle}>{t('historyModal.actualNutritionIntake')}</h4>
                       <div className={styles.nutrientGrid}>
                         {Object.entries(selectedRecord.calculationResult.actual_intake).map(([key, value]) => (
                           <div key={key} className={styles.nutrientItem}>
@@ -199,7 +200,7 @@ const HistoryRecordModal = ({ isOpen, onClose }) => {
                   {/* AI 建議 */}
                   {selectedRecord.calculationResult.description && (
                     <div className={styles.resultBox}>
-                      <h4 className={styles.resultBoxTitle}>營養師建議</h4>
+                      <h4 className={styles.resultBoxTitle}>{t('historyModal.nutritionistAdvice')}</h4>
                       <div className={styles.description}>
                         {selectedRecord.calculationResult.description}
                       </div>
@@ -212,16 +213,16 @@ const HistoryRecordModal = ({ isOpen, onClose }) => {
             <>
               {loading ? (
                 <div className={styles.loadingContainer}>
-                  載入中...
+                  {t('historyModal.loading')}
                 </div>
               ) : records.length === 0 ? (
                 <div className={styles.emptyState}>
                   <img 
                     src="/assets/icon/SearchNoResult.png" 
-                    alt="空狀態" 
+                    alt={t('historyModal.emptyStateAlt')} 
                     className={styles.emptyIcon}
                   />
-                  <p>尚無計算紀錄</p>
+                  <p>{t('historyModal.noRecords')}</p>
                 </div>
               ) : (
                 <div className={styles.recordList}>
@@ -246,13 +247,13 @@ const HistoryRecordModal = ({ isOpen, onClose }) => {
                 onClick={handleClearAll}
                 disabled={records.length === 0}
               >
-                清空
+                {t('historyModal.clearAll')}
               </button>
               <button 
                 className={styles.closeButton} 
                 onClick={onClose}
               >
-                關閉
+                {t('historyModal.close')}
               </button>
             </>
           )}
@@ -262,7 +263,7 @@ const HistoryRecordModal = ({ isOpen, onClose }) => {
       {/* 確認清空對話框 */}
       {showConfirmModal && (
         <ConfirmNotification
-          message="確定要清空所有歷史紀錄嗎？此操作無法復原"
+          message={t('historyModal.confirmClearMessage')}
           onConfirm={confirmClearAll}
           onCancel={cancelClearAll}
         />

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import TopNavbar from '../components/TopNavbar';
 import BottomNavbar from '../components/BottomNavigationbar';
 import PostList from '../components/PostList';
@@ -8,6 +9,7 @@ import { getUserSavedPosts } from '../services/socialService';
 import styles from '../styles/InteractionPostsListPage.module.css';
 
 const SavedPostsListPage = () => {
+  const { t } = useTranslation('social');
   const location = useLocation();
   const navigate = useNavigate();
   const [posts, setPosts] = useState([]);
@@ -16,7 +18,7 @@ const SavedPostsListPage = () => {
   const [notification, setNotification] = useState('');
   const [targetPostIndex, setTargetPostIndex] = useState(0);
 
-  // 從 state 獲取收藏貼文列表和目標貼文ID
+  // Get saved posts list and target post ID from state
   const { savedPosts = [], targetPostId } = location.state || {};
 
   useEffect(() => {
@@ -31,23 +33,23 @@ const SavedPostsListPage = () => {
       let postsData = [];
 
       if (savedPosts && savedPosts.length > 0) {
-        // 如果有傳入的收藏貼文列表，直接使用
+        // If saved posts list is passed in, use it directly
         postsData = savedPosts;
       } else {
-        // 否則重新獲取收藏貼文
+        // Otherwise fetch saved posts again
         const response = await getUserSavedPosts({ sort: 'post_date_desc' });
         if (response.success) {
           postsData = response.data.posts || response.data || [];
         } else {
-          throw new Error(response.error || '獲取收藏貼文失敗');
+          throw new Error(response.error || t('savedPosts.messages.fetchFailed'));
         }
       }
 
       setPosts(postsData);
 
-      // 找到目標貼文的索引
+      // Find target post index
       if (targetPostId && postsData.length > 0) {
-        const index = postsData.findIndex(post => 
+        const index = postsData.findIndex(post =>
           (post.id || post.post_id) === targetPostId
         );
         if (index !== -1) {
@@ -56,8 +58,8 @@ const SavedPostsListPage = () => {
       }
 
     } catch (err) {
-      console.error('載入收藏貼文列表失敗:', err);
-      setError(err.message || '載入收藏貼文列表失敗，請稍後再試');
+      console.error(t('savedPosts.console.loadError'), err);
+      setError(err.message || t('savedPosts.messages.loadErrorRetry'));
       setPosts([]);
     } finally {
       setLoading(false);
@@ -77,18 +79,18 @@ const SavedPostsListPage = () => {
   };
 
   const handleLike = (postId, newIsLiked) => {
-    console.log('SavedPostsListPage 收到按讚通知:', { postId, newIsLiked });
-    // Post 組件已經處理了所有邏輯，按讚操作不顯示通知
+    console.log(t('savedPosts.console.likeNotification'), { postId, newIsLiked });
+    // Post component has already handled all logic, like operation doesn't show notification
   };
 
   const handleComment = (postId) => {
-    showNotification('評論功能開發中');
+    showNotification(t('savedPosts.messages.commentInDevelopment'));
   };
 
   const handleSave = (postId, newIsSaved) => {
-    console.log('SavedPostsListPage 收到收藏通知:', { postId, newIsSaved });
-    // Post 組件已經處理了所有邏輯
-    // 如果用戶取消收藏，從收藏列表中移除這個貼文（不顯示通知）
+    console.log(t('savedPosts.console.saveNotification'), { postId, newIsSaved });
+    // Post component has already handled all logic
+    // If user unsaves, remove this post from saved list (no notification)
     if (!newIsSaved) {
       setPosts(prevPosts => prevPosts.filter(post => post.id !== postId));
     }
@@ -99,27 +101,27 @@ const SavedPostsListPage = () => {
       <TopNavbar />
       
       <div className={styles.content}>
-        {/* 標題列 */}
+        {/* Header row */}
         <div className={styles.header}>
-          <button 
+          <button
             className={styles.backButton}
             onClick={handleBackClick}
           >
             ❯
           </button>
-          <h1 className={styles.title}>收藏的貼文</h1>
+          <h1 className={styles.title}>{t('savedPosts.title')}</h1>
         </div>
 
-        {/* 分隔線 */}
+        {/* Divider */}
         <div className={styles.divider}></div>
 
-        {/* 貼文列表 */}
+        {/* Posts list */}
         <div className={styles.postsContainer}>
           <PostList
             posts={posts}
             loading={loading}
             error={error}
-            emptyMessage="尚未收藏任何貼文"
+            emptyMessage={t('savedPosts.emptyMessage')}
             targetPostIndex={targetPostIndex}
             onLike={handleLike}
             onComment={handleComment}

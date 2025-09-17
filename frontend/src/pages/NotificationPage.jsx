@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import styles from '../styles/NotificationPage.module.css';
 import TopNavbar from '../components/TopNavbar';
 import BottomNavbar from '../components/BottomNavigationbar';
@@ -8,6 +9,7 @@ import Notification from '../components/Notification';
 import { getNotifications } from '../services/notificationService';
 
 const NotificationPage = () => {
+  const { t } = useTranslation('social');
   const [unreadNotifications, setUnreadNotifications] = useState([]);
   const [readNotifications, setReadNotifications] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -30,11 +32,11 @@ const NotificationPage = () => {
         setUnreadNotifications(unread);
         setReadNotifications(read);
       } else {
-        showNotification('載入通知失敗');
+        showNotification(t('notifications.loadFailed'));
       }
     } catch (error) {
       console.error('載入通知失敗:', error);
-      showNotification('載入通知失敗');
+      showNotification(t('notifications.loadFailed'));
     } finally {
       setIsLoading(false);
     }
@@ -67,7 +69,7 @@ const NotificationPage = () => {
       <div className={styles.container}>
         <TopNavbar />
         <div className={styles.loadingContainer}>
-          <div className={styles.loading}>載入中...</div>
+          <div className={styles.loading}>{t('common.loading')}</div>
         </div>
         <BottomNavbar />
       </div>

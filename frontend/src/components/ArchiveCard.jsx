@@ -1,10 +1,12 @@
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import SymptomCalendar from './SymptomCalendar';
 import styles from '../styles/ArchiveCard.module.css';
 import { validateAbnormalPostsExist, updateDiseaseArchive } from '../services/petService';
+import { useSymptomTranslation } from '../hooks/useSymptomTranslation';
 
-const ArchiveCard = ({ 
+const ArchiveCard = ({
   archiveData,
   user,
   pet,
@@ -13,6 +15,8 @@ const ArchiveCard = ({
   onShowNotification = null,  // 新增參數，用於顯示通知
   targetAbnormalPostId = null  // 新增參數，目標異常記錄ID
 }) => {
+  const { t, i18n } = useTranslation('archives');
+  const { formatSymptomsForDisplay } = useSymptomTranslation();
   const navigate = useNavigate();
   const { petId } = useParams();
   const [validatedArchiveData, setValidatedArchiveData] = useState(archiveData);
@@ -51,7 +55,7 @@ const ArchiveCard = ({
         
         // 如果有無效的記錄
         if (invalidIds.length > 0) {
-          console.log(`發現 ${invalidIds.length} 個已刪除的異常記錄，準備移除...`);
+          console.log(t('archiveCard.messages.foundDeletedRecords', { count: invalidIds.length }));
           
           // 過濾出仍然有效的異常記錄
           const validPosts = archiveData.abnormalPostsData.filter(
@@ -79,12 +83,12 @@ const ArchiveCard = ({
             });
             
             if (updateResult.success) {
-              console.log('疾病檔案已更新，移除了已刪除的異常記錄');
+              console.log(t('archiveCard.messages.archiveUpdated'));
               if (onShowNotification) {
-                onShowNotification(`已自動移除 ${invalidIds.length} 個已刪除的異常記錄`);
+                onShowNotification(t('archiveCard.messages.autoRemovedRecords', { count: invalidIds.length }));
               }
             } else {
-              console.error('更新疾病檔案失敗:', updateResult.error);
+              console.error(t('archiveCard.messages.updateArchiveFailed'), updateResult.error);
             }
           }
         } else {
@@ -95,7 +99,7 @@ const ArchiveCard = ({
         // 標記為已驗證
         setHasValidated(true);
       } catch (error) {
-        console.error('驗證異常記錄時發生錯誤:', error);
+        console.error(t('archiveCard.messages.validateRecordsError'), error);
         // 發生錯誤時使用原始資料
         setValidatedArchiveData(archiveData);
         setHasValidated(true);
@@ -134,7 +138,7 @@ const ArchiveCard = ({
     
     if (!user || !currentUser) return;
     
-    console.log('ArchiveCard 用戶點擊:', {
+    console.log(t('archiveCard.messages.userClicked'), {
       clickedUser: user,
       currentUser: currentUser
     });
@@ -147,13 +151,13 @@ const ArchiveCard = ({
     
     if (isCurrentUser) {
       // 如果是當前用戶，導向自己的個人資料頁面
-      console.log('ArchiveCard - 導航到自己的個人資料頁面');
+      console.log(t('archiveCard.messages.navigateToOwnProfile'));
       navigate('/user-profile');
     } else {
       // 預設行為：跳轉到其他用戶個人資料頁面
       const userAccount = user.user_account || user.username;
       if (userAccount) {
-        console.log('ArchiveCard - 導航到其他用戶個人資料頁面:', `/user/${userAccount}`);
+        console.log(t('archiveCard.messages.navigateToUserProfile'), `/user/${userAccount}`);
         navigate(`/user/${userAccount}`);
       }
     }
@@ -163,13 +167,13 @@ const ArchiveCard = ({
   const formatDiagnosisStatus = (data) => {
     // 新格式：使用 goToDoctor (boolean)
     if (data.goToDoctor !== undefined) {
-      return data.goToDoctor ? '已就醫' : '未就醫';
+      return data.goToDoctor ? t('archiveCard.status.diagnosed') : t('archiveCard.status.undiagnosed');
     }
     // 舊格式：使用 diagnosisStatus (string)
     if (data.diagnosisStatus) {
-      return data.diagnosisStatus === 'diagnosed' ? '已就醫' : '未就醫';
+      return data.diagnosisStatus === 'diagnosed' ? t('archiveCard.status.diagnosed') : t('archiveCard.status.undiagnosed');
     }
-    return '未就醫'; // 預設值
+    return t('archiveCard.status.undiagnosed'); // 預設值
   };
 
   // 格式化治療狀態 - 支援新舊兩種格式
@@ -180,9 +184,9 @@ const ArchiveCard = ({
     }
     // 舊格式：使用 treatmentStatus (string)
     if (data.treatmentStatus) {
-      return data.treatmentStatus === 'treated' ? '已痊癒' : '未痊癒';
+      return data.treatmentStatus === 'treated' ? t('archiveCard.status.cured') : t('archiveCard.status.notCured');
     }
-    return '治療中'; // 預設值
+    return t('archiveCard.status.treating'); // 預設值
   };
 
   // 判斷診斷狀態的樣式類
@@ -199,7 +203,7 @@ const ArchiveCard = ({
   // 判斷治療狀態的樣式類
   const getTreatmentStatusClass = (data) => {
     if (data.healthStatus) {
-      return data.healthStatus === '已痊癒' ? 'treated' : 'untreated';
+      return data.healthStatus === t('archiveCard.status.cured') ? 'treated' : 'untreated';
     }
     if (data.treatmentStatus) {
       return data.treatmentStatus === 'treated' ? 'treated' : 'untreated';
@@ -208,30 +212,140 @@ const ArchiveCard = ({
   };
 
 
+  // 檢測內容的語言
+  const detectContentLanguage = (content) => {
+    if (!content) return 'zh';
+
+    // 各語言的特徵檢測，增加權重機制
+    const languagePatterns = {
+      'zh': [
+        { pattern: /[\u4e00-\u9fff]/g, weight: 2 },  // 中文字符（高權重）
+        { pattern: /\d{1,2}月\d{1,2}日/g, weight: 10 },  // 中文日期格式（極高權重）
+        { pattern: /的|是|在|有|和|與|但|或|因為|所以|這|那|將|會|能|可以|已經|正在/g, weight: 3 }  // 常見中文詞
+      ],
+      'en': [
+        { pattern: /\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{1,2}\b/g, weight: 15 },  // 英文日期格式（極高權重）
+        { pattern: /\b(January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2}\b/g, weight: 15 },
+        { pattern: /\b(the|and|or|but|in|on|at|to|for|with|by|from|up|about|into|through|during|was|were|had|have|has|been|being|will|would|could|should)\b/gi, weight: 1 },  // 常見英文詞（低權重但數量多）
+        { pattern: /[a-zA-Z]{4,}/g, weight: 0.5 }  // 長英文單詞（非常低權重）
+      ],
+      'es': [
+        { pattern: /\d{1,2}\s+de\s+(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre)/g, weight: 15 },  // 西班牙文日期
+        { pattern: /\b(el|la|los|las|un|una|de|del|en|con|por|para|que|y|o|pero|fue|era|había|tiene|tenía|será|sería)\b/gi, weight: 2 }  // 常見西班牙文詞
+      ],
+      'ja': [
+        { pattern: /[\u3040-\u309f\u30a0-\u30ff]/g, weight: 3 },  // 平假名和片假名（高權重）
+        { pattern: /\d{1,2}月\d{1,2}日/g, weight: 8 },  // 日文日期格式（比中文稍低權重，因為格式相同）
+        { pattern: /です|である|した|する|された|されて|について|から|まで|によって|として|において/g, weight: 5 }  // 常見日文詞尾（高權重）
+      ],
+      'ko': [
+        { pattern: /[\uac00-\ud7af]/g, weight: 3 },  // 韓文字符（高權重）
+        { pattern: /\d{1,2}월\s*\d{1,2}일/g, weight: 15 },  // 韓文日期格式（極高權重）
+        { pattern: /는|은|이|가|을|를|에|의|와|과|도|만|부터|까지|에서|으로|로|에게|한테/g, weight: 4 }  // 常見韓文助詞（高權重）
+      ]
+    };
+
+    const scores = {};
+
+    // 計算每種語言的加權分數
+    Object.keys(languagePatterns).forEach(lang => {
+      let score = 0;
+      languagePatterns[lang].forEach(({ pattern, weight }) => {
+        const matches = content.match(pattern);
+        if (matches) {
+          score += matches.length * weight;
+        }
+      });
+      scores[lang] = score;
+    });
+
+    // 找出分數最高的語言
+    const detectedLang = Object.keys(scores).reduce((a, b) => scores[a] > scores[b] ? a : b);
+
+    // 如果所有語言分數都很低，則使用當前界面語言作為後備
+    if (scores[detectedLang] < 3) {
+      const currentLang = i18n.language.split('-')[0];
+      return ['zh', 'en', 'es', 'ja', 'ko'].includes(currentLang) ? currentLang : 'zh';
+    }
+
+    // 為了調試，可以在控制台輸出檢測結果
+    console.log('Language detection scores:', scores, 'Detected:', detectedLang);
+
+    return detectedLang;
+  };
+
   // 解析AI內容並格式化顯示
   const parseAndRenderContent = (content) => {
-    if (!content) return <p className={styles.noContent}>暫無內容</p>;
+    if (!content) return <p className={styles.noContent}>{t('archiveCard.noContent')}</p>;
 
     const sections = [];
-    
+
     // 將內容按段落分割（以雙換行或單換行分隔）
     const paragraphs = content.split(/\n+/).filter(p => p.trim());
-    
-    // 日期格式檢測
-    const datePattern = /^(\d{1,2})月(\d{1,2})日/;
+
+    // 檢測內容語言
+    const contentLang = detectContentLanguage(content);
+
+    // 多語言日期格式檢測（允許在段落任何位置出現）
+    const datePatterns = {
+      'zh': /(\d{1,2})月(\d{1,2})日/g,  // 中文：12月3日
+      'en': /([A-Za-z]+)\s+(\d{1,2})/g,  // 英文：Dec 3, January 15
+      'ja': /(\d{1,2})月(\d{1,2})日/g,  // 日文：12月3日
+      'ko': /(\d{1,2})월\s*(\d{1,2})일/g,  // 韓文：12월 3일
+      'es': /(\d{1,2})\s+de\s+([a-zA-Z]+)/g  // 西班牙文：3 de diciembre
+    };
+
+    // 根據檢測到的內容語言選擇日期格式
+    const datePattern = datePatterns[contentLang] || datePatterns['zh'];
     
     paragraphs.forEach(paragraph => {
       const trimmedParagraph = paragraph.trim();
       if (!trimmedParagraph) return;
-      
-      const dateMatch = trimmedParagraph.match(datePattern);
-      
-      if (dateMatch) {
-        // 是日期段落
+
+      // 重置正則表達式，因為使用了全局標誌
+      datePattern.lastIndex = 0;
+      const dateMatches = [...trimmedParagraph.matchAll(datePattern)];
+
+      if (dateMatches.length > 0) {
+        // 段落中包含日期，只為第一個檢測到的日期創建一個區段
+        // 這樣避免同一段落創建多個重複區段
+        const dateMatch = dateMatches[0]; // 只取第一個匹配
         const year = new Date().getFullYear();
-        const month = parseInt(dateMatch[1]);
-        const day = parseInt(dateMatch[2]);
-        
+        let month, day;
+
+        if (contentLang === 'en') {
+          // 英文格式：Dec 3, January 15
+          const monthNames = {
+            'jan': 1, 'january': 1,
+            'feb': 2, 'february': 2,
+            'mar': 3, 'march': 3,
+            'apr': 4, 'april': 4,
+            'may': 5,
+            'jun': 6, 'june': 6,
+            'jul': 7, 'july': 7,
+            'aug': 8, 'august': 8,
+            'sep': 9, 'september': 9,
+            'oct': 10, 'october': 10,
+            'nov': 11, 'november': 11,
+            'dec': 12, 'december': 12
+          };
+          month = monthNames[dateMatch[1].toLowerCase()] || 1;
+          day = parseInt(dateMatch[2]);
+        } else if (contentLang === 'es') {
+          // 西班牙文格式：3 de diciembre
+          const monthNames = {
+            'enero': 1, 'febrero': 2, 'marzo': 3, 'abril': 4,
+            'mayo': 5, 'junio': 6, 'julio': 7, 'agosto': 8,
+            'septiembre': 9, 'octubre': 10, 'noviembre': 11, 'diciembre': 12
+          };
+          day = parseInt(dateMatch[1]);
+          month = monthNames[dateMatch[2].toLowerCase()] || 1;
+        } else {
+          // 中文、日文、韓文格式：數字格式
+          month = parseInt(dateMatch[1]);
+          day = parseInt(dateMatch[2]);
+        }
+
         sections.push({
           date: dateMatch[0],
           year,
@@ -241,7 +355,7 @@ const ArchiveCard = ({
           abnormalPosts: []
         });
       } else {
-        // 不是日期段落，作為普通段落處理
+        // 段落中沒有日期，作為普通段落處理
         sections.push({
           date: null,
           content: [trimmedParagraph],
@@ -265,7 +379,7 @@ const ArchiveCard = ({
         if (section.year && section.month && section.day) {
           // 構建日期字串來匹配
           const dateStr = `${section.year}-${String(section.month).padStart(2, '0')}-${String(section.day).padStart(2, '0')}`;
-          
+
           // 查找該日期的異常記錄
           const postsForDate = validatedArchiveData.abnormalPostsData.filter(post => {
             const postDate = new Date(post.record_date);
@@ -273,15 +387,36 @@ const ArchiveCard = ({
             const postDateStr = `${postDate.getUTCFullYear()}-${String(postDate.getUTCMonth() + 1).padStart(2, '0')}-${String(postDate.getUTCDate()).padStart(2, '0')}`;
             return postDateStr === dateStr;
           });
-          
-          // 格式化異常記錄數據
-          section.abnormalPosts = postsForDate.map(post => ({
-            id: post.id,
-            date: `${section.month}月${section.day}日`,
-            symptoms: Array.isArray(post.symptoms) 
-              ? post.symptoms.map(s => s.symptom_name || s).join('、')
-              : post.symptoms || '無症狀記錄'
-          }));
+
+          // 格式化異常記錄數據，根據檢測到的內容語言格式化日期顯示
+          section.abnormalPosts = postsForDate.map(post => {
+            let formattedDate;
+            if (contentLang === 'en') {
+              // 英文格式
+              const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                                'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+              formattedDate = `${monthNames[section.month - 1]} ${section.day}`;
+            } else if (contentLang === 'es') {
+              // 西班牙文格式
+              const monthNames = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+                                'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+              formattedDate = `${section.day} de ${monthNames[section.month - 1]}`;
+            } else if (contentLang === 'ko') {
+              // 韓文格式
+              formattedDate = `${section.month}월 ${section.day}일`;
+            } else {
+              // 中文和日文格式
+              formattedDate = `${section.month}月${section.day}日`;
+            }
+
+            return {
+              id: post.id,
+              date: formattedDate,
+              symptoms: Array.isArray(post.symptoms)
+                ? formatSymptomsForDisplay(post.symptoms.map(s => s.symptom_name || s))
+                : formatSymptomsForDisplay(post.symptoms) || t('archiveCard.noSymptoms')
+            };
+          });
         }
       });
     }
@@ -324,9 +459,9 @@ const ArchiveCard = ({
                       }
                     });
                   } else {
-                    console.error('無法獲取寵物ID');
+                    console.error(t('archiveCard.messages.cannotGetPetId'));
                     if (onShowNotification) {
-                      onShowNotification('無法找到寵物資訊');
+                      onShowNotification(t('archiveCard.messages.cannotFindPetInfo'));
                     }
                   }
                 }}
@@ -337,12 +472,12 @@ const ArchiveCard = ({
                 }}
               >
                 <div className={styles.postPreviewIcon}>
-                  <img src="/assets/icon/PetpagePetAbnormalPostButton.png" alt="異常記錄" />
+                  <img src="/assets/icon/PetpagePetAbnormalPostButton.png" alt={t('archiveCard.abnormalRecordAlt')} />
                 </div>
                 <div className={styles.postPreviewContent}>
                   <div className={styles.postPreviewDate}>{post.date}</div>
                   <div className={styles.postPreviewSymptoms}>
-                    症狀：{post.symptoms}
+                    {t('archiveCard.symptoms')}：{formatSymptomsForDisplay(post.symptoms)}
                   </div>
                 </div>
                 <div className={styles.postPreviewArrow}>❯</div>
@@ -358,7 +493,7 @@ const ArchiveCard = ({
   if (isValidating) {
     return (
       <div className={styles.archiveCard}>
-        <div className={styles.loadingMessage}>正在驗證異常記錄...</div>
+        <div className={styles.loadingMessage}>{t('archiveCard.validatingRecords')}</div>
       </div>
     );
   }
@@ -374,11 +509,11 @@ const ArchiveCard = ({
           onClick={handleUserClick}
         />
         <div className={styles.userDetails}>
-          <h3 className={styles.userName} onClick={handleUserClick}>{user?.user_account || '未知用戶'}</h3>
+          <h3 className={styles.userName} onClick={handleUserClick}>{user?.user_account || t('archiveCard.unknownUser')}</h3>
           <div className={styles.petInfo}>
-            <span className={styles.petName}>寵物：{pet?.pet_name || '未知寵物'}</span>
+            <span className={styles.petName}>{t('archiveCard.pet')}：{pet?.pet_name || t('archiveCard.unknownPet')}</span>
             <span className={styles.petSeparator}>•</span>
-            <span className={styles.petType}>{pet?.breed || pet?.species || '未知品種'}</span>
+            <span className={styles.petType}>{pet?.breed || pet?.species || t('archiveCard.unknownBreed')}</span>
           </div>
         </div>
       </div>
@@ -399,7 +534,7 @@ const ArchiveCard = ({
       {/* 主要病因（如果有） */}
       {validatedArchiveData.mainCause && (
         <div className={styles.mainCause}>
-          <span className={styles.causeLabel}>主要病因：</span>
+          <span className={styles.causeLabel}>{t('archiveCard.mainCause')}：</span>
           <span className={styles.causeText}>{validatedArchiveData.mainCause}</span>
         </div>
       )}
@@ -409,7 +544,7 @@ const ArchiveCard = ({
         {validatedArchiveData.generated_content ? (
           parseAndRenderContent(validatedArchiveData.generated_content)
         ) : (
-          <p className={styles.noContent}>暫無內容</p>
+          <p className={styles.noContent}>{t('archiveCard.noContent')}</p>
         )}
       </div>
 
@@ -422,11 +557,11 @@ const ArchiveCard = ({
       {/* 症狀標籤（如果有） */}
       {validatedArchiveData.symptoms && validatedArchiveData.symptoms.length > 0 && (
         <div className={styles.symptomsSection}>
-          <span className={styles.symptomsLabel}>相關症狀：</span>
+          <span className={styles.symptomsLabel}>{t('archiveCard.relatedSymptoms')}：</span>
           <div className={styles.symptomsTags}>
             {validatedArchiveData.symptoms.map((symptom, index) => (
               <span key={index} className={styles.symptomTag}>
-                {typeof symptom === 'string' ? symptom : symptom.text}
+                {formatSymptomsForDisplay(typeof symptom === 'string' ? symptom : symptom.text)}
               </span>
             ))}
           </div>
@@ -435,7 +570,7 @@ const ArchiveCard = ({
 
       {/* 時間資訊 */}
       <div className={styles.timeInfo}>
-        建立於 {new Date().toLocaleDateString('zh-TW')}
+        {t('archiveCard.createdAt')} {new Date().toLocaleDateString(i18n.language === 'en' ? 'en-US' : 'zh-TW')}
       </div>
     </div>
   );

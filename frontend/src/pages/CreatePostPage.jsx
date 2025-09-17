@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import TopNavbar from '../components/TopNavbar';
 import BottomNavbar from '../components/BottomNavigationbar';
 import Notification from '../components/Notification';
@@ -9,6 +10,7 @@ import { NotificationProvider } from '../context/NotificationContext';
 import styles from '../styles/CreatePostPage.module.css';
 
 const CreatePostPage = () => {
+  const { t } = useTranslation('posts');
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
   const imageContainerRef = useRef(null);
@@ -138,17 +140,17 @@ const CreatePostPage = () => {
             if (validImages.length > 0) {
               setSelectedImages(validImages);
             } else if (draft.images.length > 0) {
-              showNotification('無法載入已保存的圖片');
+              showNotification(t('createPost.messages.loadImagesFailed'));
             }
           } catch (error) {
             console.error('載入圖片過程出錯:', error);
-            showNotification('載入圖片時發生錯誤');
+            showNotification(t('createPost.messages.loadImagesError'));
           }
         }
       }
     } catch (error) {
       console.error('載入草稿失敗:', error);
-      showNotification('載入草稿時發生錯誤');
+      showNotification(t('createPost.messages.loadDraftError'));
       // 如果草稿損壞，清除它
       try {
         localStorage.removeItem(DRAFT_KEY);
@@ -257,7 +259,7 @@ const CreatePostPage = () => {
             images: validImageData.slice(0, 3)
           };
           draftString = JSON.stringify(finalDraft);
-          showNotification(`草稿過大，僅保存前3張圖片`);
+          showNotification(t('createPost.messages.draftTooLarge'));
         }
         
         // 如果還是太大，只保存文字
@@ -269,7 +271,7 @@ const CreatePostPage = () => {
             timestamp: Date.now()
           };
           draftString = JSON.stringify(finalDraft);
-          showNotification('草稿過大，僅保存文字內容');
+          showNotification(t('createPost.messages.draftTooLarge'));
         }
       }
       
@@ -284,7 +286,7 @@ const CreatePostPage = () => {
     } catch (error) {
       console.error('保存草稿失敗:', error);
       if (error.name === 'QuotaExceededError') {
-        showNotification('儲存空間不足，僅保存文字內容');
+        showNotification(t('createPost.messages.storageQuotaExceeded'));
         // 嘗試只保存文字內容
         try {
           const textOnlyDraft = {
@@ -349,19 +351,19 @@ const CreatePostPage = () => {
     const files = Array.from(e.target.files);
     
     if (selectedImages.length + files.length > 10) {
-      showNotification('最多只能選擇10張圖片');
+      showNotification(t('createPost.messages.maxImagesReached'));
       return;
     }
 
     // 檢查每個檔案
     for (let file of files) {
       if (file.size > 5 * 1024 * 1024) {
-        showNotification('圖片大小不能超過 5MB');
+        showNotification(t('createPost.messages.imageTooLarge'));
         return;
       }
       
       if (!file.type.startsWith('image/')) {
-        showNotification('請選擇圖片檔案');
+        showNotification(t('createPost.messages.invalidFileType'));
         return;
       }
     }
@@ -403,7 +405,7 @@ const CreatePostPage = () => {
   // 新增圖片按鈕點擊
   const handleAddImage = () => {
     if (selectedImages.length >= 10) {
-      showNotification('最多只能選擇10張圖片');
+      showNotification(t('createPost.messages.maxImagesReached'));
       return;
     }
     fileInputRef.current?.click();
@@ -414,7 +416,7 @@ const CreatePostPage = () => {
     const tagText = hashtagInput.trim();
     
     if (!tagText) {
-      showNotification('請輸入標籤內容');
+      showNotification(t('createPost.messages.enterHashtagContent'));
       return;
     }
     
@@ -422,12 +424,12 @@ const CreatePostPage = () => {
       const existingTagText = tag.tag || tag.text || (typeof tag === 'string' ? tag : '');
       return existingTagText === tagText;
     })) {
-      showNotification('此標籤已存在');
+      showNotification(t('createPost.messages.hashtagExists'));
       return;
     }
     
     if (hashtags.length >= 10) {
-      showNotification('最多只能新增10個標籤');
+      showNotification(t('createPost.messages.maxHashtagsReached'));
       return;
     }
     
@@ -497,7 +499,7 @@ const CreatePostPage = () => {
   // 下一步按鈕
   const handleNext = async () => {
     if (selectedImages.length === 0 && !description.trim()) {
-      showNotification('請至少選擇一張圖片或輸入描述');
+      showNotification(t('createPost.messages.requireContent'));
       return;
     }
     
@@ -604,9 +606,9 @@ const CreatePostPage = () => {
         
         <div className={styles.content}>
           <div className={styles.titleSection}>
-            <h2 className={styles.title}>發布日常貼文</h2>
+            <h2 className={styles.title}>{t('createPost.title')}</h2>
             {draftSaved && (
-              <span className={styles.draftIndicator}>草稿已保存</span>
+              <span className={styles.draftIndicator}>{t('common.draftSaved')}</span>
             )}
           </div>
           <div className={styles.divider}></div>
@@ -621,7 +623,7 @@ const CreatePostPage = () => {
                   alt="未選擇圖片" 
                   className={styles.warningIcon}
                 />
-                <p className={styles.noImageText}>還沒有新增任何圖片</p>
+                <p className={styles.noImageText}>{t('createPost.imageUpload.noImageSelected')}</p>
               </div>
             ) : (
               // 有圖片時顯示預覽
@@ -652,14 +654,14 @@ const CreatePostPage = () => {
             )}
             
             <div className={styles.imageControls}>
-              <button 
+              <button
                 className={styles.addImageBtn}
                 onClick={handleAddImage}
               >
-                新增圖片
+                {t('createPost.imageUpload.addImage')}
               </button>
               <span className={styles.imageCounter}>
-                選擇的圖片：{selectedImages.length}/10
+                {t('createPost.imageUpload.imageCounter', { count: selectedImages.length })}
               </span>
             </div>
             
@@ -678,7 +680,7 @@ const CreatePostPage = () => {
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="輸入描述"
+              placeholder={t('createPost.placeholders.description')}
               className={styles.descriptionInput}
               rows="4"
             />
@@ -713,20 +715,20 @@ const CreatePostPage = () => {
                   value={hashtagInput}
                   onChange={(e) => setHashtagInput(e.target.value)}
                   onKeyDown={handleHashtagKeyDown}
-                  placeholder="輸入標籤"
+                  placeholder={t('createPost.placeholders.hashtag')}
                   className={styles.hashtagInput}
                 />
               </div>
-              <button 
+              <button
                 className={styles.addHashtagBtn}
                 onClick={handleAddHashtag}
               >
-                新增
+                {t('common.add')}
               </button>
             </div>
             
             <span className={styles.hashtagCounter}>
-              標籤數量：{hashtags.length}/10
+              {t('createPost.hashtags.counter', { count: hashtags.length })}
             </span>
           </div>
 
@@ -736,13 +738,13 @@ const CreatePostPage = () => {
               className={styles.cancelButton}
               onClick={handleCancel}
             >
-              取消
+              {t('common.cancel')}
             </button>
             <button 
               className={styles.nextButton}
               onClick={handleNext}
             >
-              下一步
+              {t('common.next')}
             </button>
           </div>
         </div>
