@@ -7,12 +7,12 @@
 
 .content {
   flex: 1;
-  padding: 30px;
-  padding-top: calc(60px + max(env(safe-area-inset-top), 10px) + 30px);
-  padding-bottom: calc(70px + max(env(safe-area-inset-bottom), 8px) + 30px);
-  max-width: 430px;
+  padding: 80px 20px 90px 20px;
+  max-width: 600px;
   margin: 0 auto;
   width: 100%;
+  padding-top: calc(60px + max(env(safe-area-inset-top), 10px) + 20px);
+  padding-bottom: calc(70px + max(env(safe-area-inset-bottom), 8px) + 20px);
   box-sizing: border-box;
   overflow-y: auto;
 }
@@ -965,6 +965,21 @@
 }
 
 @media (max-width: 480px) {
+  .content {
+    padding: 15px 15px 15px 15px;
+    padding-top: calc(60px + max(env(safe-area-inset-top), 10px) + 15px);
+    padding-bottom: calc(70px + max(env(safe-area-inset-bottom), 8px) + 15px);
+  }
+
+  .header {
+    padding: 15px 0 12px 0;
+    gap: 10px;
+  }
+
+  .title {
+    font-size: 1.3rem;
+  }
+
   /* OCR 容器手機版調整 */
   .ocrContainer {
     padding: 15px;
@@ -1050,20 +1065,6 @@
     font-size: 13px;
   }
 
-
-  .content {
-    padding: 0 15px 80px 15px;
-  }
-
-  .header {
-    padding: 15px 0 12px 0;
-    gap: 10px;
-  }
-
-  .title {
-    font-size: 1.3rem;
-  }
-
   .buttonRow {
     flex-direction: column;
   }
@@ -1143,6 +1144,21 @@
 }
 
 @media (max-width: 360px) {
+  .content {
+    padding: 12px 12px 12px 12px;
+    padding-top: calc(60px + max(env(safe-area-inset-top), 10px) + 12px);
+    padding-bottom: calc(70px + max(env(safe-area-inset-bottom), 8px) + 12px);
+  }
+
+  .header {
+    padding: 12px 0 10px 0;
+    gap: 8px;
+  }
+
+  .title {
+    font-size: 1.2rem;
+  }
+
   .actionButtons {
     gap: 10px;
     margin-top: 20px;
