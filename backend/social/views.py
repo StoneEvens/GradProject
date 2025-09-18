@@ -754,6 +754,8 @@ class PostListAPIView(generics.ListAPIView):
                 insert_pos = random.randint(0, len(recommend_list))
                 recommend_list.insert(insert_pos, seen_id)
 
+            print("推薦結果:", recommend_list)
+
             return PostFrame.get_postFrames(idList=recommend_list)
         else:
             print("無用戶互動歷史")
