@@ -1,6 +1,7 @@
 from datetime import date
 from django.db import models
 from django.conf import settings
+from django.db.models import Case, When, IntegerField
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from rest_framework import status as drf_status
@@ -161,7 +162,7 @@ class DiseaseArchiveContent(models.Model):
             ).exists()
         return False
 
-    def get_content(user: CustomUser = None, hashtag: str = None, query: str = None, pets: list[Pet] = None, postFrame: PostFrame = None):
+    def get_content(user: CustomUser = None, hashtag: str = None, query: str = None, pets: list[Pet] = None, postFrame: PostFrame = None, ids: list[int] = None):
         base_queryset = DiseaseArchiveContent.objects.filter(is_private=False)
         
         if user:
@@ -181,6 +182,13 @@ class DiseaseArchiveContent(models.Model):
         
         if postFrame:
             return base_queryset.filter(postFrame=postFrame)
+
+        if ids:
+            preserved = Case(
+                *[When(id=pk, then=pos) for pos, pk in enumerate(ids)],
+                output_field=IntegerField(),
+            )
+            return base_queryset.filter(postFrame__id__in=ids, is_private=False).order_by(preserved)
 
         return base_queryset.none()
 

@@ -2257,21 +2257,20 @@ class RecommendedDiseaseArchivesAPIView(APIView):
                 )
             
             # 根據推薦的 PostFrame IDs 獲取對應的疾病檔案
-            archives = DiseaseArchiveContent.objects.filter(
-                postFrame__id__in=paginated_ids,
-                is_private=False
-            ).select_related(
+            archives = DiseaseArchiveContent.get_content(ids=paginated_ids).select_related(
                 'postFrame', 'pet'
             ).prefetch_related(
                 'illnesses__illness'
             )
             
             # 按照推薦順序排序
-            archives_dict = {archive.postFrame.id: archive for archive in archives}
-            ordered_archives = [archives_dict[post_id] for post_id in paginated_ids if post_id in archives_dict]
+            #archives_dict = {archive.postFrame.id: archive for archive in archives}
+            #ordered_archives = [archives_dict[post_id] for post_id in paginated_ids if post_id in archives_dict]
+            print(paginated_ids)
+            print(archives)
             
             serializer = DiseaseArchiveContentSerializer(
-                ordered_archives, many=True, context={'request': request}
+                archives, many=True, context={'request': request}
             )
             
             return APIResponse(
@@ -2537,13 +2536,17 @@ class PublicDiseaseArchivesPreviewAPIView(APIView):
                     insert_pos = random.randint(0, len(recommend_list))
                     recommend_list.insert(insert_pos, seen_id)
 
-                archives_queryset = DiseaseArchiveContent.objects.filter(postFrame__id__in=recommend_list, is_private=False).select_related(
+                print(recommend_list)
+
+                archives_queryset = DiseaseArchiveContent.get_content(ids=recommend_list).select_related(
                     'pet', 'postFrame', 'postFrame__user'
                 ).prefetch_related(
                     'illnesses__illness',
                     'pet__headshot',
                     'postFrame__user__headshot'
-                ).order_by('-postFrame__created_at')
+                )
+
+                print(archives_queryset)
 
             else:
                 # 如果沒有互動歷史，則不進行推薦

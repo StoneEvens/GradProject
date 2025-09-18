@@ -1,5 +1,6 @@
 from django.db import models
 from django.db.models import QuerySet
+from django.db.models import Case, When, IntegerField
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from rest_framework import status as drf_status
@@ -99,7 +100,7 @@ class PostFrame(Interactables):
     comments_count = models.IntegerField(default=0, help_text="評論數")
 
     def __str__(self):
-        return f"{self.user.username}'s Post at {self.created_at}"
+        return f"{self.id} {self.user.username}'s Post at {self.created_at}"
     
     def create(user: CustomUser):
         postFrame = PostFrame.objects.create(user=user)
@@ -127,7 +128,12 @@ class PostFrame(Interactables):
             return PostFrame.objects.filter(user__in=userList).order_by('-created_at')[:50]
         
         if idList is not None:
-            return PostFrame.objects.filter(id__in=idList)
+            # 保持返回順序與提供的 idList 相同
+            preserved = Case(
+                *[When(id=pk, then=pos) for pos, pk in enumerate(idList)],
+                output_field=IntegerField(),
+            )
+            return PostFrame.objects.filter(id__in=idList).order_by(preserved)
         
         return PostFrame.objects.none()
 
