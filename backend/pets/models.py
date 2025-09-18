@@ -35,7 +35,7 @@ class Pet(models.Model):
             id=pet_id
         )
     
-    def get_pet(user: User):
+    def get_pet(user):
         return Pet.objects.filter(owner=user)
     
     def create(owner, weight, pet_stage, age=None, pet_name=None, breed=None, pet_type=None, predicted_adult_weight=None):
