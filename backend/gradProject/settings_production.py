@@ -20,6 +20,7 @@ CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOWED_ORIGINS = [
     "https://peter.geniusbee.net",
     "https://geniusbee.net",
+    "https://localhost",  # WebView/live preview over HTTPS without explicit port
     "http://localhost:3000",  # Local development
     "http://localhost:5173",  # Vite default port
     "http://localhost:8000",  # Django development server
@@ -27,6 +28,29 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:5173",  # Vite on 127.0.0.1
     "https://127.0.0.1:5173"  # Vite on 127.0.0.1 (HTTPS)
 ]
+
+# Allow regex-based origins (e.g., Capacitor/Ionic, and https://localhost without port)
+try:
+    CORS_ALLOWED_ORIGIN_REGEXES
+except NameError:
+    CORS_ALLOWED_ORIGIN_REGEXES = []
+
+CORS_ALLOWED_ORIGIN_REGEXES = list(set(CORS_ALLOWED_ORIGIN_REGEXES + [
+    r"^capacitor://localhost$",
+    r"^ionic://localhost$",
+    r"^https://localhost$",
+]))
+
+# CSRF Trusted Origins for HTTPS forms/cookies
+try:
+    CSRF_TRUSTED_ORIGINS
+except NameError:
+    CSRF_TRUSTED_ORIGINS = []
+
+CSRF_TRUSTED_ORIGINS = list(set(CSRF_TRUSTED_ORIGINS + [
+    "https://localhost",
+    "https://peter.geniusbee.net",
+]))
 
 # Security settings for production
 SECURE_SSL_REDIRECT = True

@@ -28,14 +28,19 @@ SECRET_KEY = 'django-insecure-9$@4-v*$7-=1r-l@3(fytpr_*f1b!@z^j00f%31hcp6(udqh6s
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True  # Set to True for development
 
+# Allow common hosts; when DEBUG is True, allow all to simplify mobile/emulator testing
 ALLOWED_HOSTS = [
     'peter.geniusbee.net',
     'localhost',
     '127.0.0.1',
+    '10.0.2.2',  # Android emulator to host loopback
     'geniusbee.net',
     '.geniusbee.net',  # Allows all subdomains
     '140.119.19.25',
 ]
+if DEBUG:
+    # For local development, accept any Host header to support LAN IPs and emulator access
+    ALLOWED_HOSTS = ['*']
 
 # Development settings - disable SSL/HTTPS redirects
 SECURE_SSL_REDIRECT = False
@@ -99,6 +104,7 @@ CORS_ALLOWED_ORIGINS = [
     "https://geniusbee.net",
     "https://peter.geniusbee.net:4173",  # Vite preview server with domain
     "https://peter.geniusbee.net:5173",  # Vite dev server with domain
+    "https://localhost",  # WebView/live-reload over HTTPS default port
     "http://localhost:3000",  # Local development
     "http://localhost:5173",  # Vite default port
     "https://localhost:5173",  # Vite default port (HTTPS)
@@ -110,6 +116,16 @@ CORS_ALLOWED_ORIGINS = [
     "https://127.0.0.1:5173",  # Vite on 127.0.0.1 (HTTPS)
     "http://127.0.0.1:4173",  # Vite preview server
     "https://127.0.0.1:4173",  # Vite preview server (HTTPS)
+]
+
+# Support non-HTTP mobile WebView schemes and local/emulator IPs
+# django-cors-headers only allows http/https in CORS_ALLOWED_ORIGINS, so use regexes for capacitor/ionic
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^capacitor://localhost$",
+    r"^ionic://localhost$",
+    r"^https://localhost$",
+    r"^http://10\.0\.2\.2(:\d+)?$",  # Android emulator
+    r"^http://192\.168\.[0-9]{1,3}\.[0-9]{1,3}(:\d+)?$",  # Local LAN
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -134,6 +150,21 @@ CORS_ALLOW_HEADERS = [
     'user-agent',
     'x-csrftoken',
     'x-requested-with',
+]
+
+# CSRF trusted origins (mainly relevant when using SessionAuthentication or HTTPS forms)
+CSRF_TRUSTED_ORIGINS = [
+    "https://localhost",
+    "http://localhost:5173",
+    "https://localhost:5173",
+    "http://localhost:4173",
+    "https://localhost:4173",
+    "http://localhost:8000",
+    "http://127.0.0.1:5173",
+    "https://127.0.0.1:5173",
+    "http://10.0.2.2:8000",
+    "https://peter.geniusbee.net",
+    "https://geniusbee.net",
 ]
 CORS_ALLOW_METHODS = [
     'DELETE',
