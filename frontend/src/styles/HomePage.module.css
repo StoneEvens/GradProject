@@ -2,15 +2,18 @@
   min-height: 100vh;
   width: 100%;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
   background-image: url('/assets/icon/HomepageDesign.jpg');
-  background-size: calc(100% - 40px) auto;
-  background-position: center 70%;
+  background-size: contain;
+  background-position: center top;
   background-repeat: no-repeat;
   background-color: #ffca8c;
   position: relative;
   box-sizing: border-box;
+  padding: 20px;
+  padding-bottom: 80px;
 }
 
 .buttonWrapper {
@@ -20,8 +23,7 @@
   align-items: center;
   width: 100%;
   max-width: 300px;
-  position: absolute;
-  bottom: 13%;
+  z-index: 10;
 }
 
 .registerButton,
@@ -35,6 +37,7 @@
   cursor: pointer;
   transition: transform 0.2s ease;
   background-color: transparent;
+  touch-action: manipulation;
 }
 
 .registerButton {
@@ -55,16 +58,40 @@
   transform: scale(0.98);
 }
 
-/* 響應式設計 - 手機 */
+/* 平板螢幕 */
+@media (max-width: 768px) {
+  .container {
+    background-size: 90%;
+    background-position: center 20%;
+    padding-bottom: 60px;
+  }
+
+  .buttonWrapper {
+    max-width: 280px;
+    gap: 18px;
+  }
+
+  .registerButton,
+  .loginButton {
+    width: 260px;
+    height: 55px;
+  }
+}
+
+/* 手機螢幕 */
 @media (max-width: 480px) {
   .container {
-    background-size: calc(100% - 20px) auto;
+    background-size: 85%;
+    background-position: center 15%;
+    padding: 15px;
+    padding-bottom: 50px;
+    min-height: 100vh;
+    min-height: 100dvh; /* 動態視窗高度，適應不同瀏覽器 */
   }
 
   .buttonWrapper {
     gap: 15px;
     max-width: 260px;
-    bottom: 9%;
   }
 
   .registerButton,
@@ -74,15 +101,57 @@
   }
 }
 
-/* 超小螢幕 */
+/* 小手機螢幕 */
 @media (max-width: 360px) {
+  .container {
+    background-size: 80%;
+    background-position: center 10%;
+    padding: 10px;
+    padding-bottom: 40px;
+  }
+
   .buttonWrapper {
-    bottom: 8%;
+    gap: 12px;
+    max-width: 220px;
   }
 
   .registerButton,
   .loginButton {
     width: 200px;
     height: 45px;
+  }
+}
+
+/* 超高螢幕（如 iPhone X 系列） */
+@media (max-height: 667px) and (max-width: 480px) {
+  .container {
+    background-size: 75%;
+    background-position: center 5%;
+    padding-bottom: 30px;
+  }
+}
+
+/* 橫向模式 */
+@media (max-width: 896px) and (orientation: landscape) {
+  .container {
+    background-size: 50%;
+    background-position: left 10%;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 20px;
+  }
+
+  .buttonWrapper {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    max-width: 200px;
+  }
+
+  .registerButton,
+  .loginButton {
+    width: 180px;
+    height: 40px;
   }
 }
