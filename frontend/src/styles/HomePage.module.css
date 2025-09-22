@@ -69,15 +69,15 @@
   }
 
   .buttonWrapper {
-    max-width: 260px;
-    gap: 18px;
+    max-width: 300px;
+    gap: 20px;
     bottom: 20%;
   }
 
   .registerButton,
   .loginButton {
-    width: 240px;
-    height: 55px;
+    width: 280px;
+    height: 60px;
   }
 }
 
@@ -92,15 +92,15 @@
   }
 
   .buttonWrapper {
-    gap: 15px;
-    max-width: 220px;
+    gap: 20px;
+    max-width: 300px;
     bottom: 20%;
   }
 
   .registerButton,
   .loginButton {
-    width: 200px;
-    height: 45px;
+    width: 280px;
+    height: 60px;
   }
 }
 
@@ -113,15 +113,15 @@
   }
 
   .buttonWrapper {
-    gap: 12px;
-    max-width: 180px;
+    gap: 18px;
+    max-width: 280px;
     bottom: 20%;
   }
 
   .registerButton,
   .loginButton {
-    width: 160px;
-    height: 40px;
+    width: 260px;
+    height: 55px;
   }
 }
 
@@ -129,12 +129,13 @@
 @media (max-height: 667px) and (max-width: 480px) {
   .buttonWrapper {
     bottom: 16%;
-    gap: 10px;
+    gap: 15px;
   }
 
   .registerButton,
   .loginButton {
-    height: 35px;
+    width: 240px;
+    height: 50px;
   }
 }
 
@@ -146,14 +147,15 @@
   }
 
   .buttonWrapper {
-    max-width: 160px;
+    max-width: 260px;
+    gap: 15px;
     bottom: 20%;
   }
 
   .registerButton,
   .loginButton {
-    width: 140px;
-    height: 35px;
+    width: 220px;
+    height: 50px;
   }
 }
 
@@ -169,14 +171,14 @@
     bottom: 16%;
     left: 50%;
     transform: translateX(-50%);
-    max-width: 300px;
+    max-width: 400px;
     flex-direction: row;
     gap: 20px;
   }
 
   .registerButton,
   .loginButton {
-    width: 140px;
-    height: 35px;
+    width: 180px;
+    height: 45px;
   }
 }
