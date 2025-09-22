@@ -22,7 +22,7 @@
   width: 100%;
   max-width: 280px;
   position: absolute;
-  bottom: 18%;
+  bottom: 20%;
   left: 50%;
   transform: translateX(-50%);
   z-index: 10;
@@ -71,7 +71,7 @@
   .buttonWrapper {
     max-width: 260px;
     gap: 18px;
-    bottom: 15%;
+    bottom: 20%;
   }
 
   .registerButton,
@@ -94,7 +94,7 @@
   .buttonWrapper {
     gap: 15px;
     max-width: 220px;
-    bottom: 13%;
+    bottom: 20%;
   }
 
   .registerButton,
@@ -115,7 +115,7 @@
   .buttonWrapper {
     gap: 12px;
     max-width: 180px;
-    bottom: 11%;
+    bottom: 20%;
   }
 
   .registerButton,
@@ -128,7 +128,7 @@
 /* 超高螢幕（如 iPhone X 系列） */
 @media (max-height: 667px) and (max-width: 480px) {
   .buttonWrapper {
-    bottom: 8%;
+    bottom: 16%;
     gap: 10px;
   }
 
@@ -147,7 +147,7 @@
 
   .buttonWrapper {
     max-width: 160px;
-    bottom: 9%;
+    bottom: 20%;
   }
 
   .registerButton,
@@ -166,7 +166,7 @@
   }
 
   .buttonWrapper {
-    bottom: 11%;
+    bottom: 16%;
     left: 50%;
     transform: translateX(-50%);
     max-width: 300px;
