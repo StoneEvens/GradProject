@@ -1,91 +1,88 @@
 .container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
   min-height: 100vh;
-  padding: 1rem 1rem 1rem;
-  background-color: #ffca9c;
-  text-align: center;
-}
-
-.title {
-  color: #f08651;
-  font-size: 2.1rem;
-  margin: 5rem 0 0;
-  font-weight: bold;
-  position: relative;
-  z-index: 2;
-}
-
-.canvasWrapper {
   width: 100%;
-  max-width: 420px;
-  height: 56vh;
-  margin-top: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-image: url('/assets/icon/HomepageDesign.jpg');
+  background-size: calc(100% - 40px) auto;
+  background-position: center 70%;
+  background-repeat: no-repeat;
+  background-color: #ffca8c;
   position: relative;
-  overflow: hidden;
-  border-radius: 16px;
-  background-color: #ffca9c;
+  box-sizing: border-box;
 }
 
-.authContainer {
-  width: 100%;
-  flex: 1;
+.buttonWrapper {
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
-  padding: 2rem 0 4rem;
-  margin-top: 1rem;
+  gap: 20px;
+  align-items: center;
+  width: 100%;
+  max-width: 300px;
+  position: absolute;
+  bottom: 13%;
+}
+
+.registerButton,
+.loginButton {
+  width: 280px;
+  height: 60px;
+  border: none;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  background-color: transparent;
 }
 
 .registerButton {
-  display: block;
-  width: 100%;
-  max-width: 300px;
-  padding: 0.8rem;
-  background-color: #f08651;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 1.1rem;
-  font-weight: bold;
-  text-decoration: none;
-  margin: 0 auto 1rem;
-  transition: background-color 0.3s;
-  text-align: center;
+  background-image: url('/assets/icon/HomepageRegisterButtonDesign.jpg');
 }
 
-.registerButton:hover {
-  background-color: #d35400;
+.loginButton {
+  background-image: url('/assets/icon/HomepageLoginButtonDesign.jpg');
 }
 
-.loginLink {
-  font-size: 0.9rem;
-  color: #666;
-  margin-top: 0.8rem;
-  text-align: center;
-  cursor: pointer;
+.registerButton:hover,
+.loginButton:hover {
+  transform: scale(1.05);
 }
 
-.loginLink:hover {
-  color: #e67e22;
-  text-decoration: underline;
+.registerButton:active,
+.loginButton:active {
+  transform: scale(0.98);
 }
 
-/* 響應式設計 */
-@media screen and (min-width: 768px) {
-  .title {
-    font-size: 2.5rem;
+/* 響應式設計 - 手機 */
+@media (max-width: 480px) {
+  .container {
+    background-size: calc(100% - 20px) auto;
   }
-  
-  .canvasWrapper {
-    background: linear-gradient(to bottom, #fdf6f0, #ffe5ca);
-    border-radius: 12px;
-    max-width: 340px;
-    height: 43vh;
+
+  .buttonWrapper {
+    gap: 15px;
+    max-width: 260px;
+    bottom: 9%;
   }
-  
-  .authContainer {
-    padding: 3rem 0 5rem;
+
+  .registerButton,
+  .loginButton {
+    width: 240px;
+    height: 50px;
   }
-} 
+}
+
+/* 超小螢幕 */
+@media (max-width: 360px) {
+  .buttonWrapper {
+    bottom: 8%;
+  }
+
+  .registerButton,
+  .loginButton {
+    width: 200px;
+    height: 45px;
+  }
+}

@@ -162,33 +162,48 @@ const ChatWindow = ({ isOpen, onClose, user }) => {
               key={message.id}
               className={`${styles.messageWrapper} ${message.isUser ? styles.userMessage : styles.aiMessage}`}
             >
+              {/* AI 訊息：頭像在左，訊息在右 */}
               {!message.isUser && (
-                <img
-                  src="/assets/icon/PeterAiChatIcon.png"
-                  alt="Peter AI"
-                  className={styles.messageAvatar}
-                />
+                <>
+                  <img
+                    src="/assets/icon/PeterAiChatIcon.png"
+                    alt="Peter AI"
+                    className={styles.messageAvatar}
+                  />
+                  <div className={styles.messageContent}>
+                    <div className={styles.messageBubble}>
+                      {message.text}
+                    </div>
+                    <div className={styles.messageTime}>
+                      {formatTime(message.timestamp)}
+                    </div>
+                  </div>
+                </>
               )}
-              <div className={styles.messageContent}>
-                <div className={styles.messageBubble}>
-                  {message.text}
-                </div>
-                <div className={styles.messageTime}>
-                  {formatTime(message.timestamp)}
-                </div>
-              </div>
+              
+              {/* 使用者訊息：訊息在左，頭像在右 */}
               {message.isUser && (
-                <img
-                  src={userAvatarError || !user?.headshot_url ? "/assets/icon/DefaultAvatar.jpg" : user.headshot_url}
-                  alt={user?.username || "User"}
-                  className={styles.messageAvatar}
-                  onError={() => setUserAvatarError(true)}
-                  onLoad={() => {
-                    if (user?.headshot_url && !userAvatarError) {
-                      setUserAvatarError(false);
-                    }
-                  }}
-                />
+                <>
+                  <div className={styles.messageContent}>
+                    <div className={styles.messageBubble}>
+                      {message.text}
+                    </div>
+                    <div className={styles.messageTime}>
+                      {formatTime(message.timestamp)}
+                    </div>
+                  </div>
+                  <img
+                    src={userAvatarError || !user?.headshot_url ? "/assets/icon/DefaultAvatar.jpg" : user.headshot_url}
+                    alt={user?.username || "User"}
+                    className={styles.messageAvatar}
+                    onError={() => setUserAvatarError(true)}
+                    onLoad={() => {
+                      if (user?.headshot_url && !userAvatarError) {
+                        setUserAvatarError(false);
+                      }
+                    }}
+                  />
+                </>
               )}
             </div>
           ))}
