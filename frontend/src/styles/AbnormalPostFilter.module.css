@@ -288,25 +288,33 @@
   }
   
   .dateRangeRow {
-    flex-direction: column;
-    gap: 8px;
+    flex-direction: row;
+    gap: 4px;
+    justify-content: space-between;
   }
-  
+
+  .dateInputWrapper {
+    flex: 1;
+    max-width: calc(50% - 10px);
+  }
+
   .dateInput {
     min-width: auto;
     width: 100%;
   }
-  
+
   .dateSeparator {
-    align-self: center;
+    flex: 0 0 auto;
+    padding: 0 4px;
   }
   
   .actionButtons {
-    flex-direction: column;
+    flex-direction: row;
+    gap: 8px;
   }
-  
+
   .resetButton,
   .filterButton {
-    width: 100%;
+    flex: 1;
   }
 }
