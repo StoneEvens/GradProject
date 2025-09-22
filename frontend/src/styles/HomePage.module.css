@@ -5,7 +5,7 @@
   align-items: center;
   justify-content: center;
   background-image: url('/assets/icon/HomepageDesign.jpg');
-  background-size: cover;
+  background-size: calc(100% - 40px) auto;
   background-position: center center;
   background-repeat: no-repeat;
   background-color: #ffca8c;
@@ -22,7 +22,7 @@
   width: 100%;
   max-width: 280px;
   position: absolute;
-  bottom: 25%;
+  bottom: 18%;
   left: 50%;
   transform: translateX(-50%);
   z-index: 10;
@@ -63,14 +63,15 @@
 /* 平板螢幕 */
 @media (max-width: 768px) {
   .container {
-    background-size: cover;
+    background-size: calc(100% - 30px) auto;
     background-position: center center;
+    padding: 15px;
   }
 
   .buttonWrapper {
     max-width: 260px;
     gap: 18px;
-    bottom: 22%;
+    bottom: 15%;
   }
 
   .registerButton,
@@ -83,7 +84,7 @@
 /* 手機螢幕 */
 @media (max-width: 480px) {
   .container {
-    background-size: cover;
+    background-size: calc(100% - 20px) auto;
     background-position: center center;
     min-height: 100vh;
     min-height: 100dvh; /* 動態視窗高度，適應不同瀏覽器 */
@@ -93,7 +94,7 @@
   .buttonWrapper {
     gap: 15px;
     max-width: 220px;
-    bottom: 20%;
+    bottom: 13%;
   }
 
   .registerButton,
@@ -106,7 +107,7 @@
 /* 小手機螢幕 */
 @media (max-width: 360px) {
   .container {
-    background-size: cover;
+    background-size: calc(100% - 16px) auto;
     background-position: center center;
     padding: 8px;
   }
@@ -114,7 +115,7 @@
   .buttonWrapper {
     gap: 12px;
     max-width: 180px;
-    bottom: 18%;
+    bottom: 11%;
   }
 
   .registerButton,
@@ -127,7 +128,7 @@
 /* 超高螢幕（如 iPhone X 系列） */
 @media (max-height: 667px) and (max-width: 480px) {
   .buttonWrapper {
-    bottom: 15%;
+    bottom: 8%;
     gap: 10px;
   }
 
@@ -139,9 +140,14 @@
 
 /* 超小螢幕 */
 @media (max-width: 320px) {
+  .container {
+    background-size: calc(100% - 12px) auto;
+    padding: 6px;
+  }
+
   .buttonWrapper {
     max-width: 160px;
-    bottom: 16%;
+    bottom: 9%;
   }
 
   .registerButton,
@@ -154,12 +160,13 @@
 /* 橫向模式 */
 @media (max-width: 896px) and (orientation: landscape) and (max-height: 500px) {
   .container {
-    background-size: contain;
+    background-size: calc(100% - 24px) auto;
     background-position: center center;
+    padding: 12px;
   }
 
   .buttonWrapper {
-    bottom: 15%;
+    bottom: 11%;
     left: 50%;
     transform: translateX(-50%);
     max-width: 300px;
