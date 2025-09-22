@@ -2,18 +2,16 @@
   min-height: 100vh;
   width: 100%;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: center;
   background-image: url('/assets/icon/HomepageDesign.jpg');
-  background-size: contain;
-  background-position: center top;
+  background-size: cover;
+  background-position: center center;
   background-repeat: no-repeat;
   background-color: #ffca8c;
   position: relative;
   box-sizing: border-box;
   padding: 20px;
-  padding-bottom: 80px;
 }
 
 .buttonWrapper {
@@ -22,7 +20,11 @@
   gap: 20px;
   align-items: center;
   width: 100%;
-  max-width: 300px;
+  max-width: 280px;
+  position: absolute;
+  bottom: 25%;
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 10;
 }
 
@@ -61,19 +63,19 @@
 /* 平板螢幕 */
 @media (max-width: 768px) {
   .container {
-    background-size: 90%;
-    background-position: center 20%;
-    padding-bottom: 60px;
+    background-size: cover;
+    background-position: center center;
   }
 
   .buttonWrapper {
-    max-width: 280px;
+    max-width: 260px;
     gap: 18px;
+    bottom: 22%;
   }
 
   .registerButton,
   .loginButton {
-    width: 260px;
+    width: 240px;
     height: 55px;
   }
 }
@@ -81,38 +83,17 @@
 /* 手機螢幕 */
 @media (max-width: 480px) {
   .container {
-    background-size: 85%;
-    background-position: center 15%;
-    padding: 15px;
-    padding-bottom: 50px;
+    background-size: cover;
+    background-position: center center;
     min-height: 100vh;
     min-height: 100dvh; /* 動態視窗高度，適應不同瀏覽器 */
+    padding: 10px;
   }
 
   .buttonWrapper {
     gap: 15px;
-    max-width: 260px;
-  }
-
-  .registerButton,
-  .loginButton {
-    width: 240px;
-    height: 50px;
-  }
-}
-
-/* 小手機螢幕 */
-@media (max-width: 360px) {
-  .container {
-    background-size: 80%;
-    background-position: center 10%;
-    padding: 10px;
-    padding-bottom: 40px;
-  }
-
-  .buttonWrapper {
-    gap: 12px;
     max-width: 220px;
+    bottom: 20%;
   }
 
   .registerButton,
@@ -122,36 +103,73 @@
   }
 }
 
-/* 超高螢幕（如 iPhone X 系列） */
-@media (max-height: 667px) and (max-width: 480px) {
+/* 小手機螢幕 */
+@media (max-width: 360px) {
   .container {
-    background-size: 75%;
-    background-position: center 5%;
-    padding-bottom: 30px;
-  }
-}
-
-/* 橫向模式 */
-@media (max-width: 896px) and (orientation: landscape) {
-  .container {
-    background-size: 50%;
-    background-position: left 10%;
-    flex-direction: row;
-    justify-content: space-between;
-    padding: 20px;
+    background-size: cover;
+    background-position: center center;
+    padding: 8px;
   }
 
   .buttonWrapper {
-    position: absolute;
-    right: 20px;
-    top: 50%;
-    transform: translateY(-50%);
-    max-width: 200px;
+    gap: 12px;
+    max-width: 180px;
+    bottom: 18%;
   }
 
   .registerButton,
   .loginButton {
-    width: 180px;
+    width: 160px;
     height: 40px;
+  }
+}
+
+/* 超高螢幕（如 iPhone X 系列） */
+@media (max-height: 667px) and (max-width: 480px) {
+  .buttonWrapper {
+    bottom: 15%;
+    gap: 10px;
+  }
+
+  .registerButton,
+  .loginButton {
+    height: 35px;
+  }
+}
+
+/* 超小螢幕 */
+@media (max-width: 320px) {
+  .buttonWrapper {
+    max-width: 160px;
+    bottom: 16%;
+  }
+
+  .registerButton,
+  .loginButton {
+    width: 140px;
+    height: 35px;
+  }
+}
+
+/* 橫向模式 */
+@media (max-width: 896px) and (orientation: landscape) and (max-height: 500px) {
+  .container {
+    background-size: contain;
+    background-position: center center;
+  }
+
+  .buttonWrapper {
+    bottom: 15%;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: 300px;
+    flex-direction: row;
+    gap: 20px;
+  }
+
+  .registerButton,
+  .loginButton {
+    width: 140px;
+    height: 35px;
   }
 }
