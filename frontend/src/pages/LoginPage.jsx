@@ -1,11 +1,8 @@
 import React, { useState } from 'react';
 import styles from '../styles/LoginPage.module.css';
-import { Canvas } from '@react-three/fiber';
-import { useGLTF, OrbitControls, Environment } from '@react-three/drei';
-import LoginPageAnimation from '../components/LoginPageAnimation';
 import Notification from '../components/Notification';
 import { NotificationProvider } from '../context/NotificationContext';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { login } from '../services/authService';
 
 const LoginPage = () => {
@@ -32,7 +29,6 @@ const LoginPage = () => {
   };
 
   const validateAccountName = (accountName) => {
-    // 只允許英文、數字和標點符號
     const accountNameRegex = /^[a-zA-Z0-9\s!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]*$/;
     return accountNameRegex.test(accountName);
   };
@@ -71,7 +67,7 @@ const LoginPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
@@ -82,35 +78,27 @@ const LoginPage = () => {
         email: formData.accountName,
         password: formData.password
       });
-      
-      // 觸發認證狀態更新
-      window.dispatchEvent(new Event('auth-change'));
 
-      // 顯示成功訊息
+      window.dispatchEvent(new Event('auth-change'));
       showNotification('登入成功！');
 
-      // 延遲導航，讓用戶看到成功訊息
       setTimeout(() => {
-        navigate('/main');  // 導航到主頁面
+        navigate('/main');
       }, 1500);
 
     } catch (error) {
       let errorMessage = '登入失敗，請稍後再試';
-      
+
       if (error.response) {
-        // 檢查是否有 non_field_errors
         if (error.response.data?.non_field_errors) {
           errorMessage = error.response.data.non_field_errors[0];
         }
-        // 檢查是否有 data.errors.non_field_errors
         else if (error.response.data?.data?.errors?.non_field_errors) {
           errorMessage = error.response.data.data.errors.non_field_errors[0];
         }
-        // 檢查是否有一般的 message
         else if (error.response.data?.message) {
           errorMessage = error.response.data.message;
         }
-        // 如果都沒有，根據狀態碼給出適當的訊息
         else {
           switch (error.response.status) {
             case 401:
@@ -127,7 +115,7 @@ const LoginPage = () => {
           }
         }
       }
-      
+
       showNotification(errorMessage);
       console.error('登入錯誤：', error.response?.data);
     } finally {
@@ -135,47 +123,29 @@ const LoginPage = () => {
     }
   };
 
-  const { scene: fenceScene } = useGLTF('/assets/models/Fence.glb');
-  const { scene: fenceScene2 } = useGLTF('/assets/models/Fence2.glb');
-  const { scene: fenceScene3 } = useGLTF('/assets/models/Fence3.glb');
-  const { scene: dogbowl } = useGLTF('/assets/models/Dog bowl.glb');
-  const { scene: steak } = useGLTF('/assets/models/Steak.glb');
-
   return (
     <NotificationProvider>
-      <div className={styles.loginPage}>
+      <div className={styles.container}>
         {notification && (
           <Notification
             message={notification}
             onClose={hideNotification}
           />
         )}
-        <div className={styles.canvasArea}>
-          <Canvas className={styles.animationContainer} camera={{ position: [0, 0, 1], fov: 45 }}>
-          <Environment files="/assets/textures/indoor_office_2k.exr" background={false} intensity={0.00015} />
-            <ambientLight intensity={0.6} />
-            <directionalLight position={[5, 5, 5]} intensity={1} />
-            <LoginPageAnimation />
-            <OrbitControls enableZoom={false} enablePan={false} enableRotate={false} />
-            <primitive object={fenceScene} position={[0, -0.15, 0.2]} scale={0.5}/>
-            <primitive object={fenceScene2} position={[0.42, -0.15, 0.2]} scale={0.5}/>
-            <primitive object={fenceScene3} position={[-0.42, -0.15, 0.2]} scale={0.5}/>
-            <primitive object={dogbowl} position={[0.12, -0.15, 0.28]} scale={0.18}/>
-            <primitive object={steak} position={[0.12, -0.15, 0.28]} rotation={[0, -Math.PI / 2, 0]} scale={0.13}/>
-          </Canvas>
-        </div>
-        <div className={styles.formArea}>
-          <form className={styles.loginForm} onSubmit={handleSubmit} noValidate>
-            <input
-              type="email"
-              name="accountName"
-              value={formData.accountName}
-              onChange={handleInputChange}
-              placeholder="請輸入註冊信箱"
-              className={styles.input}
-              disabled={isLoading}
-            />
-            <div className={styles.passwordContainer}>
+        <div className={styles.formWrapper}>
+          <form onSubmit={handleSubmit} noValidate>
+            <div className={styles.accountInput}>
+              <input
+                type="email"
+                name="accountName"
+                value={formData.accountName}
+                onChange={handleInputChange}
+                placeholder="請輸入註冊信箱"
+                className={styles.input}
+                disabled={isLoading}
+              />
+            </div>
+            <div className={styles.passwordInputWrapper}>
               <input
                 type={showPassword ? "text" : "password"}
                 name="password"
@@ -185,29 +155,31 @@ const LoginPage = () => {
                 className={styles.input}
                 disabled={isLoading}
               />
-              <button 
+              <button
                 type="button"
                 className={styles.passwordToggle}
                 onClick={() => setShowPassword(!showPassword)}
                 disabled={isLoading}
               >
-                <img 
-                  src={showPassword ? "/assets/icon/LoginButton_HidePassword.png" : "/assets/icon/LoginButton_ShowPassword.png"} 
+                <img
+                  src={showPassword ? "/assets/icon/LoginButton_HidePassword.png" : "/assets/icon/LoginButton_ShowPassword.png"}
                   alt={showPassword ? "隱藏密碼" : "顯示密碼"}
                 />
               </button>
             </div>
-            <button type="submit" className={styles.loginButton} disabled={isLoading}>
+            <button
+              type="submit"
+              className={styles.loginButton}
+              disabled={isLoading}
+              aria-label={isLoading ? '登入中...' : '登入'}
+            >
               {isLoading ? '登入中...' : '登入'}
             </button>
           </form>
-          <div className={styles.forgotPassword}>
-            忘記密碼?
-          </div>
         </div>
       </div>
     </NotificationProvider>
   );
 };
 
-export default LoginPage; 
+export default LoginPage;
