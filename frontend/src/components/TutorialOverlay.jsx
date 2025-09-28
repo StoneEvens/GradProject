@@ -64,6 +64,27 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
   const lastHighlightPosRef = useRef(null);
   const chatFreezeUntilRef = useRef(0);
   const chatBubbleHeightRef = useRef(200);
+  const imageFlowScopeRef = useRef(null);
+
+  // 取得影像相關步驟的查找根節點，優先使用已建立的範圍
+  const getImageFlowRoot = useCallback(() => {
+    return imageFlowScopeRef.current && imageFlowScopeRef.current.isConnected
+      ? imageFlowScopeRef.current
+      : document;
+  }, []);
+
+  // 判斷元素是否位於導覽列（避免誤選 Navbar 圖示）
+  const isInNavbar = useCallback((el) => {
+    if (!el || !(el instanceof Element)) return false;
+    const keywords = ['navbar', 'topnav', 'bottomnavbar', 'TopNavbar', 'BottomNavbar', 'header'];
+    let current = el;
+    while (current) {
+      const className = (current.className || '').toString().toLowerCase();
+      if (keywords.some(k => className.includes(k.toLowerCase()))) return true;
+      current = current.parentElement;
+    }
+    return false;
+  }, []);
 
   // 等待目標元素的邊界在一段時間內維持穩定，避免剛導航完的布局抖動
   const waitForStableRect = useCallback((element, options = {}) => {
@@ -609,6 +630,12 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
       if (rect.width > 0 && rect.height > 0) {
         targetElementRef.current = cachedEl;
 
+        // 影像流程：在步驟 3 或 4 建立查找範圍（使用貼文建立頁面的主要容器）
+        if (stepData?.id === 3 || stepData?.id === 4) {
+          const scopeCandidate = cachedEl.closest('[class*="CreatePost"], [class*="createPost"], [class*="postContainer"], main, form');
+          imageFlowScopeRef.current = scopeCandidate || document.getElementById('root') || document.body;
+        }
+
         // 在渲染 spotlight 前等待（僅在關鍵步驟）
         (async () => {
           if (stepData?.id === 3 || stepData?.id === 6) {
@@ -672,7 +699,21 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
       // 優先使用 selector（使用自定義函數處理 :contains() 語法）
       if (selector) {
         console.log('嘗試 selector:', selector);
-        targetElement = findElementWithSelector(selector);
+        // 優先在影像流程範圍內查找
+        const queryRoot = (stepData?.id === 3 || stepData?.id === 4) ? getImageFlowRoot() : document;
+        try {
+          if (selector.includes(':contains(')) {
+            targetElement = findElementWithSelector(selector);
+            if (targetElement && (stepData?.id === 4) && isInNavbar(targetElement)) {
+              targetElement = null;
+            }
+          } else {
+            targetElement = queryRoot.querySelector(selector);
+            if (targetElement && (stepData?.id === 4) && isInNavbar(targetElement)) {
+              targetElement = null;
+            }
+          }
+        } catch (_) {}
         console.log('selector 結果:', targetElement);
       }
 
@@ -680,22 +721,35 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
       if (!targetElement && className) {
         console.log('嘗試 className:', className);
         // 查找包含該類名的元素（適用於 CSS Modules）
-        const elements = document.querySelectorAll(`[class*="${className}"]`);
+        const queryRoot = (stepData?.id === 3 || stepData?.id === 4) ? getImageFlowRoot() : document;
+        const elements = queryRoot.querySelectorAll(`[class*="${className}"]`);
         console.log('className 查找結果:', elements);
-        targetElement = elements[0];
+        targetElement = Array.from(elements).find(el => !(stepData?.id === 4 && isInNavbar(el)));
       }
 
       // 最後嘗試直接使用 className
       if (!targetElement && className) {
         console.log('嘗試直接 className:', className);
-        targetElement = document.getElementsByClassName(className)[0];
+        const queryRoot = (stepData?.id === 3 || stepData?.id === 4) ? getImageFlowRoot() : document;
+        const list = queryRoot.getElementsByClassName(className);
+        targetElement = Array.from(list).find(el => !(stepData?.id === 4 && isInNavbar(el)));
         console.log('直接 className 結果:', targetElement);
       }
 
       // 如果還是找不到，嘗試其他選擇器
       if (!targetElement && stepData.targetElement.fallbackSelector) {
         console.log('嘗試 fallbackSelector:', stepData.targetElement.fallbackSelector);
-        targetElement = findElementWithSelector(stepData.targetElement.fallbackSelector);
+        const queryRoot = (stepData?.id === 3 || stepData?.id === 4) ? getImageFlowRoot() : document;
+        try {
+          if (stepData.targetElement.fallbackSelector.includes(':contains(')) {
+            targetElement = findElementWithSelector(stepData.targetElement.fallbackSelector);
+          } else {
+            targetElement = queryRoot.querySelector(stepData.targetElement.fallbackSelector);
+          }
+          if (targetElement && (stepData?.id === 4) && isInNavbar(targetElement)) {
+            targetElement = null;
+          }
+        } catch (_) {}
         console.log('fallbackSelector 結果:', targetElement);
       }
 
@@ -723,10 +777,11 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
         }
       }
 
-      // 步驟 3：查找新增圖片相關元素
+      // 步驟 3：查找新增圖片相關元素（限定在影像流程範圍）
       if (!targetElement && stepData.id === 3) {
         console.log('步驟 3 最後嘗試：查找新增圖片相關元素');
-        const allElements = document.querySelectorAll('button, input, div[role="button"], [onclick]');
+        const queryRoot = getImageFlowRoot();
+        const allElements = queryRoot.querySelectorAll('button, input, div[role="button"], [onclick]');
 
         // 查找包含「新增」、「上傳」、「圖片」、「照片」的元素
         for (const elem of allElements) {
@@ -740,7 +795,7 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
 
         // 查找文件輸入元素
         if (!targetElement) {
-          targetElement = document.querySelector('input[type="file"]');
+          targetElement = queryRoot.querySelector('input[type="file"]');
           console.log('找到文件輸入元素:', targetElement);
         }
 
@@ -753,6 +808,28 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
           targetElement = visibleButtons[0];
           console.log('使用第一個可見元素:', targetElement);
         }
+      }
+
+      // 步驟 4：更嚴格地限定可點擊圖片（限定在影像流程範圍，排除 Navbar）
+      if (!targetElement && stepData.id === 4) {
+        console.log('步驟 4 加強：在範圍內查找可點擊圖片並排除 Navbar');
+        const queryRoot = getImageFlowRoot();
+        // 先找預期的預覽/可點擊圖片
+        let candidates = Array.from(queryRoot.querySelectorAll('[class*="imagePreview"] img, [class*="clickableImage"]'))
+          .filter(el => el && el.getBoundingClientRect().width > 0 && el.getBoundingClientRect().height > 0)
+          .filter(el => !isInNavbar(el));
+        if (candidates.length === 0) {
+          // 再找最近新增的圖片（非資產/圖示）
+          candidates = Array.from(queryRoot.querySelectorAll('img'))
+            .filter(img => {
+              const src = img.src || '';
+              const isUserImage = src.startsWith('blob:') || src.startsWith('data:image') || (!src.includes('/assets/') && !src.includes('/icon/'));
+              const rect = img.getBoundingClientRect();
+              return isUserImage && rect.width > 0 && rect.height > 0 && !isInNavbar(img);
+            });
+        }
+        targetElement = candidates[0] || null;
+        console.log('步驟 4 加強結果:', targetElement);
       }
 
       if (targetElement) {
