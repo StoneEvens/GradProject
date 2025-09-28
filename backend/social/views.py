@@ -760,7 +760,7 @@ class PostListAPIView(generics.ListAPIView):
         else:
             print("無用戶互動歷史")
 
-            return PostFrame.objects.all().order_by('-created_at')[:30]
+            return PostFrame.objects.all().order_by('-created_at')
 
     def list(self, request, *args, **kwargs):
         try:
