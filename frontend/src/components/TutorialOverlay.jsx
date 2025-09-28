@@ -65,6 +65,65 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
   const chatFreezeUntilRef = useRef(0);
   const chatBubbleHeightRef = useRef(200);
 
+  // 等待目標元素的邊界在一段時間內維持穩定，避免剛導航完的布局抖動
+  const waitForStableRect = useCallback((element, options = {}) => {
+    const thresholdPx = options.thresholdPx ?? 1; // 容許的像素變動
+    const stableMs = options.stableMs ?? 250;     // 需連續穩定的時間
+    const maxWaitMs = options.maxWaitMs ?? 1500;  // 最長等待時間
+
+    return new Promise((resolve) => {
+      if (!element || !element.getBoundingClientRect) {
+        resolve();
+        return;
+      }
+
+      let lastRect = null;
+      let stableSince = 0;
+      const startAt = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+      let rafId = 0;
+
+      const isRectClose = (a, b) => {
+        if (!a || !b) return false;
+        return (
+          Math.abs(a.top - b.top) <= thresholdPx &&
+          Math.abs(a.left - b.left) <= thresholdPx &&
+          Math.abs(a.width - b.width) <= thresholdPx &&
+          Math.abs(a.height - b.height) <= thresholdPx
+        );
+      };
+
+      const tick = () => {
+        const now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+        const rect = element.isConnected ? element.getBoundingClientRect() : null;
+
+        if (!rect) {
+          resolve();
+          return;
+        }
+
+        if (lastRect && isRectClose(rect, lastRect)) {
+          if (stableSince === 0) stableSince = now;
+          if (now - stableSince >= stableMs) {
+            resolve();
+            return;
+          }
+        } else {
+          stableSince = 0;
+          lastRect = rect;
+        }
+
+        if (now - startAt >= maxWaitMs) {
+          resolve();
+          return;
+        }
+
+        rafId = window.requestAnimationFrame(tick);
+      };
+
+      rafId = window.requestAnimationFrame(tick);
+    });
+  }, []);
+
   // 穩定更新：避免小幅度抖動與頻繁重繪
   const setHighlightPositionStable = useCallback((rect) => {
     if (!rect) {
@@ -97,9 +156,6 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
       return;
     }
     const now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
-    if (now < chatFreezeUntilRef.current) {
-      return;
-    }
     const rounded = {
       top: Math.round(pos.top),
       left: Math.round(pos.left),
@@ -115,9 +171,18 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
     if (smallMove) {
       return;
     }
+    const isLargeMove = last && (
+      Math.abs(rounded.top - last.top) > 48 ||
+      Math.abs(rounded.left - last.left) > 48 ||
+      Math.abs(rounded.width - last.width) > 32 ||
+      rounded.placement !== last.placement
+    );
+    if (now < chatFreezeUntilRef.current && !isLargeMove) {
+      return;
+    }
     lastChatPosRef.current = rounded;
     setChatPosition(rounded);
-    chatFreezeUntilRef.current = now + 120; // 120ms 冷卻時間
+    chatFreezeUntilRef.current = now + 80; // 縮短冷卻時間，加快移動反應
   }, []);
 
   // 載入教學資料
@@ -544,23 +609,34 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
       if (rect.width > 0 && rect.height > 0) {
         targetElementRef.current = cachedEl;
 
-        const appContainer = document.getElementById('root');
-        const containerRect = appContainer ? appContainer.getBoundingClientRect() : null;
-        const containerLeft = containerRect ? containerRect.left : 0;
-        const containerTop = containerRect ? containerRect.top : 0;
+        // 在渲染 spotlight 前等待（僅在關鍵步驟）
+        (async () => {
+          if (stepData?.id === 3 || stepData?.id === 6) {
+            const stableMs = stepData?.id === 6 ? 220 : 240;
+            await waitForStableRect(cachedEl, { stableMs, maxWaitMs: 1200, thresholdPx: 1 });
+          }
+          if (targetElementRef.current !== cachedEl) return;
+          if (!cachedEl.isConnected) return;
 
-        const spotlightRect = {
-          top: rect.top - containerTop - 10,
-          left: rect.left - containerLeft - 10,
-          width: rect.width + 20,
-          height: rect.height + 20
-        };
+          const appContainer = document.getElementById('root');
+          const containerRect = appContainer ? appContainer.getBoundingClientRect() : null;
+          const containerLeft = containerRect ? containerRect.left : 0;
+          const containerTop = containerRect ? containerRect.top : 0;
 
-        window.requestAnimationFrame(() => {
-          setHighlightPositionStable(spotlightRect);
-          const chatPos = calculateChatPosition(rect);
-          setChatPositionStable(chatPos);
-        });
+          const currentRect = cachedEl.getBoundingClientRect();
+          const spotlightRect = {
+            top: currentRect.top - containerTop - 10,
+            left: currentRect.left - containerLeft - 10,
+            width: currentRect.width + 20,
+            height: currentRect.height + 20
+          };
+
+          window.requestAnimationFrame(() => {
+            setHighlightPositionStable(spotlightRect);
+            const chatPos = calculateChatPosition(currentRect);
+            setChatPositionStable(chatPos);
+          });
+        })();
 
         // 確保目標元素可互動
         cachedEl.classList.add('tutorial-target');
@@ -576,7 +652,7 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
     }
 
     // 延遲查找，確保頁面已經載入（根據步驟調整較短延遲）
-    const delay = stepData?.expectedPath ? 300 : 120;
+    const delay = stepData?.expectedPath ? 200 : 80;
     setTimeout(() => {
       // 清理舊的目標元素
       if (targetElementRef.current) {
@@ -682,26 +758,37 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
       if (targetElement) {
         targetElementRef.current = targetElement;
         elementCacheRef.current[stepData.id] = targetElement;
-        const rect = targetElement.getBoundingClientRect();
 
-        // 設置 spotlight 位置（相對於容器）
-        const appContainer = document.getElementById('root');
-        const containerRect = appContainer ? appContainer.getBoundingClientRect() : null;
-        const containerLeft = containerRect ? containerRect.left : 0;
-        const containerTop = containerRect ? containerRect.top : 0;
+        // 在渲染 spotlight 前等待（僅在關鍵步驟）
+        (async () => {
+          if (stepData?.id === 3 || stepData?.id === 6) {
+            const stableMs = stepData?.id === 6 ? 220 : 240;
+            await waitForStableRect(targetElement, { stableMs, maxWaitMs: 1200, thresholdPx: 1 });
+          }
+          if (targetElementRef.current !== targetElement) return;
+          if (!targetElement.isConnected) return;
 
-        const spotlightRect = {
-          top: rect.top - containerTop - 10,
-          left: rect.left - containerLeft - 10,
-          width: rect.width + 20,
-          height: rect.height + 20
-        };
-        window.requestAnimationFrame(() => {
-          setHighlightPositionStable(spotlightRect);
-          // 計算聊天泡泡位置（根據目標元素位置）
-          const chatPos = calculateChatPosition(rect);
-          setChatPositionStable(chatPos);
-        });
+          const rect = targetElement.getBoundingClientRect();
+
+          // 設置 spotlight 位置（相對於容器）
+          const appContainer = document.getElementById('root');
+          const containerRect = appContainer ? appContainer.getBoundingClientRect() : null;
+          const containerLeft = containerRect ? containerRect.left : 0;
+          const containerTop = containerRect ? containerRect.top : 0;
+
+          const spotlightRect = {
+            top: rect.top - containerTop - 10,
+            left: rect.left - containerLeft - 10,
+            width: rect.width + 20,
+            height: rect.height + 20
+          };
+          window.requestAnimationFrame(() => {
+            setHighlightPositionStable(spotlightRect);
+            // 計算聊天泡泡位置（根據目標元素位置）
+            const chatPos = calculateChatPosition(rect);
+            setChatPositionStable(chatPos);
+          });
+        })();
 
         // 為目標元素添加特殊類，確保它可以被點擊
         targetElement.classList.add('tutorial-target');
@@ -838,7 +925,7 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
         } else {
           console.log('PageNavigate: 二次檢查條件不滿足');
         }
-      }, 500);
+      }, 350);
     }
   }, [stepData, location.pathname, tutorialType, currentStep]);
 
@@ -874,6 +961,9 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
       if (stepData && stepData.action === 'click' && stepData.expectedPath) {
         // 如果需要導航，讓導航先發生
         setTimeout(() => {
+          // 在切換步驟時，暫時凍結聊天泡泡的重新定位，避免卡頓
+          const now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+          chatFreezeUntilRef.current = now + 220;
           setStepData(nextStep);
           setCurrentStep(nextStep.id);
           // 若為最後一步，避免將第 10 步同步到 localStorage，改為維持上一階段狀態
@@ -885,6 +975,9 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
           setIsTransitioning(false);
         }, 100);
       } else {
+        // 在切換步驟時，暫時凍結聊天泡泡的重新定位，避免卡頓
+        const now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+        chatFreezeUntilRef.current = now + 220;
         setStepData(nextStep);
         setCurrentStep(nextStep.id);
         // 若為最後一步，避免將第 10 步同步到 localStorage，改為維持上一階段狀態
