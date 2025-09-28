@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import styles from '../styles/BottomNavbar.module.css';
@@ -64,6 +64,19 @@ const BottomNavbar = () => {
         break;
     }
   };
+
+  // 監聽教學衝突關閉事件
+  useEffect(() => {
+    const handleCloseTutorialConflicts = () => {
+      console.log('收到教學衝突關閉事件，關閉 PostMenu');
+      setIsPostMenuOpen(false);
+    };
+
+    window.addEventListener('closeTutorialConflicts', handleCloseTutorialConflicts);
+    return () => {
+      window.removeEventListener('closeTutorialConflicts', handleCloseTutorialConflicts);
+    };
+  }, []);
 
   return (
     <>

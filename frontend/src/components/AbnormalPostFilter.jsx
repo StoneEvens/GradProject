@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useSymptomTranslation } from '../hooks/useSymptomTranslation';
 import styles from '../styles/AbnormalPostFilter.module.css';
 
-const AbnormalPostFilter = ({ onFilterChange, symptoms = [] }) => {
+const AbnormalPostFilter = ({ onFilterChange, symptoms = [], initialFilters = null }) => {
   const { t } = useTranslation('posts');
   const { translateSingleSymptom, reverseTranslateSymptom } = useSymptomTranslation();
   const [filterType, setFilterType] = useState('symptom'); // 'symptom', 'date', 'both'
@@ -11,6 +11,29 @@ const AbnormalPostFilter = ({ onFilterChange, symptoms = [] }) => {
   const [selectedSymptoms, setSelectedSymptoms] = useState([]);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
+
+  // 處理初始篩選條件（來自 AI 操作）
+  React.useEffect(() => {
+    if (initialFilters) {
+      console.log('AbnormalPostFilter 接收到初始篩選條件:', initialFilters);
+
+      if (initialFilters.type) {
+        setFilterType(initialFilters.type);
+      }
+
+      if (initialFilters.startDate) {
+        setStartDate(initialFilters.startDate);
+      }
+
+      if (initialFilters.endDate) {
+        setEndDate(initialFilters.endDate);
+      }
+
+      if (initialFilters.symptoms && Array.isArray(initialFilters.symptoms)) {
+        setSelectedSymptoms(initialFilters.symptoms);
+      }
+    }
+  }, [initialFilters]);
 
   // 格式化日期顯示
   const formatDate = (date) => {

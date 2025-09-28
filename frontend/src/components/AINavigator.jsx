@@ -9,11 +9,17 @@ const AINavigator = ({ user }) => {
 
   const handleAIClick = () => {
     setIsChatOpen(true);
+    // 同時啟動全局浮動聊天
+    window.dispatchEvent(new CustomEvent('startFloatingChat'));
   };
 
   const handleChatClose = () => {
     setIsChatOpen(false);
+    // 不要自動關閉全局浮動聊天，讓它繼續存在
+    // 只有用戶明確的操作（如遣散頭像）才關閉全局浮動聊天
   };
+
+  // 移除本地的路徑監聽，交給全局 GlobalFloatingAI 處理
 
   return (
     <>

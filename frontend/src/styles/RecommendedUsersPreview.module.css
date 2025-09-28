@@ -1,0 +1,163 @@
+/* 推薦用戶預覽容器 */
+.container {
+  margin-top: 8px;
+  background: #fff;
+  border-radius: 15px;
+  border: none; /* 比照 AI 回覆泡泡：無邊框 */
+  box-shadow: 0 2px 8px rgba(240, 134, 81, 0.2); /* 比照 AI 回覆泡泡的柔和陰影 */
+  overflow: hidden;
+  position: relative;
+  width: 100%; /* 固定寬度與聊天泡泡一致 */
+  max-width: 280px; /* 最大寬度限制 */
+}
+
+/* 標題區域 */
+.header {
+  padding: 12px 16px 8px;
+  border-bottom: 1px solid rgba(255, 179, 112, 0.1);
+}
+
+.title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #8B4513;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* 用戶列表 */
+.userList {
+  padding: 4px 0;
+}
+
+.userItem {
+  display: flex;
+  align-items: center;
+  padding: 10px 16px;
+  gap: 12px;
+  transition: background-color 0.2s ease;
+  cursor: pointer;
+}
+
+.userItem:hover {
+  background-color: rgba(255, 179, 112, 0.1);
+}
+
+.userItem:not(:last-child) {
+  border-bottom: 1px solid rgba(255, 179, 112, 0.05);
+}
+
+/* 用戶頭像 */
+.userAvatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(255, 179, 112, 0.3);
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.userAvatar:hover {
+  transform: scale(1.05);
+}
+
+/* 用戶資訊 */
+.userInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0; /* 確保文字可以被截斷 */
+}
+
+.username {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.displayName {
+  font-size: 12px;
+  color: #666;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 追蹤按鈕 */
+.followButton {
+  border: none;
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 45px;
+  text-align: center;
+  background: linear-gradient(145deg, #F08651, #E07045);
+  color: white;
+  box-shadow: 0 1px 4px rgba(240, 134, 81, 0.3);
+  flex-shrink: 0;
+}
+
+.followButton:hover {
+  background: linear-gradient(145deg, #E07045, #D06639);
+  transform: translateY(-0.5px);
+  box-shadow: 0 2px 8px rgba(240, 134, 81, 0.4);
+}
+
+.followButton:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 3px rgba(240, 134, 81, 0.3);
+}
+
+/* 載入狀態 */
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  text-align: center;
+}
+
+.loading p {
+  color: #8B4513;
+  font-size: 14px;
+  margin: 0;
+  font-weight: 500;
+}
+
+/* 響應式設計 */
+@media (max-width: 380px) {
+  .userItem {
+    padding: 8px 12px;
+    gap: 10px;
+  }
+
+  .userAvatar {
+    width: 36px;
+    height: 36px;
+  }
+
+  .username {
+    font-size: 13px;
+  }
+
+  .displayName {
+    font-size: 11px;
+  }
+
+  .followButton {
+    padding: 5px 10px;
+    font-size: 11px;
+    min-width: 50px;
+  }
+}

@@ -19,9 +19,12 @@
   border-radius: 15px;
   width: 100%;
   max-width: 350px;
+  max-height: 90vh;
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   animation: slideIn 0.3s ease-out;
+  display: flex;
+  flex-direction: column;
 }
 
 @keyframes slideIn {
@@ -53,7 +56,7 @@
 /* Modal 內容 */
 .modalBody {
   background-color: #FFca9c;
-  padding: 15px 20px;
+  padding: 15px 20px 0;
   flex: 1;
   overflow-y: auto;
   display: flex;
@@ -61,13 +64,16 @@
   gap: 15px;
 }
 
-/* 按鈕列 */
+/* 按鈕列 - 固定在底部 */
 .buttonBar {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
-  padding: 10px 0;
+  padding: 15px 20px;
   border-top: 1px solid #ffeed6;
+  background-color: #FFca9c;
+  margin-top: auto;
+  flex-shrink: 0;
 }
 
 .leftButtons {
@@ -355,6 +361,29 @@
   padding: 10px;
   background-color: #ffeed6;
   border-radius: 8px;
+}
+
+.annotationInstructions {
+  text-align: center;
+  padding: 15px;
+  background-color: #fff6ea;
+  border-radius: 8px;
+  margin: 10px 0;
+  border: 1px solid #FFB370;
+}
+
+.annotationInstructions h3 {
+  color: #8B4513;
+  font-size: 16px;
+  margin: 0 0 8px 0;
+  font-weight: 600;
+}
+
+.annotationInstructions p {
+  color: #6B3410;
+  font-size: 14px;
+  margin: 0;
+  line-height: 1.4;
 }
 
 /* 按鈕樣式 */

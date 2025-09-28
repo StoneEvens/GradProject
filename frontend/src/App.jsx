@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import './App.css';
 import './i18n/i18n';
 import HomePage from './pages/HomePage';
@@ -54,10 +54,159 @@ import InteractiveCityPage from './pages/InteractiveCityPage';
 import CheckpointDetailPage from './pages/CheckpointDetailPage';
 import I18nDemoPage from './pages/I18nDemoPage';
 import { UserProvider } from './context/UserContext';
+import TutorialOverlay from './components/TutorialOverlay';
+import FloatingAIAvatar from './components/FloatingAIAvatar';
+import ChatWindow from './components/ChatWindow';
+
+// 全局浮動AI頭像管理器
+const GlobalFloatingAI = ({ user }) => {
+  const [floatingMode, setFloatingMode] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isForceMode, setIsForceMode] = useState(false); // 強制模式標記
+  const location = useLocation();
+
+  // 監聽全局AI聊天啟動事件
+  useEffect(() => {
+    const handleStartFloatingChat = (event) => {
+      console.log('啟動全局浮動聊天');
+      setFloatingMode(true);
+      setIsChatOpen(true);
+    };
+
+    const handleCloseFloatingChat = (event) => {
+      console.log('關閉全局浮動聊天');
+      setFloatingMode(false);
+      setIsChatOpen(false);
+    };
+
+    const handleForceFloatingMode = (event) => {
+      console.log('強制啟動浮動模式（ChatWindow 導航觸發）');
+      setFloatingMode(true);
+      setIsForceMode(true);
+      // 設置一個定時器，在導航完成後清除強制模式標記
+      setTimeout(() => {
+        console.log('清除強制模式標記');
+        setIsForceMode(false);
+      }, 2000); // 2秒後清除強制模式
+    };
+
+    const handleDismissFloatingAvatar = (event) => {
+      console.log('自動關閉漂浮頭像（教學模式觸發）');
+      setFloatingMode(false);
+      setIsChatOpen(false);
+      setIsForceMode(false);
+    };
+
+    window.addEventListener('startFloatingChat', handleStartFloatingChat);
+    window.addEventListener('closeFloatingChat', handleCloseFloatingChat);
+    window.addEventListener('forceFloatingMode', handleForceFloatingMode);
+    window.addEventListener('dismissFloatingAvatar', handleDismissFloatingAvatar);
+
+    return () => {
+      window.removeEventListener('startFloatingChat', handleStartFloatingChat);
+      window.removeEventListener('closeFloatingChat', handleCloseFloatingChat);
+      window.removeEventListener('forceFloatingMode', handleForceFloatingMode);
+      window.removeEventListener('dismissFloatingAvatar', handleDismissFloatingAvatar);
+    };
+  }, []);
+
+  // 當位置改變時，檢查是否應該啟用浮動模式
+  useEffect(() => {
+    // 只有當浮動模式已啟動時才處理路徑變化
+    if (floatingMode) {
+      // 檢查是否在有AINavigator的主頁面
+      const isOnMainPages =
+        location.pathname === '/' ||
+        location.pathname === '/main';
+
+      console.log('全局AI頭像 - 當前路徑:', location.pathname);
+      console.log('全局AI頭像 - 是否在主頁面:', isOnMainPages);
+      console.log('全局AI頭像 - 當前狀態:', { floatingMode, isChatOpen, isForceMode });
+
+      if (!isOnMainPages) {
+        console.log('在非主頁面，確保顯示浮動頭像');
+        // 在非主頁面，如果聊天是開啟的，關閉它顯示浮動頭像
+        if (isChatOpen) {
+          console.log('關閉展開的聊天，顯示浮動頭像');
+          setIsChatOpen(false);
+        }
+      } else if (!isForceMode) {
+        // 只有在非強制模式下才關閉浮動模式
+        console.log('回到主頁面且非強制模式，關閉浮動模式');
+        setFloatingMode(false);
+        setIsChatOpen(false);
+      } else {
+        console.log('回到主頁面但處於強制模式，保持浮動模式');
+      }
+    }
+  }, [location.pathname, floatingMode, isForceMode]);
+
+  // 單獨處理聊天開啟狀態變化，避免衝突
+  useEffect(() => {
+    // 當聊天開啟時，如果在非主頁面且不是浮動模式，啟動浮動模式
+    if (isChatOpen && !floatingMode) {
+      const isOnMainPages =
+        location.pathname === '/' ||
+        location.pathname === '/main';
+
+      if (!isOnMainPages) {
+        console.log('聊天開啟且不在主頁面，啟動浮動模式');
+        setFloatingMode(true);
+      }
+    }
+  }, [isChatOpen, floatingMode, location.pathname]);
+
+  const handleToggleFloating = () => {
+    setIsChatOpen(!isChatOpen);
+  };
+
+  const handleDismissFloating = () => {
+    setFloatingMode(false);
+    setIsChatOpen(false);
+  };
+
+  const handleChatClose = () => {
+    // 關閉聊天視窗
+    setIsChatOpen(false);
+    // 浮動模式狀態由路徑變化自動管理，這裡不做變更
+  };
+
+  // 只在浮動模式下渲染
+  if (!floatingMode) return null;
+
+  return (
+    <>
+      {/* 浮動 AI 頭像 - 最高 z-index */}
+      <FloatingAIAvatar
+        isVisible={!isChatOpen}
+        onAvatarClick={handleToggleFloating}
+        onDismiss={handleDismissFloating}
+      />
+
+      {/* 展開的聊天視窗 */}
+      {isChatOpen && (
+        <ChatWindow
+          isOpen={isChatOpen}
+          onClose={handleChatClose}
+          user={user}
+          floatingMode={true}
+          onToggleFloating={handleToggleFloating}
+          onDismissFloating={handleDismissFloating}
+        />
+      )}
+    </>
+  );
+};
 
 const App = () => {
   const [isUserAuthenticated, setIsUserAuthenticated] = useState(false);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
+  const [currentUser, setCurrentUser] = useState(null);
+  // 教學模式狀態
+  const [tutorialMode, setTutorialMode] = useState({
+    isActive: false,
+    tutorialType: null
+  });
 
   useEffect(() => {
     // 檢查認證狀態並嘗試刷新 Token
@@ -98,21 +247,50 @@ const App = () => {
     window.addEventListener('auth-change', checkAuth);
     
     // 監聽登出事件
-    window.addEventListener('auth-logout', () => {
+    const handleLogout = () => {
       setIsUserAuthenticated(false);
-    });
+    };
+    window.addEventListener('auth-logout', handleLogout);
+
+    // 監聽教學啟動事件
+    const handleStartTutorial = (event) => {
+      const { tutorialType } = event.detail;
+      console.log('App 收到教學啟動事件:', tutorialType);
+      setTutorialMode({
+        isActive: true,
+        tutorialType: tutorialType
+      });
+    };
+    window.addEventListener('startTutorial', handleStartTutorial);
 
     // 定期檢查 token 是否有效（每分鐘）
     const intervalId = setInterval(checkAuth, 60000);
 
     return () => {
       window.removeEventListener('auth-change', checkAuth);
-      window.removeEventListener('auth-logout', () => {
-        setIsUserAuthenticated(false);
-      });
+      window.removeEventListener('auth-logout', handleLogout);
+      window.removeEventListener('startTutorial', handleStartTutorial);
       clearInterval(intervalId);
     };
   }, []);
+
+  // 處理教學完成
+  const handleTutorialComplete = () => {
+    console.log('教學完成');
+    setTutorialMode({
+      isActive: false,
+      tutorialType: null
+    });
+  };
+
+  // 處理教學跳過
+  const handleTutorialSkip = () => {
+    console.log('教學跳過');
+    setTutorialMode({
+      isActive: false,
+      tutorialType: null
+    });
+  };
 
   // 認證檢查中顯示載入畫面
   if (isAuthLoading) {
@@ -405,6 +583,18 @@ const App = () => {
           element={<I18nDemoPage />}
         />
       </Routes>
+
+      {/* 教學模式覆蓋層 - 移到 Router 內部 */}
+      {tutorialMode.isActive && (
+        <TutorialOverlay
+          tutorialType={tutorialMode.tutorialType}
+          onComplete={handleTutorialComplete}
+          onSkip={handleTutorialSkip}
+        />
+      )}
+
+      {/* 全局浮動 AI 頭像 - 最高層級 */}
+      {isUserAuthenticated && <GlobalFloatingAI user={currentUser} />}
     </BrowserRouter>
     </UserProvider>
   );
