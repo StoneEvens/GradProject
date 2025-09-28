@@ -47,7 +47,7 @@ const tutorialData = {
         // 添加過渡配置來減少閃爍
         transition: {
           fadeOut: true,
-          delay: 300
+          delay: 320
         }
       },
       {
@@ -70,7 +70,7 @@ const tutorialData = {
         // 添加過渡配置來平滑進入
         transition: {
           fadeIn: true,
-          delay: 500,
+          delay: 480,
           waitForPageLoad: true
         }
       },
@@ -200,9 +200,9 @@ const tutorialData = {
       resetOnError: true,        // 錯誤時重置到當前步驟
       // 全局過渡設置來減少閃爍
       globalTransitions: {
-        stepTransitionDelay: 400,     // 步驟間過渡延遲 (ms)
+        stepTransitionDelay: 350,     // 步驟間過渡延遲 (ms)
         highlightFadeSpeed: 'smooth', // 高光淡入淡出速度
-        pageNavigationBuffer: 600,    // 頁面導航緩衝時間 (ms)
+        pageNavigationBuffer: 700,    // 頁面導航緩衝時間 (ms)
         smoothTransitions: true       // 啟用平滑過渡
       }
     }

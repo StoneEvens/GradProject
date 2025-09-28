@@ -257,7 +257,8 @@ const FloatingAIAvatar = ({
 
         // 移除防止滾動的事件監聽
         document.removeEventListener('wheel', preventScroll);
-        document.removeEventListener('touchstart', preventScroll);
+        // 注意：新增時使用了 capture:true，移除也必須帶上 { capture: true }
+        document.removeEventListener('touchstart', preventScroll, { capture: true });
 
         // 恢復 body 滾動
         document.body.style.overflow = '';
@@ -274,6 +275,9 @@ const FloatingAIAvatar = ({
       document.body.style.overflow = '';
       document.body.style.position = '';
       document.body.style.width = '';
+      // 防禦性移除可能殘留的全域攔截事件
+      document.removeEventListener('wheel', preventScroll);
+      document.removeEventListener('touchstart', preventScroll, { capture: true });
     };
   }, []);
 
@@ -295,6 +299,10 @@ const FloatingAIAvatar = ({
         clearTimeout(longPressTimer.current);
         longPressTimer.current = null;
       }
+
+      // 防禦性移除可能殘留的全域攔截事件
+      document.removeEventListener('wheel', preventScroll);
+      document.removeEventListener('touchstart', preventScroll, { capture: true });
     }
   }, [isVisible]);
 
