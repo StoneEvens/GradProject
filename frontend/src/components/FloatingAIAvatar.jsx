@@ -68,8 +68,16 @@ const FloatingAIAvatar = ({
     }
   }, [isVisible]);
 
+  // 防止上下文選單
+  const handleContextMenu = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    return false;
+  };
+
   // 處理觸摸開始
   const handleTouchStart = (e) => {
+    e.preventDefault();
     const touch = e.touches[0];
     setDragStart({ x: touch.clientX - position.x, y: touch.clientY - position.y });
 
@@ -197,6 +205,17 @@ const FloatingAIAvatar = ({
     handleEnd();
   };
 
+  // 防止頁面滾動的函數（但不影響頭像拖動）
+  const preventScroll = (e) => {
+    // 如果事件來自頭像容器，則不阻止
+    if (avatarRef.current && avatarRef.current.contains(e.target)) {
+      return;
+    }
+    e.preventDefault();
+    e.stopPropagation();
+    return false;
+  };
+
   // 添加全局事件監聽
   useEffect(() => {
     if (isDragging || isLongPress) {
@@ -205,16 +224,35 @@ const FloatingAIAvatar = ({
       const handleGlobalTouchMove = (e) => handleTouchMove(e);
       const handleGlobalTouchEnd = (e) => handleTouchEnd(e);
 
+      // 防止頁面滾動和其他交互
       document.addEventListener('mousemove', handleGlobalMouseMove);
       document.addEventListener('mouseup', handleGlobalMouseUp);
       document.addEventListener('touchmove', handleGlobalTouchMove, { passive: false });
       document.addEventListener('touchend', handleGlobalTouchEnd);
+
+      // 防止滾動（只針對非頭像區域）
+      document.addEventListener('wheel', preventScroll, { passive: false });
+      document.addEventListener('touchstart', preventScroll, { passive: false, capture: true });
+
+      // 禁用 body 滾動
+      document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
 
       return () => {
         document.removeEventListener('mousemove', handleGlobalMouseMove);
         document.removeEventListener('mouseup', handleGlobalMouseUp);
         document.removeEventListener('touchmove', handleGlobalTouchMove);
         document.removeEventListener('touchend', handleGlobalTouchEnd);
+
+        // 移除防止滾動的事件監聽
+        document.removeEventListener('wheel', preventScroll);
+        document.removeEventListener('touchstart', preventScroll);
+
+        // 恢復 body 滾動
+        document.body.style.overflow = '';
+        document.body.style.position = '';
+        document.body.style.width = '';
       };
     }
   }, [isDragging, isLongPress, position, dragStart]);
@@ -225,7 +263,15 @@ const FloatingAIAvatar = ({
     <>
       {/* 遣散區域覆蓋層 */}
       {showDismissZone && (
-        <div className={styles.dismissOverlay}>
+        <div
+          className={styles.dismissOverlay}
+          onTouchStart={preventScroll}
+          onTouchMove={preventScroll}
+          onTouchEnd={preventScroll}
+          onScroll={preventScroll}
+          onWheel={preventScroll}
+          onContextMenu={handleContextMenu}
+        >
           <div className={styles.dismissZone}>
             <div className={styles.dismissCircle}>
               {/* 移除圖示和文字，只保留空的圓環 */}
@@ -246,6 +292,7 @@ const FloatingAIAvatar = ({
         onMouseDown={handleMouseDown}
         onTouchEnd={handleTouchEnd}
         onMouseUp={handleMouseUp}
+        onContextMenu={handleContextMenu}
       >
         <div className={styles.avatarContainer}>
           <img
@@ -253,6 +300,7 @@ const FloatingAIAvatar = ({
             alt="Peter AI"
             className={styles.avatarImage}
             draggable={false}
+            onContextMenu={handleContextMenu}
           />
 
 

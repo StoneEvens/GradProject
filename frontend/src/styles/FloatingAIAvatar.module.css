@@ -28,6 +28,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
+
+  /* 防止長按選單 */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
 }
 
 /* 頭像圖片 */
@@ -44,6 +51,19 @@
 
   /* 飄浮動畫 */
   animation: float 3s ease-in-out infinite;
+
+  /* 防止長按選單 */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-user-drag: none;
+  -khtml-user-drag: none;
+  -moz-user-drag: none;
+  -o-user-drag: none;
+  user-drag: none;
+  pointer-events: none; /* 讓圖片本身不接收事件，由父容器處理 */
 }
 
 @keyframes float {
@@ -122,6 +142,17 @@
   justify-content: center;
   padding-bottom: 100px;
   animation: fadeIn 0.3s ease-out;
+
+  /* 防止滾動和交互 */
+  overflow: hidden;
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
+  touch-action: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
 }
 
 @keyframes fadeIn {
