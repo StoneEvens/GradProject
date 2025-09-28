@@ -403,12 +403,29 @@ const CreatePostPage = () => {
   };
 
   // 新增圖片按鈕點擊
-  const handleAddImage = () => {
+  const handleAddImage = (e) => {
     if (selectedImages.length >= 10) {
       showNotification(t('createPost.messages.maxImagesReached'));
       return;
     }
-    fileInputRef.current?.click();
+
+    // 手機版教學模式特殊處理
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    const isInTutorial = document.querySelector('[class*="tutorialOverlay"]') !== null;
+
+    if (isMobile && isInTutorial) {
+      // 在手機教學模式下，直接觸發 file input 的點擊事件
+      // 使用 setTimeout 延遲執行，確保事件鏈不被中斷
+      setTimeout(() => {
+        if (fileInputRef.current) {
+          console.log('手機教學模式：觸發檔案選擇器');
+          fileInputRef.current.click();
+        }
+      }, 0);
+    } else {
+      // 正常模式下直接點擊
+      fileInputRef.current?.click();
+    }
   };
 
   // 新增 hashtag
@@ -672,6 +689,8 @@ const CreatePostPage = () => {
               multiple
               onChange={handleImageSelect}
               className={styles.hiddenInput}
+              capture="environment"  // 改善手機相容性
+              aria-label="選擇圖片"
             />
           </div>
 
