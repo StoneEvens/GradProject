@@ -39,9 +39,49 @@
   color: white;
   padding: 15px 20px;
   display: flex;
-  justify-content: space-between;
   align-items: center;
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* 選單按鈕 */
+.menuButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  margin-right: 12px;
+}
+
+.menuButton:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.menuIcon {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  width: 18px;
+}
+
+.menuIcon span {
+  height: 2px;
+  background: white;
+  border-radius: 1px;
+  transition: all 0.2s ease;
+}
+
+.menuIcon span:nth-child(1) {
+  width: 100%;
+}
+
+.menuIcon span:nth-child(2) {
+  width: 80%;
+}
+
+.menuIcon span:nth-child(3) {
+  width: 90%;
 }
 
 .headerInfo {
@@ -83,6 +123,7 @@
   align-items: center;
   justify-content: center;
   transition: background-color 0.2s;
+  margin-left: auto;
 }
 
 .closeButton:hover {
@@ -179,7 +220,6 @@
   background: white;
   color: #333;
   border-bottom-left-radius: 8px;
-  border: 1px solid #f08651;
 }
 
 /* 訊息時間 */
@@ -577,4 +617,63 @@ body:has(.chatOverlay) {
   .inputSection {
     padding: 8px 16px;
   }
+}
+
+/* 教學按鈕樣式 */
+.tutorialButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 8px;
+  padding: 10px 20px;
+  min-width: 120px;
+  background: #fff;
+  border: 1.5px solid rgba(255, 179, 112, 0.3);
+  border-radius: 12px;
+  color: #8B4513;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  /* 添加與聊天泡泡相似的陰影和立體感 */
+  box-shadow: 0 2px 8px rgba(240, 134, 81, 0.2),
+              0 1px 2px rgba(0, 0, 0, 0.08),
+              inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.tutorialButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.1) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.tutorialButton:hover {
+  background: linear-gradient(145deg, #fff6ea, #f5eed8);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(240, 134, 81, 0.3),
+              0 2px 4px rgba(0, 0, 0, 0.1),
+              inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  border-color: #FFB370;
+  color: #6B3410;
+}
+
+.tutorialButton:hover::before {
+  opacity: 1;
+}
+
+.tutorialButton:active {
+  background: linear-gradient(145deg, #FFB370, #f08651);
+  border: 1.5px solid transparent;
+  color: white;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15),
+              0 1px 2px rgba(0, 0, 0, 0.1);
+  transform: translateY(0);
 }

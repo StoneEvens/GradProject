@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import TopNavbar from '../components/TopNavbar';
 import BottomNavbar from '../components/BottomNavigationbar';
@@ -14,6 +14,7 @@ const PetAbnormalPostsPage = () => {
   const { translateSymptomList, formatSymptomsForDisplay, reverseTranslateSymptom } = useSymptomTranslation();
   const { petId } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [pet, setPet] = useState(null);
   const [abnormalPosts, setAbnormalPosts] = useState([]);
@@ -36,6 +37,27 @@ const PetAbnormalPostsPage = () => {
   useEffect(() => {
     loadSymptoms();
   }, [translateSymptomList, t]);
+
+  // 處理 URL 參數的自動篩選（AI 操作觸發）
+  useEffect(() => {
+    const startDate = searchParams.get('startDate');
+    const endDate = searchParams.get('endDate');
+    const autoFilter = searchParams.get('autoFilter');
+
+    // 只有當 autoFilter=true 且有日期參數時才自動設置篩選
+    if (autoFilter === 'true' && (startDate || endDate)) {
+      const newFilters = {
+        type: 'date',
+        symptoms: [],
+        startDate: startDate ? new Date(startDate) : null,
+        endDate: endDate ? new Date(endDate) : null
+      };
+
+      setFilters(newFilters);
+
+      console.log('AI 操作自動設置篩選條件:', newFilters);
+    }
+  }, [searchParams]);
 
   // 根據篩選條件更新顯示的貼文
   useEffect(() => {
@@ -197,9 +219,10 @@ const PetAbnormalPostsPage = () => {
           <div className={styles.divider}></div>
 
           {/* 篩選器 */}
-          <AbnormalPostFilter 
+          <AbnormalPostFilter
             onFilterChange={handleFilterChange}
             symptoms={allSymptoms}
+            initialFilters={searchParams.get('autoFilter') === 'true' ? filters : null}
           />
 
           {/* 篩選結果資訊 */}

@@ -34,7 +34,7 @@ import { checkAnnotationPermission } from '../services/socialService';
 const ImageEditor = ({ image, isOpen, onClose, onSave, mode = 'create' }) => {
   const { t } = useTranslation('posts');
   const [annotations, setAnnotations] = useState([]);
-  const [showAnnotations, setShowAnnotations] = useState(false);
+  const [showAnnotations, setShowAnnotations] = useState(true);
   const [showAnnotationDots, setShowAnnotationDots] = useState(false);
   const [editingAnnotation, setEditingAnnotation] = useState(null);
   const [newAnnotation, setNewAnnotation] = useState(null);
@@ -366,15 +366,7 @@ const ImageEditor = ({ image, isOpen, onClose, onSave, mode = 'create' }) => {
     setSelectedPet('');
   };
 
-  // 切換標註顯示
-  const toggleAnnotations = () => {
-    setShowAnnotations(!showAnnotations);
-    // 如果關閉標註模式，也關閉編輯狀態
-    if (showAnnotations) {
-      handleCancelEdit();
-      setShowAnnotationDots(false);
-    }
-  };
+  // 已移除 toggleAnnotations 函數，因為標註模式現在永遠開啟
 
   // 切換標註點顯示
   const toggleAnnotationDots = () => {
@@ -394,7 +386,6 @@ const ImageEditor = ({ image, isOpen, onClose, onSave, mode = 'create' }) => {
 
   // 處理關閉
   const handleClose = () => {
-    setShowAnnotations(false);
     handleCancelEdit();
     onClose();
   };
@@ -502,34 +493,13 @@ const ImageEditor = ({ image, isOpen, onClose, onSave, mode = 'create' }) => {
             )}
           </div>
 
-          {/* 工具列 - 移動到圖片下方 */}
-          <div className={styles.buttonBar}>
-            <div className={styles.leftButtons}>
-              <button 
-                className={`${styles.toolButton} ${showAnnotations ? styles.active : ''}`}
-                onClick={toggleAnnotations}
-              >
-                {t('imageEditor.buttons.annotations')}
-              </button>
-              <button className={styles.toolButton}>
-                {t('imageEditor.buttons.stickers')}
-              </button>
+          {/* 標註說明 - 永久顯示 */}
+          {!newAnnotation && !editingAnnotation && (
+            <div className={styles.annotationInstructions}>
+              <h3>{t('imageEditor.buttons.annotations')}</h3>
+              <p>{t('imageEditor.instructions')}</p>
             </div>
-            <div className={styles.rightButtons}>
-              <button 
-                className={styles.cancelButton}
-                onClick={handleClose}
-              >
-                {t('imageEditor.buttons.cancel')}
-              </button>
-              <button 
-                className={styles.saveButton}
-                onClick={handleSaveAndClose}
-              >
-                {t('imageEditor.buttons.done')}
-              </button>
-            </div>
-          </div>
+          )}
 
           {/* 編輯面板 */}
           {(newAnnotation || editingAnnotation) && (
@@ -550,7 +520,7 @@ const ImageEditor = ({ image, isOpen, onClose, onSave, mode = 'create' }) => {
                     <option value="pet">{t('imageEditor.form.pet')}</option>
                   </select>
                 </div>
-                
+
                 <div className={styles.inputGroup}>
                   <label>{t('imageEditor.form.annotationContent')}</label>
                   {annotationType === 'user' ? (
@@ -578,24 +548,24 @@ const ImageEditor = ({ image, isOpen, onClose, onSave, mode = 'create' }) => {
                   )}
                 </div>
               </div>
-              
+
               <div className={styles.editActions}>
-                <button 
+                <button
                   className={styles.editCancelButton}
                   onClick={handleCancelEdit}
                 >
                   {t('imageEditor.buttons.cancel')}
                 </button>
-                
+
                 {editingAnnotation ? (
                   <>
-                    <button 
+                    <button
                       className={styles.deleteButton}
                       onClick={handleDeleteAnnotation}
                     >
                       {t('imageEditor.buttons.delete')}
                     </button>
-                    <button 
+                    <button
                       className={styles.confirmButton}
                       onClick={handleUpdateAnnotation}
                     >
@@ -603,7 +573,7 @@ const ImageEditor = ({ image, isOpen, onClose, onSave, mode = 'create' }) => {
                     </button>
                   </>
                 ) : (
-                  <button 
+                  <button
                     className={styles.confirmButton}
                     onClick={handleAddAnnotation}
                   >
@@ -613,13 +583,24 @@ const ImageEditor = ({ image, isOpen, onClose, onSave, mode = 'create' }) => {
               </div>
             </div>
           )}
+        </div>
 
-          {/* 提示文字 */}
-          {showAnnotations && !newAnnotation && !editingAnnotation && (
-            <div className={styles.hintText}>
-              {t('imageEditor.instructions')}
-            </div>
-          )}
+        {/* 工具列 - 固定在底部 */}
+        <div className={styles.buttonBar}>
+          <div className={styles.rightButtons}>
+            <button
+              className={styles.cancelButton}
+              onClick={handleClose}
+            >
+              {t('imageEditor.buttons.cancel')}
+            </button>
+            <button
+              className={styles.saveButton}
+              onClick={handleSaveAndClose}
+            >
+              {t('imageEditor.buttons.done')}
+            </button>
+          </div>
         </div>
       </div>
     </div>

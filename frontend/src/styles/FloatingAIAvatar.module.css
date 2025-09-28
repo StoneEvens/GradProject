@@ -1,0 +1,254 @@
+/* 浮動 AI 頭像 */
+.floatingAvatar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 80px;
+  height: 80px;
+  cursor: pointer;
+  user-select: none;
+  transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  z-index: 999999; /* 最高 z-index */
+}
+
+.floatingAvatar.dragging {
+  transition: none;
+  z-index: 9999999; /* 拖拽時更高 */
+}
+
+.floatingAvatar.longPress {
+  z-index: 9999999; /* 長按時更高 */
+}
+
+/* 頭像容器 */
+.avatarContainer {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 頭像圖片 */
+.avatarImage {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: 3px solid #fff;
+  box-shadow: 0 4px 12px rgba(240, 134, 81, 0.3);
+  background: #fff6ea;
+  object-fit: cover;
+  z-index: 2;
+  position: relative;
+
+  /* 飄浮動畫 */
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+/* 移除呼吸光環效果 */
+
+/* 新訊息提示點 */
+.notificationDot {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 16px;
+  height: 16px;
+  background: #ff4757;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  z-index: 3;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+}
+
+/* 拖拽提示 */
+.dragHint {
+  position: absolute;
+  top: -40px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  white-space: nowrap;
+  z-index: 3;
+  opacity: 0;
+  animation: fadeInUp 0.3s ease-out forwards;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* 遣散覆蓋層 */
+.dismissOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 9999998; /* 比頭像低一點但仍然很高 */
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 100px;
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* 遣散區域 */
+.dismissZone {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 遣散圓環 */
+.dismissCircle {
+  width: 120px;
+  height: 120px;
+  border: 3px dashed #ff6b6b;
+  border-radius: 50%;
+  background: rgba(255, 107, 107, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  animation: rotateDash 4s linear infinite; /* 變慢，從 2s 改為 4s */
+}
+
+@keyframes rotateDash {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* 移除遣散圖標和文字樣式 */
+
+/* 長按狀態下的頭像效果 */
+.floatingAvatar.longPress .avatarImage {
+  animation: shake 0.5s ease-in-out infinite;
+  border-color: #ff6b6b;
+  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.5);
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0) translateY(0);
+  }
+  25% {
+    transform: translateX(-2px) translateY(-2px);
+  }
+  50% {
+    transform: translateX(2px) translateY(-2px);
+  }
+  75% {
+    transform: translateX(-2px) translateY(2px);
+  }
+}
+
+/* 移除長按狀態下的光環效果 */
+
+/* 拖拽狀態下的效果 */
+.floatingAvatar.dragging .avatarImage {
+  transform: scale(1.1);
+  box-shadow: 0 8px 24px rgba(240, 134, 81, 0.4);
+}
+
+/* 移除拖拽狀態下的光環效果 */
+
+/* 響應式設計 */
+@media (max-width: 480px) {
+  .floatingAvatar {
+    width: 70px;
+    height: 70px;
+  }
+
+  .avatarImage {
+    width: 56px;
+    height: 56px;
+  }
+
+  .dismissCircle {
+    width: 100px;
+    height: 100px;
+  }
+
+  .dismissIcon {
+    font-size: 28px;
+  }
+
+  .dismissText {
+    font-size: 11px;
+  }
+
+  .dragHint {
+    font-size: 11px;
+    padding: 4px 8px;
+  }
+}
+
+/* 無障礙設計 */
+.floatingAvatar:focus {
+  outline: 3px solid #ff8c42;
+  outline-offset: 2px;
+}
+
+/* 防止文字選取 */
+.floatingAvatar,
+.dismissOverlay {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* 觸摸優化 */
+@media (hover: none) and (pointer: coarse) {
+  .floatingAvatar {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
