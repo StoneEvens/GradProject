@@ -66,7 +66,6 @@ const tutorialData = {
         },
         action: 'click',
         nextCondition: 'imageAdded',
-        waitFor: 'fileInput',
         // 添加過渡配置來平滑進入
         transition: {
           fadeIn: true,
