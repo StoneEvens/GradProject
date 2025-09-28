@@ -172,6 +172,16 @@ const FloatingAIAvatar = ({
         );
 
         if (distance < 60) { // 60px 範圍內算作遣散
+          // 在調用 onDismiss 前先重置狀態，確保清理工作正常進行
+          setIsDragging(false);
+          setIsLongPress(false);
+          setShowDismissZone(false);
+
+          // 立即恢復 body 滾動
+          document.body.style.overflow = '';
+          document.body.style.position = '';
+          document.body.style.width = '';
+
           onDismiss();
           return;
         }
@@ -256,6 +266,37 @@ const FloatingAIAvatar = ({
       };
     }
   }, [isDragging, isLongPress, position, dragStart]);
+
+  // 組件卸載時的清理
+  useEffect(() => {
+    return () => {
+      // 確保組件卸載時恢復 body 滾動
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+    };
+  }, []);
+
+  // 當組件變為不可見時清理狀態
+  useEffect(() => {
+    if (!isVisible) {
+      // 重置所有拖拽相關狀態
+      setIsDragging(false);
+      setIsLongPress(false);
+      setShowDismissZone(false);
+
+      // 恢復 body 滾動
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+
+      // 清除計時器
+      if (longPressTimer.current) {
+        clearTimeout(longPressTimer.current);
+        longPressTimer.current = null;
+      }
+    }
+  }, [isVisible]);
 
   if (!isVisible) return null;
 

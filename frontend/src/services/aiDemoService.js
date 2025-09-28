@@ -186,7 +186,7 @@ class AIDemoService {
 
   // 模擬延遲
   simulateDelay() {
-    const delay = 300 + Math.random() * 700; // 300-1000ms
+    const delay = 3000 + Math.random() * 2000; // 300-1000ms
     return new Promise(resolve => setTimeout(resolve, delay));
   }
 
