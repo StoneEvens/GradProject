@@ -1625,12 +1625,29 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
 
       // 第 3 步特殊處理：允許某些事件通過以支援手機版媒體選擇器
       if (stepData?.id === 3) {
-        // 檢查是否是與檔案上傳相關的點擊事件
-        if ((e.type === 'click' || e.type === 'touchstart' || e.type === 'touchend') &&
-            (e.target.classList.contains('addImageBtn') ||
-             e.target.closest('.addImageBtn') ||
-             e.target.type === 'file')) {
-          console.log('教學模式第3步：允許檔案上傳相關事件', { type: e.type, target: e.target });
+        // 檢查是否是與檔案上傳相關的元素
+        const isFileUploadRelated =
+          e.target.classList?.contains('addImageBtn') ||
+          e.target.closest('.addImageBtn') ||
+          e.target.closest('.imageControls') ||
+          e.target.type === 'file' ||
+          e.target.closest('input[type="file"]') ||
+          (e.target.textContent && e.target.textContent.includes('新增圖片'));
+
+        // 允許所有與檔案上傳相關的事件通過
+        if (isFileUploadRelated) {
+          console.log('教學模式第3步：允許檔案上傳相關事件', {
+            type: e.type,
+            target: e.target,
+            classList: e.target.classList?.value,
+            textContent: e.target.textContent
+          });
+          return;
+        }
+
+        // 對於手機觸摸事件，更寬鬆的處理
+        if (e.type === 'touchstart' || e.type === 'touchend' || e.type === 'touchmove') {
+          console.log('教學模式第3步：允許觸摸事件', { type: e.type });
           return;
         }
       }
@@ -1674,9 +1691,15 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
       const originalTouchAction = document.body.style.touchAction;
       const originalUserSelect = document.body.style.userSelect;
 
-      // 阻止頁面滾動和觸摸交互
+      // 阻止頁面滾動
       document.body.style.overflow = 'hidden';
-      document.body.style.touchAction = 'none';
+      // 第3步特殊處理：不禁用觸摸操作，以支援手機版檔案上傳
+      if (stepData?.id !== 3) {
+        document.body.style.touchAction = 'none';
+      } else {
+        // 第3步只禁用縮放和滾動，但允許點擊
+        document.body.style.touchAction = 'pan-y pinch-zoom';
+      }
       document.body.style.userSelect = 'none';
 
       console.log('教學模式：已阻止頁面滾動和背景交互');
@@ -1689,7 +1712,7 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
         console.log('教學模式結束：已恢復頁面滾動和交互');
       };
     }
-  }, [tutorial]);
+  }, [tutorial, stepData]);
 
   if (!tutorial || !stepData) {
     return null;
