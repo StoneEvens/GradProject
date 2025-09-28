@@ -565,6 +565,27 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
 
       // 對於文件輸入相關的元素，完全不添加事件監聽器，讓原始功能自由執行
       const isFileInput = targetElement.tagName === 'INPUT' && targetElement.type === 'file';
+      // 在手機上確保 change 事件能觸發 imageAdded 條件
+      if (isFileInput) {
+        try {
+          const handleChange = (e) => {
+            try {
+              if (e.target && e.target.files && e.target.files.length > 0) {
+                console.log('檔案已選擇，觸發 imageAdded 條件');
+                // 直接進入條件處理流程
+                startConditionMonitoring('imageAdded');
+              }
+            } catch (_) {}
+          };
+          targetElement.addEventListener('change', handleChange, true);
+          // 確保清理
+          const prevCleanup = cleanupRef.current;
+          cleanupRef.current = () => {
+            if (prevCleanup) prevCleanup();
+            try { targetElement.removeEventListener('change', handleChange, true); } catch (_) {}
+          };
+        } catch (_) {}
+      }
       const needsProgrammaticClick = stepData?.waitFor === 'fileInput' ||
                                    stepData?.nextCondition === 'imageAdded' ||
                                    stepData?.nextCondition === 'editorOpen' ||
@@ -1122,8 +1143,9 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
           conditionMet = false;
           break;
         case 'imageAdded':
-          // 檢查是否有圖片預覽元素出現
-          const imagePreviewElements = document.querySelectorAll('[class*="imagePreview"], [class*="clickableImage"], img[src*="blob:"]');
+          // 檢查是否有圖片預覽元素出現（限定影像流程範圍）
+          const scopeRoot = getImageFlowRoot();
+          const imagePreviewElements = scopeRoot.querySelectorAll('[class*="imagePreview"], [class*="clickableImage"], img[src*="blob:"]');
           console.log('imageAdded 條件檢查:', {
             imagePreviewCount: imagePreviewElements.length,
             foundElements: Array.from(imagePreviewElements).map(el => ({
@@ -1135,8 +1157,8 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
 
           // 如果沒找到，嘗試更廣泛的搜索
           if (imagePreviewElements.length === 0) {
-            const allImages = document.querySelectorAll('img');
-            const fileInputs = document.querySelectorAll('input[type="file"]');
+            const allImages = scopeRoot.querySelectorAll('img');
+            const fileInputs = scopeRoot.querySelectorAll('input[type="file"]');
             console.log('imageAdded 備用檢查:', {
               allImagesCount: allImages.length,
               fileInputsCount: fileInputs.length,
@@ -1152,7 +1174,7 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
 
           // 備用檢查：尋找圖片容器
           if (!hasImages) {
-            const imageContainers = document.querySelectorAll('[class*="imagePreviewContainer"], [class*="imageContainer"]');
+            const imageContainers = scopeRoot.querySelectorAll('[class*="imagePreviewContainer"], [class*="imageContainer"]');
             hasImages = Array.from(imageContainers).some(container => {
               const imagesInContainer = container.querySelectorAll('img');
               return imagesInContainer.length > 0;
@@ -1162,7 +1184,7 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
 
           // 最終備用檢查：檢查是否有新的圖片元素（非默認圖標）
           if (!hasImages) {
-            const allImages = document.querySelectorAll('img');
+            const allImages = scopeRoot.querySelectorAll('img');
             hasImages = Array.from(allImages).some(img => {
               const src = img.src || '';
               const isUserImage = src.includes('blob:') ||
@@ -1580,9 +1602,10 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
         return true;
       }
 
-      // 第 3 步：允許與上傳/新增圖片相關的互動
+      // 第 3 步：允許影像流程範圍內的互動（避免擋住媒體選擇器按鈕/label）
       if (stepData?.id === 3) {
         if (isUploadRelated(node)) return true;
+        if (imageFlowScopeRef.current && imageFlowScopeRef.current.contains(node)) return true;
       }
       return false;
     };
