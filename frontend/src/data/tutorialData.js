@@ -43,7 +43,12 @@ const tutorialData = {
         },
         action: 'click',
         nextCondition: 'pageNavigate',
-        expectedPath: '/create-post'
+        expectedPath: '/create-post',
+        // 添加過渡配置來減少閃爍
+        transition: {
+          fadeOut: true,
+          delay: 300
+        }
       },
       {
         id: 3,
@@ -61,7 +66,13 @@ const tutorialData = {
         },
         action: 'click',
         nextCondition: 'imageAdded',
-        waitFor: 'fileInput'
+        waitFor: 'fileInput',
+        // 添加過渡配置來平滑進入
+        transition: {
+          fadeIn: true,
+          delay: 500,
+          waitForPageLoad: true
+        }
       },
       {
         id: 4,
@@ -186,7 +197,14 @@ const tutorialData = {
       darkBackground: true,      // 使用暗背景突出重點
       autoAdvance: false,        // 不自動前進，需要用戶操作
       showHints: true,          // 顯示提示
-      resetOnError: true        // 錯誤時重置到當前步驟
+      resetOnError: true,        // 錯誤時重置到當前步驟
+      // 全局過渡設置來減少閃爍
+      globalTransitions: {
+        stepTransitionDelay: 400,     // 步驟間過渡延遲 (ms)
+        highlightFadeSpeed: 'smooth', // 高光淡入淡出速度
+        pageNavigationBuffer: 600,    // 頁面導航緩衝時間 (ms)
+        smoothTransitions: true       // 啟用平滑過渡
+      }
     }
   },
 
