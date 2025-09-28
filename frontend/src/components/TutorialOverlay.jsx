@@ -1574,8 +1574,8 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
         if (input && input.tagName === 'INPUT' && input.type === 'file') return true;
       }
 
-      // 類名或文字關鍵字
-      const classKeywords = ['upload', 'addImage', 'image', 'photo', 'clickableImage', 'editImage'];
+      // 類名或文字關鍵字（加強手機版支援）
+      const classKeywords = ['upload', 'addImage', 'image', 'photo', 'clickableImage', 'editImage', 'addImageBtn', 'hiddenInput'];
       const textKeywords = ['新增', '上傳', '圖片', '照片', '添加'];
       if (hasClassKeyword(node, classKeywords) || textIncludes(node, textKeywords)) return true;
 
@@ -1606,12 +1606,35 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
       if (stepData?.id === 3) {
         if (isUploadRelated(node)) return true;
         if (imageFlowScopeRef.current && imageFlowScopeRef.current.contains(node)) return true;
+
+        // 特別處理：允許所有 file input 元素，即使是隱藏的
+        const fileInputs = document.querySelectorAll('input[type="file"]');
+        for (let input of fileInputs) {
+          if (input === node || input.contains(node)) return true;
+        }
+
+        // 允許包含 file input 的父元素
+        const parentWithFileInput = node.closest('.imageSection, .imageControls');
+        if (parentWithFileInput) return true;
       }
       return false;
     };
 
     const stopIfBackground = (e) => {
       if (isAllowedTarget(e.target)) return;
+
+      // 第 3 步特殊處理：允許某些事件通過以支援手機版媒體選擇器
+      if (stepData?.id === 3) {
+        // 檢查是否是與檔案上傳相關的點擊事件
+        if ((e.type === 'click' || e.type === 'touchstart' || e.type === 'touchend') &&
+            (e.target.classList.contains('addImageBtn') ||
+             e.target.closest('.addImageBtn') ||
+             e.target.type === 'file')) {
+          console.log('教學模式第3步：允許檔案上傳相關事件', { type: e.type, target: e.target });
+          return;
+        }
+      }
+
       e.preventDefault();
       e.stopPropagation();
       if (typeof e.stopImmediatePropagation === 'function') {
