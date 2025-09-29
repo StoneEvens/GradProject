@@ -4,7 +4,7 @@ import { getAccessToken, getRefreshToken, saveTokens, refreshAccessToken as refr
 // 創建 axios 實例
 const instance = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1',
-  timeout: 15000, // 請求超時時間
+  timeout: 30000, // 增加超時時間為移動設備
   headers: {
     'Content-Type': 'application/json',
   },
