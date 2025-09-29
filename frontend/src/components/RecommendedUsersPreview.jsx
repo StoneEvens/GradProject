@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import styles from '../styles/RecommendedUsersPreview.module.css';
 import aiRecommendationService from '../services/aiRecommendationService';
 
 const RecommendedUsersPreview = ({ onUserClick }) => {
   const navigate = useNavigate();
+  const { t } = useTranslation('main');
   const [users, setUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -57,10 +59,10 @@ const RecommendedUsersPreview = ({ onUserClick }) => {
     return (
       <div className={styles.container}>
         <div className={styles.header}>
-          <span className={styles.title}>推薦用戶</span>
+          <span className={styles.title}>{t('chatWindow.recommendedUsers.title')}</span>
         </div>
         <div className={styles.loading}>
-          <p>載入中...</p>
+          <p>{t('chatWindow.recommendedUsers.loading')}</p>
         </div>
       </div>
     );
@@ -73,7 +75,7 @@ const RecommendedUsersPreview = ({ onUserClick }) => {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <span className={styles.title}>推薦用戶</span>
+        <span className={styles.title}>{t('chatWindow.recommendedUsers.title')}</span>
       </div>
       <div className={styles.userList}>
         {users.map(user => (
@@ -100,7 +102,7 @@ const RecommendedUsersPreview = ({ onUserClick }) => {
                 console.log('Follow user:', user.user_account);
               }}
             >
-              追蹤
+              {t('chatWindow.recommendedUsers.followButton')}
             </button>
           </div>
         ))}

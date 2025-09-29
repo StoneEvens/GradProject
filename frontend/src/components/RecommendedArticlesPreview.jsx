@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import styles from '../styles/RecommendedArticlesPreview.module.css';
 import aiRecommendationService from '../services/aiRecommendationService';
 
 const RecommendedArticlesPreview = ({ onArticleClick }) => {
   const navigate = useNavigate();
+  const { t } = useTranslation('main');
   const [articles, setArticles] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -58,10 +60,10 @@ const RecommendedArticlesPreview = ({ onArticleClick }) => {
     return (
       <div className={styles.container}>
         <div className={styles.header}>
-          <span className={styles.title}>相關文章推薦</span>
+          <span className={styles.title}>{t('chatWindow.recommendedArticles.title')}</span>
         </div>
         <div className={styles.loading}>
-          <p>載入中...</p>
+          <p>{t('chatWindow.recommendedArticles.loading')}</p>
         </div>
       </div>
     );
@@ -74,7 +76,7 @@ const RecommendedArticlesPreview = ({ onArticleClick }) => {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <span className={styles.title}>相關文章推薦</span>
+        <span className={styles.title}>{t('chatWindow.recommendedArticles.title')}</span>
       </div>
       <div className={styles.articleList}>
         {articles.map(article => (
