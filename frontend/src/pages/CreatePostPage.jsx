@@ -457,7 +457,9 @@ const CreatePostPage = () => {
 
   // 處理圖片點擊 - 開啟圖片編輯器
   const handleImageClick = (image) => {
-    setEditingImage(image);
+    // 確保傳遞包含標註的完整圖片對象
+    const imageWithAnnotations = selectedImages.find(img => img.id === image.id) || image;
+    setEditingImage(imageWithAnnotations);
     setShowImageEditor(true);
   };
 

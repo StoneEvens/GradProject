@@ -35,7 +35,7 @@ const ImageEditor = ({ image, isOpen, onClose, onSave, mode = 'create' }) => {
   const { t } = useTranslation('posts');
   const [annotations, setAnnotations] = useState([]);
   const [showAnnotations, setShowAnnotations] = useState(true);
-  const [showAnnotationDots, setShowAnnotationDots] = useState(false);
+  const [showAnnotationDots, setShowAnnotationDots] = useState(true);
   const [editingAnnotation, setEditingAnnotation] = useState(null);
   const [newAnnotation, setNewAnnotation] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -69,6 +69,10 @@ const ImageEditor = ({ image, isOpen, onClose, onSave, mode = 'create' }) => {
   useEffect(() => {
     if (image?.id) {
       loadAnnotations();
+      // 如果有標註，自動顯示標註點
+      if (image?.annotations && image.annotations.length > 0) {
+        setShowAnnotationDots(true);
+      }
     }
   }, [image?.id, image?.annotations]);
 
@@ -138,16 +142,23 @@ const ImageEditor = ({ image, isOpen, onClose, onSave, mode = 'create' }) => {
           setAnnotations([]);
         }
       } else {
-        // create 模式：從 localStorage 載入標註
-        const savedAnnotations = localStorage.getItem(ANNOTATIONS_KEY);
-        if (savedAnnotations) {
-          const allAnnotations = JSON.parse(savedAnnotations);
-          const imageAnnotations = allAnnotations[image.id] || [];
-          // 轉換格式並設置標註
-          const convertedAnnotations = imageAnnotations.map(convertLegacyAnnotation);
+        // create 模式：優先使用傳入的標註，否則從 localStorage 載入
+        if (image?.annotations && image.annotations.length > 0) {
+          // 如果 image 對象已經包含標註（從 selectedImages 傳入）
+          const convertedAnnotations = image.annotations.map(convertLegacyAnnotation);
           setAnnotations(convertedAnnotations);
         } else {
-          setAnnotations([]);
+          // 否則從 localStorage 載入標註
+          const savedAnnotations = localStorage.getItem(ANNOTATIONS_KEY);
+          if (savedAnnotations) {
+            const allAnnotations = JSON.parse(savedAnnotations);
+            const imageAnnotations = allAnnotations[image.id] || [];
+            // 轉換格式並設置標註
+            const convertedAnnotations = imageAnnotations.map(convertLegacyAnnotation);
+            setAnnotations(convertedAnnotations);
+          } else {
+            setAnnotations([]);
+          }
         }
       }
     } catch (error) {
@@ -187,13 +198,20 @@ const ImageEditor = ({ image, isOpen, onClose, onSave, mode = 'create' }) => {
     }
   };
 
-  // 保存標註資料到 localStorage
+  // 保存標註資料到 localStorage 或更新內存中的資料
   const saveAnnotations = (newAnnotations) => {
     try {
-      const savedAnnotations = localStorage.getItem(ANNOTATIONS_KEY);
-      const allAnnotations = savedAnnotations ? JSON.parse(savedAnnotations) : {};
-      allAnnotations[image.id] = newAnnotations;
-      localStorage.setItem(ANNOTATIONS_KEY, JSON.stringify(allAnnotations));
+      if (mode === 'edit') {
+        // edit 模式：不保存到 localStorage，只更新內存中的資料
+        // 實際的保存會在用戶點擊「完成」按鈕時通過 onSave 回調處理
+        return;
+      } else {
+        // create 模式：保存到 localStorage
+        const savedAnnotations = localStorage.getItem(ANNOTATIONS_KEY);
+        const allAnnotations = savedAnnotations ? JSON.parse(savedAnnotations) : {};
+        allAnnotations[image.id] = newAnnotations;
+        localStorage.setItem(ANNOTATIONS_KEY, JSON.stringify(allAnnotations));
+      }
     } catch (error) {
       console.error(t('imageEditor.messages.saveAnnotationsFailed'), error);
     }
@@ -210,7 +228,7 @@ const ImageEditor = ({ image, isOpen, onClose, onSave, mode = 'create' }) => {
     // 檢查是否點擊到現有標註
     const clickedAnnotation = annotations.find(annotation => {
       const distance = Math.sqrt(
-        Math.pow(annotation.x - x, 2) + Math.pow(annotation.y - y, 2)
+        Math.pow(annotation.x_position - x, 2) + Math.pow(annotation.y_position - y, 2)
       );
       return distance < 5; // 5% 的容錯範圍
     });
@@ -218,7 +236,14 @@ const ImageEditor = ({ image, isOpen, onClose, onSave, mode = 'create' }) => {
     if (clickedAnnotation) {
       // 編輯現有標註
       setEditingAnnotation(clickedAnnotation);
-      setSearchQuery(clickedAnnotation.displayName || '');
+      setAnnotationType(clickedAnnotation.target_type || 'user');
+      if (clickedAnnotation.target_type === 'pet') {
+        setSelectedPet(String(clickedAnnotation.target_id));
+        setSearchQuery('');
+      } else {
+        setSearchQuery(clickedAnnotation.display_name || '');
+        setSelectedPet('');
+      }
     } else {
       // 新增標註
       const tempAnnotation = {
