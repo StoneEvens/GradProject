@@ -60,7 +60,55 @@
     "errorMessage": "Sorry, I'm unable to respond to your question right now. Please try again later.",
     "inputPlaceholder": "Enter your question...",
     "sendButton": "Send Message",
-    "close": "Close"
+    "close": "Close",
+    "voiceInput": {
+      "startTooltip": "Start voice input (supports Chinese & English)",
+      "stopTooltip": "Stop voice input",
+      "notSupported": "Your browser does not support voice input",
+      "microphonePermission": "Please allow microphone permission",
+      "startFailed": "Unable to start voice recognition, please check microphone permission",
+      "noSpeechDetected": "No speech detected"
+    },
+    "calculator": {
+      "redirecting": "Redirecting to nutrition calculator... Please wait",
+      "buttonText": "Start Calculation"
+    },
+    "tutorial": {
+      "starting": "Starting {{tutorialTitle}}... Please wait",
+      "startButton": "Start Tutorial",
+      "titles": {
+        "tagPet": "Pet Tagging Tutorial",
+        "createPost": "Post Creation Tutorial",
+        "setReminder": "Reminder Setup Tutorial",
+        "healthRecord": "Health Record Tutorial",
+        "forumUsage": "Forum Usage Tutorial",
+        "profileSetup": "Profile Setup Tutorial"
+      }
+    },
+    "operation": {
+      "executing": "Executing {{operationDesc}}... Please wait",
+      "buttons": {
+        "findAbnormalPosts": "Let's Go!",
+        "findHealthRecords": "View Records",
+        "setFeedingReminder": "Set Reminder",
+        "searchNearbyHospitals": "Search Hospitals"
+      },
+      "descriptions": {
+        "findAbnormalPosts": "Find Abnormal Records",
+        "findHealthRecords": "Find Health Records",
+        "setFeedingReminder": "Set Feeding Reminder",
+        "searchNearbyHospitals": "Search Nearby Hospitals"
+      }
+    },
+    "recommendedUsers": {
+      "title": "Recommended Users",
+      "loading": "Loading...",
+      "followButton": "Follow"
+    },
+    "recommendedArticles": {
+      "title": "Related Articles",
+      "loading": "Loading..."
+    }
   },
   "timeDisplay": {
     "days": "days",

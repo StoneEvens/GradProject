@@ -91,11 +91,12 @@ const ChatWindow = ({
 
       // 處理錯誤
       recognition.onerror = (event) => {
-        console.error('語音識別錯誤:', event.error);
+        console.error('Speech recognition error:', event.error);
         if (event.error === 'not-allowed') {
-          alert('請允許使用麥克風權限');
+          // 使用 t 函數時需要在組件內部處理
+          console.error('Microphone permission denied');
         } else if (event.error === 'no-speech') {
-          console.log('未偵測到語音');
+          console.log('No speech detected');
         }
         setIsListening(false);
         setInterimTranscript('');
@@ -109,7 +110,7 @@ const ChatWindow = ({
 
       recognitionRef.current = recognition;
     } else {
-      console.log('瀏覽器不支援語音識別');
+      console.log('Browser does not support speech recognition');
     }
 
     // 清理函數
@@ -197,7 +198,7 @@ const ChatWindow = ({
   // 切換語音輸入
   const toggleVoiceInput = () => {
     if (!recognitionRef.current) {
-      alert('您的瀏覽器不支援語音輸入');
+      alert(t('chatWindow.voiceInput.notSupported'));
       return;
     }
 
@@ -214,8 +215,8 @@ const ChatWindow = ({
         recognitionRef.current.start();
         setIsListening(true);
       } catch (error) {
-        console.error('啟動語音識別失敗:', error);
-        alert('無法啟動語音識別，請檢查麥克風權限');
+        console.error('Failed to start speech recognition:', error);
+        alert(t('chatWindow.voiceInput.startFailed'));
       }
     }
   };
@@ -329,12 +330,12 @@ const ChatWindow = ({
     console.log('開始教學模式:', tutorialType);
 
     // 獲取教學標題
-    const tutorialTitle = aiTutorialService.getTutorialTitle(tutorialType);
+    const tutorialTitle = t(`chatWindow.tutorial.titles.${tutorialType}`);
 
     // 顯示準備訊息
     const tutorialStartMessage = {
       id: Date.now(),
-      text: `正在啟動${tutorialTitle}...請稍候`,
+      text: t('chatWindow.tutorial.starting', { tutorialTitle }),
       isUser: false,
       timestamp: new Date()
     };
@@ -373,7 +374,7 @@ const ChatWindow = ({
     // 顯示準備訊息
     const calculatorMessage = {
       id: Date.now(),
-      text: '正在導向營養計算機...請稍候',
+      text: t('chatWindow.calculator.redirecting'),
       isUser: false,
       timestamp: new Date()
     };
@@ -398,12 +399,12 @@ const ChatWindow = ({
     console.log('執行操作:', operationType, params);
 
     // 獲取操作描述
-    const operationDesc = aiOperationService.getOperationDescription(operationType);
+    const operationDesc = t(`chatWindow.operation.descriptions.${operationType}`);
 
     // 顯示準備訊息
     const operationMessage = {
       id: Date.now(),
-      text: `正在執行${operationDesc}...請稍候`,
+      text: t('chatWindow.operation.executing', { operationDesc }),
       isUser: false,
       timestamp: new Date()
     };
@@ -553,7 +554,7 @@ const ChatWindow = ({
                       className={styles.tutorialButton}
                       onClick={() => handleStartTutorial(message.tutorialType)}
                     >
-                      {aiTutorialService.getTutorialButtonText(message.tutorialType)}
+                      {t('chatWindow.tutorial.startButton')}
                     </button>
                   )}
                   {/* 如果有營養計算機，顯示營養計算機按鈕 */}
@@ -562,7 +563,7 @@ const ChatWindow = ({
                       className={styles.tutorialButton}
                       onClick={handleCalculatorClick}
                     >
-                      出發計算
+                      {t('chatWindow.calculator.buttonText')}
                     </button>
                   )}
                   {/* 如果有操作功能，顯示操作按鈕 */}
@@ -571,7 +572,7 @@ const ChatWindow = ({
                       className={styles.tutorialButton}
                       onClick={() => handleOperationClick(message.operationType)}
                     >
-                      {aiOperationService.getOperationButtonText(message.operationType)}
+                      {t(`chatWindow.operation.buttons.${message.operationType}`)}
                     </button>
                   )}
                   {/* 如果有推薦用戶，顯示推薦用戶預覽 */}
@@ -681,9 +682,9 @@ const ChatWindow = ({
               <button
                 className={`${styles.voiceBtn} ${isListening ? styles.active : ''}`}
                 onClick={toggleVoiceInput}
-                title={isListening ? '停止語音輸入' : '開始語音輸入（支援中英文）'}
+                title={isListening ? t('chatWindow.voiceInput.stopTooltip') : t('chatWindow.voiceInput.startTooltip')}
               >
-                <img src="/assets/icon/microphone.png" alt={isListening ? '停止語音輸入' : '開始語音輸入'} />
+                <img src="/assets/icon/microphone.png" alt={isListening ? t('chatWindow.voiceInput.stopTooltip') : t('chatWindow.voiceInput.startTooltip')} />
               </button>
             )}
             <button
