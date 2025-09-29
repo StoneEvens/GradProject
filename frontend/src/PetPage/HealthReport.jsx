@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useEffect } from 'react';
 import axios from 'axios';
@@ -6,6 +7,9 @@ import BottomNavigationBar from '../components/BottomNavigationBar';
 import '../styles/Header.css'
 import '../styles/BottomNavbar.module.css';
 import './HealthReport.css';
+
+// Use environment variable for API base URL
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 const CATEGORIES = {
   CBC: {
@@ -91,7 +95,7 @@ const HealthReport = () => {
 
 const ListPage = ({ reports, setReports, onUpload, onRowClick }) => {
   useEffect(() => {
-    axios.get('http://127.0.0.1:8000/api/v1/ocr/health-reports/')
+    axios.get(`${API_BASE_URL}/ocr/health-reports/`)
       .then(res => setReports(res.data))
       .catch(err => console.error('讀取報告失敗', err));
   }, []);
@@ -183,7 +187,7 @@ const UploadPage = ({ draft, setDraft, onConfirm }) => {
       formData.append('pet_id', 1);
       formData.append('image', selectedFile);
 
-      const res = await axios.post('http://127.0.0.1:8000/api/v1/ocr/report/upload/', formData, {
+  const res = await axios.post(`${API_BASE_URL}/ocr/report/upload/`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
@@ -220,7 +224,7 @@ const UploadPage = ({ draft, setDraft, onConfirm }) => {
       };
 
       // 只呼叫正式 API
-      await axios.post('http://127.0.0.1:8000/api/v1/ocr/upload/', payload, {
+  await axios.post(`${API_BASE_URL}/ocr/upload/`, payload, {
         headers: { 'Content-Type': 'application/json' },
       });
 
@@ -350,7 +354,7 @@ const ViewPage = ({ data, onBack, onDelete }) => {
         data: JSON.stringify(values),
       };
 
-      await axios.put(`http://127.0.0.1:8000/api/v1/ocr/health-reports/${id}/`, payload, {
+  await axios.put(`${API_BASE_URL}/ocr/health-reports/${id}/`, payload, {
         headers: { 'Content-Type': 'application/json' },
       });
 
@@ -366,7 +370,7 @@ const ViewPage = ({ data, onBack, onDelete }) => {
     if (!window.confirm('確定要刪除此健康報告嗎？')) return;
 
     try {
-      await axios.delete(`http://127.0.0.1:8000/api/v1/ocr/health-reports/${id}/`);
+  await axios.delete(`${API_BASE_URL}/ocr/health-reports/${id}/`);
       alert('刪除成功');
       onDelete(id);
     } catch (err) {
