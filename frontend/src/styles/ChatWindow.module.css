@@ -302,6 +302,14 @@
   border: 2px solid #f08651;
 }
 
+/* Textarea wrapper 用於包含輸入框和語音指示器 */
+.textareaWrapper {
+  flex: 1;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
 .inputTextarea {
   flex: 1;
   background: transparent;
@@ -314,11 +322,62 @@
   min-height: 20px;
   max-height: 100px;
   font-family: inherit;
+  transition: all 0.2s;
 }
 
 .inputTextarea::placeholder {
   color: #8e8e93;
 }
+
+/* 語音輸入時的樣式 */
+.inputTextarea.listening {
+  background: rgba(240, 134, 81, 0.03);
+  border-radius: 8px;
+  padding: 8px;
+}
+
+/* 語音輸入按鈕 */
+.voiceBtn {
+  background: linear-gradient(135deg, #f08651, #ff9a56);
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.voiceBtn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(240, 134, 81, 0.4);
+}
+
+.voiceBtn.active {
+  animation: voicePulse 1.5s infinite;
+}
+
+.voiceBtn img {
+  width: 16px;
+  height: 16px;
+  filter: brightness(0) invert(1);
+}
+
+@keyframes voicePulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(240, 134, 81, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(240, 134, 81, 0);
+  }
+}
+
+/* 語音指示器相關樣式 - 已移除，僅保留按鈕動畫 */
+
+/* 語言選擇器 - 已移除，改為自動識別中英文 */
 
 .inputActions {
   display: flex;
@@ -330,8 +389,8 @@
   background: linear-gradient(135deg, #f08651, #ff9a56);
   border: none;
   border-radius: 50%;
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -353,8 +412,8 @@
 }
 
 .sendBtn img {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   filter: brightness(0) invert(1);
 }
 
@@ -470,13 +529,23 @@ body:has(.chatOverlay) {
   }
 
   .sendBtn {
-    width: 32px;
-    height: 32px;
+    width: 28px;
+    height: 28px;
   }
 
   .sendBtn img {
-    width: 16px;
-    height: 16px;
+    width: 14px;
+    height: 14px;
+  }
+
+  .voiceBtn {
+    width: 28px;
+    height: 28px;
+  }
+
+  .voiceBtn img {
+    width: 14px;
+    height: 14px;
   }
 }
 
@@ -554,13 +623,23 @@ body:has(.chatOverlay) {
   }
 
   .sendBtn {
-    width: 28px;
-    height: 28px;
+    width: 26px;
+    height: 26px;
   }
 
   .sendBtn img {
-    width: 14px;
-    height: 14px;
+    width: 13px;
+    height: 13px;
+  }
+
+  .voiceBtn {
+    width: 26px;
+    height: 26px;
+  }
+
+  .voiceBtn img {
+    width: 13px;
+    height: 13px;
   }
 
   .closeButton {
@@ -589,12 +668,17 @@ body:has(.chatOverlay) {
 /* 觸控優化 */
 @media (hover: none) {
   .sendBtn:hover,
+  .voiceBtn:hover,
   .closeButton:hover {
     transform: none;
     background-color: transparent;
   }
 
   .sendBtn:active {
+    transform: scale(0.95);
+  }
+
+  .voiceBtn:active {
     transform: scale(0.95);
   }
 

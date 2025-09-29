@@ -655,6 +655,35 @@ class DatePlanAPIView(APIView):
                 status=drf_status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
+# 獲取所有未完成的計畫
+class UncompletedPlansAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            username = request.user
+            user = CustomUser.get_user(username=username)
+
+            # 查詢當前用戶所有未完成的行程，並按日期和開始時間排序
+            uncompleted_plans = Plan.objects.filter(
+                user=user,
+                is_completed=False
+            ).order_by('date', 'start_time')
+
+            serializer = PlanSerializer(uncompleted_plans, many=True)
+
+            return APIResponse(
+                data=serializer.data,
+                message='獲取未完成行程成功',
+                status=drf_status.HTTP_200_OK
+            )
+        except Exception as e:
+            return APIResponse(
+                message=f'獲取未完成行程時發生錯誤: {str(e)}',
+                code=drf_status.HTTP_500_INTERNAL_SERVER_ERROR,
+                status=drf_status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
 #----------Code Above Checked----------#
 
 class FollowAlgorithms:

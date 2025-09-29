@@ -10,6 +10,7 @@ urlpatterns = [
     path('logout/', LogoutAPIView.as_view(), name='accounts-logout'),
     path('me/', MeAPIView.as_view(), name='accounts-me'),
     path('plans/today/', TodayPlanAPIView.as_view(), name='today-plans'),
+    path('plans/uncompleted/', UncompletedPlansAPIView.as_view(), name='uncompleted-plans'),
     path('plans/date/<str:date_str>/', DatePlanAPIView.as_view(), name='date-plans'),
     path('profile/image/', UserImageAPIView.as_view(), name='user-image'),
     path('plans/create/', CreatePlanAPIView.as_view(), name='create-plan'),

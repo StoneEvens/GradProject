@@ -32,8 +32,111 @@ const ChatWindow = ({
   const [userAvatarError, setUserAvatarError] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [currentConversationId, setCurrentConversationId] = useState(null);
+
+  // 語音識別相關 state
+  const [isListening, setIsListening] = useState(false);
+  const [speechSupported, setSpeechSupported] = useState(false);
+  const [interimTranscript, setInterimTranscript] = useState('');
+
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
+  const recognitionRef = useRef(null);
+
+  // 初始化語音識別
+  useEffect(() => {
+    // 檢查瀏覽器是否支援語音識別
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (SpeechRecognition) {
+      setSpeechSupported(true);
+      const recognition = new SpeechRecognition();
+
+      // 設定語音識別參數
+      recognition.continuous = true; // 持續監聽
+      recognition.interimResults = true; // 顯示即時辨識結果
+
+      // 設定多語言識別（讓瀏覽器自動處理）
+      // 使用 maxAlternatives 來獲得多個可能的識別結果
+      recognition.maxAlternatives = 3;
+
+      // 預設使用混合語言模式（中英文混合）
+      recognition.lang = 'zh-TW'; // 主要語言是中文，但可以識別英文
+
+      // 處理識別結果
+      recognition.onresult = (event) => {
+        let interimTranscript = '';
+        let finalTranscript = '';
+
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const transcript = event.results[i][0].transcript;
+          if (event.results[i].isFinal) {
+            finalTranscript += transcript;
+          } else {
+            interimTranscript += transcript;
+          }
+        }
+
+        // 設定即時辨識文字
+        setInterimTranscript(interimTranscript);
+
+        // 如果有最終結果，添加到輸入框
+        if (finalTranscript) {
+          setInputText(prev => {
+            // 如果前面有文字，加個空格分隔
+            return prev ? prev + ' ' + finalTranscript : finalTranscript;
+          });
+          setInterimTranscript('');
+        }
+      };
+
+      // 處理錯誤
+      recognition.onerror = (event) => {
+        console.error('語音識別錯誤:', event.error);
+        if (event.error === 'not-allowed') {
+          alert('請允許使用麥克風權限');
+        } else if (event.error === 'no-speech') {
+          console.log('未偵測到語音');
+        }
+        setIsListening(false);
+        setInterimTranscript('');
+      };
+
+      // 識別結束時的處理
+      recognition.onend = () => {
+        setIsListening(false);
+        setInterimTranscript('');
+      };
+
+      recognitionRef.current = recognition;
+    } else {
+      console.log('瀏覽器不支援語音識別');
+    }
+
+    // 清理函數
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+    };
+  }, []);
+
+  // 監聽視窗關閉或組件卸載
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      // 視窗關閉時停止錄音
+      stopVoiceRecording();
+    };
+
+    // 當視窗關閉時停止錄音
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    // 清理函數
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      // 組件卸載時停止錄音
+      stopVoiceRecording();
+    };
+  }, [isListening]);
 
   // 自動滾動到最新訊息
   const scrollToBottom = () => {
@@ -82,6 +185,41 @@ const ChatWindow = ({
     setInputText(event.target.value);
   };
 
+  // 停止語音錄音的通用函數
+  const stopVoiceRecording = () => {
+    if (isListening && recognitionRef.current) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+      setInterimTranscript('');
+    }
+  };
+
+  // 切換語音輸入
+  const toggleVoiceInput = () => {
+    if (!recognitionRef.current) {
+      alert('您的瀏覽器不支援語音輸入');
+      return;
+    }
+
+    if (isListening) {
+      // 停止語音識別
+      stopVoiceRecording();
+    } else {
+      // 開始語音識別
+      try {
+        // 使用中文為主的混合識別模式
+        // 現代瀏覽器的語音識別 API 可以自動處理中英文混合
+        recognitionRef.current.lang = 'zh-TW';
+
+        recognitionRef.current.start();
+        setIsListening(true);
+      } catch (error) {
+        console.error('啟動語音識別失敗:', error);
+        alert('無法啟動語音識別，請檢查麥克風權限');
+      }
+    }
+  };
+
   // 處理按鍵事件
   const handleKeyPress = (event) => {
     if (event.key === 'Enter' && !event.shiftKey) {
@@ -93,6 +231,9 @@ const ChatWindow = ({
   // 發送訊息
   const handleSendMessage = async () => {
     if (!inputText.trim()) return;
+
+    // 如果正在錄音，先停止錄音
+    stopVoiceRecording();
 
     const userMessage = {
       id: Date.now(),
@@ -202,7 +343,8 @@ const ChatWindow = ({
     // 延遲一下讓用戶看到訊息，然後關閉聊天室並啟動教學
     setTimeout(async () => {
       try {
-        // 關閉聊天室
+        // 停止語音錄音並關閉聊天室
+        stopVoiceRecording();
         onClose();
 
         // 自動關閉漂浮頭像（如果存在）
@@ -242,7 +384,8 @@ const ChatWindow = ({
       // 通知全局啟動浮動模式（針對任何 ChatWindow 導航）
       window.dispatchEvent(new CustomEvent('forceFloatingMode'));
 
-      // 關閉聊天室
+      // 停止語音錄音並關閉聊天室
+      stopVoiceRecording();
       onClose();
 
       // 導向營養計算機頁面
@@ -272,7 +415,8 @@ const ChatWindow = ({
         // 通知全局啟動浮動模式（針對任何 ChatWindow 導航）
         window.dispatchEvent(new CustomEvent('forceFloatingMode'));
 
-        // 關閉聊天室
+        // 停止語音錄音並關閉聊天室
+        stopVoiceRecording();
         onClose();
 
         // 使用操作服務執行操作
@@ -330,6 +474,9 @@ const ChatWindow = ({
 
   // 處理聊天視窗關閉（支援浮動模式）
   const handleChatClose = () => {
+    // 如果正在錄音，先停止錄音
+    stopVoiceRecording();
+
     if (floatingMode && onToggleFloating) {
       // 浮動模式下收合為頭像
       onToggleFloating();
@@ -518,16 +665,27 @@ const ChatWindow = ({
               }}
             />
           </div>
-          <textarea
-            ref={textareaRef}
-            placeholder={t('chatWindow.inputPlaceholder')}
-            className={styles.inputTextarea}
-            value={inputText}
-            onChange={handleInputChange}
-            onKeyPress={handleKeyPress}
-            rows={1}
-          />
+          <div className={styles.textareaWrapper}>
+            <textarea
+              ref={textareaRef}
+              placeholder={interimTranscript || t('chatWindow.inputPlaceholder')}
+              className={`${styles.inputTextarea} ${isListening ? styles.listening : ''}`}
+              value={inputText + (interimTranscript ? ' ' + interimTranscript : '')}
+              onChange={handleInputChange}
+              onKeyPress={handleKeyPress}
+              rows={1}
+            />
+          </div>
           <div className={styles.inputActions}>
+            {speechSupported && (
+              <button
+                className={`${styles.voiceBtn} ${isListening ? styles.active : ''}`}
+                onClick={toggleVoiceInput}
+                title={isListening ? '停止語音輸入' : '開始語音輸入（支援中英文）'}
+              >
+                <img src="/assets/icon/microphone.png" alt={isListening ? '停止語音輸入' : '開始語音輸入'} />
+              </button>
+            )}
             <button
               className={styles.sendBtn}
               onClick={handleSendMessage}
