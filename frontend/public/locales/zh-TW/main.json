@@ -91,13 +91,15 @@
         "findAbnormalPosts": "出發!",
         "findHealthRecords": "查看記錄",
         "setFeedingReminder": "設置提醒",
-        "searchNearbyHospitals": "搜尋醫院"
+        "searchNearbyHospitals": "搜尋醫院",
+        "addFeed": "前往新增"
       },
       "descriptions": {
         "findAbnormalPosts": "查找異常記錄",
         "findHealthRecords": "查找健康記錄",
         "setFeedingReminder": "設置餵食提醒",
-        "searchNearbyHospitals": "搜尋附近醫院"
+        "searchNearbyHospitals": "搜尋附近醫院",
+        "addFeed": "新增飼料"
       }
     },
     "recommendedUsers": {

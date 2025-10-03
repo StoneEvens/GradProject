@@ -64,7 +64,7 @@ class RecommendationService:
                 })
 
             if data_array:
-                print(data_array[0])
+                print(f"正在建立社群貼文向量索引... ({len(data_array)} 筆資料)")
                 # Initialize FAISS index
                 self.__initialize(data_array, content_type="social")
             else:
@@ -84,7 +84,7 @@ class RecommendationService:
                 })
 
             if data_array:
-                print(data_array[0])
+                print(f"正在建立疾病檔案向量索引... ({len(data_array)} 筆資料)")
                 # Initialize FAISS index
                 self.__initialize(data_array, content_type="forum")
             else:

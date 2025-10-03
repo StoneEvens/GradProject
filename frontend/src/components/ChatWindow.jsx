@@ -2,19 +2,11 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import styles from '../styles/ChatWindow.module.css';
-// 為 Demo 使用專門的 Demo Service
-// 正式環境可切換回 aiChatService
-import aiChatService from '../services/aiDemoService';
-// import aiChatService from '../services/aiChatService';
-import aiOperationService from '../services/aiOperationService';
-import aiTutorialService from '../services/aiTutorialService';
-// 新的 AI Agent 架構（可選升級）
-// import aiAgentService from '../services/aiAgentService';
+import aiChatService from '../services/aiChatService';
 import RecommendedUsersPreview from './RecommendedUsersPreview';
 import RecommendedArticlesPreview from './RecommendedArticlesPreview';
 import ChatSidebar from './ChatSidebar';
 import FloatingAIAvatar from './FloatingAIAvatar';
-import { saveConversation, updateConversation, loadConversation } from '../utils/chatStorage';
 
 const ChatWindow = ({
   isOpen,
@@ -252,97 +244,70 @@ const ChatWindow = ({
     setIsTyping(true);
 
     try {
-      // 當前使用 Demo Service
-      const aiResult = await aiChatService.processMessage(userInput);
+      // 使用正式後端 AI Chat Service
+      const aiResult = await aiChatService.processMessage(userInput, {
+        user: user,
+        petId: user?.pets?.[0]?.id || null
+      });
 
-      // 未來升級到新架構時，只需要替換上面一行為：
-      // const aiResult = await aiAgentService.processMessage(userInput, {
-      //   user: user,
-      //   petId: user?.pets?.[0]?.id || 1
-      // });
+      console.log('AI 回應結果:', aiResult); // Debug 用
 
-      // 模擬真實的回應時間
-      const delay = 800 + Math.random() * 1500; // 0.8-2.3秒
+      const aiMessage = {
+        id: Date.now() + 1,
+        text: aiResult.response,
+        isUser: false,
+        timestamp: new Date(),
+        confidence: aiResult.confidence,
+        source: aiResult.source,
+        intent: aiResult.intent, // 顯示意圖
+        // 加入教學相關資訊
+        hasTutorial: aiResult.hasTutorial || false,
+        tutorialType: aiResult.tutorialType || null,
+        // 加入推薦用戶相關資訊
+        hasRecommendedUsers: aiResult.hasRecommendedUsers || false,
+        recommendedUserDetails: aiResult.recommendedUserDetails || [],  // 加入用戶詳細資料
+        // 加入推薦文章相關資訊
+        hasRecommendedArticles: aiResult.hasRecommendedArticles || false,
+        recommendedArticleIds: aiResult.recommendedArticleIds || [],  // 加入推薦文章 ID
+        // 加入營養計算機相關資訊
+        hasCalculator: aiResult.hasCalculator || false,
+        // 加入操作功能相關資訊
+        hasOperation: aiResult.hasOperation || false,
+        operationType: aiResult.operationType || null
+      };
 
-      setTimeout(() => {
-        const aiMessage = {
-          id: Date.now() + 1,
-          text: aiResult.response,
-          isUser: false,
-          timestamp: new Date(),
-          confidence: aiResult.confidence,
-          source: aiResult.source,
-          // 加入教學相關資訊
-          hasTutorial: aiResult.hasTutorial || false,
-          tutorialType: aiResult.tutorialType || null,
-          // 加入推薦用戶相關資訊
-          hasRecommendedUsers: aiResult.hasRecommendedUsers || false,
-          // 加入推薦文章相關資訊
-          hasRecommendedArticles: aiResult.hasRecommendedArticles || false,
-          // 加入營養計算機相關資訊
-          hasCalculator: aiResult.hasCalculator || false,
-          // 加入操作功能相關資訊
-          hasOperation: aiResult.hasOperation || false,
-          operationType: aiResult.operationType || null
-        };
+      const finalMessages = [...newMessages, aiMessage];
+      setMessages(finalMessages);
+      setIsTyping(false);
 
-        const finalMessages = [...newMessages, aiMessage];
-        setMessages(finalMessages);
-        setIsTyping(false);
-
-        // 保存或更新對話記錄
-        if (currentConversationId) {
-          updateConversation(currentConversationId, finalMessages);
-        } else {
-          const conversationId = saveConversation(finalMessages);
-          setCurrentConversationId(conversationId);
-        }
-      }, delay);
+      // 更新當前對話 ID（後端會返回）
+      if (aiResult.conversationId) {
+        setCurrentConversationId(aiResult.conversationId);
+      }
 
     } catch (error) {
       console.error('Error processing message:', error);
 
-      setTimeout(() => {
-        const errorMessage = {
-          id: Date.now() + 1,
-          text: t('chatWindow.errorMessage'),
-          isUser: false,
-          timestamp: new Date()
-        };
+      const errorMessage = {
+        id: Date.now() + 1,
+        text: error.response?.data?.response || t('chatWindow.errorMessage') || '抱歉，處理您的請求時發生錯誤。',
+        isUser: false,
+        timestamp: new Date(),
+        error: true
+      };
 
-        const finalMessages = [...newMessages, errorMessage];
-        setMessages(finalMessages);
-        setIsTyping(false);
-
-        // 保存或更新對話記錄
-        if (currentConversationId) {
-          updateConversation(currentConversationId, finalMessages);
-        } else {
-          const conversationId = saveConversation(finalMessages);
-          setCurrentConversationId(conversationId);
-        }
-      }, 1000);
+      const finalMessages = [...newMessages, errorMessage];
+      setMessages(finalMessages);
+      setIsTyping(false);
     }
   };
 
-  // 處理開始教學按鈕點擊
-  const handleStartTutorial = async (tutorialType) => {
+  // 處理開始教學按鈕點擊 - 觸發教學模式事件
+  const handleStartTutorial = (tutorialType) => {
     console.log('開始教學模式:', tutorialType);
 
-    // 獲取教學標題
-    const tutorialTitle = t(`chatWindow.tutorial.titles.${tutorialType}`);
-
-    // 顯示準備訊息
-    const tutorialStartMessage = {
-      id: Date.now(),
-      text: t('chatWindow.tutorial.starting', { tutorialTitle }),
-      isUser: false,
-      timestamp: new Date()
-    };
-    setMessages(prev => [...prev, tutorialStartMessage]);
-
     // 延遲一下讓用戶看到訊息，然後關閉聊天室並啟動教學
-    setTimeout(async () => {
+    setTimeout(() => {
       try {
         // 停止語音錄音並關閉聊天室
         stopVoiceRecording();
@@ -351,20 +316,18 @@ const ChatWindow = ({
         // 自動關閉漂浮頭像（如果存在）
         window.dispatchEvent(new CustomEvent('dismissFloatingAvatar'));
 
-        // 使用教學服務啟動教學
-        const result = await aiTutorialService.startTutorial(tutorialType, {
-          source: 'ai_chat',
-          user: user
-        });
-
-        if (!result.success) {
-          console.error('啟動教學失敗:', result.error);
-          // 這裡可以顯示錯誤訊息或使用備用方案
-        }
+        // 觸發教學模式事件，由 App.jsx 或相應組件處理
+        window.dispatchEvent(new CustomEvent('startTutorial', {
+          detail: {
+            tutorialType,
+            source: 'ai_chat',
+            user: user
+          }
+        }));
       } catch (error) {
         console.error('啟動教學過程中發生錯誤:', error);
       }
-    }, 1000);
+    }, 500);
   };
 
   // 處理營養計算機按鈕點擊
@@ -394,24 +357,12 @@ const ChatWindow = ({
     }, 1000);
   };
 
-  // 處理操作按鈕點擊
+  // 處理操作按鈕點擊 - 根據後端回傳的操作類型執行導航
   const handleOperationClick = async (operationType, params = {}) => {
     console.log('執行操作:', operationType, params);
 
-    // 獲取操作描述
-    const operationDesc = t(`chatWindow.operation.descriptions.${operationType}`);
-
-    // 顯示準備訊息
-    const operationMessage = {
-      id: Date.now(),
-      text: t('chatWindow.operation.executing', { operationDesc }),
-      isUser: false,
-      timestamp: new Date()
-    };
-    setMessages(prev => [...prev, operationMessage]);
-
     // 延遲一下讓用戶看到訊息，然後關閉聊天室並執行操作
-    setTimeout(async () => {
+    setTimeout(() => {
       try {
         // 通知全局啟動浮動模式（針對任何 ChatWindow 導航）
         window.dispatchEvent(new CustomEvent('forceFloatingMode'));
@@ -420,17 +371,32 @@ const ChatWindow = ({
         stopVoiceRecording();
         onClose();
 
-        // 使用操作服務執行操作
-        const result = await aiOperationService.executeOperation(operationType, params, navigate);
-
-        if (!result.success) {
-          console.error('操作執行失敗:', result.error);
-          // 這裡可以添加錯誤處理，比如顯示錯誤訊息
+        // 根據操作類型執行相應的導航
+        switch (operationType) {
+          case 'navigate_health_records':
+            navigate('/health', { state: params });
+            break;
+          case 'navigate_feeding_schedule':
+            navigate('/schedule', { state: params });
+            break;
+          case 'navigate_nearby_hospitals':
+            navigate('/interactive-city', { state: params });
+            break;
+          case 'navigate_pet_profile':
+            if (params.petId) {
+              navigate(`/pets/${params.petId}`, { state: params });
+            }
+            break;
+          case 'navigate_social':
+            navigate('/social', { state: params });
+            break;
+          default:
+            console.warn('未知的操作類型:', operationType);
         }
       } catch (error) {
         console.error('操作執行過程中發生錯誤:', error);
       }
-    }, 1000);
+    }, 500);
   };
 
   // 處理側邊欄
@@ -442,12 +408,136 @@ const ChatWindow = ({
     setIsSidebarOpen(false);
   };
 
-  const handleConversationSelect = (conversation) => {
-    setMessages(conversation.messages);
-    setCurrentConversationId(conversation.id);
+  // 根據用戶 ID 獲取用戶詳情（用於舊對話）
+  const fetchUserDetailsByIds = async (userIds) => {
+    if (!userIds || userIds.length === 0) return [];
+
+    try {
+      // 使用現有的 getUserFollowStatusBatch API 獲取用戶資訊
+      const { getUserFollowStatusBatch } = await import('../services/socialService');
+      const userDetails = await getUserFollowStatusBatch(userIds);
+
+      // 將 status 格式轉換為用戶詳情格式
+      return userIds.map(userId => {
+        const status = userDetails[userId];
+        return status ? {
+          id: userId,
+          user_account: status.user_account || '',
+          user_fullname: status.user_fullname || '',
+          headshot_url: status.headshot_url || null,
+          user_intro: status.user_intro || null,
+          account_privacy: status.account_privacy || 'public'
+        } : null;
+      }).filter(user => user !== null);
+    } catch (error) {
+      console.error('獲取用戶詳情失敗:', error);
+      return [];
+    }
+  };
+
+  const handleConversationSelect = async (conversation) => {
+    try {
+      // 從後端載入完整的對話詳情
+      const conversationDetail = await aiChatService.loadConversation(conversation.id);
+
+      // 檢查是否有 messages
+      if (!conversationDetail.messages || !Array.isArray(conversationDetail.messages)) {
+        console.error('對話詳情中沒有訊息陣列:', conversationDetail);
+        throw new Error('對話詳情格式錯誤');
+      }
+
+      // 將後端的 messages 轉換為前端格式
+      // 按照創建時間排序（確保舊的在前，新的在後）
+      const sortedMessages = [...conversationDetail.messages].sort((a, b) =>
+        new Date(a.created_at) - new Date(b.created_at)
+      );
+
+      const formattedMessages = await Promise.all(sortedMessages
+        .filter(msg => msg.role !== 'system') // 過濾掉系統訊息
+        .map(async (msg) => {
+          // 處理 additional_data 可能是字串或物件的情況
+          let additionalData = msg.additional_data;
+          if (typeof additionalData === 'string') {
+            try {
+              additionalData = JSON.parse(additionalData);
+            } catch (e) {
+              additionalData = {};
+            }
+          }
+
+          // 處理 entities 可能是字串或物件的情況
+          let entities = msg.entities;
+          if (typeof entities === 'string') {
+            try {
+              entities = JSON.parse(entities);
+            } catch (e) {
+              entities = {};
+            }
+          }
+
+          // 獲取推薦用戶詳情
+          let recommendedUserDetails = additionalData?.recommendedUserDetails ||
+                                      additionalData?.recommended_user_details ||
+                                      [];
+
+          // 如果沒有用戶詳情但有用戶 ID，嘗試獲取
+          if (recommendedUserDetails.length === 0 && msg.has_recommended_users) {
+            const userIds = additionalData?.recommended_user_ids || [];
+            if (userIds.length > 0) {
+              recommendedUserDetails = await fetchUserDetailsByIds(userIds);
+            }
+          }
+
+          return {
+            id: msg.id || Date.now() + Math.random(),
+            text: msg.content,
+            isUser: msg.role === 'user',
+            timestamp: new Date(msg.created_at),
+            confidence: msg.confidence,
+            intent: msg.intent,
+            source: msg.source,
+            // AI 訊息的額外資訊
+            hasTutorial: msg.has_tutorial || false,
+            tutorialType: msg.tutorial_type || null,
+            hasRecommendedUsers: msg.has_recommended_users || false,
+            recommendedUserDetails: recommendedUserDetails,
+            hasRecommendedArticles: msg.has_recommended_articles || false,
+            // 推薦文章 ID 可能在 additional_data 中
+            recommendedArticleIds: additionalData?.recommendedArticleIds ||
+                                  additionalData?.recommended_article_ids ||
+                                  [],
+            hasCalculator: msg.has_calculator || false,
+            hasOperation: msg.has_operation || false,
+            operationType: msg.operation_type || null,
+            // 操作參數
+            operationParams: additionalData?.operationParams ||
+                           additionalData?.operation_params ||
+                           {}
+          };
+        }));
+
+      setMessages(formattedMessages);
+      setCurrentConversationId(conversation.id);
+    } catch (error) {
+      console.error('載入對話失敗:', error);
+      console.error('錯誤詳情:', error.response || error);
+
+      // 如果載入失敗，使用 fallback 方式
+      if (conversation.messages && conversation.messages.length > 0) {
+        setMessages(conversation.messages);
+        setCurrentConversationId(conversation.id);
+      } else {
+        // 顯示錯誤訊息給用戶
+        alert('載入對話失敗，請稍後再試');
+      }
+    }
   };
 
   const handleNewConversation = () => {
+    // 重置 AI Chat Service 的會話狀態
+    aiChatService.startNewConversation();
+
+    // 重置前端狀態
     setMessages([
       {
         id: 1,
@@ -576,23 +666,35 @@ const ChatWindow = ({
                     </button>
                   )}
                   {/* 如果有推薦用戶，顯示推薦用戶預覽 */}
-                  {message.hasRecommendedUsers && (
+                  {message.hasRecommendedUsers && message.recommendedUserDetails && (
                     <RecommendedUsersPreview
+                      users={message.recommendedUserDetails}
                       onUserClick={(user) => {
                         console.log('點擊推薦用戶:', user);
+                        // 導航到用戶個人頁面
+                        navigate(`/user/${user.user_account}`);
                       }}
                     />
                   )}
                   {/* 如果有推薦文章，顯示推薦文章預覽 */}
-                  {message.hasRecommendedArticles && (
+                  {message.hasRecommendedArticles && message.recommendedArticleIds && (
                     <RecommendedArticlesPreview
-                      onArticleClick={(article) => {
-                        console.log('點擊推薦文章:', article);
-                      }}
+                      articleIds={message.recommendedArticleIds}
                     />
                   )}
                   <div className={styles.messageTime}>
                     {formatTime(message.timestamp)}
+                    {/* 顯示意圖資訊（測試用） */}
+                    {message.intent && (
+                      <span style={{ marginLeft: '8px', color: '#666', fontSize: '0.85em' }}>
+                        | 意圖: <strong>{message.intent}</strong>
+                      </span>
+                    )}
+                    {message.confidence !== undefined && (
+                      <span style={{ marginLeft: '8px', color: '#888', fontSize: '0.85em' }}>
+                        | 信心度: {(message.confidence * 100).toFixed(0)}%
+                      </span>
+                    )}
                   </div>
                 </div>
               </>

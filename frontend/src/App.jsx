@@ -5,8 +5,7 @@ import './i18n/i18n';
 import HomePage from './pages/HomePage';
 import RegisterPage from './pages/RegisterPage';
 import LoginPage from './pages/LoginPage';
-import MainPage from './pages/MainPage';
-import MainPageV2 from './pages/MainPageV2';
+import MainPage from './pages/MainPageV2';
 import UserProfilePage from './pages/UserProfilePage';
 import OtherUserProfilePage from './pages/OtherUserProfilePage';
 import UserFollowConditionPage from './pages/UserFollowConditionPage';
@@ -33,8 +32,7 @@ import PetRelatedPostsPage from './pages/PetRelatedPostsPage';
 import PetRelatedPostsListPage from './pages/PetRelatedPostsListPage';
 import PetAbnormalPostsPage from './pages/PetAbnormalPostsPage';
 import AbnormalPostDetailPage from './pages/AbnormalPostDetailPage';
-import CalculatorPage from './pages/CalculatorPage';
-import CalculatorPageV2 from './pages/CalculatorPageV2';
+import CalculatorPage from './pages/CalculatorPageV2';
 import FeedPage from './pages/FeedPage';
 import FeedDetailPage from './pages/FeedDetailPage';
 import MarkedFeedsPage from './pages/MarkedFeedsPage';
@@ -52,7 +50,6 @@ import DiseaseArchivePreviewPage from './pages/DiseaseArchivePreviewPage';
 import DiseaseArchiveDetailPage from './pages/DiseaseArchiveDetailPage';
 import InteractiveCityPage from './pages/InteractiveCityPage';
 import CheckpointDetailPage from './pages/CheckpointDetailPage';
-import I18nDemoPage from './pages/I18nDemoPage';
 import { UserProvider } from './context/UserContext';
 import TutorialOverlay from './components/TutorialOverlay';
 import FloatingAIAvatar from './components/FloatingAIAvatar';
@@ -316,7 +313,7 @@ const App = () => {
         {/* 根路徑：已登入導向MainPage，未登入導向HomePage */}
         <Route 
           path="/" 
-          element={isUserAuthenticated ? <MainPageV2 /> : <HomePage />} 
+          element={isUserAuthenticated ? <MainPage /> : <HomePage />} 
         />
         {/* 登入頁面：已登入導向MainPage */}
         <Route 
@@ -331,7 +328,7 @@ const App = () => {
         {/* 主頁面：未登入導向HomePage */}
         <Route 
           path="/main" 
-          element={isUserAuthenticated ? <MainPageV2 /> : <Navigate to="/" />} 
+          element={isUserAuthenticated ? <MainPage /> : <Navigate to="/" />} 
         />
         {/* 用戶個人頁：未登入導向HomePage */}
         <Route 
@@ -515,12 +512,7 @@ const App = () => {
         {/* 計算機頁面：未登入導向HomePage */}
         <Route 
           path="/calculator" 
-          element={isUserAuthenticated ? <CalculatorPageV2 /> : <Navigate to="/" />} 
-        />
-        {/* 舊版計算機頁面（保留用於測試） */}
-        <Route 
-          path="/calculator-old" 
-          element={isUserAuthenticated ? <CalculatorPage /> : <Navigate to="/" />} 
+          element={isUserAuthenticated ? <CalculatorPage /> : <Navigate to="/" />}
         />
         {/* 飼料頁面：未登入導向HomePage */}
         <Route 
@@ -576,11 +568,6 @@ const App = () => {
         <Route
           path="/checkpoint/:id"
           element={isUserAuthenticated ? <CheckpointDetailPage /> : <Navigate to="/" />}
-        />
-        {/* i18n 多語言示範頁面 */}
-        <Route
-          path="/i18n-demo"
-          element={<I18nDemoPage />}
         />
       </Routes>
 

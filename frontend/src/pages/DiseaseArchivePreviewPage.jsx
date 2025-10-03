@@ -177,46 +177,60 @@ const DiseaseArchivePreviewPage = () => {
       try {
         const DRAFT_KEY = `diseaseArchiveDraft_${petId}`;
         const savedDraft = localStorage.getItem(DRAFT_KEY);
-        
-        
+
+        console.log('載入 localStorage draft:', savedDraft ? '存在' : '不存在');
+
         if (savedDraft && (!data.abnormalPostsData || data.abnormalPostsData.length === 0)) {
           const draftData = JSON.parse(savedDraft);
-          
-          
-          if (draftData.abnormalPostsForDates) {
+          console.log('Draft 資料:', draftData);
+
+          // 優先使用 realAbnormalPosts，因為它包含完整的 API 資料
+          if (draftData.realAbnormalPosts && Array.isArray(draftData.realAbnormalPosts) && draftData.realAbnormalPosts.length > 0) {
+            console.log('使用 realAbnormalPosts:', draftData.realAbnormalPosts.length, '筆');
+            data.abnormalPostsData = draftData.realAbnormalPosts;
+          }
+          // 如果沒有 realAbnormalPosts，嘗試從 abnormalPostsForDates 構建
+          else if (draftData.abnormalPostsForDates) {
+            console.log('使用 abnormalPostsForDates');
             const objectValues = Object.values(draftData.abnormalPostsForDates);
             const filteredPosts = objectValues.filter(post => post && post.id);
-            
+
             const abnormalPostsData = filteredPosts.map(post => {
-              // Use rawData if available, otherwise use post itself
+              // 優先使用 rawData（完整的 API 資料）
               if (post.rawData) {
+                console.log('使用 post.rawData:', post.rawData.id);
                 return post.rawData;
               } else {
-                // Build standard format abnormal record data
+                console.warn('沒有 rawData，嘗試手動構建:', post);
+                // 如果有 record_date 直接使用
+                if (post.record_date) {
+                  return {
+                    id: post.id,
+                    record_date: post.record_date,
+                    symptoms: post.symptoms || [],
+                    content: post.content || post.description || t('diseaseArchivePreview.defaultContent.abnormalRecord')
+                  };
+                }
+                // 否則嘗試從 date 字串解析（容錯處理）
                 return {
                   id: post.id,
-                  record_date: `2025-${String(post.date.split('月')[0]).padStart(2, '0')}-${String(post.date.split('月')[1].split('日')[0]).padStart(2, '0')}T12:00:00Z`,
-                  symptoms: post.symptoms ? [{ symptom_name: post.symptoms }] : [],
-                  content: post.description || t('diseaseArchivePreview.defaultContent.abnormalRecord')
+                  record_date: post.date || new Date().toISOString(),
+                  symptoms: post.symptoms ? (Array.isArray(post.symptoms) ? post.symptoms : [{ symptom_name: post.symptoms }]) : [],
+                  content: post.description || post.content || t('diseaseArchivePreview.defaultContent.abnormalRecord')
                 };
               }
             });
-            
+
+            console.log('構建的 abnormalPostsData:', abnormalPostsData.length, '筆');
             data.abnormalPostsData = abnormalPostsData;
           }
-          
-          // If not found from abnormalPostsForDates, try other possible sources
-          if (!data.abnormalPostsData || data.abnormalPostsData.length === 0) {
-            // Try to get from other possible fields
-            if (draftData.realAbnormalPosts && Array.isArray(draftData.realAbnormalPosts)) {
-              data.abnormalPostsData = draftData.realAbnormalPosts;
-            }
+          // 最後嘗試其他可能的欄位
+          else if (draftData.abnormalPosts && Array.isArray(draftData.abnormalPosts)) {
+            console.log('使用 abnormalPosts');
+            data.abnormalPostsData = draftData.abnormalPosts;
           }
-          
-          // Prioritize realAbnormalPosts as it contains complete API data
-          if (draftData.realAbnormalPosts && Array.isArray(draftData.realAbnormalPosts) && draftData.realAbnormalPosts.length > 0) {
-            data.abnormalPostsData = draftData.realAbnormalPosts;
-          }
+
+          console.log('最終 abnormalPostsData:', data.abnormalPostsData ? data.abnormalPostsData.length : 0, '筆');
         }
       } catch (error) {
         console.error(t('diseaseArchivePreview.console.getLocalStorageFailed'), error);

@@ -1062,45 +1062,59 @@ class FollowStatusBatchAPIView(APIView):
     permission_classes = [IsAuthenticated]
     
     def post(self, request):
-        """批量獲取多個使用者的追蹤狀態"""
+        """批量獲取多個使用者的追蹤狀態和基本資訊"""
         try:
             user_ids = request.data.get('user_ids', [])
-            
+
             if not user_ids:
                 return APIResponse(
                     message='請提供使用者ID列表',
                     code=drf_status.HTTP_400_BAD_REQUEST,
                     status=drf_status.HTTP_400_BAD_REQUEST
                 )
-            
+
             # 獲取追蹤關係
             follow_relations = UserFollow.objects.filter(
                 user=request.user,
                 follows__id__in=user_ids
             ).select_related('follows')
-            
+
+            # 獲取所有請求的用戶資訊（只包含公開帳戶）
+            users = User.objects.filter(
+                id__in=user_ids,
+                account_privacy='public'
+            )
+
             # 建立結果字典
             follow_status = {}
-            for user_id in user_ids:
-                follow_status[str(user_id)] = {
+            for user_obj in users:
+                user_id_str = str(user_obj.id)
+                follow_status[user_id_str] = {
                     'is_following': False,
-                    'is_requested': False
+                    'is_requested': False,
+                    # 添加用戶基本資訊
+                    'user_account': user_obj.user_account,
+                    'user_fullname': user_obj.user_fullname,
+                    'headshot_url': user_obj.headshot.firebase_url if hasattr(user_obj, 'headshot') and user_obj.headshot else None,
+                    'user_intro': user_obj.user_intro if hasattr(user_obj, 'user_intro') else None,
+                    'account_privacy': user_obj.account_privacy
                 }
-            
+
             # 更新有追蹤關係的狀態
             for relation in follow_relations:
                 user_id_str = str(relation.follows.id)
-                if relation.confirm_or_not:
-                    follow_status[user_id_str]['is_following'] = True
-                else:
-                    follow_status[user_id_str]['is_requested'] = True
-            
+                if user_id_str in follow_status:
+                    if relation.confirm_or_not:
+                        follow_status[user_id_str]['is_following'] = True
+                    else:
+                        follow_status[user_id_str]['is_requested'] = True
+
             return APIResponse(
                 data={'follow_status': follow_status},
                 message='批量獲取追蹤狀態成功',
                 status=drf_status.HTTP_200_OK
             )
-            
+
         except Exception as e:
             return APIResponse(
                 message=f'批量獲取追蹤狀態失敗: {str(e)}',
@@ -1110,20 +1124,28 @@ class FollowStatusBatchAPIView(APIView):
 
 class FollowingListAPIView(APIView):
     permission_classes = [IsAuthenticated]
-    
+
     def get(self, request):
         """獲取指定使用者的追蹤列表"""
         try:
             # 檢查是否有 user 參數（userAccount 或 userId）
             user_param = request.GET.get('user')
             if user_param:
-                # 嘗試先用 user_account 查找，如果不行就用 id 查找
+                # 修復：優先嘗試用 user_account 查找（即使是純數字），失敗後才用 id 查找
+                # 這樣可以支援 user_account='12345' 這類純數字帳號
+                target_user = None
                 try:
-                    if user_param.isdigit():
-                        target_user = User.objects.get(id=int(user_param))
-                    else:
-                        target_user = User.objects.get(user_account=user_param)
+                    # 先嘗試用 user_account 查找
+                    target_user = User.objects.get(user_account=user_param)
                 except User.DoesNotExist:
+                    # 如果是純數字，再嘗試用 id 查找
+                    if user_param.isdigit():
+                        try:
+                            target_user = User.objects.get(id=int(user_param))
+                        except User.DoesNotExist:
+                            pass
+
+                if target_user is None:
                     return APIResponse(
                         message='找不到指定的用戶',
                         code=drf_status.HTTP_404_NOT_FOUND,
@@ -1182,20 +1204,28 @@ class FollowingListAPIView(APIView):
 
 class FollowersListAPIView(APIView):
     permission_classes = [IsAuthenticated]
-    
+
     def get(self, request):
         """獲取指定使用者的粉絲列表"""
         try:
             # 檢查是否有 user 參數（userAccount 或 userId）
             user_param = request.GET.get('user')
             if user_param:
-                # 嘗試先用 user_account 查找，如果不行就用 id 查找
+                # 修復：優先嘗試用 user_account 查找（即使是純數字），失敗後才用 id 查找
+                # 這樣可以支援 user_account='12345' 這類純數字帳號
+                target_user = None
                 try:
-                    if user_param.isdigit():
-                        target_user = User.objects.get(id=int(user_param))
-                    else:
-                        target_user = User.objects.get(user_account=user_param)
+                    # 先嘗試用 user_account 查找
+                    target_user = User.objects.get(user_account=user_param)
                 except User.DoesNotExist:
+                    # 如果是純數字，再嘗試用 id 查找
+                    if user_param.isdigit():
+                        try:
+                            target_user = User.objects.get(id=int(user_param))
+                        except User.DoesNotExist:
+                            pass
+
+                if target_user is None:
                     return APIResponse(
                         message='找不到指定的用戶',
                         code=drf_status.HTTP_404_NOT_FOUND,

@@ -176,20 +176,5 @@
     "我理解您的需求了！若能提供更具體的頁面或步驟，我可以給出更精準的操作指引。",
     "這是個好問題！我先幫您整理相關功能與入口，您也可以在設定頁面查看更多選項。",
     "感謝您的提問！若提供寵物名稱或時間區間，我可以幫您快速彙整相關紀錄與建議。"
-  ],
-
-  "apiEndpoints": {
-    "comment": "以下是為未來整合 AI API 預留的配置",
-    "openaiConfig": {
-      "model": "gpt-3.5-turbo",
-      "systemPrompt": "你是 PETer App 的專屬 AI 助手 Peter，專門協助用戶解決寵物照護和 App 使用相關問題。請用溫暖、專業且友善的語調回答問題。",
-      "maxTokens": 150,
-      "temperature": 0.7
-    },
-    "fallbackToAPI": {
-      "enabled": false,
-      "threshold": 0.3,
-      "comment": "當本地知識庫匹配度低於閾值時，是否調用 AI API"
-    }
-  }
+  ]
 }

@@ -119,6 +119,36 @@
   box-shadow: 0 1px 3px rgba(240, 134, 81, 0.3);
 }
 
+/* 追蹤中狀態 */
+.followButton.following {
+  background: #f0f0f0;
+  color: #666;
+  box-shadow: none;
+  border: 1px solid #ddd;
+}
+
+.followButton.following:hover {
+  background: #e8e8e8;
+  color: #555;
+  transform: none;
+  box-shadow: none;
+}
+
+/* 已請求狀態 */
+.followButton.requested {
+  background: #fff3e0;
+  color: #F08651;
+  box-shadow: none;
+  border: 1px solid #F08651;
+}
+
+.followButton.requested:hover {
+  background: #ffe0b2;
+  color: #E07045;
+  transform: none;
+  box-shadow: none;
+}
+
 /* 載入狀態 */
 .loading {
   display: flex;
