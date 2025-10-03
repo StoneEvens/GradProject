@@ -39,7 +39,7 @@ api_v1_prefix = 'api/v1/'
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    
+
     # API 版本化路由
     path(f'{api_v1_prefix}accounts/', include('accounts.urls')),
     path(f'{api_v1_prefix}pets/', include('pets.urls')),
@@ -52,6 +52,7 @@ urlpatterns = [
     # path(f'{api_v1_prefix}article_recommendations/', include('articleRecommendation.urls')),  # 已移除測試資料
     path(f'{api_v1_prefix}ocr/', include('ocrapp.urls')),
     path(f'{api_v1_prefix}auctions/', include('auctions.urls')),
+    path(f'{api_v1_prefix}ai/', include('aiAgent.urls')),
 
     # Swagger 文檔
     re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),

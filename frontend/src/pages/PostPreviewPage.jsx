@@ -9,16 +9,6 @@ import { NotificationProvider } from '../context/NotificationContext';
 import { getUserProfile } from '../services/userService';
 import styles from '../styles/PostPreviewPage.module.css';
 
-// 開發環境下載入測試工具
-if (process.env.NODE_ENV === 'development') {
-  import('../utils/testPostAPI').then(module => {
-    console.log('🔧 貼文發布測試工具已載入');
-    console.log('在控制台輸入以下命令進行測試：');
-    console.log('- testBasicPost() // 測試基本貼文');
-    console.log('- testPostAPI() // 測試完整貼文');
-  });
-}
-
 const PostPreviewPage = () => {
   const { t } = useTranslation('posts');
   const navigate = useNavigate();

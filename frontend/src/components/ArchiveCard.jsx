@@ -69,26 +69,31 @@ const ArchiveCard = ({
           };
           setValidatedArchiveData(updatedArchiveData);
           
-          // 如果有archiveId，更新資料庫中的檔案
-          const archiveId = archiveData.id || 
-                           archiveData.archive_id || 
-                           archiveData.archiveId ||
-                           archiveData.diseaseArchiveId ||
-                           archiveData.disease_archive_id ||
-                           archiveData.postFrame;
-          
-          if (archiveId) {
-            const updateResult = await updateDiseaseArchive(archiveId, {
-              abnormal_posts: validIds
-            });
-            
-            if (updateResult.success) {
-              console.log(t('archiveCard.messages.archiveUpdated'));
-              if (onShowNotification) {
-                onShowNotification(t('archiveCard.messages.autoRemovedRecords', { count: invalidIds.length }));
+          // 只有擁有者才能更新資料庫中的檔案
+          const isOwner = !isPublicView && currentUser && user && currentUser.id === user.id;
+
+          if (isOwner) {
+            // 如果有archiveId，更新資料庫中的檔案
+            const archiveId = archiveData.id ||
+                             archiveData.archive_id ||
+                             archiveData.archiveId ||
+                             archiveData.diseaseArchiveId ||
+                             archiveData.disease_archive_id ||
+                             archiveData.postFrame;
+
+            if (archiveId) {
+              const updateResult = await updateDiseaseArchive(archiveId, {
+                abnormal_posts: validIds
+              });
+
+              if (updateResult.success) {
+                console.log(t('archiveCard.messages.archiveUpdated'));
+                if (onShowNotification) {
+                  onShowNotification(t('archiveCard.messages.autoRemovedRecords', { count: invalidIds.length }));
+                }
+              } else {
+                console.error(t('archiveCard.messages.updateArchiveFailed'), updateResult.error);
               }
-            } else {
-              console.error(t('archiveCard.messages.updateArchiveFailed'), updateResult.error);
             }
           }
         } else {

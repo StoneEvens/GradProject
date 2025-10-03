@@ -1,0 +1,234 @@
+{
+  "version": "1.0.0",
+  "description": "系統操作資料庫 - 用於 AI 代理使用者執行系統操作的詳細資訊",
+  "instructions": {
+    "how_to_add": "每個操作項目包含以下欄位",
+    "fields": {
+      "id": "唯一識別碼（整數，遞增）",
+      "operation_type": "操作類型標識符（駝峰命名，如 findAbnormalPosts）",
+      "name": "操作的簡短名稱",
+      "description": "操作的詳細描述，幫助向量搜尋匹配",
+      "keywords": "關鍵字陣列，用於提高搜尋準確度（建議 5-10 個）",
+      "use_cases": "使用者可能的請求範例（建議 3-5 個）",
+      "method": "HTTP 方法（GET, POST, PUT, DELETE, NAVIGATE）",
+      "endpoint": "API 端點或前端路由（如果是導航操作）",
+      "requires_auth": "是否需要使用者認證（true/false）",
+      "required_params": "必要參數陣列，每個參數包含 name, type, description, source",
+      "optional_params": "可選參數陣列，格式同 required_params",
+      "response_format": "預期的回應格式說明",
+      "success_message": "操作成功後的訊息模板",
+      "error_handling": "錯誤處理說明",
+      "category": "分類標籤（如：records, reminders, navigation, social）"
+    },
+    "param_source_types": {
+      "context": "從上下文獲取（如當前使用者 ID、當前寵物 ID）",
+      "user_input": "從使用者輸入中提取",
+      "gpt_inference": "由 GPT 推斷或詢問使用者",
+      "current_time": "使用當前時間",
+      "default": "使用預設值"
+    },
+    "example": "請參考下方的範例操作項目"
+  },
+  "operations": [
+    {
+      "id": 1,
+      "operation_type": "findAbnormalPosts",
+      "name": "查找異常記錄",
+      "description": "幫助使用者查找指定寵物的異常健康記錄和症狀記錄，可指定時間範圍",
+      "keywords": ["異常", "記錄", "症狀", "健康問題", "不正常", "奇怪行為", "異常貼文", "病歷"],
+      "use_cases": [
+        "我家貓咪最近有什麼異常",
+        "幫我找異常記錄",
+        "查看過去兩週的健康問題",
+        "有沒有不正常的記錄",
+        "最近的異常貼文"
+      ],
+      "method": "NAVIGATE",
+      "endpoint": "/pet/{petId}/abnormal-posts",
+      "requires_auth": true,
+      "required_params": [
+        {
+          "name": "petId",
+          "type": "integer",
+          "description": "寵物 ID",
+          "source": "context",
+          "default_source": "user.default_pet_id"
+        }
+      ],
+      "optional_params": [
+        {
+          "name": "startDate",
+          "type": "string",
+          "format": "YYYY-MM-DD",
+          "description": "開始日期",
+          "source": "gpt_inference",
+          "default": "14_days_ago"
+        },
+        {
+          "name": "endDate",
+          "type": "string",
+          "format": "YYYY-MM-DD",
+          "description": "結束日期",
+          "source": "current_time",
+          "default": "today"
+        },
+        {
+          "name": "autoFilter",
+          "type": "boolean",
+          "description": "標記為 AI 自動篩選",
+          "source": "default",
+          "default": true
+        }
+      ],
+      "response_format": "導航至異常記錄頁面",
+      "success_message": "已為您導航至 {petName} 的異常記錄頁面，顯示 {startDate} 到 {endDate} 的記錄。",
+      "error_handling": "如果找不到寵物，詢問使用者要查看哪隻寵物的記錄",
+      "category": "records"
+    },
+    {
+      "id": 2,
+      "operation_type": "findHealthRecords",
+      "name": "查找健康記錄",
+      "description": "查詢寵物的完整健康記錄，包括健康報告、體檢記錄等",
+      "keywords": ["健康記錄", "醫療記錄", "病歷", "體檢", "健康報告", "OCR", "檢查報告"],
+      "use_cases": [
+        "查看健康記錄",
+        "有哪些醫療記錄",
+        "幫我找健康報告",
+        "最近的體檢記錄",
+        "健康記錄在哪"
+      ],
+      "method": "NAVIGATE",
+      "endpoint": "/pet/{petId}/health-records",
+      "requires_auth": true,
+      "required_params": [
+        {
+          "name": "petId",
+          "type": "integer",
+          "description": "寵物 ID",
+          "source": "context",
+          "default_source": "user.default_pet_id"
+        }
+      ],
+      "optional_params": [
+        {
+          "name": "type",
+          "type": "string",
+          "description": "記錄類型（all, cbc, biochemistry, urinalysis, other）",
+          "source": "gpt_inference",
+          "default": "all"
+        },
+        {
+          "name": "autoFilter",
+          "type": "boolean",
+          "description": "標記為 AI 自動篩選",
+          "source": "default",
+          "default": true
+        }
+      ],
+      "response_format": "導航至健康記錄頁面",
+      "success_message": "已為您導航至 {petName} 的健康記錄頁面。",
+      "error_handling": "如果找不到寵物，詢問使用者要查看哪隻寵物的記錄",
+      "category": "records"
+    },
+    {
+      "id": 3,
+      "operation_type": "setFeedingReminder",
+      "name": "設置餵食提醒",
+      "description": "幫助使用者為寵物設置定時餵食提醒通知",
+      "keywords": ["餵食提醒", "餵食時間", "提醒", "設定", "通知", "定時", "鬧鐘", "餵食"],
+      "use_cases": [
+        "設定餵食提醒",
+        "每天幾點餵食",
+        "提醒我餵貓",
+        "設置餵食時間",
+        "建立餵食提醒"
+      ],
+      "method": "NAVIGATE",
+      "endpoint": "/pet/{petId}/feeding-reminders/create",
+      "requires_auth": true,
+      "required_params": [
+        {
+          "name": "petId",
+          "type": "integer",
+          "description": "寵物 ID",
+          "source": "context",
+          "default_source": "user.default_pet_id"
+        }
+      ],
+      "optional_params": [],
+      "response_format": "導航至創建餵食提醒頁面",
+      "success_message": "已為您開啟 {petName} 的餵食提醒設定頁面，請填寫提醒時間。",
+      "error_handling": "如果找不到寵物，詢問使用者要為哪隻寵物設置提醒",
+      "category": "reminders"
+    },
+    {
+      "id": 4,
+      "operation_type": "searchNearbyHospitals",
+      "name": "搜尋附近醫院",
+      "description": "根據使用者位置或指定地點搜尋附近的動物醫院",
+      "keywords": ["附近醫院", "動物醫院", "獸醫", "診所", "急診", "看病", "就醫", "醫療"],
+      "use_cases": [
+        "找附近的動物醫院",
+        "哪裡有獸醫",
+        "緊急就醫",
+        "搜尋動物醫院",
+        "最近的診所在哪"
+      ],
+      "method": "NAVIGATE",
+      "endpoint": "/hospitals/search",
+      "requires_auth": false,
+      "required_params": [],
+      "optional_params": [
+        {
+          "name": "location",
+          "type": "string",
+          "description": "搜尋位置（地址或地標）",
+          "source": "user_input",
+          "default": "user_current_location"
+        },
+        {
+          "name": "radius",
+          "type": "integer",
+          "description": "搜尋半徑（公里）",
+          "source": "default",
+          "default": 5
+        },
+        {
+          "name": "autoSearch",
+          "type": "boolean",
+          "description": "標記為 AI 自動搜尋",
+          "source": "default",
+          "default": true
+        }
+      ],
+      "response_format": "導航至醫院搜尋結果頁面",
+      "success_message": "已為您搜尋附近 {radius} 公里內的動物醫院。",
+      "error_handling": "如果無法取得位置，請使用者手動輸入地址",
+      "category": "navigation"
+    },
+    {
+      "id": 5,
+      "operation_type": "addFeed",
+      "name": "新增飼料",
+      "description": "引導使用者前往飼料頁面新增飼料資料",
+      "keywords": ["新增飼料", "飼料資料", "飼料", "添加", "建立", "飼料資訊"],
+      "use_cases": [
+        "新增飼料",
+        "如何添加飼料",
+        "想新增飼料資料",
+        "建立飼料資訊",
+        "加入新飼料"
+      ],
+      "method": "NAVIGATE",
+      "endpoint": "/feeds",
+      "requires_auth": true,
+      "required_params": [],
+      "optional_params": [],
+      "response_format": "導航至飼料頁面",
+      "success_message": "已為您開啟飼料頁面，您可以在這裡新增飼料資料。",
+      "error_handling": "無特殊錯誤處理",
+      "category": "feed"
+    }
+  ]
+}

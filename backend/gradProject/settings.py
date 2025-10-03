@@ -81,6 +81,7 @@ INSTALLED_APPS = [
     "ocrapp",
     "auctions",
     "interactivecity",
+    "aiAgent",
     'sslserver',
 ]
 

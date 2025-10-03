@@ -1,173 +1,411 @@
-import knowledgeBase from '../data/aiKnowledgeBase.json';
+// AI Chat Service - 連接後端 AI Agent API
+// 整合 OpenAI + 向量資料庫的完整 AI 服務
+
+import axios from 'axios';
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
 
 class AIChatService {
   constructor() {
-    this.kb = knowledgeBase.knowledgeBase;
-    this.defaultResponses = knowledgeBase.defaultResponses;
-    this.apiConfig = knowledgeBase.apiEndpoints;
+    this.apiClient = axios.create({
+      baseURL: `${API_BASE_URL}/ai`,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    // 添加請求攔截器來加入 JWT token
+    this.apiClient.interceptors.request.use(
+      (config) => {
+        const token = localStorage.getItem('accessToken');
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+      },
+      (error) => {
+        return Promise.reject(error);
+      }
+    );
+
+    // 會話上下文管理
+    this.sessionContext = {
+      conversationHistory: [],
+      lastIntent: null,
+    };
+
+    // 當前對話 ID（用於後端對話記錄）
+    this.currentConversationId = null;
   }
 
-  // 主要的訊息處理函數
-  async processMessage(userInput) {
+  /**
+   * 處理使用者訊息
+   * @param {string} userMessage - 使用者輸入訊息
+   * @param {Object} additionalContext - 額外的上下文資訊
+   * @returns {Promise<Object>} AI 回應
+   */
+  async processMessage(userMessage, additionalContext = {}) {
     try {
-      // 預處理用戶輸入
-      const processedInput = this.preprocessInput(userInput);
-
-      // 嘗試從本地知識庫找到匹配
-      const localResponse = this.findLocalMatch(processedInput);
-
-      if (localResponse.confidence > 0.6) {
-        return {
-          response: localResponse.message,
-          source: 'local',
-          confidence: localResponse.confidence
-        };
-      }
-
-      // 如果本地匹配度不高，且啟用了 API fallback
-      if (this.apiConfig.fallbackToAPI.enabled && localResponse.confidence < this.apiConfig.fallbackToAPI.threshold) {
-        return await this.callAIAPI(userInput);
-      }
-
-      // 使用預設回應
-      return {
-        response: this.getRandomResponse(this.defaultResponses),
-        source: 'default',
-        confidence: 0.3
+      // 準備請求資料
+      const requestData = {
+        message: userMessage,
+        conversationId: this.currentConversationId, // 加入對話 ID
+        context: {
+          ...this.sessionContext,
+          ...additionalContext,
+          timestamp: new Date().toISOString(),
+        },
       };
+
+      // 調用後端 API
+      const response = await this.apiClient.post('/chat/', requestData);
+
+      // 更新當前對話 ID（如果是新對話，後端會返回）
+      if (response.data.conversationId) {
+        this.currentConversationId = response.data.conversationId;
+      }
+
+      // 更新會話上下文
+      this.updateSessionContext(userMessage, response.data);
+
+      return response.data;
 
     } catch (error) {
       console.error('AI Chat Service Error:', error);
+      return this.handleError(error);
+    }
+  }
+
+  /**
+   * 更新會話上下文
+   * @param {string} userMessage - 使用者訊息
+   * @param {Object} aiResponse - AI 回應
+   */
+  updateSessionContext(userMessage, aiResponse) {
+    // 記錄對話歷史
+    this.sessionContext.conversationHistory.push({
+      user: userMessage,
+      ai: aiResponse.response,
+      intent: aiResponse.intent,
+      timestamp: new Date().toISOString(),
+    });
+
+    // 限制歷史記錄數量
+    if (this.sessionContext.conversationHistory.length > 10) {
+      this.sessionContext.conversationHistory.shift();
+    }
+
+    // 更新最後意圖
+    if (aiResponse.intent) {
+      this.sessionContext.lastIntent = aiResponse.intent;
+    }
+  }
+
+  /**
+   * 錯誤處理
+   * @param {Error} error - 錯誤對象
+   * @returns {Object} 錯誤回應
+   */
+  handleError(error) {
+    // 網路錯誤或後端未啟動
+    if (error.code === 'ERR_NETWORK' || !error.response) {
       return {
-        response: "抱歉，我暫時無法理解您的問題。請稍後再試，或者描述得更具體一些。",
+        response: '抱歉，目前無法連接到 AI 服務。請確認網路連線或稍後再試。',
         source: 'error',
-        confidence: 0
+        confidence: 0.0,
+        error: true,
+        hasTutorial: false,
+        hasRecommendedUsers: false,
+        hasRecommendedArticles: false,
+        hasCalculator: false,
+        hasOperation: false,
+      };
+    }
+
+    // API 錯誤
+    if (error.response) {
+      return {
+        response: error.response.data?.response || '抱歉，處理您的請求時發生錯誤。',
+        source: 'error',
+        confidence: 0.0,
+        error: true,
+        detail: error.response.data?.detail,
+        hasTutorial: false,
+        hasRecommendedUsers: false,
+        hasRecommendedArticles: false,
+        hasCalculator: false,
+        hasOperation: false,
+      };
+    }
+
+    // 未知錯誤
+    return {
+      response: '抱歉，發生了未預期的錯誤。',
+      source: 'error',
+      confidence: 0.0,
+      error: true,
+      hasTutorial: false,
+      hasRecommendedUsers: false,
+      hasRecommendedArticles: false,
+      hasCalculator: false,
+      hasOperation: false,
+    };
+  }
+
+  /**
+   * 檢查 AI 服務健康狀態
+   * @returns {Promise<Object>} 服務狀態
+   */
+  async checkHealth() {
+    try {
+      const response = await this.apiClient.get('/health/');
+      return response.data;
+    } catch (error) {
+      console.error('AI Health Check Error:', error);
+      return {
+        status: 'unhealthy',
+        error: error.message,
       };
     }
   }
 
-  // 預處理用戶輸入
-  preprocessInput(input) {
-    return input
-      .toLowerCase()
-      .trim()
-      .replace(/[！。？，、；：「」『』（）【】]/g, '') // 移除中文標點
-      .replace(/[!.?,;:()\[\]{}]/g, ''); // 移除英文標點
-  }
-
-  // 在本地知識庫中尋找匹配
-  findLocalMatch(processedInput) {
-    let bestMatch = {
-      message: '',
-      confidence: 0,
-      category: ''
+  /**
+   * 重置會話上下文
+   */
+  resetSession() {
+    this.sessionContext = {
+      conversationHistory: [],
+      lastIntent: null,
     };
-
-    // 遍歷知識庫的每個分類
-    for (const [category, data] of Object.entries(this.kb)) {
-      const matchScore = this.calculateMatchScore(processedInput, data.keywords);
-
-      if (matchScore > bestMatch.confidence) {
-        bestMatch = {
-          message: this.getRandomResponse(data.responses),
-          confidence: matchScore,
-          category: category
-        };
-      }
-    }
-
-    return bestMatch;
+    this.currentConversationId = null; // 也重置對話 ID
   }
 
-  // 計算匹配分數
-  calculateMatchScore(input, keywords) {
-    let score = 0;
-    let totalKeywords = keywords.length;
-
-    for (const keyword of keywords) {
-      if (input.includes(keyword.toLowerCase())) {
-        // 關鍵字匹配基礎分數
-        score += 1;
-
-        // 如果是完全匹配，給予額外分數
-        if (input === keyword.toLowerCase()) {
-          score += 0.5;
-        }
-
-        // 如果關鍵字在輸入開頭，給予額外分數
-        if (input.startsWith(keyword.toLowerCase())) {
-          score += 0.3;
-        }
-      }
-    }
-
-    // 正規化分數 (0-1 之間)
-    return Math.min(score / totalKeywords, 1);
+  /**
+   * 獲取會話上下文
+   * @returns {Object} 當前會話上下文
+   */
+  getSessionContext() {
+    return { ...this.sessionContext };
   }
 
-  // 從回應陣列中隨機選擇一個
-  getRandomResponse(responses) {
-    if (!Array.isArray(responses) || responses.length === 0) {
-      return "我需要更多資訊才能幫助您。";
-    }
-    return responses[Math.floor(Math.random() * responses.length)];
-  }
+  // ========== 對話管理 API ==========
 
-  // 調用外部 AI API (為未來擴展預留)
-  async callAIAPI(userInput) {
+  /**
+   * 取得所有對話列表
+   * @param {Object} params - 查詢參數 { archived, pinned }
+   * @returns {Promise<Array>} 對話列表
+   */
+  async getConversations(params = {}) {
     try {
-      // 這裡將來可以整合 OpenAI API 或其他 AI 服務
-      const response = await fetch('/api/ai-chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          message: userInput,
-          model: this.apiConfig.openaiConfig.model,
-          systemPrompt: this.apiConfig.openaiConfig.systemPrompt,
-          maxTokens: this.apiConfig.openaiConfig.maxTokens,
-          temperature: this.apiConfig.openaiConfig.temperature
-        })
-      });
+      const response = await this.apiClient.get('/conversations/', { params });
+      return response.data;
+    } catch (error) {
+      console.error('Get Conversations Error:', error);
+      throw error;
+    }
+  }
 
-      if (response.ok) {
-        const data = await response.json();
-        return {
-          response: data.message,
-          source: 'api',
-          confidence: 0.9
-        };
+  /**
+   * 取得指定對話詳情（包含所有訊息）
+   * @param {number} conversationId - 對話 ID
+   * @returns {Promise<Object>} 對話詳情
+   */
+  async getConversationDetail(conversationId) {
+    try {
+      const response = await this.apiClient.get(`/conversations/${conversationId}/`);
+      return response.data;
+    } catch (error) {
+      console.error('Get Conversation Detail Error:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * 載入指定對話（設定為當前對話）
+   * @param {number} conversationId - 對話 ID
+   * @returns {Promise<Object>} 對話詳情
+   */
+  async loadConversation(conversationId) {
+    try {
+      const conversation = await this.getConversationDetail(conversationId);
+
+      // 設定為當前對話
+      this.currentConversationId = conversationId;
+
+      // 重建對話歷史到 sessionContext
+      this.sessionContext.conversationHistory = conversation.messages
+        .filter(msg => msg.role !== 'system')
+        .map(msg => ({
+          user: msg.role === 'user' ? msg.content : null,
+          ai: msg.role === 'assistant' ? msg.content : null,
+          intent: msg.intent,
+          timestamp: msg.created_at,
+        }));
+
+      // 取得最後一個意圖
+      const lastAssistantMessage = conversation.messages
+        .reverse()
+        .find(msg => msg.role === 'assistant');
+      if (lastAssistantMessage) {
+        this.sessionContext.lastIntent = lastAssistantMessage.intent;
+      }
+
+      return conversation;
+    } catch (error) {
+      console.error('Load Conversation Error:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * 建立新對話
+   * @param {Object} data - 對話資料 { title, context_data }
+   * @returns {Promise<Object>} 新建的對話
+   */
+  async createConversation(data = {}) {
+    try {
+      const response = await this.apiClient.post('/conversations/create/', data);
+      this.currentConversationId = response.data.id;
+      return response.data;
+    } catch (error) {
+      console.error('Create Conversation Error:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * 更新對話
+   * @param {number} conversationId - 對話 ID
+   * @param {Object} data - 更新資料 { title, is_pinned, is_archived }
+   * @returns {Promise<Object>} 更新後的對話
+   */
+  async updateConversation(conversationId, data) {
+    try {
+      const response = await this.apiClient.patch(
+        `/conversations/${conversationId}/update/`,
+        data
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Update Conversation Error:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * 刪除對話
+   * @param {number} conversationId - 對話 ID
+   * @returns {Promise<void>}
+   */
+  async deleteConversation(conversationId) {
+    try {
+      await this.apiClient.delete(`/conversations/${conversationId}/delete/`);
+
+      // 如果刪除的是當前對話，重置會話
+      if (this.currentConversationId === conversationId) {
+        this.resetSession();
       }
     } catch (error) {
-      console.error('AI API Error:', error);
+      console.error('Delete Conversation Error:', error);
+      throw error;
     }
-
-    // API 調用失敗時的 fallback
-    return {
-      response: this.getRandomResponse(this.defaultResponses),
-      source: 'fallback',
-      confidence: 0.4
-    };
   }
 
-  // 獲取建議問題 (可選功能)
-  getSuggestedQuestions() {
-    return [
-      "如何使用寵物照護功能？",
-      "怎麼在社群發布照片？",
-      "如何找到附近的寵物醫院？",
-      "怎麼設定餵食提醒？",
-      "App 有哪些主要功能？"
-    ];
+  /**
+   * 封存/取消封存對話
+   * @param {number} conversationId - 對話 ID
+   * @param {boolean} isArchived - 是否封存
+   * @returns {Promise<Object>} 更新後的對話
+   */
+  async archiveConversation(conversationId, isArchived = true) {
+    try {
+      const response = await this.apiClient.post(
+        `/conversations/${conversationId}/archive/`,
+        { is_archived: isArchived }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Archive Conversation Error:', error);
+      throw error;
+    }
   }
 
-  // 更新知識庫 (為未來的學習功能預留)
-  updateKnowledgeBase(category, keywords, responses) {
-    // 這個功能可以在未來實現動態學習
-    console.log('Knowledge base update requested:', { category, keywords, responses });
+  /**
+   * 置頂/取消置頂對話
+   * @param {number} conversationId - 對話 ID
+   * @param {boolean} isPinned - 是否置頂
+   * @returns {Promise<Object>} 更新後的對話
+   */
+  async pinConversation(conversationId, isPinned = true) {
+    try {
+      const response = await this.apiClient.post(
+        `/conversations/${conversationId}/pin/`,
+        { is_pinned: isPinned }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Pin Conversation Error:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * 提交對話回饋
+   * @param {number} messageId - 訊息 ID
+   * @param {Object} feedback - 回饋資料 { rating, comment, is_inaccurate, is_unhelpful, is_inappropriate }
+   * @returns {Promise<Object>} 回饋記錄
+   */
+  async submitFeedback(messageId, feedback) {
+    try {
+      const response = await this.apiClient.post('/feedback/', {
+        message: messageId,
+        ...feedback,
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Submit Feedback Error:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * 開始新對話（重置當前會話）
+   */
+  startNewConversation() {
+    this.resetSession();
+  }
+
+  /**
+   * 取得當前對話 ID
+   * @returns {number|null} 對話 ID
+   */
+  getCurrentConversationId() {
+    return this.currentConversationId;
+  }
+
+  /**
+   * 取得疾病檔案詳情（根據 post ID 列表）
+   * @param {Array<number>} postIds - PostFrame ID 列表
+   * @returns {Promise<Array>} 疾病檔案詳情列表
+   */
+  async getDiseaseArchiveDetails(postIds) {
+    try {
+      if (!postIds || postIds.length === 0) {
+        return [];
+      }
+
+      // 調用後端 API 取得疾病檔案詳情
+      const response = await this.apiClient.post('/disease-archives/batch/', {
+        post_ids: postIds,
+      });
+
+      return response.data;
+    } catch (error) {
+      console.error('Get Disease Archive Details Error:', error);
+      return [];
+    }
   }
 }
 
-// 導出單例實例
+// 導出單例
 export default new AIChatService();

@@ -2,51 +2,49 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import styles from '../styles/RecommendedArticlesPreview.module.css';
-import aiRecommendationService from '../services/aiRecommendationService';
+import aiChatService from '../services/aiChatService';
 
-const RecommendedArticlesPreview = ({ onArticleClick }) => {
+const RecommendedArticlesPreview = ({ articleIds = [], onArticleClick }) => {
   const navigate = useNavigate();
   const { t } = useTranslation('main');
   const [articles, setArticles] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // 獲取推薦文章
+  // 獲取推薦文章詳情
   useEffect(() => {
-    const fetchRecommendedArticles = async () => {
+    const fetchArticleDetails = async () => {
+      if (!articleIds || articleIds.length === 0) {
+        setIsLoading(false);
+        return;
+      }
+
       setIsLoading(true);
 
       try {
-        // 使用推薦服務獲取文章
-        const result = await aiRecommendationService.getRecommendedArticles({
-          context: 'health_consultation',
-          symptoms: ['咳嗽', '嘔吐'],
-          pet_breed: '吉娃娃'
-        });
-
-        if (result.success) {
-          setArticles(result.articles);
-        } else {
-          console.error('獲取推薦文章失敗:', result.error);
-          setArticles([]);
-        }
+        // 從後端 API 獲取疾病檔案詳情
+        const articleDetails = await aiChatService.getDiseaseArchiveDetails(articleIds);
+        setArticles(articleDetails);
       } catch (error) {
-        console.error('獲取推薦文章過程中發生錯誤:', error);
+        console.error('獲取推薦文章詳情失敗:', error);
         setArticles([]);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchRecommendedArticles();
-  }, []);
+    fetchArticleDetails();
+  }, [articleIds]);
 
-  // 處理文章點擊
+  // 處理文章點擊 - 跳轉到疾病檔案詳情頁面
   const handleArticleClick = (article) => {
     if (onArticleClick) {
       onArticleClick(article);
     } else {
-      // 使用推薦服務處理文章點擊
-      aiRecommendationService.handleArticleClick(article, navigate);
+      // 通知全局啟動浮動模式
+      window.dispatchEvent(new CustomEvent('forceFloatingMode'));
+
+      // 跳轉到疾病檔案詳情頁面（公開瀏覽模式）
+      navigate(`/disease-archive/${article.id}/public`);
     }
   };
 
@@ -76,7 +74,7 @@ const RecommendedArticlesPreview = ({ onArticleClick }) => {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <span className={styles.title}>{t('chatWindow.recommendedArticles.title')}</span>
+        <span className={styles.title}>💡 相關案例分享</span>
       </div>
       <div className={styles.articleList}>
         {articles.map(article => (
@@ -86,8 +84,12 @@ const RecommendedArticlesPreview = ({ onArticleClick }) => {
             onClick={() => handleArticleClick(article)}
           >
             <div className={styles.articleContent}>
-              <div className={styles.articleTitle}>{article.title}</div>
-              <div className={styles.articleAuthor}>{article.author}</div>
+              <div className={styles.articleTitle}>
+                {article.archive_title || '疾病案例分享'}
+              </div>
+              <div className={styles.articleAuthor}>
+                由 {article.author?.fullname || article.author?.username || '匿名'} 分享
+              </div>
               <div className={styles.articleDate}>{formatDate(article.created_at)}</div>
             </div>
 
