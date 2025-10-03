@@ -17,6 +17,7 @@ from django.db import transaction
 from django.utils.text import slugify
 from django.utils import timezone
 from django.apps import apps
+from datetime import datetime
 import json
 import re
 import logging
@@ -748,10 +749,13 @@ class PostListAPIView(generics.ListAPIView):
                     recommend_list.append(post_id)
             # Randomly insert seen_ids into recommend_list
             seen_list = list(seen_ids)
-            random.shuffle(seen_list)
+            # random.shuffle(seen_list)
             # Insert each seen_id at a random position in recommend_list
+            insert_pos = 0
             for seen_id in seen_list:
-                insert_pos = random.randint(0, len(recommend_list))
+                # insert_pos = random.randint(0, len(recommend_list))
+                offset = datetime.now().day + datetime.now().month + datetime.now().year
+                insert_pos = (insert_pos + offset) % (len(recommend_list) + 1)
                 recommend_list.insert(insert_pos, seen_id)
 
             print("推薦結果:", recommend_list)
