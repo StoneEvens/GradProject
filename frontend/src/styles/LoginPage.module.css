@@ -124,11 +124,18 @@
   opacity: 1;
 }
 
+.buttonGroup {
+  display: flex;
+  gap: 15px;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.backButton,
 .loginButton {
-  width: 200px;
+  flex: 1;
   height: 45px;
   border: none;
-  background-image: url('/assets/icon/LoginpageConfirmButton.png');
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
@@ -138,17 +145,27 @@
   touch-action: manipulation;
   font-size: 0;
   color: transparent;
-  margin-top: 10px;
 }
 
+.backButton {
+  background-image: url('/assets/icon/RegisterPageBackButton.png');
+}
+
+.loginButton {
+  background-image: url('/assets/icon/LoginpageConfirmButton.png');
+}
+
+.backButton:hover,
 .loginButton:hover {
   transform: scale(1.05);
 }
 
+.backButton:active,
 .loginButton:active {
   transform: scale(0.98);
 }
 
+.backButton:disabled,
 .loginButton:disabled {
   opacity: 0.6;
   cursor: not-allowed;
@@ -180,8 +197,8 @@
     height: 60px;
   }
 
+  .backButton,
   .loginButton {
-    width: 180px;
     height: 45px;
   }
 }
@@ -213,8 +230,8 @@
     height: 60px;
   }
 
+  .backButton,
   .loginButton {
-    width: 170px;
     height: 40px;
   }
 
@@ -251,8 +268,8 @@
     height: 55px;
   }
 
+  .backButton,
   .loginButton {
-    width: 160px;
     height: 38px;
   }
 }
@@ -275,8 +292,8 @@
     height: 50px;
   }
 
+  .backButton,
   .loginButton {
-    width: 150px;
     height: 35px;
   }
 }
@@ -305,8 +322,8 @@
     height: 50px;
   }
 
+  .backButton,
   .loginButton {
-    width: 140px;
     height: 35px;
   }
 
@@ -343,10 +360,12 @@
     height: 45px;
   }
 
-  .loginButton {
-    width: 150px;
-    height: 35px;
+  .buttonGroup {
     margin-top: 5px;
   }
 
+  .backButton,
+  .loginButton {
+    height: 35px;
+  }
 }

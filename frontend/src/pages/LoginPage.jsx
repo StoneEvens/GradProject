@@ -65,6 +65,10 @@ const LoginPage = () => {
     setNotification('');
   };
 
+  const handleBackToHome = () => {
+    navigate('/');
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -167,14 +171,23 @@ const LoginPage = () => {
                 />
               </button>
             </div>
-            <button
-              type="submit"
-              className={styles.loginButton}
-              disabled={isLoading}
-              aria-label={isLoading ? '登入中...' : '登入'}
-            >
-              {isLoading ? '登入中...' : '登入'}
-            </button>
+            <div className={styles.buttonGroup}>
+              <button
+                type="button"
+                onClick={handleBackToHome}
+                className={styles.backButton}
+                disabled={isLoading}
+                aria-label="返回初始頁面"
+              />
+              <button
+                type="submit"
+                className={styles.loginButton}
+                disabled={isLoading}
+                aria-label={isLoading ? '登入中...' : '登入'}
+              >
+                {isLoading ? '登入中...' : ''}
+              </button>
+            </div>
           </form>
         </div>
       </div>
