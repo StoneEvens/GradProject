@@ -1,8 +1,5 @@
 import React, { useState } from 'react';
 import styles from '../styles/RegisterPage.module.css';
-import { Canvas } from '@react-three/fiber';
-import { useGLTF, OrbitControls, Environment } from '@react-three/drei';
-import RegisterPageAnimation from '../components/RegisterPageAnimation';
 import Notification from '../components/Notification';
 import { NotificationProvider } from '../context/NotificationContext';
 import { useNavigate } from 'react-router-dom';
@@ -226,68 +223,87 @@ const RegisterPage = () => {
     return /[A-Z]/.test(password);
   };
 
+  const handleBackToHome = () => {
+    navigate('/');
+  };
+
   const renderStep = () => {
     switch (step) {
       case 1:
         return (
           <div className={styles.formStep}>
-            <input
-              type="text"
-              name="accountName"
-              value={formData.accountName}
-              onChange={handleInputChange}
-              placeholder="請輸入您想使用的帳號名稱"
-              className={styles.input}
-              maxLength="60"
-              disabled={isLoading}
-            />
+            <div className={styles.accountInput}>
+              <input
+                type="text"
+                name="accountName"
+                value={formData.accountName}
+                onChange={handleInputChange}
+                placeholder="請輸入您想使用的帳號名稱"
+                className={styles.input}
+                maxLength="60"
+                disabled={isLoading}
+              />
+            </div>
             <div className={styles.hint}>英文,數字或標點符號 (最多60字元)</div>
-            <input
-              type="text"
-              name="userName"
-              value={formData.userName}
-              onChange={handleInputChange}
-              placeholder="請輸入您的使用者姓名"
-              className={styles.input}
-              maxLength="60"
-              disabled={isLoading}
-            />
-            <button 
-              onClick={nextStep} 
-              className={styles.singleButton}
-              disabled={isLoading}
-            >
-              {isLoading ? '檢查中...' : '下一步'}
-            </button>
+            <div className={styles.passwordInput}>
+              <input
+                type="text"
+                name="userName"
+                value={formData.userName}
+                onChange={handleInputChange}
+                placeholder="請輸入您的使用者姓名"
+                className={styles.input}
+                maxLength="60"
+                disabled={isLoading}
+              />
+            </div>
+            <div className={styles.buttonGroup}>
+              <button
+                onClick={handleBackToHome}
+                className={styles.backButton}
+                disabled={isLoading}
+                aria-label="返回初始頁面"
+              />
+              <button
+                onClick={nextStep}
+                className={styles.nextStepButton}
+                disabled={isLoading}
+                aria-label={isLoading ? '檢查中...' : '下一步'}
+              >
+                {isLoading ? '檢查中...' : ''}
+              </button>
+            </div>
           </div>
         );
       case 2:
         return (
           <div className={styles.formStep}>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              placeholder="請輸入您的電子信箱"
-              className={styles.input}
-              disabled={isLoading}
-            />
+            <div className={styles.accountInput}>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleInputChange}
+                placeholder="請輸入您的電子信箱"
+                className={styles.input}
+                disabled={isLoading}
+              />
+            </div>
             <div className={styles.hint}>example@mail.com</div>
             <div className={styles.buttonGroup}>
-              <button 
-                onClick={prevStep} 
+              <button
+                onClick={prevStep}
                 className={styles.backButton}
                 disabled={isLoading}
-              >
-                上一步
-              </button>
-              <button 
-                onClick={nextStep} 
-                className={styles.nextButton}
+                aria-label="返回上一步"
+              />
+              <button
+                onClick={nextStep}
+                className={styles.nextStepButton}
                 disabled={isLoading}
+                aria-label={isLoading ? '檢查中...' : '下一步'}
               >
-                {isLoading ? '檢查中...' : '下一步'}
+                {isLoading ? '檢查中...' : ''}
               </button>
             </div>
           </div>
@@ -295,7 +311,7 @@ const RegisterPage = () => {
       case 3:
         return (
           <div className={styles.formStep}>
-            <div className={styles.passwordContainer}>
+            <div className={styles.passwordInputWrapper}>
               <input
                 type={showPassword ? "text" : "password"}
                 name="password"
@@ -305,35 +321,35 @@ const RegisterPage = () => {
                 className={styles.input}
                 disabled={isLoading}
               />
-              <button 
+              <button
                 type="button"
                 className={styles.passwordToggle}
                 onClick={() => setShowPassword(!showPassword)}
                 disabled={isLoading}
               >
-                <img 
-                  src={showPassword ? "/assets/icon/LoginButton_HidePassword.png" : "/assets/icon/LoginButton_ShowPassword.png"} 
+                <img
+                  src={showPassword ? "/assets/icon/LoginButton_HidePassword.png" : "/assets/icon/LoginButton_ShowPassword.png"}
                   alt={showPassword ? "隱藏密碼" : "顯示密碼"}
                 />
               </button>
             </div>
             <div className={styles.passwordHintContainer}>
               <div className={styles.passwordHint}>
-                <img 
-                  src={checkPasswordLength(formData.password) ? "/assets/icon/RegisterPage_CheckIcon.png" : "/assets/icon/RegisterPage_NotCheckIcon.png"} 
+                <img
+                  src={checkPasswordLength(formData.password) ? "/assets/icon/RegisterPage_CheckIcon.png" : "/assets/icon/RegisterPage_NotCheckIcon.png"}
                   alt="密碼長度檢查"
                 />
                 <span>8字元以上</span>
               </div>
               <div className={styles.passwordHint}>
-                <img 
-                  src={checkPasswordUpperCase(formData.password) ? "/assets/icon/RegisterPage_CheckIcon.png" : "/assets/icon/RegisterPage_NotCheckIcon.png"} 
+                <img
+                  src={checkPasswordUpperCase(formData.password) ? "/assets/icon/RegisterPage_CheckIcon.png" : "/assets/icon/RegisterPage_NotCheckIcon.png"}
                   alt="大寫字母檢查"
                 />
                 <span>一個大寫英文字母</span>
               </div>
             </div>
-            <div className={styles.passwordContainer}>
+            <div className={styles.accountInput}>
               <input
                 type={showConfirmPassword ? "text" : "password"}
                 name="confirmPassword"
@@ -343,32 +359,32 @@ const RegisterPage = () => {
                 className={styles.input}
                 disabled={isLoading}
               />
-              <button 
+              <button
                 type="button"
                 className={styles.passwordToggle}
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 disabled={isLoading}
               >
-                <img 
-                  src={showConfirmPassword ? "/assets/icon/LoginButton_HidePassword.png" : "/assets/icon/LoginButton_ShowPassword.png"} 
+                <img
+                  src={showConfirmPassword ? "/assets/icon/LoginButton_HidePassword.png" : "/assets/icon/LoginButton_ShowPassword.png"}
                   alt={showConfirmPassword ? "隱藏密碼" : "顯示密碼"}
                 />
               </button>
             </div>
             <div className={styles.buttonGroup}>
-              <button 
-                onClick={prevStep} 
+              <button
+                onClick={prevStep}
                 className={styles.backButton}
                 disabled={isLoading}
-              >
-                上一步
-              </button>
-              <button 
-                onClick={handleSubmit} 
-                className={styles.submitButton}
+                aria-label="返回上一步"
+              />
+              <button
+                onClick={handleSubmit}
+                className={styles.registerButton}
                 disabled={isLoading}
+                aria-label={isLoading ? '處理中...' : '完成註冊'}
               >
-                {isLoading ? '處理中...' : '完成註冊'}
+                {isLoading ? '處理中...' : ''}
               </button>
             </div>
           </div>
@@ -378,32 +394,16 @@ const RegisterPage = () => {
     }
   };
 
-  const { scene: fenceScene } = useGLTF('/assets/models/Fence.glb');
-  const { scene: fenceScene2 } = useGLTF('/assets/models/Fence2.glb');
-  const { scene: fenceScene3 } = useGLTF('/assets/models/Fence3.glb');
-
   return (
     <NotificationProvider>
-      <div className={styles.registerPage}>
+      <div className={styles.container}>
         {notification && (
           <Notification
             message={notification}
             onClose={hideNotification}
           />
         )}
-        <div className={styles.canvasArea}>
-          <Canvas className={styles.animationContainer} camera={{ position: [0, 0, 1], fov: 45 }}>
-            <Environment files="/assets/textures/indoor_office_2k.exr" background={false} intensity={0.00015} />
-            <ambientLight intensity={0.6} />
-            <directionalLight position={[5, 5, 5]} intensity={1} />
-            <RegisterPageAnimation />
-            <OrbitControls enableZoom={false} enablePan={false} enableRotate={false} />
-            <primitive object={fenceScene} position={[0, -0.15, 0.2]} scale={0.5}/>
-            <primitive object={fenceScene2} position={[0.42, -0.15, 0.2]} scale={0.5}/>
-            <primitive object={fenceScene3} position={[-0.42, -0.15, 0.2]} scale={0.5}/>
-          </Canvas>
-        </div>
-        <div className={styles.formArea}>
+        <div className={styles.formWrapper}>
           {renderStep()}
         </div>
       </div>
