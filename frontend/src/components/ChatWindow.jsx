@@ -222,7 +222,6 @@ const ChatWindow = ({
   };
 
   // 發送訊息
-  /*
   const handleSendMessage = async () => {
     if (!inputText.trim()) return;
 
@@ -302,12 +301,6 @@ const ChatWindow = ({
       setIsTyping(false);
     }
   };
-  */
-  const handleSendMessage = async () => {
-    if (!inputText.trim()) return;
-
-    
-  }
 
   // 處理開始教學按鈕點擊 - 觸發教學模式事件
   const handleStartTutorial = (tutorialType) => {
