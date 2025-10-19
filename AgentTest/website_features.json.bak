@@ -1,0 +1,149 @@
+{
+    "website_info": {
+        "name": "Pet Social Platform",
+        "base_url": "http://localhost:3000",
+        "description": "A comprehensive pet management and social platform with health tracking, social features, and AI assistance"
+    }} "website_info": {
+        "name": "Pet App",
+        "base_url": "http://localhost:3000",
+        "description": "A web application for pet management and social interactions"
+    },
+    "features": {
+        "authentication": {
+            "login": {
+                "path": "/login",
+                "elements": {
+                    "username_input": {
+                        "selector": "#username",
+                        "type": "input",
+                        "description": "Username input field"
+                    },
+                    "password_input": {
+                        "selector": "#password",
+                        "type": "input",
+                        "description": "Password input field"
+                    },
+                    "login_button": {
+                        "selector": "#login-button",
+                        "type": "button",
+                        "description": "Login submit button"
+                    }
+                },
+                "description": "User login functionality"
+            },
+            "register": {
+                "path": "/register",
+                "elements": {
+                    "username_input": {
+                        "selector": "#register-username",
+                        "type": "input",
+                        "description": "New username input"
+                    }
+                },
+                "description": "New user registration"
+            }
+        },
+        "pets": {
+            "list_pets": {
+                "path": "/pets",
+                "elements": {
+                    "pet_list": {
+                        "selector": ".pet-list",
+                        "type": "list",
+                        "description": "List of user's pets"
+                    },
+                    "add_pet_button": {
+                        "selector": "#add-pet-button",
+                        "type": "button",
+                        "description": "Button to add a new pet"
+                    }
+                },
+                "description": "View and manage pets"
+            },
+            "add_pet": {
+                "path": "/pets/add",
+                "elements": {
+                    "name_input": {
+                        "selector": "#pet-name",
+                        "type": "input",
+                        "description": "Pet name input field"
+                    },
+                    "type_select": {
+                        "selector": "#pet-type",
+                        "type": "select",
+                        "description": "Pet type selection dropdown"
+                    }
+                },
+                "description": "Add a new pet"
+            }
+        }
+    },
+    "api_endpoints": {
+        "auth": {
+            "login": {
+                "method": "POST",
+                "path": "/api/auth/login",
+                "description": "Authenticate user",
+                "parameters": {
+                    "username": "string",
+                    "password": "string"
+                }
+            }
+        },
+        "pets": {
+            "list": {
+                "method": "GET",
+                "path": "/api/pets",
+                "description": "Get list of user's pets"
+            },
+            "create": {
+                "method": "POST",
+                "path": "/api/pets",
+                "description": "Create a new pet",
+                "parameters": {
+                    "name": "string",
+                    "type": "string",
+                    "age": "number"
+                }
+            }
+        }
+    },
+    "workflows": {
+        "pet_registration": {
+            "description": "Complete process of adding a new pet",
+            "steps": [
+                {
+                    "action": "navigate",
+                    "path": "/pets"
+                },
+                {
+                    "action": "click",
+                    "element": "add_pet_button"
+                },
+                {
+                    "action": "fill_form",
+                    "form": "add_pet",
+                    "fields": ["name", "type"]
+                }
+            ]
+        },
+        "user_login": {
+            "description": "Process of user authentication",
+            "steps": [
+                {
+                    "action": "navigate",
+                    "path": "/login"
+                },
+                {
+                    "action": "fill_form",
+                    "form": "login",
+                    "fields": ["username", "password"]
+                },
+                {
+                    "action": "click",
+                    "element": "login_button"
+                }
+            ]
+        }
+    }
+}

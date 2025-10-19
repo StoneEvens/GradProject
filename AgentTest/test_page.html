@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCP Server & AI Agent Test Page</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+
+        .test-section {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .test-section h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        input[type="text"],
+        input[type="password"],
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background 0.3s;
+            margin-right: 10px;
+        }
+
+        button:hover {
+            background: #5568d3;
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            font-weight: 600;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .result-box {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .config-section {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .config-section h3 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        .session-info {
+            background: #e7f3ff;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 MCP Server & AI Agent Test Suite</h1>
+
+        <!-- Configuration Section -->
+        <div class="config-section">
+            <h3>⚙️ Configuration</h3>
+            <div class="input-group">
+                <label for="mcpUrl">MCP Server URL:</label>
+                <input type="text" id="mcpUrl" value="http://localhost:5000" placeholder="http://localhost:5000">
+            </div>
+            <div class="input-group">
+                <label for="mcpKey">MCP API Key:</label>
+                <input type="password" id="mcpKey" value="your-default-api-key" placeholder="Enter your MCP API key">
+            </div>
+            <div class="input-group">
+                <label for="testUrl">Test Website URL:</label>
+                <input type="text" id="testUrl" value="http://localhost:4173" placeholder="http://localhost:4173">
+            </div>
+        </div>
+
+        <!-- Test 1: MCP Server Connection -->
+        <div class="test-section">
+            <h2>1️⃣ Test MCP Server Connection</h2>
+            <p>This test checks if the MCP server is running and accessible.</p>
+            <button onclick="testMCPConnection()">Test Connection</button>
+            <div id="mcpConnectionResult"></div>
+        </div>
+
+        <!-- Test 2: Create Browser Session -->
+        <div class="test-section">
+            <h2>2️⃣ Create Browser Session</h2>
+            <p>Create a new browser session on the MCP server.</p>
+            <button onclick="createSession()">Create Session</button>
+            <div id="sessionResult"></div>
+            <div id="sessionInfo" class="session-info" style="display: none;"></div>
+        </div>
+
+        <!-- Test 3: Navigate to URL -->
+        <div class="test-section">
+            <h2>3️⃣ Navigate to URL</h2>
+            <p>Test browser navigation (requires active session).</p>
+            <div class="input-group">
+                <label for="navUrl">URL to navigate:</label>
+                <input type="text" id="navUrl" placeholder="https://example.com">
+            </div>
+            <button onclick="testNavigate()">Navigate</button>
+            <div id="navigateResult"></div>
+        </div>
+
+        <!-- Test 4: Execute Actions -->
+        <div class="test-section">
+            <h2>4️⃣ Execute Browser Actions</h2>
+            <p>Test clicking, typing, and other browser actions.</p>
+            <div class="input-group">
+                <label for="actionType">Action Type:</label>
+                <select id="actionType" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 5px;">
+                    <option value="click">Click Element</option>
+                    <option value="type">Type Text</option>
+                    <option value="get_text">Get Text</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label for="selector">CSS Selector:</label>
+                <input type="text" id="selector" placeholder="e.g., #username, .btn-primary">
+            </div>
+            <div class="input-group" id="textInputGroup" style="display: none;">
+                <label for="textInput">Text to Type:</label>
+                <input type="text" id="textInput" placeholder="Text to enter">
+            </div>
+            <button onclick="executeAction()">Execute Action</button>
+            <div id="actionResult"></div>
+        </div>
+
+        <!-- Test 5: Full Workflow Test -->
+        <div class="test-section">
+            <h2>5️⃣ Full Workflow Test</h2>
+            <p>Test a complete workflow: Create session → Navigate → Execute actions.</p>
+            <button onclick="testFullWorkflow()">Run Full Workflow</button>
+            <div id="workflowResult"></div>
+        </div>
+
+        <!-- Test 6: Close Session -->
+        <div class="test-section">
+            <h2>6️⃣ Close Session</h2>
+            <p>Close the current browser session.</p>
+            <button onclick="closeSession()">Close Session</button>
+            <div id="closeResult"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentSessionId = null;
+
+        // Update action form based on selection
+        document.getElementById('actionType').addEventListener('change', function() {
+            const textInputGroup = document.getElementById('textInputGroup');
+            textInputGroup.style.display = this.value === 'type' ? 'block' : 'none';
+        });
+
+        function showResult(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+
+        function showResultWithData(elementId, message, data, type = 'success') {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `
+                <div class="status ${type}">${message}</div>
+                <div class="result-box">${JSON.stringify(data, null, 2)}</div>
+            `;
+        }
+
+        async function testMCPConnection() {
+            const mcpUrl = document.getElementById('mcpUrl').value;
+            showResult('mcpConnectionResult', '🔄 Testing connection...', 'info');
+
+            try {
+                const response = await fetch(`${mcpUrl}/docs`);
+                if (response.ok) {
+                    showResult('mcpConnectionResult', '✅ MCP Server is running and accessible!', 'success');
+                } else {
+                    showResult('mcpConnectionResult', '❌ MCP Server responded with error: ' + response.status, 'error');
+                }
+            } catch (error) {
+                showResult('mcpConnectionResult', '❌ Cannot connect to MCP Server. Make sure it is running on ' + mcpUrl, 'error');
+            }
+        }
+
+        async function createSession() {
+            const mcpUrl = document.getElementById('mcpUrl').value;
+            const mcpKey = document.getElementById('mcpKey').value;
+            showResult('sessionResult', '🔄 Creating browser session...', 'info');
+
+            try {
+                const response = await fetch(`${mcpUrl}/session/create`, {
+                    method: 'POST',
+                    headers: {
+                        'X-API-Key': mcpKey,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    currentSessionId = data.session_id;
+                    showResultWithData('sessionResult', '✅ Session created successfully!', data, 'success');
+                    
+                    const sessionInfo = document.getElementById('sessionInfo');
+                    sessionInfo.style.display = 'block';
+                    sessionInfo.innerHTML = `<strong>Active Session ID:</strong> ${currentSessionId}`;
+                } else {
+                    const error = await response.text();
+                    showResult('sessionResult', '❌ Failed to create session: ' + error, 'error');
+                }
+            } catch (error) {
+                showResult('sessionResult', '❌ Error: ' + error.message, 'error');
+            }
+        }
+
+        async function testNavigate() {
+            if (!currentSessionId) {
+                showResult('navigateResult', '❌ Please create a session first!', 'error');
+                return;
+            }
+
+            const mcpUrl = document.getElementById('mcpUrl').value;
+            const mcpKey = document.getElementById('mcpKey').value;
+            const navUrl = document.getElementById('navUrl').value || document.getElementById('testUrl').value;
+            
+            showResult('navigateResult', '🔄 Navigating to ' + navUrl + '...', 'info');
+
+            try {
+                const response = await fetch(`${mcpUrl}/session/${currentSessionId}/action`, {
+                    method: 'POST',
+                    headers: {
+                        'X-API-Key': mcpKey,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        action: 'navigate',
+                        url: navUrl
+                    })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    showResultWithData('navigateResult', '✅ Navigation successful!', data, 'success');
+                } else {
+                    showResultWithData('navigateResult', '❌ Navigation failed', data, 'error');
+                }
+            } catch (error) {
+                showResult('navigateResult', '❌ Error: ' + error.message, 'error');
+            }
+        }
+
+        async function executeAction() {
+            if (!currentSessionId) {
+                showResult('actionResult', '❌ Please create a session first!', 'error');
+                return;
+            }
+
+            const mcpUrl = document.getElementById('mcpUrl').value;
+            const mcpKey = document.getElementById('mcpKey').value;
+            const actionType = document.getElementById('actionType').value;
+            const selector = document.getElementById('selector').value;
+            const text = document.getElementById('textInput').value;
+
+            if (!selector) {
+                showResult('actionResult', '❌ Please enter a CSS selector!', 'error');
+                return;
+            }
+
+            const actionData = {
+                action: actionType,
+                selector: selector
+            };
+
+            if (actionType === 'type') {
+                if (!text) {
+                    showResult('actionResult', '❌ Please enter text to type!', 'error');
+                    return;
+                }
+                actionData.text = text;
+            }
+
+            showResult('actionResult', `🔄 Executing ${actionType} action...`, 'info');
+
+            try {
+                const response = await fetch(`${mcpUrl}/session/${currentSessionId}/action`, {
+                    method: 'POST',
+                    headers: {
+                        'X-API-Key': mcpKey,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(actionData)
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    showResultWithData('actionResult', '✅ Action executed successfully!', data, 'success');
+                } else {
+                    showResultWithData('actionResult', '❌ Action failed', data, 'error');
+                }
+            } catch (error) {
+                showResult('actionResult', '❌ Error: ' + error.message, 'error');
+            }
+        }
+
+        async function testFullWorkflow() {
+            showResult('workflowResult', '🔄 Starting full workflow test...', 'info');
+            
+            let log = '📋 Workflow Log:\n\n';
+            
+            // Step 1: Create session
+            log += '1. Creating session...\n';
+            await createSession();
+            await sleep(1000);
+            
+            if (!currentSessionId) {
+                showResult('workflowResult', '❌ Workflow failed at session creation', 'error');
+                return;
+            }
+            log += '   ✓ Session created: ' + currentSessionId + '\n\n';
+            
+            // Step 2: Navigate
+            log += '2. Navigating to test URL...\n';
+            const testUrl = document.getElementById('testUrl').value;
+            await testNavigate();
+            await sleep(2000);
+            log += '   ✓ Navigation completed\n\n';
+            
+            log += '3. Workflow completed successfully! 🎉\n';
+            log += '\nYou can now test manual actions with the active session.';
+            
+            showResult('workflowResult', log.replace(/\n/g, '<br>'), 'success');
+        }
+
+        async function closeSession() {
+            if (!currentSessionId) {
+                showResult('closeResult', '❌ No active session to close!', 'error');
+                return;
+            }
+
+            const mcpUrl = document.getElementById('mcpUrl').value;
+            const mcpKey = document.getElementById('mcpKey').value;
+            
+            showResult('closeResult', '🔄 Closing session...', 'info');
+
+            try {
+                const response = await fetch(`${mcpUrl}/session/${currentSessionId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-API-Key': mcpKey
+                    }
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    showResultWithData('closeResult', '✅ Session closed successfully!', data, 'success');
+                    currentSessionId = null;
+                    document.getElementById('sessionInfo').style.display = 'none';
+                } else {
+                    showResultWithData('closeResult', '❌ Failed to close session', data, 'error');
+                }
+            } catch (error) {
+                showResult('closeResult', '❌ Error: ' + error.message, 'error');
+            }
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+    </script>
+</body>
+</html>
