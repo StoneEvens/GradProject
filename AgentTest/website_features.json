@@ -1,0 +1,1318 @@
+{
+    "website_info": {
+        "name": "Pet Social Platform",
+        "base_url": "http://localhost:3000",
+        "description": "A comprehensive pet management and social platform with health tracking, social features, and AI assistance"
+    },
+    "features": {
+        "auth": {
+            "home": {
+                "path": "/",
+                "description": "Landing page - redirects to /main if authenticated",
+                "elements": {
+                    "login_link": {
+                        "selector": ".login-link",
+                        "type": "link",
+                        "description": "Link to login page"
+                    },
+                    "register_link": {
+                        "selector": ".register-link",
+                        "type": "link",
+                        "description": "Link to registration page"
+                    }
+                }
+            },
+            "login": {
+                "path": "/login",
+                "description": "User login page",
+                "elements": {
+                    "username_input": {
+                        "selector": ".input",
+                        "type": "input",
+                        "description": "Username or email input field"
+                    },
+                    "password_input": {
+                        "selector": ".input",
+                        "type": "input",
+                        "description": "Password input field"
+                    },
+                    "login_button": {
+                        "selector": ".login-button",
+                        "type": "button",
+                        "description": "Login submit button"
+                    },
+                    "register_link": {
+                        "selector": ".register-link",
+                        "type": "link",
+                        "description": "Link to registration"
+                    }
+                }
+            },
+            "register": {
+                "path": "/register",
+                "description": "Multi-step user registration",
+                "elements": {
+                    "account_input": {
+                        "selector": ".accountInput .input",
+                        "type": "input",
+                        "description": "Account username input (step 1)"
+                    },
+                    "email_input": {
+                        "selector": ".accountInput .input",
+                        "type": "input",
+                        "description": "Email input (step 2)"
+                    },
+                    "password_input": {
+                        "selector": ".passwordInputWrapper .input",
+                        "type": "input",
+                        "description": "Password input (step 3)"
+                    },
+                    "confirm_password_input": {
+                        "selector": ".accountInput .input",
+                        "type": "input",
+                        "description": "Confirm password input"
+                    },
+                    "next_button": {
+                        "selector": ".nextStepButton",
+                        "type": "button",
+                        "description": "Next step button"
+                    },
+                    "back_button": {
+                        "selector": ".backButton",
+                        "type": "button",
+                        "description": "Previous step button"
+                    },
+                    "register_button": {
+                        "selector": ".registerButton",
+                        "type": "button",
+                        "description": "Final registration button"
+                    }
+                }
+            }
+        },
+        "main": {
+            "main_page": {
+                "path": "/main",
+                "description": "Main dashboard with AI navigator and daily schedule",
+                "elements": {
+                    "ai_navigator": {
+                        "selector": ".ai-navigator",
+                        "type": "component",
+                        "description": "AI assistant navigator"
+                    },
+                    "daily_schedule": {
+                        "selector": ".daily-schedule",
+                        "type": "component",
+                        "description": "Daily pet care schedule"
+                    },
+                    "recommended_articles": {
+                        "selector": ".recommended-articles",
+                        "type": "component",
+                        "description": "Recommended articles preview"
+                    },
+                    "pet_switcher": {
+                        "selector": ".pet-switcher",
+                        "type": "component",
+                        "description": "Switch between pets"
+                    }
+                }
+            }
+        },
+        "user": {
+            "profile": {
+                "path": "/user-profile",
+                "description": "Current user's profile page",
+                "elements": {
+                    "avatar": {
+                        "selector": ".avatar",
+                        "type": "image",
+                        "description": "User avatar"
+                    },
+                    "edit_button": {
+                        "selector": ".editButton",
+                        "type": "button",
+                        "description": "Edit profile button"
+                    },
+                    "nickname": {
+                        "selector": ".nickname",
+                        "type": "text",
+                        "description": "User account name"
+                    },
+                    "realname": {
+                        "selector": ".realname",
+                        "type": "text",
+                        "description": "User full name"
+                    },
+                    "followers_count": {
+                        "selector": ".followStatItem",
+                        "type": "text",
+                        "description": "Followers count"
+                    },
+                    "following_count": {
+                        "selector": ".followStatItem",
+                        "type": "text",
+                        "description": "Following count"
+                    },
+                    "tabs": {
+                        "selector": ".tabs",
+                        "type": "component",
+                        "description": "Community/Forum post tabs"
+                    }
+                }
+            },
+            "other_user_profile": {
+                "path": "/user/:userAccount",
+                "description": "View another user's profile",
+                "elements": {
+                    "follow_button": {
+                        "selector": ".followButton",
+                        "type": "button",
+                        "description": "Follow/unfollow button"
+                    },
+                    "user_posts": {
+                        "selector": ".postList",
+                        "type": "list",
+                        "description": "User's posts list"
+                    }
+                }
+            },
+            "follow_condition": {
+                "path": "/user/:userAccount/follow/:type",
+                "description": "View followers/following lists",
+                "elements": {
+                    "followers_tab": {
+                        "selector": ".tab.activeTab",
+                        "type": "button",
+                        "description": "Followers tab"
+                    },
+                    "following_tab": {
+                        "selector": ".tab",
+                        "type": "button",
+                        "description": "Following tab"
+                    },
+                    "user_list": {
+                        "selector": ".userList",
+                        "type": "list",
+                        "description": "List of users"
+                    }
+                }
+            },
+            "user_posts": {
+                "path": "/user-posts",
+                "description": "View user's posts",
+                "elements": {
+                    "post_list": {
+                        "selector": ".postList",
+                        "type": "list",
+                        "description": "List of posts"
+                    }
+                }
+            }
+        },
+        "pets": {
+            "pet_page": {
+                "path": "/pet",
+                "description": "Pet profile and management page",
+                "elements": {
+                    "pet_avatar": {
+                        "selector": ".avatar",
+                        "type": "image",
+                        "description": "Pet avatar image"
+                    },
+                    "pet_name": {
+                        "selector": ".petName",
+                        "type": "text",
+                        "description": "Pet name"
+                    },
+                    "pet_breed": {
+                        "selector": ".petBreed",
+                        "type": "text",
+                        "description": "Pet breed"
+                    },
+                    "edit_pet_button": {
+                        "selector": ".functionCell",
+                        "type": "button",
+                        "description": "Edit pet data button"
+                    },
+                    "function_grid": {
+                        "selector": ".functionGrid",
+                        "type": "component",
+                        "description": "Pet function buttons"
+                    },
+                    "add_first_pet_button": {
+                        "selector": ".addFirstPetButton",
+                        "type": "button",
+                        "description": "Add first pet button (when no pets)"
+                    }
+                }
+            },
+            "add": {
+                "path": "/pet/add",
+                "description": "Add new pet form",
+                "elements": {
+                    "name_input": {
+                        "selector": ".input",
+                        "type": "input",
+                        "description": "Pet name input"
+                    },
+                    "breed_select": {
+                        "selector": ".select",
+                        "type": "select",
+                        "description": "Pet breed selection"
+                    },
+                    "photo_upload": {
+                        "selector": ".upload",
+                        "type": "file",
+                        "description": "Pet photo upload"
+                    },
+                    "submit_button": {
+                        "selector": ".submitButton",
+                        "type": "button",
+                        "description": "Submit pet form"
+                    }
+                }
+            },
+            "edit": {
+                "path": "/pet/:petId/edit",
+                "description": "Edit existing pet information",
+                "elements": {
+                    "form_fields": {
+                        "selector": ".input",
+                        "type": "input",
+                        "description": "Pet information fields"
+                    },
+                    "save_button": {
+                        "selector": ".saveButton",
+                        "type": "button",
+                        "description": "Save changes button"
+                    }
+                }
+            },
+            "related_posts": {
+                "path": "/pet/:petId/posts",
+                "description": "Posts related to specific pet",
+                "elements": {
+                    "pet_avatar": {
+                        "selector": ".petAvatar",
+                        "type": "image",
+                        "description": "Pet avatar"
+                    },
+                    "sort_select": {
+                        "selector": ".sortSelect",
+                        "type": "select",
+                        "description": "Sort options"
+                    },
+                    "posts_list": {
+                        "selector": ".postsContainer",
+                        "type": "list",
+                        "description": "Related posts"
+                    }
+                }
+            },
+            "related_posts_list": {
+                "path": "/pet/:petId/posts-list",
+                "description": "List view of pet related posts",
+                "elements": {
+                    "back_button": {
+                        "selector": ".backButton",
+                        "type": "button",
+                        "description": "Back button"
+                    },
+                    "posts_container": {
+                        "selector": ".postsContainer",
+                        "type": "list",
+                        "description": "Posts list container"
+                    }
+                }
+            },
+            "abnormal_posts": {
+                "path": "/pet/:petId/abnormal-posts",
+                "description": "Pet abnormal condition posts",
+                "elements": {
+                    "create_button": {
+                        "selector": ".createButton",
+                        "type": "button",
+                        "description": "Create new abnormal post"
+                    },
+                    "filter": {
+                        "selector": ".filter",
+                        "type": "component",
+                        "description": "Filter abnormal posts"
+                    },
+                    "posts_list": {
+                        "selector": ".postsList",
+                        "type": "list",
+                        "description": "Abnormal posts list"
+                    }
+                }
+            },
+            "abnormal_post_detail": {
+                "path": "/pet/:petId/abnormal-post/:postId",
+                "description": "Abnormal post detail page",
+                "elements": {
+                    "post_content": {
+                        "selector": ".postContent",
+                        "type": "content",
+                        "description": "Post content"
+                    },
+                    "edit_button": {
+                        "selector": ".editButton",
+                        "type": "button",
+                        "description": "Edit post button"
+                    }
+                }
+            },
+            "abnormal_post_public": {
+                "path": "/abnormal-post/:postId/public",
+                "description": "Public view of abnormal post",
+                "elements": {
+                    "post_content": {
+                        "selector": ".postContent",
+                        "type": "content",
+                        "description": "Public post content"
+                    }
+                }
+            },
+            "edit_abnormal_post": {
+                "path": "/pet/:petId/abnormal-post/:postId/edit",
+                "description": "Edit abnormal post",
+                "elements": {
+                    "edit_form": {
+                        "selector": ".editForm",
+                        "type": "form",
+                        "description": "Edit form"
+                    }
+                }
+            },
+            "disease_archive": {
+                "path": "/pet/:petId/disease-archive",
+                "description": "Pet disease archive list",
+                "elements": {
+                    "create_button": {
+                        "selector": ".createButton",
+                        "type": "button",
+                        "description": "Create disease archive"
+                    },
+                    "archive_list": {
+                        "selector": ".archiveList",
+                        "type": "list",
+                        "description": "Disease archives"
+                    }
+                }
+            },
+            "create_disease_archive": {
+                "path": "/pet/:petId/disease-archive/create",
+                "description": "Create new disease archive",
+                "elements": {
+                    "form": {
+                        "selector": ".archiveForm",
+                        "type": "form",
+                        "description": "Archive creation form"
+                    }
+                }
+            },
+            "disease_archive_edit_content": {
+                "path": "/pet/:petId/disease-archive/edit-content",
+                "description": "Edit disease archive content (step 2)",
+                "elements": {
+                    "content_editor": {
+                        "selector": ".contentEditor",
+                        "type": "editor",
+                        "description": "Content editor"
+                    }
+                }
+            },
+            "disease_archive_preview": {
+                "path": "/pet/:petId/disease-archive/preview",
+                "description": "Preview disease archive before publishing",
+                "elements": {
+                    "preview_content": {
+                        "selector": ".previewContent",
+                        "type": "content",
+                        "description": "Archive preview"
+                    },
+                    "publish_button": {
+                        "selector": ".publishButton",
+                        "type": "button",
+                        "description": "Publish archive"
+                    }
+                }
+            },
+            "disease_archive_detail": {
+                "path": "/pet/:petId/disease-archive/:archiveId",
+                "description": "Disease archive detail page",
+                "elements": {
+                    "archive_content": {
+                        "selector": ".archiveContent",
+                        "type": "content",
+                        "description": "Archive content"
+                    },
+                    "like_button": {
+                        "selector": ".likeButton",
+                        "type": "button",
+                        "description": "Like archive"
+                    },
+                    "save_button": {
+                        "selector": ".saveButton",
+                        "type": "button",
+                        "description": "Save archive"
+                    }
+                }
+            },
+            "disease_archive_public": {
+                "path": "/disease-archive/:archiveId/public",
+                "description": "Public disease archive view",
+                "elements": {
+                    "archive_content": {
+                        "selector": ".archiveContent",
+                        "type": "content",
+                        "description": "Public archive content"
+                    }
+                }
+            }
+        },
+        "health": {
+            "calculator": {
+                "path": "/calculator",
+                "description": "Health calculator for pet blood test results",
+                "elements": {
+                    "step1": {
+                        "selector": ".calculator-step1",
+                        "type": "component",
+                        "description": "Calculator step 1"
+                    },
+                    "step2": {
+                        "selector": ".calculator-step2",
+                        "type": "component",
+                        "description": "Calculator step 2"
+                    },
+                    "step3": {
+                        "selector": ".calculator-step3",
+                        "type": "component",
+                        "description": "Calculator step 3 - results"
+                    }
+                }
+            },
+            "reports": {
+                "path": "/pet/:petId/health-reports",
+                "description": "List of health reports for a pet",
+                "elements": {
+                    "upload_button": {
+                        "selector": ".uploadButton",
+                        "type": "button",
+                        "description": "Upload new report"
+                    },
+                    "reports_list": {
+                        "selector": ".reportsList",
+                        "type": "list",
+                        "description": "Health reports list"
+                    }
+                }
+            },
+            "report_upload": {
+                "path": "/pet/:petId/health-report/upload",
+                "description": "Upload new health report",
+                "elements": {
+                    "file_upload": {
+                        "selector": ".fileUpload",
+                        "type": "file",
+                        "description": "Upload report files"
+                    },
+                    "submit_button": {
+                        "selector": ".submitButton",
+                        "type": "button",
+                        "description": "Submit report"
+                    }
+                }
+            },
+            "report_detail": {
+                "path": "/pet/:petId/health-report/:id",
+                "description": "View health report details",
+                "elements": {
+                    "report_content": {
+                        "selector": ".reportContent",
+                        "type": "content",
+                        "description": "Report details"
+                    },
+                    "edit_button": {
+                        "selector": ".editButton",
+                        "type": "button",
+                        "description": "Edit report"
+                    }
+                }
+            },
+            "report_edit": {
+                "path": "/pet/:petId/health-report/:id/edit",
+                "description": "Edit health report",
+                "elements": {
+                    "edit_form": {
+                        "selector": ".editForm",
+                        "type": "form",
+                        "description": "Edit report form"
+                    }
+                }
+            }
+        },
+        "social": {
+            "social_page": {
+                "path": "/social",
+                "description": "Main social page with tabs",
+                "elements": {
+                    "daily_tab": {
+                        "selector": ".tab.active",
+                        "type": "button",
+                        "description": "Daily posts tab"
+                    },
+                    "forum_tab": {
+                        "selector": ".tab",
+                        "type": "button",
+                        "description": "Forum tab"
+                    },
+                    "post_list": {
+                        "selector": ".postList",
+                        "type": "list",
+                        "description": "Social posts"
+                    },
+                    "archive_list": {
+                        "selector": ".archiveList",
+                        "type": "list",
+                        "description": "Forum archives"
+                    }
+                }
+            },
+            "create_post": {
+                "path": "/create-post",
+                "description": "Create daily social post",
+                "elements": {
+                    "image_upload": {
+                        "selector": ".imageUpload",
+                        "type": "file",
+                        "description": "Upload post images"
+                    },
+                    "description_input": {
+                        "selector": ".descriptionInput",
+                        "type": "textarea",
+                        "description": "Post description"
+                    },
+                    "hashtag_input": {
+                        "selector": ".hashtagInput",
+                        "type": "input",
+                        "description": "Add hashtags"
+                    },
+                    "preview_button": {
+                        "selector": ".previewButton",
+                        "type": "button",
+                        "description": "Preview post"
+                    }
+                }
+            },
+            "create_abnormal_post": {
+                "path": "/create-abnormal-post",
+                "description": "Create abnormal condition post",
+                "elements": {
+                    "form": {
+                        "selector": ".abnormalForm",
+                        "type": "form",
+                        "description": "Abnormal post form"
+                    }
+                }
+            },
+            "post_preview": {
+                "path": "/create-post-preview",
+                "description": "Preview post before publishing",
+                "elements": {
+                    "preview_card": {
+                        "selector": ".postCard",
+                        "type": "component",
+                        "description": "Post preview"
+                    },
+                    "publish_button": {
+                        "selector": ".publishButton",
+                        "type": "button",
+                        "description": "Publish post"
+                    },
+                    "back_button": {
+                        "selector": ".backButton",
+                        "type": "button",
+                        "description": "Back to edit"
+                    }
+                }
+            },
+            "edit_post": {
+                "path": "/post/:postId/edit",
+                "description": "Edit existing post",
+                "elements": {
+                    "edit_form": {
+                        "selector": ".editForm",
+                        "type": "form",
+                        "description": "Edit post form"
+                    }
+                }
+            },
+            "search_posts": {
+                "path": "/search-posts",
+                "description": "Search posts by keyword",
+                "elements": {
+                    "search_input": {
+                        "selector": ".searchInput",
+                        "type": "input",
+                        "description": "Search input"
+                    },
+                    "results": {
+                        "selector": ".searchResults",
+                        "type": "list",
+                        "description": "Search results"
+                    }
+                }
+            },
+            "liked_posts": {
+                "path": "/liked-posts",
+                "description": "Posts liked by user",
+                "elements": {
+                    "sort_select": {
+                        "selector": ".sortSelect",
+                        "type": "select",
+                        "description": "Sort options"
+                    },
+                    "posts_container": {
+                        "selector": ".postsContainer",
+                        "type": "list",
+                        "description": "Liked posts"
+                    }
+                }
+            },
+            "liked_posts_list": {
+                "path": "/liked-posts-list",
+                "description": "List view of liked posts",
+                "elements": {
+                    "posts_list": {
+                        "selector": ".postsContainer",
+                        "type": "list",
+                        "description": "Posts list"
+                    }
+                }
+            },
+            "saved_posts": {
+                "path": "/saved-posts",
+                "description": "Posts saved by user",
+                "elements": {
+                    "sort_select": {
+                        "selector": ".sortSelect",
+                        "type": "select",
+                        "description": "Sort options"
+                    },
+                    "posts_container": {
+                        "selector": ".postsContainer",
+                        "type": "list",
+                        "description": "Saved posts"
+                    }
+                }
+            },
+            "saved_posts_list": {
+                "path": "/saved-posts-list",
+                "description": "List view of saved posts",
+                "elements": {
+                    "posts_list": {
+                        "selector": ".postsContainer",
+                        "type": "list",
+                        "description": "Posts list"
+                    }
+                }
+            },
+            "liked_archives": {
+                "path": "/liked-archives",
+                "description": "Forum archives liked by user",
+                "elements": {
+                    "archive_list": {
+                        "selector": ".archiveList",
+                        "type": "list",
+                        "description": "Liked archives"
+                    }
+                }
+            },
+            "saved_archives": {
+                "path": "/saved-archives",
+                "description": "Forum archives saved by user",
+                "elements": {
+                    "sort_select": {
+                        "selector": ".sortSelect",
+                        "type": "select",
+                        "description": "Sort options"
+                    },
+                    "archive_list": {
+                        "selector": ".archiveList",
+                        "type": "list",
+                        "description": "Saved archives"
+                    }
+                }
+            }
+        },
+        "feeds": {
+            "feed_page": {
+                "path": "/feeds",
+                "description": "Pet food/feed database main page",
+                "elements": {
+                    "feed_list": {
+                        "selector": ".feedList",
+                        "type": "list",
+                        "description": "List of feeds"
+                    },
+                    "search": {
+                        "selector": ".searchBar",
+                        "type": "input",
+                        "description": "Search feeds"
+                    }
+                }
+            },
+            "feed_detail": {
+                "path": "/feeds/:id",
+                "description": "Feed details page",
+                "elements": {
+                    "feed_info": {
+                        "selector": ".feedInfo",
+                        "type": "content",
+                        "description": "Feed information"
+                    },
+                    "mark_button": {
+                        "selector": ".markButton",
+                        "type": "button",
+                        "description": "Mark as favorite"
+                    },
+                    "review_button": {
+                        "selector": ".reviewButton",
+                        "type": "button",
+                        "description": "Write review"
+                    }
+                }
+            },
+            "marked_feeds": {
+                "path": "/feeds/my-marked",
+                "description": "User's marked favorite feeds",
+                "elements": {
+                    "feed_list": {
+                        "selector": ".feedList",
+                        "type": "list",
+                        "description": "Marked feeds"
+                    }
+                }
+            },
+            "all_feeds": {
+                "path": "/feeds/all",
+                "description": "Browse all feeds",
+                "elements": {
+                    "feed_list": {
+                        "selector": ".feedList",
+                        "type": "list",
+                        "description": "All feeds"
+                    }
+                }
+            },
+            "search_results": {
+                "path": "/feeds/search",
+                "description": "Feed search results",
+                "elements": {
+                    "results_list": {
+                        "selector": ".resultsList",
+                        "type": "list",
+                        "description": "Search results"
+                    }
+                }
+            }
+        },
+        "interactive_city": {
+            "main": {
+                "path": "/interactive-city",
+                "description": "Interactive city map with checkpoints",
+                "elements": {
+                    "map_canvas": {
+                        "selector": ".interactive-map-canvas",
+                        "type": "canvas",
+                        "description": "Interactive city map"
+                    },
+                    "checkpoint_info": {
+                        "selector": ".checkpoint-info-area",
+                        "type": "component",
+                        "description": "Checkpoint information"
+                    },
+                    "missions": {
+                        "selector": ".daily-missions",
+                        "type": "component",
+                        "description": "Daily missions"
+                    }
+                }
+            },
+            "checkpoint_detail": {
+                "path": "/checkpoint/:id",
+                "description": "Checkpoint detail page",
+                "elements": {
+                    "detail_canvas": {
+                        "selector": ".checkpoint-detail-canvas",
+                        "type": "canvas",
+                        "description": "Checkpoint detail view"
+                    },
+                    "info": {
+                        "selector": ".checkpointInfo",
+                        "type": "content",
+                        "description": "Checkpoint information"
+                    }
+                }
+            }
+        },
+        "notifications": {
+            "notification_page": {
+                "path": "/notifications",
+                "description": "User notifications page",
+                "elements": {
+                    "unread_notifications": {
+                        "selector": ".unreadNotifications",
+                        "type": "list",
+                        "description": "Unread notifications"
+                    },
+                    "past_notifications": {
+                        "selector": ".pastNotifications",
+                        "type": "list",
+                        "description": "Past notifications"
+                    }
+                }
+            }
+        },
+        "settings": {
+            "settings_page": {
+                "path": "/settings",
+                "description": "User settings page",
+                "elements": {
+                    "account_settings": {
+                        "selector": ".accountSettings",
+                        "type": "component",
+                        "description": "Account settings"
+                    },
+                    "language_selector": {
+                        "selector": ".languageSelector",
+                        "type": "component",
+                        "description": "Language selection"
+                    },
+                    "interaction_settings": {
+                        "selector": ".interactionSettings",
+                        "type": "component",
+                        "description": "Interaction settings"
+                    },
+                    "logout_button": {
+                        "selector": ".logoutButton",
+                        "type": "button",
+                        "description": "Logout button"
+                    }
+                }
+            }
+        }
+    },
+    "common_elements": {
+        "navigation": {
+            "bottom_nav": {
+                "selector": ".bottom-navigation-bar",
+                "type": "navigation",
+                "description": "Bottom navigation bar",
+                "items": {
+                    "home": ".nav-home",
+                    "pet": ".nav-pet",
+                    "post": ".nav-post",
+                    "social": ".nav-social",
+                    "profile": ".nav-profile"
+                }
+            },
+            "top_navbar": {
+                "selector": ".top-navbar",
+                "type": "navigation",
+                "description": "Top navigation bar",
+                "elements": {
+                    "back_button": ".back-button",
+                    "title": ".navbar-title",
+                    "menu_button": ".menu-button",
+                    "notification_icon": ".notification-icon"
+                }
+            },
+            "post_menu": {
+                "selector": ".post-menu",
+                "type": "component",
+                "description": "Post creation menu",
+                "items": {
+                    "daily_record": ".daily-record-option",
+                    "abnormal_record": ".abnormal-record-option"
+                }
+            }
+        },
+        "ai_assistant": {
+            "floating_avatar": {
+                "selector": ".floating-ai-avatar",
+                "type": "component",
+                "description": "Floating AI assistant avatar"
+            },
+            "chat_window": {
+                "selector": ".chat-window",
+                "type": "component",
+                "description": "AI chat interface",
+                "elements": {
+                    "message_input": ".message-input",
+                    "send_button": ".send-button",
+                    "chat_messages": ".chat-messages"
+                }
+            },
+            "ai_navigator": {
+                "selector": ".ai-navigator",
+                "type": "component",
+                "description": "AI navigation assistant on main page"
+            }
+        },
+        "modals": {
+            "edit_profile_modal": {
+                "selector": ".edit-profile-modal",
+                "type": "modal",
+                "description": "Edit user profile modal"
+            },
+            "create_feed_modal": {
+                "selector": ".create-feed-modal",
+                "type": "modal",
+                "description": "Create feed review modal"
+            },
+            "location_modal": {
+                "selector": ".location-modal",
+                "type": "modal",
+                "description": "Select location modal"
+            },
+            "confirm_modal": {
+                "selector": ".confirm-modal",
+                "type": "modal",
+                "description": "Generic confirmation modal"
+            }
+        },
+        "components": {
+            "pet_switcher": {
+                "selector": ".pet-switcher",
+                "type": "component",
+                "description": "Switch between user's pets"
+            },
+            "post": {
+                "selector": ".post",
+                "type": "component",
+                "description": "Individual post component"
+            },
+            "archive_card": {
+                "selector": ".archive-card",
+                "type": "component",
+                "description": "Forum archive card"
+            },
+            "image_viewer": {
+                "selector": ".image-viewer",
+                "type": "component",
+                "description": "Image viewer/carousel"
+            },
+            "search_bar": {
+                "selector": ".search-bar",
+                "type": "component",
+                "description": "Search bar component"
+            },
+            "tutorial_overlay": {
+                "selector": ".tutorial-overlay",
+                "type": "component",
+                "description": "Tutorial overlay for feature guidance"
+            }
+        }
+    },
+    "workflows": {
+        "authentication": {
+            "register_workflow": {
+                "description": "Complete user registration process",
+                "steps": [
+                    {
+                        "action": "navigate",
+                        "path": "/register"
+                    },
+                    {
+                        "action": "fill",
+                        "element": "account_input",
+                        "description": "Enter username"
+                    },
+                    {
+                        "action": "click",
+                        "element": "next_button"
+                    },
+                    {
+                        "action": "fill",
+                        "element": "email_input",
+                        "description": "Enter email"
+                    },
+                    {
+                        "action": "click",
+                        "element": "next_button"
+                    },
+                    {
+                        "action": "fill",
+                        "element": "password_input",
+                        "description": "Enter password"
+                    },
+                    {
+                        "action": "fill",
+                        "element": "confirm_password_input",
+                        "description": "Confirm password"
+                    },
+                    {
+                        "action": "click",
+                        "element": "register_button"
+                    }
+                ]
+            },
+            "login_workflow": {
+                "description": "User login process",
+                "steps": [
+                    {
+                        "action": "navigate",
+                        "path": "/login"
+                    },
+                    {
+                        "action": "fill",
+                        "element": "username_input",
+                        "description": "Enter credentials"
+                    },
+                    {
+                        "action": "click",
+                        "element": "login_button"
+                    }
+                ]
+            }
+        },
+        "pet_management": {
+            "add_pet_workflow": {
+                "description": "Add a new pet",
+                "steps": [
+                    {
+                        "action": "navigate",
+                        "path": "/pet"
+                    },
+                    {
+                        "action": "click",
+                        "element": "add_first_pet_button"
+                    },
+                    {
+                        "action": "fill_form",
+                        "elements": ["name_input", "breed_select", "photo_upload"]
+                    },
+                    {
+                        "action": "click",
+                        "element": "submit_button"
+                    }
+                ]
+            },
+            "create_disease_archive_workflow": {
+                "description": "Create disease archive for pet",
+                "steps": [
+                    {
+                        "action": "navigate",
+                        "path": "/pet/:petId/disease-archive"
+                    },
+                    {
+                        "action": "click",
+                        "element": "create_button"
+                    },
+                    {
+                        "action": "fill_form",
+                        "description": "Fill archive basic info"
+                    },
+                    {
+                        "action": "navigate",
+                        "path": "/pet/:petId/disease-archive/edit-content"
+                    },
+                    {
+                        "action": "edit",
+                        "element": "content_editor"
+                    },
+                    {
+                        "action": "navigate",
+                        "path": "/pet/:petId/disease-archive/preview"
+                    },
+                    {
+                        "action": "click",
+                        "element": "publish_button"
+                    }
+                ]
+            }
+        },
+        "health_tracking": {
+            "upload_health_report_workflow": {
+                "description": "Upload and create health report",
+                "steps": [
+                    {
+                        "action": "navigate",
+                        "path": "/pet/:petId/health-reports"
+                    },
+                    {
+                        "action": "click",
+                        "element": "upload_button"
+                    },
+                    {
+                        "action": "upload",
+                        "element": "file_upload"
+                    },
+                    {
+                        "action": "click",
+                        "element": "submit_button"
+                    }
+                ]
+            },
+            "use_calculator_workflow": {
+                "description": "Use health calculator for blood test results",
+                "steps": [
+                    {
+                        "action": "navigate",
+                        "path": "/calculator"
+                    },
+                    {
+                        "action": "fill_form",
+                        "element": "step1"
+                    },
+                    {
+                        "action": "fill_form",
+                        "element": "step2"
+                    },
+                    {
+                        "action": "view_results",
+                        "element": "step3"
+                    }
+                ]
+            },
+            "create_abnormal_post_workflow": {
+                "description": "Report abnormal pet condition",
+                "steps": [
+                    {
+                        "action": "click",
+                        "element": "bottom_nav.post"
+                    },
+                    {
+                        "action": "click",
+                        "element": "abnormal_record_option"
+                    },
+                    {
+                        "action": "fill_form",
+                        "element": "abnormal_form"
+                    },
+                    {
+                        "action": "submit"
+                    }
+                ]
+            }
+        },
+        "social_interaction": {
+            "create_post_workflow": {
+                "description": "Create and publish daily post",
+                "steps": [
+                    {
+                        "action": "navigate",
+                        "path": "/create-post"
+                    },
+                    {
+                        "action": "upload",
+                        "element": "image_upload"
+                    },
+                    {
+                        "action": "fill",
+                        "element": "description_input"
+                    },
+                    {
+                        "action": "fill",
+                        "element": "hashtag_input"
+                    },
+                    {
+                        "action": "click",
+                        "element": "preview_button"
+                    },
+                    {
+                        "action": "navigate",
+                        "path": "/create-post-preview"
+                    },
+                    {
+                        "action": "click",
+                        "element": "publish_button"
+                    }
+                ]
+            },
+            "search_and_view_posts_workflow": {
+                "description": "Search for posts",
+                "steps": [
+                    {
+                        "action": "navigate",
+                        "path": "/search-posts"
+                    },
+                    {
+                        "action": "fill",
+                        "element": "search_input"
+                    },
+                    {
+                        "action": "view",
+                        "element": "results"
+                    }
+                ]
+            },
+            "follow_user_workflow": {
+                "description": "Follow another user",
+                "steps": [
+                    {
+                        "action": "navigate",
+                        "path": "/user/:userAccount"
+                    },
+                    {
+                        "action": "click",
+                        "element": "follow_button"
+                    }
+                ]
+            }
+        },
+        "feed_database": {
+            "search_feed_workflow": {
+                "description": "Search and review pet food",
+                "steps": [
+                    {
+                        "action": "navigate",
+                        "path": "/feeds"
+                    },
+                    {
+                        "action": "fill",
+                        "element": "search"
+                    },
+                    {
+                        "action": "click",
+                        "element": "feed_list_item"
+                    },
+                    {
+                        "action": "navigate",
+                        "path": "/feeds/:id"
+                    },
+                    {
+                        "action": "click",
+                        "element": "review_button"
+                    }
+                ]
+            }
+        },
+        "interactive_city": {
+            "explore_city_workflow": {
+                "description": "Explore interactive city and checkpoints",
+                "steps": [
+                    {
+                        "action": "navigate",
+                        "path": "/interactive-city"
+                    },
+                    {
+                        "action": "interact",
+                        "element": "map_canvas"
+                    },
+                    {
+                        "action": "click",
+                        "element": "checkpoint"
+                    },
+                    {
+                        "action": "navigate",
+                        "path": "/checkpoint/:id"
+                    }
+                ]
+            }
+        }
+    }
+}
