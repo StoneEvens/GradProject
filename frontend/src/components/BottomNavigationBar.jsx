@@ -115,7 +115,7 @@ const BottomNavbar = () => {
           <img 
             src="/assets/icon/BottomButton_Calculator.png" 
             alt={t('nav.calculator')}
-            className={styles.icon}
+            className={`${styles.icon} ${styles.calculate}`}
             onClick={() => handleNavItemClick('calculator')}
           />
         </div>
