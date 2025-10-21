@@ -213,7 +213,286 @@ const tutorialData = {
     title: '如何發布貼文',
     description: '學習如何創建和發布貼文',
     steps: [
-      // ... 其他教學步驟
+      {
+        id: 1,
+        title: '步驟 1：開啟發文選單',
+        instruction: '點擊底部導覽列中間的「發文」按鈕',
+        targetElement: {
+          component: 'BottomNavbar',
+          selector: 'img[alt*="post"], img[src*="CreatePost"], [class*="createPost"]',
+          className: 'createPost',
+          fallbackSelector: '.icon'
+        },
+        highlight: {
+          type: 'circle',
+          position: 'bottom-center'
+        },
+        action: 'click',
+        nextCondition: 'menuOpen'
+      },
+      {
+        id: 2,
+        title: '步驟 2：選擇日常記錄',
+        instruction: '在彈出的選單中，選擇「日常記錄」',
+        targetElement: {
+          component: 'PostMenu',
+          selector: '[class*="menuItem"]:first-child, [class*="buttonElement"]:first-child, [class*="menu"] button:first-child, [class*="popup"] button:first-child',
+          className: 'menuItem',
+          fallbackSelector: 'button:first-child, div:first-child'
+        },
+        highlight: {
+          type: 'rectangle',
+          position: 'menu'
+        },
+        action: 'click',
+        nextCondition: 'pageNavigate',
+        expectedPath: '/create-post',
+        // 添加過渡配置來減少閃爍
+        transition: {
+          fadeOut: true,
+          delay: 320
+        }
+      },
+      {
+        id: 3,
+        title: '步驟 3：新增照片',
+        instruction: '點擊「新增圖片」按鈕，選擇您要上傳的照片',
+        targetElement: {
+          component: 'CreatePostPage',
+          selector: '[class*="addImageBtn"], button[class*="addImage"], input[type="file"], [class*="upload"]',
+          className: 'addImageBtn',
+          fallbackSelector: 'button, input[type="file"]'
+        },
+        highlight: {
+          type: 'rectangle',
+          position: 'center'
+        },
+        action: 'click',
+        nextCondition: 'imageAdded',
+        // 添加過渡配置來平滑進入
+        transition: {
+          fadeIn: true,
+          delay: 480,
+          waitForPageLoad: true
+        }
+      },
+      {
+        id: 4,
+        title: '步驟 4：點擊照片進行編輯',
+        instruction: '點擊剛才上傳的照片，開啟圖片編輯器',
+        targetElement: {
+          component: 'CreatePostPage',
+          selector: '[class*="imagePreview"] img, [class*="clickableImage"]',
+          className: 'clickableImage',
+          fallbackSelector: 'img'
+        },
+        highlight: {
+          type: 'rectangle',
+          position: 'image'
+        },
+        action: 'click',
+        nextCondition: 'editorOpen'
+      },
+      {
+        id: 5,
+        title: '步驟 5：在照片上點擊',
+        instruction: '在照片中您想要標註寵物的位置點擊一下',
+        targetElement: {
+          component: 'ImageEditor',
+          selector: '[class*="editImage"], img[alt*="編輯"], img[alt*="圖片"]',
+          className: 'editImage',
+          fallbackSelector: 'img'
+        },
+        highlight: {
+          type: 'fullImage',
+          position: 'center'
+        },
+        action: 'click',
+        nextCondition: 'annotationPointAdded',
+        showPointer: true
+      },
+      {
+        id: 6,
+        title: '步驟 6：選擇標註類型',
+        instruction: '在「標註類型」下拉選單中，選擇「寵物」',
+        targetElement: {
+          component: 'ImageEditor',
+          selector: '[class*="typeSelect"], select',
+          className: 'typeSelect',
+          fallbackSelector: 'select'
+        },
+        highlight: {
+          type: 'rectangle',
+          position: 'form'
+        },
+        action: 'select',
+        selectValue: 'pet',
+        nextCondition: 'typeSelected'
+      },
+      {
+        id: 7,
+        title: '步驟 7：選擇寵物名稱',
+        instruction: '在「標註內容」下拉選單中，選擇您的寵物',
+        targetElement: {
+          component: 'ImageEditor',
+          selector: '[class*="searchInput"], select[class*="search"]',
+          className: 'searchInput',
+          fallbackSelector: 'select:last-of-type'
+        },
+        highlight: {
+          type: 'rectangle',
+          position: 'form'
+        },
+        action: 'select',
+        nextCondition: 'petSelected'
+      },
+      {
+        id: 8,
+        title: '步驟 8：新增標註',
+        instruction: '點擊「新增」按鈕，完成標註',
+        targetElement: {
+          component: 'ImageEditor',
+          selector: '[class*="confirmButton"], button:contains("新增")',
+          className: 'confirmButton',
+          fallbackSelector: 'button:last-of-type'
+        },
+        highlight: {
+          type: 'rectangle',
+          position: 'button'
+        },
+        action: 'click',
+        nextCondition: 'annotationAdded'
+      },
+      {
+        id: 9,
+        title: '步驟 9：儲存並關閉',
+        instruction: '點擊「完成」按鈕，儲存您的標註',
+        targetElement: {
+          component: 'ImageEditor',
+          selector: '[class*="saveButton"], button:contains("完成")',
+          className: 'saveButton',
+          fallbackSelector: 'button:contains("儲存")'
+        },
+        highlight: {
+          type: 'rectangle',
+          position: 'button'
+        },
+        action: 'click',
+        nextCondition: 'editorClosed'
+      },
+      {
+        id: 10,
+        title: '步驟 10：新增描述',
+        instruction: '在輸入框裡，新增您的貼文描述',
+        targetElement: {
+          component: 'DescriptionSection',
+          selector: '[class*="descriptionInput"]',
+          className: 'descriptionInput',
+          fallbackSelector: 'textarea'
+        },
+        highlight: {
+          type: 'rectangle',
+          position: 'textarea'
+        },
+        action: 'click',
+        nextCondition: 'editorClosed'
+      },
+      {
+        id: 11,
+        title: '步驟 11：新增標籤',
+        instruction: '在「輸入標籤」裡，新增您想使用的 hashtag',
+        targetElement: {
+          component: 'CreatePostPage',
+          selector: '[class*="hashtagInput"], [class*="hashtagInputContainer"], [class*="hashtagInputSection"]',
+          className: 'hashtagInput',
+          fallbackSelector: 'span[class*="hashSymbol"] + input[type="text"]'
+        },
+        highlight: {
+          type: 'rectangle',
+          position: 'button'
+        },
+        action: 'click',
+        nextCondition: 'annotationAdded'
+      },
+      {
+        id: 12,
+        title: '步驟 12：新增hashtag到貼文中',
+        instruction: '點擊「新增」按鈕',
+        targetElement: {
+          component: 'CreatePostPage',
+          selector: 'button[class*="addHashtagBtn"], [class*="hashtagInputSection"] > button, [class*="hashtagInputSection"] button',
+          className: 'addHashtagButton',
+          fallbackSelector: 'div[class*="hashtagInputSection"] button:not([disabled])'
+        },
+        highlight: {
+          type: 'rectangle',
+          position: 'button'
+        },
+        action: 'click',
+        nextCondition: 'annotationAdded'
+      },
+      {
+        id: 13,
+        title: '步驟 13：點擊「下一步」按鈕',
+        instruction: '確認無誤後點擊按鈕進入預覽頁面',
+        targetElement: {
+          component: 'CreatePostPage',
+          selector: '[class*="nextButton"], button:contains("下一步")',
+          className: 'confirmButton',
+          fallbackSelector: 'button:last-of-type'
+        },
+        highlight: {
+          type: 'rectangle',
+          position: 'button'
+        },
+        action: 'click',
+        nextCondition: 'annotationAdded'
+      },
+      {
+        id: 14,
+        title: '步驟 14：選擇您的位置',
+        instruction: '在位置清單中，選擇您發文的地點',
+        targetElement: {
+          component: 'CreatePostPage',
+          selector: 'button[class*="locationButton"], div[class*="userDetails"] > button, div[class*="userInfo"] button',
+          className: 'locationButton',
+          fallbackSelector: 'button[aria-haspopup="listbox"], button[aria-label*="位置"]'
+        },
+        highlight: {
+          type: 'rectangle',
+          position: 'form'
+        },
+        action: 'click',
+        nextCondition: 'annotationAdded'
+      },
+      {
+        id: 15,
+        title: '步驟 15：發布貼文',
+        instruction: '點擊「發布」按鈕，發布您的貼文',
+        targetElement: {
+          component: 'PostPreviewPage',
+          selector: 'button[class*="publishButton"], div[class*="actionButtons"] button:last-of-type, div[class*="actionButtons"] > button:nth-of-type(2)',
+          className: 'publishButton',
+          fallbackSelector: 'button:not([disabled])[class*="publishButton"], div[class*="actionButtons"] button:not([disabled]):last-of-type'
+        },
+        highlight: {
+          type: 'rectangle',
+          position: 'button'
+        },
+        action: 'click',
+        nextCondition: 'annotationAdded'
+      },
+      {
+        id: 16,
+        title: '完成！',
+        instruction: '恭喜！您已成功發布一則貼文。貼文將會顯示在您的主頁。',
+        targetElement: null,
+        highlight: {
+          type: 'none',
+          position: 'center'
+        },
+        action: 'complete'
+      }
     ]
   },
 
@@ -224,7 +503,374 @@ const tutorialData = {
     steps: [
       // ... 其他教學步驟
     ]
-  }
+  },
+  calculate: {
+  id: 'calculate',
+  title: '如何使用營養計算機',
+  description: '學習如何使用計算機計算寵物一天所需攝取之飼料量',
+  steps: [
+    {
+      id: 1,
+      title: '步驟 1：開啟營養計算機',
+      instruction: '點擊底部導覽列的「計算機」按鈕',
+      targetElement: {
+        component: 'BottomNavbar',
+        selector: 'img[alt*="calculator"], img[src*="Calculator"], [class*="calculate"]',
+        className: 'calculate',
+        fallbackSelector: '.icon'
+      },
+      highlight: {
+        type: 'circle',
+        position: 'bottom-center'
+      },
+      action: 'click',
+      nextCondition: 'menuOpen'
+    },
+      {
+        id: 2,
+        title: '步驟 2：選擇寵物',
+        instruction: '點擊選擇想計算的寵物',
+        targetElement: {
+          component: 'Calculate',
+          selector: '[class*="petSwitcher"] > [class*="petItem"]:first-of-type, [class*="petSwitcher"] [class*="petItem"]:first-of-type',
+          className: 'petItem',
+          fallbackSelector: '[class*="petSwitcher"] > div:first-of-type'
+        },
+        highlight: {
+          type: 'rectangle',
+          position: 'center'
+        },
+        action: 'click',
+        nextCondition: 'imageAdded',
+        // 添加過渡配置來平滑進入
+        transition: {
+          fadeIn: true,
+          delay: 480,
+          waitForPageLoad: true
+        }
+      },
+      {
+        id: 3,
+        title: '步驟 3：更改身體數據',
+        instruction: '若身高及體重與當初輸入資料時有變化，可在此更改',
+        targetElement: {
+          component: 'Calculate',
+          selector: '[class*="petInfoSection"]',
+          className: 'petInfoSection',
+          fallbackSelector: '[class*="petInfoSection"]'
+        },
+        highlight: {
+          type: 'rectangle',
+          position: 'image'
+        },
+        action: 'click',
+        nextCondition: 'editorOpen'
+      },
+      {
+        id: 4,
+        title: '步驟 4：切換頁面',
+        instruction: '切換到「寵物狀況」頁面',
+        targetElement: {
+          component: 'Calculate',
+          selector: 'button[class*="navButton"]:has(img[src*="CalculatorPetConditionIcon"])',
+          className: 'navButton',
+          fallbackSelector: 'img[src*="CalculatorPetConditionIcon"]'
+        },
+        highlight: {
+          type: 'fullImage',
+          position: 'center'
+        },
+        action: 'click',
+        nextCondition: 'annotationPointAdded',
+        showPointer: true
+      },
+      {
+        id: 5,
+        title: '步驟 5：選擇狀況',
+        instruction: '在以下的按鈕中選擇寵物有的身體狀況',
+        targetElement: {
+          component: 'Calculate',
+          selector: '[class*="conditionPanel"], [class*="section"] [class*="conditionPanel"]',
+          className: 'conditionPanel',
+          fallbackSelector: 'div[class*="conditionPanel"]'
+        },
+        highlight: {
+          type: 'rectangle',
+          position: 'form'
+        },
+        action: 'click',
+        nextCondition: 'annotationPointAdded',
+        showPointer: true
+      },
+      {
+        id: 6,
+        title: '步驟 6：切換頁面',
+        instruction: '切換到「選擇飼料」頁面',
+        targetElement: {
+          component: 'Calculate',
+          selector: 'button[class*="navButton"]:has(img[src*="PetpageFeedButton"])',
+          className: 'navButton',
+          fallbackSelector: 'img[src*="PetpageFeedButton"]'
+        },
+        highlight: {
+          type: 'fullImage',
+          position: 'center'
+        },
+        action: 'click',
+        nextCondition: 'annotationPointAdded',
+        showPointer: true
+      },
+      {
+        id: 7,
+        title: '步驟 7：選擇飼料或新增飼料',
+        instruction: '若已經新增過飼料，您可以直接點選「選擇飼料」，若需要新增飼料，就點選「新增飼料」',
+        targetElement: {
+          component: 'Calculate',
+          selector: '[class*="feedActions"]',
+          className: 'feedActions',
+          fallbackSelector: 'div[class*="feedActions"]'
+        },
+        highlight: {
+          type: 'rectangle',
+          position: 'center'
+        },
+        action: 'click',
+        nextCondition: 'annotationPointAdded',
+        showPointer: true
+      },
+      {
+        id: 8,
+        title: '步驟 8：新增飼料',
+        instruction: '若需要新增飼料，請點選「新增飼料」',
+        targetElement: {
+          component: 'Calculate',
+          selector: '[class*="feedActions"] button[class*="feedActionBtn"]:nth-of-type(2)',
+          className: 'feedActionBtn',
+          fallbackSelector: '[class*="feedActions"] button:last-of-type'
+        },
+        highlight: {
+          type: 'rectangle',
+          position: 'button'
+        },
+        action: 'click',
+        nextCondition: 'annotationPointAdded',
+        showPointer: true
+      },
+      {
+        id: 9,
+        title: '步驟 9：選擇寵物類型',
+        instruction: '選擇這隻寵物是貓還是狗',
+        targetElement: {
+          component: 'CreateFeedModal',
+          selector: 'select[class*="petTypeSelect"]:not([disabled]), [class*="selectSection"] select:not([disabled])',
+          className: 'petTypeSelect',
+          fallbackSelector: 'label[class*="selectLabel"] + select:not([disabled])'
+        },
+        highlight: {
+          type: 'rectangle',
+          position: 'form'
+        },
+        action: 'click',
+        nextCondition: 'annotationAdded'
+      },
+      {
+        id: 10,
+        title: '步驟 10：輸入飼料名稱',
+        instruction: '',
+        targetElement: {
+          component: 'CreateFeedModal',
+          selector: '[class*="inputSection"]:first-of-type input[class*="textInput"]:not([disabled]), [class*="inputSection"]:first-of-type input[type="text"]:not([disabled])',
+          className: 'textInput',
+          fallbackSelector: '[class*="inputSection"]:first-of-type label + input[type="text"]:not([disabled])'
+        },
+        highlight: {
+          type: 'rectangle',
+          position: 'form'
+        },
+        action: 'click',
+        nextCondition: 'annotationPointAdded',
+        showPointer: true
+      },
+      {
+        id: 11,
+        title: '步驟 11：輸入飼料品牌',
+        instruction: '',
+        targetElement: {
+          component: 'CreateFeedModal',
+          selector: '[class*="inputSection"]:first-of-type + [class*="inputSection"] input[class*="textInput"]:not([disabled]), [class*="inputSection"]:first-of-type + [class*="inputSection"] input[type="text"]:not([disabled])',
+          className: 'textInput',
+          fallbackSelector: '[class*="inputSection"]:first-of-type + [class*="inputSection"] label + input[type="text"]:not([disabled])'
+        },
+        highlight: {
+          type: 'rectangle',
+          position: 'form'
+        },
+        action: 'click',
+        nextCondition: 'annotationPointAdded',
+        showPointer: true
+      },
+      {
+        id: 12,
+        title: '步驟 12：輸入飼料價格',
+        instruction: '',
+        targetElement: {
+          component: 'CreateFeedModal',
+          selector: '[class*="inputSection"]:first-of-type + [class*="inputSection"] + [class*="inputSection"] input[type="number"]:not([disabled]), input[type="number"]:not([disabled])',
+          className: 'textInput',
+          fallbackSelector: '[class*="inputSection"]:first-of-type + [class*="inputSection"] + [class*="inputSection"] label + input[type="number"]:not([disabled])'
+        },
+        highlight: {
+          type: 'rectangle',
+          position: 'form'
+        },
+        action: 'click',
+        nextCondition: 'annotationPointAdded',
+        showPointer: true
+      },
+      {
+        id: 13,
+        title: '步驟 13：上傳飼料正面圖片',
+        instruction: '',
+        targetElement: {
+          component: 'CreateFeedModal',
+          selector: '[class*="uploadSection"]:first-of-type [class*="noImageState"] button[class*="uploadButton"]:not([disabled])',
+          className: 'uploadButton',
+          fallbackSelector: '[class*="uploadSection"]:first-of-type [class*="imagePreview"] button[class*="removeImageBtn"]:not([disabled]), [class*="uploadSection"]:first-of-type [class*="imageSection"] button:not([disabled])'
+        },
+        highlight: {
+          type: 'rectangle',
+          position: 'button'
+        },
+        action: 'click',
+        nextCondition: 'annotationPointAdded',
+        showPointer: true
+      },
+      {
+        id: 14,
+        title: '步驟 14：上傳飼料營養標示',
+        instruction: '',
+        targetElement: {
+          component: 'CreateFeedModal',
+          selector: '[class*="uploadSection"]:first-of-type + [class*="uploadSection"] [class*="noImageState"] button[class*="uploadButton"]:not([disabled])',
+          className: 'uploadButton',
+          fallbackSelector: '[class*="uploadSection"]:first-of-type + [class*="uploadSection"] [class*="imagePreview"] button[class*="removeImageBtn"]:not([disabled]), [class*="uploadSection"]:first-of-type + [class*="uploadSection"] [class*="imageSection"] button:not([disabled])'
+        },
+        highlight: {
+          type: 'rectangle',
+          position: 'button'
+        },
+        action: 'click',
+        nextCondition: 'annotationPointAdded',
+        showPointer: true
+      },
+      {
+        id: 15,
+        title: '步驟 15：完成「新增飼料」',
+        instruction: '按下「確認新增」按鈕',
+        targetElement: {
+          component: 'CreateFeedModal',
+          selector: '[class*="modalFooter"] button[class*="confirmButton"]:not([disabled])',
+          className: 'confirmButton',
+          fallbackSelector: '[class*="modalFooter"] button + button:not([disabled]), [class*="modalFooter"] button:last-of-type:not([disabled])'
+        },
+        highlight: {
+          type: 'rectangle',
+          position: 'button'
+        },
+        action: 'click',
+        nextCondition: 'annotationPointAdded',
+        showPointer: true
+      },
+      {
+        id: 16,
+        title: '步驟 16：點選「開始計算」按鈕',
+        instruction: '開始依數據計算結果',
+        targetElement: {
+          component: 'Calculate',
+          selector: 'button[class*="navButton"]:has(img[src*="CalculatorCalculateIcon"])',
+          className: 'navButton',
+          fallbackSelector: 'img[src*="CalculatorCalculateIcon"]'
+        },
+        highlight: {
+          type: 'fullImage',
+          position: 'center'
+        },
+        action: 'click',
+        nextCondition: 'annotationPointAdded',
+        showPointer: true
+      },
+      {
+        id: 17,
+        title: '完成！',
+        instruction: '恭喜！您已成功獲得計算結果！',
+        targetElement: null,
+        highlight: {
+          type: 'none',
+          position: 'center'
+        },
+        action: 'complete'
+      }
+  ]},
+
+  addPet: {
+    id: 'addPet',
+    title: '如何新增一隻寵物',
+    description: '學習如何將您的寵物新增到系統裡',
+    steps: [
+      {
+        id: 1,
+        title: '步驟 1：開啟寵物頁面',
+        instruction: '點擊底部導覽列的「寵物」按鈕',
+        targetElement: {
+          component: 'BottomNavbar',
+          selector: 'img[alt*="pets"], img[src*="CreatePost"], [class*="createPost"]',
+          className: 'calculate',
+          fallbackSelector: '.icon'
+        },
+        highlight: {
+          type: 'circle',
+          position: 'bottom-center'
+        },
+        action: 'click',
+        nextCondition: 'menuOpen'
+      },
+      {
+        id: 2,
+        title: '步驟 2：按下「新增寵物」按鈕',
+        instruction: '',
+        targetElement: {
+          component: 'addPet',
+          selector: 'button[class*="addFirstPetButton"]:not([disabled])',
+          className: 'addFirstPetButton',
+          fallbackSelector: 'button[class*="addFirstPetButton"], button[class*="addPetButton"]:not([disabled])'
+        },
+        highlight: {
+          type: 'rectangle',
+          position: 'button'
+        },
+        action: 'click',
+        nextCondition: 'menuOpen'
+      },
+      {
+        id: 3,
+        title: '步驟 3：按下「新增寵物」按鈕',
+        instruction: '',
+        targetElement: {
+          component: 'addPet',
+          selector: 'button[class*="addFirstPetButton"]:not([disabled])',
+          className: 'addFirstPetButton',
+          fallbackSelector: 'button[class*="addFirstPetButton"], button[class*="addPetButton"]:not([disabled])'
+        },
+        highlight: {
+          type: 'rectangle',
+          position: 'button'
+        },
+        action: 'click',
+        nextCondition: 'menuOpen'
+      },
+
+    ]
+  },
 };
 
 // 教學狀態管理
