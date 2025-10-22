@@ -1,1 +1,10 @@
 fastmcp
+mcp
+# Align with workspace root requirements to avoid resolver conflicts
+httpx==0.28.1
+
+# Keep uvicorn unpinned to get fixes, but avoid websockets 14 deprecations by pinning
+# websockets below 14 until uvicorn fully drops legacy imports.
+uvicorn
+starlette
+websockets<14
