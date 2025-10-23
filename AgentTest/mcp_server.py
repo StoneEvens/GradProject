@@ -1,12 +1,8 @@
-import logging
-import os
 from typing import Dict, List, Any
 
 from fastmcp import FastMCP
-from openai import OpenAI
 
-#OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
-#openai_client = OpenAI() if OPENAI_API_KEY else None
+import requests
 
 server_instructions = """This is a sample MCP server that provides basic tools for demonstration purposes."""
 
@@ -17,13 +13,21 @@ def create_mcp_server():
     async def get_greeting(name: str) -> str:
         """Get a personalized greeting"""
         return f"Hello, {name}!"
+
+    @mcp.tool()
+    async def get_user_pet_info(user_id: str) -> Dict[str, Any]:
+        """Fetch user pet information from a mock database"""
+        mock_db = {
+            "1": {"pet_name": "Buddy", "pet_type": "Dog"},
+            "2": {"pet_name": "Mittens", "pet_type": "Cat"},
+        }
+
+        return mock_db.get(user_id, {"error": "User not found"})
     
+
     return mcp
 
 def main():
-    #if not openai_client:
-        #logging.warning("OPENAI_API_KEY not set. OpenAI-dependent tools will be unavailable.")
-
     mcp_server = create_mcp_server()
     
     try:
