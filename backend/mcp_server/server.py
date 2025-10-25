@@ -4,6 +4,8 @@ from fastmcp import FastMCP
 
 from accounts.models import CustomUser
 from pets.models import Pet
+from social.apps import SocialConfig
+from social.models import PostFrame
 
 # Server configuration
 SERVER_NAME = "PETer MCP Server"
@@ -15,8 +17,6 @@ def create_mcp_server() -> FastMCP:
 
     @mcp.tool()
     async def get_user_pet_info(user_id: str) -> Dict:
-        
-
         @sync_to_async
         def fetch() -> Dict:
             try:
@@ -43,6 +43,27 @@ def create_mcp_server() -> FastMCP:
                     "user": user.username,
                     "pets": pets
                 }
+            except Exception as e:
+                raise
+
+        return await fetch()
+    
+    @mcp.tool()
+    async def get_post_recommendations(content_description: str) -> list[dict]:
+        @sync_to_async
+        def fetch() -> list[dict]:
+            try:
+                recommendation_service = SocialConfig.get_recommendation_service()
+                if recommendation_service is None:
+                    return {"error": "Recommendation service not available."}
+
+                embedded_description = recommendation_service.embed_content(content_description)
+                recommendations = recommendation_service.get_recommendations(embedded_description)
+                recommendations = recommendations[:3]  # Limit to top 3 recommendations
+
+                posts = [PostFrame.objects.get(id=post_id) for post_id in recommendations]
+
+                return posts
             except Exception as e:
                 raise
 

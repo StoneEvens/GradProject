@@ -151,6 +151,23 @@ class RecommendationService:
         np.save(f'{content_type}_post_ids.npy', post_ids)
         np.save(f'{content_type}_post_embs.npy', post_embeddings)
 
+    #----------Content Embedding----------#
+    def embed_content(self, content: str) -> np.ndarray:
+        encoded = self.tokenizer(
+            [content],
+            padding=True,
+            truncation=True,
+            return_tensors="pt"
+        ).to(self.device)
+
+        with torch.no_grad():
+            outputs = self.model(**encoded)
+            emb = self.__mean_pooling(outputs, encoded.attention_mask)
+            emb = torch.nn.functional.normalize(emb, p=2, dim=1)
+            emb = emb.cpu().numpy()
+
+        return emb[0]
+
     #----------Embedding New Post----------#
     def embed_new_post(self, post_id: int, content: str, content_type: str) -> np.ndarray:
         if content_type not in ["social", "forum"]:
@@ -160,20 +177,7 @@ class RecommendationService:
         post_embeddings = np.load(f'{content_type}_post_embs.npy')
         post_ids = np.load(f'{content_type}_post_ids.npy')
 
-        # Encode the text
-        encoded = self.tokenizer(
-            [content],
-            padding=True,
-            truncation=True,
-            return_tensors="pt"
-        ).to(self.device)
-
-        # Generate embedding
-        with torch.no_grad():
-            outputs = self.model(**encoded)
-            emb = self.__mean_pooling(outputs, encoded.attention_mask)
-            emb = torch.nn.functional.normalize(emb, p=2, dim=1)
-            emb = emb.cpu().numpy()
+        emb = self.embed_content(content)
 
         # Add new embedding and ID to the arrays
         post_embeddings = np.vstack([post_embeddings, emb])
