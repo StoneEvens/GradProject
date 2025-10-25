@@ -1,11 +1,14 @@
 from typing import Dict, Optional
+import json
 from asgiref.sync import sync_to_async
 from fastmcp import FastMCP
 
 from accounts.models import CustomUser
 from pets.models import Pet
+from social.models import PostFrame, SoLContent
+from utils.recommendation_service import RecommendationService
 from social.apps import SocialConfig
-from social.models import PostFrame
+from social.serializers import PostFrameSerializer
 
 # Server configuration
 SERVER_NAME = "PETer MCP Server"
@@ -53,25 +56,30 @@ def create_mcp_server() -> FastMCP:
     
     @mcp.tool(
         name="get_post_recommendations",
-        description="Get up to 3 recommended social posts based on a natural-language content description."
+        description="Get recommended social posts based on a natural-language content description. Please use keywords; vague descriptions may yield poor results."
     )
-    async def get_post_recommendations(content_description: str) -> list[dict]:
+    async def get_post_recommendations(content_description: str, hashtags: list[str]) -> list[dict]:
         @sync_to_async
         def fetch() -> list[dict]:
             try:
                 recommendation_service = SocialConfig.get_recommendation_service()
                 if recommendation_service is None:
-                    return {"error": "Recommendation service not available."}
+                    return [{"error": "Recommendation service not available."}]
 
-                embedded_description = recommendation_service.embed_content(content_description)
-                recommendations = recommendation_service.get_recommendations(embedded_description)
-                recommendations = recommendations[:3]  # Limit to top 3 recommendations
+                embedded_description = recommendation_service.embed_content(content_description, hashtags=hashtags)
+                recommended_post_ids = recommendation_service.recommend_posts(user_vec=embedded_description, content_type='social')
+                top_post_ids = recommended_post_ids[:5]
 
-                posts = [PostFrame.objects.get(id=post_id) for post_id in recommendations]
+                posts = PostFrame.get_postFrames(idList=top_post_ids)
 
-                return posts
+                serializer = PostFrameSerializer(posts, many=True)
+                # Ensure a plain built-in list[dict] (not DRF ReturnList/ReturnDict)
+                # Also stringify non-JSON-serializable types (e.g., datetimes) via default=str
+                posts_data: list[dict] = json.loads(json.dumps(serializer.data, default=str))
+
+                return posts_data
             except Exception as e:
-                raise
+                return [{"error": f"Failed to get recommendations: {str(e)}"}]
 
         return await fetch()
 

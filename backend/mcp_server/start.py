@@ -11,9 +11,8 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 def main():
-    # Mark this as MCP server process and disable recommendation service
+    # Mark this as MCP server process
     os.environ['MCP_SERVER_PROCESS'] = 'true'
-    os.environ['SKIP_RECOMMENDATION_SERVICE'] = 'true'
 
     # Add the backend directory to Python path
     backend_dir = Path(__file__).resolve().parent.parent

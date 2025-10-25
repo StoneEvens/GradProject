@@ -9,10 +9,6 @@ class SocialConfig(AppConfig):
     _recommendation_service = None
 
     def ready(self):
-        # Skip initialization if this is the MCP server process
-        if os.environ.get('SKIP_RECOMMENDATION_SERVICE') == 'true':
-            return
-            
         if not hasattr(SocialConfig, '_init_started'):
             SocialConfig._init_started = True
             # Initialize in a separate thread
@@ -31,7 +27,7 @@ class SocialConfig(AppConfig):
 
     @classmethod
     def get_recommendation_service(cls):
-        if cls._recommendation_service is None and not os.environ.get('SKIP_RECOMMENDATION_SERVICE') == 'true':
+        if cls._recommendation_service is None:
             from utils.recommendation_service import RecommendationService
             cls._recommendation_service = RecommendationService()
         return cls._recommendation_service
