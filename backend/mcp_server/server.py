@@ -15,7 +15,10 @@ def create_mcp_server() -> FastMCP:
 
     mcp = FastMCP(name=SERVER_NAME, instructions=SERVER_INSTRUCTIONS)
 
-    @mcp.tool()
+    @mcp.tool(
+        name="get_user_pet_info",
+        description="Fetch a public user's basic profile and their pets (including related entities)."
+    )
     async def get_user_pet_info(user_id: str) -> Dict:
         @sync_to_async
         def fetch() -> Dict:
@@ -48,7 +51,10 @@ def create_mcp_server() -> FastMCP:
 
         return await fetch()
     
-    @mcp.tool()
+    @mcp.tool(
+        name="get_post_recommendations",
+        description="Get up to 3 recommended social posts based on a natural-language content description."
+    )
     async def get_post_recommendations(content_description: str) -> list[dict]:
         @sync_to_async
         def fetch() -> list[dict]:
