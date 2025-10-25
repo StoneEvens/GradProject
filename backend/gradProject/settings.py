@@ -83,7 +83,6 @@ INSTALLED_APPS = [
     "interactivecity",
     "aiAgent",
     'sslserver',
-    'mcp_server',
 ]
 
 MIDDLEWARE = [

@@ -40,21 +40,27 @@ echo Starting services...
 echo.
 
 REM Start Django backend
-echo [1/3] Django Backend (port 8000)...
+echo [1/4] Django Backend (port 8000)...
 cd /d "%BACKEND_PATH%"
 start /min "" python manage.py runserver 127.0.0.1:8000 --noreload
 echo     Status: Starting...
 
+REM Start MCP server
+echo [2/4] MCP Server (port 5000)...
+cd /d "%BACKEND_PATH%"
+start /min "" python -m mcp_server.start
+echo     Status: Starting...
+
 REM Wait and start Vite frontend
 timeout /t 3 /nobreak >nul
-echo [2/3] Vite Frontend (port 4173)...
+echo [3/4] Vite Frontend (port 4173)...
 cd /d "%FRONTEND_PATH%"  
 start /min "" npm run preview
 echo     Status: Starting...
 
 REM Wait and start Nginx
 timeout /t 3 /nobreak >nul
-echo [3/3] Nginx Reverse Proxy (port 443)...
+echo [4/4] Nginx Reverse Proxy (port 443)...
 
 REM Ensure nginx directories exist and copy config
 if not exist "C:\nginx\logs" mkdir "C:\nginx\logs"
@@ -77,13 +83,15 @@ echo ========================================
 echo            Services Ready!
 echo ========================================
 echo.
-echo  🌐 Website:  https://petapp.geniusbee.net
-echo  🔧 API:      https://petapp.geniusbee.net/api/v1
-echo  ⚙️  Admin:    https://petapp.geniusbee.net/admin
+echo Website:  https://petapp.geniusbee.net
+echo API:      https://petapp.geniusbee.net/api/v1
+echo Admin:    https://petapp.geniusbee.net/admin
+echo MCP Server: https://petapp.geniusbee.net/mcp
 echo.
 echo  Local Development URLs:
-echo  📦 Django:   http://127.0.0.1:8000
-echo  ⚛️  Vite:     http://127.0.0.1:4173
+echo Django:   http://127.0.0.1:8000
+echo MCP:      http://127.0.0.1:5000
+echo Vite:     http://127.0.0.1:4173
 echo.
 echo ========================================
 echo Commands: petapp stop ^| petapp status
@@ -95,7 +103,8 @@ goto :stop
 :stop
 echo.
 echo Stopping all services...
-taskkill /f /im "python.exe" >nul 2>&1 && echo ✓ Django stopped || echo ✗ Django not running
+taskkill /f /fi "windowtitle eq Django*" /im "python.exe" >nul 2>&1 && echo ✓ Django stopped || echo ✗ Django not running
+taskkill /f /fi "windowtitle eq MCP*" /im "python.exe" >nul 2>&1 && echo ✓ MCP Server stopped || echo ✗ MCP Server not running
 taskkill /f /im "node.exe" >nul 2>&1 && echo ✓ Vite stopped || echo ✗ Vite not running  
 taskkill /f /im "nginx.exe" >nul 2>&1 && echo ✓ Nginx stopped || echo ✗ Nginx not running
 echo.
@@ -106,7 +115,8 @@ pause
 exit /b
 
 :stop_quiet
-taskkill /f /im "python.exe" >nul 2>&1
+taskkill /f /fi "windowtitle eq Django*" /im "python.exe" >nul 2>&1
+taskkill /f /fi "windowtitle eq MCP*" /im "python.exe" >nul 2>&1
 taskkill /f /im "node.exe" >nul 2>&1
 taskkill /f /im "nginx.exe" >nul 2>&1
 exit /b
@@ -122,6 +132,10 @@ echo Django Backend (python.exe):
 tasklist /fi "imagename eq python.exe" /fo table 2>nul | findstr "python.exe" && echo ✓ Running || echo ✗ Not running
 echo.
 
+echo MCP Server (python.exe):
+tasklist /fi "windowtitle eq MCP*" /fi "imagename eq python.exe" /fo table 2>nul | findstr "python.exe" && echo ✓ Running || echo ✗ Not running
+echo.
+
 echo Vite Frontend (node.exe):
 tasklist /fi "imagename eq node.exe" /fo table 2>nul | findstr "node.exe" && echo ✓ Running || echo ✗ Not running
 echo.
@@ -133,6 +147,8 @@ echo.
 echo Port Status:
 echo Django (8000): 
 netstat -an 2>nul | findstr ":8000 " && echo ✓ Port active || echo ✗ Port inactive
+echo MCP (5000):
+netstat -an 2>nul | findstr ":5000 " && echo ✓ Port active || echo ✗ Port inactive
 echo Vite (5173):
 netstat -an 2>nul | findstr ":5173 " && echo ✓ Port active || echo ✗ Port inactive  
 echo Nginx (443):

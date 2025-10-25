@@ -1,3 +1,4 @@
+import os
 from django.apps import AppConfig
 import threading
 
@@ -8,6 +9,10 @@ class SocialConfig(AppConfig):
     _recommendation_service = None
 
     def ready(self):
+        # Skip initialization if this is the MCP server process
+        if os.environ.get('SKIP_RECOMMENDATION_SERVICE') == 'true':
+            return
+            
         if not hasattr(SocialConfig, '_init_started'):
             SocialConfig._init_started = True
             # Initialize in a separate thread
@@ -19,11 +24,14 @@ class SocialConfig(AppConfig):
         try:
             from utils.recommendation_service import RecommendationService
             if SocialConfig._recommendation_service is None:
-                print("Initializing Social Recommendation Service")
+                print("Getting RecommendationService instance")
                 SocialConfig._recommendation_service = RecommendationService()
         except Exception as e:
             print(f"Error initializing recommendation service: {e}")
 
     @classmethod
     def get_recommendation_service(cls):
+        if cls._recommendation_service is None and not os.environ.get('SKIP_RECOMMENDATION_SERVICE') == 'true':
+            from utils.recommendation_service import RecommendationService
+            cls._recommendation_service = RecommendationService()
         return cls._recommendation_service
