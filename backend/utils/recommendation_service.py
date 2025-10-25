@@ -115,6 +115,29 @@ class RecommendationService:
         counts = mask.sum(1).clamp(min=1e-9)          # (batch, 1)
         return summed / counts
 
+    #----------Batch Text Embedding----------#
+    def __embed_texts(self, texts: List[str]) -> np.ndarray:
+        """
+        Embed a list of texts and return L2-normalized embeddings as a numpy array.
+        Shape: (len(texts), hidden_dim)
+        """
+        if not texts:
+            return np.empty((0, 0), dtype=np.float32)
+
+        encoded = self.tokenizer(
+            texts,
+            padding=True,
+            truncation=True,
+            return_tensors="pt"
+        ).to(self.device)
+
+        with torch.no_grad():
+            outputs = self.model(**encoded)
+            embs = self.__mean_pooling(outputs, encoded.attention_mask)
+            embs = torch.nn.functional.normalize(embs, p=2, dim=1)
+
+        return embs.cpu().numpy()
+
     #----------Build FAISS Index----------#
     def __initialize(self, data_array, content_type):
         if content_type not in ["social", "forum"]:
@@ -128,23 +151,47 @@ class RecommendationService:
 
         for i in range(0, len(data_array), batch_size):
             batch = data_array[i : i + batch_size]
-            texts = [p["content"] for p in batch]
-            ids   = [p["id"]   for p in batch]
 
-            encoded = self.tokenizer(
-                texts,
-                padding=True,
-                truncation=True,
-                return_tensors="pt"
-            ).to(self.device)
+            # Prepare flattened texts: for each post, include content (w=1) and each hashtag (w=2)
+            flattened_texts: List[str] = []
+            group_meta = []  # list of tuples: (start_idx, count, weights)
+            ids   = []
 
-            with torch.no_grad():
-                outputs = self.model(**encoded)
-                embs    = self.__mean_pooling(outputs, encoded.attention_mask)
-                embs    = torch.nn.functional.normalize(embs, p=2, dim=1)
+            for p in batch:
+                ids.append(p["id"])  # collect id for each post
+                start = len(flattened_texts)
+
+                # Always include content with weight 1
+                content_text = p.get("content", "") or ""
+                flattened_texts.append(content_text)
+
+                # Include hashtags with weight 2 each
+                hashtags = p.get("hashtags") or []
+                for h in hashtags:
+                    h_text = h if isinstance(h, str) else str(h)
+                    # Prefix with # to preserve hashtag semantics if not already present
+                    if not h_text.startswith("#"):
+                        h_text = "#" + h_text
+                    flattened_texts.append(h_text)
+
+                count = len(flattened_texts) - start
+                # weights: 1 for content, 2 for each hashtag
+                weights = np.array([1.0] + [2.0] * (count - 1), dtype=np.float32)
+                group_meta.append((start, count, weights))
+
+            # Embed everything in one pass for this batch
+            embs_flat = self.__embed_texts(flattened_texts)  # shape: (sum(count), dim)
+
+            # Aggregate per-post using weighted average, then L2 normalize
+            for (start, count, weights) in group_meta:
+                group_vecs = embs_flat[start : start + count]
+                weighted = (group_vecs * weights[:, None]).sum(axis=0) / max(weights.sum(), 1e-9)
+                norm = np.linalg.norm(weighted)
+                if norm > 0:
+                    weighted = weighted / norm
+                all_embeddings.append(weighted[None, :])  # keep as (1, dim) for easy vstack later
 
             all_ids.extend(ids)
-            all_embeddings.append(embs.cpu().numpy())
 
         post_ids        = np.array(all_ids)                          # shape: (N_posts,)
         post_embeddings = np.vstack(all_embeddings)                  # shape: (N_posts, hidden_dim)
@@ -152,24 +199,30 @@ class RecommendationService:
         np.save(f'{content_type}_post_embs.npy', post_embeddings)
 
     #----------Content Embedding----------#
-    def embed_content(self, content: str) -> np.ndarray:
-        encoded = self.tokenizer(
-            [content],
-            padding=True,
-            truncation=True,
-            return_tensors="pt"
-        ).to(self.device)
+    def embed_content(self, content: str, hashtags: List[str] | None = None) -> np.ndarray:
+        """
+        Embed a post's content, optionally including hashtags.
+        Weighting: content=1.0, each hashtag=2.0.
+        Returns a single L2-normalized embedding vector.
+        """
+        hashtags = hashtags or []
+        if not hashtags:
+            return self.__embed_texts([content])[0]
 
-        with torch.no_grad():
-            outputs = self.model(**encoded)
-            emb = self.__mean_pooling(outputs, encoded.attention_mask)
-            emb = torch.nn.functional.normalize(emb, p=2, dim=1)
-            emb = emb.cpu().numpy()
+        texts = [content] + [h if isinstance(h, str) else str(h) for h in hashtags]
+        # Ensure hashtag semantics
+        texts = [texts[0]] + [t if t.startswith('#') else '#' + t for t in texts[1:]]
+        weights = np.array([1.0] + [2.0] * len(hashtags), dtype=np.float32)
 
-        return emb[0]
+        embs = self.__embed_texts(texts)
+        weighted = (embs * weights[:, None]).sum(axis=0) / max(weights.sum(), 1e-9)
+        norm = np.linalg.norm(weighted)
+        if norm > 0:
+            weighted = weighted / norm
+        return weighted
 
     #----------Embedding New Post----------#
-    def embed_new_post(self, post_id: int, content: str, content_type: str) -> np.ndarray:
+    def embed_new_post(self, post_id: int, content: str, content_type: str, hashtags: List[str] | None = None) -> np.ndarray:
         if content_type not in ["social", "forum"]:
             print(f"Warning: Unsupported content type '{content_type}'.")
             return
@@ -177,7 +230,7 @@ class RecommendationService:
         post_embeddings = np.load(f'{content_type}_post_embs.npy')
         post_ids = np.load(f'{content_type}_post_ids.npy')
 
-        emb = self.embed_content(content)
+        emb = self.embed_content(content, hashtags=hashtags)
 
         # Add new embedding and ID to the arrays
         post_embeddings = np.vstack([post_embeddings, emb])
