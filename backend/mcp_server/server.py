@@ -2,25 +2,20 @@ from typing import Dict, Optional
 from asgiref.sync import sync_to_async
 from fastmcp import FastMCP
 
+from accounts.models import CustomUser
+from pets.models import Pet
+
 # Server configuration
-SERVER_NAME = "Pet App MCP Server"
-SERVER_INSTRUCTIONS = """
-MCP Server providing tools for pet and user information management.
-Supports user authentication and pet data retrieval operations.
-"""
+SERVER_NAME = "PETer MCP Server"
+SERVER_INSTRUCTIONS = "MCP Server providing tools for the PETer app."
 
 def create_mcp_server() -> FastMCP:
 
     mcp = FastMCP(name=SERVER_NAME, instructions=SERVER_INSTRUCTIONS)
 
     @mcp.tool()
-    async def get_greeting(name: str) -> str:
-        return f"Hello, {name}!"
-
-    @mcp.tool()
     async def get_user_pet_info(user_id: str) -> Dict:
-        from accounts.models import CustomUser
-        from pets.models import Pet
+        
 
         @sync_to_async
         def fetch() -> Dict:
@@ -48,7 +43,6 @@ def create_mcp_server() -> FastMCP:
                     "user": user.username,
                     "pets": pets
                 }
-            
             except Exception as e:
                 raise
 

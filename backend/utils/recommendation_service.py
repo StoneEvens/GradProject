@@ -21,7 +21,21 @@ logging.set_verbosity_error()  # This will suppress transformers warnings
 script_dir = os.path.dirname(os.path.abspath(__file__))
 
 class RecommendationService:
+    _instance = None
+    _initialized = False
+    
+    def __new__(cls):
+        if cls._instance is None:
+            print("Creating new RecommendationService instance")
+            cls._instance = super(RecommendationService, cls).__new__(cls)
+        return cls._instance
+    
     def __init__(self):
+        # Skip initialization if already done
+        if RecommendationService._initialized:
+            return
+            
+        print("Initializing RecommendationService")
         ##---------HyperParameters---------##
         self.BATCH_SIZE = 4
         self.ACTION_WEIGHTS = {"liked": 1.0, "comment": 1.5, "share": 2.0}
@@ -91,6 +105,7 @@ class RecommendationService:
                 print(f"No data found to initialize for forum contents")
 
         print("推薦服務初始化已完成")
+        RecommendationService._initialized = True
 
     #----------Mean Pooling----------#
     def __mean_pooling(self, outputs, mask):
