@@ -35,6 +35,8 @@ def main():
             apps.populate([
                 'accounts',  # Required for CustomUser model
                 'pets',      # Required for Pet model
+                'social',    # Required for PostFrame model
+                'feeds',     # Required for Feed model
             ])
             
         logger.info("Django environment initialized successfully with minimal configuration")
