@@ -1,3 +1,4 @@
+import os
 from django.apps import AppConfig
 import threading
 
@@ -19,11 +20,14 @@ class SocialConfig(AppConfig):
         try:
             from utils.recommendation_service import RecommendationService
             if SocialConfig._recommendation_service is None:
-                print("Initializing Social Recommendation Service")
+                print("Getting RecommendationService instance")
                 SocialConfig._recommendation_service = RecommendationService()
         except Exception as e:
             print(f"Error initializing recommendation service: {e}")
 
     @classmethod
     def get_recommendation_service(cls):
+        if cls._recommendation_service is None:
+            from utils.recommendation_service import RecommendationService
+            cls._recommendation_service = RecommendationService()
         return cls._recommendation_service
