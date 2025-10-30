@@ -1,8 +1,10 @@
-fastapi>=0.68.0
-uvicorn>=0.15.0
-selenium>=4.1.0
-webdriver_manager>=3.8.0
-python-dotenv>=0.19.0
-pydantic>=1.8.2
-websockets>=10.0
-playwright>=1.20.0
+fastmcp
+mcp
+# Align with workspace root requirements to avoid resolver conflicts
+httpx==0.28.1
+
+# Keep uvicorn unpinned to get fixes, but avoid websockets 14 deprecations by pinning
+# websockets below 14 until uvicorn fully drops legacy imports.
+uvicorn
+starlette
+websockets<14
