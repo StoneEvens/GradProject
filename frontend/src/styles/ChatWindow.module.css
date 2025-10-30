@@ -760,9 +760,9 @@ body:has(.chatOverlay) {
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15),
               0 1px 2px rgba(0, 0, 0, 0.1);
   transform: translateY(0);
-}}
+}
 
-/* MCP ±±¨î«ö¶s¼Ë¦¡ */
+/* MCP æ§åˆ¶æŒ‰éˆ•å€åŸŸ */
 .mcpControls {
   display: flex;
   gap: 8px;
@@ -795,7 +795,7 @@ body:has(.chatOverlay) {
   box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
 }
 
-/* ¦Û°Ê¤Æ«ö¶s¼Ë¦¡ */
+/* ï¿½Û°Ê¤Æ«ï¿½ï¿½sï¿½Ë¦ï¿½ */
 .automationButton {
   display: flex;
   align-items: center;
@@ -827,7 +827,7 @@ body:has(.chatOverlay) {
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15);
 }
 
-/* ¦Û°Ê¤Æµ²ªG¼Ë¦¡ */
+/* ï¿½Û°Ê¤Æµï¿½ï¿½Gï¿½Ë¦ï¿½ */
 .automationResult {
   margin-top: 8px;
   padding: 8px 12px;
@@ -841,7 +841,7 @@ body:has(.chatOverlay) {
   gap: 6px;
 }
 
-/* ¦Û°Ê¤Æ¿ù»~¼Ë¦¡ */
+/* ï¿½Û°Ê¤Æ¿ï¿½ï¿½~ï¿½Ë¦ï¿½ */
 .automationError {
   margin-top: 8px;
   padding: 8px 12px;
@@ -853,4 +853,79 @@ body:has(.chatOverlay) {
   display: flex;
   align-items: center;
   gap: 6px;
+}
+
+/* Operation Queue Indicator */
+.operationQueueIndicator {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 12px 16px;
+  border-top: 2px solid rgba(255, 255, 255, 0.2);
+  animation: slideInUp 0.3s ease-out;
+}
+
+@keyframes slideInUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.operationQueueContent {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: white;
+}
+
+.operationQueueIcon {
+  font-size: 20px;
+  animation: rotate 2s linear infinite;
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.operationQueueText {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.operationQueueButton {
+  background: white;
+  color: #667eea;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.operationQueueButton:hover:not(:disabled) {
+  background: #f0f0f0;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.operationQueueButton:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.operationQueueButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }

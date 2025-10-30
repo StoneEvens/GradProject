@@ -52,7 +52,8 @@ urlpatterns = [
     # path(f'{api_v1_prefix}article_recommendations/', include('articleRecommendation.urls')),  # 已移除測試資料
     path(f'{api_v1_prefix}ocr/', include('ocrapp.urls')),
     path(f'{api_v1_prefix}auctions/', include('auctions.urls')),
-    path(f'{api_v1_prefix}ai/', include('aiAgent.urls')),
+    path(f'{api_v1_prefix}ai-agent/', include('aiAgent.urls')),  # Changed prefix to avoid conflict
+    path(f'{api_v1_prefix}ai/', include('ai.urls')),  # ChatKit and AI services
 
     # Swagger 文檔
     re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),

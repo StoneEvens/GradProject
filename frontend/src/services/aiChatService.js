@@ -1,17 +1,19 @@
 // AI Chat Service - 連接後端 AI Agent API
-// 整合 OpenAI + 向量資料庫的完整 AI 服務
+// 整合 OpenAI Agents SDK with MCP tools
 
 import axios from 'axios';
+import operationClient from './operationClient';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
 
 class AIChatService {
   constructor() {
     this.apiClient = axios.create({
-      baseURL: `${API_BASE_URL}/ai`,
+      baseURL: `${API_BASE_URL}/ai`,  // Points to new ai app with MCP agent
       headers: {
         'Content-Type': 'application/json',
       },
+      timeout: 120000, // 120 seconds for AI agent processing
     });
 
     // 添加請求攔截器來加入 JWT token
@@ -67,6 +69,17 @@ class AIChatService {
 
       // 更新會話上下文
       this.updateSessionContext(userMessage, response.data);
+
+      // Check if backend returned operations and add them to operation client
+      if (response.data.operations && Array.isArray(response.data.operations)) {
+        console.log('[AIChatService] Received operations from backend:', response.data.operations);
+        const result = operationClient.addOperations(response.data.operations);
+        console.log(`[AIChatService] Added ${result.success} operations to queue, ${result.failed} failed`);
+        
+        // Add operation info to response for UI display
+        response.data.hasOperations = true;
+        response.data.operationCount = result.success;
+      }
 
       return response.data;
 
@@ -233,21 +246,37 @@ class AIChatService {
       this.currentConversationId = conversationId;
 
       // 重建對話歷史到 sessionContext
-      this.sessionContext.conversationHistory = conversation.messages
-        .filter(msg => msg.role !== 'system')
-        .map(msg => ({
-          user: msg.role === 'user' ? msg.content : null,
-          ai: msg.role === 'assistant' ? msg.content : null,
-          intent: msg.intent,
-          timestamp: msg.created_at,
-        }));
+      // Messages are stored in database and returned immediately
+      if (conversation.messages && conversation.messages.length > 0) {
+        // Convert database format to session format
+        // Group user/assistant messages into pairs
+        this.sessionContext.conversationHistory = [];
+        let currentPair = {};
+        
+        for (const msg of conversation.messages) {
+          if (msg.role === 'user') {
+            currentPair = { user: msg.content, timestamp: msg.created_at };
+          } else if (msg.role === 'assistant') {
+            currentPair.ai = msg.content;
+            this.sessionContext.conversationHistory.push(currentPair);
+            currentPair = {};
+          }
+        }
 
-      // 取得最後一個意圖
-      const lastAssistantMessage = conversation.messages
-        .reverse()
-        .find(msg => msg.role === 'assistant');
-      if (lastAssistantMessage) {
-        this.sessionContext.lastIntent = lastAssistantMessage.intent;
+        // 取得最後一個意圖（如果有的話）
+        const lastAssistantMessage = conversation.messages
+          .slice()
+          .reverse()
+          .find(msg => msg.role === 'assistant');
+        if (lastAssistantMessage && lastAssistantMessage.intent) {
+          this.sessionContext.lastIntent = lastAssistantMessage.intent;
+        }
+        
+        console.log(`[AIChatService] Loaded conversation ${conversationId} with ${this.sessionContext.conversationHistory.length} message pairs`);
+      } else {
+        // Empty history
+        this.sessionContext.conversationHistory = [];
+        console.log('[AIChatService] Loaded empty conversation');
       }
 
       return conversation;
@@ -256,7 +285,6 @@ class AIChatService {
       throw error;
     }
   }
-
   /**
    * 建立新對話
    * @param {Object} data - 對話資料 { title, context_data }

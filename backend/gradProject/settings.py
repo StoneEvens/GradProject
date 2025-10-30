@@ -82,6 +82,7 @@ INSTALLED_APPS = [
     "auctions",
     "interactivecity",
     "aiAgent",
+    "ai",  # ChatKit and AI services
     'sslserver',
 ]
 
@@ -403,3 +404,24 @@ else:
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_BROWSER_XSS_FILTER = True
 X_FRAME_OPTIONS = 'DENY'
+
+# ============================================================================
+# OpenAI Configuration
+# ============================================================================
+
+# OpenAI API Key for ChatKit and AI services
+OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY', '')
+
+# OpenAI Workflow ID for ChatKit sessions
+# Create a workflow at https://platform.openai.com
+# ChatKit uses workflows instead of assistants
+OPENAI_WORKFLOW_ID = os.environ.get('OPENAI_WORKFLOW_ID', '')
+
+# Optional: ChatKit API base URL (defaults to https://api.openai.com)
+CHATKIT_API_BASE = os.environ.get('CHATKIT_API_BASE', 'https://api.openai.com')
+
+# Optional: OpenAI model configuration
+OPENAI_DEFAULT_MODEL = os.environ.get('OPENAI_DEFAULT_MODEL', 'gpt-4o')
+OPENAI_MAX_TOKENS = int(os.environ.get('OPENAI_MAX_TOKENS', '4000'))
+
+
