@@ -1143,6 +1143,7 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
           const menuElements = document.querySelectorAll('[class*="menu"], [class*="popup"], [class*="modal"]');
           conditionMet = menuElements.length > 0;
           break;
+        
         case 'pageNavigate':
           // 這個條件通過路由變化處理，在這裡不需要特別檢查
           conditionMet = false;
