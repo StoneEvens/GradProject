@@ -395,7 +395,7 @@ const tutorialData = {
           position: 'textarea'
         },
         action: 'click',
-        nextCondition: 'editorClosed'
+        nextCondition: 'descriptionEnterTwice'
       },
       {
         id: 11,
