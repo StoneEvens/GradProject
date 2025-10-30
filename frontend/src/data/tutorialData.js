@@ -1023,7 +1023,7 @@ const tutorialData = {
     {
         id: 15,
         title: '完成！',
-        instruction: '恭喜！您已成功新增一隻您的寵物！',
+        instruction: '恭喜！您已成功新增一篇異常記錄！',
         targetElement: null,
         highlight: {
           type: 'none',
