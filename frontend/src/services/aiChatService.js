@@ -75,8 +75,7 @@ class AIChatService {
         const result = operationClient.addOperations(response.data.operations);
         console.log(`[AIChatService] Added ${result.success} operations to queue, ${result.failed} failed`);
         
-        // Add operation info to response for UI display
-        response.data.hasOperations = true;
+        // Add operation count info to response for logging
         response.data.operationCount = result.success;
       }
 
@@ -120,10 +119,11 @@ class AIChatService {
         source: 'error',
         error: true,
         hasTutorial: false,
-        hasRecommendedUsers: false,
-        hasRecommendedArticles: false,
         hasCalculator: false,
-        hasOperation: false,
+        operations: [],
+        recommendedUsers: {},
+        recommendedSocialPosts: {},
+        recommendedForumPosts: {}
       };
     }
 
@@ -135,10 +135,11 @@ class AIChatService {
         error: true,
         detail: error.response.data?.detail,
         hasTutorial: false,
-        hasRecommendedUsers: false,
-        hasRecommendedArticles: false,
         hasCalculator: false,
-        hasOperation: false,
+        operations: [],
+        recommendedUsers: {},
+        recommendedSocialPosts: {},
+        recommendedForumPosts: {}
       };
     }
 
@@ -148,10 +149,11 @@ class AIChatService {
       source: 'error',
       error: true,
       hasTutorial: false,
-      hasRecommendedUsers: false,
-      hasRecommendedArticles: false,
       hasCalculator: false,
-      hasOperation: false,
+      operations: [],
+      recommendedUsers: {},
+      recommendedSocialPosts: {},
+      recommendedForumPosts: {}
     };
   }
 
