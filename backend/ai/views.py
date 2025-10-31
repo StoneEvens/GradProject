@@ -26,74 +26,50 @@ def create_standardized_response(
     recommended_users=None,
     recommended_social_posts=None,
     recommended_forum_posts=None,
-    confidence=1.0,
-    intent=None,
-    tutorial_type=None,
-    recommended_user_details=None,
-    recommended_article_ids=None,
     **kwargs
 ):
-    """
-    Create a standardized response following the format in BACKEND_RESPONSE_FORMAT.md
-
-    This ensures ALL responses (success or error) follow the same structure
-    that the frontend expects.
-    """
     if operations is None:
         operations = []
-if recommended_users is None:
-    if recommended_user_details is None:
-        recommended_user_details = []
-
-    if recommended_article_ids is None:
-        recommended_article_ids = []
-
+    if recommended_users is None:
         recommended_users = {}
     if recommended_social_posts is None:
         recommended_social_posts = {}
     if recommended_forum_posts is None:
         recommended_forum_posts = {}
-
+    
     # Auto-detect operation_type if not specified
     if operation_type is None and operations:
         operation_type = operations[0].get('type')
-
+    
     base_response = {
         'response': response,
         'source': source,
         'conversationId': conversation_id,
-        'confidence': confidence,
-
+        
         # Feature flags for buttons/UI elements
         'hasTutorial': has_tutorial,
         'hasCalculator': has_calculator,
-
+        
         # Operations array (hasOperation derived from length > 0)
         'operations': operations,
-        'recommendedUserDetails': recommended_user_details,
-        'recommendedArticleIds': recommended_article_ids,
         
         # Always include recommendation dictionaries (even if empty)
         'recommendedUsers': recommended_users,
         'recommendedSocialPosts': recommended_social_posts,
         'recommendedForumPosts': recommended_forum_posts,
     }
-
+    
     # Add optional fields only if they have values
     if operation_type:
         base_response['operationType'] = operation_type
     if tutorial_type:
         base_response['tutorialType'] = tutorial_type
-    if intent:
-        base_response['intent'] = intent
-    if tutorial_type:
-        base_response['tutorialType'] = tutorial_type
     if error:
         base_response['error'] = error
-
+    
     # Add any additional kwargs
     base_response.update(kwargs)
-
+    
     return base_response
 
 
@@ -157,100 +133,20 @@ def run_mcp_agent(user_message, user_id, username, conversation_id=None, session
         # Create the agent with structured output
         info_fetcher = Agent(
             name="Info Fetcher",
-            instructions=f"""You are PETer AI, a helpful pet care assistant. Understand the user's intention and provide information using the MCP tools.
+            instructions=f"""Use Traditional Chinese or English to respond to the user's requests. Understand the user's intention, then provide information using the mcp tools to the user. 
 
-**IMPORTANT OUTPUT FORMAT RULES:**
+When responding, structure your output according to the AgentResponse schema:
+- response: Your text response to the user
+- has_tutorial: Set to true if you want to show a tutorial button (for health, training, or nutrition tutorials)
+- tutorial_type: If has_tutorial is true, specify: "health", "training", or "nutrition"
+- has_calculator: Set to true if you want to show a calculator button (for pet nutrition or health calculations)
+- operation_type: If performing an operation, specify: "navigate", "fill_form", "click", or "display_data"
+- operations: List of operations to perform (each with operation_id, type, params, requires_confirmation)
+- recommended_users: When using get_user_information, put results here as {{user_id: user_details}}
+- recommended_social_posts: When using get_post_recommendations for social posts, put results here as {{post_id: post_details}}
+- recommended_forum_posts: When using get_post_recommendations for forum posts, put results here as {{post_id: post_details}}
 
-When you need to trigger UI actions (like showing user recommendations, articles, or navigation), you MUST append an OPERATIONS section to your response in this EXACT format:
-
-Your natural language response here.
-
-OPERATIONS:
-[
-  {{
-    "type": "operation_type",
-    "params": {{...}}
-  }}
-]
-
-**Supported Operation Types:**
-
-1. **show_recommended_users** - When recommending users to follow
-   Example:
-   ```
-   我幫你找到了幾位養貓的用戶！
-
-   OPERATIONS:
-   [
-     {{
-       "type": "show_recommended_users",
-       "params": {{
-         "users": [
-           {{
-             "id": 1,
-             "user_account": "StoneEvens",
-             "user_fullname": "Stone Evens",
-             "headshot_url": null,
-             "user_intro": "有一隻米克斯貓「μ咪」"
-           }}
-         ]
-       }}
-     }}
-   ]
-   ```
-
-2. **show_recommended_articles** - When recommending articles/posts
-   ```
-   這些文章可能對你有幫助！
-
-   OPERATIONS:
-   [
-     {{
-       "type": "show_recommended_articles",
-       "params": {{
-         "article_ids": [1, 2, 3]
-       }}
-     }}
-   ]
-   ```
-
-3. **start_tutorial** - When user needs guidance
-   ```
-   我可以帶你進行互動教學！
-
-   OPERATIONS:
-   [
-     {{
-       "type": "start_tutorial",
-       "params": {{
-         "tutorial_type": "feeding"
-       }}
-     }}
-   ]
-   ```
-
-4. **open_calculator** - When user needs nutrition calculator
-   ```
-   讓我幫你打開營養計算機。
-
-   OPERATIONS:
-   [
-     {{
-       "type": "open_calculator",
-       "params": {{}}
-     }}
-   ]
-   ```
-
-**When to use MCP tools:**
-- Use get_user_information to get user profiles when recommending users
-- Use get_post_recommendations to get article recommendations
-- Use get_user_pet_info_detailed to get detailed pet information
-- Always try to use MCP tools first before making assumptions
-
-**Current User ID:** {user_id}
-
-Remember: ALWAYS format user recommendations with the OPERATIONS section so the UI can display them properly!""",
+Do not make too many assumptions. Try to use the given information to answer the user first, then ask if they would like to provide more information. Try to use the mcp tools first. User ID: {user_id}""",
             model="gpt-5",
             tools=[mcp],
             output_type=AgentOutputSchema(AgentResponse, strict_json_schema=False),  # Enable structured output with relaxed schema!
@@ -356,81 +252,49 @@ Remember: ALWAYS format user recommendations with the OPERATIONS section so the 
         structured_output = None
         ai_response_text = ""
         
-        for item in agent_result.new_items:
-            if hasattr(item, 'content') and item.content:
-                for content_item in item.content:
-                    if hasattr(content_item, 'text'):
-                        ai_response_text += content_item.text
-        
-        # Fallback to final_output if available
-        if not ai_response_text and agent_result.final_output:
+        # Try to get structured output from final_output
+        if agent_result.final_output:
             try:
-                ai_response_text = agent_result.final_output_as(str)
-            except:
-                ai_response_text = str(agent_result.final_output)
+                # The agent returns an AgentResponse Pydantic model
+                structured_output = agent_result.final_output_as(AgentResponse)
+                logger.info(f"✓ Successfully extracted structured output from agent")
+                logger.info(f"  - response text length: {len(structured_output.response)}")
+                logger.info(f"  - has_tutorial: {structured_output.has_tutorial}")
+                logger.info(f"  - has_calculator: {structured_output.has_calculator}")
+                logger.info(f"  - operations count: {len(structured_output.operations)}")
+                logger.info(f"  - recommended_users count: {len(structured_output.recommended_users)}")
+                logger.info(f"  - recommended_social_posts count: {len(structured_output.recommended_social_posts)}")
+                logger.info(f"  - recommended_forum_posts count: {len(structured_output.recommended_forum_posts)}")
+            except Exception as e:
+                logger.warning(f"Could not extract structured output: {e}")
         
-        logger.info(f"Agent response: {ai_response_text[:200]}...")
+        # Fallback to text extraction if structured output fails
+        if not structured_output:
+            logger.warning("Falling back to text extraction (structured output not available)")
+            for item in agent_result.new_items:
+                if hasattr(item, 'content') and item.content:
+                    for content_item in item.content:
+                        if hasattr(content_item, 'text'):
+                            ai_response_text += content_item.text
+            
+            if not ai_response_text and agent_result.final_output:
+                try:
+                    ai_response_text = agent_result.final_output_as(str)
+                except:
+                    ai_response_text = str(agent_result.final_output)
+            
+            # Create a basic structured output from text
+            structured_output = AgentResponse(
+                response=ai_response_text,
+                has_tutorial=False,
+                has_calculator=False,
+                operations=[],
+                recommended_users={},
+                recommended_social_posts={},
+                recommended_forum_posts={}
+            )
         
-        # Extract operations from response text
-        operations = []
-        response_text = ai_response_text
-
-        if 'OPERATIONS:' in ai_response_text:
-            parts = ai_response_text.split('OPERATIONS:')
-            response_text = parts[0].strip()
-
-            try:
-                import json
-                import re
-
-                operations_part = parts[1]
-                # Match array of objects with nested braces - use greedy matching
-                # This handles multiple operations: [{...}, {...}, ...]
-                json_match = re.search(r'\[[\s\S]*\]', operations_part)
-
-                if json_match:
-                    operations_json = json_match.group(0)
-                    operations = json.loads(operations_json)
-                    logger.info(f"Extracted {len(operations)} operations from agent response")
-                else:
-                    logger.warning("OPERATIONS: marker found but no JSON array detected")
-            except json.JSONDecodeError as parse_error:
-                logger.error(f"Failed to parse operations JSON: {parse_error}")
-                logger.debug(f"Operations text: {operations_part[:500]}")
-            except Exception as parse_error:
-                logger.error(f"Failed to parse operations: {parse_error}")
-        else:
-            # Fallback: Try to detect user recommendations from text format
-            # Example: "- StoneEvens（用戶ID: 1）：有一隻米克斯貓「μ咪」"
-            logger.info("No OPERATIONS section found, attempting to parse user recommendations from text")
-            import re
-
-            user_pattern = r'-\s*([^\s（]+)\s*（用戶ID:\s*(\d+)）[：:]\s*(.+?)(?=\n-|\n\n|$)'
-            matches = re.findall(user_pattern, ai_response_text, re.MULTILINE | re.DOTALL)
-
-            if matches:
-                users = []
-                for match in matches:
-                    user_account = match[0]
-                    user_id_str = match[1]
-                    description = match[2].strip()
-
-                    users.append({
-                        "id": int(user_id_str),
-                        "user_account": user_account,
-                        "user_fullname": user_account,  # Fallback
-                        "headshot_url": None,
-                        "user_intro": description
-                    })
-
-                if users:
-                    logger.info(f"Extracted {len(users)} users from text format (fallback)")
-                    operations.append({
-                        "type": "show_recommended_users",
-                        "params": {
-                            "users": users
-                        }
-                    })
+        logger.info(f"Agent response: {structured_output.response[:200]}...")
         
         # Build updated conversation history for frontend display
         # Append new exchange to previous history
@@ -793,7 +657,6 @@ def main_chat(request):
                 response='抱歉，我暫時無法處理您的請求。請稍後再試。',
                 source='error',
                 conversation_id=conversation_id,
-                confidence=0.0,
                 error=result['error']
             )
             return Response(error_response, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -911,76 +774,34 @@ def main_chat(request):
         else:
             logger.warning("⚠ No thread record - messages not saved to database")
         
-        # Transform result to aiAgent format
-        operations = result.get('operations', [])
-
-        # Extract additional fields from operations
-        intent = None
-        tutorial_type = None
-        has_tutorial = False
-        has_recommended_users = False
-        has_recommended_articles = False
-        has_calculator = False
-        recommended_user_details = []
-        recommended_article_ids = []
-
-        for operation in operations:
-            op_type = operation.get('type', '')
-
-            # Detect tutorial operations
-            if op_type == 'start_tutorial':
-                has_tutorial = True
-                tutorial_type = operation.get('params', {}).get('tutorial_type')
-
-            # Detect recommended users
-            elif op_type == 'show_recommended_users':
-                has_recommended_users = True
-                recommended_user_details = operation.get('params', {}).get('users', [])
-
-            # Detect recommended articles
-            elif op_type == 'show_recommended_articles':
-                has_recommended_articles = True
-                recommended_article_ids = operation.get('params', {}).get('article_ids', [])
-
-            # Detect calculator
-            elif op_type == 'open_calculator':
-                has_calculator = True
-
-            # Extract intent from first operation if available
-            if not intent and 'intent' in operation:
-                intent = operation.get('intent')
-
-        # Build standardized response
+        # Build standardized response with structured output data
         response_data = create_standardized_response(
             response=result.get('response', ''),
             source='mcp_agent',
             conversation_id=conversation_id,
             operations=operations,
-            confidence=1.0,  # MCP agent always returns high confidence
-            intent=intent,
             has_tutorial=has_tutorial,
             tutorial_type=tutorial_type,
-            has_recommended_users=has_recommended_users,
-            recommended_user_details=recommended_user_details,
-            has_recommended_articles=has_recommended_articles,
-            recommended_article_ids=recommended_article_ids,
-            has_calculator=has_calculator
+            has_calculator=has_calculator,
+            operation_type=operation_type,
+            recommended_users=recommended_users,
+            recommended_social_posts=recommended_social_posts,
+            recommended_forum_posts=recommended_forum_posts
         )
-
-        logger.info(f"Main chat response: {response_data['response'][:100]}... (Operations: {len(operations)})")
-
+        
+        logger.info(f"Main chat response: {response_data['response'][:100]}... (Operations: {len(operations)}, Users: {len(recommended_users)}, Social: {len(recommended_social_posts)}, Forum: {len(recommended_forum_posts)})")
+        
         return Response(response_data, status=status.HTTP_200_OK)
         
     except Exception as e:
         logger.error(f"Unexpected error in main_chat: {str(e)}", exc_info=True)
         import traceback
         traceback.print_exc()
-
+        
         error_response = create_standardized_response(
             response='抱歉，我暫時無法處理您的請求。請稍後再試。',
             source='error',
             conversation_id=request.data.get('conversationId'),
-            confidence=0.0,
             error=f'處理請求時發生錯誤: {str(e)}'
         )
         return Response(error_response, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -1176,3 +997,4 @@ def archive_conversation(request, conversation_id):
         return Response({
             'error': f'Failed to archive conversation: {str(e)}'
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
