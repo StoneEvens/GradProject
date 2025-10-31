@@ -1,5 +1,7 @@
 from typing import Dict, Optional
 import json
+import inspect
+from typing import get_type_hints, get_origin, get_args
 from asgiref.sync import sync_to_async
 from fastmcp import FastMCP
 
@@ -172,6 +174,81 @@ def create_mcp_server() -> FastMCP:
                 return json.loads(json.dumps(pet_foods_data, default=str))
             except Exception as e:
                 return [{"error": f"Failed to fetch pet foods details: {str(e)}"}]
+
+        return await fetch()
+
+    @mcp.tool(
+        name="list_available_tools",
+        description="List all available MCP tools exposed by this server."
+    )
+    async def list_available_tools() -> list[dict]:
+        @sync_to_async
+        def fetch() -> list[dict]:
+            try:
+                def type_to_str(tp) -> str:
+                    try:
+                        if tp is inspect._empty:
+                            return "unknown"
+                        origin = get_origin(tp)
+                        if origin is None:
+                            return getattr(tp, "__name__", str(tp))
+                        args = ", ".join(type_to_str(a) for a in get_args(tp))
+                        return f"{getattr(origin, '__name__', str(origin))}[{args}]"
+                    except Exception:
+                        return str(tp)
+
+                def params_of(func) -> list[dict]:
+                    try:
+                        sig = inspect.signature(func)
+                        hints = {}
+                        try:
+                            hints = get_type_hints(func)
+                        except Exception:
+                            pass
+                        out = []
+                        for name, p in sig.parameters.items():
+                            if name in ("self", "cls"):
+                                continue
+                            ann = hints.get(name, p.annotation)
+                            entry = {
+                                "name": name,
+                                "type": type_to_str(ann),
+                                "required": p.default is inspect._empty,
+                            }
+                            if p.default is not inspect._empty:
+                                entry["default"] = str(p.default)
+                            out.append(entry)
+                        return out
+                    except Exception:
+                        return []
+
+                items: list[dict] = []
+                tools = getattr(mcp, "tools", None) or getattr(mcp, "_tools", None)
+                if isinstance(tools, dict):
+                    for t in tools.values():
+                        # Try to resolve underlying callable and metadata
+                        fn = getattr(t, "fn", None) or getattr(t, "func", None) or getattr(t, "__call__", None) or t
+                        name = getattr(t, "name", None) or getattr(fn, "__name__", None) or "unknown"
+                        desc = getattr(t, "description", None) or getattr(fn, "__doc__", "")
+                        items.append({
+                            "name": name,
+                            "description": str(desc) if desc else "",
+                            "parameters": params_of(fn)
+                        })
+                else:
+                    # Fallback: static list in case reflection is unavailable
+                    static = [
+                        {"name": "get_user_pet_info_detailed", "description": "Fetch a public user's profile and pets with abnormal posts.", "parameters": [{"name": "user_id", "type": "int", "required": True}]},
+                        {"name": "get_post_recommendations", "description": "Get recommended social/forum posts by description and hashtags.", "parameters": [{"name": "content_description", "type": "str", "required": True}, {"name": "hashtags", "type": "list[str]", "required": True}, {"name": "isSocial", "type": "bool", "required": True}, {"name": "isForum", "type": "bool", "required": True}]},
+                        {"name": "get_user_information", "description": "Fetch basic information of users by their IDs.", "parameters": [{"name": "user_ids", "type": "list[int]", "required": True}]},
+                        {"name": "get_user_pet_types", "description": "Fetch the types of pets owned by users.", "parameters": [{"name": "user_ids", "type": "list[int]", "required": True}]},
+                        {"name": "get_pet_foods_details", "description": "Fetch detailed information about pet foods.", "parameters": []}
+                    ]
+                    items = static
+
+                return json.loads(json.dumps(items, default=str))
+            except Exception as e:
+                return [{"error": f"Failed to list tools: {str(e)}"}]
 
         return await fetch()
 

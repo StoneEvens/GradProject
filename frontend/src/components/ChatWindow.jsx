@@ -263,16 +263,15 @@ const ChatWindow = ({
         // 加入教學相關資訊
         hasTutorial: aiResult.hasTutorial || false,
         tutorialType: aiResult.tutorialType || null,
-        // 加入推薦用戶相關資訊
-        hasRecommendedUsers: aiResult.hasRecommendedUsers || false,
-        recommendedUserDetails: aiResult.recommendedUserDetails || [],  // 加入用戶詳細資料
-        // 加入推薦文章相關資訊
-        hasRecommendedArticles: aiResult.hasRecommendedArticles || false,
-        recommendedArticleIds: aiResult.recommendedArticleIds || [],  // 加入推薦文章 ID
+        // 加入推薦用戶相關資訊 (新格式: 字典) - 不需要 hasRecommendedUsers flag
+        recommendedUsers: aiResult.recommendedUsers || {},  // 字典格式 {id: details}
+        // 加入推薦文章相關資訊 (新格式: 字典) - 不需要 hasRecommendedArticles flag
+        recommendedSocialPosts: aiResult.recommendedSocialPosts || {},  // 字典格式 {id: details}
+        recommendedForumPosts: aiResult.recommendedForumPosts || {},  // 字典格式 {id: details}
         // 加入營養計算機相關資訊
         hasCalculator: aiResult.hasCalculator || false,
-        // 加入操作功能相關資訊
-        hasOperation: aiResult.hasOperation || false,
+        // 加入操作功能相關資訊 (operations array)
+        operations: aiResult.operations || [],
         operationType: aiResult.operationType || null
       };
 
@@ -475,17 +474,69 @@ const ChatWindow = ({
             }
           }
 
-          // 獲取推薦用戶詳情
-          let recommendedUserDetails = additionalData?.recommendedUserDetails ||
-                                      additionalData?.recommended_user_details ||
-                                      [];
-
-          // 如果沒有用戶詳情但有用戶 ID，嘗試獲取
-          if (recommendedUserDetails.length === 0 && msg.has_recommended_users) {
+          // 獲取推薦用戶詳情 (支援舊格式和新格式)
+          let recommendedUsers = {};
+          
+          // 新格式: recommendedUsers 字典
+          if (additionalData?.recommendedUsers && typeof additionalData.recommendedUsers === 'object') {
+            recommendedUsers = additionalData.recommendedUsers;
+          } 
+          // 新格式: recommended_users 字典  (snake_case from backend)
+          else if (additionalData?.recommended_users && typeof additionalData.recommended_users === 'object') {
+            recommendedUsers = additionalData.recommended_users;
+          }
+          // 舊格式: recommendedUserDetails 陣列
+          else if (additionalData?.recommendedUserDetails && Array.isArray(additionalData.recommendedUserDetails)) {
+            recommendedUserDetails = additionalData.recommendedUserDetails;
+            // 轉換為字典格式
+            recommendedUsers = {};
+            recommendedUserDetails.forEach(user => {
+              if (user && user.id) {
+                recommendedUsers[user.id] = user;
+              }
+            });
+          }
+          // 舊格式: recommended_user_details 陣列 (snake_case)
+          else if (additionalData?.recommended_user_details && Array.isArray(additionalData.recommended_user_details)) {
+            recommendedUserDetails = additionalData.recommended_user_details;
+            // 轉換為字典格式
+            recommendedUsers = {};
+            recommendedUserDetails.forEach(user => {
+              if (user && user.id) {
+                recommendedUsers[user.id] = user;
+              }
+            });
+          }
+          // 如果沒有用戶詳情但有用戶 ID (舊格式)，嘗試獲取
+          else if (Object.keys(recommendedUsers).length === 0 && msg.has_recommended_users) {
             const userIds = additionalData?.recommended_user_ids || [];
             if (userIds.length > 0) {
               recommendedUserDetails = await fetchUserDetailsByIds(userIds);
+              // 轉換為字典格式
+              recommendedUsers = {};
+              recommendedUserDetails.forEach(user => {
+                if (user && user.id) {
+                  recommendedUsers[user.id] = user;
+                }
+              });
             }
+          }
+
+          // 獲取推薦文章 (支援新格式)
+          let recommendedSocialPosts = {};
+          let recommendedForumPosts = {};
+          
+          // 新格式: recommendedSocialPosts 和 recommendedForumPosts 字典
+          if (additionalData?.recommendedSocialPosts && typeof additionalData.recommendedSocialPosts === 'object') {
+            recommendedSocialPosts = additionalData.recommendedSocialPosts;
+          } else if (additionalData?.recommended_social_posts && typeof additionalData.recommended_social_posts === 'object') {
+            recommendedSocialPosts = additionalData.recommended_social_posts;
+          }
+          
+          if (additionalData?.recommendedForumPosts && typeof additionalData.recommendedForumPosts === 'object') {
+            recommendedForumPosts = additionalData.recommendedForumPosts;
+          } else if (additionalData?.recommended_forum_posts && typeof additionalData.recommended_forum_posts === 'object') {
+            recommendedForumPosts = additionalData.recommended_forum_posts;
           }
 
           return {
@@ -499,15 +550,12 @@ const ChatWindow = ({
             // AI 訊息的額外資訊
             hasTutorial: msg.has_tutorial || false,
             tutorialType: msg.tutorial_type || null,
-            hasRecommendedUsers: msg.has_recommended_users || false,
-            recommendedUserDetails: recommendedUserDetails,
-            hasRecommendedArticles: msg.has_recommended_articles || false,
-            // 推薦文章 ID 可能在 additional_data 中
-            recommendedArticleIds: additionalData?.recommendedArticleIds ||
-                                  additionalData?.recommended_article_ids ||
-                                  [],
+            // 推薦用戶和文章直接從字典判斷，不需要 has_ flags
+            recommendedUsers: recommendedUsers,  // 字典格式
+            recommendedSocialPosts: recommendedSocialPosts,  // 字典格式
+            recommendedForumPosts: recommendedForumPosts,  // 字典格式
             hasCalculator: msg.has_calculator || false,
-            hasOperation: msg.has_operation || false,
+            operations: additionalData?.operations || [],
             operationType: msg.operation_type || null,
             // 操作參數
             operationParams: additionalData?.operationParams ||
@@ -657,7 +705,7 @@ const ChatWindow = ({
                     </button>
                   )}
                   {/* 如果有操作功能，顯示操作按鈕 */}
-                  {message.hasOperation && (
+                  {message.operations && message.operations.length > 0 && (
                     <button
                       className={styles.tutorialButton}
                       onClick={() => handleOperationClick(message.operationType)}
@@ -666,9 +714,9 @@ const ChatWindow = ({
                     </button>
                   )}
                   {/* 如果有推薦用戶，顯示推薦用戶預覽 */}
-                  {message.hasRecommendedUsers && message.recommendedUserDetails && (
+                  {Object.keys(message.recommendedUsers || {}).length > 0 && (
                     <RecommendedUsersPreview
-                      users={message.recommendedUserDetails}
+                      users={Object.values(message.recommendedUsers)}
                       onUserClick={(user) => {
                         console.log('點擊推薦用戶:', user);
                         // 導航到用戶個人頁面
@@ -677,9 +725,11 @@ const ChatWindow = ({
                     />
                   )}
                   {/* 如果有推薦文章，顯示推薦文章預覽 */}
-                  {message.hasRecommendedArticles && message.recommendedArticleIds && (
+                  {(Object.keys(message.recommendedSocialPosts || {}).length > 0 ||
+                    Object.keys(message.recommendedForumPosts || {}).length > 0) && (
                     <RecommendedArticlesPreview
-                      articleIds={message.recommendedArticleIds}
+                      socialPosts={message.recommendedSocialPosts || {}}
+                      forumPosts={message.recommendedForumPosts || {}}
                     />
                   )}
                   <div className={styles.messageTime}>
