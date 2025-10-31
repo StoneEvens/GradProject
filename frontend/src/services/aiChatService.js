@@ -33,7 +33,6 @@ class AIChatService {
     // 會話上下文管理
     this.sessionContext = {
       conversationHistory: [],
-      lastIntent: null,
     };
 
     // 當前對話 ID（用於後端對話記錄）
@@ -99,18 +98,12 @@ class AIChatService {
     this.sessionContext.conversationHistory.push({
       user: userMessage,
       ai: aiResponse.response,
-      intent: aiResponse.intent,
       timestamp: new Date().toISOString(),
     });
 
     // 限制歷史記錄數量
     if (this.sessionContext.conversationHistory.length > 10) {
       this.sessionContext.conversationHistory.shift();
-    }
-
-    // 更新最後意圖
-    if (aiResponse.intent) {
-      this.sessionContext.lastIntent = aiResponse.intent;
     }
   }
 
@@ -125,7 +118,6 @@ class AIChatService {
       return {
         response: '抱歉，目前無法連接到 AI 服務。請確認網路連線或稍後再試。',
         source: 'error',
-        confidence: 0.0,
         error: true,
         hasTutorial: false,
         hasRecommendedUsers: false,
@@ -140,7 +132,6 @@ class AIChatService {
       return {
         response: error.response.data?.response || '抱歉，處理您的請求時發生錯誤。',
         source: 'error',
-        confidence: 0.0,
         error: true,
         detail: error.response.data?.detail,
         hasTutorial: false,
@@ -155,7 +146,6 @@ class AIChatService {
     return {
       response: '抱歉，發生了未預期的錯誤。',
       source: 'error',
-      confidence: 0.0,
       error: true,
       hasTutorial: false,
       hasRecommendedUsers: false,
@@ -185,10 +175,9 @@ class AIChatService {
   /**
    * 重置會話上下文
    */
-  resetSession() {
+  resetSessionContext() {
     this.sessionContext = {
       conversationHistory: [],
-      lastIntent: null,
     };
     this.currentConversationId = null; // 也重置對話 ID
   }
@@ -262,15 +251,6 @@ class AIChatService {
             currentPair = {};
           }
         }
-
-        // 取得最後一個意圖（如果有的話）
-        const lastAssistantMessage = conversation.messages
-          .slice()
-          .reverse()
-          .find(msg => msg.role === 'assistant');
-        if (lastAssistantMessage && lastAssistantMessage.intent) {
-          this.sessionContext.lastIntent = lastAssistantMessage.intent;
-        }
         
         console.log(`[AIChatService] Loaded conversation ${conversationId} with ${this.sessionContext.conversationHistory.length} message pairs`);
       } else {
@@ -331,7 +311,7 @@ class AIChatService {
 
       // 如果刪除的是當前對話，重置會話
       if (this.currentConversationId === conversationId) {
-        this.resetSession();
+        this.resetSessionContext();
       }
     } catch (error) {
       console.error('Delete Conversation Error:', error);
@@ -400,7 +380,7 @@ class AIChatService {
    * 開始新對話（重置當前會話）
    */
   startNewConversation() {
-    this.resetSession();
+    this.resetSessionContext();
   }
 
   /**

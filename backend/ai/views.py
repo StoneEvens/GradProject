@@ -12,6 +12,64 @@ from .models import AgentThread, AgentMessage
 
 logger = logging.getLogger(__name__)
 
+
+def create_standardized_response(
+    response='',
+    source='mcp_agent',
+    conversation_id=None,
+    operations=None,
+    has_tutorial=False,
+    has_recommended_users=False,
+    has_recommended_articles=False,
+    has_calculator=False,
+    has_operation=None,
+    operation_type=None,
+    error=None,
+    **kwargs
+):
+    """
+    Create a standardized response following the format in BACKEND_RESPONSE_FORMAT.md
+    
+    This ensures ALL responses (success or error) follow the same structure
+    that the frontend expects.
+    """
+    if operations is None:
+        operations = []
+    
+    # Auto-detect has_operation if not specified
+    if has_operation is None:
+        has_operation = len(operations) > 0
+    
+    # Auto-detect operation_type if not specified
+    if operation_type is None and operations:
+        operation_type = operations[0].get('type')
+    
+    base_response = {
+        'response': response,
+        'source': source,
+        'conversationId': conversation_id,
+        
+        'hasTutorial': has_tutorial,
+        'hasRecommendedUsers': has_recommended_users,
+        'hasRecommendedArticles': has_recommended_articles,
+        'hasCalculator': has_calculator,
+        'hasOperation': has_operation,
+        
+        'operations': operations,
+    }
+    
+    # Add optional fields only if they have values
+    if operation_type:
+        base_response['operationType'] = operation_type
+    if error:
+        base_response['error'] = error
+    
+    # Add any additional kwargs
+    base_response.update(kwargs)
+    
+    return base_response
+
+
 def run_mcp_agent(user_message, user_id, username, conversation_id=None, session_id=None, previous_history=None):
     """
     Core MCP agent execution logic with OpenAI's Session-based memory
@@ -79,26 +137,7 @@ def run_mcp_agent(user_message, user_id, username, conversation_id=None, session
         # Create the agent
         info_fetcher = Agent(
             name="Info Fetcher",
-            instructions=f"""Understand the user's intention, then provide information using the mcp tools to the user. Do not make to many assumptions. Try to use the given information to answer the user first, then ask the user if they would like to provide more information to polish the response. Try to use the mcp tools first.
-
-User ID: {user_id}
-
-When users ask you to perform website actions (like navigating to pages), respond with operations in this format at the end of your message:
-
-OPERATIONS:
-[
-  {{
-    "operation_id": "unique-id",
-    "type": "navigate|display_data|fill_form",
-    "params": {{"param1": "value1"}},
-    "requires_confirmation": false
-  }}
-]
-
-Available operation types:
-- navigate: Navigate to a page. Params: {{"path": "/page-path"}}
-- display_data: Show data to user. Params: {{"message": "text", "data": {{...}}}}
-- fill_form: Fill form fields. Params: {{"fieldName": "value"}}""",
+            instructions=f"""Understand the user's intention, then provide information using the mcp tools to the user. Do not make to many assumptions. Try to use the given information to answer the user first, then ask the user if they would like to provide more information to polish the response. Try to use the mcp tools first. User ID: {user_id}""",
             model="gpt-5",
             tools=[mcp],
             model_settings=ModelSettings(
@@ -461,17 +500,13 @@ def main_chat(request):
         
         # Check if there was an error
         if 'error' in result:
-            return Response({
-                'error': result['error'],
-                'response': '抱歉，我暫時無法處理您的請求。請稍後再試。',
-                'source': 'error',
-                'confidence': 0.0,
-                'hasTutorial': False,
-                'hasRecommendedUsers': False,
-                'hasRecommendedArticles': False,
-                'hasCalculator': False,
-                'hasOperation': False
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            error_response = create_standardized_response(
+                response='抱歉，我暫時無法處理您的請求。請稍後再試。',
+                source='error',
+                conversation_id=conversation_id,
+                error=result['error']
+            )
+            return Response(error_response, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
         # Get the session_id from the result (OpenAI's session.id)
         returned_session_id = result.get('session_id')
@@ -552,34 +587,14 @@ def main_chat(request):
         
         # Transform result to aiAgent format
         operations = result.get('operations', [])
-        intent = 'general_query'
-        has_operation = len(operations) > 0
         
-        if operations:
-            # Try to infer intent from operation types
-            op_types = [op.get('type') for op in operations]
-            if 'navigate' in op_types:
-                intent = 'navigation'
-            elif 'display_data' in op_types:
-                intent = 'data_display'
-            elif 'fill_form' in op_types:
-                intent = 'form_filling'
-        
-        # Build aiAgent-compatible response
-        response_data = {
-            'response': result.get('response', ''),
-            'source': 'mcp_agent',
-            'confidence': 1.0,  # MCP agent is authoritative
-            'intent': intent,
-            'conversationId': conversation_id,  # Keep original conversation ID
-            'operations': operations,  # Pass through operations for operation client
-            'hasTutorial': False,  # MCP agent doesn't provide tutorials yet
-            'hasRecommendedUsers': False,
-            'hasRecommendedArticles': False,
-            'hasCalculator': False,
-            'hasOperation': has_operation,
-            'operationType': operations[0].get('type') if operations else None
-        }
+        # Build standardized response
+        response_data = create_standardized_response(
+            response=result.get('response', ''),
+            source='mcp_agent',
+            conversation_id=conversation_id,
+            operations=operations
+        )
         
         logger.info(f"Main chat response: {response_data['response'][:100]}... (Operations: {len(operations)})")
         
@@ -589,40 +604,19 @@ def main_chat(request):
         logger.error(f"Unexpected error in main_chat: {str(e)}", exc_info=True)
         import traceback
         traceback.print_exc()
-        return Response({
-            'error': f'處理請求時發生錯誤: {str(e)}',
-            'response': '抱歉，我暫時無法處理您的請求。請稍後再試。',
-            'source': 'error',
-            'confidence': 0.0,
-            'hasTutorial': False,
-            'hasRecommendedUsers': False,
-            'hasRecommendedArticles': False,
-            'hasCalculator': False,
-            'hasOperation': False
-        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+        error_response = create_standardized_response(
+            response='抱歉，我暫時無法處理您的請求。請稍後再試。',
+            source='error',
+            conversation_id=request.data.get('conversationId'),
+            error=f'處理請求時發生錯誤: {str(e)}'
+        )
+        return Response(error_response, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_conversations(request):
-    """
-    Get list of user's conversations
-    
-    Query params:
-        - archived: bool (default: False) - Include archived conversations
-    
-    Returns:
-        [
-            {
-                "id": 1,
-                "title": "How to feed my cat?",
-                "created_at": "2025-10-31T10:00:00Z",
-                "updated_at": "2025-10-31T12:00:00Z",
-                "is_active": true
-            },
-            ...
-        ]
-    """
     try:
         # Get query parameters
         archived = request.query_params.get('archived', 'false').lower() == 'true'
@@ -656,33 +650,6 @@ def get_conversations(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_conversation_detail(request, conversation_id):
-    """
-    Get conversation detail with message history from database
-    
-    Path params:
-        - conversation_id: int - Conversation ID (Django model ID)
-    
-    Returns:
-        {
-            "id": 1,
-            "title": "How to feed my cat?",
-            "created_at": "2025-10-31T10:00:00Z",
-            "updated_at": "2025-10-31T12:00:00Z",
-            "is_active": true,
-            "messages": [
-                {
-                    "role": "user",
-                    "content": "How to feed my cat?",
-                    "created_at": "2025-10-31T10:00:00Z"
-                },
-                {
-                    "role": "assistant",
-                    "content": "Here are some tips...",
-                    "created_at": "2025-10-31T10:00:05Z"
-                }
-            ]
-        }
-    """
     try:
         # Get the conversation
         try:
