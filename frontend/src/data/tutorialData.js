@@ -412,7 +412,7 @@ const tutorialData = {
           position: 'button'
         },
         action: 'click',
-        nextCondition: 'annotationAdded'
+        nextCondition: 'hashtagAdded'
       },
       {
         id: 12,
@@ -429,7 +429,7 @@ const tutorialData = {
           position: 'button'
         },
         action: 'click',
-        nextCondition: 'annotationAdded'
+        nextCondition: 'pageNavigate'
       },
       {
         id: 13,
@@ -446,7 +446,7 @@ const tutorialData = {
           position: 'button'
         },
         action: 'click',
-        nextCondition: 'annotationAdded'
+        nextCondition: 'pageNavigate'
       },
       {
         id: 14,
@@ -463,7 +463,7 @@ const tutorialData = {
           position: 'form'
         },
         action: 'click',
-        nextCondition: 'annotationAdded'
+        nextCondition: 'pageNavigate'
       },
       {
         id: 15,
@@ -480,7 +480,7 @@ const tutorialData = {
           position: 'button'
         },
         action: 'click',
-        nextCondition: 'annotationAdded'
+        nextCondition: 'pageNavigate'
       },
       {
         id: 16,

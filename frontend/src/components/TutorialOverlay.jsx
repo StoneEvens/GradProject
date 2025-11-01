@@ -1125,6 +1125,22 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
       return;
     }
 
+    else if (stepData.nextCondition === 'postPublished') {
+      const successNotices = document.querySelectorAll(
+        '[class*="notification"], [class*="toast"], [class*="alert"]'
+      );
+      conditionMet = Array.from(successNotices).some(el => {
+        const text = el.textContent || '';
+        return (
+          text.includes('發布成功') ||
+          text.includes('貼文已發佈') ||
+          text.includes('上傳完成') ||
+          text.includes('Post published') ||
+          text.includes('Successfully posted')
+        );
+      });
+    }
+
     // 使用 MutationObserver 監聽 DOM 變化
     const observer = new MutationObserver((mutations) => {
       let conditionMet = false;
@@ -1323,7 +1339,11 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
 
           conditionMet = petSelected;
           break;
-        case 'annotationAdded':
+        
+          case 'hashtagAdded':
+z
+
+          case 'annotationAdded':
           // 檢查是否標註已添加完成（編輯面板消失且有標註點存在）
           const editPanels = document.querySelectorAll('[class*="editPanel"]');
           const existingAnnotations = document.querySelectorAll('[class*="annotationPoint"], [class*="annotationDot"]');
