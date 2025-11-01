@@ -74,7 +74,7 @@ def run_mcp_agent(user_message, user_id, username, conversation_id=None, session
         # Create the agent with structured output
         info_fetcher = Agent(
             name="Info Fetcher",
-            instructions=f"""Use Traditional Chinese or English to respond to the user's requests. Understand the user's intention, then provide information using the mcp tools to the user. Do not spend too much time analyzing the data after retrieving it; just present the information clearly.
+            instructions=f"""Use Traditional Chinese or English to respond to the user's requests. Understand the user's intention, then provide information using the mcp tools to the user. No need to summarize or show the data, the frontend will handle it; but it's okay to ask if the user needs more information related to it.
 
 When responding, structure your output according to the AgentResponse schema:
 - response: Your text response to the user
