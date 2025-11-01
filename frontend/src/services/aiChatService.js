@@ -1,34 +1,15 @@
 // AI Chat Service - 連接後端 AI Agent API
 // 整合 OpenAI Agents SDK with MCP tools
 
-import axios from 'axios';
+import axiosInstance from '../utils/axios';
 import operationClient from './operationClient';
-
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
 
 class AIChatService {
   constructor() {
-    this.apiClient = axios.create({
-      baseURL: `${API_BASE_URL}/ai`,  // Points to new ai app with MCP agent
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      timeout: 120000, // 120 seconds for AI agent processing
-    });
-
-    // 添加請求攔截器來加入 JWT token
-    this.apiClient.interceptors.request.use(
-      (config) => {
-        const token = localStorage.getItem('accessToken');
-        if (token) {
-          config.headers.Authorization = `Bearer ${token}`;
-        }
-        return config;
-      },
-      (error) => {
-        return Promise.reject(error);
-      }
-    );
+    // Use shared axios instance with standard interceptors
+    this.apiClient = axiosInstance;
+    this.basePath = '/ai';
+    this.agentBasePath = '/ai-agent'; // for legacy endpoints still provided by aiAgent app
 
     // 會話上下文管理
     this.sessionContext = {
@@ -59,7 +40,7 @@ class AIChatService {
       };
 
       // 調用後端 API
-      const response = await this.apiClient.post('/chat/', requestData);
+  const response = await this.apiClient.post(`${this.basePath}/chat/`, requestData);
 
       // 更新當前對話 ID（如果是新對話，後端會返回）
       if (response.data.conversationId) {
@@ -116,7 +97,6 @@ class AIChatService {
     if (error.code === 'ERR_NETWORK' || !error.response) {
       return {
         response: '抱歉，目前無法連接到 AI 服務。請確認網路連線或稍後再試。',
-        source: 'error',
         error: true,
         hasTutorial: false,
         hasCalculator: false,
@@ -131,7 +111,6 @@ class AIChatService {
     if (error.response) {
       return {
         response: error.response.data?.response || '抱歉，處理您的請求時發生錯誤。',
-        source: 'error',
         error: true,
         detail: error.response.data?.detail,
         hasTutorial: false,
@@ -146,7 +125,6 @@ class AIChatService {
     // 未知錯誤
     return {
       response: '抱歉，發生了未預期的錯誤。',
-      source: 'error',
       error: true,
       hasTutorial: false,
       hasCalculator: false,
@@ -163,7 +141,7 @@ class AIChatService {
    */
   async checkHealth() {
     try {
-      const response = await this.apiClient.get('/health/');
+  const response = await this.apiClient.get(`${this.agentBasePath}/health/`);
       return response.data;
     } catch (error) {
       console.error('AI Health Check Error:', error);
@@ -201,7 +179,7 @@ class AIChatService {
    */
   async getConversations(params = {}) {
     try {
-      const response = await this.apiClient.get('/conversations/', { params });
+  const response = await this.apiClient.get(`${this.basePath}/conversations/`, { params });
       return response.data;
     } catch (error) {
       console.error('Get Conversations Error:', error);
@@ -216,7 +194,7 @@ class AIChatService {
    */
   async getConversationDetail(conversationId) {
     try {
-      const response = await this.apiClient.get(`/conversations/${conversationId}/`);
+  const response = await this.apiClient.get(`${this.basePath}/conversations/${conversationId}/`);
       return response.data;
     } catch (error) {
       console.error('Get Conversation Detail Error:', error);
@@ -274,7 +252,7 @@ class AIChatService {
    */
   async createConversation(data = {}) {
     try {
-      const response = await this.apiClient.post('/conversations/create/', data);
+  const response = await this.apiClient.post(`${this.agentBasePath}/conversations/create/`, data);
       this.currentConversationId = response.data.id;
       return response.data;
     } catch (error) {
@@ -292,7 +270,7 @@ class AIChatService {
   async updateConversation(conversationId, data) {
     try {
       const response = await this.apiClient.patch(
-        `/conversations/${conversationId}/update/`,
+        `${this.basePath}/conversations/${conversationId}/update/`,
         data
       );
       return response.data;
@@ -309,7 +287,7 @@ class AIChatService {
    */
   async deleteConversation(conversationId) {
     try {
-      await this.apiClient.delete(`/conversations/${conversationId}/delete/`);
+  await this.apiClient.delete(`${this.basePath}/conversations/${conversationId}/delete/`);
 
       // 如果刪除的是當前對話，重置會話
       if (this.currentConversationId === conversationId) {
@@ -330,7 +308,7 @@ class AIChatService {
   async archiveConversation(conversationId, isArchived = true) {
     try {
       const response = await this.apiClient.post(
-        `/conversations/${conversationId}/archive/`,
+        `${this.basePath}/conversations/${conversationId}/archive/`,
         { is_archived: isArchived }
       );
       return response.data;
@@ -349,7 +327,7 @@ class AIChatService {
   async pinConversation(conversationId, isPinned = true) {
     try {
       const response = await this.apiClient.post(
-        `/conversations/${conversationId}/pin/`,
+        `${this.agentBasePath}/conversations/${conversationId}/pin/`,
         { is_pinned: isPinned }
       );
       return response.data;
@@ -367,7 +345,7 @@ class AIChatService {
    */
   async submitFeedback(messageId, feedback) {
     try {
-      const response = await this.apiClient.post('/feedback/', {
+      const response = await this.apiClient.post(`${this.agentBasePath}/feedback/`, {
         message: messageId,
         ...feedback,
       });
@@ -405,7 +383,7 @@ class AIChatService {
       }
 
       // 調用後端 API 取得疾病檔案詳情
-      const response = await this.apiClient.post('/disease-archives/batch/', {
+      const response = await this.apiClient.post(`${this.agentBasePath}/disease-archives/batch/`, {
         post_ids: postIds,
       });
 
