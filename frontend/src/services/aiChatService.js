@@ -98,7 +98,7 @@ class AIChatService {
       return {
         response: '抱歉，目前無法連接到 AI 服務。請確認網路連線或稍後再試。',
         error: true,
-        hasTutorial: false,
+        tutorial: null,
         hasCalculator: false,
         operations: [],
         recommendedUsers: {},
@@ -113,7 +113,7 @@ class AIChatService {
         response: error.response.data?.response || '抱歉，處理您的請求時發生錯誤。',
         error: true,
         detail: error.response.data?.detail,
-        hasTutorial: false,
+        tutorial: null,
         hasCalculator: false,
         operations: [],
         recommendedUsers: {},
@@ -126,7 +126,7 @@ class AIChatService {
     return {
       response: '抱歉，發生了未預期的錯誤。',
       error: true,
-      hasTutorial: false,
+      tutorial: null,
       hasCalculator: false,
       operations: [],
       recommendedUsers: {},

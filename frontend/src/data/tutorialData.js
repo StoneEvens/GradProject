@@ -511,15 +511,6 @@ const tutorialData = {
       }
     }
   },
-
-  feedPet: {
-    id: 'feedPet',
-    title: '如何設定餵食提醒',
-    description: '學習如何為您的寵物設定餵食時間提醒',
-    steps: [
-      // ... 其他教學步驟
-    ]
-  },
   calculate: {
   id: 'calculate',
   title: '如何使用營養計算機',

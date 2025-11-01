@@ -1,13 +1,14 @@
 /* 教學模式覆蓋層 */
 .tutorialOverlay {
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
   width: 100%;
   height: 100%;
-  z-index: 10000;
+  /* Ensure overlay is above ChatWindow (100000) and FloatingAIAvatar (~9999999) */
+  z-index: 10000050;
   pointer-events: none;  /* 改回 none，讓事件能夠穿透到目標元素 */
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   /* 防止滾動 */
@@ -25,7 +26,7 @@
   background: rgba(0, 0, 0, 0.7);
   backdrop-filter: blur(2px);
   -webkit-backdrop-filter: blur(2px);
-  z-index: 9998;
+  z-index: 10000040;
   pointer-events: none;  /* 改為 none，允許點擊穿透 */
   /* 阻止用戶與背景內容交互 */
   touch-action: none;
@@ -40,7 +41,7 @@
 .chatBubbleContainer {
   position: absolute;
   will-change: top, left, width, transform, opacity;
-  z-index: 10002;
+  z-index: 10000060;
   animation: fadeInScale 0.18s ease-out;
   transition: top 0.2s ease-out, left 0.2s ease-out, right 0.2s ease-out;
   pointer-events: auto;
