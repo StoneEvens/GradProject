@@ -49,6 +49,16 @@ export const clearTokens = () => {
   localStorage.removeItem('userData');
 };
 
+// 清除 AI 聊天相關本地快取
+const clearAiChatCache = () => {
+  try {
+    localStorage.removeItem('aiChat.lastConversationId');
+    localStorage.removeItem('aiChat.lastMessages');
+  } catch (e) {
+    // no-op
+  }
+};
+
 // 防止同時多次刷新token的Promise快取
 let refreshPromise = null;
 
@@ -233,6 +243,7 @@ export const logout = async () => {
     console.error('登出請求失敗:', error);
   } finally {
     clearTokens();
+    clearAiChatCache();
     window.location.href = '/';
   }
 };
@@ -266,6 +277,9 @@ export const setupAuthEventListeners = () => {
       window.showNotification(message);
     }
     
+    // 清除 AI 聊天相關本地快取
+    clearAiChatCache();
+
     // 延遲跳轉到登入頁面，讓用戶看到通知
     setTimeout(() => {
       window.location.href = '/login';

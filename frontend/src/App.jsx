@@ -269,6 +269,13 @@ const App = () => {
     
     // 監聽登出事件
     const handleLogout = () => {
+      // 清除 AI 會話本地快取，避免跨帳號殘留
+      try {
+        localStorage.removeItem('aiChat.lastConversationId');
+        localStorage.removeItem('aiChat.lastMessages');
+      } catch (e) {
+        // no-op
+      }
       setIsUserAuthenticated(false);
     };
     window.addEventListener('auth-logout', handleLogout);
