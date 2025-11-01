@@ -1390,6 +1390,51 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
             }
           }
           break;
+        case 'descriptionEnterTwice': {
+          const scopeRoot = (typeof getDescriptionFlowRoot === 'function')
+            ? getDescriptionFlowRoot()
+            : (document.querySelector('[class*="descriptionSection"]') || document);
+
+          const ta = scopeRoot.querySelector(
+            'textarea[class*="descriptionInput"]:not([disabled]), [class*="descriptionSection"] textarea:not([disabled])'
+          );
+
+          if (!ta) {
+            conditionMet = false;
+            break;
+          }
+
+          if (!ta.__tutorialDoubleEnterHooked) {
+            ta.__tutorialDoubleEnterHooked = true;
+            ta.__tutorialEnterState = { lastTs: 0, composing: false };
+
+            ta.addEventListener('compositionstart', () => { ta.__tutorialEnterState.composing = true; });
+            ta.addEventListener('compositionend',   () => { ta.__tutorialEnterState.composing = false; });
+
+            ta.addEventListener('keydown', (e) => {
+              if (e.key !== 'Enter') return;
+              if (e.shiftKey || e.altKey || e.ctrlKey || e.metaKey) return;
+              if (ta.__tutorialEnterState.composing || e.isComposing) return;
+
+              const now = Date.now();
+              const within = now - (ta.__tutorialEnterState.lastTs || 0);
+
+              if (within > 0 && within <= 600) {
+                e.preventDefault();
+
+                ta.__tutorialDoubleEnterFired = true;
+
+              } else {
+                ta.__tutorialEnterState.lastTs = now;
+              }
+            }, true);
+          }
+
+          conditionMet = !!ta.__tutorialDoubleEnterFired;
+
+          break;
+        }
+
         default:
           console.warn('未知的條件:', condition);
           break;

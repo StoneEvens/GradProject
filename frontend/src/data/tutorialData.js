@@ -493,7 +493,23 @@ const tutorialData = {
         },
         action: 'complete'
       }
-    ]
+    ],
+    // 教學選項配置
+    options: {
+      allowSkip: true,           // 允許跳過教學
+      showProgress: true,        // 顯示進度條
+      darkBackground: true,      // 使用暗背景突出重點
+      autoAdvance: false,        // 不自動前進，需要用戶操作
+      showHints: true,          // 顯示提示
+      resetOnError: true,        // 錯誤時重置到當前步驟
+      // 全局過渡設置來減少閃爍
+      globalTransitions: {
+        stepTransitionDelay: 350,     // 步驟間過渡延遲 (ms)
+        highlightFadeSpeed: 'smooth', // 高光淡入淡出速度
+        pageNavigationBuffer: 700,    // 頁面導航緩衝時間 (ms)
+        smoothTransitions: true       // 啟用平滑過渡
+      }
+    }
   },
 
   feedPet: {
