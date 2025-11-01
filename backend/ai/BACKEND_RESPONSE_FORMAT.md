@@ -5,7 +5,6 @@
 ```json
 {
   "response": "AI's text response to the user",
-  "source": "mcp_agent | error",
   "conversationId": "uuid-or-null",
   
   "hasTutorial": false,
@@ -26,6 +25,7 @@
   - `hasRecommendedArticles` = `Object.keys(recommendedSocialPosts).length > 0 || Object.keys(recommendedForumPosts).length > 0`
   - `hasOperation` = `operations.length > 0`
 - **Recommendation dictionaries and operations array are ALWAYS returned** (even if empty) for consistency
+- Each post object inside `recommendedSocialPosts` and `recommendedForumPosts` includes a `created_at` ISO timestamp. The backend normalizes possible variants (`post_date`, `createdAt`, etc.) to `created_at` for frontend compatibility.
 
 ## Optional Fields (Only When Applicable)
 
@@ -152,7 +152,6 @@ Each operation in the `operations` array:
 ```json
 {
   "response": "您的寵物聽起來很健康！",
-  "source": "mcp_agent",
   "conversationId": "abc-123",
   "hasTutorial": false,
   "hasCalculator": false,
@@ -167,7 +166,6 @@ Each operation in the `operations` array:
 ```json
 {
   "response": "這些用戶也養了柴犬，您可以參考他們的經驗！",
-  "source": "mcp_agent",
   "conversationId": "abc-123",
   "hasTutorial": false,
   "hasCalculator": false,
@@ -195,7 +193,6 @@ Each operation in the `operations` array:
 ```json
 {
   "response": "我找到了一些相關的疾病案例分享。",
-  "source": "mcp_agent",
   "conversationId": "abc-123",
   "hasTutorial": false,
   "hasCalculator": false,
@@ -245,7 +242,6 @@ Each operation in the `operations` array:
 ```json
 {
   "response": "我會幫您導航到社群頁面。",
-  "source": "mcp_agent",
   "conversationId": "abc-123",
   "hasTutorial": false,
   "hasCalculator": false,
@@ -274,7 +270,6 @@ Each operation in the `operations` array:
 {
   "error": "處理請求時發生錯誤",
   "response": "抱歉，我暫時無法處理您的請求。",
-  "source": "error",
   "conversationId": null,
   "hasTutorial": false,
   "hasCalculator": false,

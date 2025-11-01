@@ -1,18 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
+import { useSearchParams, useNavigate, useLocation, useParams } from 'react-router-dom';
 import TopNavbar from '../components/TopNavbar';
 import BottomNavbar from '../components/BottomNavigationbar';
 import SocialSearchResults from '../components/SocialSearchResults';
 import PostList from '../components/PostList';
 import ArchiveList from '../components/ArchiveList';
 import { getUserProfile } from '../services/userService';
-import { getPosts } from '../services/socialService';
+import { getPosts, getPost } from '../services/socialService';
 import { getPublicDiseaseArchivesPreview } from '../services/petService';
 import styles from '../styles/SocialPage.module.css';
 
 const SocialPage = () => {
   const { t } = useTranslation('posts');
+  const { postId } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const location = useLocation();
@@ -153,8 +154,69 @@ const SocialPage = () => {
     }
   };
 
-  // 初始載入資料
+  // 初始載入資料與代理注入處理
   useEffect(() => {
+    // 若來自代理注入貼文，優先處理注入流程
+    const injected = location.state?.injectedPost;
+    if (!showSearchResults && injected) {
+      (async () => {
+        try {
+          setLoading(true);
+          setActiveTab('daily');
+
+          // 如果注入貼文缺少圖片，嘗試用後端資料補全（最佳化體驗，非必需）
+          let primaryPost = injected;
+          if (!primaryPost.images || primaryPost.images.length === 0) {
+            try {
+              const single = await getPost(injected.id);
+              if (single.success && single.data) {
+                primaryPost = single.data;
+              }
+            } catch (e) {
+              // 靜默失敗，保留注入資料
+            }
+          }
+
+          // 載入常規貼文併入列表，避免重複
+          try {
+            const result = await getPosts({ offset: 0, limit: 10 });
+            if (result.success) {
+              const allPosts = result.data.posts || [];
+              const newPosts = allPosts.filter(post => {
+                const hasImages = post.images && Array.isArray(post.images) && post.images.length > 0;
+                if (!hasImages) {
+                  console.log(`🚫 過濾掉沒有圖片的項目 (ID: ${post.id || post.post_id})`);
+                }
+                return hasImages;
+              });
+
+              const deduped = newPosts.filter(p => (p.id || p.post_id) !== primaryPost.id);
+              setPosts([primaryPost, ...deduped]);
+              setHasMore(result.data.has_more || false);
+              setPage(0);
+            } else {
+              setPosts([primaryPost]);
+              setHasMore(false);
+              setPage(0);
+            }
+          } catch (e) {
+            setPosts([primaryPost]);
+            setHasMore(false);
+            setPage(0);
+          }
+        } finally {
+          setLoading(false);
+          // 清除一次性狀態，避免返回時重複注入
+          try {
+            window.history.replaceState({}, document.title);
+          } catch (e) {
+            // no-op
+          }
+        }
+      })();
+      return; // 已處理注入，不再執行下方一般載入
+    }
+
     if (!showSearchResults) {
       if (activeTab === 'daily') {
         loadPosts(0, false);
@@ -162,7 +224,7 @@ const SocialPage = () => {
         loadArchives(0, false);
       }
     }
-  }, [showSearchResults, activeTab]);
+  }, [showSearchResults, activeTab, location.state]);
 
   // 監聽貼文更新
   useEffect(() => {
@@ -184,8 +246,8 @@ const SocialPage = () => {
     
     const finalQuery = queryFromState || queryFromUrl;
     
-    // 設定初始標籤
-    setActiveTab(tabFromUrl);
+    // 設定初始標籤；若 URL 有 postId，強制 daily
+    setActiveTab(postId ? 'daily' : tabFromUrl);
     
     if (finalQuery) {
       setSearchQuery(finalQuery);
@@ -196,9 +258,10 @@ const SocialPage = () => {
       }
     } else {
       setSearchQuery('');
+      // 若有 postId，仍維持非搜尋模式
       setShowSearchResults(false);
     }
-  }, [searchParams, location.state]);
+  }, [searchParams, location.state, postId]);
 
 
 
@@ -300,7 +363,11 @@ const SocialPage = () => {
     
     // 如果沒有 increment（即點擊留言按鈕），導航到貼文詳情頁面
     if (increment === 0) {
-      navigate(`/post/${postId}`);
+      // 最小化（但不隱藏）AI 浮動頭像
+      try {
+        window.dispatchEvent(new CustomEvent('forceFloatingMode'));
+      } catch (e) {}
+      // 不再導航到貼文詳情頁（該路由已移除），由 PostList 內部開啟留言面板
     }
   };
 

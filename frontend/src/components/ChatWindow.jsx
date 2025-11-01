@@ -33,6 +33,11 @@ const ChatWindow = ({
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
   const recognitionRef = useRef(null);
+  const restoredRef = useRef(false);
+
+  // 簡易本地快取鍵
+  const LAST_CONV_ID_KEY = 'aiChat.lastConversationId';
+  const LAST_MESSAGES_KEY = 'aiChat.lastMessages';
 
   // 初始化語音識別
   useEffect(() => {
@@ -142,7 +147,9 @@ const ChatWindow = ({
 
   // 當翻譯準備好時初始化歡迎訊息
   useEffect(() => {
-    if (ready && messages.length === 0) {
+    // 若已有快取或已還原，不顯示歡迎訊息
+    const hasCache = !!localStorage.getItem(LAST_CONV_ID_KEY) || !!localStorage.getItem(LAST_MESSAGES_KEY);
+    if (ready && messages.length === 0 && !hasCache) {
       setMessages([
         {
           id: 1,
@@ -257,9 +264,6 @@ const ChatWindow = ({
         text: aiResult.response,
         isUser: false,
         timestamp: new Date(),
-        confidence: aiResult.confidence,
-        source: aiResult.source,
-        intent: aiResult.intent, // 顯示意圖
         // 加入教學相關資訊
         hasTutorial: aiResult.hasTutorial || false,
         tutorialType: aiResult.tutorialType || null,
@@ -282,6 +286,7 @@ const ChatWindow = ({
       // 更新當前對話 ID（後端會返回）
       if (aiResult.conversationId) {
         setCurrentConversationId(aiResult.conversationId);
+        try { localStorage.setItem(LAST_CONV_ID_KEY, String(aiResult.conversationId)); } catch (e) {}
       }
 
     } catch (error) {
@@ -300,6 +305,135 @@ const ChatWindow = ({
       setIsTyping(false);
     }
   };
+
+  // 將後端會話詳情格式化為前端訊息結構
+  const formatMessagesFromConversationDetail = async (conversationDetail) => {
+    if (!conversationDetail.messages || !Array.isArray(conversationDetail.messages)) {
+      return [];
+    }
+
+    const sortedMessages = [...conversationDetail.messages].sort((a, b) =>
+      new Date(a.created_at) - new Date(b.created_at)
+    );
+
+    const formattedMessages = await Promise.all(sortedMessages
+      .filter(msg => msg.role !== 'system')
+      .map(async (msg) => {
+        let additionalData = msg.additional_data;
+        if (typeof additionalData === 'string') {
+          try { additionalData = JSON.parse(additionalData); } catch { additionalData = {}; }
+        }
+
+        let messageData = msg.message_data;
+        if (typeof messageData === 'string') {
+          try { messageData = JSON.parse(messageData); } catch { messageData = null; }
+        }
+
+        // 推薦用戶
+        let recommendedUsers = {};
+        if (messageData?.recommendedUsers && typeof messageData.recommendedUsers === 'object') {
+          recommendedUsers = messageData.recommendedUsers;
+        } else if (additionalData?.recommendedUsers && typeof additionalData.recommendedUsers === 'object') {
+          recommendedUsers = additionalData.recommendedUsers;
+        } else if (additionalData?.recommended_users && typeof additionalData.recommended_users === 'object') {
+          recommendedUsers = additionalData.recommended_users;
+        } else if (additionalData?.recommendedUserDetails && Array.isArray(additionalData.recommendedUserDetails)) {
+          const arr = additionalData.recommendedUserDetails;
+          arr.forEach(u => { if (u?.id) recommendedUsers[u.id] = u; });
+        } else if (additionalData?.recommended_user_details && Array.isArray(additionalData.recommended_user_details)) {
+          const arr = additionalData.recommended_user_details;
+          arr.forEach(u => { if (u?.id) recommendedUsers[u.id] = u; });
+        } else if (msg.has_recommended_users) {
+          const userIds = additionalData?.recommended_user_ids || [];
+          if (userIds.length > 0) {
+            const fetched = await fetchUserDetailsByIds(userIds);
+            fetched.forEach(u => { if (u?.id) recommendedUsers[u.id] = u; });
+          }
+        }
+
+        // 推薦文章
+        let recommendedSocialPosts = {};
+        let recommendedForumPosts = {};
+        if (messageData?.recommendedSocialPosts && typeof messageData.recommendedSocialPosts === 'object') {
+          recommendedSocialPosts = messageData.recommendedSocialPosts;
+        } else if (additionalData?.recommendedSocialPosts && typeof additionalData.recommendedSocialPosts === 'object') {
+          recommendedSocialPosts = additionalData.recommendedSocialPosts;
+        } else if (additionalData?.recommended_social_posts && typeof additionalData.recommended_social_posts === 'object') {
+          recommendedSocialPosts = additionalData.recommended_social_posts;
+        }
+
+        if (messageData?.recommendedForumPosts && typeof messageData.recommendedForumPosts === 'object') {
+          recommendedForumPosts = messageData.recommendedForumPosts;
+        } else if (additionalData?.recommendedForumPosts && typeof additionalData.recommendedForumPosts === 'object') {
+          recommendedForumPosts = additionalData.recommendedForumPosts;
+        } else if (additionalData?.recommended_forum_posts && typeof additionalData.recommended_forum_posts === 'object') {
+          recommendedForumPosts = additionalData.recommended_forum_posts;
+        }
+
+        return {
+          id: msg.id || Date.now() + Math.random(),
+          text: messageData?.response || msg.content,
+          isUser: msg.role === 'user',
+          timestamp: new Date(msg.created_at),
+          hasTutorial: (messageData?.hasTutorial ?? msg.has_tutorial) || false,
+          tutorialType: messageData?.tutorialType ?? msg.tutorial_type ?? null,
+          recommendedUsers,
+          recommendedSocialPosts,
+          recommendedForumPosts,
+          hasCalculator: (messageData?.hasCalculator ?? msg.has_calculator) || false,
+          operations: messageData?.operations || additionalData?.operations || [],
+          operationType: messageData?.operationType ?? msg.operation_type ?? null,
+          operationParams: additionalData?.operationParams || additionalData?.operation_params || {}
+        };
+      }));
+
+    return formattedMessages;
+  };
+
+  // 開啟聊天視窗時嘗試還原最近一次會話
+  useEffect(() => {
+    if (!isOpen || restoredRef.current) return;
+
+    const restore = async () => {
+      try {
+        const lastId = localStorage.getItem(LAST_CONV_ID_KEY);
+        const cachedMessagesRaw = localStorage.getItem(LAST_MESSAGES_KEY);
+
+        if (cachedMessagesRaw && messages.length === 0) {
+          try {
+            const cached = JSON.parse(cachedMessagesRaw);
+            if (Array.isArray(cached) && cached.length > 0) {
+              setMessages(cached.map(m => ({ ...m, timestamp: new Date(m.timestamp) })));
+            }
+          } catch {}
+        }
+
+        if (lastId) {
+          const conversationDetail = await aiChatService.loadConversation(lastId);
+          const formatted = await formatMessagesFromConversationDetail(conversationDetail);
+          setMessages(formatted);
+          setCurrentConversationId(Number(lastId));
+        }
+      } catch (e) {
+        // 無法還原時保持當前狀態
+      } finally {
+        restoredRef.current = true;
+      }
+    };
+
+    restore();
+    // 僅在首次打開時運行
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
+
+  // 將當前訊息快取到本地（限制條數以避免過大）
+  useEffect(() => {
+    try {
+      const max = 30;
+      const trimmed = messages.slice(-max).map(m => ({ ...m, timestamp: m.timestamp instanceof Date ? m.timestamp.toISOString() : m.timestamp }));
+      localStorage.setItem(LAST_MESSAGES_KEY, JSON.stringify(trimmed));
+    } catch {}
+  }, [messages]);
 
   // 處理開始教學按鈕點擊 - 觸發教學模式事件
   const handleStartTutorial = (tutorialType) => {
@@ -354,6 +488,27 @@ const ChatWindow = ({
       // 導向營養計算機頁面
       navigate('/calculator');
     }, 1000);
+  };
+
+  // 在點擊推薦項目後，最小化（但不隱藏）AI HUD 並執行導航
+  const minimizeHudThen = (navigateFn) => {
+    try {
+      // 開啟浮動模式並允許 GlobalFloatingAI 自動關閉展開視窗
+      window.dispatchEvent(new CustomEvent('forceFloatingMode'));
+    } catch (e) {}
+    // 停止可能的錄音
+    stopVoiceRecording();
+    // 立即收起聊天視窗（保持浮動頭像可見）
+    if (floatingMode && onToggleFloating) {
+      onToggleFloating();
+    } else if (onClose) {
+      onClose();
+    }
+    // 執行實際導航
+    if (typeof navigateFn === 'function') {
+      // 略微延遲，讓HUD狀態更新更順滑
+      setTimeout(() => navigateFn(), 50);
+    }
   };
 
   // 處理操作按鈕點擊 - 根據後端回傳的操作類型執行導航
@@ -438,134 +593,10 @@ const ChatWindow = ({
     try {
       // 從後端載入完整的對話詳情
       const conversationDetail = await aiChatService.loadConversation(conversation.id);
-
-      // 檢查是否有 messages
-      if (!conversationDetail.messages || !Array.isArray(conversationDetail.messages)) {
-        console.error('對話詳情中沒有訊息陣列:', conversationDetail);
-        throw new Error('對話詳情格式錯誤');
-      }
-
-      // 將後端的 messages 轉換為前端格式
-      // 按照創建時間排序（確保舊的在前，新的在後）
-      const sortedMessages = [...conversationDetail.messages].sort((a, b) =>
-        new Date(a.created_at) - new Date(b.created_at)
-      );
-
-      const formattedMessages = await Promise.all(sortedMessages
-        .filter(msg => msg.role !== 'system') // 過濾掉系統訊息
-        .map(async (msg) => {
-          // 處理 additional_data 可能是字串或物件的情況
-          let additionalData = msg.additional_data;
-          if (typeof additionalData === 'string') {
-            try {
-              additionalData = JSON.parse(additionalData);
-            } catch (e) {
-              additionalData = {};
-            }
-          }
-
-          // 處理 entities 可能是字串或物件的情況
-          let entities = msg.entities;
-          if (typeof entities === 'string') {
-            try {
-              entities = JSON.parse(entities);
-            } catch (e) {
-              entities = {};
-            }
-          }
-
-          // 獲取推薦用戶詳情 (支援舊格式和新格式)
-          let recommendedUsers = {};
-          
-          // 新格式: recommendedUsers 字典
-          if (additionalData?.recommendedUsers && typeof additionalData.recommendedUsers === 'object') {
-            recommendedUsers = additionalData.recommendedUsers;
-          } 
-          // 新格式: recommended_users 字典  (snake_case from backend)
-          else if (additionalData?.recommended_users && typeof additionalData.recommended_users === 'object') {
-            recommendedUsers = additionalData.recommended_users;
-          }
-          // 舊格式: recommendedUserDetails 陣列
-          else if (additionalData?.recommendedUserDetails && Array.isArray(additionalData.recommendedUserDetails)) {
-            recommendedUserDetails = additionalData.recommendedUserDetails;
-            // 轉換為字典格式
-            recommendedUsers = {};
-            recommendedUserDetails.forEach(user => {
-              if (user && user.id) {
-                recommendedUsers[user.id] = user;
-              }
-            });
-          }
-          // 舊格式: recommended_user_details 陣列 (snake_case)
-          else if (additionalData?.recommended_user_details && Array.isArray(additionalData.recommended_user_details)) {
-            recommendedUserDetails = additionalData.recommended_user_details;
-            // 轉換為字典格式
-            recommendedUsers = {};
-            recommendedUserDetails.forEach(user => {
-              if (user && user.id) {
-                recommendedUsers[user.id] = user;
-              }
-            });
-          }
-          // 如果沒有用戶詳情但有用戶 ID (舊格式)，嘗試獲取
-          else if (Object.keys(recommendedUsers).length === 0 && msg.has_recommended_users) {
-            const userIds = additionalData?.recommended_user_ids || [];
-            if (userIds.length > 0) {
-              recommendedUserDetails = await fetchUserDetailsByIds(userIds);
-              // 轉換為字典格式
-              recommendedUsers = {};
-              recommendedUserDetails.forEach(user => {
-                if (user && user.id) {
-                  recommendedUsers[user.id] = user;
-                }
-              });
-            }
-          }
-
-          // 獲取推薦文章 (支援新格式)
-          let recommendedSocialPosts = {};
-          let recommendedForumPosts = {};
-          
-          // 新格式: recommendedSocialPosts 和 recommendedForumPosts 字典
-          if (additionalData?.recommendedSocialPosts && typeof additionalData.recommendedSocialPosts === 'object') {
-            recommendedSocialPosts = additionalData.recommendedSocialPosts;
-          } else if (additionalData?.recommended_social_posts && typeof additionalData.recommended_social_posts === 'object') {
-            recommendedSocialPosts = additionalData.recommended_social_posts;
-          }
-          
-          if (additionalData?.recommendedForumPosts && typeof additionalData.recommendedForumPosts === 'object') {
-            recommendedForumPosts = additionalData.recommendedForumPosts;
-          } else if (additionalData?.recommended_forum_posts && typeof additionalData.recommended_forum_posts === 'object') {
-            recommendedForumPosts = additionalData.recommended_forum_posts;
-          }
-
-          return {
-            id: msg.id || Date.now() + Math.random(),
-            text: msg.content,
-            isUser: msg.role === 'user',
-            timestamp: new Date(msg.created_at),
-            confidence: msg.confidence,
-            intent: msg.intent,
-            source: msg.source,
-            // AI 訊息的額外資訊
-            hasTutorial: msg.has_tutorial || false,
-            tutorialType: msg.tutorial_type || null,
-            // 推薦用戶和文章直接從字典判斷，不需要 has_ flags
-            recommendedUsers: recommendedUsers,  // 字典格式
-            recommendedSocialPosts: recommendedSocialPosts,  // 字典格式
-            recommendedForumPosts: recommendedForumPosts,  // 字典格式
-            hasCalculator: msg.has_calculator || false,
-            operations: additionalData?.operations || [],
-            operationType: msg.operation_type || null,
-            // 操作參數
-            operationParams: additionalData?.operationParams ||
-                           additionalData?.operation_params ||
-                           {}
-          };
-        }));
-
+      const formattedMessages = await formatMessagesFromConversationDetail(conversationDetail);
       setMessages(formattedMessages);
       setCurrentConversationId(conversation.id);
+      try { localStorage.setItem(LAST_CONV_ID_KEY, String(conversation.id)); } catch (e) {}
     } catch (error) {
       console.error('載入對話失敗:', error);
       console.error('錯誤詳情:', error.response || error);
@@ -595,6 +626,7 @@ const ChatWindow = ({
       }
     ]);
     setCurrentConversationId(null);
+    try { localStorage.removeItem(LAST_CONV_ID_KEY); } catch (e) {}
   };
 
   // 處理浮動頭像點擊
@@ -719,8 +751,7 @@ const ChatWindow = ({
                       users={Object.values(message.recommendedUsers)}
                       onUserClick={(user) => {
                         console.log('點擊推薦用戶:', user);
-                        // 導航到用戶個人頁面
-                        navigate(`/user/${user.user_account}`);
+                        minimizeHudThen(() => navigate(`/user/${user.user_account}`));
                       }}
                     />
                   )}
@@ -730,21 +761,24 @@ const ChatWindow = ({
                     <RecommendedArticlesPreview
                       socialPosts={message.recommendedSocialPosts || {}}
                       forumPosts={message.recommendedForumPosts || {}}
+                      onArticleClick={(article) => {
+                        // 社群貼文：注入並導向社群頁；論壇貼文：直接導向公共疾病檔案詳情
+                        if (article?.type === 'social') {
+                          minimizeHudThen(() => navigate('/social', {
+                            state: {
+                              injectedPost: article,
+                              source: 'agent',
+                              focus: true
+                            }
+                          }));
+                        } else {
+                          minimizeHudThen(() => navigate(`/disease-archive/${article.id}/public`));
+                        }
+                      }}
                     />
                   )}
                   <div className={styles.messageTime}>
                     {formatTime(message.timestamp)}
-                    {/* 顯示意圖資訊（測試用） */}
-                    {message.intent && (
-                      <span style={{ marginLeft: '8px', color: '#666', fontSize: '0.85em' }}>
-                        | 意圖: <strong>{message.intent}</strong>
-                      </span>
-                    )}
-                    {message.confidence !== undefined && (
-                      <span style={{ marginLeft: '8px', color: '#888', fontSize: '0.85em' }}>
-                        | 信心度: {(message.confidence * 100).toFixed(0)}%
-                      </span>
-                    )}
                   </div>
                 </div>
               </>

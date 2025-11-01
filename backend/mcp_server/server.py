@@ -73,7 +73,7 @@ def create_mcp_server() -> FastMCP:
     
     @mcp.tool(
         name="get_post_recommendations",
-        description="Get recommended social posts based on a natural-language content description. Please use keywords; vague descriptions may yield poor results. Fetch both social and forum posts on default."
+        description="Get recommended social posts based on a natural-language content description. Please use keywords; vague descriptions may yield poor results. Fetch both social and forum posts if no specific instruction was given."
     )
     async def get_post_recommendations(content_description: str, hashtags: list[str], isSocial: bool, isForum: bool) -> list[dict]:
         @sync_to_async

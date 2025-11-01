@@ -9,68 +9,9 @@ from rest_framework import status
 from django.conf import settings
 import logging
 from .models import AgentThread, AgentMessage
+from datetime import datetime, timezone
 
 logger = logging.getLogger(__name__)
-
-
-def create_standardized_response(
-    response='',
-    source='mcp_agent',
-    conversation_id=None,
-    operations=None,
-    has_tutorial=False,
-    has_calculator=False,
-    operation_type=None,
-    tutorial_type=None,
-    error=None,
-    recommended_users=None,
-    recommended_social_posts=None,
-    recommended_forum_posts=None,
-    **kwargs
-):
-    if operations is None:
-        operations = []
-    if recommended_users is None:
-        recommended_users = {}
-    if recommended_social_posts is None:
-        recommended_social_posts = {}
-    if recommended_forum_posts is None:
-        recommended_forum_posts = {}
-    
-    # Auto-detect operation_type if not specified
-    if operation_type is None and operations:
-        operation_type = operations[0].get('type')
-    
-    base_response = {
-        'response': response,
-        'source': source,
-        'conversationId': conversation_id,
-        
-        # Feature flags for buttons/UI elements
-        'hasTutorial': has_tutorial,
-        'hasCalculator': has_calculator,
-        
-        # Operations array (hasOperation derived from length > 0)
-        'operations': operations,
-        
-        # Always include recommendation dictionaries (even if empty)
-        'recommendedUsers': recommended_users,
-        'recommendedSocialPosts': recommended_social_posts,
-        'recommendedForumPosts': recommended_forum_posts,
-    }
-    
-    # Add optional fields only if they have values
-    if operation_type:
-        base_response['operationType'] = operation_type
-    if tutorial_type:
-        base_response['tutorialType'] = tutorial_type
-    if error:
-        base_response['error'] = error
-    
-    # Add any additional kwargs
-    base_response.update(kwargs)
-    
-    return base_response
 
 
 def run_mcp_agent(user_message, user_id, username, conversation_id=None, session_id=None, previous_history=None):
@@ -133,7 +74,7 @@ def run_mcp_agent(user_message, user_id, username, conversation_id=None, session
         # Create the agent with structured output
         info_fetcher = Agent(
             name="Info Fetcher",
-            instructions=f"""Use Traditional Chinese or English to respond to the user's requests. Understand the user's intention, then provide information using the mcp tools to the user. 
+            instructions=f"""Use Traditional Chinese or English to respond to the user's requests. Understand the user's intention, then provide information using the mcp tools to the user. Do not spend too much time analyzing the data after retrieving it; just present the information clearly.
 
 When responding, structure your output according to the AgentResponse schema:
 - response: Your text response to the user
@@ -145,6 +86,8 @@ When responding, structure your output according to the AgentResponse schema:
 - recommended_users: When using get_user_information, put results here as {{user_id: user_details}}
 - recommended_social_posts: When using get_post_recommendations for social posts, put results here as {{post_id: post_details}}
 - recommended_forum_posts: When using get_post_recommendations for forum posts, put results here as {{post_id: post_details}}
+
+When calling get_post_recommendations by default, fetch BOTH social and forum posts unless the user explicitly asks for one type (i.e., set isSocial=true and isForum=true). Then, separate the returned items into recommended_social_posts and recommended_forum_posts accordingly.
 
 Do not make too many assumptions. Try to use the given information to answer the user first, then ask if they would like to provide more information. Try to use the mcp tools first. User ID: {user_id}""",
             model="gpt-5",
@@ -320,8 +263,7 @@ Do not make too many assumptions. Try to use the given information to answer the
             'recommended_forum_posts': structured_output.recommended_forum_posts,
             'session_id': final_session_id,  # OpenAI session ID for conversation continuation
             'conversation_id': final_conversation_id,  # Our database ID
-            'conversation_history': updated_history,  # Return for frontend display only
-            'agent_result': agent_result  # Include full agent result for debugging if needed
+            'conversation_history': updated_history  # Return for frontend display only
         }
         
     except ImportError as e:
@@ -432,117 +374,8 @@ def agent_chat(request):
     }, status=status.HTTP_200_OK)
 
 
-def extract_recommendations_from_agent_result(agent_result):
-    """
-    Extract and format user and post recommendations from the agent result.
-    
-    The agent calls MCP tools like get_user_information and get_post_recommendations,
-    and we extract those results to format them into the dictionary structure
-    expected by the frontend.
-    
-    Returns a tuple: (recommended_users_dict, recommended_social_posts_dict, recommended_forum_posts_dict)
-    """
-    from media.models import UserHeadshot
-    from accounts.models import CustomUser
-    
-    recommended_users = {}
-    recommended_social_posts = {}
-    recommended_forum_posts = {}
-    
-    try:
-        # The agent result contains items with tool calls and responses
-        if not hasattr(agent_result, 'new_items'):
-            return recommended_users, recommended_social_posts, recommended_forum_posts
-        
-        for item in agent_result.new_items:
-            # Check for tool calls in the item
-            if not hasattr(item, 'content'):
-                continue
-                
-            for content_item in item.content:
-                # Check if this is a tool response
-                if hasattr(content_item, 'tool_use_id') and hasattr(content_item, 'content'):
-                    tool_name = getattr(content_item, 'name', '')
-                    tool_content = content_item.content
-                    
-                    # Parse JSON content if it's a string
-                    if isinstance(tool_content, str):
-                        try:
-                            import json
-                            tool_content = json.loads(tool_content)
-                        except:
-                            continue
-                    
-                    # Extract user information
-                    if tool_name == 'get_user_information' and isinstance(tool_content, dict):
-                        # Format: {user_id: {username, user_fullname, user_intro, user_account}}
-                        for user_id_str, user_info in tool_content.items():
-                            if user_id_str == 'error':
-                                continue
-                            try:
-                                user_id = int(user_id_str)
-                                # Get the full user object to get headshot
-                                user = CustomUser.objects.filter(id=user_id, account_privacy='public').first()
-                                if user:
-                                    recommended_users[str(user_id)] = {
-                                        'id': user_id,
-                                        'user_account': user_info.get('user_account', ''),
-                                        'user_fullname': user_info.get('user_fullname', ''),
-                                        'headshot_url': UserHeadshot.get_headshot_url(user),
-                                        'user_intro': user_info.get('user_intro'),
-                                        'account_privacy': 'public'
-                                    }
-                            except (ValueError, AttributeError) as e:
-                                logger.error(f"Error processing user {user_id_str}: {e}")
-                                continue
-                    
-                    # Extract post recommendations
-                    elif tool_name == 'get_post_recommendations' and isinstance(tool_content, list):
-                        for post_data in tool_content:
-                            if 'error' in post_data:
-                                continue
-                            
-                            post_id = post_data.get('id')
-                            if not post_id:
-                                continue
-                            
-                            # Determine if it's a social post or forum post
-                            # Forum posts have 'archive_title' or 'health_status'
-                            is_forum = 'archive_title' in post_data or 'health_status' in post_data
-                            
-                            if is_forum:
-                                # Forum post (disease archive)
-                                recommended_forum_posts[str(post_id)] = {
-                                    'id': post_id,
-                                    'archive_id': post_data.get('id'),
-                                    'archive_title': post_data.get('archive_title', ''),
-                                    'author': post_data.get('author', {}),
-                                    'content': post_data.get('content', ''),
-                                    'pet_info': post_data.get('pet_info', {}),
-                                    'health_status': post_data.get('health_status', ''),
-                                    'go_to_doctor': post_data.get('go_to_doctor', False),
-                                    'created_at': post_data.get('created_at', ''),
-                                    'likes': post_data.get('likes', 0),
-                                    'comments_count': post_data.get('comments_count', 0)
-                                }
-                            else:
-                                # Social post
-                                recommended_social_posts[str(post_id)] = {
-                                    'id': post_id,
-                                    'author': post_data.get('author', {}),
-                                    'content': post_data.get('content', ''),
-                                    'location': post_data.get('location'),
-                                    'created_at': post_data.get('created_at', ''),
-                                    'likes': post_data.get('likes', 0),
-                                    'comments_count': post_data.get('comments_count', 0)
-                                }
-        
-        logger.info(f"Extracted {len(recommended_users)} users, {len(recommended_social_posts)} social posts, {len(recommended_forum_posts)} forum posts")
-        
-    except Exception as e:
-        logger.error(f"Error extracting recommendations: {str(e)}", exc_info=True)
-    
-    return recommended_users, recommended_social_posts, recommended_forum_posts
+# NOTE: The agent already returns standardized dictionaries for recommendations.
+# Legacy extraction from raw MCP tool outputs is no longer required and has been removed.
 
 
 @api_view(['POST'])
@@ -570,16 +403,15 @@ def main_chat(request):
     Response (aiAgent-compatible format):
         {
             "response": "Here are your pets...",
-            "source": "mcp_agent",
-            "confidence": 1.0,
-            "intent": "get_pet_info",
             "conversationId": 123,
-            "operations": [...],  // Added for operation client
+            "operations": [...],
+            "operationType": "navigate | fill_form | click | display_data",
             "hasTutorial": false,
-            "hasRecommendedUsers": false,
-            "hasRecommendedArticles": false,
+            "tutorialType": null,
             "hasCalculator": false,
-            "hasOperation": true
+            "recommendedUsers": {},
+            "recommendedSocialPosts": {},
+            "recommendedForumPosts": {}
         }
     """
     try:
@@ -653,12 +485,15 @@ def main_chat(request):
         
         # Check if there was an error
         if 'error' in result:
-            error_response = create_standardized_response(
-                response='抱歉，我暫時無法處理您的請求。請稍後再試。',
-                source='error',
-                conversation_id=conversation_id,
-                error=result['error']
-            )
+            error_response = dict(result) if isinstance(result, dict) else {}
+            error_response.setdefault('response', '抱歉，我暫時無法處理您的請求。請稍後再試。')
+            error_response.setdefault('hasTutorial', False)
+            error_response.setdefault('hasCalculator', False)
+            error_response.setdefault('operations', [])
+            error_response.setdefault('recommendedUsers', {})
+            error_response.setdefault('recommendedSocialPosts', {})
+            error_response.setdefault('recommendedForumPosts', {})
+            error_response['conversationId'] = conversation_id
             return Response(error_response, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
         # Get the session_id from the result (OpenAI's session.id)
@@ -729,6 +564,30 @@ def main_chat(request):
         recommended_users = result.get('recommended_users', {})
         recommended_social_posts = result.get('recommended_social_posts', {})
         recommended_forum_posts = result.get('recommended_forum_posts', {})
+
+        # Normalize post dates to ensure 'created_at' exists for all posts
+        def _normalize_post_dates(posts_dict):
+            if not isinstance(posts_dict, dict):
+                return {}
+            for _pid, _post in list(posts_dict.items()):
+                if not isinstance(_post, dict):
+                    # Skip non-dict entries
+                    continue
+                ts = (
+                    _post.get('created_at')
+                    or _post.get('post_date')
+                    or _post.get('createdAt')
+                    or _post.get('postDate')
+                    or _post.get('timestamp')
+                    or _post.get('posted_at')
+                    or _post.get('published_at')
+                )
+                # Always set created_at so frontend can reliably consume it
+                _post['created_at'] = ts or datetime.now(timezone.utc).isoformat()
+            return posts_dict
+
+        recommended_social_posts = _normalize_post_dates(recommended_social_posts)
+        recommended_forum_posts = _normalize_post_dates(recommended_forum_posts)
         
         logger.info(f"Structured output received:")
         logger.info(f"  - Operations: {len(operations)}")
@@ -750,12 +609,25 @@ def main_chat(request):
             if not operation_type and operations:
                 operation_type = operations[0].get('type')
             
-            # Save assistant response with metadata
+            # Build the exact response payload to return (pass-through from agent, ensure conversationId)
+            response_payload = dict(result) if isinstance(result, dict) else {}
+            # Remove non-serializable/internal fields (e.g., agent_result)
+            response_payload.pop('agent_result', None)
+            response_payload['conversationId'] = conversation_id
+            # Ensure required keys exist for consistency
+            response_payload.setdefault('hasTutorial', has_tutorial)
+            response_payload.setdefault('tutorialType', tutorial_type)
+            response_payload.setdefault('hasCalculator', has_calculator)
+            response_payload.setdefault('operationType', operation_type)
+            response_payload.setdefault('operations', operations)
+            response_payload.setdefault('recommendedUsers', recommended_users)
+            response_payload.setdefault('recommendedSocialPosts', recommended_social_posts)
+            response_payload.setdefault('recommendedForumPosts', recommended_forum_posts)
+
             AgentMessage.objects.create(
                 conversation=thread,
                 role='assistant',
                 content=result.get('response', ''),
-                source='mcp_agent',
                 # Feature flags (buttons/UI) - now from structured output!
                 has_tutorial=has_tutorial,
                 tutorial_type=tutorial_type,
@@ -767,27 +639,16 @@ def main_chat(request):
                     'recommendedSocialPosts': recommended_social_posts,
                     'recommendedForumPosts': recommended_forum_posts,
                     'operations': operations,
-                    'operationParams': {}  # TODO: Extract from operations if needed
+                    'operationParams': {},  # TODO: Extract from operations if needed
+                    'message_data': response_payload  # Persist full standardized agent response for this message
                 }
             )
             logger.info(f"✓ Saved messages to database for conversation {thread.id}")
         else:
             logger.warning("⚠ No thread record - messages not saved to database")
         
-        # Build standardized response with structured output data
-        response_data = create_standardized_response(
-            response=result.get('response', ''),
-            source='mcp_agent',
-            conversation_id=conversation_id,
-            operations=operations,
-            has_tutorial=has_tutorial,
-            tutorial_type=tutorial_type,
-            has_calculator=has_calculator,
-            operation_type=operation_type,
-            recommended_users=recommended_users,
-            recommended_social_posts=recommended_social_posts,
-            recommended_forum_posts=recommended_forum_posts
-        )
+        # Build final response payload (pass-through)
+        response_data = response_payload
         
         logger.info(f"Main chat response: {response_data['response'][:100]}... (Operations: {len(operations)}, Users: {len(recommended_users)}, Social: {len(recommended_social_posts)}, Forum: {len(recommended_forum_posts)})")
         
@@ -798,12 +659,17 @@ def main_chat(request):
         import traceback
         traceback.print_exc()
         
-        error_response = create_standardized_response(
-            response='抱歉，我暫時無法處理您的請求。請稍後再試。',
-            source='error',
-            conversation_id=request.data.get('conversationId'),
-            error=f'處理請求時發生錯誤: {str(e)}'
-        )
+        error_response = {
+            'response': '抱歉，我暫時無法處理您的請求。請稍後再試。',
+            'conversationId': request.data.get('conversationId'),
+            'hasTutorial': False,
+            'hasCalculator': False,
+            'operations': [],
+            'recommendedUsers': {},
+            'recommendedSocialPosts': {},
+            'recommendedForumPosts': {},
+            'error': f'處理請求時發生錯誤: {str(e)}'
+        }
         return Response(error_response, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
@@ -861,10 +727,44 @@ def get_conversation_detail(request, conversation_id):
         
         messages_data = []
         for msg in messages:
+            # Include metadata needed to reconstruct previews and controls (no intent/source/confidence)
+            # Build standardized message data for assistant messages if available
+            msg_additional = msg.additional_data or {}
+            message_data_payload = None
+            if msg.role == 'assistant':
+                # Prefer saved standardized payload if present, else reconstruct
+                saved_payload = msg_additional.get('message_data')
+                if isinstance(saved_payload, dict):
+                    message_data_payload = saved_payload
+                else:
+                    # Reconstruct a standardized payload matching live response format
+                    message_data_payload = {
+                        'response': msg.content,
+                        'conversationId': conversation.id,
+                        'hasTutorial': msg.has_tutorial,
+                        'tutorialType': msg.tutorial_type,
+                        'hasCalculator': msg.has_calculator,
+                        'operationType': msg.operation_type,
+                        'operations': msg_additional.get('operations', []),
+                        'recommendedUsers': msg_additional.get('recommendedUsers', {}),
+                        'recommendedSocialPosts': msg_additional.get('recommendedSocialPosts', {}),
+                        'recommendedForumPosts': msg_additional.get('recommendedForumPosts', {})
+                    }
+
             messages_data.append({
+                'id': msg.id,
                 'role': msg.role,
                 'content': msg.content,
-                'created_at': msg.created_at.isoformat()
+                'created_at': msg.created_at.isoformat(),
+                'has_tutorial': msg.has_tutorial,
+                'tutorial_type': msg.tutorial_type,
+                'has_calculator': msg.has_calculator,
+                'operation_type': msg.operation_type,
+                # Structured data (recommended posts/users, operations, etc.)
+                'additional_data': msg_additional,
+                'entities': msg.entities or {},
+                # Exact standardized agent response for assistant messages
+                'message_data': message_data_payload,
             })
         
         conversation_data = {

@@ -234,8 +234,10 @@ const Post = ({
     if (onComment) {
       onComment(postData.id);
     } else {
-      // 預設導航到貼文詳情頁面
-      navigate(`/post/${postData.id}`);
+      // 預設：不再導航到貼文詳情頁面（路由已移除），僅最小化 AI 浮動頭像
+      try {
+        window.dispatchEvent(new CustomEvent('forceFloatingMode'));
+      } catch (e) {}
     }
   };
 
