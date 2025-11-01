@@ -252,4 +252,26 @@ def create_mcp_server() -> FastMCP:
 
         return await fetch()
 
+    @mcp.tool(
+        name="list_tutorial_topics",
+        description="List available tutorial topics for users as an id->description mapping."
+    )
+    async def list_tutorial_topics() -> Dict[str, str]:
+        @sync_to_async
+        def fetch() -> Dict[str, str]:
+            try:
+                # Return values aligned with frontend tutorialOptionsMap.json
+                topics_map: Dict[str, str] = {
+                    "tagPet": "學習如何在照片中標記您的寵物",
+                    "createPost": "學習如何創建和發布貼文",
+                    "calculate": "學習如何使用計算機計算寵物一天所需攝取之飼料量",
+                    "addAbnormalPost": "學習如何新增一篇異常記錄",
+                    "addPet": "學習如何將您的寵物新增到系統裡"
+                }
+                return json.loads(json.dumps(topics_map, ensure_ascii=False))
+            except Exception as e:
+                return {"error": f"Failed to list tutorial topics: {str(e)}"}
+
+        return await fetch()
+
     return mcp

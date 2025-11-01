@@ -264,9 +264,8 @@ const ChatWindow = ({
         text: aiResult.response,
         isUser: false,
         timestamp: new Date(),
-        // 加入教學相關資訊
-        hasTutorial: aiResult.hasTutorial || false,
-        tutorialType: aiResult.tutorialType || null,
+        // 加入教學相關資訊（新：使用單一 tutorial 欄位）
+        tutorial: aiResult.tutorial || null,
         // 加入推薦用戶相關資訊 (新格式: 字典) - 不需要 hasRecommendedUsers flag
         recommendedUsers: aiResult.recommendedUsers || {},  // 字典格式 {id: details}
         // 加入推薦文章相關資訊 (新格式: 字典) - 不需要 hasRecommendedArticles flag
@@ -375,8 +374,7 @@ const ChatWindow = ({
           text: messageData?.response || msg.content,
           isUser: msg.role === 'user',
           timestamp: new Date(msg.created_at),
-          hasTutorial: (messageData?.hasTutorial ?? msg.has_tutorial) || false,
-          tutorialType: messageData?.tutorialType ?? msg.tutorial_type ?? null,
+          tutorial: messageData?.tutorial ?? msg.tutorial_type ?? null,
           recommendedUsers,
           recommendedSocialPosts,
           recommendedForumPosts,
@@ -436,8 +434,8 @@ const ChatWindow = ({
   }, [messages]);
 
   // 處理開始教學按鈕點擊 - 觸發教學模式事件
-  const handleStartTutorial = (tutorialType) => {
-    console.log('開始教學模式:', tutorialType);
+  const handleStartTutorial = (tutorialId) => {
+    console.log('開始教學模式:', tutorialId);
 
     // 延遲一下讓用戶看到訊息，然後關閉聊天室並啟動教學
     setTimeout(() => {
@@ -452,7 +450,8 @@ const ChatWindow = ({
         // 觸發教學模式事件，由 App.jsx 或相應組件處理
         window.dispatchEvent(new CustomEvent('startTutorial', {
           detail: {
-            tutorialType,
+            // 保持事件欄位名稱為 tutorialType 以相容其他組件
+            tutorialType: tutorialId,
             source: 'ai_chat',
             user: user
           }
@@ -719,10 +718,10 @@ const ChatWindow = ({
                     ))}
                   </div>
                   {/* 如果有教學模式，顯示開始教學按鈕 */}
-                  {message.hasTutorial && (
+                  {message.tutorial && (
                     <button
                       className={styles.tutorialButton}
-                      onClick={() => handleStartTutorial(message.tutorialType)}
+                      onClick={() => handleStartTutorial(message.tutorial)}
                     >
                       {t('chatWindow.tutorial.startButton')}
                     </button>

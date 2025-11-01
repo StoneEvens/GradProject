@@ -30,8 +30,7 @@ def run_mcp_agent(user_message, user_id, username, conversation_id=None, session
         class AgentResponse(BaseModel):
             """Structured response from the AI agent"""
             response: str = Field(description="The main text response to the user")
-            has_tutorial: bool = Field(default=False, description="Whether tutorial button should be shown")
-            tutorial_type: Optional[str] = Field(default=None, description="Type of tutorial: health, training, nutrition")
+            tutorial: Optional[str] = Field(default=None, description="Tutorial identifier to start (e.g., 'createPost'). If set, frontend shows a tutorial button.")
             has_calculator: bool = Field(default=False, description="Whether calculator button should be shown")
             operation_type: Optional[str] = Field(default=None, description="Primary operation type: navigate, fill_form, click, display_data")
             operations: List[Dict[str, Any]] = Field(default_factory=list, description="List of operations to perform")
@@ -66,7 +65,8 @@ def run_mcp_agent(user_message, user_id, username, conversation_id=None, session
                 "get_post_recommendations",
                 "get_user_information",
                 "get_user_pet_types",
-                "get_pet_foods_details"
+                "get_pet_foods_details",
+                "list_tutorial_topics"
             ],
             "require_approval": "never"
         })
@@ -74,12 +74,11 @@ def run_mcp_agent(user_message, user_id, username, conversation_id=None, session
         # Create the agent with structured output
         info_fetcher = Agent(
             name="Info Fetcher",
-            instructions=f"""Use Traditional Chinese or English to respond to the user's requests. Understand the user's intention, then provide information using the mcp tools to the user. No need to summarize or show the data, the frontend will handle it; but it's okay to ask if the user needs more information related to it.
+            instructions=f"""Use Traditional Chinese or English to respond to the user's requests. Understand the user's intention, then provide information using the MCP tools to the user. No need to summarize or show raw data; the frontend will render appropriately. Ask if the user needs more info when helpful.
 
 When responding, structure your output according to the AgentResponse schema:
 - response: Your text response to the user
-- has_tutorial: Set to true if you want to show a tutorial button (for health, training, or nutrition tutorials)
-- tutorial_type: If has_tutorial is true, specify: "health", "training", or "nutrition"
+- tutorial: If you want to start a guided tutorial, set this to one of the valid tutorial IDs (e.g., "createPost"). Use the list_tutorial_topics tool to discover valid IDs.
 - has_calculator: Set to true if you want to show a calculator button (for pet nutrition or health calculations)
 - operation_type: If performing an operation, specify: "navigate", "fill_form", "click", or "display_data"
 - operations: List of operations to perform (each with operation_id, type, params, requires_confirmation)
@@ -89,7 +88,9 @@ When responding, structure your output according to the AgentResponse schema:
 
 When calling get_post_recommendations by default, fetch BOTH social and forum posts unless the user explicitly asks for one type (i.e., set isSocial=true and isForum=true). Then, separate the returned items into recommended_social_posts and recommended_forum_posts accordingly.
 
-Do not make too many assumptions. Try to use the given information to answer the user first, then ask if they would like to provide more information. Try to use the mcp tools first. User ID: {user_id}""",
+Use the MCP tool list_tutorial_topics to validate the available tutorial IDs and their descriptions before setting the tutorial field. Do not use legacy fields like has_tutorial or tutorial_type.
+
+User ID: {user_id}""",
             model="gpt-5",
             tools=[mcp],
             output_type=AgentOutputSchema(AgentResponse, strict_json_schema=False),  # Enable structured output with relaxed schema!
@@ -158,8 +159,7 @@ Do not make too many assumptions. Try to use the given information to answer the
                 'error': 'Agent processing took too long. Please try a simpler request.',
                 'response': '',
                 'operations': [],
-                'has_tutorial': False,
-                'tutorial_type': None,
+                'tutorial': None,
                 'has_calculator': False,
                 'operation_type': None,
                 'recommended_users': {},
@@ -202,7 +202,7 @@ Do not make too many assumptions. Try to use the given information to answer the
                 structured_output = agent_result.final_output_as(AgentResponse)
                 logger.info(f"✓ Successfully extracted structured output from agent")
                 logger.info(f"  - response text length: {len(structured_output.response)}")
-                logger.info(f"  - has_tutorial: {structured_output.has_tutorial}")
+                logger.info(f"  - tutorial: {structured_output.tutorial}")
                 logger.info(f"  - has_calculator: {structured_output.has_calculator}")
                 logger.info(f"  - operations count: {len(structured_output.operations)}")
                 logger.info(f"  - recommended_users count: {len(structured_output.recommended_users)}")
@@ -229,7 +229,7 @@ Do not make too many assumptions. Try to use the given information to answer the
             # Create a basic structured output from text
             structured_output = AgentResponse(
                 response=ai_response_text,
-                has_tutorial=False,
+                tutorial=None,
                 has_calculator=False,
                 operations=[],
                 recommended_users={},
@@ -253,8 +253,7 @@ Do not make too many assumptions. Try to use the given information to answer the
         
         return {
             'response': structured_output.response,
-            'has_tutorial': structured_output.has_tutorial,
-            'tutorial_type': structured_output.tutorial_type,
+            'tutorial': structured_output.tutorial,
             'has_calculator': structured_output.has_calculator,
             'operation_type': structured_output.operation_type,
             'operations': structured_output.operations,
@@ -272,8 +271,7 @@ Do not make too many assumptions. Try to use the given information to answer the
             'error': 'Missing required package. Install: pip uninstall agents && pip install git+https://github.com/openai/openai-agents-python.git',
             'response': '',
             'operations': [],
-            'has_tutorial': False,
-            'tutorial_type': None,
+            'tutorial': None,
             'has_calculator': False,
             'operation_type': None,
             'recommended_users': {},
@@ -290,8 +288,7 @@ Do not make too many assumptions. Try to use the given information to answer the
             'error': f'Unexpected error: {str(e)}',
             'response': '',
             'operations': [],
-            'has_tutorial': False,
-            'tutorial_type': None,
+            'tutorial': None,
             'has_calculator': False,
             'operation_type': None,
             'recommended_users': {},
@@ -487,7 +484,7 @@ def main_chat(request):
         if 'error' in result:
             error_response = dict(result) if isinstance(result, dict) else {}
             error_response.setdefault('response', '抱歉，我暫時無法處理您的請求。請稍後再試。')
-            error_response.setdefault('hasTutorial', False)
+            error_response.setdefault('tutorial', None)
             error_response.setdefault('hasCalculator', False)
             error_response.setdefault('operations', [])
             error_response.setdefault('recommendedUsers', {})
@@ -557,8 +554,7 @@ def main_chat(request):
         # Extract structured data from agent result
         # With output_type=AgentResponse, all data is already structured!
         operations = result.get('operations', [])
-        has_tutorial = result.get('has_tutorial', False)
-        tutorial_type = result.get('tutorial_type')
+        tutorial = result.get('tutorial')
         has_calculator = result.get('has_calculator', False)
         operation_type = result.get('operation_type')
         recommended_users = result.get('recommended_users', {})
@@ -594,7 +590,7 @@ def main_chat(request):
         logger.info(f"  - Recommended users: {len(recommended_users)}")
         logger.info(f"  - Recommended social posts: {len(recommended_social_posts)}")
         logger.info(f"  - Recommended forum posts: {len(recommended_forum_posts)}")
-        logger.info(f"  - Has tutorial: {has_tutorial}, Has calculator: {has_calculator}")
+        logger.info(f"  - Tutorial: {tutorial}, Has calculator: {has_calculator}")
         
         # Save messages to database for history display
         if thread:
@@ -615,8 +611,7 @@ def main_chat(request):
             response_payload.pop('agent_result', None)
             response_payload['conversationId'] = conversation_id
             # Ensure required keys exist for consistency
-            response_payload.setdefault('hasTutorial', has_tutorial)
-            response_payload.setdefault('tutorialType', tutorial_type)
+            response_payload.setdefault('tutorial', tutorial)
             response_payload.setdefault('hasCalculator', has_calculator)
             response_payload.setdefault('operationType', operation_type)
             response_payload.setdefault('operations', operations)
@@ -629,8 +624,8 @@ def main_chat(request):
                 role='assistant',
                 content=result.get('response', ''),
                 # Feature flags (buttons/UI) - now from structured output!
-                has_tutorial=has_tutorial,
-                tutorial_type=tutorial_type,
+                has_tutorial=bool(tutorial) if tutorial is not None else False,
+                tutorial_type=tutorial,
                 has_calculator=has_calculator,
                 operation_type=operation_type,
                 # Store dictionaries in additional_data
@@ -662,7 +657,7 @@ def main_chat(request):
         error_response = {
             'response': '抱歉，我暫時無法處理您的請求。請稍後再試。',
             'conversationId': request.data.get('conversationId'),
-            'hasTutorial': False,
+            'tutorial': None,
             'hasCalculator': False,
             'operations': [],
             'recommendedUsers': {},
@@ -741,8 +736,7 @@ def get_conversation_detail(request, conversation_id):
                     message_data_payload = {
                         'response': msg.content,
                         'conversationId': conversation.id,
-                        'hasTutorial': msg.has_tutorial,
-                        'tutorialType': msg.tutorial_type,
+                        'tutorial': msg.tutorial_type,  # keep single field only
                         'hasCalculator': msg.has_calculator,
                         'operationType': msg.operation_type,
                         'operations': msg_additional.get('operations', []),

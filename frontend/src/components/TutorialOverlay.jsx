@@ -254,7 +254,8 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
     const containerLeft = containerRect ? containerRect.left : (window.innerWidth - containerWidth) / 2;
     const containerTop = containerRect ? containerRect.top : 0;
 
-    const margin = 20;
+  const margin = 20;
+  const baseLeft = containerLeft + margin;
     const chatBubbleHeight = chatBubbleHeightRef.current || 200; // 動態量測後的聊天泡泡高度
 
     // 步驟 5：固定在畫面下方 35% 位置（覆蓋其他定位邏輯）
@@ -266,7 +267,7 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
       );
       return {
         top: finalTop,
-        left: margin,
+        left: baseLeft,
         width: containerWidth - (margin * 2),
         placement: 'bottom-35-fixed',
         description: '步驟5：固定在下方35%'
@@ -286,7 +287,7 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
           const bottomGap = Math.max(24, margin);
           return {
             top: Math.max(margin, containerHeight - chatBubbleHeight - bottomGap),
-            left: margin,
+            left: baseLeft,
             width: containerWidth - (margin * 2),
             placement: 'bottom-fixed-avoid-highlight',
             description: '步驟5：高光占比大，固定底部'
@@ -299,7 +300,7 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
         if (fitsBelow) {
           return {
             top: belowTop,
-            left: margin,
+            left: baseLeft,
             width: containerWidth - (margin * 2),
             placement: 'below-highlight',
             description: '全圖高亮 - 高光區塊下方'
@@ -312,7 +313,7 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
         if (fitsAbove) {
           return {
             top: aboveTop,
-            left: margin,
+            left: baseLeft,
             width: containerWidth - (margin * 2),
             placement: 'above-highlight',
             description: '全圖高亮 - 高光區塊上方'
@@ -326,7 +327,7 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
         );
         return {
           top: Math.max(margin, fallbackTop),
-          left: margin,
+          left: baseLeft,
           width: containerWidth - (margin * 2),
           placement: 'center',
           description: '全圖高亮 - 空間不足（置中）'
@@ -336,7 +337,7 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
       const fallbackTop = containerHeight - 250;
       return {
         top: Math.max(margin, Math.min(fallbackTop, containerHeight - chatBubbleHeight - margin)),
-        left: margin,
+        left: baseLeft,
         width: containerWidth - (margin * 2),
         placement: 'bottom-fixed',
         description: '全圖高亮 - 尚無高光位置（備用）'
@@ -347,7 +348,7 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
       // 沒有目標元素時（如完成步驟），放在容器中央
       return {
         top: (containerHeight - chatBubbleHeight) / 2,
-        left: margin,
+        left: baseLeft,
         width: containerWidth - (margin * 2),
         placement: 'center-default',
         description: '沒有目標元素 - 中央位置'
@@ -417,7 +418,7 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
 
         return {
           top: finalTop,
-          left: margin,
+          left: baseLeft,
           width: containerWidth - (margin * 2),
           placement: pos.placement,
           description: pos.description
@@ -428,7 +429,7 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
     // 備用方案
     return {
       top: containerHeight - 250,
-      left: margin,
+      left: baseLeft,
       width: containerWidth - (margin * 2),
       placement: 'bottom-fixed',
       description: '容器下方（備用）'
@@ -671,15 +672,11 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
           if (targetElementRef.current !== cachedEl) return;
           if (!cachedEl.isConnected) return;
 
-          const appContainer = document.getElementById('root');
-          const containerRect = appContainer ? appContainer.getBoundingClientRect() : null;
-          const containerLeft = containerRect ? containerRect.left : 0;
-          const containerTop = containerRect ? containerRect.top : 0;
-
           const currentRect = cachedEl.getBoundingClientRect();
           const spotlightRect = {
-            top: currentRect.top - containerTop - 10,
-            left: currentRect.left - containerLeft - 10,
+            // Use viewport-relative coordinates since overlay is fixed to viewport
+            top: currentRect.top - 10,
+            left: currentRect.left - 10,
             width: currentRect.width + 20,
             height: currentRect.height + 20
           };
@@ -873,15 +870,10 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
 
           const rect = targetElement.getBoundingClientRect();
 
-          // 設置 spotlight 位置（相對於容器）
-          const appContainer = document.getElementById('root');
-          const containerRect = appContainer ? appContainer.getBoundingClientRect() : null;
-          const containerLeft = containerRect ? containerRect.left : 0;
-          const containerTop = containerRect ? containerRect.top : 0;
-
+          // 設置 spotlight 位置（viewport 相對座標，因為 overlay 是 fixed）
           const spotlightRect = {
-            top: rect.top - containerTop - 10,
-            left: rect.left - containerLeft - 10,
+            top: rect.top - 10,
+            left: rect.left - 10,
             width: rect.width + 20,
             height: rect.height + 20
           };
@@ -1570,7 +1562,7 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
 
   // 處理跳過
   const handleSkip = () => {
-    if (tutorial && tutorial.options.allowSkip) {
+    if (tutorial && (tutorial.options?.allowSkip ?? true)) {
       tutorialUtils.saveTutorialProgress(tutorialType, currentStep, 'skipped');
       onSkip && onSkip();
     }
@@ -1856,7 +1848,7 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
                 </div>
 
                 {/* 進度指示器 */}
-                {tutorial.options.showProgress && (
+                {(tutorial.options?.showProgress ?? true) && (
                   <div className={styles.progressIndicator}>
                     <div className={styles.progressDots}>
                       {Array.from({ length: tutorial.steps.length }, (_, index) => (
