@@ -30,9 +30,7 @@
         "如何上傳寵物照片"
       ],
       "answer": "您可以進入「寵物檔案」頁面，點擊寵物頭像圖片，選擇「更換照片」選項，然後從相簿選擇或拍攝新照片即可完成更換。",
-      "has_tutorial": false,
-      "tutorial_type": null,
-      "category": "pet"
+      "tutorial": null
     },
     {
       "id": 2,

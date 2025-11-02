@@ -407,10 +407,34 @@ const ChatWindow = ({
         }
 
         if (lastId) {
-          const conversationDetail = await aiChatService.loadConversation(lastId);
-          const formatted = await formatMessagesFromConversationDetail(conversationDetail);
-          setMessages(formatted);
-          setCurrentConversationId(Number(lastId));
+          try {
+            const conversationDetail = await aiChatService.loadConversation(lastId);
+            const formatted = await formatMessagesFromConversationDetail(conversationDetail);
+            setMessages(formatted);
+            setCurrentConversationId(Number(lastId));
+          } catch (loadErr) {
+            // 快取對話已不存在：建立新對話
+            try {
+              const newConv = await aiChatService.createConversation({ title: '新對話' });
+              setCurrentConversationId(newConv.id);
+              try { localStorage.setItem(LAST_CONV_ID_KEY, String(newConv.id)); } catch {}
+
+              // 若無快取訊息，顯示歡迎訊息
+              if (!localStorage.getItem(LAST_MESSAGES_KEY)) {
+                setMessages([
+                  {
+                    id: 1,
+                    text: t('chatWindow.welcomeMessage'),
+                    isUser: false,
+                    timestamp: new Date()
+                  }
+                ]);
+              }
+            } catch (createErr) {
+              // 無法建立新對話時，保持現狀
+              console.warn('建立新對話失敗:', createErr);
+            }
+          }
         }
       } catch (e) {
         // 無法還原時保持當前狀態
