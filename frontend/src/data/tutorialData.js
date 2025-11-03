@@ -395,7 +395,7 @@ const tutorialData = {
           position: 'textarea'
         },
         action: 'click',
-        nextCondition: 'descriptionEnterTwice'
+        nextCondition: 'pageNavigate'
       },
       {
         id: 11,
