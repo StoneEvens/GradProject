@@ -8,7 +8,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     host: '127.0.0.1',  // Local development
-    port: 5173,         // Specific port to avoid conflicts
+    port: 4173,         // Specific port to avoid conflicts
     cors: true,
     // Allow requests from the reverse proxy domain
     allowedHosts: ['peter.geniusbee.net', 'localhost', '127.0.0.1'],

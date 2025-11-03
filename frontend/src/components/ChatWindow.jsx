@@ -435,6 +435,16 @@ const ChatWindow = ({
               console.warn('建立新對話失敗:', createErr);
             }
           }
+        } else {
+          // 無快取對話：建立新對話
+          try {
+            const newConv = await aiChatService.createConversation({ title: '新對話' });
+            setCurrentConversationId(newConv.id);
+            try { localStorage.setItem(LAST_CONV_ID_KEY, String(newConv.id)); } catch {}
+            // 不覆蓋已存在的訊息（例如已預先顯示的歡迎訊息或本地快取）
+          } catch (createErr) {
+            console.warn('建立新對話失敗（無快取情況）:', createErr);
+          }
         }
       } catch (e) {
         // 無法還原時保持當前狀態
