@@ -394,7 +394,7 @@ const tutorialData = {
           type: 'rectangle',
           position: 'textarea'
         },
-        action: 'click',
+        action: 'none',
         nextCondition: 'manualNext'
       },
       {
