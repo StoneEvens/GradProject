@@ -114,6 +114,11 @@ const ChatSidebar = ({ isOpen, onClose, currentConversationId, onConversationSel
       await aiChatService.deleteConversation(conversationId);
       // 從列表中移除已刪除的對話
       setConversations(prev => prev.filter(conv => conv.id !== conversationId));
+
+      // 如果刪除的是當前對話，立即切換到新對話
+      if (conversationId === currentConversationId && typeof onNewConversation === 'function') {
+        onNewConversation();
+      }
     } catch (error) {
       console.error('刪除對話失敗:', error);
       setError('刪除對話失敗，請稍後再試');
