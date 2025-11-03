@@ -38,7 +38,8 @@ logs/
 .env.staging
 *.env
 .dotenv
-backend/ocrapp/*.json
+# 將 OCR 應用程式中的服務帳戶金鑰等 JSON 檔排除（相對於本目錄）
+ocrapp/*.json
 
 # 媒體檔案和上傳內容
 media/
