@@ -888,6 +888,29 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
           });
         })();
 
+          // 🌟 若是可輸入元件（例如 textarea/input），允許互動與聚焦
+        if (targetElement) {
+          targetElement.style.pointerEvents = 'auto';
+          targetElement.style.zIndex = '10011'; // 稍微高於 spotlight
+          targetElement.style.userSelect = 'auto';
+
+          const tag = targetElement.tagName.toUpperCase();
+          if (
+            tag === 'INPUT' ||
+            tag === 'TEXTAREA' ||
+            targetElement.contentEditable === 'true'
+          ) {
+            setTimeout(() => {
+              try {
+                targetElement.focus();
+                console.log('🟢 Tutorial: 已自動聚焦輸入元素');
+              } catch (e) {
+                console.warn('Focus 失敗:', e);
+              }
+            }, 400);
+          }
+        }
+
         // 為目標元素添加特殊類，確保它可以被點擊
         targetElement.classList.add('tutorial-target');
         targetElement.style.position = 'relative';
@@ -1942,6 +1965,30 @@ z
                 >
                   {stepData.action === 'complete' ? '✓ 完成教學' : '✕ 關閉教學'}
                 </button>
+                {/* 第10步：新增一個「下一步」按鈕 */}
+                {stepData?.id === 10 && (
+                  <button
+                    className={styles.nextButton}
+                    onClick={() => {
+                      console.log('🟢 Tutorial: 手動進入下一步 (from Step 10)');
+                      handleNextStep();
+                    }}
+                    style={{
+                      marginLeft: '10px',
+                      backgroundColor: '#4CAF50',
+                      color: 'white',
+                      padding: '6px 12px',
+                      borderRadius: '6px',
+                      border: 'none',
+                      cursor: 'pointer',
+                      fontSize: '14px',
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                    }}
+                  >
+                    下一步 →
+                  </button>
+                )}
+
 
               </div>
             </div>
