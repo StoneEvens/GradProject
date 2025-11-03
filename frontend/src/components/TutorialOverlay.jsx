@@ -371,7 +371,7 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
       {
         condition: relativeTargetBottom < containerHeight * 0.5 &&
                    (containerHeight - relativeTargetBottom) > (chatBubbleHeight + 60),
-        top: relativeTargetBottom + 40,
+        top: relativeTargetBottom + 30,
         placement: 'below-target',
         description: '目標元素下方'
       },
@@ -379,7 +379,7 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
       {
         condition: relativeTargetTop > containerHeight * 0.5 &&
                    relativeTargetTop > (chatBubbleHeight + 60),
-        top: relativeTargetTop - chatBubbleHeight - 40,
+        top: relativeTargetTop - chatBubbleHeight - 30,
         placement: 'above-target',
         description: '目標元素上方'
       },
