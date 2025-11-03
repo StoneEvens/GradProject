@@ -1157,8 +1157,47 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
           // 這個條件通過路由變化處理，在這裡不需要特別檢查
           conditionMet = false;
           break;
-        case 'noCondition':
+        // 點擊 textarea（for step10）
+        case 'descriptionClicked': {
+          const ta = document.querySelector(
+            'textarea[class*="descriptionInput"]:not([disabled]), [class*="descriptionSection"] textarea:not([disabled])'
+          );
+
+          if (!ta) {
+            conditionMet = false;
+            break;
+          }
+
+          if (!ta.__tutorialClickHooked) {
+            ta.__tutorialClickHooked = true;
+            ta.addEventListener('click', () => {
+              ta.__tutorialClicked = true;
+            }, { once: true }); // 只要點過一次就觸發
+          }
+
+          conditionMet = !!ta.__tutorialClicked;
           break;
+        }
+
+        // 通用元素點擊條件（所有步驟可共用）
+        case 'elementClicked': {
+          const el = findElementWithSelector(currentStep.targetElement?.selector);
+          if (!el) {
+            conditionMet = false;
+            break;
+          }
+
+          if (!el.__tutorialClickHooked) {
+            el.__tutorialClickHooked = true;
+            el.addEventListener('click', () => {
+              el.__tutorialClicked = true;
+            }, { once: true });
+          }
+
+          conditionMet = !!el.__tutorialClicked;
+          break;
+        }
+
         case 'imageAdded':
           // 檢查是否有圖片預覽元素出現（限定影像流程範圍）
           const scopeRoot = getImageFlowRoot();

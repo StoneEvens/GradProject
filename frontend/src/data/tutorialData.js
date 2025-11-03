@@ -395,7 +395,7 @@ const tutorialData = {
           position: 'textarea'
         },
         action: 'click',
-        nextCondition: 'noCondition'
+        nextCondition: 'descriptionClicked'
       },
       {
         id: 11,
