@@ -38,6 +38,7 @@ logs/
 .env.staging
 *.env
 .dotenv
+backend/ocrapp/*.json
 
 # 媒體檔案和上傳內容
 media/
