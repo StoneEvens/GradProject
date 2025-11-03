@@ -523,7 +523,9 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
           // 對於 menuOpen、pageNavigate 和 imageAdded 條件，需要讓點擊事件正常執行
           if (stepData.nextCondition === 'menuOpen' || 
               stepData.nextCondition === 'pageNavigate' || 
-              stepData.nextCondition === 'noCondition' || 
+              stepData.nextCondition === 'noCondition' ||
+              stepData.nextCondition === 'descriptionClicked' || 
+              stepData.nextCondition === 'elementClicked'  || 
               stepData.nextCondition === 'imageAdded') {
             // 移除事件阻止，讓原始點擊功能執行
             console.log('允許原始點擊事件執行以觸發:', stepData.nextCondition);
