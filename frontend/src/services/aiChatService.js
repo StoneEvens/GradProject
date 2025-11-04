@@ -194,7 +194,10 @@ class AIChatService {
    */
   async getConversationDetail(conversationId) {
     try {
-  const response = await this.apiClient.get(`${this.basePath}/conversations/${conversationId}/`);
+      if (!conversationId || String(conversationId) === 'undefined') {
+        throw new Error('Invalid conversation id');
+      }
+      const response = await this.apiClient.get(`${this.basePath}/conversations/${conversationId}/`);
       return response.data;
     } catch (error) {
       console.error('Get Conversation Detail Error:', error);
@@ -209,6 +212,11 @@ class AIChatService {
    */
   async loadConversation(conversationId) {
     try {
+      // Guard: if missing/invalid id, auto-create a new AI conversation in正确的命名空间
+      if (!conversationId || String(conversationId) === 'undefined') {
+        const created = await this.createConversation({ title: '新對話' });
+        conversationId = created.id;
+      }
       const conversation = await this.getConversationDetail(conversationId);
 
       // 設定為當前對話
@@ -252,7 +260,8 @@ class AIChatService {
    */
   async createConversation(data = {}) {
     try {
-  const response = await this.apiClient.post(`${this.agentBasePath}/conversations/create/`, data);
+      // Use AI (AgentThread) namespace so conversation details align with /ai/conversations/:id
+      const response = await this.apiClient.post(`${this.basePath}/conversations/create/`, data);
       this.currentConversationId = response.data.id;
       return response.data;
     } catch (error) {

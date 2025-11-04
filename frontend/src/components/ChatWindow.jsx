@@ -645,11 +645,11 @@ const ChatWindow = ({
     }
   };
 
-  const handleNewConversation = () => {
+  const handleNewConversation = async () => {
     // 重置 AI Chat Service 的會話狀態
     aiChatService.startNewConversation();
 
-    // 重置前端狀態
+    // 預設顯示歡迎訊息
     setMessages([
       {
         id: 1,
@@ -658,8 +658,18 @@ const ChatWindow = ({
         timestamp: new Date()
       }
     ]);
-    setCurrentConversationId(null);
-    try { localStorage.removeItem(LAST_CONV_ID_KEY); } catch (e) {}
+
+    // 立刻在後端建立新對話，避免「新對話」在列表中消失
+    try {
+      const newConv = await aiChatService.createConversation({ title: '新對話' });
+      setCurrentConversationId(newConv.id);
+      try { localStorage.setItem(LAST_CONV_ID_KEY, String(newConv.id)); } catch (e) {}
+    } catch (err) {
+      console.warn('建立新對話失敗（按下新對話）:', err);
+      // 失敗時，至少清掉舊的快取，讓下次開啟時會自動建立
+      setCurrentConversationId(null);
+      try { localStorage.removeItem(LAST_CONV_ID_KEY); } catch (e) {}
+    }
   };
 
   // 處理浮動頭像點擊

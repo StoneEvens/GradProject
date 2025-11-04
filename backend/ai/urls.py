@@ -11,6 +11,7 @@ urlpatterns = [
     path('chat/', views.main_chat, name='main-chat'),
     
     # Conversation management endpoints
+    path('conversations/create/', views.create_conversation, name='create-conversation'),
     path('conversations/', views.get_conversations, name='get-conversations'),
     path('conversations/<int:conversation_id>/', views.get_conversation_detail, name='get-conversation-detail'),
     path('conversations/<int:conversation_id>/update/', views.update_conversation, name='update-conversation'),

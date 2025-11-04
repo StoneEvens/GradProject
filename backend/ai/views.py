@@ -74,7 +74,7 @@ def run_mcp_agent(user_message, user_id, username, conversation_id=None, session
         # Create the agent with structured output
         info_fetcher = Agent(
             name="Info Fetcher",
-            instructions=f"""Use Traditional Chinese or English to respond to the user's requests. Understand the user's intention, then provide information using the MCP tools to the user. No need to summarize or show raw data; the frontend will render appropriately. Ask if the user needs more info when helpful.
+            instructions=f"""Use Traditional Chinese or English to respond to the user's requests. Understand the user's intention, then provide information using the MCP tools to the user. Ask if the user needs more info when helpful Return the data and do not summarize or show raw data. Please quickly provide the data back to the user.
             When calling get_post_recommendations by default, fetch BOTH social and forum posts unless the user explicitly asks for one type (i.e., set isSocial=true and isForum=true). Then, separate the returned items into recommended_social_posts and recommended_forum_posts accordingly.
             Use the MCP tool list_tutorial_topics to validate the available tutorial IDs and their descriptions before setting the tutorial field. Do not use legacy fields like has_tutorial or tutorial_type.
             User ID: {user_id}""",
@@ -860,6 +860,61 @@ def delete_conversation(request, conversation_id):
         logger.error(f"Error deleting conversation: {str(e)}", exc_info=True)
         return Response({
             'error': f'Failed to delete conversation: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_conversation(request):
+    """
+    Create a new AI Agent conversation (AgentThread) with a fresh OpenAI Session.
+    This lets the frontend initialize a conversation ID before sending the first message.
+
+    Request body (optional):
+        { "title": "新對話" }
+
+    Response:
+        { "id": <int>, "title": <str>, "created_at": <iso8601> }
+    """
+    try:
+        try:
+            from agents.memory import OpenAIConversationsSession
+        except Exception as e:
+            logger.error(f"Missing or failing agents package when creating conversation: {e}")
+            return Response({
+                'error': 'Server is missing required agent packages. Please contact support.'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        title = request.data.get('title') or '新對話'
+
+        # Initialize a new OpenAI session (session id created lazily by API on first use)
+        session = OpenAIConversationsSession()
+        session_id = getattr(session, '_session_id', None)
+
+        # Create the DB thread now; if session_id is not yet assigned, it will be set on first run.
+        # However, the OpenAI SDK usually assigns an id lazily; we still store whatever we have.
+        if not session_id:
+            # Mark a placeholder; it will be updated on first run mismatch check
+            session_id = f"sess_pending_{uuid.uuid4().hex[:8]}"
+
+        thread = AgentThread.objects.create(
+            user=request.user,
+            thread_id=session_id,
+            title=title
+        )
+
+        logger.info(f"Created new AgentThread {thread.id} for user {request.user.username} with session '{session_id}'")
+
+        return Response({
+            'id': thread.id,
+            'title': thread.title,
+            'created_at': thread.created_at.isoformat()
+        }, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        logger.error(f"Error creating new conversation: {str(e)}", exc_info=True)
+        return Response({
+            'error': f'Failed to create conversation: {str(e)}'
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
