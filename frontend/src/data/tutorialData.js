@@ -411,8 +411,8 @@ const tutorialData = {
           type: 'rectangle',
           position: 'button'
         },
-        action: 'click',
-        nextCondition: 'hashtagAdded'
+        action: 'none',
+        nextCondition: 'manualNext'
       },
       {
         id: 12,
@@ -428,8 +428,7 @@ const tutorialData = {
           type: 'rectangle',
           position: 'button'
         },
-        action: 'click',
-        nextCondition: 'pageNavigate'
+        action: 'click'
       },
       {
         id: 13,
