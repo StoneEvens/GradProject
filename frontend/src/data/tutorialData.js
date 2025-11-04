@@ -460,7 +460,8 @@ const tutorialData = {
           type: 'rectangle',
           position: 'form'
         },
-        action: 'click'
+        action: 'none',
+        nextCondition: 'manualNext'
       },
       {
         id: 15,
@@ -476,8 +477,7 @@ const tutorialData = {
           type: 'rectangle',
           position: 'button'
         },
-        action: 'click',
-        nextCondition: 'pageNavigate'
+        action: 'click'
       },
       {
         id: 16,
