@@ -1968,7 +1968,7 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
                   <button
                     className={styles.nextButton}
                     onClick={() => {
-                      console.log('🟢 Tutorial: 手動進入下一步 (from Step 10)');
+                      console.log('🟢 Tutorial: 手動進入下一步');
                       handleNextStep();
                     }}
                     style={{
