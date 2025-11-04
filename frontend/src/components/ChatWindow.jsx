@@ -415,7 +415,7 @@ const ChatWindow = ({
           } catch (loadErr) {
             // 快取對話已不存在：建立新對話
             try {
-              const newConv = await aiChatService.createConversation({ title: '新對話' });
+              const newConv = await aiChatService.createConversation({ title: '新對話', welcome_message: t('chatWindow.welcomeMessage') });
               setCurrentConversationId(newConv.id);
               try { localStorage.setItem(LAST_CONV_ID_KEY, String(newConv.id)); } catch {}
 
@@ -438,7 +438,7 @@ const ChatWindow = ({
         } else {
           // 無快取對話：建立新對話
           try {
-            const newConv = await aiChatService.createConversation({ title: '新對話' });
+            const newConv = await aiChatService.createConversation({ title: '新對話', welcome_message: t('chatWindow.welcomeMessage') });
             setCurrentConversationId(newConv.id);
             try { localStorage.setItem(LAST_CONV_ID_KEY, String(newConv.id)); } catch {}
             // 不覆蓋已存在的訊息（例如已預先顯示的歡迎訊息或本地快取）
@@ -661,7 +661,7 @@ const ChatWindow = ({
 
     // 立刻在後端建立新對話，避免「新對話」在列表中消失
     try {
-      const newConv = await aiChatService.createConversation({ title: '新對話' });
+      const newConv = await aiChatService.createConversation({ title: '新對話', welcome_message: t('chatWindow.welcomeMessage') });
       setCurrentConversationId(newConv.id);
       try { localStorage.setItem(LAST_CONV_ID_KEY, String(newConv.id)); } catch (e) {}
     } catch (err) {

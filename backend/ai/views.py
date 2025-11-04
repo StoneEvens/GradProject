@@ -13,6 +13,9 @@ from datetime import datetime, timezone
 
 logger = logging.getLogger(__name__)
 
+# Default welcome message for new conversations (fallback if none provided)
+DEFAULT_WELCOME_MESSAGE = "您好！我是 PETer 專員 Peter，很高興為您服務。今天想從哪個功能開始？"
+
 
 def run_mcp_agent(user_message, user_id, username, conversation_id=None, session_id=None, previous_history=None):
     try:
@@ -74,7 +77,7 @@ def run_mcp_agent(user_message, user_id, username, conversation_id=None, session
         # Create the agent with structured output
         info_fetcher = Agent(
             name="Info Fetcher",
-            instructions=f"""Use Traditional Chinese or English to respond to the user's requests. Understand the user's intention, then provide information using the MCP tools to the user. Ask if the user needs more info when helpful Return the data and do not summarize or show raw data. Please quickly provide the data back to the user.
+            instructions=f"""Use Traditional Chinese or English to respond to the user's requests. Understand the user's intention, then provide information using the MCP tools to the user. Ask if the user needs more info when helpful. The user expects a result in 50 seconds, so please be concise and efficient. DO NOT summarize the data.
             When calling get_post_recommendations by default, fetch BOTH social and forum posts unless the user explicitly asks for one type (i.e., set isSocial=true and isForum=true). Then, separate the returned items into recommended_social_posts and recommended_forum_posts accordingly.
             Use the MCP tool list_tutorial_topics to validate the available tutorial IDs and their descriptions before setting the tutorial field. Do not use legacy fields like has_tutorial or tutorial_type.
             User ID: {user_id}""",
@@ -886,6 +889,7 @@ def create_conversation(request):
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         title = request.data.get('title') or '新對話'
+        provided_welcome = request.data.get('welcome_message')
 
         # Initialize a new OpenAI session (session id created lazily by API on first use)
         session = OpenAIConversationsSession()
@@ -904,6 +908,41 @@ def create_conversation(request):
         )
 
         logger.info(f"Created new AgentThread {thread.id} for user {request.user.username} with session '{session_id}'")
+
+        # Persist an initial assistant welcome message so the conversation has history immediately
+        try:
+            welcome_text = provided_welcome if isinstance(provided_welcome, str) and provided_welcome.strip() else DEFAULT_WELCOME_MESSAGE
+            AgentMessage.objects.create(
+                conversation=thread,
+                role='assistant',
+                content=welcome_text,
+                has_tutorial=False,
+                tutorial_type=None,
+                has_calculator=False,
+                operation_type=None,
+                additional_data={
+                    'recommendedUsers': {},
+                    'recommendedSocialPosts': {},
+                    'recommendedForumPosts': {},
+                    'operations': [],
+                    'operationParams': {},
+                    # Store a standardized payload to match live responses
+                    'message_data': {
+                        'response': welcome_text,
+                        'conversationId': thread.id,
+                        'tutorial': None,
+                        'hasCalculator': False,
+                        'operationType': None,
+                        'operations': [],
+                        'recommendedUsers': {},
+                        'recommendedSocialPosts': {},
+                        'recommendedForumPosts': {}
+                    }
+                }
+            )
+            logger.info(f"Seeded welcome message for conversation {thread.id}")
+        except Exception as se:
+            logger.warning(f"Failed to seed welcome message for conversation {thread.id}: {se}")
 
         return Response({
             'id': thread.id,
