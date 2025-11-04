@@ -1966,7 +1966,7 @@ z
                   {stepData.action === 'complete' ? '✓ 完成教學' : '✕ 關閉教學'}
                 </button>
                 {/* 第10步：新增一個「下一步」按鈕 */}
-                {targetElementData?.stepId === 10 && (
+                {stepData?.nextCondition === 'manualNext' && (
                   <button
                     className={styles.nextButton}
                     onClick={() => {
