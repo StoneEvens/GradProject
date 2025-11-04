@@ -75,22 +75,9 @@ def run_mcp_agent(user_message, user_id, username, conversation_id=None, session
         info_fetcher = Agent(
             name="Info Fetcher",
             instructions=f"""Use Traditional Chinese or English to respond to the user's requests. Understand the user's intention, then provide information using the MCP tools to the user. No need to summarize or show raw data; the frontend will render appropriately. Ask if the user needs more info when helpful.
-
-When responding, structure your output according to the AgentResponse schema:
-- response: Your text response to the user
-- tutorial: If you want to start a guided tutorial, set this to one of the valid tutorial IDs (e.g., "createPost"). Use the list_tutorial_topics tool to discover valid IDs.
-- has_calculator: Set to true if you want to show a calculator button (for pet nutrition or health calculations)
-- operation_type: If performing an operation, specify: "navigate", "fill_form", "click", or "display_data"
-- operations: List of operations to perform (each with operation_id, type, params, requires_confirmation)
-- recommended_users: When using get_user_information, put results here as {{user_id: user_details}}
-- recommended_social_posts: When using get_post_recommendations for social posts, put results here as {{post_id: post_details}}
-- recommended_forum_posts: When using get_post_recommendations for forum posts, put results here as {{post_id: post_details}}
-
-When calling get_post_recommendations by default, fetch BOTH social and forum posts unless the user explicitly asks for one type (i.e., set isSocial=true and isForum=true). Then, separate the returned items into recommended_social_posts and recommended_forum_posts accordingly.
-
-Use the MCP tool list_tutorial_topics to validate the available tutorial IDs and their descriptions before setting the tutorial field. Do not use legacy fields like has_tutorial or tutorial_type.
-
-User ID: {user_id}""",
+            When calling get_post_recommendations by default, fetch BOTH social and forum posts unless the user explicitly asks for one type (i.e., set isSocial=true and isForum=true). Then, separate the returned items into recommended_social_posts and recommended_forum_posts accordingly.
+            Use the MCP tool list_tutorial_topics to validate the available tutorial IDs and their descriptions before setting the tutorial field. Do not use legacy fields like has_tutorial or tutorial_type.
+            User ID: {user_id}""",
             model="gpt-5",
             tools=[mcp],
             output_type=AgentOutputSchema(AgentResponse, strict_json_schema=False),  # Enable structured output with relaxed schema!
@@ -106,41 +93,62 @@ User ID: {user_id}""",
         # Create or reuse session for conversation persistence
         if session_id:
             logger.info(f"Reusing OpenAI session: {session_id}")
-            session = OpenAIConversationsSession(conversation_id=session_id)
+            base_session = OpenAIConversationsSession(conversation_id=session_id)
         else:
-            logger.info("Creating new OpenAI session for conversation persistence")
-            session = OpenAIConversationsSession()
+            logger.info("Creating new OpenAI session for conversation persistence (will be created lazily by API)")
+            base_session = OpenAIConversationsSession()
         
         # With session memory, input must be a string (not a list)
         # OpenAI loads previous messages automatically via the session
         logger.info(f"Sending only new message as string (OpenAI manages history via session)")
         
         # Run the agent workflow
-        async def run_agent():
-            with trace("PETer Agent"):
-                # Use Session parameter for conversation persistence with store=True
-                # Input must be a string when using session memory
-                run_kwargs = {
-                    "input": user_message,  # String input when using session memory
-                    "session": session,  # Session for conversation persistence!
-                    "run_config": RunConfig(
-                        trace_metadata={
-                            "__trace_source__": "agent-builder",
-                            "workflow_id": workflow_id,
-                            "user_id": user_id,
-                            "session_id": session._session_id or "new"
+        session_used = {"session": base_session}
+
+        async def run_agent_with_retry(max_retries: int = 1):
+            """Run the agent with minimal retry if session initialization hits a transient 500."""
+            attempt = 0
+            current_session = base_session
+            last_err = None
+            while attempt <= max_retries:
+                try:
+                    with trace("PETer Agent"):
+                        run_kwargs = {
+                            "input": user_message,
+                            "session": current_session,
+                            "run_config": RunConfig(
+                                trace_metadata={
+                                    "__trace_source__": "agent-builder",
+                                    "workflow_id": workflow_id,
+                                    "user_id": user_id,
+                                    "session_id": getattr(current_session, "_session_id", None) or "new"
+                                }
+                            )
                         }
-                    )
-                }
-                
-                logger.info(f"Calling Runner.run with session (conversation_id: {session._session_id or 'will be created'})")
-                
-                info_fetcher_result_temp = await Runner.run(
-                    info_fetcher,
-                    **run_kwargs
-                )
-                
-                return info_fetcher_result_temp
+
+                        logger.info(
+                            f"Attempt {attempt+1}: Runner.run with session (conversation_id: {getattr(current_session, '_session_id', None) or 'will be created'})"
+                        )
+
+                        # Record which session is being used for this successful attempt
+                        session_used["session"] = current_session
+                        return await Runner.run(info_fetcher, **run_kwargs)
+                except Exception as e:
+                    last_err = e
+                    attempt += 1
+                    # Only retry once on possible transient OpenAI 500 from conversations.create
+                    if attempt <= max_retries:
+                        logger.warning(f"Agent run failed on attempt {attempt} with error: {e}. Retrying with fresh session...")
+                        try:
+                            await asyncio.sleep(0.8)
+                        except Exception:
+                            pass
+                        # Refresh session for retry
+                        current_session = OpenAIConversationsSession()
+                    else:
+                        break
+            # If we get here, all retries failed
+            raise last_err if last_err else RuntimeError("Unknown agent run failure")
         
         # Execute the async function
         logger.info("Running OpenAI Agent with MCP tools...")
@@ -148,7 +156,7 @@ User ID: {user_id}""",
         # Run with a timeout to prevent indefinite hanging
         try:
             agent_result = asyncio.wait_for(
-                run_agent(),
+                run_agent_with_retry(max_retries=1),
                 timeout=90.0  # 90 second timeout for agent execution
             )
             agent_result = asyncio.run(agent_result)
@@ -180,7 +188,7 @@ User ID: {user_id}""",
         # With Session-based persistence, the session._session_id is what we need to save
         # After Runner.run, OpenAI updates the session with the conversation_id
         # This is the key to conversation continuity!
-        final_session_id = session._session_id
+        final_session_id = getattr(session_used.get("session"), "_session_id", None) or session_id
         logger.info(f"✓ Session conversation_id for persistence: {final_session_id}")
         
         # Generate our own conversation_id for database tracking
