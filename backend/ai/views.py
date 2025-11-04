@@ -16,6 +16,64 @@ logger = logging.getLogger(__name__)
 # Default welcome message for new conversations (fallback if none provided)
 DEFAULT_WELCOME_MESSAGE = "您好！我是 PETer 專員 Peter，很高興為您服務。今天想從哪個功能開始？"
 
+# Human-friendly labels for known operation types (used to improve conversation titles)
+OPERATION_TITLE_LABELS = {
+    'navigate_health_records': '健康紀錄',
+    'navigate_feeding_schedule': '餵食排程',
+    'navigate_nearby_hospitals': '附近醫院',
+    'navigate_pet_profile': '寵物檔案',
+    'navigate_social': '社群'
+}
+
+def _generate_conversation_title(user_message: str, tutorial: str = None, operation_type: str = None) -> str:
+    """Generate a concise conversation title reflecting user's intention.
+
+    Priority:
+    1) Tutorial id present -> "教學：{id}"
+    2) Operation type present -> "操作：{label}"
+    3) Cleaned user message (first sentence), up to ~50 chars
+    """
+    try:
+        # 1) Tutorial-based
+        if tutorial:
+            return f"教學：{str(tutorial).strip()}"
+
+        # 2) Operation-based
+        if operation_type:
+            label = OPERATION_TITLE_LABELS.get(operation_type, operation_type)
+            return f"操作：{label}"
+
+        # 3) Derive from user message
+        title = (user_message or '').strip()
+        # Remove common polite prefixes
+        for prefix in ['請問', '想問', '我想知道', '可以告訴我', '幫我', '能不能', '可以幫我', '請幫我']:
+            if title.startswith(prefix):
+                title = title[len(prefix):].strip()
+
+        # Cut at first sentence terminator if exists
+        for ch in ['。', '？', '！', '.', '?', '!']:
+            idx = title.find(ch)
+            if idx != -1:
+                title = title[:idx+1]
+                break
+
+        # Trim length to ~50 chars, trying to stop at punctuation
+        max_len = 50
+        if len(title) > max_len:
+            slice_part = title[:max_len]
+            for ch in ['，', '、', ',', '。', '；', ';']:
+                idx = slice_part.rfind(ch)
+                if idx != -1 and idx >= 30:  # keep reasonably informative
+                    title = slice_part[:idx+1]
+                    break
+            else:
+                title = title[:47] + '...'
+
+        # Fallback
+        return title or '新對話'
+    except Exception:
+        return '新對話'
+
 
 def run_mcp_agent(user_message, user_id, username, conversation_id=None, session_id=None, previous_history=None):
     try:
@@ -87,8 +145,7 @@ def run_mcp_agent(user_message, user_id, username, conversation_id=None, session
             model_settings=ModelSettings(
                 store=True,  # OpenAI stores conversation history via Session
                 reasoning=Reasoning(
-                    effort="low",
-                    summary="auto"
+                    effort="low"
                 )
             )
         )
@@ -512,29 +569,13 @@ def main_chat(request):
         # Handle thread persistence in database
         if is_new_conversation and returned_session_id:
             # New conversation - create database record with the session_id from OpenAI
-            # Generate a concise title from the user's first message
-            title = user_message.strip()
-            
-            # Remove common prefixes to get to the core question
-            prefixes_to_remove = ['請問', '想問', '我想知道', '可以告訴我', '幫我', '能不能', '可以幫我']
-            for prefix in prefixes_to_remove:
-                if title.startswith(prefix):
-                    title = title[len(prefix):].strip()
-            
-            # Truncate if too long
-            if len(title) > 50:
-                # Try to find a natural break point (period, question mark, comma)
-                for i, char in enumerate(title[40:50], 40):
-                    if char in '。？！，':
-                        title = title[:i+1]
-                        break
-                else:
-                    title = title[:47] + "..."
-            
-            # Fallback to first 50 chars if empty
-            if not title:
-                title = user_message[:50] if len(user_message) <= 50 else user_message[:47] + "..."
-            
+            # Generate a concise title that reflects user's true intention
+            title = _generate_conversation_title(
+                user_message=user_message,
+                tutorial=tutorial,
+                operation_type=operation_type
+            )
+
             thread = AgentThread.objects.create(
                 user=request.user,
                 thread_id=returned_session_id,  # Store OpenAI's session.id (e.g., "sess_xxx...")
@@ -561,6 +602,30 @@ def main_chat(request):
             # Verify session_id matches what we got back (should be the same)
             if returned_session_id and thread.thread_id != returned_session_id:
                 logger.error(f"⚠ Session ID mismatch! DB: {thread.thread_id}, Response: {returned_session_id}")
+                # If the stored session is a pending placeholder, update to the real session id
+                try:
+                    if str(thread.thread_id).startswith('sess_pending_'):
+                        thread.thread_id = returned_session_id
+                        thread.save(update_fields=['thread_id', 'updated_at'])
+                        logger.info(f"✓ Updated pending session id to real id for conversation {conversation_id}")
+                except Exception as _:
+                    pass
+
+            # Improve title if it's still generic and this is effectively the first real user intent
+            try:
+                generic_titles = {'新對話', '對話', 'Conversation', 'New Chat'}
+                if (thread.title in generic_titles) or (thread.title and len(thread.title) <= 3):
+                    new_title = _generate_conversation_title(
+                        user_message=user_message,
+                        tutorial=tutorial,
+                        operation_type=operation_type
+                    )
+                    if new_title and new_title != thread.title:
+                        thread.title = new_title
+                        thread.save(update_fields=['title', 'updated_at'])
+                        logger.info(f"✓ Updated conversation title to '{new_title}' for conversation {conversation_id}")
+            except Exception as _:
+                pass
         
         # Extract structured data from agent result
         # With output_type=AgentResponse, all data is already structured!
