@@ -98,6 +98,7 @@ def run_mcp_agent(user_message, user_id, username, conversation_id=None, session
             recommended_users: Dict[str, Dict[str, Any]] = Field(default_factory=dict, description="Dictionary of recommended users {id: details}")
             recommended_social_posts: Dict[str, Dict[str, Any]] = Field(default_factory=dict, description="Dictionary of recommended social posts {id: details}")
             recommended_forum_posts: Dict[str, Dict[str, Any]] = Field(default_factory=dict, description="Dictionary of recommended forum posts {id: details}")
+            pending_operation: Optional[Dict[str, Any]] = Field(default=None, description="Pending operation that requires user confirmation (from prepare_navigate tool)")
         
         # Log conversation status
         if session_id:
@@ -127,7 +128,8 @@ def run_mcp_agent(user_message, user_id, username, conversation_id=None, session
                 "get_user_information",
                 "get_user_pet_types",
                 "get_pet_foods_details",
-                "list_tutorial_topics"
+                "list_tutorial_topics",
+                "prepare_navigate"
             ],
             "require_approval": "never"
         })
@@ -138,6 +140,15 @@ def run_mcp_agent(user_message, user_id, username, conversation_id=None, session
             instructions=f"""Use Traditional Chinese or English to respond to the user's requests. Understand the user's intention, then provide information using the MCP tools to the user. Ask if the user needs more info when helpful. The user expects a result in 50 seconds, so please be concise and efficient. DO NOT summarize the data.
             When calling get_post_recommendations by default, fetch BOTH social and forum posts unless the user explicitly asks for one type (i.e., set isSocial=true and isForum=true). Then, separate the returned items into recommended_social_posts and recommended_forum_posts accordingly.
             Use the MCP tool list_tutorial_topics to validate the available tutorial IDs and their descriptions before setting the tutorial field. Do not use legacy fields like has_tutorial or tutorial_type.
+
+            **Page Navigation:**
+            When the user requests to navigate to a page (e.g., "帶我去社群頁面", "前往寵物列表"), use the prepare_navigate MCP tool. This tool returns a pending operation that requires user confirmation.
+            - Call prepare_navigate with the target path and optional reason
+            - The tool returns an operation object with confirmation_message, preview, etc.
+            - Set the pending_operation field in your response to this operation object
+            - In your response text, inform the user that you're ready to navigate and they need to confirm
+            - Available paths: /social, /pets, /pets/{{id}}, /profile, /calculator, /health, /schedule, /interactive-city, /user/{{username}}
+
             User ID: {user_id}""",
             model="gpt-5",
             tools=[mcp],
@@ -636,6 +647,7 @@ def main_chat(request):
         recommended_users = result.get('recommended_users', {})
         recommended_social_posts = result.get('recommended_social_posts', {})
         recommended_forum_posts = result.get('recommended_forum_posts', {})
+        pending_operation = result.get('pending_operation')
 
         # Normalize post dates to ensure 'created_at' exists for all posts
         def _normalize_post_dates(posts_dict):
@@ -694,6 +706,7 @@ def main_chat(request):
             response_payload.setdefault('recommendedUsers', recommended_users)
             response_payload.setdefault('recommendedSocialPosts', recommended_social_posts)
             response_payload.setdefault('recommendedForumPosts', recommended_forum_posts)
+            response_payload.setdefault('pendingOperation', pending_operation)
 
             AgentMessage.objects.create(
                 conversation=thread,

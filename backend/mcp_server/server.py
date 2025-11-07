@@ -274,4 +274,81 @@ def create_mcp_server() -> FastMCP:
 
         return await fetch()
 
+    @mcp.tool(
+        name="prepare_navigate",
+        description="Prepare a page navigation operation that requires user confirmation. Available paths: /social, /pets, /pets/{id}, /profile, /calculator, /health, /schedule, /interactive-city, /user/{username}"
+    )
+    async def prepare_navigate(
+        path: str,
+        reason: Optional[str] = None
+    ) -> Dict:
+        """
+        準備頁面跳轉操作（需要用戶確認）
+
+        參數:
+        - path: 目標路徑（必填）
+        - reason: 跳轉原因（選填）
+
+        支援的路徑:
+        - /social: 社群頁面
+        - /pets: 寵物列表
+        - /pets/{id}: 特定寵物頁面
+        - /profile: 個人檔案
+        - /calculator: 營養計算機
+        - /health: 健康記錄
+        - /schedule: 餵食排程
+        - /interactive-city: 互動城市
+        - /user/{username}: 用戶檔案頁面
+
+        返回待確認操作
+        """
+        import uuid
+        from datetime import datetime, timezone, timedelta
+
+        # 路徑對應的友善名稱
+        path_names = {
+            "/social": "社群頁面",
+            "/pets": "寵物列表",
+            "/profile": "個人檔案",
+            "/calculator": "營養計算機",
+            "/health": "健康記錄",
+            "/schedule": "餵食排程",
+            "/interactive-city": "互動城市"
+        }
+
+        # 處理動態路徑
+        friendly_name = path_names.get(path)
+        if not friendly_name:
+            if path.startswith("/pets/"):
+                friendly_name = "寵物詳情頁面"
+            elif path.startswith("/user/"):
+                friendly_name = "用戶檔案頁面"
+            elif path.startswith("/disease-archive/"):
+                friendly_name = "疾病檔案頁面"
+            else:
+                friendly_name = path
+
+        operation_id = f"nav_{uuid.uuid4().hex[:12]}"
+        expires_at = (datetime.now(timezone.utc) + timedelta(minutes=5)).isoformat()
+
+        confirmation_msg = f"確認要前往「{friendly_name}」嗎？"
+        if reason:
+            confirmation_msg += f"\n\n{reason}"
+
+        return {
+            "operation_id": operation_id,
+            "type": "navigate",
+            "params": {
+                "path": path
+            },
+            "confirmation_message": confirmation_msg,
+            "preview": {
+                "destination": friendly_name,
+                "path": path,
+                "reason": reason or "用戶要求前往此頁面"
+            },
+            "requires_confirmation": True,
+            "expires_at": expires_at
+        }
+
     return mcp
