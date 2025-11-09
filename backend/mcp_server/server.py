@@ -103,6 +103,9 @@ def create_mcp_server() -> FastMCP:
                     serializer = DiseaseArchiveContentSerializer(archives, many=True)
                     posts_data += json.loads(json.dumps(serializer.data, default=str))
 
+                for post in posts_data:
+                    print(f"Recommended Post ID: {post.get('id')} Title: {post.get('title')}")
+
                 return posts_data
             except Exception as e:
                 return [{"error": f"Failed to get recommendations: {str(e)}"}]
@@ -118,17 +121,36 @@ def create_mcp_server() -> FastMCP:
         def fetch() -> Dict:
             try:
                 users_info: Dict[int, Dict] = {}
+                # Fetch only public users to avoid leaking private profile data
                 users = CustomUser.objects.filter(id__in=user_ids, account_privacy='public')
 
                 for user in users:
-                    users_info[user.id] = {
-                        "username": user.username,
-                        "user_intro": user.user_intro,
-                        "user_fullname": user.user_fullname,
-                        "user_account": user.user_account,
+                    # Build a rich, serialization-safe user dict (exclude sensitive fields like password, email)
+                    data: Dict[str, Optional[str]] = {
+                        "id": user.id,
+                        "username": getattr(user, 'username', None),
+                        "user_account": getattr(user, 'user_account', None),
+                        "user_fullname": getattr(user, 'user_fullname', None),
+                        "user_intro": getattr(user, 'user_intro', None),
+                        "account_privacy": getattr(user, 'account_privacy', None),
                     }
+                    # Optional avatar/headshot URL if present
+                    headshot = getattr(user, 'headshot', None)
+                    if headshot and getattr(headshot, 'url', None):
+                        data["headshot_url"] = headshot.url
+                    # Optional timestamps if model has them
+                    if hasattr(user, 'date_joined'):
+                        data['date_joined'] = str(user.date_joined)
+                    if hasattr(user, 'last_login') and user.last_login:
+                        data['last_login'] = str(user.last_login)
 
-                return users_info
+                    users_info[user.id] = data
+
+                return {
+                    "users": users_info,
+                    "requested_ids": user_ids,
+                    "found_ids": list(users_info.keys())
+                }
             except Exception as e:
                 return {"error": f"Failed to fetch user information: {str(e)}"}
 

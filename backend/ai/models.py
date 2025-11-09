@@ -6,13 +6,13 @@ User = get_user_model()
 
 class AgentThread(models.Model):
     """
-    Stores OpenAI Agent conversation IDs for conversation persistence
+    Stores mapping between our DB conversations and OpenAI session IDs for continuity.
+
+    OpenAI's Agents SDK (with store=True) persists message history server-side.
+    We use Django's auto-increment 'id' as the local conversationId for the frontend.
+    The 'thread_id' column stores the OpenAI continuation identifier (session_id).
     
-    OpenAI's store=True handles the actual message history on their servers.
-    This model uses Django's auto-generated 'id' as the conversationId for the frontend,
-    and stores the corresponding OpenAI conversation_id (starts with 'conv-').
-    
-    Note: thread_id field actually stores OpenAI conversation IDs (legacy naming).
+    Note: Field name 'thread_id' is legacy; it actually holds the OpenAI session_id.
     """
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='agent_threads')
     thread_id = models.CharField(max_length=255, unique=True, help_text="OpenAI conversation ID (starts with 'conv-')")

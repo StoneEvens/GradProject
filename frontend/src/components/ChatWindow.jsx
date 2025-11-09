@@ -259,6 +259,21 @@ const ChatWindow = ({
 
       console.log('AI 回應結果:', aiResult); // Debug 用
 
+      // Normalize post recommendation arrays (ensure id + post_id present, drop malformed)
+      const normalizePostList = (lst, typeHint) => {
+        if (!Array.isArray(lst)) return [];
+        return lst
+          .filter(p => p && (p.post_id !== undefined || p.id !== undefined))
+          .map(p => {
+            const post_id = p.post_id !== undefined ? p.post_id : p.id;
+            const id = p.id !== undefined ? p.id : post_id;
+            return { ...p, post_id, id, type: p.type || typeHint || p.category || 'forum' };
+          });
+      };
+
+      const normSocial = normalizePostList(aiResult.recommendedSocialPosts, 'social');
+      const normForum = normalizePostList(aiResult.recommendedForumPosts, 'forum');
+
       const aiMessage = {
         id: Date.now() + 1,
         text: aiResult.response,
@@ -266,11 +281,27 @@ const ChatWindow = ({
         timestamp: new Date(),
         // 加入教學相關資訊（新：使用單一 tutorial 欄位）
         tutorial: aiResult.tutorial || null,
-        // 加入推薦用戶相關資訊 (新格式: 字典) - 不需要 hasRecommendedUsers flag
-        recommendedUsers: aiResult.recommendedUsers || {},  // 字典格式 {id: details}
-        // 加入推薦文章相關資訊 (新格式: 字典) - 不需要 hasRecommendedArticles flag
-        recommendedSocialPosts: aiResult.recommendedSocialPosts || {},  // 字典格式 {id: details}
-        recommendedForumPosts: aiResult.recommendedForumPosts || {},  // 字典格式 {id: details}
+        // 推薦用戶標準化為陣列
+    recommendedUsers: Array.isArray(aiResult.recommendedUsers)
+      ? aiResult.recommendedUsers.map(_u => {
+          const u = { ..._u };
+          const id = u.id !== undefined ? u.id : (u.user_id !== undefined ? u.user_id : undefined);
+          const user_id = u.user_id !== undefined ? u.user_id : (u.id !== undefined ? u.id : id);
+          const user_account = u.user_account ?? u.account ?? (typeof u.display_name === 'string' ? u.display_name : u.username);
+          const user_fullname = u.user_fullname ?? u.display_name ?? u.fullname ?? u.name;
+          return { ...u, id, user_id, user_account, user_fullname };
+        }).filter(u => u.id !== undefined)
+      : Object.entries(aiResult.recommendedUsers || {}).map(([uid, _u]) => {
+          const u = { ...(_u || {}) };
+          const id = u.id !== undefined ? u.id : uid;
+          const user_id = u.user_id !== undefined ? u.user_id : id;
+          const user_account = u.user_account ?? u.account ?? (typeof u.display_name === 'string' ? u.display_name : u.username);
+          const user_fullname = u.user_fullname ?? u.display_name ?? u.fullname ?? u.name;
+          return { ...u, id, user_id, user_account, user_fullname };
+        }),
+    // Post recommendations (array form, each element now guaranteed to have id & post_id)
+    recommendedSocialPosts: normSocial,
+    recommendedForumPosts: normForum,
         // 加入營養計算機相關資訊
         hasCalculator: aiResult.hasCalculator || false,
         // 加入操作功能相關資訊 (operations array)
@@ -330,46 +361,89 @@ const ChatWindow = ({
           try { messageData = JSON.parse(messageData); } catch { messageData = null; }
         }
 
-        // 推薦用戶
-        let recommendedUsers = {};
-        if (messageData?.recommendedUsers && typeof messageData.recommendedUsers === 'object') {
-          recommendedUsers = messageData.recommendedUsers;
-        } else if (additionalData?.recommendedUsers && typeof additionalData.recommendedUsers === 'object') {
-          recommendedUsers = additionalData.recommendedUsers;
-        } else if (additionalData?.recommended_users && typeof additionalData.recommended_users === 'object') {
-          recommendedUsers = additionalData.recommended_users;
+        // 推薦用戶標準化為陣列
+        const normalizeUsersList = (val) => {
+          if (!val) return [];
+          if (Array.isArray(val)) {
+            return val.map(_u => {
+              const u = { ..._u };
+              const id = u.id !== undefined ? u.id : (u.user_id !== undefined ? u.user_id : undefined);
+              const user_id = u.user_id !== undefined ? u.user_id : (u.id !== undefined ? u.id : id);
+              const user_account = u.user_account ?? u.account ?? (typeof u.display_name === 'string' ? u.display_name : u.username);
+              const user_fullname = u.user_fullname ?? u.display_name ?? u.fullname ?? u.name;
+              return { ...u, id, user_id, user_account, user_fullname };
+            }).filter(u => u.id !== undefined);
+          }
+          if (typeof val === 'object') {
+            return Object.entries(val).map(([uid, _u]) => {
+              const u = { ...(_u || {}) };
+              const id = u.id !== undefined ? u.id : uid;
+              const user_id = u.user_id !== undefined ? u.user_id : id;
+              const user_account = u.user_account ?? u.account ?? (typeof u.display_name === 'string' ? u.display_name : u.username);
+              const user_fullname = u.user_fullname ?? u.display_name ?? u.fullname ?? u.name;
+              return { ...u, id, user_id, user_account, user_fullname };
+            });
+          }
+          return [];
+        };
+        let recommendedUsers = [];
+        if (messageData?.recommendedUsers) {
+          recommendedUsers = normalizeUsersList(messageData.recommendedUsers);
+        } else if (additionalData?.recommendedUsers) {
+          recommendedUsers = normalizeUsersList(additionalData.recommendedUsers);
+        } else if (additionalData?.recommended_users) {
+          recommendedUsers = normalizeUsersList(additionalData.recommended_users);
         } else if (additionalData?.recommendedUserDetails && Array.isArray(additionalData.recommendedUserDetails)) {
-          const arr = additionalData.recommendedUserDetails;
-          arr.forEach(u => { if (u?.id) recommendedUsers[u.id] = u; });
+          recommendedUsers = normalizeUsersList(additionalData.recommendedUserDetails);
         } else if (additionalData?.recommended_user_details && Array.isArray(additionalData.recommended_user_details)) {
-          const arr = additionalData.recommended_user_details;
-          arr.forEach(u => { if (u?.id) recommendedUsers[u.id] = u; });
+          recommendedUsers = normalizeUsersList(additionalData.recommended_user_details);
         } else if (msg.has_recommended_users) {
           const userIds = additionalData?.recommended_user_ids || [];
           if (userIds.length > 0) {
             const fetched = await fetchUserDetailsByIds(userIds);
-            fetched.forEach(u => { if (u?.id) recommendedUsers[u.id] = u; });
+            recommendedUsers = normalizeUsersList(fetched);
           }
         }
 
         // 推薦文章
-        let recommendedSocialPosts = {};
-        let recommendedForumPosts = {};
-        if (messageData?.recommendedSocialPosts && typeof messageData.recommendedSocialPosts === 'object') {
-          recommendedSocialPosts = messageData.recommendedSocialPosts;
-        } else if (additionalData?.recommendedSocialPosts && typeof additionalData.recommendedSocialPosts === 'object') {
-          recommendedSocialPosts = additionalData.recommendedSocialPosts;
-        } else if (additionalData?.recommended_social_posts && typeof additionalData.recommended_social_posts === 'object') {
-          recommendedSocialPosts = additionalData.recommended_social_posts;
-        }
-
-        if (messageData?.recommendedForumPosts && typeof messageData.recommendedForumPosts === 'object') {
-          recommendedForumPosts = messageData.recommendedForumPosts;
-        } else if (additionalData?.recommendedForumPosts && typeof additionalData.recommendedForumPosts === 'object') {
-          recommendedForumPosts = additionalData.recommendedForumPosts;
-        } else if (additionalData?.recommended_forum_posts && typeof additionalData.recommended_forum_posts === 'object') {
-          recommendedForumPosts = additionalData.recommended_forum_posts;
-        }
+        // 推薦文章（支援新陣列格式與舊字典格式）
+        const normalizePostList = (lst, typeHint) => {
+          if (!Array.isArray(lst)) return [];
+          return lst
+            .filter(p => p && (p.post_id !== undefined || p.id !== undefined))
+            .map(p => {
+              const post_id = p.post_id !== undefined ? p.post_id : p.id;
+              const id = p.id !== undefined ? p.id : post_id;
+              return { ...p, post_id, id, type: p.type || typeHint || 'forum' };
+            });
+        };
+        const convertLegacyDictToArray = (obj, typeHint) => {
+          if (!obj || typeof obj !== 'object') return [];
+          if (Array.isArray(obj)) return normalizePostList(obj, typeHint);
+          const arr = Object.entries(obj).map(([pid, data]) => ({
+            post_id: pid,
+            id: data?.id !== undefined ? data.id : pid,
+            title: data?.title || '',
+            post_details: data?.post_details || data?.details || '',
+            created_at: data?.created_at || null,
+            type: typeHint || data?.type
+          }));
+            return normalizePostList(arr, typeHint);
+        };
+        let recommendedSocialPosts = convertLegacyDictToArray(
+          messageData?.recommendedSocialPosts ||
+          additionalData?.recommendedSocialPosts ||
+          additionalData?.recommended_social_posts ||
+          [],
+          'social'
+        );
+        let recommendedForumPosts = convertLegacyDictToArray(
+          messageData?.recommendedForumPosts ||
+          additionalData?.recommendedForumPosts ||
+          additionalData?.recommended_forum_posts ||
+          [],
+          'forum'
+        );
 
         return {
           id: msg.id || Date.now() + Math.random(),
@@ -841,33 +915,35 @@ const ChatWindow = ({
                     </button>
                   )}
                   {/* 如果有推薦用戶，顯示推薦用戶預覽 */}
-                  {Object.keys(message.recommendedUsers || {}).length > 0 && (
+                  {Array.isArray(message.recommendedUsers) && message.recommendedUsers.length > 0 && (
                     <RecommendedUsersPreview
-                      users={Object.values(message.recommendedUsers)}
+                      users={message.recommendedUsers}
                       onUserClick={(user) => {
                         console.log('點擊推薦用戶:', user);
-                        minimizeHudThen(() => navigate(`/user/${user.user_account}`));
+                        const targetId = user.user_id ?? user.id;
+                        if (targetId !== undefined && targetId !== null) {
+                          minimizeHudThen(() => navigate(`/user/${targetId}`));
+                        } else {
+                          const dest = user.user_account || String(user.id);
+                          minimizeHudThen(() => navigate(`/user/${dest}`));
+                        }
                       }}
                     />
                   )}
                   {/* 如果有推薦文章，顯示推薦文章預覽 */}
-                  {(Object.keys(message.recommendedSocialPosts || {}).length > 0 ||
-                    Object.keys(message.recommendedForumPosts || {}).length > 0) && (
+                  {(Array.isArray(message.recommendedSocialPosts) && message.recommendedSocialPosts.length > 0 ||
+                    Array.isArray(message.recommendedForumPosts) && message.recommendedForumPosts.length > 0) && (
                     <RecommendedArticlesPreview
-                      socialPosts={message.recommendedSocialPosts || {}}
-                      forumPosts={message.recommendedForumPosts || {}}
+                      socialPosts={message.recommendedSocialPosts}
+                      forumPosts={message.recommendedForumPosts}
                       onArticleClick={(article) => {
-                        // 社群貼文：注入並導向社群頁；論壇貼文：直接導向公共疾病檔案詳情
                         if (article?.type === 'social') {
                           minimizeHudThen(() => navigate('/social', {
-                            state: {
-                              injectedPost: article,
-                              source: 'agent',
-                              focus: true
-                            }
+                            state: { injectedPost: article, source: 'agent', focus: true }
                           }));
                         } else {
-                          minimizeHudThen(() => navigate(`/disease-archive/${article.id}/public`));
+                          const targetId = article.post_id || article.id;
+                          minimizeHudThen(() => navigate(`/disease-archive/${targetId}/public`));
                         }
                       }}
                     />

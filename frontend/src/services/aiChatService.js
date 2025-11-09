@@ -101,9 +101,9 @@ class AIChatService {
         tutorial: null,
         hasCalculator: false,
         operations: [],
-        recommendedUsers: {},
-        recommendedSocialPosts: {},
-        recommendedForumPosts: {}
+  recommendedUsers: [],
+        recommendedSocialPosts: [],
+        recommendedForumPosts: []
       };
     }
 
@@ -116,9 +116,9 @@ class AIChatService {
         tutorial: null,
         hasCalculator: false,
         operations: [],
-        recommendedUsers: {},
-        recommendedSocialPosts: {},
-        recommendedForumPosts: {}
+  recommendedUsers: [],
+        recommendedSocialPosts: [],
+        recommendedForumPosts: []
       };
     }
 
@@ -129,9 +129,9 @@ class AIChatService {
       tutorial: null,
       hasCalculator: false,
       operations: [],
-      recommendedUsers: {},
-      recommendedSocialPosts: {},
-      recommendedForumPosts: {}
+  recommendedUsers: [],
+      recommendedSocialPosts: [],
+      recommendedForumPosts: []
     };
   }
 

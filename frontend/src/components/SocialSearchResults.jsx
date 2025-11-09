@@ -144,7 +144,7 @@ const SocialSearchResults = ({ searchQuery, onUserClick }) => {
   // 處理追蹤按鈕點擊
   const handleFollowButtonClick = (user) => {
     const userFollowState = followStates[user.id];
-    
+
     // 如果是已追蹤或已請求狀態，直接執行操作（取消追蹤）
     if (userFollowState && (userFollowState.is_following || userFollowState.is_requested)) {
       handleFollowToggle(user.user_account, user.id);

@@ -41,16 +41,20 @@ const RecommendedArticlesPreview = ({
           
           // 添加社交貼文 (標記類型)
           Object.values(socialPosts).forEach(post => {
+            const id = post.id ?? post.post_id ?? post.postId;
             allPosts.push({
               ...post,
+              id,
               type: 'social'
             });
           });
           
           // 添加論壇貼文 (標記類型)
           Object.values(forumPosts).forEach(post => {
+            const id = post.id ?? post.post_id ?? post.postId;
             allPosts.push({
               ...post,
+              id,
               type: 'forum'
             });
           });
@@ -100,7 +104,8 @@ const RecommendedArticlesPreview = ({
         });
       } else {
         // 跳轉到疾病檔案詳情頁面（公開瀏覽模式）
-        navigate(`/disease-archive/${article.id}/public`);
+        const targetId = article.id ?? article.post_id ?? article.postId;
+        navigate(`/disease-archive/${targetId}/public`);
       }
     }
   };
@@ -149,7 +154,7 @@ const RecommendedArticlesPreview = ({
     };
 
     return {
-      id: post.id,
+      id: post.id ?? post.post_id ?? post.postId,
       created_at: post.created_at || post.post_date || new Date().toISOString(),
       images,
       content: {
@@ -172,16 +177,11 @@ const RecommendedArticlesPreview = ({
     return date.toLocaleDateString('zh-TW');
   };
 
-  // 獲取文章標題
+  // 使用回應中的 title，並加上貼文類型前綴（社交貼文／論壇貼文）；若缺失則不顯示
   const getArticleTitle = (article) => {
-    if (article.type === 'forum') {
-      return article.archive_title || '疾病案例分享';
-    } else {
-      // 社交貼文: 使用內容前30字作為標題
-      // Handle both old format (content string) and new agent format (content_text at top-level or content.content_text)
-      const content = article.content_text || article.content?.content_text || article.content || '';
-      return content.length > 30 ? content.substring(0, 30) + '...' : content || '社交貼文';
-    }
+    if (!article || typeof article.title !== 'string' || !article.title.trim()) return '';
+    const typeLabel = article.type === 'forum' ? '論壇貼文' : '社交貼文';
+    return `${typeLabel}：${article.title}`;
   };
 
   // 獲取作者名稱
@@ -238,9 +238,11 @@ const RecommendedArticlesPreview = ({
             onClick={() => handleArticleClick(article)}
           >
             <div className={styles.articleContent}>
-              <div className={styles.articleTitle}>
-                {getArticleTitle(article)}
-              </div>
+              {getArticleTitle(article) && (
+                <div className={styles.articleTitle}>
+                  {getArticleTitle(article)}
+                </div>
+              )}
               <div className={styles.articleAuthor}>
                 由 {getAuthorName(article)} 分享
                 {article.type === 'social' && getLocation(article) && (
