@@ -4,6 +4,7 @@ import inspect
 from typing import get_type_hints, get_origin, get_args
 from asgiref.sync import sync_to_async
 from fastmcp import FastMCP
+import os
 
 from accounts.models import CustomUser
 from pets.models import Pet, DiseaseArchiveContent
@@ -275,8 +276,46 @@ def create_mcp_server() -> FastMCP:
         return await fetch()
 
     @mcp.tool(
+        name="get_navigation_paths",
+        description="Get all available page paths and their mappings. Use this to find the correct path for user navigation requests."
+    )
+    async def get_navigation_paths() -> Dict:
+        """
+        返回所有可用的頁面路徑和對應的關鍵字映射
+
+        Returns:
+        {
+            "available_paths": [
+                {
+                    "path": "/social",
+                    "name": "社群頁面",
+                    "keywords": ["社群", "社交", "貼文"],
+                    "description": "查看和發布社群貼文"
+                },
+                ...
+            ],
+            "dynamic_paths": [...]
+        }
+        """
+        try:
+            # 讀取 navigation_paths.json
+            current_dir = os.path.dirname(__file__)
+            json_path = os.path.join(current_dir, 'navigation_paths.json')
+
+            with open(json_path, 'r', encoding='utf-8') as f:
+                paths_data = json.load(f)
+
+            return paths_data
+        except Exception as e:
+            return {
+                "error": f"Failed to load navigation paths: {str(e)}",
+                "available_paths": [],
+                "dynamic_paths": []
+            }
+
+    @mcp.tool(
         name="prepare_navigate",
-        description="Prepare a page navigation operation that requires user confirmation. Available paths: /social, /pets, /pets/{id}, /profile, /calculator, /health, /schedule, /interactive-city, /user/{username}"
+        description="Prepare a page navigation operation that requires user confirmation. Call get_navigation_paths first to find the correct path."
     )
     async def prepare_navigate(
         path: str,

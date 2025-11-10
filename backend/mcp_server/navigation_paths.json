@@ -1,0 +1,66 @@
+{
+  "available_paths": [
+    {
+      "path": "/social",
+      "name": "社群頁面",
+      "keywords": ["社群", "社交", "貼文", "動態"],
+      "description": "查看和發布社群貼文"
+    },
+    {
+      "path": "/pets",
+      "name": "寵物列表",
+      "keywords": ["寵物列表", "我的寵物", "寵物"],
+      "description": "查看和管理您的寵物列表"
+    },
+    {
+      "path": "/profile",
+      "name": "個人檔案",
+      "keywords": ["個人檔案", "我的檔案", "個人資料", "檔案", "設定"],
+      "description": "查看和編輯個人檔案"
+    },
+    {
+      "path": "/calculator",
+      "name": "營養計算機",
+      "keywords": ["計算機", "營養計算", "飼料計算", "卡路里"],
+      "description": "計算寵物的營養需求"
+    },
+    {
+      "path": "/health",
+      "name": "健康記錄",
+      "keywords": ["健康記錄", "健康報告", "醫療記錄", "體檢"],
+      "description": "查看寵物的健康記錄"
+    },
+    {
+      "path": "/schedule",
+      "name": "餵食排程",
+      "keywords": ["餵食排程", "餵食時間表", "排程", "餵食"],
+      "description": "管理寵物的餵食時間表"
+    },
+    {
+      "path": "/auctions",
+      "name": "寵物競拍",
+      "keywords": ["競拍", "拍賣", "競標"],
+      "description": "參與寵物競拍活動"
+    }
+  ],
+  "dynamic_paths": [
+    {
+      "pattern": "/pets/{id}",
+      "name": "寵物詳情頁面",
+      "description": "查看特定寵物的詳細資訊",
+      "example": "/pets/123"
+    },
+    {
+      "pattern": "/user/{username}",
+      "name": "用戶檔案頁面",
+      "description": "查看其他用戶的檔案",
+      "example": "/user/johndoe"
+    },
+    {
+      "pattern": "/disease-archive/{id}/public",
+      "name": "疾病檔案頁面",
+      "description": "查看疾病檔案詳情",
+      "example": "/disease-archive/456/public"
+    }
+  ]
+}

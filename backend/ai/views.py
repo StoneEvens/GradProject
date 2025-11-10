@@ -129,6 +129,7 @@ def run_mcp_agent(user_message, user_id, username, conversation_id=None, session
                 "get_user_pet_types",
                 "get_pet_foods_details",
                 "list_tutorial_topics",
+                "get_navigation_paths",
                 "prepare_navigate"
             ],
             "require_approval": "never"
@@ -141,13 +142,25 @@ def run_mcp_agent(user_message, user_id, username, conversation_id=None, session
             When calling get_post_recommendations by default, fetch BOTH social and forum posts unless the user explicitly asks for one type (i.e., set isSocial=true and isForum=true). Then, separate the returned items into recommended_social_posts and recommended_forum_posts accordingly.
             Use the MCP tool list_tutorial_topics to validate the available tutorial IDs and their descriptions before setting the tutorial field. Do not use legacy fields like has_tutorial or tutorial_type.
 
-            **Page Navigation:**
-            When the user requests to navigate to a page (e.g., "帶我去社群頁面", "前往寵物列表"), use the prepare_navigate MCP tool. This tool returns a pending operation that requires user confirmation.
-            - Call prepare_navigate with the target path and optional reason
-            - The tool returns an operation object with confirmation_message, preview, etc.
-            - Set the pending_operation field in your response to this operation object
-            - In your response text, inform the user that you're ready to navigate and they need to confirm
-            - Available paths: /social, /pets, /pets/{{id}}, /profile, /calculator, /health, /schedule, /interactive-city, /user/{{username}}
+            **IMPORTANT - Page Navigation:**
+            When the user wants to navigate to a page (e.g., "帶我去社群頁面", "前往寵物列表", "去健康記錄"), you MUST follow these steps:
+
+            1. First, call the get_navigation_paths MCP tool to get all available page paths and their keyword mappings.
+
+            2. Search through the returned paths to find the best match based on the user's keywords.
+               Example: If user says "帶我去社群頁面", look for paths with keywords matching "社群".
+
+            3. Once you find the correct path, call the prepare_navigate MCP tool:
+               Example: result = prepare_navigate(path="/social", reason="用戶要求前往社群頁面")
+
+            4. The tool returns an operation object. You MUST set this entire object to the pending_operation field in your response.
+               Example response structure:
+               {{
+                 "response": "我已經準備好帶您前往社群頁面，請點擊下方按鈕確認。",
+                 "pending_operation": <the object returned by prepare_navigate>
+               }}
+
+            5. Do NOT just set operation_type to "navigate" - you MUST call get_navigation_paths, then prepare_navigate, and set pending_operation!
 
             User ID: {user_id}""",
             model="gpt-5",
@@ -244,6 +257,7 @@ def run_mcp_agent(user_message, user_id, username, conversation_id=None, session
                 'recommended_users': {},
                 'recommended_social_posts': {},
                 'recommended_forum_posts': {},
+                'pending_operation': None,
                 'session_id': session_id,
                 'conversation_id': conversation_id,
                 'conversation_history': previous_history  # Return what we had
@@ -287,6 +301,7 @@ def run_mcp_agent(user_message, user_id, username, conversation_id=None, session
                 logger.info(f"  - recommended_users count: {len(structured_output.recommended_users)}")
                 logger.info(f"  - recommended_social_posts count: {len(structured_output.recommended_social_posts)}")
                 logger.info(f"  - recommended_forum_posts count: {len(structured_output.recommended_forum_posts)}")
+                logger.info(f"  - pending_operation: {structured_output.pending_operation}")
             except Exception as e:
                 logger.warning(f"Could not extract structured output: {e}")
         
@@ -339,6 +354,7 @@ def run_mcp_agent(user_message, user_id, username, conversation_id=None, session
             'recommended_users': structured_output.recommended_users,
             'recommended_social_posts': structured_output.recommended_social_posts,
             'recommended_forum_posts': structured_output.recommended_forum_posts,
+            'pending_operation': structured_output.pending_operation,  # Pending operation requiring user confirmation
             'session_id': final_session_id,  # OpenAI session ID for conversation continuation
             'conversation_id': final_conversation_id,  # Our database ID
             'conversation_history': updated_history  # Return for frontend display only
@@ -356,6 +372,7 @@ def run_mcp_agent(user_message, user_id, username, conversation_id=None, session
             'recommended_users': {},
             'recommended_social_posts': {},
             'recommended_forum_posts': {},
+            'pending_operation': None,
             'session_id': session_id,  # Return as-is, don't generate fallback
             'conversation_id': conversation_id,
             'conversation_history': []
@@ -373,6 +390,7 @@ def run_mcp_agent(user_message, user_id, username, conversation_id=None, session
             'recommended_users': {},
             'recommended_social_posts': {},
             'recommended_forum_posts': {},
+            'pending_operation': None,
             'session_id': session_id,  # Return as-is, don't generate fallback
             'conversation_id': conversation_id,
             'conversation_history': []
