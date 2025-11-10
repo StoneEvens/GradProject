@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import Dict, Optional, Literal
 import json
 import inspect
 from typing import get_type_hints, get_origin, get_args
@@ -15,6 +15,7 @@ from social.serializers import PostFrameSerializer
 from pets.serializers import DiseaseArchiveContentSerializer, AbnormalPostSerializer
 from feeds.models import Feed
 from django.forms.models import model_to_dict
+from mcp_server.database_operations import get_operation_list, perform_operation
 
 # Server configuration
 SERVER_NAME = "PETer MCP Server"
@@ -104,6 +105,9 @@ def create_mcp_server() -> FastMCP:
                     serializer = DiseaseArchiveContentSerializer(archives, many=True)
                     posts_data += json.loads(json.dumps(serializer.data, default=str))
 
+                for post in posts_data:
+                    print(f"Recommended Post ID: {post.get('id')} Title: {post.get('title')}")
+
                 return posts_data
             except Exception as e:
                 return [{"error": f"Failed to get recommendations: {str(e)}"}]
@@ -119,17 +123,36 @@ def create_mcp_server() -> FastMCP:
         def fetch() -> Dict:
             try:
                 users_info: Dict[int, Dict] = {}
+                # Fetch only public users to avoid leaking private profile data
                 users = CustomUser.objects.filter(id__in=user_ids, account_privacy='public')
 
                 for user in users:
-                    users_info[user.id] = {
-                        "username": user.username,
-                        "user_intro": user.user_intro,
-                        "user_fullname": user.user_fullname,
-                        "user_account": user.user_account,
+                    # Build a rich, serialization-safe user dict (exclude sensitive fields like password, email)
+                    data: Dict[str, Optional[str]] = {
+                        "id": user.id,
+                        "username": getattr(user, 'username', None),
+                        "user_account": getattr(user, 'user_account', None),
+                        "user_fullname": getattr(user, 'user_fullname', None),
+                        "user_intro": getattr(user, 'user_intro', None),
+                        "account_privacy": getattr(user, 'account_privacy', None),
                     }
+                    # Optional avatar/headshot URL if present
+                    headshot = getattr(user, 'headshot', None)
+                    if headshot and getattr(headshot, 'url', None):
+                        data["headshot_url"] = headshot.url
+                    # Optional timestamps if model has them
+                    if hasattr(user, 'date_joined'):
+                        data['date_joined'] = str(user.date_joined)
+                    if hasattr(user, 'last_login') and user.last_login:
+                        data['last_login'] = str(user.last_login)
 
-                return users_info
+                    users_info[user.id] = data
+
+                return {
+                    "users": users_info,
+                    "requested_ids": user_ids,
+                    "found_ids": list(users_info.keys())
+                }
             except Exception as e:
                 return {"error": f"Failed to fetch user information: {str(e)}"}
 
@@ -321,26 +344,6 @@ def create_mcp_server() -> FastMCP:
         path: str,
         reason: Optional[str] = None
     ) -> Dict:
-        """
-        準備頁面跳轉操作（需要用戶確認）
-
-        參數:
-        - path: 目標路徑（必填）
-        - reason: 跳轉原因（選填）
-
-        支援的路徑:
-        - /social: 社群頁面
-        - /pets: 寵物列表
-        - /pets/{id}: 特定寵物頁面
-        - /profile: 個人檔案
-        - /calculator: 營養計算機
-        - /health: 健康記錄
-        - /schedule: 餵食排程
-        - /interactive-city: 互動城市
-        - /user/{username}: 用戶檔案頁面
-
-        返回待確認操作
-        """
         import uuid
         from datetime import datetime, timezone, timedelta
 
@@ -389,5 +392,31 @@ def create_mcp_server() -> FastMCP:
             "requires_confirmation": True,
             "expires_at": expires_at
         }
+    
+    @mcp.tool(
+        name="database_operation_list",
+        description="List available database operations as well as the parameters required."
+    )
+    async def database_operation_list() -> Dict:
+        @sync_to_async
+        def fetch() -> Dict:
+            return get_operation_list()
+        
+        return await fetch()
+
+    @mcp.tool(
+        name="perform_database_operation",
+        description="Perform a database operation such as adding or updating pet information."
+    )
+    async def perform_database_operation(
+        operation: Literal["add_pet", "update_pet"],
+        data: Dict
+    ) -> Dict:
+        @sync_to_async
+        def execute() -> Dict:
+            return perform_operation(operation, data)
+        
+        return await execute()
+
 
     return mcp

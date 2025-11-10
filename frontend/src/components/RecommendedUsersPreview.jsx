@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import styles from '../styles/RecommendedUsersPreview.module.css';
 import { getUserFollowStatus, followUser, getUserFollowStatusBatch } from '../services/socialService';
-import { getUserProfile } from '../services/userService';
+import { getUserProfile, getUserSummary } from '../services/userService';
 import ConfirmFollowModal from './ConfirmFollowModal';
 
 const RecommendedUsersPreview = ({ users, onUserClick }) => {
@@ -14,6 +14,7 @@ const RecommendedUsersPreview = ({ users, onUserClick }) => {
   const [currentUser, setCurrentUser] = useState(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [enrichedUsers, setEnrichedUsers] = useState([]);
 
   // 獲取當前用戶資訊
   useEffect(() => {
@@ -28,11 +29,50 @@ const RecommendedUsersPreview = ({ users, onUserClick }) => {
     fetchCurrentUser();
   }, []);
 
-  // 載入追蹤狀態
+  // Enrich users (fetch user_account/user_fullname if missing) then load follow states
   useEffect(() => {
-    if (users && users.length > 0) {
-      loadFollowStates(users);
-    }
+    const enrich = async () => {
+      if (!users || users.length === 0) {
+        setEnrichedUsers([]);
+        return;
+      }
+      const results = await Promise.all(users.map(async (u) => {
+        // Already has needed fields
+        const baseId = u.id !== undefined && u.id !== null ? u.id : (u.user_id !== undefined ? u.user_id : undefined);
+        // If already enriched (has user_account + user_fullname + id), just return normalized copy
+        if (u.user_account && u.user_fullname && baseId !== undefined) {
+          return { ...u, id: baseId };
+        }
+        try {
+          // Try summary endpoint (supports id or account). Use id first.
+          const identifier = baseId !== undefined ? baseId : (u.user_account || u.username || u.display_name);
+          const summary = identifier !== undefined ? await getUserSummary(identifier) : null;
+          if (summary && (summary.user_account || summary.username)) {
+            return {
+              ...u,
+              id: summary.id !== undefined ? summary.id : baseId,
+              user_account: summary.user_account || summary.username || u.user_account,
+              user_fullname: summary.user_fullname || summary.display_name || u.user_fullname || u.display_name || u.name || u.username
+            };
+          }
+        } catch (e) {
+          // Silent enrichment failure; keep original
+        }
+        // Fallback without reliable account: mark nonFollowable to avoid 500 errors
+        const fallbackAccount = u.user_account || u.username;
+        const reliableAccount = (fallbackAccount && typeof fallbackAccount === 'string' && !fallbackAccount.includes(' ')) ? fallbackAccount : null;
+        return {
+          ...u,
+          id: baseId,
+          user_account: reliableAccount,
+          user_fullname: u.user_fullname || u.display_name || u.name || u.username || (reliableAccount ? reliableAccount : `User ${baseId}`),
+          nonFollowable: !reliableAccount
+        };
+      }));
+      setEnrichedUsers(results);
+      loadFollowStates(results);
+    };
+    enrich();
   }, [users]);
 
   const loadFollowStates = async (usersList) => {
@@ -83,7 +123,13 @@ const RecommendedUsersPreview = ({ users, onUserClick }) => {
       if (isCurrentUser) {
         navigate('/user-profile');
       } else {
-        navigate(`/user/${user.user_account}`);
+        const targetId = user.user_id ?? user.id;
+        if (targetId !== undefined && targetId !== null) {
+          navigate(`/user/${targetId}`);
+        } else {
+          // Fallback to previous username-based route if id missing
+          navigate(`/user/${user.user_account}`);
+        }
       }
     }
   };
@@ -94,18 +140,16 @@ const RecommendedUsersPreview = ({ users, onUserClick }) => {
 
     const userFollowState = followStates[user.id];
 
-    // 如果是已追蹤或已請求狀態，直接執行操作（取消追蹤）
+    const userAccount = user.user_account || user.username;
+    if (!userAccount) {
+      console.warn('跳過追蹤：缺少可用的 user_account', user);
+      return;
+    }
     if (userFollowState && (userFollowState.is_following || userFollowState.is_requested)) {
-      handleFollowToggle(user.user_account, user.id);
+      handleFollowToggle(userAccount, user.id);
     } else {
-      // 新追蹤操作：只有私人帳戶才顯示確認Modal
-      if (user.account_privacy === 'private') {
-        setSelectedUser(user);
-        setShowConfirmModal(true);
-      } else {
-        // 公開帳戶直接執行追蹤
-        handleFollowToggle(user.user_account, user.id);
-      }
+      // 私人帳戶可加入確認流程（若需要可擴展）
+      handleFollowToggle(userAccount, user.id);
     }
   };
 
@@ -113,7 +157,8 @@ const RecommendedUsersPreview = ({ users, onUserClick }) => {
   const handleConfirmFollow = () => {
     if (selectedUser) {
       setShowConfirmModal(false);
-      handleFollowToggle(selectedUser.user_account, selectedUser.id);
+      const userAccount = selectedUser.user_account || selectedUser.username;
+      handleFollowToggle(userAccount, selectedUser.id);
       setSelectedUser(null);
     }
   };
@@ -127,7 +172,7 @@ const RecommendedUsersPreview = ({ users, onUserClick }) => {
   // 處理追蹤切換
   const handleFollowToggle = async (userAccount, userId) => {
     try {
-      const result = await followUser(userAccount);
+      let result = await followUser(userAccount);
 
       if (result.success) {
         // 更新追蹤狀態
@@ -183,7 +228,7 @@ const RecommendedUsersPreview = ({ users, onUserClick }) => {
     e.target.src = '/assets/icon/DefaultAvatar.jpg';
   };
 
-  if (!users || users.length === 0) {
+  if (!enrichedUsers || enrichedUsers.length === 0) {
     return null;
   }
 
@@ -194,8 +239,11 @@ const RecommendedUsersPreview = ({ users, onUserClick }) => {
           <span className={styles.title}>{tMain('chatWindow.recommendedUsers.title')}</span>
         </div>
         <div className={styles.userList}>
-          {users.map(user => {
+          {enrichedUsers.map(user => {
             const userFollowState = followStates[user.id];
+            const username = user.user_account || user.account || user.username || user.display_name || `user_${user.id}`;
+            const displayName = user.user_fullname || user.display_name || user.name || username;
+            const disableFollow = user.nonFollowable === true;
 
             return (
               <div
@@ -205,19 +253,21 @@ const RecommendedUsersPreview = ({ users, onUserClick }) => {
               >
                 <img
                   src={user.headshot_url || '/assets/icon/DefaultAvatar.jpg'}
-                  alt={user.user_fullname || user.user_account}
+                  alt={displayName}
                   className={styles.userAvatar}
                   onError={handleImageError}
                 />
                 <div className={styles.userInfo}>
-                  <div className={styles.username}>{user.user_account}</div>
-                  <div className={styles.displayName}>{user.user_fullname}</div>
+                  <div className={styles.username}>{username}</div>
+                  <div className={styles.displayName}>{displayName}</div>
                 </div>
                 <button
-                  className={getFollowButtonClass(userFollowState)}
-                  onClick={(e) => handleFollowButtonClick(e, user)}
+                  className={getFollowButtonClass(userFollowState) + (disableFollow ? ' ' + styles.disabled : '')}
+                  disabled={disableFollow}
+                  title={disableFollow ? '此推薦缺少有效帳號，暫時無法追蹤' : ''}
+                  onClick={(e) => handleFollowButtonClick(e, { ...user, user_account: username, user_fullname: displayName })}
                 >
-                  {getFollowButtonText(user, userFollowState)}
+                  {disableFollow ? '無法追蹤' : getFollowButtonText(user, userFollowState)}
                 </button>
               </div>
             );

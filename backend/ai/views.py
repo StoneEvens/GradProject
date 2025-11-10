@@ -1,6 +1,7 @@
 import os
 import uuid
 import requests
+import asyncio
 from django.shortcuts import render
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
@@ -9,6 +10,7 @@ from rest_framework import status
 from django.conf import settings
 import logging
 from .models import AgentThread, AgentMessage
+from .PETer_Agent import WorkflowInput, run_workflow
 from datetime import datetime, timezone
 
 logger = logging.getLogger(__name__)
@@ -75,326 +77,124 @@ def _generate_conversation_title(user_message: str, tutorial: str = None, operat
         return '新對話'
 
 
-def run_mcp_agent(user_message, user_id, username, conversation_id=None, session_id=None, previous_history=None):
-    try:
-        from agents import HostedMCPTool, Agent, ModelSettings, TResponseInputItem, Runner, RunConfig, trace, AgentOutputSchema
-        from agents.memory import OpenAIConversationsSession
-        from pydantic import BaseModel, Field
-        from openai.types.shared.reasoning import Reasoning
-        from typing import Optional, Dict, List, Any
-        import asyncio
-        
-        if previous_history is None:
-            previous_history = []
-        
-        # Define structured output schema
-        class AgentResponse(BaseModel):
-            """Structured response from the AI agent"""
-            response: str = Field(description="The main text response to the user")
-            tutorial: Optional[str] = Field(default=None, description="Tutorial identifier to start (e.g., 'createPost'). If set, frontend shows a tutorial button.")
-            has_calculator: bool = Field(default=False, description="Whether calculator button should be shown")
-            operation_type: Optional[str] = Field(default=None, description="Primary operation type: navigate, fill_form, click, display_data")
-            operations: List[Dict[str, Any]] = Field(default_factory=list, description="List of operations to perform")
-            recommended_users: Dict[str, Dict[str, Any]] = Field(default_factory=dict, description="Dictionary of recommended users {id: details}")
-            recommended_social_posts: Dict[str, Dict[str, Any]] = Field(default_factory=dict, description="Dictionary of recommended social posts {id: details}")
-            recommended_forum_posts: Dict[str, Dict[str, Any]] = Field(default_factory=dict, description="Dictionary of recommended forum posts {id: details}")
-            pending_operation: Optional[Dict[str, Any]] = Field(default=None, description="Pending operation that requires user confirmation (from prepare_navigate tool)")
-        
-        # Log conversation status
-        if session_id:
-            logger.info(f"Continuing existing session: {session_id}")
-        else:
-            logger.info(f"Starting new session (OpenAI will create conversation_id)")
-        
-        if conversation_id:
-            logger.info(f"Continuing existing conversation: {conversation_id} (OpenAI will load history)")
-        else:
-            logger.info(f"Starting new conversation (OpenAI will generate conversation_id)")
-        
-        logger.info(f"Agent chat request from user {username} (ID: {user_id}): {user_message}")
-        
-        # Get workflow ID
-        workflow_id = os.environ.get('OPENAI_WORKFLOW_ID') or "wf_68fee4a8907881908aad9aaf9cf500b2000a3772ba65199b"
-        
-        # Define the MCP tool configuration
-        mcp = HostedMCPTool(tool_config={
-            "type": "mcp",
-            "server_label": "MCP",
-            "server_url": "https://peter.geniusbee.net/mcp/sse",
-            "server_description": "MCP",
-            "allowed_tools": [
-                "get_user_pet_info_detailed",
-                "get_post_recommendations",
-                "get_user_information",
-                "get_user_pet_types",
-                "get_pet_foods_details",
-                "list_tutorial_topics",
-                "get_navigation_paths",
-                "prepare_navigate"
-            ],
-            "require_approval": "never"
-        })
-        
-        # Create the agent with structured output
-        info_fetcher = Agent(
-            name="Info Fetcher",
-            instructions=f"""Use Traditional Chinese or English to respond to the user's requests. Understand the user's intention, then provide information using the MCP tools to the user. Ask if the user needs more info when helpful. The user expects a result in 50 seconds, so please be concise and efficient. DO NOT summarize the data.
-            When calling get_post_recommendations by default, fetch BOTH social and forum posts unless the user explicitly asks for one type (i.e., set isSocial=true and isForum=true). Then, separate the returned items into recommended_social_posts and recommended_forum_posts accordingly.
-            Use the MCP tool list_tutorial_topics to validate the available tutorial IDs and their descriptions before setting the tutorial field. Do not use legacy fields like has_tutorial or tutorial_type.
-
-            **IMPORTANT - Page Navigation:**
-            When the user wants to navigate to a page (e.g., "帶我去社群頁面", "前往寵物列表", "去健康記錄"), you MUST follow these steps:
-
-            1. First, call the get_navigation_paths MCP tool to get all available page paths and their keyword mappings.
-
-            2. Search through the returned paths to find the best match based on the user's keywords.
-               Example: If user says "帶我去社群頁面", look for paths with keywords matching "社群".
-
-            3. Once you find the correct path, call the prepare_navigate MCP tool:
-               Example: result = prepare_navigate(path="/social", reason="用戶要求前往社群頁面")
-
-            4. The tool returns an operation object. You MUST set this entire object to the pending_operation field in your response.
-               Example response structure:
-               {{
-                 "response": "我已經準備好帶您前往社群頁面，請點擊下方按鈕確認。",
-                 "pending_operation": <the object returned by prepare_navigate>
-               }}
-
-            5. Do NOT just set operation_type to "navigate" - you MUST call get_navigation_paths, then prepare_navigate, and set pending_operation!
-
-            User ID: {user_id}""",
-            model="gpt-5",
-            tools=[mcp],
-            output_type=AgentOutputSchema(AgentResponse, strict_json_schema=False),  # Enable structured output with relaxed schema!
-            model_settings=ModelSettings(
-                store=True,  # OpenAI stores conversation history via Session
-                reasoning=Reasoning(
-                    effort="low"
-                )
-            )
+def _run_agent_plug_and_play(message: str, user_id: str, username: str, session_id: str | None):
+    """Wrapper to invoke PETer_Agent.run_workflow and normalize response structure.
+    Returns dict with keys similar to legacy format.
+    """
+    workflow_input = WorkflowInput(input_as_text=message)
+    result = asyncio.run(
+        run_workflow(
+            workflow_input,
+            user_id=int(user_id) if str(user_id).isdigit() else user_id,
+            username=username,
+            session_id=session_id,
         )
-        
-        # Create or reuse session for conversation persistence
-        if session_id:
-            logger.info(f"Reusing OpenAI session: {session_id}")
-            base_session = OpenAIConversationsSession(conversation_id=session_id)
-        else:
-            logger.info("Creating new OpenAI session for conversation persistence (will be created lazily by API)")
-            base_session = OpenAIConversationsSession()
-        
-        # With session memory, input must be a string (not a list)
-        # OpenAI loads previous messages automatically via the session
-        logger.info(f"Sending only new message as string (OpenAI manages history via session)")
-        
-        # Run the agent workflow
-        session_used = {"session": base_session}
-
-        async def run_agent_with_retry(max_retries: int = 1):
-            """Run the agent with minimal retry if session initialization hits a transient 500."""
-            attempt = 0
-            current_session = base_session
-            last_err = None
-            while attempt <= max_retries:
-                try:
-                    with trace("PETer Agent"):
-                        run_kwargs = {
-                            "input": user_message,
-                            "session": current_session,
-                            "run_config": RunConfig(
-                                trace_metadata={
-                                    "__trace_source__": "agent-builder",
-                                    "workflow_id": workflow_id,
-                                    "user_id": user_id,
-                                    "session_id": getattr(current_session, "_session_id", None) or "new"
-                                }
-                            )
-                        }
-
-                        logger.info(
-                            f"Attempt {attempt+1}: Runner.run with session (conversation_id: {getattr(current_session, '_session_id', None) or 'will be created'})"
-                        )
-
-                        # Record which session is being used for this successful attempt
-                        session_used["session"] = current_session
-                        return await Runner.run(info_fetcher, **run_kwargs)
-                except Exception as e:
-                    last_err = e
-                    attempt += 1
-                    # Only retry once on possible transient OpenAI 500 from conversations.create
-                    if attempt <= max_retries:
-                        logger.warning(f"Agent run failed on attempt {attempt} with error: {e}. Retrying with fresh session...")
-                        try:
-                            await asyncio.sleep(0.8)
-                        except Exception:
-                            pass
-                        # Refresh session for retry
-                        current_session = OpenAIConversationsSession()
-                    else:
-                        break
-            # If we get here, all retries failed
-            raise last_err if last_err else RuntimeError("Unknown agent run failure")
-        
-        # Execute the async function
-        logger.info("Running OpenAI Agent with MCP tools...")
-        
-        # Run with a timeout to prevent indefinite hanging
+    )
+    parsed = result.get('output_parsed', {})
+    session_id_final = result.get('session_id') or session_id
+    
+    # Helper to remove blank/placeholder post recommendations. If nothing meaningful remains,
+    # return an empty list (so the frontend doesn't render empty cards).
+    def _sanitize_post_recs(recs):
+        """Convert legacy dict format {id: {...}} or list into list[{'post_id': id, ...}] and drop blanks."""
+        out = []
         try:
-            agent_result = asyncio.wait_for(
-                run_agent_with_retry(max_retries=1),
-                timeout=90.0  # 90 second timeout for agent execution
-            )
-            agent_result = asyncio.run(agent_result)
-            logger.info(f"Agent execution completed. Result type: {type(agent_result)}")
-        except asyncio.TimeoutError:
-            logger.error("Agent execution timed out after 90 seconds")
-            return {
-                'error': 'Agent processing took too long. Please try a simpler request.',
-                'response': '',
-                'operations': [],
-                'tutorial': None,
-                'has_calculator': False,
-                'operation_type': None,
-                'recommended_users': {},
-                'recommended_social_posts': {},
-                'recommended_forum_posts': {},
-                'pending_operation': None,
-                'session_id': session_id,
-                'conversation_id': conversation_id,
-                'conversation_history': previous_history  # Return what we had
-            }
-        
-        # Extract conversation_id from OpenAI's response
-        print("=" * 80)
-        print("EXTRACTING CONVERSATION ID FROM OPENAI RESPONSE")
-        print("=" * 80)
-        
-        returned_conversation_id = None
-        
-        # With Session-based persistence, the session._session_id is what we need to save
-        # After Runner.run, OpenAI updates the session with the conversation_id
-        # This is the key to conversation continuity!
-        final_session_id = getattr(session_used.get("session"), "_session_id", None) or session_id
-        logger.info(f"✓ Session conversation_id for persistence: {final_session_id}")
-        
-        # Generate our own conversation_id for database tracking
-        if conversation_id:
-            final_conversation_id = conversation_id
+            if isinstance(recs, dict):
+                for _pid, _post in recs.items():
+                    if not isinstance(_post, dict):
+                        continue
+                    title = (_post.get('title') or '').strip()
+                    details = (_post.get('post_details') or _post.get('details') or '').strip()
+                    if not (title or details):
+                        continue
+                    item = dict(_post)
+                    item.setdefault('post_id', _pid)
+                    out.append(item)
+            elif isinstance(recs, list):
+                for _post in recs:
+                    if not isinstance(_post, dict):
+                        continue
+                    title = (_post.get('title') or '').strip()
+                    details = (_post.get('post_details') or _post.get('details') or '').strip()
+                    if not (title or details):
+                        continue
+                    # Ensure post_id exists (fallback to provided id field variants if any)
+                    pid = _post.get('post_id') or _post.get('id')
+                    item = dict(_post)
+                    if pid is not None:
+                        item['post_id'] = pid
+                    out.append(item)
+        except Exception:
+            return []
+        return out
+
+    # Helper to sanitize user recommendations. If all entries are blank placeholders,
+    # return [] instead of a dict with empty fields.
+    def _sanitize_user_recs(recs):
+        """Normalize recommended users into list[{user_id, display_name, user_details}]."""
+        out = []
+        try:
+            if isinstance(recs, dict):
+                for _uid, _user in recs.items():
+                    if not isinstance(_user, dict):
+                        continue
+                    display_name = (_user.get('display_name') or _user.get('name') or '').strip()
+                    details = (_user.get('user_details') or _user.get('details') or '').strip()
+                    if not (display_name or details):
+                        continue
+                    item = dict(_user)
+                    item.setdefault('user_id', _uid)
+                    out.append(item)
+            elif isinstance(recs, list):
+                for _user in recs:
+                    if not isinstance(_user, dict):
+                        continue
+                    display_name = (_user.get('display_name') or _user.get('name') or '').strip()
+                    details = (_user.get('user_details') or _user.get('details') or '').strip()
+                    if not (display_name or details):
+                        continue
+                    # ensure user_id present
+                    uid = _user.get('user_id') or _user.get('id')
+                    item = dict(_user)
+                    if uid is not None:
+                        item['user_id'] = uid
+                    out.append(item)
+        except Exception:
+            return []
+        return out
+
+    # Normalize operation list shape (each item has operation_name / operation_data)
+    operations_raw = parsed.get('operations') or []
+    operations = []
+    for op in operations_raw:
+        # Accept dict or Pydantic object
+        if isinstance(op, dict):
+            operations.append(op)
         else:
-            final_conversation_id = f"conv_{uuid.uuid4().hex}"
-        
-        logger.info(f"✓ Database conversation_id: {final_conversation_id}")
-        
-        # With structured output (output_type=AgentResponse), extract the Pydantic model
-        structured_output = None
-        ai_response_text = ""
-        
-        # Try to get structured output from final_output
-        if agent_result.final_output:
             try:
-                # The agent returns an AgentResponse Pydantic model
-                structured_output = agent_result.final_output_as(AgentResponse)
-                logger.info(f"✓ Successfully extracted structured output from agent")
-                logger.info(f"  - response text length: {len(structured_output.response)}")
-                logger.info(f"  - tutorial: {structured_output.tutorial}")
-                logger.info(f"  - has_calculator: {structured_output.has_calculator}")
-                logger.info(f"  - operations count: {len(structured_output.operations)}")
-                logger.info(f"  - recommended_users count: {len(structured_output.recommended_users)}")
-                logger.info(f"  - recommended_social_posts count: {len(structured_output.recommended_social_posts)}")
-                logger.info(f"  - recommended_forum_posts count: {len(structured_output.recommended_forum_posts)}")
-                logger.info(f"  - pending_operation: {structured_output.pending_operation}")
-            except Exception as e:
-                logger.warning(f"Could not extract structured output: {e}")
-        
-        # Fallback to text extraction if structured output fails
-        if not structured_output:
-            logger.warning("Falling back to text extraction (structured output not available)")
-            for item in agent_result.new_items:
-                if hasattr(item, 'content') and item.content:
-                    for content_item in item.content:
-                        if hasattr(content_item, 'text'):
-                            ai_response_text += content_item.text
-            
-            if not ai_response_text and agent_result.final_output:
-                try:
-                    ai_response_text = agent_result.final_output_as(str)
-                except:
-                    ai_response_text = str(agent_result.final_output)
-            
-            # Create a basic structured output from text
-            structured_output = AgentResponse(
-                response=ai_response_text,
-                tutorial=None,
-                has_calculator=False,
-                operations=[],
-                recommended_users={},
-                recommended_social_posts={},
-                recommended_forum_posts={}
-            )
-        
-        logger.info(f"Agent response: {structured_output.response[:200]}...")
-        
-        # Build updated conversation history for frontend display
-        # Append new exchange to previous history
-        updated_history = list(previous_history) if previous_history else []
-        updated_history.append({
-            "role": "user",
-            "content": [{"type": "input_text", "text": user_message}]
-        })
-        updated_history.append({
-            "role": "assistant",
-            "content": [{"type": "output_text", "text": structured_output.response}]
-        })
-        
-        return {
-            'response': structured_output.response,
-            'tutorial': structured_output.tutorial,
-            'has_calculator': structured_output.has_calculator,
-            'operation_type': structured_output.operation_type,
-            'operations': structured_output.operations,
-            'recommended_users': structured_output.recommended_users,
-            'recommended_social_posts': structured_output.recommended_social_posts,
-            'recommended_forum_posts': structured_output.recommended_forum_posts,
-            'pending_operation': structured_output.pending_operation,  # Pending operation requiring user confirmation
-            'session_id': final_session_id,  # OpenAI session ID for conversation continuation
-            'conversation_id': final_conversation_id,  # Our database ID
-            'conversation_history': updated_history  # Return for frontend display only
-        }
-        
-    except ImportError as e:
-        logger.error(f"Missing required package: {str(e)}")
-        return {
-            'error': 'Missing required package. Install: pip uninstall agents && pip install git+https://github.com/openai/openai-agents-python.git',
-            'response': '',
-            'operations': [],
-            'tutorial': None,
-            'has_calculator': False,
-            'operation_type': None,
-            'recommended_users': {},
-            'recommended_social_posts': {},
-            'recommended_forum_posts': {},
-            'pending_operation': None,
-            'session_id': session_id,  # Return as-is, don't generate fallback
-            'conversation_id': conversation_id,
-            'conversation_history': []
-        }
-        
-    except Exception as e:
-        logger.error(f"Unexpected error in run_mcp_agent: {str(e)}", exc_info=True)
-        return {
-            'error': f'Unexpected error: {str(e)}',
-            'response': '',
-            'operations': [],
-            'tutorial': None,
-            'has_calculator': False,
-            'operation_type': None,
-            'recommended_users': {},
-            'recommended_social_posts': {},
-            'recommended_forum_posts': {},
-            'pending_operation': None,
-            'session_id': session_id,  # Return as-is, don't generate fallback
-            'conversation_id': conversation_id,
-            'conversation_history': []
-        }
+                operations.append(op.model_dump())
+            except Exception:
+                operations.append({
+                    'operation_name': getattr(op, 'operation_name', ''),
+                    'operation_data': getattr(op, 'operation_data', ''),
+                })
+    # Sanitize recommendations: drop blank placeholders; if empty -> []
+    recommended_social_posts = _sanitize_post_recs(parsed.get('recommended_social_posts') or [])
+    recommended_forum_posts = _sanitize_post_recs(parsed.get('recommended_forum_posts') or [])
+    recommended_users = _sanitize_user_recs(parsed.get('recommended_users') or [])
+    return {
+        'response': parsed.get('reply', ''),
+        'tutorial': parsed.get('tutorial'),
+        'has_calculator': parsed.get('has_calculator', False),
+        'operation_type': parsed.get('operation_type'),
+        'operations': operations,
+    'recommended_users': recommended_users,
+        'recommended_social_posts': recommended_social_posts,
+        'recommended_forum_posts': recommended_forum_posts,
+        # Standardized: thread_id is the OpenAI id used to continue conversation
+        'session_id': session_id_final,
+        'conversation_history': []  # Built separately after DB persistence
+    }
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -442,15 +242,97 @@ def agent_chat(request):
     user = request.user
     user_id = str(user.id)
     
-    # Call the core MCP agent logic
-    result = run_mcp_agent(
-        user_message=user_message,
-        user_id=user_id,
-        username=user.username,
-        conversation_id=conversation_id,
-        session_id=session_id,
-        previous_history=previous_history
-    )
+    # Call the plug-and-play agent logic
+    # Only send a valid OpenAI session id that starts with 'conv-' back to the SDK; otherwise start a fresh session
+    session_id_for_agent = session_id if (isinstance(session_id, str) and session_id.startswith('conv-')) else None
+    result = _run_agent_plug_and_play(user_message, user_id, user.username, session_id_for_agent)
+
+    # Canonical OpenAI continuation id
+    returned_session_id = result.get('session_id') or (session_id if isinstance(session_id, str) and session_id.startswith('conv-') else None)
+
+    # Resolve or create conversation thread
+    thread = None
+    if conversation_id:
+        try:
+            thread = AgentThread.objects.get(id=conversation_id, user=user)
+        except AgentThread.DoesNotExist:
+            thread = None
+
+    if not thread and returned_session_id:
+        # Try to find by session id
+        try:
+            thread = AgentThread.objects.get(thread_id=returned_session_id, user=user)
+        except AgentThread.DoesNotExist:
+            thread = None
+
+    if not thread and returned_session_id:
+        # Create new thread with a sensible title based on intent
+        title = _generate_conversation_title(
+            user_message=user_message,
+            tutorial=result.get('tutorial'),
+            operation_type=result.get('operation_type')
+        )
+        thread = AgentThread.objects.create(
+            user=user,
+            thread_id=returned_session_id,
+            title=title
+        )
+        conversation_id = thread.id
+    elif thread and returned_session_id and thread.thread_id != returned_session_id:
+        # Update stored session id if needed (e.g., pending placeholder -> real id)
+        if str(thread.thread_id).startswith('sess_pending_') and returned_session_id and returned_session_id.startswith('conv-'):
+            thread.thread_id = returned_session_id
+            thread.save(update_fields=['thread_id', 'updated_at'])
+
+    # Save latest user/assistant messages
+    if thread:
+        AgentMessage.objects.create(
+            conversation=thread,
+            role='user',
+            content=user_message
+        )
+        AgentMessage.objects.create(
+            conversation=thread,
+            role='assistant',
+            content=result.get('response', ''),
+            has_tutorial=bool(result.get('tutorial')),
+            tutorial_type=result.get('tutorial'),
+            has_calculator=result.get('has_calculator', False),
+            operation_type=result.get('operation_type'),
+            additional_data={
+                'operations': result.get('operations', []),
+                'recommendedUsers': result.get('recommended_users', []),
+                'recommendedSocialPosts': result.get('recommended_social_posts', {}),
+                'recommendedForumPosts': result.get('recommended_forum_posts', {}),
+                'message_data': {
+                    'response': result.get('response', ''),
+                    'operations': result.get('operations', []),
+                    'tutorial': result.get('tutorial'),
+                    'hasCalculator': result.get('has_calculator', False),
+                    'operationType': result.get('operation_type'),
+                    'recommendedUsers': result.get('recommended_users', []),
+                    'recommendedSocialPosts': result.get('recommended_social_posts', {}),
+                    'recommendedForumPosts': result.get('recommended_forum_posts', {}),
+                    'session_id': returned_session_id,
+                    'conversationId': thread.id,
+                }
+            }
+        )
+
+    # Build conversation history from DB for the response
+    conversation_history_built = []
+    if thread:
+        for msg in thread.messages.order_by('created_at').all():
+            if msg.role == 'user':
+                conversation_history_built.append({
+                    'role': 'user',
+                    'content': [{ 'type': 'input_text', 'text': msg.content }]
+                })
+            elif msg.role == 'assistant':
+                conversation_history_built.append({
+                    'role': 'assistant',
+                    'content': [{ 'type': 'output_text', 'text': msg.content }]
+                })
     
     # Check for errors
     if 'error' in result:
@@ -459,12 +341,13 @@ def agent_chat(request):
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
     # Return successful response
+    # conversation_id handling moved out; use session_id only in this simplified endpoint
     return Response({
         'response': result['response'],
         'operations': result['operations'],
-        'session_id': result['session_id'],
-        'conversation_id': result['conversation_id'],
-        'conversation_history': result['conversation_history']
+        'session_id': returned_session_id,
+        'conversation_id': conversation_id,
+        'conversation_history': conversation_history_built,
     }, status=status.HTTP_200_OK)
 
 
@@ -476,44 +359,15 @@ def agent_chat(request):
 @permission_classes([IsAuthenticated])
 def main_chat(request):
     """
-    Main chat endpoint - compatible with aiChatService frontend
-    
-    This endpoint wraps agent_chat and transforms the response to match
-    the aiAgent app format, allowing the main page ChatWindow to use the
-    new OpenAI Agents SDK with MCP tools seamlessly.
-    
-    Request body (from aiChatService):
-        {
-            "message": "Show me my pets",
-            "conversationId": 123,  // optional
-            "context": {
-                "petId": 1,
-                "lastIntent": "feeding",
-                "conversationHistory": [...],
-                ...
-            }
-        }
-    
-    Response (aiAgent-compatible format):
-        {
-            "response": "Here are your pets...",
-            "conversationId": 123,
-            "operations": [...],
-            "operationType": "navigate | fill_form | click | display_data",
-            "hasTutorial": false,
-            "tutorialType": null,
-            "hasCalculator": false,
-            "recommendedUsers": {},
-            "recommendedSocialPosts": {},
-            "recommendedForumPosts": {}
-        }
+    Main chat endpoint - compatible with aiChatService frontend.
+    Uses PETer_Agent.run_workflow under the hood; persists OpenAI session_id and messages in DB.
     """
     try:
-        # Extract data from request (aiChatService format)
+        # 1. Parse request
         user_message = request.data.get('message')
         conversation_id = request.data.get('conversationId')
         context = request.data.get('context', {})
-        
+
         if not user_message:
             return Response({
                 'error': '訊息不能為空',
@@ -521,258 +375,152 @@ def main_chat(request):
                 'source': 'error',
                 'confidence': 0.0
             }, status=status.HTTP_400_BAD_REQUEST)
-        
-        # Extract conversation history from context if available (for display/fallback only)
-        conversation_history = context.get('conversationHistory', [])
-        
-        # Convert aiChatService history format to agent format (kept for frontend display)
-        # Note: This history is NOT sent to the agent - OpenAI loads it from store
-        agent_history = []
-        for hist_item in conversation_history:
-            if 'user' in hist_item:
-                agent_history.append({
-                    "role": "user",
-                    "content": [{"type": "input_text", "text": hist_item['user']}]
-                })
-            if 'ai' in hist_item:
-                agent_history.append({
-                    "role": "assistant",
-                    "content": [{"type": "output_text", "text": hist_item['ai']}]
-                })
-        
-        # Get or create thread from database
+
+        # 2. Resolve existing DB thread
         thread = None
-        openai_session_id = None  # Changed from openai_conversation_id to openai_session_id
-        is_new_conversation = False
-        
+        openai_session_id = None
+        is_new = True
         if conversation_id:
-            # Try to find existing thread by conversation_id
             try:
-                thread = AgentThread.objects.get(
-                    id=conversation_id,
-                    user=request.user,
-                    is_active=True
-                )
-                openai_session_id = thread.thread_id  # This contains the OpenAI session.id
-                logger.info(f"Found existing OpenAI session: {openai_session_id} for frontend conversation: {conversation_id}")
+                thread = AgentThread.objects.get(id=conversation_id, user=request.user, is_active=True)
+                openai_session_id = thread.thread_id  # may be conv-* or placeholder
+                is_new = False
+                logger.info(f"Existing conversation {conversation_id} maps to session {openai_session_id}")
             except AgentThread.DoesNotExist:
-                logger.info(f"No thread found for conversation_id: {conversation_id}, will create new session")
-                is_new_conversation = True
-        else:
-            logger.info("No conversation_id provided, will create new OpenAI session")
-            is_new_conversation = True
-        
-        logger.info(f"Main chat request from user {request.user.username}: {user_message}")
-        logger.info(f"Frontend Conversation ID: {conversation_id}, OpenAI Session ID: {openai_session_id or 'will be created'}")
-        logger.info(f"Using OpenAI's Session-based memory (store=True)")
-        
-        # Call the core MCP agent logic
-        # Note: previous_history is passed but NOT sent to agent - only for frontend display
-        result = run_mcp_agent(
-            user_message=user_message,
-            user_id=str(request.user.id),
-            username=request.user.username,
-            conversation_id=None,  # Not used anymore
-            session_id=openai_session_id,  # Pass the OpenAI session.id for conversation continuation
-            previous_history=agent_history  # Kept for frontend display only
-        )
-        
-        # Check if there was an error
+                logger.info(f"Conversation id {conversation_id} not found; will create new thread")
+
+        # 3. Run agent (only pass valid conv-* session id)
+        session_id_for_agent = openai_session_id if (isinstance(openai_session_id, str) and openai_session_id.startswith('conv-')) else None
+        result = _run_agent_plug_and_play(user_message, str(request.user.id), request.user.username, session_id_for_agent)
+
         if 'error' in result:
-            error_response = dict(result) if isinstance(result, dict) else {}
-            error_response.setdefault('response', '抱歉，我暫時無法處理您的請求。請稍後再試。')
-            error_response.setdefault('tutorial', None)
-            error_response.setdefault('hasCalculator', False)
-            error_response.setdefault('operations', [])
-            error_response.setdefault('recommendedUsers', {})
-            error_response.setdefault('recommendedSocialPosts', {})
-            error_response.setdefault('recommendedForumPosts', {})
-            error_response['conversationId'] = conversation_id
-            return Response(error_response, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
-        # Get the session_id from the result (OpenAI's session.id)
-        returned_session_id = result.get('session_id')
-        
-        logger.info(f"Session ID from run_mcp_agent: {returned_session_id}")
-        
-        # Handle thread persistence in database
-        if is_new_conversation and returned_session_id:
-            # New conversation - create database record with the session_id from OpenAI
-            # Generate a concise title that reflects user's true intention
-            title = _generate_conversation_title(
-                user_message=user_message,
-                tutorial=tutorial,
-                operation_type=operation_type
-            )
+            err_payload = dict(result)
+            err_payload.setdefault('response', '抱歉，我暫時無法處理您的請求。請稍後再試。')
+            err_payload.setdefault('conversationId', conversation_id)
+            return Response(err_payload, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-            thread = AgentThread.objects.create(
-                user=request.user,
-                thread_id=returned_session_id,  # Store OpenAI's session.id (e.g., "sess_xxx...")
-                title=title
-            )
-            logger.info(f"✓ Created thread record: session_id '{returned_session_id}' -> Django ID {thread.id}")
-            
-            # Update conversation_id to return the Django-generated ID to frontend
-            conversation_id = thread.id
-            
-        elif is_new_conversation and not returned_session_id:
-            # This shouldn't happen now, but handle gracefully
-            logger.error("⚠ ERROR: New conversation but no session_id in result!")
-            logger.error("⚠ This indicates a bug in run_mcp_agent()")
-            logger.warning("⚠ User will need to start a new conversation for each message")
-            # Don't create thread record without session_id
-            thread = None
-            
-        elif thread:
-            # Existing conversation - update timestamp
-            thread.save(update_fields=['updated_at'])
-            logger.info(f"✓ Updated thread timestamp for conversation {conversation_id}")
-            
-            # Verify session_id matches what we got back (should be the same)
-            if returned_session_id and thread.thread_id != returned_session_id:
-                logger.error(f"⚠ Session ID mismatch! DB: {thread.thread_id}, Response: {returned_session_id}")
-                # If the stored session is a pending placeholder, update to the real session id
-                try:
-                    if str(thread.thread_id).startswith('sess_pending_'):
-                        thread.thread_id = returned_session_id
-                        thread.save(update_fields=['thread_id', 'updated_at'])
-                        logger.info(f"✓ Updated pending session id to real id for conversation {conversation_id}")
-                except Exception as _:
-                    pass
-
-            # Improve title if it's still generic and this is effectively the first real user intent
-            try:
-                generic_titles = {'新對話', '對話', 'Conversation', 'New Chat'}
-                if (thread.title in generic_titles) or (thread.title and len(thread.title) <= 3):
-                    new_title = _generate_conversation_title(
-                        user_message=user_message,
-                        tutorial=tutorial,
-                        operation_type=operation_type
-                    )
-                    if new_title and new_title != thread.title:
-                        thread.title = new_title
-                        thread.save(update_fields=['title', 'updated_at'])
-                        logger.info(f"✓ Updated conversation title to '{new_title}' for conversation {conversation_id}")
-            except Exception as _:
-                pass
-        
-        # Extract structured data from agent result
-        # With output_type=AgentResponse, all data is already structured!
+        # 4. Extract structured fields
         operations = result.get('operations', [])
         tutorial = result.get('tutorial')
         has_calculator = result.get('has_calculator', False)
         operation_type = result.get('operation_type')
-        recommended_users = result.get('recommended_users', {})
+        recommended_users = result.get('recommended_users', [])
         recommended_social_posts = result.get('recommended_social_posts', {})
         recommended_forum_posts = result.get('recommended_forum_posts', {})
-        pending_operation = result.get('pending_operation')
 
-        # Normalize post dates to ensure 'created_at' exists for all posts
-        def _normalize_post_dates(posts_dict):
-            if not isinstance(posts_dict, dict):
-                return {}
-            for _pid, _post in list(posts_dict.items()):
-                if not isinstance(_post, dict):
-                    # Skip non-dict entries
-                    continue
+        returned_session_id = result.get('session_id')
+        logger.info(f"Agent returned session_id={returned_session_id}")
+
+        # 5. Persist thread if new and valid session id
+        if is_new and returned_session_id and returned_session_id.startswith('conv-'):
+            title = _generate_conversation_title(user_message, tutorial, operation_type)
+            thread = AgentThread.objects.create(user=request.user, thread_id=returned_session_id, title=title)
+            conversation_id = thread.id
+            logger.info(f"Created new thread {conversation_id} for session {returned_session_id}")
+        elif is_new and not (returned_session_id and returned_session_id.startswith('conv-')):
+            logger.warning("New conversation but no valid session_id yet; will defer creation until next valid response")
+        elif thread and returned_session_id and returned_session_id.startswith('conv-') and thread.thread_id != returned_session_id:
+            if str(thread.thread_id).startswith('sess_pending_') or not thread.thread_id.startswith('conv-'):
+                thread.thread_id = returned_session_id
+                thread.save(update_fields=['thread_id', 'updated_at'])
+                logger.info("Upgraded placeholder session id -> real conv id")
+
+        # 6. Improve generic title
+        if thread:
+            generic_titles = {'新對話', '對話', 'Conversation', 'New Chat'}
+            if (thread.title in generic_titles) or (thread.title and len(thread.title) <= 3):
+                new_title = _generate_conversation_title(user_message, tutorial, operation_type)
+                if new_title and new_title != thread.title:
+                    thread.title = new_title
+                    thread.save(update_fields=['title', 'updated_at'])
+                    logger.info(f"Updated conversation title to {new_title}")
+
+        # 7. Normalize recommended post dates (supports dict or list, preserves shape)
+        def _normalize_post_dates(posts):
+            # Normalize a single post dict in place
+            def _norm_one(p):
+                if not isinstance(p, dict):
+                    return p
                 ts = (
-                    _post.get('created_at')
-                    or _post.get('post_date')
-                    or _post.get('createdAt')
-                    or _post.get('postDate')
-                    or _post.get('timestamp')
-                    or _post.get('posted_at')
-                    or _post.get('published_at')
+                    p.get('created_at') or p.get('post_date') or p.get('createdAt') or p.get('postDate') or
+                    p.get('timestamp') or p.get('posted_at') or p.get('published_at')
                 )
-                # Always set created_at so frontend can reliably consume it
-                _post['created_at'] = ts or datetime.now(timezone.utc).isoformat()
-            return posts_dict
+                if ts:
+                    p['created_at'] = ts
+                return p
+
+            if isinstance(posts, dict):
+                for _pid, _post in posts.items():
+                    if isinstance(_post, dict):
+                        posts[_pid] = _norm_one(_post)
+                return posts
+            if isinstance(posts, list):
+                return [_norm_one(p) for p in posts if isinstance(p, dict)]
+            return posts
 
         recommended_social_posts = _normalize_post_dates(recommended_social_posts)
         recommended_forum_posts = _normalize_post_dates(recommended_forum_posts)
-        
-        logger.info(f"Structured output received:")
-        logger.info(f"  - Operations: {len(operations)}")
-        logger.info(f"  - Recommended users: {len(recommended_users)}")
-        logger.info(f"  - Recommended social posts: {len(recommended_social_posts)}")
-        logger.info(f"  - Recommended forum posts: {len(recommended_forum_posts)}")
-        logger.info(f"  - Tutorial: {tutorial}, Has calculator: {has_calculator}")
-        
-        # Save messages to database for history display
+
+        # 8. Persist messages
         if thread:
-            # Save user message
-            AgentMessage.objects.create(
-                conversation=thread,
-                role='user',
-                content=user_message
-            )
-            
-            # Determine operation type from operations array (for legacy compatibility)
+            AgentMessage.objects.create(conversation=thread, role='user', content=user_message)
             if not operation_type and operations:
                 operation_type = operations[0].get('type')
-            
-            # Build the exact response payload to return (pass-through from agent, ensure conversationId)
-            response_payload = dict(result) if isinstance(result, dict) else {}
-            # Remove non-serializable/internal fields (e.g., agent_result)
-            response_payload.pop('agent_result', None)
-            response_payload['conversationId'] = conversation_id
-            # Ensure required keys exist for consistency
-            response_payload.setdefault('tutorial', tutorial)
-            response_payload.setdefault('hasCalculator', has_calculator)
-            response_payload.setdefault('operationType', operation_type)
-            response_payload.setdefault('operations', operations)
-            response_payload.setdefault('recommendedUsers', recommended_users)
-            response_payload.setdefault('recommendedSocialPosts', recommended_social_posts)
-            response_payload.setdefault('recommendedForumPosts', recommended_forum_posts)
-            response_payload.setdefault('pendingOperation', pending_operation)
-
+            response_payload = {
+                'response': result.get('response', ''),
+                'operations': operations,
+                'tutorial': tutorial,
+                'hasCalculator': has_calculator,
+                'operationType': operation_type,
+                'recommendedUsers': recommended_users,
+                'recommendedSocialPosts': recommended_social_posts,
+                'recommendedForumPosts': recommended_forum_posts,
+                'session_id': returned_session_id,
+                'conversationId': conversation_id,
+            }
+            response_payload.setdefault('pendingOperation', None)
             AgentMessage.objects.create(
                 conversation=thread,
                 role='assistant',
                 content=result.get('response', ''),
-                # Feature flags (buttons/UI) - now from structured output!
                 has_tutorial=bool(tutorial) if tutorial is not None else False,
                 tutorial_type=tutorial,
                 has_calculator=has_calculator,
                 operation_type=operation_type,
-                # Store dictionaries in additional_data
                 additional_data={
                     'recommendedUsers': recommended_users,
                     'recommendedSocialPosts': recommended_social_posts,
                     'recommendedForumPosts': recommended_forum_posts,
                     'operations': operations,
-                    'operationParams': {},  # TODO: Extract from operations if needed
-                    'message_data': response_payload  # Persist full standardized agent response for this message
+                    'operationParams': {},
+                    'message_data': response_payload,
                 }
             )
-            logger.info(f"✓ Saved messages to database for conversation {thread.id}")
         else:
-            logger.warning("⚠ No thread record - messages not saved to database")
-        
-        # Build final response payload (pass-through)
-        response_data = response_payload
-        
-        logger.info(f"Main chat response: {response_data['response'][:100]}... (Operations: {len(operations)}, Users: {len(recommended_users)}, Social: {len(recommended_social_posts)}, Forum: {len(recommended_forum_posts)})")
-        
-        return Response(response_data, status=status.HTTP_200_OK)
-        
+            response_payload = {
+                'response': result.get('response', ''),
+                'operations': operations,
+                'tutorial': tutorial,
+                'hasCalculator': has_calculator,
+                'operationType': operation_type,
+                'recommendedUsers': recommended_users,
+                'recommendedSocialPosts': recommended_social_posts,
+                'recommendedForumPosts': recommended_forum_posts,
+                'session_id': returned_session_id,
+                'conversationId': conversation_id,
+                'pendingOperation': None,
+                'warning': 'Session not yet established; conversation not persisted until valid session_id (conv-) is returned.'
+            }
+
+        logger.info(f"Main chat response ready (session={returned_session_id}, convId={conversation_id})")
+        return Response(response_payload, status=status.HTTP_200_OK)
     except Exception as e:
-        logger.error(f"Unexpected error in main_chat: {str(e)}", exc_info=True)
-        import traceback
-        traceback.print_exc()
-        
-        error_response = {
+        logger.error(f"Unexpected error in main_chat: {e}", exc_info=True)
+        return Response({
             'response': '抱歉，我暫時無法處理您的請求。請稍後再試。',
-            'conversationId': request.data.get('conversationId'),
-            'tutorial': None,
-            'hasCalculator': False,
-            'operations': [],
-            'recommendedUsers': {},
-            'recommendedSocialPosts': {},
-            'recommendedForumPosts': {},
-            'error': f'處理請求時發生錯誤: {str(e)}'
-        }
-        return Response(error_response, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            'conversationId': conversation_id,
+            'error': f'處理請求時發生錯誤: {e}',
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['GET'])
