@@ -1,6 +1,16 @@
 from typing import Dict, Literal
+from datetime import datetime
 from accounts.models import CustomUser
-from pets.models import Pet
+from pets.models import (
+    Pet, AbnormalPost, DiseaseArchiveContent, Symptom, Illness,
+    PostSymptomsRelation, ArchiveAbnormalPostRelation, ArchiveIllnessRelation
+)
+from social.models import PostFrame
+from media.models import AbnormalPostImage
+from django.db import transaction
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def get_operation_list() -> Dict:
@@ -45,6 +55,66 @@ def get_operation_list() -> Dict:
                 "predicted_adult_weight": "預期成犬/成貓體重 (浮點數，公斤)",
                 "description": "寵物描述 (字串)"
             }
+        },
+        "add_abnormal_post": {
+            "description": "新增異常記錄（寵物健康異常情況的記錄）",
+            "required_params": ["user_id", "pet_id", "symptoms"],
+            "optional_params": ["content", "weight", "body_temperature", "water_amount", "is_emergency", "record_date", "is_private"],
+            "param_details": {
+                "user_id": "用戶ID (整數)",
+                "pet_id": "寵物ID (整數)",
+                "symptoms": "症狀列表 (字串陣列，例如: ['打噴嚏', '咳嗽', '發燒'])",
+                "content": "異常描述內容 (字串)",
+                "weight": "當時體重 (浮點數，公斤)",
+                "body_temperature": "體溫 (浮點數，攝氏度)",
+                "water_amount": "飲水量 (整數，毫升)",
+                "is_emergency": "是否為就醫記錄 (布林值，預設: False)",
+                "record_date": "記錄日期 (字串，ISO格式，例如: '2025-01-15T10:30:00Z')",
+                "is_private": "是否為私人記錄 (布林值，預設: True)"
+            }
+        },
+        "create_disease_archive": {
+            "description": "建立疾病檔案（將多個異常記錄整合成一個疾病檔案）",
+            "required_params": ["user_id", "pet_id", "archive_title", "content", "abnormal_post_ids"],
+            "optional_params": ["main_cause", "go_to_doctor", "health_status", "is_private"],
+            "param_details": {
+                "user_id": "用戶ID (整數)",
+                "pet_id": "寵物ID (整數)",
+                "archive_title": "檔案標題 (字串)",
+                "content": "檔案內容/統整描述 (字串)",
+                "abnormal_post_ids": "包含的異常記錄ID列表 (整數陣列，例如: [1, 2, 3])",
+                "main_cause": "主要病因 (字串)",
+                "go_to_doctor": "是否有就醫 (布林值，預設: False)",
+                "health_status": "健康狀態 (字串，例如: '已康復', '治療中')",
+                "is_private": "是否為私人記錄 (布林值，預設: True)"
+            }
+        },
+        "update_abnormal_post": {
+            "description": "更新異常記錄",
+            "required_params": ["user_id", "post_id"],
+            "optional_params": ["pet_id", "content", "symptoms", "weight", "body_temperature", "water_amount", "is_emergency", "record_date", "is_private"],
+            "param_details": {
+                "user_id": "用戶ID (整數)",
+                "post_id": "異常記錄ID (整數)",
+                "pet_id": "新的寵物ID (整數，可用於轉移記錄到其他寵物)",
+                "content": "異常描述內容 (字串)",
+                "symptoms": "症狀列表 (字串陣列，例如: ['打噴嚏', '咳嗽'])",
+                "weight": "當時體重 (浮點數，公斤)",
+                "body_temperature": "體溫 (浮點數，攝氏度)",
+                "water_amount": "飲水量 (整數，毫升)",
+                "is_emergency": "是否為就醫記錄 (布林值)",
+                "record_date": "記錄日期 (字串，ISO格式)",
+                "is_private": "是否為私人記錄 (布林值)"
+            }
+        },
+        "delete_abnormal_post": {
+            "description": "刪除異常記錄",
+            "required_params": ["user_id", "post_id"],
+            "optional_params": [],
+            "param_details": {
+                "user_id": "用戶ID (整數)",
+                "post_id": "異常記錄ID (整數)"
+            }
         }
     }
     return {
@@ -59,6 +129,14 @@ def perform_operation(operation: str, data: Dict) -> Dict:
             return _add_pet(data)
         elif operation == "update_pet":
             return _update_pet(data)
+        elif operation == "add_abnormal_post":
+            return _add_abnormal_post(data)
+        elif operation == "update_abnormal_post":
+            return _update_abnormal_post(data)
+        elif operation == "delete_abnormal_post":
+            return _delete_abnormal_post(data)
+        elif operation == "create_disease_archive":
+            return _create_disease_archive(data)
         else:
             return {"error": f"Operation '{operation}' is not implemented"}
     except Exception as e:
@@ -165,5 +243,468 @@ def _update_pet(data: Dict) -> Dict:
             "breed": pet.breed,
             "age": pet.age,
             "description": pet.description
+        }
+    }
+
+
+@transaction.atomic
+def _add_abnormal_post(data: Dict) -> Dict:
+    """
+    新增異常記錄
+    
+    Args:
+        data: 包含異常記錄資訊的字典
+        
+    Returns:
+        Dict: 操作結果
+    """
+    # 驗證必要欄位
+    required_fields = ["user_id", "pet_id", "symptoms"]
+    missing_fields = [f for f in required_fields if f not in data]
+    if missing_fields:
+        return {"error": f"Missing required fields: {', '.join(missing_fields)}"}
+    
+    # 獲取用戶
+    try:
+        user = CustomUser.objects.get(id=data["user_id"])
+    except CustomUser.DoesNotExist:
+        return {"error": f"User with id {data['user_id']} not found"}
+    
+    # 獲取寵物並驗證所有權
+    try:
+        pet = Pet.objects.get(id=data["pet_id"], owner=user)
+    except Pet.DoesNotExist:
+        return {"error": f"Pet with id {data['pet_id']} not found or does not belong to user"}
+    
+    # 驗證症狀
+    symptoms = data.get("symptoms", [])
+    if not symptoms or not isinstance(symptoms, list):
+        return {"error": "Symptoms must be a non-empty list"}
+    
+    # 處理記錄日期
+    record_date = None
+    if data.get("record_date"):
+        try:
+            record_date = datetime.fromisoformat(data["record_date"].replace('Z', '+00:00'))
+            
+            # 檢查該日期是否已有記錄
+            date_start = record_date.replace(hour=0, minute=0, second=0, microsecond=0)
+            date_end = record_date.replace(hour=23, minute=59, second=59, microsecond=999999)
+            
+            existing_post = AbnormalPost.objects.filter(
+                pet=pet,
+                record_date__range=(date_start, date_end)
+            ).first()
+            
+            if existing_post:
+                return {
+                    "error": f"Pet already has an abnormal post on {record_date.strftime('%Y-%m-%d')}. Only one post per day per pet is allowed."
+                }
+        except ValueError as e:
+            return {"error": f"Invalid date format: {str(e)}"}
+    
+    # 建立異常記錄
+    abnormal_post = AbnormalPost.objects.create(
+        pet=pet,
+        user=user,
+        content=data.get("content", ""),
+        weight=float(data["weight"]) if data.get("weight") else None,
+        body_temperature=float(data["body_temperature"]) if data.get("body_temperature") else None,
+        water_amount=int(data["water_amount"]) if data.get("water_amount") else None,
+        is_emergency=data.get("is_emergency", False),
+        record_date=record_date,
+        is_private=data.get("is_private", True)
+    )
+    
+    # 新增症狀關聯
+    symptoms_added = []
+    symptoms_not_found = []
+    
+    for symptom_text in symptoms:
+        if isinstance(symptom_text, str) and symptom_text.strip():
+            symptom_name = symptom_text.strip()
+            
+            # 查找現有症狀
+            symptom = Symptom.objects.filter(symptom_name=symptom_name).first()
+            
+            if symptom:
+                PostSymptomsRelation.objects.get_or_create(
+                    post=abnormal_post,
+                    symptom=symptom
+                )
+                symptoms_added.append(symptom_name)
+            else:
+                symptoms_not_found.append(symptom_name)
+    
+    # 準備回傳資料
+    result = {
+        "success": True,
+        "message": f"Abnormal post created successfully for pet '{pet.pet_name}'",
+        "abnormal_post_id": abnormal_post.id,
+        "post_data": {
+            "id": abnormal_post.id,
+            "pet_id": pet.id,
+            "pet_name": pet.pet_name,
+            "content": abnormal_post.content,
+            "weight": abnormal_post.weight,
+            "body_temperature": abnormal_post.body_temperature,
+            "water_amount": abnormal_post.water_amount,
+            "is_emergency": abnormal_post.is_emergency,
+            "record_date": abnormal_post.record_date.isoformat() if abnormal_post.record_date else None,
+            "is_private": abnormal_post.is_private,
+            "created_at": abnormal_post.created_at.isoformat(),
+            "symptoms_added": symptoms_added
+        }
+    }
+    
+    if symptoms_not_found:
+        result["warning"] = f"Some symptoms were not found in database: {', '.join(symptoms_not_found)}"
+    
+    return result
+
+
+@transaction.atomic
+def _create_disease_archive(data: Dict) -> Dict:
+    """
+    建立疾病檔案
+    
+    Args:
+        data: 包含疾病檔案資訊的字典
+        
+    Returns:
+        Dict: 操作結果
+    """
+    # 驗證必要欄位
+    required_fields = ["user_id", "pet_id", "archive_title", "content", "abnormal_post_ids"]
+    missing_fields = [f for f in required_fields if f not in data]
+    if missing_fields:
+        return {"error": f"Missing required fields: {', '.join(missing_fields)}"}
+    
+    # 驗證資料
+    archive_title = data.get("archive_title", "").strip()
+    content = data.get("content", "").strip()
+    abnormal_post_ids = data.get("abnormal_post_ids", [])
+    
+    if not archive_title:
+        return {"error": "Archive title cannot be empty"}
+    
+    if not content:
+        return {"error": "Archive content cannot be empty"}
+    
+    if not abnormal_post_ids or not isinstance(abnormal_post_ids, list):
+        return {"error": "At least one abnormal post ID is required"}
+    
+    # 獲取用戶
+    try:
+        user = CustomUser.objects.get(id=data["user_id"])
+    except CustomUser.DoesNotExist:
+        return {"error": f"User with id {data['user_id']} not found"}
+    
+    # 獲取寵物並驗證所有權
+    try:
+        pet = Pet.objects.get(id=data["pet_id"], owner=user)
+    except Pet.DoesNotExist:
+        return {"error": f"Pet with id {data['pet_id']} not found or does not belong to user"}
+    
+    # 驗證異常記錄是否存在且屬於該用戶的寵物
+    abnormal_posts = AbnormalPost.objects.filter(
+        id__in=abnormal_post_ids,
+        pet=pet,
+        user=user
+    ).order_by('record_date')
+    
+    if abnormal_posts.count() != len(abnormal_post_ids):
+        return {
+            "error": "Some abnormal post IDs are invalid or do not belong to the specified pet and user"
+        }
+    
+    # 建立PostFrame
+    post_frame = PostFrame.objects.create(user=user)
+    
+    # 建立疾病檔案
+    disease_archive = DiseaseArchiveContent.objects.create(
+        archive_title=archive_title,
+        content=content,
+        go_to_doctor=data.get("go_to_doctor", False),
+        health_status=data.get("health_status", ""),
+        pet=pet,
+        postFrame=post_frame,
+        is_private=data.get("is_private", True)
+    )
+    
+    # 建立異常記錄關聯
+    archive_post_relations = []
+    for abnormal_post in abnormal_posts:
+        archive_post_relations.append(
+            ArchiveAbnormalPostRelation(
+                archive=disease_archive,
+                post=abnormal_post
+            )
+        )
+    ArchiveAbnormalPostRelation.objects.bulk_create(archive_post_relations)
+    
+    # 處理主要病因
+    main_cause = data.get("main_cause", "").strip()
+    if main_cause:
+        illness, created = Illness.objects.get_or_create(
+            illness_name=main_cause
+        )
+        ArchiveIllnessRelation.objects.create(
+            archive=disease_archive,
+            illness=illness
+        )
+    
+    logger.info(f"User {user.id} created disease archive {disease_archive.id} for pet {pet.id}")
+    
+    return {
+        "success": True,
+        "message": f"Disease archive '{archive_title}' created successfully for pet '{pet.pet_name}'",
+        "disease_archive_id": disease_archive.id,
+        "archive_data": {
+            "id": disease_archive.id,
+            "archive_title": disease_archive.archive_title,
+            "pet_id": pet.id,
+            "pet_name": pet.pet_name,
+            "content": disease_archive.content,
+            "go_to_doctor": disease_archive.go_to_doctor,
+            "health_status": disease_archive.health_status,
+            "is_private": disease_archive.is_private,
+            "main_cause": main_cause if main_cause else None,
+            "included_abnormal_post_ids": list(abnormal_posts.values_list('id', flat=True)),
+            "post_frame_id": post_frame.id
+        }
+    }
+
+
+@transaction.atomic
+def _update_abnormal_post(data: Dict) -> Dict:
+    """
+    更新異常記錄
+    
+    Args:
+        data: 包含更新資訊的字典
+        
+    Returns:
+        Dict: 操作結果
+    """
+    # 驗證必要欄位
+    required_fields = ["user_id", "post_id"]
+    missing_fields = [f for f in required_fields if f not in data]
+    if missing_fields:
+        return {"error": f"Missing required fields: {', '.join(missing_fields)}"}
+    
+    # 獲取用戶
+    try:
+        user = CustomUser.objects.get(id=data["user_id"])
+    except CustomUser.DoesNotExist:
+        return {"error": f"User with id {data['user_id']} not found"}
+    
+    # 獲取異常記錄並驗證所有權
+    try:
+        abnormal_post = AbnormalPost.objects.get(
+            id=data["post_id"],
+            user=user
+        )
+    except AbnormalPost.DoesNotExist:
+        return {"error": f"Abnormal post with id {data['post_id']} not found or does not belong to user"}
+    
+    # 記錄原始寵物ID
+    original_pet_id = abnormal_post.pet.id
+    
+    # 更新欄位
+    update_fields = []
+    
+    # 如果要更換寵物
+    if "pet_id" in data and data["pet_id"]:
+        try:
+            new_pet = Pet.objects.get(id=data["pet_id"], owner=user)
+            abnormal_post.pet = new_pet
+            update_fields.append("pet")
+        except Pet.DoesNotExist:
+            return {"error": f"Pet with id {data['pet_id']} not found or does not belong to user"}
+    
+    # 更新內容
+    if "content" in data:
+        abnormal_post.content = data["content"]
+        update_fields.append("content")
+    
+    # 更新體重
+    if "weight" in data:
+        abnormal_post.weight = float(data["weight"]) if data["weight"] is not None else None
+        update_fields.append("weight")
+    
+    # 更新體溫
+    if "body_temperature" in data:
+        abnormal_post.body_temperature = float(data["body_temperature"]) if data["body_temperature"] is not None else None
+        update_fields.append("body_temperature")
+    
+    # 更新飲水量
+    if "water_amount" in data:
+        abnormal_post.water_amount = int(data["water_amount"]) if data["water_amount"] is not None else None
+        update_fields.append("water_amount")
+    
+    # 更新就醫記錄標記
+    if "is_emergency" in data:
+        abnormal_post.is_emergency = bool(data["is_emergency"])
+        update_fields.append("is_emergency")
+    
+    # 更新隱私設定
+    if "is_private" in data:
+        abnormal_post.is_private = bool(data["is_private"])
+        update_fields.append("is_private")
+    
+    # 更新記錄日期
+    if "record_date" in data and data["record_date"]:
+        try:
+            record_date = datetime.fromisoformat(data["record_date"].replace('Z', '+00:00'))
+            abnormal_post.record_date = record_date
+            update_fields.append("record_date")
+        except ValueError as e:
+            return {"error": f"Invalid date format: {str(e)}"}
+    
+    # 儲存更新
+    if update_fields:
+        abnormal_post.save(update_fields=update_fields)
+    
+    # 更新症狀關聯（如果提供）
+    symptoms_updated = False
+    symptoms_added = []
+    symptoms_not_found = []
+    
+    if "symptoms" in data and data["symptoms"] is not None:
+        symptoms = data["symptoms"]
+        
+        if not isinstance(symptoms, list):
+            return {"error": "Symptoms must be a list"}
+        
+        # 刪除現有症狀關聯
+        PostSymptomsRelation.objects.filter(post=abnormal_post).delete()
+        
+        # 新增新的症狀關聯
+        for symptom_text in symptoms:
+            if isinstance(symptom_text, str) and symptom_text.strip():
+                symptom_name = symptom_text.strip()
+                
+                # 查找現有症狀
+                symptom = Symptom.objects.filter(symptom_name=symptom_name).first()
+                
+                if symptom:
+                    PostSymptomsRelation.objects.get_or_create(
+                        post=abnormal_post,
+                        symptom=symptom
+                    )
+                    symptoms_added.append(symptom_name)
+                else:
+                    symptoms_not_found.append(symptom_name)
+        
+        symptoms_updated = True
+    
+    # 重新獲取更新後的資料
+    abnormal_post.refresh_from_db()
+    
+    # 準備回傳資料
+    result = {
+        "success": True,
+        "message": f"Abnormal post {abnormal_post.id} updated successfully",
+        "abnormal_post_id": abnormal_post.id,
+        "post_data": {
+            "id": abnormal_post.id,
+            "pet_id": abnormal_post.pet.id,
+            "pet_name": abnormal_post.pet.pet_name,
+            "content": abnormal_post.content,
+            "weight": abnormal_post.weight,
+            "body_temperature": abnormal_post.body_temperature,
+            "water_amount": abnormal_post.water_amount,
+            "is_emergency": abnormal_post.is_emergency,
+            "record_date": abnormal_post.record_date.isoformat() if abnormal_post.record_date else None,
+            "is_private": abnormal_post.is_private,
+            "updated_at": abnormal_post.updated_at.isoformat()
+        }
+    }
+    
+    # 如果更新了症狀，加入症狀資訊
+    if symptoms_updated:
+        result["post_data"]["symptoms_updated"] = symptoms_added
+        if symptoms_not_found:
+            result["warning"] = f"Some symptoms were not found in database: {', '.join(symptoms_not_found)}"
+    
+    # 如果更換了寵物，記錄一下
+    if abnormal_post.pet.id != original_pet_id:
+        result["note"] = f"Pet changed from ID {original_pet_id} to ID {abnormal_post.pet.id}"
+    
+    return result
+
+
+@transaction.atomic
+def _delete_abnormal_post(data: Dict) -> Dict:
+    """
+    刪除異常記錄
+    
+    Args:
+        data: 包含刪除資訊的字典
+        
+    Returns:
+        Dict: 操作結果
+    """
+    # 驗證必要欄位
+    required_fields = ["user_id", "post_id"]
+    missing_fields = [f for f in required_fields if f not in data]
+    if missing_fields:
+        return {"error": f"Missing required fields: {', '.join(missing_fields)}"}
+    
+    # 獲取用戶
+    try:
+        user = CustomUser.objects.get(id=data["user_id"])
+    except CustomUser.DoesNotExist:
+        return {"error": f"User with id {data['user_id']} not found"}
+    
+    # 獲取異常記錄並驗證所有權
+    try:
+        abnormal_post = AbnormalPost.objects.get(
+            id=data["post_id"],
+            user=user
+        )
+    except AbnormalPost.DoesNotExist:
+        return {"error": f"Abnormal post with id {data['post_id']} not found or does not belong to user"}
+    
+    # 記錄一些資訊用於回傳
+    pet_name = abnormal_post.pet.pet_name
+    record_date = abnormal_post.record_date.strftime('%Y-%m-%d') if abnormal_post.record_date else "Unknown date"
+    post_id = abnormal_post.id
+    
+    # 刪除關聯的圖片（如果有）
+    try:
+        images = AbnormalPostImage.objects.filter(abnormal_post=abnormal_post)
+        image_count = images.count()
+        
+        # 注意：實際的 Firebase Storage 刪除在這裡不執行，因為需要 firebase_storage_service
+        # 這個服務通常在 Django 環境中才能正常使用
+        # 如果需要完整的圖片刪除功能，建議在視圖層處理
+        
+        # 從資料庫刪除圖片記錄
+        images.delete()
+        logger.info(f"Deleted {image_count} images associated with abnormal post {post_id}")
+    except Exception as img_error:
+        logger.warning(f"Error deleting images: {str(img_error)}")
+        # 繼續執行，不因為圖片刪除失敗而中斷
+    
+    # 刪除症狀關聯
+    PostSymptomsRelation.objects.filter(post=abnormal_post).delete()
+    
+    # 刪除與疾病檔案的關聯（如果有）
+    ArchiveAbnormalPostRelation.objects.filter(post=abnormal_post).delete()
+    
+    # 刪除異常記錄本身
+    abnormal_post.delete()
+    
+    logger.info(f"User {user.id} deleted abnormal post {post_id}")
+    
+    return {
+        "success": True,
+        "message": f"Successfully deleted abnormal post for '{pet_name}' on {record_date}",
+        "deleted_post_id": post_id,
+        "details": {
+            "pet_name": pet_name,
+            "record_date": record_date
         }
     }
