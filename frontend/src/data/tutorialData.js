@@ -528,292 +528,277 @@ const tutorialData = {
         position: 'bottom-center'
       },
       action: 'click',
-      nextCondition: 'menuOpen'
-    },
-      {
-        id: 2,
-        title: '步驟 2：選擇寵物',
-        instruction: '點擊選擇想計算的寵物',
-        targetElement: {
-          component: 'Calculate',
-          selector: '[class*="petSwitcher"] > [class*="petItem"]:first-of-type, [class*="petSwitcher"] [class*="petItem"]:first-of-type',
-          className: 'petItem',
-          fallbackSelector: '[class*="petSwitcher"] > div:first-of-type'
-        },
-        highlight: {
-          type: 'rectangle',
-          position: 'center'
-        },
-        action: 'click',
-        nextCondition: 'imageAdded',
-        // 添加過渡配置來平滑進入
-        transition: {
-          fadeIn: true,
-          delay: 480,
-          waitForPageLoad: true
-        }
-      },
-      {
-        id: 3,
-        title: '步驟 3：更改身體數據',
-        instruction: '若身高及體重與當初輸入資料時有變化，可在此更改',
-        targetElement: {
-          component: 'Calculate',
-          selector: '[class*="petInfoSection"]',
-          className: 'petInfoSection',
-          fallbackSelector: '[class*="petInfoSection"]'
-        },
-        highlight: {
-          type: 'rectangle',
-          position: 'image'
-        },
-        action: 'click',
-        nextCondition: 'editorOpen'
-      },
-      {
-        id: 4,
-        title: '步驟 4：切換頁面',
-        instruction: '切換到「寵物狀況」頁面',
-        targetElement: {
-          component: 'Calculate',
-          selector: 'button[class*="navButton"]:has(img[src*="CalculatorPetConditionIcon"])',
-          className: 'navButton',
-          fallbackSelector: 'img[src*="CalculatorPetConditionIcon"]'
-        },
-        highlight: {
-          type: 'fullImage',
-          position: 'center'
-        },
-        action: 'click',
-        nextCondition: 'annotationPointAdded',
-        showPointer: true
-      },
-      {
-        id: 5,
-        title: '步驟 5：選擇狀況',
-        instruction: '在以下的按鈕中選擇寵物有的身體狀況',
-        targetElement: {
-          component: 'Calculate',
-          selector: '[class*="conditionPanel"], [class*="section"] [class*="conditionPanel"]',
-          className: 'conditionPanel',
-          fallbackSelector: 'div[class*="conditionPanel"]'
-        },
-        highlight: {
-          type: 'rectangle',
-          position: 'form'
-        },
-        action: 'click',
-        nextCondition: 'annotationPointAdded',
-        showPointer: true
-      },
-      {
-        id: 6,
-        title: '步驟 6：切換頁面',
-        instruction: '切換到「選擇飼料」頁面',
-        targetElement: {
-          component: 'Calculate',
-          selector: 'button[class*="navButton"]:has(img[src*="PetpageFeedButton"])',
-          className: 'navButton',
-          fallbackSelector: 'img[src*="PetpageFeedButton"]'
-        },
-        highlight: {
-          type: 'fullImage',
-          position: 'center'
-        },
-        action: 'click',
-        nextCondition: 'annotationPointAdded',
-        showPointer: true
-      },
-      {
-        id: 7,
-        title: '步驟 7：選擇飼料或新增飼料',
-        instruction: '若已經新增過飼料，您可以直接點選「選擇飼料」，若需要新增飼料，就點選「新增飼料」',
-        targetElement: {
-          component: 'Calculate',
-          selector: '[class*="feedActions"]',
-          className: 'feedActions',
-          fallbackSelector: 'div[class*="feedActions"]'
-        },
-        highlight: {
-          type: 'rectangle',
-          position: 'center'
-        },
-        action: 'click',
-        nextCondition: 'annotationPointAdded',
-        showPointer: true
-      },
-      {
-        id: 8,
-        title: '步驟 8：新增飼料',
-        instruction: '若需要新增飼料，請點選「新增飼料」',
-        targetElement: {
-          component: 'Calculate',
-          selector: '[class*="feedActions"] button[class*="feedActionBtn"]:nth-of-type(2)',
-          className: 'feedActionBtn',
-          fallbackSelector: '[class*="feedActions"] button:last-of-type'
-        },
-        highlight: {
-          type: 'rectangle',
-          position: 'button'
-        },
-        action: 'click',
-        nextCondition: 'annotationPointAdded',
-        showPointer: true
-      },
-      {
-        id: 9,
-        title: '步驟 9：選擇寵物類型',
-        instruction: '選擇這隻寵物是貓還是狗',
-        targetElement: {
-          component: 'CreateFeedModal',
-          selector: 'select[class*="petTypeSelect"]:not([disabled]), [class*="selectSection"] select:not([disabled])',
-          className: 'petTypeSelect',
-          fallbackSelector: 'label[class*="selectLabel"] + select:not([disabled])'
-        },
-        highlight: {
-          type: 'rectangle',
-          position: 'form'
-        },
-        action: 'click',
-        nextCondition: 'annotationAdded'
-      },
-      {
-        id: 10,
-        title: '步驟 10：輸入飼料名稱',
-        instruction: '',
-        targetElement: {
-          component: 'CreateFeedModal',
-          selector: '[class*="inputSection"]:first-of-type input[class*="textInput"]:not([disabled]), [class*="inputSection"]:first-of-type input[type="text"]:not([disabled])',
-          className: 'textInput',
-          fallbackSelector: '[class*="inputSection"]:first-of-type label + input[type="text"]:not([disabled])'
-        },
-        highlight: {
-          type: 'rectangle',
-          position: 'form'
-        },
-        action: 'click',
-        nextCondition: 'annotationPointAdded',
-        showPointer: true
-      },
-      {
-        id: 11,
-        title: '步驟 11：輸入飼料品牌',
-        instruction: '',
-        targetElement: {
-          component: 'CreateFeedModal',
-          selector: '[class*="inputSection"]:first-of-type + [class*="inputSection"] input[class*="textInput"]:not([disabled]), [class*="inputSection"]:first-of-type + [class*="inputSection"] input[type="text"]:not([disabled])',
-          className: 'textInput',
-          fallbackSelector: '[class*="inputSection"]:first-of-type + [class*="inputSection"] label + input[type="text"]:not([disabled])'
-        },
-        highlight: {
-          type: 'rectangle',
-          position: 'form'
-        },
-        action: 'click',
-        nextCondition: 'annotationPointAdded',
-        showPointer: true
-      },
-      {
-        id: 12,
-        title: '步驟 12：輸入飼料價格',
-        instruction: '',
-        targetElement: {
-          component: 'CreateFeedModal',
-          selector: '[class*="inputSection"]:first-of-type + [class*="inputSection"] + [class*="inputSection"] input[type="number"]:not([disabled]), input[type="number"]:not([disabled])',
-          className: 'textInput',
-          fallbackSelector: '[class*="inputSection"]:first-of-type + [class*="inputSection"] + [class*="inputSection"] label + input[type="number"]:not([disabled])'
-        },
-        highlight: {
-          type: 'rectangle',
-          position: 'form'
-        },
-        action: 'click',
-        nextCondition: 'annotationPointAdded',
-        showPointer: true
-      },
-      {
-        id: 13,
-        title: '步驟 13：上傳飼料正面圖片',
-        instruction: '',
-        targetElement: {
-          component: 'CreateFeedModal',
-          selector: '[class*="uploadSection"]:first-of-type [class*="noImageState"] button[class*="uploadButton"]:not([disabled])',
-          className: 'uploadButton',
-          fallbackSelector: '[class*="uploadSection"]:first-of-type [class*="imagePreview"] button[class*="removeImageBtn"]:not([disabled]), [class*="uploadSection"]:first-of-type [class*="imageSection"] button:not([disabled])'
-        },
-        highlight: {
-          type: 'rectangle',
-          position: 'button'
-        },
-        action: 'click',
-        nextCondition: 'annotationPointAdded',
-        showPointer: true
-      },
-      {
-        id: 14,
-        title: '步驟 14：上傳飼料營養標示',
-        instruction: '',
-        targetElement: {
-          component: 'CreateFeedModal',
-          selector: '[class*="uploadSection"]:first-of-type + [class*="uploadSection"] [class*="noImageState"] button[class*="uploadButton"]:not([disabled])',
-          className: 'uploadButton',
-          fallbackSelector: '[class*="uploadSection"]:first-of-type + [class*="uploadSection"] [class*="imagePreview"] button[class*="removeImageBtn"]:not([disabled]), [class*="uploadSection"]:first-of-type + [class*="uploadSection"] [class*="imageSection"] button:not([disabled])'
-        },
-        highlight: {
-          type: 'rectangle',
-          position: 'button'
-        },
-        action: 'click',
-        nextCondition: 'annotationPointAdded',
-        showPointer: true
-      },
-      {
-        id: 15,
-        title: '步驟 15：完成「新增飼料」',
-        instruction: '按下「確認新增」按鈕',
-        targetElement: {
-          component: 'CreateFeedModal',
-          selector: '[class*="modalFooter"] button[class*="confirmButton"]:not([disabled])',
-          className: 'confirmButton',
-          fallbackSelector: '[class*="modalFooter"] button + button:not([disabled]), [class*="modalFooter"] button:last-of-type:not([disabled])'
-        },
-        highlight: {
-          type: 'rectangle',
-          position: 'button'
-        },
-        action: 'click',
-        nextCondition: 'annotationPointAdded',
-        showPointer: true
-      },
-      {
-        id: 16,
-        title: '步驟 16：點選「開始計算」按鈕',
-        instruction: '開始依數據計算結果',
-        targetElement: {
-          component: 'Calculate',
-          selector: 'button[class*="navButton"]:has(img[src*="CalculatorCalculateIcon"])',
-          className: 'navButton',
-          fallbackSelector: 'img[src*="CalculatorCalculateIcon"]'
-        },
-        highlight: {
-          type: 'fullImage',
-          position: 'center'
-        },
-        action: 'click',
-        nextCondition: 'annotationPointAdded',
-        showPointer: true
-      },
-      {
-        id: 17,
-        title: '完成！',
-        instruction: '恭喜！您已成功獲得計算結果！',
-        targetElement: null,
-        highlight: {
-          type: 'none',
-          position: 'center'
-        },
-        action: 'complete'
+      nextCondition: 'pageNavigateToCalculator',
+      transition: {
+        fadeIn: true,
+        delay: 480,
+        waitForPageLoad: true
       }
+    },
+    {
+      id: 2,
+      title: '步驟 2：選擇寵物',
+      instruction: '點擊選擇想計算的寵物',
+      targetElement: {
+        component: 'Calculate',
+        selector: '[class*="petSwitcher"] > [class*="petItem"]:first-of-type, [class*="petSwitcher"] [class*="petItem"]:first-of-type',
+        className: 'petItem',
+        fallbackSelector: '[class*="petSwitcher"] > div:first-of-type'
+      },
+      highlight: {
+        type: 'rectangle',
+        position: 'center'
+      },
+      nextCondition: 'manualNext',
+      action: 'click'
+    },
+    {
+      id: 3,
+      title: '步驟 3：更改身體數據',
+      instruction: '若身高及體重與當初輸入資料時有變化，可在此更改',
+      targetElement: {
+        component: 'Calculate',
+        selector: '[class*="petInfoSection"]',
+        className: 'petInfoSection',
+        fallbackSelector: '[class*="petInfoSection"]'
+      },
+      highlight: {
+        type: 'rectangle',
+        position: 'image'
+      },
+      action: 'click',
+      nextCondition: 'manualNext'
+    },
+    {
+      id: 4,
+      title: '步驟 4：切換頁面',
+      instruction: '切換到「寵物狀況」頁面',
+      targetElement: {
+        component: 'Calculate',
+        selector: 'button[class*="navButton"]:has(img[src*="CalculatorPetConditionIcon"])',
+        className: 'navButton',
+        fallbackSelector: 'img[src*="CalculatorPetConditionIcon"]'
+      },
+      highlight: {
+        type: 'fullImage',
+        position: 'center'
+      },
+      action: 'click',
+      showPointer: true
+    },
+    {
+      id: 5,
+      title: '步驟 5：選擇狀況',
+      instruction: '在以下的按鈕中選擇寵物有的身體狀況',
+      targetElement: {
+        component: 'Calculate',
+        selector: '[class*="conditionPanel"], [class*="section"] [class*="conditionPanel"]',
+        className: 'conditionPanel',
+        fallbackSelector: 'div[class*="conditionPanel"]'
+      },
+      highlight: {
+        type: 'rectangle',
+        position: 'form'
+      },
+      nextCondition: 'manualNext'
+    },
+    {
+      id: 6,
+      title: '步驟 6：切換頁面',
+      instruction: '切換到「選擇飼料」頁面',
+      targetElement: {
+        component: 'Calculate',
+        selector: 'button[class*="navButton"]:has(img[src*="PetpageFeedButton"])',
+        className: 'navButton',
+        fallbackSelector: 'img[src*="PetpageFeedButton"]'
+      },
+      highlight: {
+        type: 'fullImage',
+        position: 'center'
+      },
+      action: 'click',
+      showPointer: true
+    },
+    {
+      id: 7,
+      title: '步驟 7：選擇飼料或新增飼料',
+      instruction: '若已經新增過飼料，您可以直接點選「選擇飼料」，若需要新增飼料，就點選「新增飼料」，這邊教學新增飼料',
+      targetElement: {
+        component: 'Calculate',
+        selector: '[class*="feedActions"] button[class*="feedActionBtn"]:nth-of-type(2)',
+        className: 'feedActionBtn',
+        fallbackSelector: '[class*="feedActions"] button:last-of-type'
+      },
+      highlight: {
+        type: 'rectangle',
+        position: 'center'
+      },
+      nextCondition: 'manualNext',
+      showPointer: true
+    },
+    {
+      id: 8,
+      title: '步驟 8：新增飼料',
+      instruction: '若需要新增飼料，請點選「新增飼料」',
+      targetElement: {
+        component: 'Calculate',
+        selector: '[class*="feedActions"] button[class*="feedActionBtn"]:nth-of-type(2)',
+        className: 'feedActionBtn',
+        fallbackSelector: '[class*="feedActions"] button:last-of-type'
+      },
+      highlight: {
+        type: 'rectangle',
+        position: 'button'
+      },
+      action: 'click',
+      showPointer: true
+    },
+    {
+      id: 9,
+      title: '步驟 9：選擇寵物類型',
+      instruction: '選擇這隻寵物是貓還是狗',
+      targetElement: {
+        component: 'CreateFeedModal',
+        selector: 'select[class*="petTypeSelect"]:not([disabled]), [class*="selectSection"] select:not([disabled])',
+        className: 'petTypeSelect',
+        fallbackSelector: 'label[class*="selectLabel"] + select:not([disabled])'
+      },
+      highlight: {
+        type: 'rectangle',
+        position: 'form'
+      },
+      nextCondition: 'manualNext'
+    },
+    {
+      id: 10,
+      title: '步驟 10：輸入飼料名稱',
+      instruction: '',
+      targetElement: {
+        component: 'CreateFeedModal',
+        selector: '[class*="inputSection"]:nth-of-type(1) input[class*="textInput"]:not([disabled])',
+        className: 'textInput',
+        fallbackSelector: '[class*="inputSection"]:first-of-type label + input[type="text"]:not([disabled])'
+      },
+      highlight: {
+        type: 'rectangle',
+        position: 'form'
+      },
+      nextCondition: 'manualNext',
+      showPointer: true
+    },
+    {
+      id: 11,
+      title: '步驟 11：輸入飼料品牌',
+      instruction: '',
+      targetElement: {
+        component: 'CreateFeedModal',
+        selector: '[class*="inputSection"]:first-of-type + [class*="inputSection"] input[class*="textInput"]:not([disabled]), label:has-text("品牌") + input[class*="textInput"]:not([disabled])',
+        className: 'textInput',
+        fallbackSelector: 'label:contains("品牌") + input[type="text"]:not([disabled])'
+      },
+      highlight: {
+        type: 'rectangle',
+        position: 'form'
+      },
+      nextCondition: 'manualNext',
+      showPointer: true
+    },
+    {
+      id: 12,
+      title: '步驟 12：輸入飼料價格',
+      instruction: '',
+      targetElement: {
+        component: 'CreateFeedModal',
+        selector: '[class*="inputSection"]:first-of-type + [class*="inputSection"] + [class*="inputSection"] input[type="number"]:not([disabled]), input[type="number"]:not([disabled])',
+        className: 'textInput',
+        fallbackSelector: '[class*="inputSection"]:first-of-type + [class*="inputSection"] + [class*="inputSection"] label + input[type="number"]:not([disabled])'
+      },
+      highlight: {
+        type: 'rectangle',
+        position: 'form'
+      },
+      nextCondition: 'manualNext',
+      showPointer: true
+    },
+    {
+      id: 13,
+      title: '步驟 13：上傳飼料正面圖片',
+      instruction: '',
+      targetElement: {
+        component: 'CreateFeedModal',
+        selector: '[class*="uploadSection"]:first-of-type [class*="noImageState"] button[class*="uploadButton"]:not([disabled])',
+        className: 'uploadButton',
+        fallbackSelector: '[class*="uploadSection"]:first-of-type [class*="imagePreview"] button[class*="removeImageBtn"]:not([disabled]), [class*="uploadSection"]:first-of-type [class*="imageSection"] button:not([disabled])'
+      },
+      highlight: {
+        type: 'rectangle',
+        position: 'button'
+      },
+      action: 'click',
+      showPointer: true
+    },
+    {
+      id: 14,
+      title: '步驟 14：上傳飼料營養標示',
+      instruction: '',
+      targetElement: {
+        component: 'CreateFeedModal',
+        selector: '[class*="uploadSection"]:first-of-type + [class*="uploadSection"] [class*="noImageState"] button[class*="uploadButton"]:not([disabled])',
+        className: 'uploadButton',
+        fallbackSelector: '[class*="uploadSection"]:first-of-type + [class*="uploadSection"] [class*="imagePreview"] button[class*="removeImageBtn"]:not([disabled]), [class*="uploadSection"]:first-of-type + [class*="uploadSection"] [class*="imageSection"] button:not([disabled])'
+      },
+      highlight: {
+        type: 'rectangle',
+        position: 'button'
+      },
+      action: 'click',
+      showPointer: true
+    },
+    {
+      id: 15,
+      title: '步驟 15：完成「新增飼料」',
+      instruction: '按下「確認新增」按鈕',
+      targetElement: {
+        component: 'CreateFeedModal',
+        selector: '[class*="modalFooter"] button[class*="confirmButton"]:not([disabled])',
+        className: 'confirmButton',
+        fallbackSelector: '[class*="modalFooter"] button + button:not([disabled]), [class*="modalFooter"] button:last-of-type:not([disabled])'
+      },
+      highlight: {
+        type: 'rectangle',
+        position: 'button'
+      },
+      action: 'click',
+      showPointer: true
+    },
+    {
+      id: 16,
+      title: '步驟 16：點選「開始計算」按鈕',
+      instruction: '開始依數據計算結果',
+      targetElement: {
+        component: 'Calculate',
+        selector: 'button[class*="navButton"]:has(img[src*="CalculatorCalculateIcon"])',
+        className: 'navButton',
+        fallbackSelector: 'img[src*="CalculatorCalculateIcon"]'
+      },
+      highlight: {
+        type: 'fullImage',
+        position: 'center'
+      },
+      action: 'click',
+      showPointer: true
+    },
+    {
+      id: 17,
+      title: '完成！',
+      instruction: '恭喜！您已成功獲得計算結果！',
+      targetElement: null,
+      highlight: {
+        type: 'none',
+        position: 'center'
+      },
+      action: 'complete'
+    }
   ]},
   addAbnormalPost: {
   id: 'addAbnormalPost',

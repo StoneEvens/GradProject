@@ -18,6 +18,8 @@ class AIChatService {
 
     // 當前對話 ID（用於後端對話記錄）
     this.currentConversationId = null;
+    // 當前 OpenAI Session ID（用於延續同一個 AI 對話）
+    this.currentSessionId = null;
   }
 
   /**
@@ -32,6 +34,7 @@ class AIChatService {
       const requestData = {
         message: userMessage,
         conversationId: this.currentConversationId, // 加入對話 ID
+        session_id: this.currentSessionId, // 加入 OpenAI Session ID 以延續對話
         context: {
           ...this.sessionContext,
           ...additionalContext,
@@ -39,12 +42,22 @@ class AIChatService {
         },
       };
 
+      // DEBUG: Log what we're sending
+      console.log('[AIChatService] Sending message with session_id:', this.currentSessionId);
+      console.log('[AIChatService] Request data:', { conversationId: requestData.conversationId, session_id: requestData.session_id });
+
       // 調用後端 API
   const response = await this.apiClient.post(`${this.basePath}/chat/`, requestData);
 
       // 更新當前對話 ID（如果是新對話，後端會返回）
       if (response.data.conversationId) {
         this.currentConversationId = response.data.conversationId;
+      }
+
+      // 更新當前 Session ID（OpenAI 對話延續 ID）
+      if (response.data.session_id) {
+        this.currentSessionId = response.data.session_id;
+        console.log('[AIChatService] Updated session_id to:', this.currentSessionId);
       }
 
       // 更新會話上下文
@@ -160,6 +173,7 @@ class AIChatService {
       conversationHistory: [],
     };
     this.currentConversationId = null; // 也重置對話 ID
+    this.currentSessionId = null; // 也重置 Session ID
   }
 
   /**
@@ -221,6 +235,26 @@ class AIChatService {
 
       // 設定為當前對話
       this.currentConversationId = conversationId;
+
+      // 提取並設定 OpenAI Session ID（從任一訊息的 message_data 中）
+      // 這樣可以延續同一個 OpenAI 對話，而不是每次重開都建立新對話
+      this.currentSessionId = null;
+      if (conversation.messages && conversation.messages.length > 0) {
+        console.log(`[AIChatService] Looking for session_id in ${conversation.messages.length} messages`);
+        // 從最後一條助手訊息中提取 session_id
+        for (let i = conversation.messages.length - 1; i >= 0; i--) {
+          const msg = conversation.messages[i];
+          console.log(`[AIChatService] Message ${i}: role=${msg.role}, has_message_data=${!!msg.message_data}, session_id=${msg.message_data?.session_id}`);
+          if (msg.role === 'assistant' && msg.message_data && msg.message_data.session_id) {
+            this.currentSessionId = msg.message_data.session_id;
+            console.log(`[AIChatService] ✓ Restored session_id: ${this.currentSessionId}`);
+            break;
+          }
+        }
+        if (!this.currentSessionId) {
+          console.warn('[AIChatService] ✗ No session_id found in conversation messages!');
+        }
+      }
 
       // 重建對話歷史到 sessionContext
       // Messages are stored in database and returned immediately

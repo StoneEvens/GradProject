@@ -197,6 +197,7 @@ summary_agent = Agent(
 
 async def run_workflow(workflow_input: WorkflowInput, user_id: int, username: str, session_id: str | None) -> dict:
   with trace("PETer Agent"):
+    print(f"[PETer_Agent] run_workflow called with session_id: {session_id}")
     # State variables, not used for now
     state = {
 
@@ -205,6 +206,7 @@ async def run_workflow(workflow_input: WorkflowInput, user_id: int, username: st
 
     # Create or reuse an OpenAIConversationsSession for stateful memory
     base_session = OpenAIConversationsSession(conversation_id=session_id) if session_id else OpenAIConversationsSession()
+    print(f"[PETer_Agent] Created base_session with _session_id: {getattr(base_session, '_session_id', None)}")
 
     format_run_kwargs_kwargs = {
         "input": workflow_input.input_as_text + " user_id: " + str(user_id) + " username: " + username,
@@ -260,6 +262,7 @@ async def run_workflow(workflow_input: WorkflowInput, user_id: int, username: st
 
     # Extract the session id from the session object after runs (assigned lazily by OpenAI)
     final_session_id = getattr(base_session, "_session_id", None) or session_id
+    print(f"[PETer_Agent] final_session_id after agent runs: {final_session_id} (input was: {session_id})")
 
     summary_agent_result = {
       "output_text": summary_agent_result_temp.final_output.json(),
