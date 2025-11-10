@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import Dict, Optional, Literal
 import json
 import inspect
 from typing import get_type_hints, get_origin, get_args
@@ -14,6 +14,7 @@ from social.serializers import PostFrameSerializer
 from pets.serializers import DiseaseArchiveContentSerializer, AbnormalPostSerializer
 from feeds.models import Feed
 from django.forms.models import model_to_dict
+from mcp_server.database_operations import get_operation_list, perform_operation
 
 # Server configuration
 SERVER_NAME = "PETer MCP Server"
@@ -304,26 +305,6 @@ def create_mcp_server() -> FastMCP:
         path: str,
         reason: Optional[str] = None
     ) -> Dict:
-        """
-        準備頁面跳轉操作（需要用戶確認）
-
-        參數:
-        - path: 目標路徑（必填）
-        - reason: 跳轉原因（選填）
-
-        支援的路徑:
-        - /social: 社群頁面
-        - /pets: 寵物列表
-        - /pets/{id}: 特定寵物頁面
-        - /profile: 個人檔案
-        - /calculator: 營養計算機
-        - /health: 健康記錄
-        - /schedule: 餵食排程
-        - /interactive-city: 互動城市
-        - /user/{username}: 用戶檔案頁面
-
-        返回待確認操作
-        """
         import uuid
         from datetime import datetime, timezone, timedelta
 
@@ -372,5 +353,31 @@ def create_mcp_server() -> FastMCP:
             "requires_confirmation": True,
             "expires_at": expires_at
         }
+    
+    @mcp.tool(
+        name="database_operation_list",
+        description="List available database operations as well as the parameters required."
+    )
+    async def database_operation_list() -> Dict:
+        @sync_to_async
+        def fetch() -> Dict:
+            return get_operation_list()
+        
+        return await fetch()
+
+    @mcp.tool(
+        name="perform_database_operation",
+        description="Perform a database operation such as adding or updating pet information."
+    )
+    async def perform_database_operation(
+        operation: Literal["add_pet", "update_pet"],
+        data: Dict
+    ) -> Dict:
+        @sync_to_async
+        def execute() -> Dict:
+            return perform_operation(operation, data)
+        
+        return await execute()
+
 
     return mcp
