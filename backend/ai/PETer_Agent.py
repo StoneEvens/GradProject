@@ -16,7 +16,9 @@ mcp = HostedMCPTool(tool_config={
     "get_user_pet_types",
     "get_pet_foods_details",
     "list_tutorial_topics",
-    "prepare_navigate"
+    "prepare_navigate",
+    "database_operation_list",
+    "perform_database_operation"
   ],
   "require_approval": "never",
   "server_description": "MCP",
