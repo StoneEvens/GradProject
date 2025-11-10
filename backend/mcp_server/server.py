@@ -16,6 +16,7 @@ from pets.serializers import DiseaseArchiveContentSerializer, AbnormalPostSerial
 from feeds.models import Feed
 from django.forms.models import model_to_dict
 from mcp_server.database_operations import get_operation_list, perform_operation
+from mcp_server.entity_resolver import EntityResolver
 
 # Server configuration
 SERVER_NAME = "PETer MCP Server"
@@ -401,7 +402,7 @@ def create_mcp_server() -> FastMCP:
         @sync_to_async
         def fetch() -> Dict:
             return get_operation_list()
-        
+
         return await fetch()
 
     @mcp.tool(
@@ -415,8 +416,61 @@ def create_mcp_server() -> FastMCP:
         @sync_to_async
         def execute() -> Dict:
             return perform_operation(operation, data)
-        
+
         return await execute()
+
+    @mcp.tool(
+        name="resolve_entity_context",
+        description="""
+        Resolve dynamic path parameters by finding entities based on natural language descriptions.
+
+        This is a UNIVERSAL tool for handling dynamic paths that require IDs.
+
+        Supported entity types:
+        - social_post: User's social posts (for /post/{id}/edit, etc.)
+        - feed: Pet food products (for /feeds/{id})
+        - pet: User's pets (for /pet/{id}/edit, /pet/{id}/health-reports, etc.)
+        - user: Other users (for /user/{username})
+        - health_report: Health reports (for /pet/{petId}/health-report/{id})
+        - disease_archive: Disease archives (for /pet/{petId}/disease-archive/{id})
+        - abnormal_post: Abnormal records (for /pet/{petId}/abnormal-post/{id})
+
+        Common conditions patterns:
+        - time_range: "today", "yesterday", "last_week", "last_month", "last_sunday"
+        - specific_date: "2025-11-03"
+        - keywords: ["keyword1", "keyword2"]
+        - pet_name: "pet name"
+        - newest: true (get most recent)
+        - oldest: true (get earliest)
+
+        Returns matching entities with their IDs and resolved paths.
+        """
+    )
+    async def resolve_entity_context(
+        entity_type: Literal["social_post", "feed", "pet", "user", "health_report", "disease_archive", "abnormal_post"],
+        user_id: int,
+        conditions: Dict,
+        limit: int = 5
+    ) -> Dict:
+        """
+        統一的動態路徑參數解析工具
+
+        Examples:
+
+        1. "幫我跳轉到上禮拜天發的貼文編輯頁面"
+           - entity_type: "social_post"
+           - conditions: {"time_range": "last_sunday"}
+
+        2. "前往我最後查看的飼料頁面"
+           - entity_type: "feed"
+           - conditions: {"usage": "last_viewed"}
+
+        3. "帶我去我第一隻寵物的健康報告"
+           - entity_type: "pet"
+           - conditions: {"oldest": true}
+           - Then use pet_id to query health_report
+        """
+        return await EntityResolver.resolve(entity_type, user_id, conditions, limit)
 
 
     return mcp
