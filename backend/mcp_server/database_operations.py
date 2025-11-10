@@ -1,6 +1,6 @@
 from typing import Dict, Literal
-from datetime import datetime
-from accounts.models import CustomUser
+from datetime import datetime, date, time
+from accounts.models import CustomUser, Plan
 from pets.models import (
     Pet, AbnormalPost, DiseaseArchiveContent, Symptom, Illness,
     PostSymptomsRelation, ArchiveAbnormalPostRelation, ArchiveIllnessRelation
@@ -115,6 +115,55 @@ def get_operation_list() -> Dict:
                 "user_id": "用戶ID (整數)",
                 "post_id": "異常記錄ID (整數)"
             }
+        },
+        "add_plan": {
+            "description": "新增當日行程/計劃",
+            "required_params": ["user_id", "title", "date"],
+            "optional_params": ["description", "start_time", "end_time", "is_completed"],
+            "param_details": {
+                "user_id": "用戶ID (整數)",
+                "title": "行程標題 (字串)",
+                "date": "日期 (字串，格式: 'YYYY-MM-DD'，例如: '2025-11-15')",
+                "description": "行程描述 (字串)",
+                "start_time": "開始時間 (字串，格式: 'HH:MM'，例如: '14:30'，預設: '08:00')",
+                "end_time": "結束時間 (字串，格式: 'HH:MM'，例如: '16:00'，預設: '09:00')",
+                "is_completed": "是否已完成 (布林值，預設: False)"
+            }
+        },
+        "update_plan": {
+            "description": "更新行程資訊",
+            "required_params": ["user_id", "plan_id"],
+            "optional_params": ["title", "description", "date", "start_time", "end_time", "is_completed"],
+            "param_details": {
+                "user_id": "用戶ID (整數)",
+                "plan_id": "行程ID (整數)",
+                "title": "行程標題 (字串)",
+                "description": "行程描述 (字串)",
+                "date": "日期 (字串，格式: 'YYYY-MM-DD')",
+                "start_time": "開始時間 (字串，格式: 'HH:MM')",
+                "end_time": "結束時間 (字串，格式: 'HH:MM')",
+                "is_completed": "是否已完成 (布林值)"
+            }
+        },
+        "delete_plan": {
+            "description": "刪除行程",
+            "required_params": ["user_id", "plan_id"],
+            "optional_params": [],
+            "param_details": {
+                "user_id": "用戶ID (整數)",
+                "plan_id": "行程ID (整數)"
+            }
+        },
+        "list_plans": {
+            "description": "列出用戶的行程列表",
+            "required_params": ["user_id"],
+            "optional_params": ["start_date", "end_date", "is_completed"],
+            "param_details": {
+                "user_id": "用戶ID (整數)",
+                "start_date": "開始日期 (字串，格式: 'YYYY-MM-DD'，用於篩選日期範圍)",
+                "end_date": "結束日期 (字串，格式: 'YYYY-MM-DD'，用於篩選日期範圍)",
+                "is_completed": "篩選已完成/未完成 (布林值，不提供則返回全部)"
+            }
         }
     }
     return {
@@ -137,6 +186,14 @@ def perform_operation(operation: str, data: Dict) -> Dict:
             return _delete_abnormal_post(data)
         elif operation == "create_disease_archive":
             return _create_disease_archive(data)
+        elif operation == "add_plan":
+            return _add_plan(data)
+        elif operation == "update_plan":
+            return _update_plan(data)
+        elif operation == "delete_plan":
+            return _delete_plan(data)
+        elif operation == "list_plans":
+            return _list_plans(data)
         else:
             return {"error": f"Operation '{operation}' is not implemented"}
     except Exception as e:
@@ -707,4 +764,308 @@ def _delete_abnormal_post(data: Dict) -> Dict:
             "pet_name": pet_name,
             "record_date": record_date
         }
+    }
+
+
+# ==================== Plan Operations ====================
+
+def _add_plan(data: Dict) -> Dict:
+    """
+    新增行程
+    
+    Args:
+        data: 包含行程資訊的字典
+        
+    Returns:
+        Dict: 操作結果
+    """
+    # 驗證必要欄位
+    required_fields = ["user_id", "title", "date"]
+    missing_fields = [f for f in required_fields if f not in data]
+    if missing_fields:
+        return {"error": f"Missing required fields: {', '.join(missing_fields)}"}
+    
+    # 獲取用戶
+    try:
+        user = CustomUser.objects.get(id=data["user_id"])
+    except CustomUser.DoesNotExist:
+        return {"error": f"User with id {data['user_id']} not found"}
+    
+    # 驗證標題
+    title = data.get("title", "").strip()
+    if not title:
+        return {"error": "Title cannot be empty"}
+    
+    # 處理日期
+    try:
+        plan_date = datetime.strptime(data["date"], "%Y-%m-%d").date()
+    except ValueError:
+        return {"error": "Invalid date format. Use 'YYYY-MM-DD' (e.g., '2025-11-15')"}
+    
+    # 處理時間
+    start_time_str = data.get("start_time", "08:00")
+    end_time_str = data.get("end_time", "09:00")
+    
+    try:
+        start_time_obj = datetime.strptime(start_time_str, "%H:%M").time()
+    except ValueError:
+        return {"error": "Invalid start_time format. Use 'HH:MM' (e.g., '14:30')"}
+    
+    try:
+        end_time_obj = datetime.strptime(end_time_str, "%H:%M").time()
+    except ValueError:
+        return {"error": "Invalid end_time format. Use 'HH:MM' (e.g., '16:00')"}
+    
+    # 驗證時間邏輯
+    if start_time_obj >= end_time_obj:
+        return {"error": "Start time must be before end time"}
+    
+    # 建立行程
+    plan = Plan.objects.create(
+        user=user,
+        title=title,
+        description=data.get("description", ""),
+        date=plan_date,
+        start_time=start_time_obj,
+        end_time=end_time_obj,
+        is_completed=data.get("is_completed", False)
+    )
+    
+    logger.info(f"User {user.id} created plan {plan.id} for {plan_date}")
+    
+    return {
+        "success": True,
+        "message": f"Plan '{title}' created successfully for {plan_date}",
+        "plan_id": plan.id,
+        "plan_data": {
+            "id": plan.id,
+            "title": plan.title,
+            "description": plan.description,
+            "date": plan.date.strftime("%Y-%m-%d"),
+            "start_time": plan.start_time.strftime("%H:%M"),
+            "end_time": plan.end_time.strftime("%H:%M"),
+            "is_completed": plan.is_completed
+        }
+    }
+
+
+def _update_plan(data: Dict) -> Dict:
+    """
+    更新行程
+    
+    Args:
+        data: 包含更新資訊的字典
+        
+    Returns:
+        Dict: 操作結果
+    """
+    # 驗證必要欄位
+    required_fields = ["user_id", "plan_id"]
+    missing_fields = [f for f in required_fields if f not in data]
+    if missing_fields:
+        return {"error": f"Missing required fields: {', '.join(missing_fields)}"}
+    
+    # 獲取用戶
+    try:
+        user = CustomUser.objects.get(id=data["user_id"])
+    except CustomUser.DoesNotExist:
+        return {"error": f"User with id {data['user_id']} not found"}
+    
+    # 獲取行程並驗證所有權
+    try:
+        plan = Plan.objects.get(id=data["plan_id"], user=user)
+    except Plan.DoesNotExist:
+        return {"error": f"Plan with id {data['plan_id']} not found or does not belong to user"}
+    
+    # 更新欄位
+    update_fields = []
+    
+    # 更新標題
+    if "title" in data:
+        title = data["title"].strip()
+        if not title:
+            return {"error": "Title cannot be empty"}
+        plan.title = title
+        update_fields.append("title")
+    
+    # 更新描述
+    if "description" in data:
+        plan.description = data["description"]
+        update_fields.append("description")
+    
+    # 更新日期
+    if "date" in data:
+        try:
+            plan.date = datetime.strptime(data["date"], "%Y-%m-%d").date()
+            update_fields.append("date")
+        except ValueError:
+            return {"error": "Invalid date format. Use 'YYYY-MM-DD'"}
+    
+    # 更新開始時間
+    if "start_time" in data:
+        try:
+            plan.start_time = datetime.strptime(data["start_time"], "%H:%M").time()
+            update_fields.append("start_time")
+        except ValueError:
+            return {"error": "Invalid start_time format. Use 'HH:MM'"}
+    
+    # 更新結束時間
+    if "end_time" in data:
+        try:
+            plan.end_time = datetime.strptime(data["end_time"], "%H:%M").time()
+            update_fields.append("end_time")
+        except ValueError:
+            return {"error": "Invalid end_time format. Use 'HH:MM'"}
+    
+    # 驗證時間邏輯（如果兩者都被更新或已存在）
+    if plan.start_time >= plan.end_time:
+        return {"error": "Start time must be before end time"}
+    
+    # 更新完成狀態
+    if "is_completed" in data:
+        plan.is_completed = bool(data["is_completed"])
+        update_fields.append("is_completed")
+    
+    # 儲存更新
+    if update_fields:
+        plan.save(update_fields=update_fields)
+    
+    logger.info(f"User {user.id} updated plan {plan.id}")
+    
+    return {
+        "success": True,
+        "message": f"Plan '{plan.title}' updated successfully",
+        "plan_id": plan.id,
+        "plan_data": {
+            "id": plan.id,
+            "title": plan.title,
+            "description": plan.description,
+            "date": plan.date.strftime("%Y-%m-%d"),
+            "start_time": plan.start_time.strftime("%H:%M"),
+            "end_time": plan.end_time.strftime("%H:%M"),
+            "is_completed": plan.is_completed
+        }
+    }
+
+
+def _delete_plan(data: Dict) -> Dict:
+    """
+    刪除行程
+    
+    Args:
+        data: 包含刪除資訊的字典
+        
+    Returns:
+        Dict: 操作結果
+    """
+    # 驗證必要欄位
+    required_fields = ["user_id", "plan_id"]
+    missing_fields = [f for f in required_fields if f not in data]
+    if missing_fields:
+        return {"error": f"Missing required fields: {', '.join(missing_fields)}"}
+    
+    # 獲取用戶
+    try:
+        user = CustomUser.objects.get(id=data["user_id"])
+    except CustomUser.DoesNotExist:
+        return {"error": f"User with id {data['user_id']} not found"}
+    
+    # 獲取行程並驗證所有權
+    try:
+        plan = Plan.objects.get(id=data["plan_id"], user=user)
+    except Plan.DoesNotExist:
+        return {"error": f"Plan with id {data['plan_id']} not found or does not belong to user"}
+    
+    # 記錄資訊用於回傳
+    plan_id = plan.id
+    plan_title = plan.title
+    plan_date = plan.date.strftime("%Y-%m-%d")
+    
+    # 刪除行程
+    plan.delete()
+    
+    logger.info(f"User {user.id} deleted plan {plan_id}")
+    
+    return {
+        "success": True,
+        "message": f"Successfully deleted plan '{plan_title}' on {plan_date}",
+        "deleted_plan_id": plan_id,
+        "details": {
+            "title": plan_title,
+            "date": plan_date
+        }
+    }
+
+
+def _list_plans(data: Dict) -> Dict:
+    """
+    列出用戶的行程列表
+    
+    Args:
+        data: 包含篩選條件的字典
+        
+    Returns:
+        Dict: 操作結果，包含行程列表
+    """
+    # 驗證必要欄位
+    if "user_id" not in data:
+        return {"error": "Missing required field: user_id"}
+    
+    # 獲取用戶
+    try:
+        user = CustomUser.objects.get(id=data["user_id"])
+    except CustomUser.DoesNotExist:
+        return {"error": f"User with id {data['user_id']} not found"}
+    
+    # 基本查詢
+    plans = Plan.objects.filter(user=user)
+    
+    # 日期範圍篩選
+    if "start_date" in data and "end_date" in data:
+        try:
+            start_date = datetime.strptime(data["start_date"], "%Y-%m-%d").date()
+            end_date = datetime.strptime(data["end_date"], "%Y-%m-%d").date()
+            plans = plans.filter(date__range=(start_date, end_date))
+        except ValueError:
+            return {"error": "Invalid date format for start_date or end_date. Use 'YYYY-MM-DD'"}
+    elif "start_date" in data:
+        try:
+            start_date = datetime.strptime(data["start_date"], "%Y-%m-%d").date()
+            plans = plans.filter(date__gte=start_date)
+        except ValueError:
+            return {"error": "Invalid date format for start_date. Use 'YYYY-MM-DD'"}
+    elif "end_date" in data:
+        try:
+            end_date = datetime.strptime(data["end_date"], "%Y-%m-%d").date()
+            plans = plans.filter(date__lte=end_date)
+        except ValueError:
+            return {"error": "Invalid date format for end_date. Use 'YYYY-MM-DD'"}
+    
+    # 完成狀態篩選
+    if "is_completed" in data:
+        plans = plans.filter(is_completed=bool(data["is_completed"]))
+    
+    # 按日期和開始時間排序
+    plans = plans.order_by('date', 'start_time')
+    
+    # 轉換為字典列表
+    plans_data = []
+    for plan in plans:
+        plans_data.append({
+            "id": plan.id,
+            "title": plan.title,
+            "description": plan.description,
+            "date": plan.date.strftime("%Y-%m-%d"),
+            "start_time": plan.start_time.strftime("%H:%M"),
+            "end_time": plan.end_time.strftime("%H:%M"),
+            "is_completed": plan.is_completed
+        })
+    
+    logger.info(f"User {user.id} listed {len(plans_data)} plans")
+    
+    return {
+        "success": True,
+        "message": f"Found {len(plans_data)} plan(s)",
+        "total_count": len(plans_data),
+        "plans": plans_data
     }

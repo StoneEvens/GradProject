@@ -407,10 +407,10 @@ def create_mcp_server() -> FastMCP:
 
     @mcp.tool(
         name="perform_database_operation",
-        description="Perform a database operation such as adding or updating pet information."
+        description="Perform a database operation such as managing pet information, abnormal posts, disease archives, or user plans/schedules. Use database_operation_list tool to see all available operations and their required parameters."
     )
     async def perform_database_operation(
-        operation: Literal["add_pet", "update_pet"],
+        operation: Literal["add_pet", "update_pet", "add_abnormal_post", "update_abnormal_post", "delete_abnormal_post", "create_disease_archive", "add_plan", "update_plan", "delete_plan", "list_plans"],
         data: Dict
     ) -> Dict:
         @sync_to_async
