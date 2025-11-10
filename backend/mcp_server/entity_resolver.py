@@ -13,7 +13,8 @@ from asgiref.sync import sync_to_async
 
 from social.models import PostFrame, SoLContent
 from feeds.models import Feed
-from pets.models import Pet, AbnormalPost, DiseaseArchiveContent, HealthReport
+from pets.models import Pet, AbnormalPost, DiseaseArchiveContent
+from ocrapp.models import HealthReport
 from accounts.models import CustomUser
 
 
