@@ -226,10 +226,9 @@ class AIChatService {
    */
   async loadConversation(conversationId) {
     try {
-      // Guard: if missing/invalid id, auto-create a new AI conversation in正确的命名空间
+      // Guard: if missing/invalid id, throw error (don't auto-create)
       if (!conversationId || String(conversationId) === 'undefined') {
-        const created = await this.createConversation({ title: '新對話' });
-        conversationId = created.id;
+        throw new Error('Invalid conversation id - no conversation to load');
       }
       const conversation = await this.getConversationDetail(conversationId);
 

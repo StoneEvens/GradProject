@@ -121,7 +121,7 @@ class SummaryAgentSchema(BaseModel):
 workflow_organizer = Agent(
   name="Workflow Organizer",
   instructions="Understand the user's intention, then plan out the workflow by checking what tools the mcp server provides and how these tools can help achieve the user's intention. " \
-  "If the user's intention cannot be fulfilled by any available tools, simply state that the task cannot be completed. " \
+  "If the user's request is beyond available tools, simply state that the task cannot be completed with current capabilities. You do not need to assist with these requests or provide any information or suggestions." \
   "You SHOULD NOT retrieve data by yourself. Do not spend too much time constructing the instruction; allowing the next agent to complete the task is enough. The final output should all be relevant to the user's needs.",
   model="gpt-5",
   tools=[
@@ -139,47 +139,18 @@ workflow_organizer = Agent(
 summary_agent = Agent(
   name="Summary Agent",
   instructions=(
-    "Please understand the user's intent and filter out any irrelevant information from the tool outputs."
-    "Use the organizer's Instruction to decide which MCP tools to call. Populate ONLY the JSON schema fields. "
-    "In 'reply', provide a concise user-facing answer (no raw data tables). For post recommendations, return lists: "
-    "'recommended_social_posts' and 'recommended_forum_posts' as arrays of objects each with post_id, title, post_details, created_at. If available, also include user_fullname (author display name) and location. "
-    "Return empty lists when no recommendations. Do NOT invent placeholder ids or titles. Do not use dynamic property names keyed by ids.\n\n"
+    "Understand user intent, filter irrelevant tool outputs. Use organizer's Instruction to decide which MCP tools to call. Populate ONLY JSON schema fields. "
+    "In reply: concise answer, no raw data. Post recommendations: use recommended_social_posts and recommended_forum_posts arrays with post_id, title, post_details, created_at, user_fullname, location. "
+    "Do not display raw data such as JSON dumps, urls, internal tutorial name, internal mcp tool name, internal database operation name, or lists directly to the user. Instead, summarize the information in a user-friendly manner within the 'reply' field."
+    "If the user's request is beyond available tools, simply state that the task cannot be completed with current capabilities. You do not need to assist with these requests or provide any information or suggestions." 
+    "Return empty lists if none. Do NOT invent ids/titles or use dynamic property names.\n\n"
 
-    "**NAVIGATION HANDLING - IMPORTANT:**\n"
-    "When the user requests to navigate to a page, the app will AUTOMATICALLY execute the navigation. No user confirmation needed.\n\n"
-
-    "1. **Static Paths (no parameters needed):**\n"
-    "   - Call get_navigation_paths to get all available paths\n"
-    "   - Match the user's intent with keywords to find the target path\n"
-    "   - Add a navigation operation to the 'operations' array:\n"
-    "     operations.append({\n"
-    "       'operation_name': 'navigate',\n"
-    "       'operation_data': json.dumps({'path': '/matched/path', 'destination': 'friendly name'})\n"
-    "     })\n"
-    "   - In reply, inform user: '正在為您跳轉到[頁面名稱]...'\n\n"
-
-    "2. **Dynamic Paths (require IDs):**\n"
-    "   Examples: 'jump to my post from last Sunday', 'go to the feed I last viewed'\n"
-    "   - First, use resolve_entity_context to find the entity:\n"
-    "     * For posts: resolve_entity_context(entity_type='social_post', user_id=USER_ID, conditions={'time_range': 'last_sunday'})\n"
-    "     * For feeds: resolve_entity_context(entity_type='feed', user_id=USER_ID, conditions={'newest': true})\n"
-    "     * For pets: resolve_entity_context(entity_type='pet', user_id=USER_ID, conditions={'pet_name': 'name'})\n"
-    "   - The tool returns results with 'resolved_path' field (e.g., '/post/123/edit')\n"
-    "   - If found: add navigation operation to 'operations' array:\n"
-    "     operations.append({\n"
-    "       'operation_name': 'navigate',\n"
-    "       'operation_data': json.dumps({'path': resolved_path, 'destination': 'entity description'})\n"
-    "     })\n"
-    "   - If multiple results: use the first one and mention in reply\n"
-    "   - In reply: '已找到您的[實體]，正在跳轉...'\n\n"
-
-    "3. **If entity not found:**\n"
-    "   - In reply, inform user you couldn't find the entity\n"
-    "   - Suggest alternatives or navigate to a related list page\n"
-    "   - Example: operations.append({'operation_name': 'navigate', 'operation_data': json.dumps({'path': '/social'})})\n\n"
-
-    "IMPORTANT: Always use the 'operations' array for navigation, NOT prepare_navigate tool.\n"
-    "Available entity types for resolve_entity_context: social_post, feed, pet, user, health_report, disease_archive, abnormal_post"
+    "NAVIGATION: Add to operations array: {operation_name: navigate, operation_data: json.dumps({path: /target, destination: name})}. "
+    "User will see a button to navigate - do NOT say 'navigating' or 'redirecting'. Instead say: 您可以點擊下方按鈕前往[頁面]。\n"
+    "Static paths: get_navigation_paths, match intent, add to operations.\n"
+    "Dynamic paths: resolve_entity_context(entity_type, user_id, conditions), use resolved_path.\n"
+    "Not found: inform user, suggest alternatives.\n"
+    "Entities: social_post, feed, pet, user, health_report, disease_archive, abnormal_post, plan"
   ),
   model="gpt-5-mini",
   tools=[

@@ -76,9 +76,13 @@
     "tutorial": {
       "starting": "正在啟動{{tutorialTitle}}...請稍候",
       "startButton": "開始教學",
+      "startButtonWithTitle": "開始{{tutorialTitle}}",
       "titles": {
         "tagPet": "寵物標註教學",
         "createPost": "貼文創建教學",
+        "calculate": "營養計算機教學",
+        "addAbnormalPost": "異常記錄新增教學",
+        "addPet": "寵物新增教學",
         "setReminder": "提醒設置教學",
         "healthRecord": "健康記錄教學",
         "forumUsage": "論壇使用教學",
@@ -88,6 +92,7 @@
     "operation": {
       "executing": "正在執行{{operationDesc}}...請稍候",
       "buttons": {
+        "navigate": "前往頁面",
         "findAbnormalPosts": "出發!",
         "findHealthRecords": "查看記錄",
         "setFeedingReminder": "設置提醒",

@@ -311,37 +311,9 @@ const ChatWindow = ({
 
       const finalMessages = [...newMessages, aiMessage];
 
-      // 自動執行 navigate 操作
-      const navigateOp = (aiResult.operations || []).find(op =>
-        op.operation_name === 'navigate' || op.operation_name === 'navigation'
-      );
+      // NOTE: Navigation operations are no longer auto-executed.
+      // They will be shown as buttons for user to click manually.
 
-      if (navigateOp) {
-        try {
-          const opData = typeof navigateOp.operation_data === 'string'
-            ? JSON.parse(navigateOp.operation_data)
-            : navigateOp.operation_data;
-
-          if (opData.path) {
-            console.log('自動執行頁面跳轉:', opData.path);
-
-            // 延遲一下讓用戶看到 AI 的回應訊息
-            setTimeout(() => {
-              // 啟動浮動模式
-              window.dispatchEvent(new CustomEvent('forceFloatingMode'));
-
-              // 停止語音錄音並關閉聊天室
-              stopVoiceRecording();
-              onClose();
-
-              // 執行導航
-              navigate(opData.path);
-            }, 1000);
-          }
-        } catch (error) {
-          console.error('解析 navigate 操作失敗:', error, navigateOp);
-        }
-      }
       setMessages(finalMessages);
       setIsTyping(false);
 
@@ -519,38 +491,28 @@ const ChatWindow = ({
             setMessages(formatted);
             setCurrentConversationId(Number(lastId));
           } catch (loadErr) {
-            // 快取對話已不存在：建立新對話
-            try {
-              const newConv = await aiChatService.createConversation({ title: '新對話', welcome_message: t('chatWindow.welcomeMessage') });
-              setCurrentConversationId(newConv.id);
-              try { localStorage.setItem(LAST_CONV_ID_KEY, String(newConv.id)); } catch {}
+            // Cached conversation no longer exists: start fresh (no DB creation)
+            console.log('[ChatWindow] Cached conversation not found, starting fresh');
+            setCurrentConversationId(null);
+            try { localStorage.removeItem(LAST_CONV_ID_KEY); } catch {}
 
-              // 若無快取訊息，顯示歡迎訊息
-              if (!localStorage.getItem(LAST_MESSAGES_KEY)) {
-                setMessages([
-                  {
-                    id: 1,
-                    text: t('chatWindow.welcomeMessage'),
-                    isUser: false,
-                    timestamp: new Date()
-                  }
-                ]);
-              }
-            } catch (createErr) {
-              // 無法建立新對話時，保持現狀
-              console.warn('建立新對話失敗:', createErr);
+            // If no cached messages, show welcome message
+            if (!localStorage.getItem(LAST_MESSAGES_KEY)) {
+              setMessages([
+                {
+                  id: 1,
+                  text: t('chatWindow.welcomeMessage'),
+                  isUser: false,
+                  timestamp: new Date()
+                }
+              ]);
             }
           }
         } else {
-          // 無快取對話：建立新對話
-          try {
-            const newConv = await aiChatService.createConversation({ title: '新對話', welcome_message: t('chatWindow.welcomeMessage') });
-            setCurrentConversationId(newConv.id);
-            try { localStorage.setItem(LAST_CONV_ID_KEY, String(newConv.id)); } catch {}
-            // 不覆蓋已存在的訊息（例如已預先顯示的歡迎訊息或本地快取）
-          } catch (createErr) {
-            console.warn('建立新對話失敗（無快取情況）:', createErr);
-          }
+          // No cached conversation: start fresh (no DB creation)
+          console.log('[ChatWindow] No cached conversation, starting fresh');
+          setCurrentConversationId(null);
+          // Don't overwrite existing messages (e.g., pre-displayed welcome message or local cache)
         }
       } catch (e) {
         // 無法還原時保持當前狀態
@@ -692,6 +654,37 @@ const ChatWindow = ({
     }, 500);
   };
 
+  // 處理導航按鈕點擊
+  const handleNavigationClick = (operation) => {
+    console.log('執行導航操作:', operation);
+
+    try {
+      const opData = typeof operation.operation_data === 'string'
+        ? JSON.parse(operation.operation_data)
+        : operation.operation_data;
+
+      if (!opData.path) {
+        console.error('導航操作缺少路徑:', operation);
+        return;
+      }
+
+      // 延遲一下讓用戶看到訊息，然後關閉聊天室並導航
+      setTimeout(() => {
+        // 啟動浮動模式
+        window.dispatchEvent(new CustomEvent('forceFloatingMode'));
+
+        // 停止語音錄音並關閉聊天室
+        stopVoiceRecording();
+        onClose();
+
+        // 執行導航
+        navigate(opData.path);
+      }, 300);
+    } catch (error) {
+      console.error('解析導航操作失敗:', error, operation);
+    }
+  };
+
 
   // 處理側邊欄
   const handleToggleSidebar = () => {
@@ -753,10 +746,10 @@ const ChatWindow = ({
   };
 
   const handleNewConversation = async () => {
-    // 重置 AI Chat Service 的會話狀態
+    // Reset AI Chat Service session state (in-memory only, no DB call yet)
     aiChatService.startNewConversation();
 
-    // 預設顯示歡迎訊息
+    // Show welcome message locally
     setMessages([
       {
         id: 1,
@@ -766,17 +759,11 @@ const ChatWindow = ({
       }
     ]);
 
-    // 立刻在後端建立新對話，避免「新對話」在列表中消失
-    try {
-      const newConv = await aiChatService.createConversation({ title: '新對話', welcome_message: t('chatWindow.welcomeMessage') });
-      setCurrentConversationId(newConv.id);
-      try { localStorage.setItem(LAST_CONV_ID_KEY, String(newConv.id)); } catch (e) {}
-    } catch (err) {
-      console.warn('建立新對話失敗（按下新對話）:', err);
-      // 失敗時，至少清掉舊的快取，讓下次開啟時會自動建立
-      setCurrentConversationId(null);
-      try { localStorage.removeItem(LAST_CONV_ID_KEY); } catch (e) {}
-    }
+    // Clear conversation ID - new conversation will be created in DB when user sends first message
+    setCurrentConversationId(null);
+    try { localStorage.removeItem(LAST_CONV_ID_KEY); } catch (e) {}
+    
+    console.log('[ChatWindow] Started new conversation (no DB creation yet)');
   };
 
   // 處理浮動頭像點擊
@@ -874,7 +861,11 @@ const ChatWindow = ({
                       className={styles.tutorialButton}
                       onClick={() => handleStartTutorial(message.tutorial)}
                     >
-                      {t('chatWindow.tutorial.startButton')}
+                      {t(`chatWindow.tutorial.titles.${message.tutorial}`) 
+                        ? t('chatWindow.tutorial.startButtonWithTitle', { 
+                            tutorialTitle: t(`chatWindow.tutorial.titles.${message.tutorial}`)
+                          })
+                        : t('chatWindow.tutorial.startButton')}
                     </button>
                   )}
                   {/* 如果有營養計算機，顯示營養計算機按鈕 */}
@@ -886,17 +877,53 @@ const ChatWindow = ({
                       {t('chatWindow.calculator.buttonText')}
                     </button>
                   )}
-                  {/* 如果有操作功能，顯示操作按鈕（但不包括自動執行的 navigate 操作） */}
-                  {message.operations && message.operations.length > 0 &&
-                   message.operationType !== 'navigate' &&
-                   message.operationType !== 'navigation' && (
-                    <button
-                      className={styles.tutorialButton}
-                      onClick={() => handleOperationClick(message.operationType)}
-                    >
-                      {t(`chatWindow.operation.buttons.${message.operationType}`)}
-                    </button>
-                  )}
+                  {/* 如果有操作功能，顯示操作按鈕 */}
+                  {message.operations && message.operations.length > 0 && (() => {
+                    // 找出導航操作
+                    const navigateOp = message.operations.find(op => 
+                      op.operation_name === 'navigate' || op.operation_name === 'navigation'
+                    );
+                    // 找出其他操作
+                    const otherOps = message.operations.filter(op => 
+                      op.operation_name !== 'navigate' && op.operation_name !== 'navigation'
+                    );
+
+                    return (
+                      <>
+                        {/* 顯示導航按鈕 */}
+                        {navigateOp && (() => {
+                          try {
+                            const opData = typeof navigateOp.operation_data === 'string'
+                              ? JSON.parse(navigateOp.operation_data)
+                              : navigateOp.operation_data;
+                            
+                            return (
+                              <button
+                                className={styles.tutorialButton}
+                                onClick={() => handleNavigationClick(navigateOp)}
+                              >
+                                {opData.destination 
+                                  ? `前往${opData.destination}` 
+                                  : t('chatWindow.operation.buttons.navigate', '前往頁面')}
+                              </button>
+                            );
+                          } catch (e) {
+                            console.error('解析導航操作失敗:', e);
+                            return null;
+                          }
+                        })()}
+                        {/* 顯示其他操作按鈕 */}
+                        {otherOps.length > 0 && message.operationType && (
+                          <button
+                            className={styles.tutorialButton}
+                            onClick={() => handleOperationClick(message.operationType)}
+                          >
+                            {t(`chatWindow.operation.buttons.${message.operationType}`)}
+                          </button>
+                        )}
+                      </>
+                    );
+                  })()}
                   {/* 如果有推薦用戶，顯示推薦用戶預覽 */}
                   {Array.isArray(message.recommendedUsers) && message.recommendedUsers.length > 0 && (
                     <RecommendedUsersPreview

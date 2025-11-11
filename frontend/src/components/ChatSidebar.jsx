@@ -112,10 +112,10 @@ const ChatSidebar = ({ isOpen, onClose, currentConversationId, onConversationSel
     event.stopPropagation();
     try {
       await aiChatService.deleteConversation(conversationId);
-      // 從列表中移除已刪除的對話
+      // Remove from list
       setConversations(prev => prev.filter(conv => conv.id !== conversationId));
 
-      // 如果刪除的是當前對話，立即切換到新對話
+      // If deleting current conversation, start a new one (in-memory only, no DB creation)
       if (conversationId === currentConversationId && typeof onNewConversation === 'function') {
         onNewConversation();
       }
