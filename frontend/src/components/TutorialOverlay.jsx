@@ -523,6 +523,8 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
           // 對於 menuOpen、pageNavigate 和 imageAdded 條件，需要讓點擊事件正常執行
           if (stepData.nextCondition === 'menuOpen' || 
               stepData.nextCondition === 'manualNext' ||
+              stepData.nextCondition === 'nutritionImageUploaded' || 
+              stepData.nextCondition === 'frontImageUploaded' ||
               stepData.nextCondition === 'selectedPet' || 
               stepData.nextCondition === 'pageNavigateToCalculator' ||
               stepData.nextCondition === 'pageNavigate' || 
@@ -665,10 +667,19 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
         targetElementRef.current = cachedEl;
 
         // 影像流程：在步驟 3 或 4 建立查找範圍（使用貼文建立頁面的主要容器）
-        if (stepData?.id === 3 || stepData?.id === 4) {
-          const scopeCandidate = cachedEl.closest('[class*="CreatePost"], [class*="createPost"], [class*="postContainer"], main, form');
+        if (stepData?.id === 3 || stepData?.id === 4 || stepData?.id === 13 || stepData?.id === 14) {
+          const scopeCandidate = cachedEl.closest(
+            '[class*="CreatePost"], [class*="createPost"], [class*="createFeed"], [class*="postContainer"], main, form'
+          );
           imageFlowScopeRef.current = scopeCandidate || document.getElementById('root') || document.body;
         }
+
+        // if (stepData?.id === 3 || stepData?.id === 4) {
+        //   const scopeCandidate = cachedEl.closest('[class*="CreatePost"], [class*="createPost"], [class*="postContainer"], main, form');
+        //   imageFlowScopeRef.current = scopeCandidate || document.getElementById('root') || document.body;
+        // }
+        
+
 
         // 在渲染 spotlight 前等待（僅在關鍵步驟）
         (async () => {
@@ -1176,22 +1187,68 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
       let conditionMet = false;
 
       switch (condition) {
-        case 'manualNext':
-          // 手動下一步模式：讓畫面可互動、不被遮罩蓋掉
-          const overlayEls = document.querySelectorAll('.tutorial-overlay, .tutorial-highlight');
-          overlayEls.forEach(el => {
-            el.style.pointerEvents = 'none';
-          });
+        case 'manualNext': {
+          // 判斷是否為上傳圖片的步驟（正面圖 or 營養標示圖）
+          const isUploadStep =
+            stepData?.targetElement?.selector?.includes('upload-front') ||
+            stepData?.targetElement?.selector?.includes('upload-nutrition');
 
-          // 若有目標元素，確保它能點擊
-          const target = document.querySelector(stepData?.targetElement?.selector);
-          if (target) {
-            target.style.pointerEvents = 'auto';
-          }
+          setTimeout(() => {
+            // 關閉所有教學遮罩的互動
+            const overlays = document.querySelectorAll('.tutorial-overlay, .tutorial-highlight');
+            overlays.forEach(el => {
+              // 上傳步驟：直接關閉整層遮罩，讓使用者真實點擊 input
+              // 其他步驟：保留遮罩，但允許目標元素互動
+              if (isUploadStep) {
+                el.style.display = 'none'; // 🔥 關鍵：整層消失才能開啟檔案總管
+              } else {
+                el.style.pointerEvents = 'none';
+              }
+            });
 
-          // manualNext 不自動通過條件，由按鈕 handleNextStep 控制
+            // 找目標元素
+            const target = document.querySelector(stepData?.targetElement?.selector);
+            if (target) {
+              target.style.pointerEvents = 'auto';
+              target.style.zIndex = '999999';
+              console.log('🟢 開放互動目標元素:', target);
+            }
+          }, 150);
+
+          // manualNext 步驟永遠不自動通過
           conditionMet = false;
           break;
+        }
+
+        // case 'manualNext':
+        //   // 手動下一步模式：讓畫面可互動、不被遮罩蓋掉
+        //   const overlayEls = document.querySelectorAll('.tutorial-overlay, .tutorial-highlight');
+        //   overlayEls.forEach(el => {
+        //     el.style.pointerEvents = 'none';
+        //   });
+
+        //   // 若有目標元素，確保它能點擊
+        //   const target = document.querySelector(stepData?.targetElement?.selector);
+        //   if (target) {
+        //     target.style.pointerEvents = 'auto';
+        //   }
+
+        //   // manualNext 不自動通過條件，由按鈕 handleNextStep 控制
+        //   conditionMet = false;
+        //   break;
+        case 'frontImageUploaded': {
+          const img = document.querySelector('[data-step="upload-front"] img');
+          conditionMet = !!img;
+          if (conditionMet) console.log('🟢 frontImageUploaded 條件達成');
+          break;
+        }
+
+        case 'nutritionImageUploaded': {
+          const img = document.querySelector('[data-step="upload-nutrition"] img');
+          conditionMet = !!img;
+          if (conditionMet) console.log('🟢 nutritionImageUploaded 條件達成');
+          break;
+        }
 
         case 'menuOpen':
           // 檢查是否有選單元素出現
@@ -1848,8 +1905,28 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
       return false;
     };
 
+    // const stopIfBackground = (e) => {
+    //   if (isAllowedTarget(e.target)) return;
+    //   e.preventDefault();
+    //   e.stopPropagation();
+    //   if (typeof e.stopImmediatePropagation === 'function') {
+    //     e.stopImmediatePropagation();
+    //   }
+    //   console.log('教學模式：已攔截背景互動事件', { type: e.type, target: e.target });
+    // };
     const stopIfBackground = (e) => {
-      if (isAllowedTarget(e.target)) return;
+      const target = e.target;
+
+      // ✅ 放行「教學目標」與「檔案上傳 input」
+      if (
+        isAllowedTarget(target) ||
+        target.closest('.tutorial-target') ||
+        (target.tagName === 'INPUT' && target.type === 'file')
+      ) {
+        return;
+      }
+
+      // ❌ 其他全部攔截
       e.preventDefault();
       e.stopPropagation();
       if (typeof e.stopImmediatePropagation === 'function') {
@@ -1857,6 +1934,7 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
       }
       console.log('教學模式：已攔截背景互動事件', { type: e.type, target: e.target });
     };
+
 
     const events = ['pointerdown', 'pointerup', 'click', 'mousedown', 'mouseup', 'touchstart', 'touchend', 'contextmenu', 'keydown', 'keyup'];
     events.forEach(evt => document.addEventListener(evt, stopIfBackground, true));

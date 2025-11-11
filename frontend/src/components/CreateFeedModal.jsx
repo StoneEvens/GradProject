@@ -269,7 +269,7 @@ const CreateFeedModal = ({ isOpen, onClose, onConfirm, defaultPetType = 'cat' })
           </div>
 
           {/* 正面圖片上傳區域 */}
-          <div className={styles.uploadSection}>
+          <div className={styles.uploadSection} data-step="upload-front">
             <label className={styles.uploadLabel}>{t('createModal.labels.frontImage')}</label>
             <div className={styles.imageSection}>
               {!frontPreview ? (
@@ -306,7 +306,7 @@ const CreateFeedModal = ({ isOpen, onClose, onConfirm, defaultPetType = 'cat' })
           </div>
 
           {/* 營養標示圖片上傳區域 */}
-          <div className={styles.uploadSection}>
+          <div className={styles.uploadSection} data-step="upload-nutrition">
             <label className={styles.uploadLabel}>{t('createModal.labels.nutritionImage')}</label>
             <div className={styles.imageSection}>
               {!nutritionPreview ? (
