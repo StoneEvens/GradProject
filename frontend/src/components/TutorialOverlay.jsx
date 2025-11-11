@@ -887,6 +887,24 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
           if (!targetElement.isConnected) return;
 
           const rect = targetElement.getBoundingClientRect();
+          // 🔽 若目標元素不在可視範圍中，平滑滾動讓它進入視野
+          const rectCheck = targetElement.getBoundingClientRect();
+          const isOutOfView =
+            rectCheck.top < 0 || rectCheck.bottom > window.innerHeight ||
+            rectCheck.left < 0 || rectCheck.right > window.innerWidth;
+
+          if (isOutOfView) {
+            console.log('🔽 自動滾動到目標元素中 (findAndHighlightElement)');
+            targetElement.scrollIntoView({
+              behavior: 'smooth',
+              block: 'center',
+              inline: 'nearest'
+            });
+
+            // 🕒 等滾動動畫結束 + DOM 穩定後再繼續
+            await new Promise(r => setTimeout(r, 800));
+          }
+
 
           // 設置 spotlight 位置（viewport 相對座標，因為 overlay 是 fixed）
           const spotlightRect = {
@@ -901,6 +919,17 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
             const chatPos = calculateChatPosition(rect);
             setChatPositionStable(chatPos);
           });
+          // 🔽 自動滾動到目標元素 (若不在可視範圍)
+          const viewportHeight = window.innerHeight;
+          if (rect.top < 0 || rect.bottom > viewportHeight) {
+            console.log('🔽 自動滾動到目標元素中...');
+            targetElement.scrollIntoView({
+              behavior: 'smooth',
+              block: 'center',
+              inline: 'nearest'
+            });
+          }
+
         })();
 
           // 🌟 若是可輸入元件（例如 textarea/input），允許互動與聚焦
@@ -1376,73 +1405,154 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
           break;
         }
 
-        case 'imageAdded':
-          // 檢查是否有圖片預覽元素出現（限定影像流程範圍）
+        // case 'imageAdded':
+        //   // 檢查是否有圖片預覽元素出現（限定影像流程範圍）
+        //   const scopeRoot = getImageFlowRoot();
+          
+        //   // 主要檢查：尋找圖片預覽容器中的實際圖片
+        //   const imagePreviewContainers = scopeRoot.querySelectorAll('[class*="imagePreviewContainer"], [class*="imageContainer"]');
+        //   let hasValidImages = false;
+          
+        //   // 檢查預覽容器中是否有用戶上傳的圖片
+        //   Array.from(imagePreviewContainers).forEach(container => {
+        //     const imagesInContainer = container.querySelectorAll('img');
+        //     Array.from(imagesInContainer).forEach(img => {
+        //       const src = img.src || '';
+        //       const isUserImage = src.startsWith('blob:') || 
+        //                          src.startsWith('data:image') || 
+        //                          (!src.includes('/assets/') && !src.includes('/icon/') && src.length > 0);
+        //       if (isUserImage) {
+        //         hasValidImages = true;
+        //         console.log('✅ 發現用戶上傳的圖片:', {
+        //           src: src.substring(0, 50) + '...',
+        //           className: img.className
+        //         });
+        //       }
+        //     });
+        //   });
+
+        //   // 備用檢查：直接查找帶有特定類名的圖片元素
+        //   if (!hasValidImages) {
+        //     const imagePreviewElements = scopeRoot.querySelectorAll('[class*="imagePreview"] img, [class*="clickableImage"]');
+        //     Array.from(imagePreviewElements).forEach(img => {
+        //       const src = img.src || '';
+        //       const isUserImage = src.startsWith('blob:') || 
+        //                          src.startsWith('data:image') || 
+        //                          (!src.includes('/assets/') && !src.includes('/icon/') && src.length > 0);
+        //       if (isUserImage) {
+        //         hasValidImages = true;
+        //         console.log('✅ 備用檢查發現用戶上傳的圖片:', {
+        //           src: src.substring(0, 50) + '...',
+        //           className: img.className
+        //         });
+        //       }
+        //     });
+        //   }
+
+        //   // 最終檢查：查找所有 blob: 或 data:image 開頭的圖片
+        //   if (!hasValidImages) {
+        //     const allImages = scopeRoot.querySelectorAll('img');
+        //     Array.from(allImages).forEach(img => {
+        //       const src = img.src || '';
+        //       if (src.startsWith('blob:') || src.startsWith('data:image')) {
+        //         hasValidImages = true;
+        //         console.log('✅ 最終檢查發現用戶上傳的圖片:', {
+        //           src: src.substring(0, 50) + '...',
+        //           className: img.className
+        //         });
+        //       }
+        //     });
+        //   }
+
+        //   console.log('imageAdded 條件檢查結果:', {
+        //     hasValidImages,
+        //     imagePreviewContainersCount: imagePreviewContainers.length,
+        //     totalImagesInScope: scopeRoot.querySelectorAll('img').length
+        //   });
+
+        //   conditionMet = hasValidImages;
+        //   break;
+        case 'imageAdded': {
           const scopeRoot = getImageFlowRoot();
-          
-          // 主要檢查：尋找圖片預覽容器中的實際圖片
-          const imagePreviewContainers = scopeRoot.querySelectorAll('[class*="imagePreviewContainer"], [class*="imageContainer"]');
+          if (!scopeRoot) {
+            console.warn('⚠️ 無法取得影像流程根節點');
+            conditionMet = false;
+            break;
+          }
+
+          const isUserImage = src =>
+            src.startsWith('blob:') ||
+            src.startsWith('data:image') ||
+            (!src.includes('/assets/') && !src.includes('/icon/') && src.length > 0);
+
           let hasValidImages = false;
-          
-          // 檢查預覽容器中是否有用戶上傳的圖片
-          Array.from(imagePreviewContainers).forEach(container => {
-            const imagesInContainer = container.querySelectorAll('img');
-            Array.from(imagesInContainer).forEach(img => {
-              const src = img.src || '';
-              const isUserImage = src.startsWith('blob:') || 
-                                 src.startsWith('data:image') || 
-                                 (!src.includes('/assets/') && !src.includes('/icon/') && src.length > 0);
-              if (isUserImage) {
-                hasValidImages = true;
-                console.log('✅ 發現用戶上傳的圖片:', {
-                  src: src.substring(0, 50) + '...',
-                  className: img.className
-                });
-              }
-            });
-          });
 
-          // 備用檢查：直接查找帶有特定類名的圖片元素
-          if (!hasValidImages) {
-            const imagePreviewElements = scopeRoot.querySelectorAll('[class*="imagePreview"] img, [class*="clickableImage"]');
-            Array.from(imagePreviewElements).forEach(img => {
-              const src = img.src || '';
-              const isUserImage = src.startsWith('blob:') || 
-                                 src.startsWith('data:image') || 
-                                 (!src.includes('/assets/') && !src.includes('/icon/') && src.length > 0);
-              if (isUserImage) {
-                hasValidImages = true;
-                console.log('✅ 備用檢查發現用戶上傳的圖片:', {
-                  src: src.substring(0, 50) + '...',
-                  className: img.className
-                });
-              }
-            });
+          const allImages = Array.from(scopeRoot.querySelectorAll('img'));
+          for (const img of allImages) {
+            if (isUserImage(img.src)) {
+              hasValidImages = true;
+              console.log('✅ 發現用戶上傳的圖片:', img.src.substring(0, 100) + '...');
+              break;
+            }
           }
-
-          // 最終檢查：查找所有 blob: 或 data:image 開頭的圖片
-          if (!hasValidImages) {
-            const allImages = scopeRoot.querySelectorAll('img');
-            Array.from(allImages).forEach(img => {
-              const src = img.src || '';
-              if (src.startsWith('blob:') || src.startsWith('data:image')) {
-                hasValidImages = true;
-                console.log('✅ 最終檢查發現用戶上傳的圖片:', {
-                  src: src.substring(0, 50) + '...',
-                  className: img.className
-                });
-              }
-            });
-          }
-
-          console.log('imageAdded 條件檢查結果:', {
-            hasValidImages,
-            imagePreviewContainersCount: imagePreviewContainers.length,
-            totalImagesInScope: scopeRoot.querySelectorAll('img').length
-          });
 
           conditionMet = hasValidImages;
+          console.log('🧩 imageAdded 檢查結果:', hasValidImages);
+
+          if (hasValidImages) {
+            // ✅ 通知導引系統可以進下一步
+            if (typeof goToNextStep === 'function') {
+              console.log('➡️ 觸發導引進入下一步（步驟 14）');
+              goToNextStep(); // <-- 這行才是真正切換步驟的關鍵！
+            } else {
+              console.warn('⚠️ 找不到 goToNextStep() 方法，請確認導引系統是否暴露此函式');
+            }
+
+            // ✅ 自動滾到下一步的按鈕區域
+            if (typeof nextStep === 'object' && nextStep?.targetElement) {
+              const nextSelector = nextStep.targetElement.selector || nextStep.targetElement.fallbackSelector;
+
+              // 等待步驟 14 元素出現後再滾動
+              const waitForElement = (selector, maxAttempts = 10, interval = 300) => {
+                return new Promise(resolve => {
+                  let attempts = 0;
+                  const timer = setInterval(() => {
+                    const el = document.querySelector(selector);
+                    if (el) {
+                      clearInterval(timer);
+                      resolve(el);
+                    }
+                    attempts++;
+                    if (attempts >= maxAttempts) {
+                      clearInterval(timer);
+                      resolve(null);
+                    }
+                  }, interval);
+                });
+              };
+
+              (async () => {
+                const el = await waitForElement(nextSelector);
+                if (!el) {
+                  console.warn('⚠️ 找不到步驟 14 的目標元素');
+                  return;
+                }
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                console.log('🔽 自動滾動到步驟 14 的按鈕');
+              })();
+            }
+          }
+
           break;
+        }
+
+
+
+
+
+
+
+
         case 'editorOpen':
           // 檢查是否有圖片編輯器打開
           const editorElements = document.querySelectorAll('[class*="imageEditor"], [class*="editor"], [class*="modal"][class*="open"], [class*="editImage"], [class*="modalOverlay"], [class*="modalContainer"]');
