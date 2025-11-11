@@ -98,7 +98,7 @@
       "answer": "點選畫面下方正中間的\"+\"，進入異常紀錄頁面。選擇寵物，填寫日期、症狀、身體數值紀錄，亦可新增圖片或文字描述，按下\"建立\"即可。其中，勾選\"為就醫紀錄\"，可以方便日後上傳論壇文章，日期標記使用。",
       "has_tutorial": false,
       "tutorial_type": null,
-      "category": "record"
+      "category": "health"
     },
     {
       "id": 6,
