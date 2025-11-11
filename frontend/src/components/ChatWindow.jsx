@@ -306,12 +306,42 @@ const ChatWindow = ({
         hasCalculator: aiResult.hasCalculator || false,
         // 加入操作功能相關資訊 (operations array)
         operations: aiResult.operations || [],
-        operationType: aiResult.operationType || null,
-        // 加入待確認操作（頁面跳轉等）
-        pendingOperation: aiResult.pendingOperation || null
+        operationType: aiResult.operationType || null
       };
 
       const finalMessages = [...newMessages, aiMessage];
+
+      // 自動執行 navigate 操作
+      const navigateOp = (aiResult.operations || []).find(op =>
+        op.operation_name === 'navigate' || op.operation_name === 'navigation'
+      );
+
+      if (navigateOp) {
+        try {
+          const opData = typeof navigateOp.operation_data === 'string'
+            ? JSON.parse(navigateOp.operation_data)
+            : navigateOp.operation_data;
+
+          if (opData.path) {
+            console.log('自動執行頁面跳轉:', opData.path);
+
+            // 延遲一下讓用戶看到 AI 的回應訊息
+            setTimeout(() => {
+              // 啟動浮動模式
+              window.dispatchEvent(new CustomEvent('forceFloatingMode'));
+
+              // 停止語音錄音並關閉聊天室
+              stopVoiceRecording();
+              onClose();
+
+              // 執行導航
+              navigate(opData.path);
+            }, 1000);
+          }
+        } catch (error) {
+          console.error('解析 navigate 操作失敗:', error, navigateOp);
+        }
+      }
       setMessages(finalMessages);
       setIsTyping(false);
 
@@ -662,44 +692,6 @@ const ChatWindow = ({
     }, 500);
   };
 
-  // 處理待確認操作（頁面跳轉）
-  const handleConfirmPendingOperation = (pendingOperation) => {
-    console.log('用戶確認操作:', pendingOperation);
-
-    if (!pendingOperation || pendingOperation.type !== 'navigate') {
-      console.warn('不支援的操作類型:', pendingOperation?.type);
-      return;
-    }
-
-    const { params } = pendingOperation;
-    const targetPath = params.path;
-
-    // 顯示確認訊息
-    const confirmMessage = {
-      id: Date.now(),
-      text: `正在前往 ${pendingOperation.preview?.destination || targetPath}...`,
-      isUser: false,
-      timestamp: new Date()
-    };
-    setMessages(prev => [...prev, confirmMessage]);
-
-    // 延遲後執行跳轉
-    setTimeout(() => {
-      try {
-        // 通知全局啟動浮動模式
-        window.dispatchEvent(new CustomEvent('forceFloatingMode'));
-
-        // 停止語音錄音並關閉聊天室
-        stopVoiceRecording();
-        onClose();
-
-        // 執行導航
-        navigate(targetPath);
-      } catch (error) {
-        console.error('頁面跳轉時發生錯誤:', error);
-      }
-    }, 800);
-  };
 
   // 處理側邊欄
   const handleToggleSidebar = () => {
@@ -901,17 +893,6 @@ const ChatWindow = ({
                       onClick={() => handleOperationClick(message.operationType)}
                     >
                       {t(`chatWindow.operation.buttons.${message.operationType}`)}
-                    </button>
-                  )}
-                  {/* 如果有待確認操作，顯示確認按鈕 */}
-                  {message.pendingOperation && (
-                    <button
-                      className={styles.tutorialButton}
-                      onClick={() => handleConfirmPendingOperation(message.pendingOperation)}
-                    >
-                      {message.pendingOperation.preview?.destination
-                        ? `確認前往${message.pendingOperation.preview.destination}`
-                        : '確認操作'}
                     </button>
                   )}
                   {/* 如果有推薦用戶，顯示推薦用戶預覽 */}

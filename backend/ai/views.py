@@ -243,12 +243,12 @@ def agent_chat(request):
     user_id = str(user.id)
     
     # Call the plug-and-play agent logic
-    # Only send a valid OpenAI session id that starts with 'conv-' back to the SDK; otherwise start a fresh session
-    session_id_for_agent = session_id if (isinstance(session_id, str) and session_id.startswith('conv-')) else None
+    # Only send a valid OpenAI session id that starts with 'conv_' back to the SDK; otherwise start a fresh session
+    session_id_for_agent = session_id if (isinstance(session_id, str) and session_id.startswith('conv_')) else None
     result = _run_agent_plug_and_play(user_message, user_id, user.username, session_id_for_agent)
 
     # Canonical OpenAI continuation id
-    returned_session_id = result.get('session_id') or (session_id if isinstance(session_id, str) and session_id.startswith('conv-') else None)
+    returned_session_id = result.get('session_id') or (session_id if isinstance(session_id, str) and session_id.startswith('conv_') else None)
 
     # Resolve or create conversation thread
     thread = None
@@ -278,9 +278,9 @@ def agent_chat(request):
             title=title
         )
         conversation_id = thread.id
-    elif thread and returned_session_id and thread.thread_id != returned_session_id:
+    elif thread and returned_session_id and returned_session_id.startswith('conv_') and thread.thread_id != returned_session_id:
         # Update stored session id if needed (e.g., pending placeholder -> real id)
-        if str(thread.thread_id).startswith('sess_pending_') and returned_session_id and returned_session_id.startswith('conv-'):
+        if str(thread.thread_id).startswith('sess_pending_') or not thread.thread_id.startswith('conv_'):
             thread.thread_id = returned_session_id
             thread.save(update_fields=['thread_id', 'updated_at'])
 
@@ -366,7 +366,11 @@ def main_chat(request):
         # 1. Parse request
         user_message = request.data.get('message')
         conversation_id = request.data.get('conversationId')
+        frontend_session_id = request.data.get('session_id')  # Accept session_id from frontend
         context = request.data.get('context', {})
+
+        print(f"[main_chat] Received request - conversationId: {conversation_id}, frontend_session_id: {frontend_session_id}")
+        logger.info(f"[main_chat] Received request - conversationId: {conversation_id}, frontend_session_id: {frontend_session_id}")
 
         if not user_message:
             return Response({
@@ -385,12 +389,27 @@ def main_chat(request):
                 thread = AgentThread.objects.get(id=conversation_id, user=request.user, is_active=True)
                 openai_session_id = thread.thread_id  # may be conv-* or placeholder
                 is_new = False
+                print(f"[main_chat] Found thread: {thread.id}, thread_id={openai_session_id}")
                 logger.info(f"Existing conversation {conversation_id} maps to session {openai_session_id}")
             except AgentThread.DoesNotExist:
+                print(f"[main_chat] Thread not found for conversation_id: {conversation_id}")
                 logger.info(f"Conversation id {conversation_id} not found; will create new thread")
+        
+        # 3. Prioritize session_id from frontend if provided (to handle reloaded conversations)
+        # Frontend extracts this from message history when loading a conversation
+        print(f"[main_chat] Before check: frontend_session_id={frontend_session_id}, type={type(frontend_session_id)}")
+        if frontend_session_id and isinstance(frontend_session_id, str) and frontend_session_id.startswith('conv_'):
+            openai_session_id = frontend_session_id
+            print(f"[main_chat] ✓ Using session_id from frontend: {openai_session_id}")
+            logger.info(f"✓ Using session_id from frontend: {openai_session_id}")
+        else:
+            print(f"[main_chat] ✗ Not using frontend session_id")
+            logger.info(f"✗ Not using frontend session_id (value: {frontend_session_id}, type: {type(frontend_session_id)})")
 
-        # 3. Run agent (only pass valid conv-* session id)
-        session_id_for_agent = openai_session_id if (isinstance(openai_session_id, str) and openai_session_id.startswith('conv-')) else None
+        # 4. Run agent (only pass valid conv_* session id)
+        session_id_for_agent = openai_session_id if (isinstance(openai_session_id, str) and openai_session_id.startswith('conv_')) else None
+        print(f"[main_chat] → Passing session_id_for_agent to PETer: {session_id_for_agent}")
+        logger.info(f"→ Passing session_id_for_agent to PETer: {session_id_for_agent}")
         result = _run_agent_plug_and_play(user_message, str(request.user.id), request.user.username, session_id_for_agent)
 
         if 'error' in result:
@@ -399,7 +418,7 @@ def main_chat(request):
             err_payload.setdefault('conversationId', conversation_id)
             return Response(err_payload, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        # 4. Extract structured fields
+        # 5. Extract structured fields
         operations = result.get('operations', [])
         tutorial = result.get('tutorial')
         has_calculator = result.get('has_calculator', False)
@@ -411,21 +430,21 @@ def main_chat(request):
         returned_session_id = result.get('session_id')
         logger.info(f"Agent returned session_id={returned_session_id}")
 
-        # 5. Persist thread if new and valid session id
-        if is_new and returned_session_id and returned_session_id.startswith('conv-'):
+        # 6. Persist thread if new and valid session id
+        if is_new and returned_session_id and returned_session_id.startswith('conv_'):
             title = _generate_conversation_title(user_message, tutorial, operation_type)
             thread = AgentThread.objects.create(user=request.user, thread_id=returned_session_id, title=title)
             conversation_id = thread.id
             logger.info(f"Created new thread {conversation_id} for session {returned_session_id}")
-        elif is_new and not (returned_session_id and returned_session_id.startswith('conv-')):
+        elif is_new and not (returned_session_id and returned_session_id.startswith('conv_')):
             logger.warning("New conversation but no valid session_id yet; will defer creation until next valid response")
-        elif thread and returned_session_id and returned_session_id.startswith('conv-') and thread.thread_id != returned_session_id:
-            if str(thread.thread_id).startswith('sess_pending_') or not thread.thread_id.startswith('conv-'):
+        elif thread and returned_session_id and returned_session_id.startswith('conv_') and thread.thread_id != returned_session_id:
+            if str(thread.thread_id).startswith('sess_pending_') or not thread.thread_id.startswith('conv_'):
                 thread.thread_id = returned_session_id
                 thread.save(update_fields=['thread_id', 'updated_at'])
                 logger.info("Upgraded placeholder session id -> real conv id")
 
-        # 6. Improve generic title
+        # 7. Improve generic title
         if thread:
             generic_titles = {'新對話', '對話', 'Conversation', 'New Chat'}
             if (thread.title in generic_titles) or (thread.title and len(thread.title) <= 3):
@@ -435,7 +454,7 @@ def main_chat(request):
                     thread.save(update_fields=['title', 'updated_at'])
                     logger.info(f"Updated conversation title to {new_title}")
 
-        # 7. Normalize recommended post dates (supports dict or list, preserves shape)
+        # 8. Normalize recommended post dates (supports dict or list, preserves shape)
         def _normalize_post_dates(posts):
             # Normalize a single post dict in place
             def _norm_one(p):
@@ -461,7 +480,7 @@ def main_chat(request):
         recommended_social_posts = _normalize_post_dates(recommended_social_posts)
         recommended_forum_posts = _normalize_post_dates(recommended_forum_posts)
 
-        # 8. Persist messages
+        # 9. Persist messages
         if thread:
             AgentMessage.objects.create(conversation=thread, role='user', content=user_message)
             if not operation_type and operations:
@@ -509,7 +528,7 @@ def main_chat(request):
                 'session_id': returned_session_id,
                 'conversationId': conversation_id,
                 'pendingOperation': None,
-                'warning': 'Session not yet established; conversation not persisted until valid session_id (conv-) is returned.'
+                'warning': 'Session not yet established; conversation not persisted until valid session_id (conv_) is returned.'
             }
 
         logger.info(f"Main chat response ready (session={returned_session_id}, convId={conversation_id})")

@@ -1,0 +1,315 @@
+{
+  "available_paths": [
+    {
+      "path": "/main",
+      "name": "主頁面",
+      "keywords": ["主頁", "首頁", "主畫面", "home", "main"],
+      "description": "應用程式的主頁面"
+    },
+    {
+      "path": "/social",
+      "name": "社群頁面",
+      "keywords": ["社群", "社交", "貼文", "動態", "發文"],
+      "description": "查看和發布社群貼文"
+    },
+    {
+      "path": "/social/search",
+      "name": "社群搜尋",
+      "keywords": ["搜尋社群", "找貼文", "社群搜尋"],
+      "description": "搜尋社群貼文和用戶"
+    },
+    {
+      "path": "/pet",
+      "name": "寵物頁面",
+      "keywords": ["寵物", "我的寵物", "寵物列表", "寵物資訊"],
+      "description": "查看和管理您的寵物"
+    },
+    {
+      "path": "/pet/add",
+      "name": "新增寵物",
+      "keywords": ["新增寵物", "加寵物", "添加寵物", "註冊寵物"],
+      "description": "新增一隻新寵物"
+    },
+    {
+      "path": "/user-profile",
+      "name": "個人檔案",
+      "keywords": ["個人檔案", "我的檔案", "個人資料", "用戶資料", "profile"],
+      "description": "查看和編輯個人檔案"
+    },
+    {
+      "path": "/user-posts",
+      "name": "我的貼文",
+      "keywords": ["我的貼文", "個人貼文", "發過的文"],
+      "description": "查看我發布的所有貼文"
+    },
+    {
+      "path": "/settings",
+      "name": "設定頁面",
+      "keywords": ["設定", "設置", "選項", "偏好設定"],
+      "description": "應用程式設定"
+    },
+    {
+      "path": "/notifications",
+      "name": "通知頁面",
+      "keywords": ["通知", "訊息", "提醒", "notification"],
+      "description": "查看所有通知"
+    },
+    {
+      "path": "/calculator",
+      "name": "營養計算機",
+      "keywords": ["計算機", "營養計算", "飼料計算", "卡路里", "營養需求"],
+      "description": "計算寵物的營養需求"
+    },
+    {
+      "path": "/feeds",
+      "name": "飼料頁面",
+      "keywords": ["飼料", "食物", "寵物食品", "狗糧", "貓糧"],
+      "description": "瀏覽和搜尋寵物飼料"
+    },
+    {
+      "path": "/feeds/my-marked",
+      "name": "我的精選飼料",
+      "keywords": ["精選飼料", "收藏飼料", "標記飼料", "我的飼料"],
+      "description": "查看我標記的飼料"
+    },
+    {
+      "path": "/feeds/all",
+      "name": "所有飼料",
+      "keywords": ["所有飼料", "全部飼料", "飼料列表"],
+      "description": "瀏覽所有可用飼料"
+    },
+    {
+      "path": "/feeds/search",
+      "name": "飼料搜尋",
+      "keywords": ["搜尋飼料", "找飼料", "飼料搜尋"],
+      "description": "搜尋特定飼料"
+    },
+    {
+      "path": "/interactive-city",
+      "name": "互動城市",
+      "keywords": ["互動城市", "城市", "地圖", "探索"],
+      "description": "探索互動城市地圖"
+    },
+    {
+      "path": "/create-post",
+      "name": "創建貼文",
+      "keywords": ["發文", "創建貼文", "新增貼文", "發布貼文", "寫文章"],
+      "description": "創建新的社群貼文"
+    },
+    {
+      "path": "/create-abnormal-post",
+      "name": "創建異常記錄",
+      "keywords": ["異常記錄", "記錄異常", "健康異常", "寵物異常"],
+      "description": "記錄寵物的異常狀況"
+    },
+    {
+      "path": "/search-posts",
+      "name": "搜尋貼文",
+      "keywords": ["搜尋", "找貼文", "搜尋貼文"],
+      "description": "搜尋社群貼文"
+    },
+    {
+      "path": "/liked-posts",
+      "name": "按讚的貼文",
+      "keywords": ["按讚", "喜歡", "點讚", "liked"],
+      "description": "查看按讚的貼文"
+    },
+    {
+      "path": "/liked-posts-list",
+      "name": "按讚貼文列表",
+      "keywords": ["按讚列表", "點讚列表"],
+      "description": "查看按讚貼文的完整列表"
+    },
+    {
+      "path": "/saved-posts",
+      "name": "收藏的貼文",
+      "keywords": ["收藏", "儲存", "saved", "書籤"],
+      "description": "查看收藏的貼文"
+    },
+    {
+      "path": "/saved-posts-list",
+      "name": "收藏貼文列表",
+      "keywords": ["收藏列表", "儲存列表"],
+      "description": "查看收藏貼文的完整列表"
+    },
+    {
+      "path": "/liked-archives",
+      "name": "按讚的檔案",
+      "keywords": ["按讚檔案", "喜歡的檔案", "論壇按讚"],
+      "description": "查看按讚的論壇檔案"
+    },
+    {
+      "path": "/saved-archives",
+      "name": "收藏的檔案",
+      "keywords": ["收藏檔案", "儲存的檔案", "論壇收藏"],
+      "description": "查看收藏的論壇檔案"
+    }
+  ],
+  "dynamic_paths": [
+    {
+      "pattern": "/user/{userAccount}",
+      "name": "用戶檔案頁面",
+      "keywords": ["用戶", "他人檔案", "查看用戶"],
+      "description": "查看其他用戶的檔案",
+      "example": "/user/johndoe",
+      "note": "需要提供用戶帳號"
+    },
+    {
+      "pattern": "/user/{userAccount}/follow/{type}",
+      "name": "用戶追蹤狀況",
+      "keywords": ["追蹤", "跟隨", "粉絲", "following", "followers"],
+      "description": "查看用戶的追蹤者或追蹤中列表",
+      "example": "/user/johndoe/follow/followers",
+      "note": "type 可以是 followers 或 following"
+    },
+    {
+      "pattern": "/user/{userAccount}/posts",
+      "name": "用戶貼文列表",
+      "keywords": ["用戶貼文", "他人貼文"],
+      "description": "查看特定用戶的所有貼文",
+      "example": "/user/johndoe/posts"
+    },
+    {
+      "pattern": "/pet/{petId}/edit",
+      "name": "編輯寵物",
+      "keywords": ["編輯寵物", "修改寵物", "更新寵物資料"],
+      "description": "編輯寵物的資訊",
+      "example": "/pet/123/edit",
+      "note": "需要提供寵物 ID"
+    },
+    {
+      "pattern": "/pet/{petId}/posts",
+      "name": "寵物相關貼文",
+      "keywords": ["寵物貼文", "關於寵物的文章"],
+      "description": "查看與特定寵物相關的貼文",
+      "example": "/pet/123/posts"
+    },
+    {
+      "pattern": "/pet/{petId}/posts-list",
+      "name": "寵物貼文列表",
+      "keywords": ["寵物貼文列表"],
+      "description": "查看寵物相關貼文的完整列表",
+      "example": "/pet/123/posts-list"
+    },
+    {
+      "pattern": "/pet/{petId}/health-reports",
+      "name": "健康報告列表",
+      "keywords": ["健康報告", "體檢", "醫療記錄", "健康記錄"],
+      "description": "查看寵物的健康報告列表",
+      "example": "/pet/123/health-reports",
+      "note": "需要提供寵物 ID"
+    },
+    {
+      "pattern": "/pet/{petId}/health-report/upload",
+      "name": "上傳健康報告",
+      "keywords": ["上傳報告", "新增報告", "健康報告上傳"],
+      "description": "上傳新的健康報告",
+      "example": "/pet/123/health-report/upload"
+    },
+    {
+      "pattern": "/pet/{petId}/health-report/{id}",
+      "name": "健康報告詳情",
+      "keywords": ["報告詳情", "查看報告"],
+      "description": "查看特定健康報告的詳細資訊",
+      "example": "/pet/123/health-report/456"
+    },
+    {
+      "pattern": "/pet/{petId}/health-report/{id}/edit",
+      "name": "編輯健康報告",
+      "keywords": ["編輯報告", "修改報告"],
+      "description": "編輯健康報告",
+      "example": "/pet/123/health-report/456/edit"
+    },
+    {
+      "pattern": "/pet/{petId}/disease-archive",
+      "name": "疾病檔案",
+      "keywords": ["疾病", "疾病檔案", "病歷"],
+      "description": "查看寵物的疾病檔案",
+      "example": "/pet/123/disease-archive"
+    },
+    {
+      "pattern": "/pet/{petId}/disease-archive/create",
+      "name": "建立疾病檔案",
+      "keywords": ["建立疾病檔案", "新增病歷"],
+      "description": "建立新的疾病檔案",
+      "example": "/pet/123/disease-archive/create"
+    },
+    {
+      "pattern": "/pet/{petId}/disease-archive/edit-content",
+      "name": "編輯疾病檔案內容",
+      "keywords": ["編輯疾病檔案", "修改病歷"],
+      "description": "編輯疾病檔案的內容",
+      "example": "/pet/123/disease-archive/edit-content"
+    },
+    {
+      "pattern": "/pet/{petId}/disease-archive/preview",
+      "name": "預覽疾病檔案",
+      "keywords": ["預覽", "疾病檔案預覽"],
+      "description": "預覽疾病檔案",
+      "example": "/pet/123/disease-archive/preview"
+    },
+    {
+      "pattern": "/pet/{petId}/disease-archive/{archiveId}",
+      "name": "疾病檔案詳情",
+      "keywords": ["疾病詳情", "病歷詳情"],
+      "description": "查看特定疾病檔案的詳細資訊",
+      "example": "/pet/123/disease-archive/456"
+    },
+    {
+      "pattern": "/disease-archive/{archiveId}/public",
+      "name": "公開疾病檔案",
+      "keywords": ["公開病歷", "查看病歷"],
+      "description": "查看公開的疾病檔案",
+      "example": "/disease-archive/456/public"
+    },
+    {
+      "pattern": "/pet/{petId}/abnormal-posts",
+      "name": "異常貼文列表",
+      "keywords": ["異常", "異常記錄", "健康問題"],
+      "description": "查看寵物的異常記錄列表",
+      "example": "/pet/123/abnormal-posts"
+    },
+    {
+      "pattern": "/pet/{petId}/abnormal-post/{postId}",
+      "name": "異常貼文詳情",
+      "keywords": ["異常詳情", "查看異常"],
+      "description": "查看特定異常記錄的詳細資訊",
+      "example": "/pet/123/abnormal-post/456"
+    },
+    {
+      "pattern": "/pet/{petId}/abnormal-post/{postId}/edit",
+      "name": "編輯異常記錄",
+      "keywords": ["編輯異常", "修改異常記錄"],
+      "description": "編輯異常記錄",
+      "example": "/pet/123/abnormal-post/456/edit"
+    },
+    {
+      "pattern": "/abnormal-post/{postId}/public",
+      "name": "公開異常記錄",
+      "keywords": ["公開異常", "查看異常"],
+      "description": "查看公開的異常記錄",
+      "example": "/abnormal-post/456/public"
+    },
+    {
+      "pattern": "/post/{postId}/edit",
+      "name": "編輯貼文",
+      "keywords": ["編輯", "修改貼文", "改文章"],
+      "description": "編輯社群貼文",
+      "example": "/post/123/edit"
+    },
+    {
+      "pattern": "/feeds/{id}",
+      "name": "飼料詳情",
+      "keywords": ["飼料詳情", "飼料資訊"],
+      "description": "查看特定飼料的詳細資訊",
+      "example": "/feeds/789"
+    },
+    {
+      "pattern": "/checkpoint/{id}",
+      "name": "站點詳情",
+      "keywords": ["站點", "地點", "checkpoint"],
+      "description": "查看互動城市中的站點詳情",
+      "example": "/checkpoint/101"
+    }
+  ]
+}

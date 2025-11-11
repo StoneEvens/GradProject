@@ -226,7 +226,7 @@ const CreateFeedModal = ({ isOpen, onClose, onConfirm, defaultPetType = 'cat' })
           </div>
 
           {/* 飼料名稱輸入區域 */}
-          <div className={styles.inputSection}>
+          <div className={styles.inputSection} data-step="feed-name">
             <label className={styles.inputLabel}>{t('createModal.labels.feedName')}</label>
             <input
               type="text"
@@ -240,7 +240,7 @@ const CreateFeedModal = ({ isOpen, onClose, onConfirm, defaultPetType = 'cat' })
           </div>
 
           {/* 飼料品牌輸入區域 */}
-          <div className={styles.inputSection}>
+          <div className={styles.inputSection} data-step="feed-brand">
             <label className={styles.inputLabel}>{t('createModal.labels.feedBrand')}</label>
             <input
               type="text"

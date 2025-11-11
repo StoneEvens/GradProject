@@ -522,6 +522,9 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
 
           // 對於 menuOpen、pageNavigate 和 imageAdded 條件，需要讓點擊事件正常執行
           if (stepData.nextCondition === 'menuOpen' || 
+              stepData.nextCondition === 'manualNext' ||
+              stepData.nextCondition === 'selectedPet' || 
+              stepData.nextCondition === 'pageNavigateToCalculator' ||
               stepData.nextCondition === 'pageNavigate' || 
               stepData.nextCondition === 'noCondition' ||
               stepData.nextCondition === 'descriptionClicked' || 
@@ -594,7 +597,8 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
       }
       const needsProgrammaticClick = stepData?.nextCondition === 'editorOpen' ||
                                    stepData?.nextCondition === 'annotationPointAdded' ||
-                                   stepData?.nextCondition === 'petSelected' ||
+                                   stepData?.nextCondition === 'selectedPet' ||
+                                   stepData?.nextCondition === 'pageNavigateToCalculator' ||
                                    stepData?.nextCondition === 'annotationAdded' ||
                                    stepData?.nextCondition === 'editorClosed' ||
                                    stepData?.action === 'select' ||
@@ -1172,10 +1176,102 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
       let conditionMet = false;
 
       switch (condition) {
+        case 'manualNext':
+          // 手動下一步模式：讓畫面可互動、不被遮罩蓋掉
+          const overlayEls = document.querySelectorAll('.tutorial-overlay, .tutorial-highlight');
+          overlayEls.forEach(el => {
+            el.style.pointerEvents = 'none';
+          });
+
+          // 若有目標元素，確保它能點擊
+          const target = document.querySelector(stepData?.targetElement?.selector);
+          if (target) {
+            target.style.pointerEvents = 'auto';
+          }
+
+          // manualNext 不自動通過條件，由按鈕 handleNextStep 控制
+          conditionMet = false;
+          break;
+
         case 'menuOpen':
           // 檢查是否有選單元素出現
           const menuElements = document.querySelectorAll('[class*="menu"], [class*="popup"], [class*="modal"]');
           conditionMet = menuElements.length > 0;
+          break;
+
+        case 'scrollToPet': {
+          const petSection = document.querySelector('[class*="petSwitcher"]');
+
+          if (petSection) {
+            const rect = petSection.getBoundingClientRect();
+
+            // 若目標區塊尚未進入可視區域，則自動平滑滾動過去
+            if (rect.top > window.innerHeight || rect.bottom < 0) {
+              setTimeout(() => {
+                console.log('🔽 自動滾動到寵物選擇區...');
+                petSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }, 300);
+            }
+
+            // 當滾動後元素進入畫面中
+            conditionMet = rect.top < window.innerHeight && rect.bottom > 0;
+            if (conditionMet) {
+              console.log('🐾 已滾動到寵物選擇區，準備進入步驟 2');
+            }
+          } else {
+            conditionMet = false;
+          }
+
+          break;
+        }
+
+        case 'pageNavigateToCalculator': {
+          // 判斷是否已跳轉到計算機頁面
+          const onCalcPage = window.location.pathname.includes('/calculator');
+          
+          if (onCalcPage) {
+            console.log('✅ 已經在 /calculator 頁面，準備自動滾動到寵物區');
+            const petSection = document.querySelector('[class*="petSwitcher"]');
+            
+            if (petSection) {
+              petSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              setTimeout(() => {
+                console.log('🐾 滾動完成，進入步驟 2');
+                goToNextStep(); // ← 換成你的實際步驟切換函式
+              }, 800);
+            }
+            conditionMet = true;
+          } else {
+            // 若還沒跳轉，監聽 URL 變化
+            const observer = new MutationObserver(() => {
+              const now = window.location.pathname;
+              if (now.includes('/calculator')) {
+                console.log('✅ 偵測到頁面跳轉成功！');
+                observer.disconnect();
+                const petSection = document.querySelector('[class*="petSwitcher"]');
+                if (petSection) {
+                  petSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  setTimeout(() => goToNextStep(), 800);
+                }
+              }
+            });
+
+            observer.observe(document.body, { childList: true, subtree: true });
+            conditionMet = false;
+          }
+
+          break;
+        }
+
+        
+
+        case 'selectedPet':
+          // 檢查是否有被選取的寵物元素
+          const selectedPet = document.querySelector('[class*="petItem"][class*="active"], [class*="petItem"].selected');
+          conditionMet = !!selectedPet;
+          if (conditionMet) {
+            console.log('🎯 nextCondition: selectedPet 已達成，將進入步驟 3');
+      }
           break;
         
         case 'pageNavigate':

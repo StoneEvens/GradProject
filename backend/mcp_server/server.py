@@ -1,9 +1,10 @@
-from typing import Dict, Optional
+from typing import Dict, Optional, Literal
 import json
 import inspect
 from typing import get_type_hints, get_origin, get_args
 from asgiref.sync import sync_to_async
 from fastmcp import FastMCP
+import os
 
 from accounts.models import CustomUser
 from pets.models import Pet, DiseaseArchiveContent
@@ -14,6 +15,8 @@ from social.serializers import PostFrameSerializer
 from pets.serializers import DiseaseArchiveContentSerializer, AbnormalPostSerializer
 from feeds.models import Feed
 from django.forms.models import model_to_dict
+from mcp_server.database_operations import get_operation_list, perform_operation
+from mcp_server.entity_resolver import EntityResolver
 
 # Server configuration
 SERVER_NAME = "PETer MCP Server"
@@ -297,33 +300,51 @@ def create_mcp_server() -> FastMCP:
         return await fetch()
 
     @mcp.tool(
+        name="get_navigation_paths",
+        description="Get all available page paths and their mappings. Use this to find the correct path for user navigation requests."
+    )
+    async def get_navigation_paths() -> Dict:
+        """
+        返回所有可用的頁面路徑和對應的關鍵字映射
+
+        Returns:
+        {
+            "available_paths": [
+                {
+                    "path": "/social",
+                    "name": "社群頁面",
+                    "keywords": ["社群", "社交", "貼文"],
+                    "description": "查看和發布社群貼文"
+                },
+                ...
+            ],
+            "dynamic_paths": [...]
+        }
+        """
+        try:
+            # 讀取 navigation_paths.json
+            current_dir = os.path.dirname(__file__)
+            json_path = os.path.join(current_dir, 'navigation_paths.json')
+
+            with open(json_path, 'r', encoding='utf-8') as f:
+                paths_data = json.load(f)
+
+            return paths_data
+        except Exception as e:
+            return {
+                "error": f"Failed to load navigation paths: {str(e)}",
+                "available_paths": [],
+                "dynamic_paths": []
+            }
+
+    @mcp.tool(
         name="prepare_navigate",
-        description="Prepare a page navigation operation that requires user confirmation. Available paths: /social, /pets, /pets/{id}, /profile, /calculator, /health, /schedule, /interactive-city, /user/{username}"
+        description="Prepare a page navigation operation that requires user confirmation. Call get_navigation_paths first to find the correct path."
     )
     async def prepare_navigate(
         path: str,
         reason: Optional[str] = None
     ) -> Dict:
-        """
-        準備頁面跳轉操作（需要用戶確認）
-
-        參數:
-        - path: 目標路徑（必填）
-        - reason: 跳轉原因（選填）
-
-        支援的路徑:
-        - /social: 社群頁面
-        - /pets: 寵物列表
-        - /pets/{id}: 特定寵物頁面
-        - /profile: 個人檔案
-        - /calculator: 營養計算機
-        - /health: 健康記錄
-        - /schedule: 餵食排程
-        - /interactive-city: 互動城市
-        - /user/{username}: 用戶檔案頁面
-
-        返回待確認操作
-        """
         import uuid
         from datetime import datetime, timezone, timedelta
 
@@ -372,5 +393,84 @@ def create_mcp_server() -> FastMCP:
             "requires_confirmation": True,
             "expires_at": expires_at
         }
+    
+    @mcp.tool(
+        name="database_operation_list",
+        description="List available database operations as well as the parameters required."
+    )
+    async def database_operation_list() -> Dict:
+        @sync_to_async
+        def fetch() -> Dict:
+            return get_operation_list()
+
+        return await fetch()
+
+    @mcp.tool(
+        name="perform_database_operation",
+        description="Perform a database operation such as managing pet information, abnormal posts, disease archives, or user plans/schedules. Use database_operation_list tool to see all available operations and their required parameters."
+    )
+    async def perform_database_operation(
+        operation: Literal["add_pet", "update_pet", "add_abnormal_post", "update_abnormal_post", "delete_abnormal_post", "create_disease_archive", "add_plan", "update_plan", "delete_plan", "list_plans"],
+        data: Dict
+    ) -> Dict:
+        @sync_to_async
+        def execute() -> Dict:
+            return perform_operation(operation, data)
+
+        return await execute()
+
+    @mcp.tool(
+        name="resolve_entity_context",
+        description="""
+        Resolve dynamic path parameters by finding entities based on natural language descriptions.
+
+        This is a UNIVERSAL tool for handling dynamic paths that require IDs.
+
+        Supported entity types:
+        - social_post: User's social posts (for /post/{id}/edit, etc.)
+        - feed: Pet food products (for /feeds/{id})
+        - pet: User's pets (for /pet/{id}/edit, /pet/{id}/health-reports, etc.)
+        - user: Other users (for /user/{username})
+        - health_report: Health reports (for /pet/{petId}/health-report/{id})
+        - disease_archive: Disease archives (for /pet/{petId}/disease-archive/{id})
+        - abnormal_post: Abnormal records (for /pet/{petId}/abnormal-post/{id})
+
+        Common conditions patterns:
+        - time_range: "today", "yesterday", "last_week", "last_month", "last_sunday"
+        - specific_date: "2025-11-03"
+        - keywords: ["keyword1", "keyword2"]
+        - pet_name: "pet name"
+        - newest: true (get most recent)
+        - oldest: true (get earliest)
+
+        Returns matching entities with their IDs and resolved paths.
+        """
+    )
+    async def resolve_entity_context(
+        entity_type: Literal["social_post", "feed", "pet", "user", "health_report", "disease_archive", "abnormal_post"],
+        user_id: int,
+        conditions: Dict,
+        limit: int = 5
+    ) -> Dict:
+        """
+        統一的動態路徑參數解析工具
+
+        Examples:
+
+        1. "幫我跳轉到上禮拜天發的貼文編輯頁面"
+           - entity_type: "social_post"
+           - conditions: {"time_range": "last_sunday"}
+
+        2. "前往我最後查看的飼料頁面"
+           - entity_type: "feed"
+           - conditions: {"usage": "last_viewed"}
+
+        3. "帶我去我第一隻寵物的健康報告"
+           - entity_type: "pet"
+           - conditions: {"oldest": true}
+           - Then use pet_id to query health_report
+        """
+        return await EntityResolver.resolve(entity_type, user_id, conditions, limit)
+
 
     return mcp
