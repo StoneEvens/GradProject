@@ -120,7 +120,9 @@ class SummaryAgentSchema(BaseModel):
 #---------------------------------------------------------------------
 workflow_organizer = Agent(
   name="Workflow Organizer",
-  instructions="Understand the user's intention, then plan out the workflow by checking what tools the mcp server provides and how these tools can help achieve the user's intention. You SHOULD NOT retrieve data by yourself. Do not spend too much time constructing the instruction; allowing the next agent to complete the task is enough. The final output should all be relevant to the user's needs.",
+  instructions="Understand the user's intention, then plan out the workflow by checking what tools the mcp server provides and how these tools can help achieve the user's intention. " \
+  "If the user's intention cannot be fulfilled by any available tools, simply state that the task cannot be completed. " \
+  "You SHOULD NOT retrieve data by yourself. Do not spend too much time constructing the instruction; allowing the next agent to complete the task is enough. The final output should all be relevant to the user's needs.",
   model="gpt-5",
   tools=[
     mcp
