@@ -886,8 +886,10 @@ const ChatWindow = ({
                       {t('chatWindow.calculator.buttonText')}
                     </button>
                   )}
-                  {/* 如果有操作功能，顯示操作按鈕 */}
-                  {message.operations && message.operations.length > 0 && (
+                  {/* 如果有操作功能，顯示操作按鈕（但不包括自動執行的 navigate 操作） */}
+                  {message.operations && message.operations.length > 0 &&
+                   message.operationType !== 'navigate' &&
+                   message.operationType !== 'navigation' && (
                     <button
                       className={styles.tutorialButton}
                       onClick={() => handleOperationClick(message.operationType)}
