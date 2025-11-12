@@ -185,7 +185,6 @@ def _run_agent_plug_and_play(message: str, user_id: str, username: str, session_
     return {
         'response': parsed.get('reply', ''),
         'tutorial': parsed.get('tutorial'),
-        'has_calculator': parsed.get('has_calculator', False),
         'operation_type': parsed.get('operation_type'),
         'operations': operations,
     'recommended_users': recommended_users,
@@ -297,7 +296,6 @@ def agent_chat(request):
             content=result.get('response', ''),
             has_tutorial=bool(result.get('tutorial')),
             tutorial_type=result.get('tutorial'),
-            has_calculator=result.get('has_calculator', False),
             operation_type=result.get('operation_type'),
             additional_data={
                 'operations': result.get('operations', []),
@@ -308,7 +306,6 @@ def agent_chat(request):
                     'response': result.get('response', ''),
                     'operations': result.get('operations', []),
                     'tutorial': result.get('tutorial'),
-                    'hasCalculator': result.get('has_calculator', False),
                     'operationType': result.get('operation_type'),
                     'recommendedUsers': result.get('recommended_users', []),
                     'recommendedSocialPosts': result.get('recommended_social_posts', {}),
@@ -421,7 +418,6 @@ def main_chat(request):
         # 5. Extract structured fields
         operations = result.get('operations', [])
         tutorial = result.get('tutorial')
-        has_calculator = result.get('has_calculator', False)
         operation_type = result.get('operation_type')
         recommended_users = result.get('recommended_users', [])
         recommended_social_posts = result.get('recommended_social_posts', {})
@@ -489,7 +485,6 @@ def main_chat(request):
                 'response': result.get('response', ''),
                 'operations': operations,
                 'tutorial': tutorial,
-                'hasCalculator': has_calculator,
                 'operationType': operation_type,
                 'recommendedUsers': recommended_users,
                 'recommendedSocialPosts': recommended_social_posts,
@@ -504,7 +499,6 @@ def main_chat(request):
                 content=result.get('response', ''),
                 has_tutorial=bool(tutorial) if tutorial is not None else False,
                 tutorial_type=tutorial,
-                has_calculator=has_calculator,
                 operation_type=operation_type,
                 additional_data={
                     'recommendedUsers': recommended_users,
@@ -520,7 +514,6 @@ def main_chat(request):
                 'response': result.get('response', ''),
                 'operations': operations,
                 'tutorial': tutorial,
-                'hasCalculator': has_calculator,
                 'operationType': operation_type,
                 'recommendedUsers': recommended_users,
                 'recommendedSocialPosts': recommended_social_posts,
@@ -611,7 +604,6 @@ def get_conversation_detail(request, conversation_id):
                         'response': msg.content,
                         'conversationId': conversation.id,
                         'tutorial': msg.tutorial_type,  # keep single field only
-                        'hasCalculator': msg.has_calculator,
                         'operationType': msg.operation_type,
                         'operations': msg_additional.get('operations', []),
                         'recommendedUsers': msg_additional.get('recommendedUsers', {}),
@@ -626,7 +618,6 @@ def get_conversation_detail(request, conversation_id):
                 'created_at': msg.created_at.isoformat(),
                 'has_tutorial': msg.has_tutorial,
                 'tutorial_type': msg.tutorial_type,
-                'has_calculator': msg.has_calculator,
                 'operation_type': msg.operation_type,
                 # Structured data (recommended posts/users, operations, etc.)
                 'additional_data': msg_additional,
@@ -781,7 +772,6 @@ def create_conversation(request):
                 content=welcome_text,
                 has_tutorial=False,
                 tutorial_type=None,
-                has_calculator=False,
                 operation_type=None,
                 additional_data={
                     'recommendedUsers': {},
@@ -794,7 +784,6 @@ def create_conversation(request):
                         'response': welcome_text,
                         'conversationId': thread.id,
                         'tutorial': None,
-                        'hasCalculator': False,
                         'operationType': None,
                         'operations': [],
                         'recommendedUsers': {},
