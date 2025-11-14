@@ -105,10 +105,11 @@ class AgentMessage(models.Model):
         verbose_name='Tutorial type',
         help_text='health, training, nutrition, etc.'
     )
+    # DEPRECATED: has_calculator field is no longer used (kept for backwards compatibility)
     has_calculator = models.BooleanField(
         default=False, 
-        verbose_name='Has calculator',
-        help_text='Shows calculator button'
+        verbose_name='Has calculator (DEPRECATED)',
+        help_text='DEPRECATED - No longer used'
     )
     operation_type = models.CharField(
         max_length=50,
