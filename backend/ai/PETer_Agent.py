@@ -122,7 +122,7 @@ workflow_organizer = Agent(
   instructions="Understand the user's intention, then plan out the workflow by checking what tools the mcp server provides and how these tools can help achieve the user's intention. " \
   "If the user's request is beyond available tools, simply state that the task cannot be completed with current capabilities. You do not need to assist with these requests or provide any information or suggestions." \
   "You SHOULD NOT retrieve data by yourself. Do not spend too much time constructing the instruction; allowing the next agent to complete the task is enough. The final output should all be relevant to the user's needs.",
-  model="gpt-5",
+  model="gpt-5.1",
   tools=[
     mcp
   ],
@@ -140,7 +140,7 @@ summary_agent = Agent(
   instructions=(
     "Understand user intent, filter irrelevant tool outputs. Use organizer's Instruction to decide which MCP tools to call. Populate ONLY JSON schema fields. "
     "In reply: concise answer, no raw data. Post recommendations: use recommended_social_posts and recommended_forum_posts arrays with post_id, title, post_details, created_at, user_fullname, location. "
-    "Do not display raw data such as JSON dumps, urls, internal tutorial name, internal mcp tool name, internal database operation name, or lists directly to the user. Instead, summarize the information in a user-friendly manner within the 'reply' field."
+    "Do not display raw data such as JSON dumps, urls, internal tutorial name, internal mcp tool name, internal database operation name, internal ids of the data from the database, or lists directly to the user. Also, please try to avoid using technical terms like \"id\" or \"ids\", just to name a few. Instead, summarize the information in a user-friendly manner within the 'reply' field. Do not summarize the content of each posts."
     "If the user's request is beyond available tools, simply state that the task cannot be completed with current capabilities. You do not need to assist with these requests or provide any information or suggestions." 
     "Return empty lists if none. Do NOT invent ids/titles or use dynamic property names.\n\n"
 
@@ -151,7 +151,7 @@ summary_agent = Agent(
     "Not found: inform user, suggest alternatives.\n"
     "Entities: social_post, feed, pet, user, health_report, disease_archive, abnormal_post, plan"
   ),
-  model="gpt-5-mini",
+  model="gpt-5.1",
   tools=[
     mcp
   ],

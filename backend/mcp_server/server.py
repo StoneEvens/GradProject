@@ -28,20 +28,19 @@ def create_mcp_server() -> FastMCP:
 
     @mcp.tool(
         name="get_user_pet_info_detailed",
-        description="Fetch a public user's basic profile and their pets (including related entities)."
+        description="Fetch a user's basic profile and their pets (including related entities)."
+        "Note that this operation requires verification that the user is performing the operation for themself. The easiest way to ensure this is to check the target of the prompt matches the user ID of the requester. The user id was added to the prompt automatically by the backend."
     )
     async def get_user_pet_info_detailed(user_id: int) -> Dict:
         @sync_to_async
         def fetch() -> Dict:
             try:
-                # Query for public user profile
                 user = CustomUser.objects.filter(
-                    id=user_id, 
-                    account_privacy='public'
+                    id=user_id
                 ).first()
 
                 if not user:
-                    return {"error": "User not found or not public."}
+                    return {"error": "User not found."}
 
                 # Get user's pets with related data (keep model instances to access relations)
                 pets_qs = (Pet.objects
@@ -75,8 +74,45 @@ def create_mcp_server() -> FastMCP:
         return await fetch()
     
     @mcp.tool(
+        name="get_user_pet_list",
+        description="Fetch a user's list of pets."
+    )
+    async def get_user_pet_list(user_id: int) -> Dict:
+        @sync_to_async
+        def fetch() -> Dict:
+            try:
+                user = CustomUser.objects.filter(
+                    id=user_id
+                ).first()
+
+                if not user:
+                    return {"error": "User not found."}
+
+                pets_qs = Pet.objects.filter(owner=user)
+
+                pets_data: list[dict] = []
+                for pet in pets_qs:
+                    pets_data.append({
+                        'name': pet.name,
+                        'type': pet.type
+                    })
+
+                # Ensure JSON-serializable primitives
+                pets_data = json.loads(json.dumps(pets_data, default=str))
+
+                return {
+                    "user": user.username,
+                    "pets": pets_data
+                }
+            except Exception as e:
+                return {"error": f"Failed to fetch pet list: {str(e)}"}
+
+        return await fetch()
+    
+    @mcp.tool(
         name="get_post_recommendations",
         description="Get recommended social posts based on a natural-language content description. Please use keywords; vague descriptions may yield poor results. Fetch both social and forum posts if no specific instruction was given."
+        "You can also use this tool to get the posts related to specific pet type, then use the result to filter such pet type owned by users."
     )
     async def get_post_recommendations(content_description: str, hashtags: list[str], isSocial: bool, isForum: bool) -> list[dict]:
         @sync_to_async
@@ -92,7 +128,7 @@ def create_mcp_server() -> FastMCP:
 
                 if (isSocial):
                     recommended_post_ids = recommendation_service.recommend_posts(user_vec=embedded_description, content_type='social')
-                    top_post_ids = recommended_post_ids[:5]
+                    top_post_ids = recommended_post_ids[:3]
 
                     posts = PostFrame.get_postFrames(idList=top_post_ids)
                     serializer = PostFrameSerializer(posts, many=True)
@@ -100,7 +136,7 @@ def create_mcp_server() -> FastMCP:
 
                 if (isForum):
                     recommended_post_ids = recommendation_service.recommend_posts(user_vec=embedded_description, content_type='forum')
-                    top_post_ids = recommended_post_ids[:5]
+                    top_post_ids = recommended_post_ids[:3]
 
                     archives = DiseaseArchiveContent.get_content(ids=top_post_ids)
                     serializer = DiseaseArchiveContentSerializer(archives, many=True)
@@ -408,6 +444,7 @@ def create_mcp_server() -> FastMCP:
     @mcp.tool(
         name="perform_database_operation",
         description="Perform a database operation such as managing pet information, abnormal posts, disease archives, or user plans/schedules. Use database_operation_list tool to see all available operations and their required parameters."
+        "Note that database operations affects personal data; please verify that the user is doing the operation for themself. The easiest way to ensure this is to check the target of the prompt matches the user ID of the requester. The user id was added to the prompt automatically by the backend."
     )
     async def perform_database_operation(
         operation: Literal["add_pet", "update_pet", "add_abnormal_post", "update_abnormal_post", "delete_abnormal_post", "create_disease_archive", "add_plan", "update_plan", "delete_plan", "list_plans"],

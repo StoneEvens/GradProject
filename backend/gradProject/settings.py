@@ -259,6 +259,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'gradProject.wsgi.application'
+ASGI_APPLICATION = 'gradProject.asgi.application'
 
 
 # Database

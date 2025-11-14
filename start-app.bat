@@ -39,10 +39,10 @@ set FRONTEND_PATH=c:\Users\GeniusBee\GradProject\frontend
 echo Starting services...
 echo.
 
-REM Start Django backend
+REM Start Django backend with ASGI support
 echo [1/4] Django Backend (port 8000)...
 cd /d "%BACKEND_PATH%"
-start /min "" python manage.py runserver 127.0.0.1:8000 --noreload
+start /min "" python -m uvicorn gradProject.asgi:application --host 127.0.0.1 --port 8000
 echo     Status: Starting...
 
 REM Start MCP server

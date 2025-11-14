@@ -1,7 +1,6 @@
 import os
 import uuid
 import requests
-import asyncio
 from django.shortcuts import render
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
@@ -12,6 +11,7 @@ import logging
 from .models import AgentThread, AgentMessage
 from .PETer_Agent import WorkflowInput, run_workflow
 from datetime import datetime, timezone
+from asgiref.sync import async_to_sync
 
 logger = logging.getLogger(__name__)
 
@@ -82,13 +82,11 @@ def _run_agent_plug_and_play(message: str, user_id: str, username: str, session_
     Returns dict with keys similar to legacy format.
     """
     workflow_input = WorkflowInput(input_as_text=message)
-    result = asyncio.run(
-        run_workflow(
-            workflow_input,
-            user_id=int(user_id) if str(user_id).isdigit() else user_id,
-            username=username,
-            session_id=session_id,
-        )
+    result = async_to_sync(run_workflow)(
+        workflow_input,
+        user_id=int(user_id) if str(user_id).isdigit() else user_id,
+        username=username,
+        session_id=session_id,
     )
     parsed = result.get('output_parsed', {})
     session_id_final = result.get('session_id') or session_id
