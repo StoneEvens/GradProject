@@ -428,7 +428,9 @@ const ChatWindow = ({
       // 使用正式後端 AI Chat Service
       const aiResult = await aiChatService.processMessage(userInput, {
         user: user,
-        petId: user?.pets?.[0]?.id || null
+        petId: user?.pets?.[0]?.id || null,
+        hasImages: selectedImages.length > 0,
+        imageCount: selectedImages.length
       });
 
       console.log('AI 回應結果:', aiResult); // Debug 用

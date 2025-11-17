@@ -181,7 +181,7 @@ def get_operation_list() -> Dict:
             }
         },
         "create_social_post": {
-            "description": "建立社群貼文（不含圖片）。圖片需透過前端另外上傳。寵物標註需要圖片，請告知用戶在上傳圖片後使用標註功能。",
+            "description": "建立社群貼文（不含圖片）。相片需透過前端另外上傳，只支援相片不支援影片。",
             "required_params": ["user_id", "content"],
             "optional_params": ["location", "hashtags"],
             "param_details": {
@@ -192,8 +192,14 @@ def get_operation_list() -> Dict:
             },
             "notes": [
                 "此操作只建立貼文結構，不包含圖片",
-                "如需標註寵物，必須先上傳圖片後使用圖片標註功能",
+                "相片上傳由前端處理，只支援相片不支援影片",
                 "hashtags 可從參數提供或從 content 中的 #標籤 自動解析"
+            ],
+            "limitations": [
+                "不支援標註寵物功能（無論是否有圖片）",
+                "不支援設定可見範圍（公開/私人）",
+                "不支援設定留言權限或互動設定",
+                "不要詢問用戶關於寵物標註、可見範圍、留言設定等功能"
             ],
             "response_handling": {
                 "on_success": "Tool returns {success: true, post_id: X, message: '貼文建立成功！', note: '...'}",
@@ -202,8 +208,8 @@ def get_operation_list() -> Dict:
                 "important": "Do NOT mention post_id or technical details in the reply field. The post_id should ONLY be in operations array for frontend to use."
             },
             "user_responses": {
-                "missing_content": "好的！請告訴我貼文的內容是什麼呢？您也可以提供地點或標籤。",
-                "want_tag_pets": "標註寵物需要先上傳圖片喔！您可以先建立貼文，之後再使用圖片上傳功能來標註寵物。請問貼文內容是什麼呢？"
+                "missing_content": "好的！請告訴我貼文的內容是什麼呢？您也可以選擇性地提供地點或標籤（hashtags）。",
+                "ask_guidance": "詢問用戶時只需要問：1）貼文內容、2）是否有相片要上傳、3）地點（可選）、4）標籤（可選）。不要詢問其他功能。"
             }
         }
     }

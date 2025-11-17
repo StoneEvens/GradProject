@@ -77,11 +77,19 @@ def _generate_conversation_title(user_message: str, tutorial: str = None, operat
         return '新對話'
 
 
-def _run_agent_plug_and_play(message: str, user_id: str, username: str, session_id: str | None):
+def _run_agent_plug_and_play(message: str, user_id: str, username: str, session_id: str | None, context: dict = None):
     """Wrapper to invoke PETer_Agent.run_workflow and normalize response structure.
     Returns dict with keys similar to legacy format.
     """
-    workflow_input = WorkflowInput(input_as_text=message)
+    # Append context information to the message if provided
+    context_str = ""
+    if context:
+        if context.get('hasImages'):
+            image_count = context.get('imageCount', 0)
+            context_str = f" [用戶已準備 {image_count} 張相片待上傳]"
+
+    message_with_context = message + context_str
+    workflow_input = WorkflowInput(input_as_text=message_with_context)
     result = async_to_sync(run_workflow)(
         workflow_input,
         user_id=int(user_id) if str(user_id).isdigit() else user_id,
@@ -405,7 +413,7 @@ def main_chat(request):
         session_id_for_agent = openai_session_id if (isinstance(openai_session_id, str) and openai_session_id.startswith('conv_')) else None
         print(f"[main_chat] → Passing session_id_for_agent to PETer: {session_id_for_agent}")
         logger.info(f"→ Passing session_id_for_agent to PETer: {session_id_for_agent}")
-        result = _run_agent_plug_and_play(user_message, str(request.user.id), request.user.username, session_id_for_agent)
+        result = _run_agent_plug_and_play(user_message, str(request.user.id), request.user.username, session_id_for_agent, context)
 
         if 'error' in result:
             err_payload = dict(result)
