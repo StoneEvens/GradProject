@@ -1007,6 +1007,7 @@ Keep responses natural and conversational for voice interaction. Use the user's 
                 },
                 json={
                     'session': {
+                        'type': 'realtime',
                         'model': model,
                         'voice': voice,
                         'instructions': instructions,
