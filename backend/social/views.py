@@ -1,4 +1,5 @@
 from rest_framework import generics, status as drf_status
+from rest_framework.parsers import MultiPartParser, FormParser
 from .models import PostHashtag, PostFrame, SoLContent, PostPets, ImageAnnotation
 from .serializers import *
 from rest_framework.permissions import IsAuthenticated
