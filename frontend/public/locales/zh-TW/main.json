@@ -93,6 +93,10 @@
       "executing": "正在執行{{operationDesc}}...請稍候",
       "buttons": {
         "navigate": "前往頁面",
+        "navigate_social": "前往貼文頁面",
+        "navigate_pet_profile": "前往寵物檔案",
+        "navigate_health": "前往健康記錄",
+        "navigate_schedule": "前往餵食排程",
         "findAbnormalPosts": "出發!",
         "findHealthRecords": "查看記錄",
         "setFeedingReminder": "設置提醒",

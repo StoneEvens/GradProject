@@ -215,13 +215,13 @@ def get_operation_list() -> Dict:
             ],
             "response_handling": {
                 "on_success": "Tool returns {success: true, post_id: X, message: '貼文建立成功！', note: '...'}",
-                "tell_user": "貼文建立成功！ + include the note field if present",
+                "tell_user": "回覆格式：「貼文建立成功！\n\n內容：[content]\n地點：[location]\n標籤：[hashtags]\n\n您可以點擊下方按鈕前往貼文頁面，並標註寵物。」圖片已由前端自動上傳，不要提及圖片上傳。",
                 "operations_array": "MUST add operation: {operation_name: 'post_created', operation_data: json.dumps({post_id: X, status: 'pending_images'})}",
-                "important": "Do NOT mention post_id or technical details in the reply field. The post_id should ONLY be in operations array for frontend to use."
+                "important": "Do NOT mention post_id or technical details in the reply field. The post_id should ONLY be in operations array for frontend to use. Do NOT mention uploading photos - photos are handled by frontend automatically."
             },
             "user_responses": {
                 "missing_content": "好的！請告訴我貼文的內容是什麼呢？您也可以選擇性地提供地點或標籤（hashtags）。",
-                "ask_guidance": "⚠️ 重要：只詢問以下資訊：\n1）貼文內容（必需）\n2）地點（可選）\n3）標籤/hashtags（可選）\n\n絕對不要詢問：可見範圍、隱私設定、留言權限、寵物標註等。系統不支援這些功能。"
+                "ask_guidance": "重要：只詢問以下資訊：\n1）貼文內容（必需）\n2）地點（可選）\n3）標籤/hashtags（可選）\n\n絕對不要詢問：可見範圍、隱私設定、留言權限、寵物標註等。系統不支援這些功能。"
             }
         }
     }
