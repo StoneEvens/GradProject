@@ -117,24 +117,23 @@
 }
 
 .voiceCallButton {
-  background: none;
+  background: white;
   border: none;
-  color: white;
-  font-size: 20px;
-  cursor: pointer;
-  padding: 0;
-  width: 30px;
-  height: 30px;
   border-radius: 50%;
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
   transition: all 0.2s;
+  flex-shrink: 0;
   position: relative;
 }
 
 .voiceCallButton:hover {
-  background-color: rgba(255, 255, 255, 0.2);
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.4);
 }
 
 .voiceCallButton.active {
@@ -144,6 +143,7 @@
 
 .voiceCallButton.active:hover {
   background-color: #ff3333;
+  transform: scale(1.05);
 }
 
 .voiceCallButton img {
@@ -715,6 +715,26 @@ body:has(.chatOverlay) {
     width: 14px;
     height: 14px;
   }
+
+  .photoBtn {
+    width: 28px;
+    height: 28px;
+  }
+
+  .photoBtn img {
+    width: 14px;
+    height: 14px;
+  }
+
+  .voiceCallButton {
+    width: 28px;
+    height: 28px;
+  }
+
+  .voiceCallButton img {
+    width: 14px;
+    height: 14px;
+  }
 }
 
 /* 針對更小的手機優化 */
@@ -806,6 +826,26 @@ body:has(.chatOverlay) {
   }
 
   .voiceBtn img {
+    width: 13px;
+    height: 13px;
+  }
+
+  .photoBtn {
+    width: 26px;
+    height: 26px;
+  }
+
+  .photoBtn img {
+    width: 13px;
+    height: 13px;
+  }
+
+  .voiceCallButton {
+    width: 26px;
+    height: 26px;
+  }
+
+  .voiceCallButton img {
     width: 13px;
     height: 13px;
   }
