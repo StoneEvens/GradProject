@@ -1029,18 +1029,42 @@ Keep responses natural and conversational for voice interaction. Use the user's 
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
         session_response_data = openai_response.json()
-        logger.info(f"Created GA realtime session for user {request.user.id}")
-        logger.info(f"Session ID: {session_response_data.get('id')}")
-        logger.info(f"Tools configured: {len(tools)}")
-        
+
+        # Debug: Log the actual response structure
+        logger.info(f"OpenAI Response Data: {session_response_data}")
+        logger.info(f"Response keys: {session_response_data.keys()}")
+
         # Extract session details from GA endpoint response
+        # The response structure may vary, so we need to handle different formats
+        session_id = (session_response_data.get('id') or
+                     session_response_data.get('session_id') or
+                     session_response_data.get('session', {}).get('id'))
+
+        if not session_id:
+            logger.error(f"No session ID found in response: {session_response_data}")
+            return Response({
+                'error': 'Invalid response from OpenAI: missing session ID'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        logger.info(f"Created GA realtime session for user {request.user.id}")
+        logger.info(f"Session ID: {session_id}")
+        logger.info(f"Tools configured: {len(tools)}")
+
+        # Extract client_secret (handle different response structures)
+        client_secret_data = session_response_data.get('client_secret', {})
+        if not client_secret_data:
+            logger.error(f"No client_secret in response: {session_response_data}")
+            return Response({
+                'error': 'Invalid response from OpenAI: missing client_secret'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
         session_data = {
-            'session_id': session_response_data['id'],
+            'session_id': session_id,
             'client_secret': {
-                'value': session_response_data['client_secret']['value'],
-                'expires_at': session_response_data['client_secret']['expires_at']
+                'value': client_secret_data.get('value'),
+                'expires_at': client_secret_data.get('expires_at')
             },
-            'model': session_response_data['model'],
+            'model': session_response_data.get('model', model),
             'voice': voice,
             'instructions': instructions,
             'modalities': session_response_data.get('modalities', ['text', 'audio']),
