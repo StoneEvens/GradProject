@@ -1,20 +1,20 @@
 /**
- * Realtime Voice Service
+ * Realtime Voice Service using OpenAI SDK
  * 
- * Browser-native implementation of OpenAI Realtime API client.
+ * Uses the official openai package (v6.7.0+) realtime WebSocket support:
+ * - Ephemeral token authentication via client_secret
+ * - MCP tool integration (tools configured on backend)
+ * - Audio streaming and playback
+ * - Session management
  * 
  * Architecture:
- * 1. Backend creates ephemeral session using OpenAI Python SDK
- * 2. Frontend receives session credentials (ephemeral token)
- * 3. Frontend connects directly to OpenAI WebSocket with token
- * 4. Audio is streamed via Web Audio API
- * 
- * No additional npm packages needed - uses native browser APIs:
- * - WebSocket for connection
- * - MediaRecorder for audio input
- * - Web Audio API for audio output
+ * 1. Backend creates session via /v1/realtime/client_secrets with tools
+ * 2. Frontend connects using OpenAIRealtimeWebSocket with client_secret
+ * 3. MCP tools execute server-side automatically
+ * 4. Audio handled via Web Audio API
  */
 
+import { OpenAIRealtimeWebSocket } from 'openai/realtime/websocket';
 import axiosInstance from '../utils/axios';
 
 export interface RealtimeSessionConfig {
@@ -27,6 +27,7 @@ export interface RealtimeSessionConfig {
   voice: string;
   instructions: string;
   modalities: string[];
+  tools: any[];
   user_id: number;
   conversation_id?: number;
   conversation_title?: string;
@@ -46,16 +47,18 @@ export interface RealtimeEvent {
 type EventHandler = (event: RealtimeEvent) => void;
 
 class RealtimeVoiceService {
-  private ws: WebSocket | null = null;
+  private transport: OpenAIRealtimeWebSocket | null = null;
   private sessionConfig: RealtimeSessionConfig | null = null;
   private audioContext: AudioContext | null = null;
   private mediaStream: MediaStream | null = null;
   private mediaRecorder: MediaRecorder | null = null;
   private eventHandlers: Map<string, Set<EventHandler>> = new Map();
+  private audioQueue: Float32Array[] = [];
+  private isPlayingAudio: boolean = false;
 
   /**
    * Create a new realtime session through the backend
-   * Uses the shared axios instance for proper auth handling
+   * Backend configures MCP tools and returns ephemeral token
    */
   async createSession(options: CreateSessionOptions = {}): Promise<RealtimeSessionConfig> {
     try {
@@ -68,165 +71,343 @@ class RealtimeVoiceService {
       if (!this.sessionConfig) {
         throw new Error('Invalid session config received');
       }
-      
-      console.log('[RealtimeVoice] ✅ Session created successfully');
-      console.log('[RealtimeVoice] Session ID:', this.sessionConfig.session_id);
-      console.log('[RealtimeVoice] Model:', this.sessionConfig.model);
-      console.log('[RealtimeVoice] Token expires at:', new Date(this.sessionConfig.client_secret.expires_at * 1000).toLocaleString());
-      
+
+      console.log('[RealtimeVoice] ✅ Session created:', {
+        session_id: this.sessionConfig.session_id,
+        model: this.sessionConfig.model,
+        voice: this.sessionConfig.voice,
+        modalities: this.sessionConfig.modalities,
+        tools_count: this.sessionConfig.tools?.length || 0,
+        conversation_id: this.sessionConfig.conversation_id
+      });
+
       return this.sessionConfig;
-    } catch (error: any) {
-      console.error('[RealtimeVoice] ❌ Failed to create realtime session:', error);
-      console.error('[RealtimeVoice] Error details:', error.response?.data);
-      throw new Error(error.response?.data?.error || error.message || 'Failed to create session');
+    } catch (error) {
+      console.error('[RealtimeVoice] ❌ Failed to create session:', error);
+      throw error;
     }
   }
 
   /**
-   * Connect to OpenAI Realtime API WebSocket
+   * Connect to OpenAI Realtime API
+   * Uses the OpenAI SDK's WebSocket transport with ephemeral client_secret
    */
   async connect(): Promise<void> {
     if (!this.sessionConfig) {
       throw new Error('No session config. Call createSession() first.');
     }
 
-    const wsUrl = `wss://api.openai.com/v1/realtime?model=${this.sessionConfig.model}`;
+    const token = this.sessionConfig.client_secret.value;
+    const model = this.sessionConfig.model;
     
-    console.log('[RealtimeVoice] Connecting to OpenAI WebSocket...');
-    console.log('[RealtimeVoice] Model:', this.sessionConfig.model);
+    console.log('[RealtimeVoice] Connecting to OpenAI Realtime API...');
+    console.log('[RealtimeVoice] Model:', model);
     console.log('[RealtimeVoice] Session ID:', this.sessionConfig.session_id);
-    
-    return new Promise((resolve, reject) => {
-      const connectionTimeout = setTimeout(() => {
-        if (this.ws && this.ws.readyState !== WebSocket.OPEN) {
-          console.error('[RealtimeVoice] WebSocket connection timeout');
-          this.ws.close();
-          reject(new Error('WebSocket connection timeout after 10 seconds'));
-        }
-      }, 10000); // 10 second timeout
+    console.log('[RealtimeVoice] Token type:', token.startsWith('ek_') ? 'ephemeral' : 'unknown');
+    console.log('[RealtimeVoice] MCP Tools:', this.sessionConfig.tools?.length || 0);
 
-      this.ws = new WebSocket(wsUrl, [
-        'realtime',
-        `openai-insecure-api-key.${this.sessionConfig!.client_secret.value}`
-      ]);
-
-      this.ws.onopen = () => {
-        clearTimeout(connectionTimeout);
-        console.log('[RealtimeVoice] ✅ WebSocket connected to OpenAI Realtime API');
-        console.log('[RealtimeVoice] WebSocket readyState:', this.ws?.readyState);
-        this.setupSession();
-        resolve();
-      };
-
-      this.ws.onerror = (error) => {
-        clearTimeout(connectionTimeout);
-        console.error('[RealtimeVoice] ❌ WebSocket error:', error);
-        console.error('[RealtimeVoice] WebSocket readyState:', this.ws?.readyState);
-        reject(new Error('WebSocket connection failed. Check console for details.'));
-      };
-
-      this.ws.onclose = (event) => {
-        clearTimeout(connectionTimeout);
-        console.log('[RealtimeVoice] WebSocket connection closed');
-        console.log('[RealtimeVoice] Close code:', event.code, 'Reason:', event.reason);
-        this.emit({ type: 'connection.closed', code: event.code, reason: event.reason });
-      };
-
-      this.ws.onmessage = (event) => {
-        try {
-          const message = JSON.parse(event.data);
-          this.handleServerEvent(message);
-        } catch (error) {
-          console.error('[RealtimeVoice] Failed to parse server message:', error);
-        }
-      };
-    });
-  }
-
-  /**
-   * Setup session configuration
-   */
-  private setupSession(): void {
-    console.log('[RealtimeVoice] Setting up session configuration...');
-    this.sendEvent({
-      type: 'session.update',
-      session: {
-        voice: this.sessionConfig!.voice,
-        instructions: this.sessionConfig!.instructions,
-        modalities: this.sessionConfig!.modalities,
-        temperature: 0.8,
-      }
-    });
-  }
-
-  /**
-   * Handle events from the server
-   */
-  private handleServerEvent(event: RealtimeEvent): void {
-    console.log('Server event:', event.type);
-
-    // Handle audio response
-    if (event.type === 'response.audio.delta' && event.delta) {
-      this.playAudioDelta(event.delta);
-    }
-
-    // Emit to registered handlers
-    this.emit(event);
-  }
-
-  /**
-   * Start recording audio from microphone
-   */
-  async startRecording(): Promise<void> {
     try {
-      // Initialize audio context
-      if (!this.audioContext) {
-        this.audioContext = new AudioContext({ sampleRate: 24000 });
-      }
-
-      // Get microphone access
-      this.mediaStream = await navigator.mediaDevices.getUserMedia({
-        audio: {
-          channelCount: 1,
-          sampleRate: 24000,
-          echoCancellation: true,
-          noiseSuppression: true,
+      // Create WebSocket using the ephemeral client_secret
+      // The constructor connects immediately
+      this.transport = new OpenAIRealtimeWebSocket(
+        {
+          model: model,
+          dangerouslyAllowBrowser: true,  // Required for browser usage
+        },
+        {
+          apiKey: token,  // Use the ephemeral client_secret from /v1/realtime/client_secrets
+          baseURL: 'https://api.openai.com/v1',  // GA endpoint base
         }
-      });
+      );
 
-      // Create media recorder
-      this.mediaRecorder = new MediaRecorder(this.mediaStream, {
-        mimeType: 'audio/webm',
-      });
-
-      this.mediaRecorder.ondataavailable = async (event) => {
-        if (event.data.size > 0) {
-          // Convert to base64 and send to server
-          const reader = new FileReader();
-          reader.onloadend = () => {
-            const base64 = (reader.result as string).split(',')[1];
-            this.sendEvent({
-              type: 'input_audio_buffer.append',
-              audio: base64,
+      // Set up event listeners after creating the transport
+      this.setupTransportEventListeners();
+      
+      // Wait for WebSocket to be fully open before proceeding
+      await new Promise<void>((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          reject(new Error('WebSocket connection timeout'));
+        }, 10000); // 10 second timeout
+        
+        if (this.transport!.socket) {
+          const socket = this.transport!.socket;
+          
+          socket.addEventListener('open', () => {
+            clearTimeout(timeout);
+            console.log('[RealtimeVoice] WebSocket opened successfully');
+            resolve();
+          });
+          
+          socket.addEventListener('error', (event) => {
+            clearTimeout(timeout);
+            console.error('[RealtimeVoice] WebSocket error event:', event);
+            reject(new Error('WebSocket connection failed'));
+          });
+          
+          socket.addEventListener('close', (event) => {
+            console.log('[RealtimeVoice] WebSocket closed:', {
+              code: event.code,
+              reason: event.reason,
+              wasClean: event.wasClean
             });
-          };
-          reader.readAsDataURL(event.data);
+            if (!event.wasClean) {
+              clearTimeout(timeout);
+              reject(new Error(`WebSocket closed abnormally: ${event.code} ${event.reason}`));
+            }
+          });
+          
+          // Check if already open
+          if (socket.readyState === 1) { // OPEN
+            clearTimeout(timeout);
+            console.log('[RealtimeVoice] WebSocket already open');
+            resolve();
+          }
+        } else {
+          clearTimeout(timeout);
+          reject(new Error('No WebSocket created'));
         }
-      };
+      });
 
-      // Start recording in small chunks
-      this.mediaRecorder.start(100); // 100ms chunks
-      console.log('Recording started');
+      console.log('[RealtimeVoice] ✅ Connected successfully');
+      console.log('[RealtimeVoice] WebSocket URL:', this.transport.url?.toString());
+      
+      // Initialize audio context for playback
+      this.audioContext = new AudioContext({ sampleRate: 24000 });
+      
+      this.emit({ type: 'connection.opened' });
+      
     } catch (error) {
-      console.error('Failed to start recording:', error);
+      console.error('[RealtimeVoice] ❌ Connection failed:', error);
+      this.emit({ type: 'error', error });
       throw error;
     }
   }
 
   /**
-   * Stop recording audio
+   * Set up event listeners for the transport layer
+   * These forward events from the OpenAI SDK to our event handlers
    */
-  stopRecording(): void {
+  private setupTransportEventListeners(): void {
+    if (!this.transport) return;
+
+    // Listen to all server events (uses 'event' listener for all events)
+    this.transport.on('event', (event: any) => {
+      console.log('[RealtimeVoice] Server event:', event.type);
+      
+      // Forward to our event handlers
+      this.emit(event);
+      
+      // Handle specific events
+      switch (event.type) {
+        case 'session.created':
+          console.log('[RealtimeVoice] Session created on server');
+          break;
+          
+        case 'session.updated':
+          console.log('[RealtimeVoice] Session updated');
+          break;
+          
+        case 'conversation.created':
+          console.log('[RealtimeVoice] Conversation created');
+          break;
+          
+        case 'conversation.item.created':
+          console.log('[RealtimeVoice] Item created:', event.item?.type);
+          break;
+          
+        case 'conversation.item.completed':
+          console.log('[RealtimeVoice] Item completed:', event.item?.id);
+          break;
+          
+        case 'response.created':
+          console.log('[RealtimeVoice] Response created');
+          break;
+          
+        case 'response.done':
+          console.log('[RealtimeVoice] Response done');
+          break;
+          
+        case 'response.audio.delta':
+          // Handle audio delta - play the audio
+          if (event.delta) {
+            this.handleAudioDelta(event.delta);
+          }
+          break;
+          
+        case 'response.audio_transcript.delta':
+          console.log('[RealtimeVoice] Audio transcript delta:', event.delta);
+          break;
+          
+        case 'response.function_call_arguments.delta':
+          console.log('[RealtimeVoice] Function call args delta:', event.delta);
+          break;
+          
+        case 'input_audio_buffer.speech_started':
+          console.log('[RealtimeVoice] User started speaking');
+          break;
+          
+        case 'input_audio_buffer.speech_stopped':
+          console.log('[RealtimeVoice] User stopped speaking');
+          break;
+          
+        case 'error':
+          console.error('[RealtimeVoice] Server error:', event.error);
+          break;
+      }
+    });
+    
+    // Listen for errors
+    this.transport.on('error', (error: any) => {
+      console.error('[RealtimeVoice] Error:', error);
+      this.emit({ type: 'error', error });
+    });
+  }
+
+  /**
+   * Convert ArrayBuffer to base64 string
+   */
+  private arrayBufferToBase64(buffer: ArrayBuffer): string {
+    const bytes = new Uint8Array(buffer);
+    let binary = '';
+    for (let i = 0; i < bytes.byteLength; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    return btoa(binary);
+  }
+
+  /**
+   * Handle incoming audio delta from the server
+   * Convert base64 audio to PCM16 and play it
+   */
+  private handleAudioDelta(deltaBase64: string): void {
+    if (!this.audioContext) return;
+
+    try {
+      // Decode base64 to binary
+      const binaryString = atob(deltaBase64);
+      const len = binaryString.length;
+      const bytes = new Uint8Array(len);
+      for (let i = 0; i < len; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+
+      // Convert PCM16 to Float32
+      const pcm16 = new Int16Array(bytes.buffer);
+      const float32 = new Float32Array(pcm16.length);
+      for (let i = 0; i < pcm16.length; i++) {
+        float32[i] = pcm16[i] / 32768.0;
+      }
+
+      // Add to playback queue
+      this.audioQueue.push(float32);
+      
+      // Start playback if not already playing
+      if (!this.isPlayingAudio) {
+        this.playNextAudioChunk();
+      }
+      
+    } catch (error) {
+      console.error('[RealtimeVoice] Error handling audio delta:', error);
+    }
+  }
+
+  /**
+   * Play audio chunks from the queue
+   */
+  private playNextAudioChunk(): void {
+    if (!this.audioContext || this.audioQueue.length === 0) {
+      this.isPlayingAudio = false;
+      return;
+    }
+
+    this.isPlayingAudio = true;
+    const audioData = this.audioQueue.shift()!;
+
+    // Create audio buffer
+    const audioBuffer = this.audioContext.createBuffer(
+      1, // mono
+      audioData.length,
+      24000 // 24kHz sample rate
+    );
+    
+    // Copy audio data
+    const channelData = audioBuffer.getChannelData(0);
+    channelData.set(audioData);
+
+    // Create source and play
+    const source = this.audioContext.createBufferSource();
+    source.buffer = audioBuffer;
+    source.connect(this.audioContext.destination);
+    
+    source.onended = () => {
+      this.playNextAudioChunk();
+    };
+    
+    source.start();
+  }
+
+  /**
+   * Start capturing audio from microphone and sending to server
+   * Alias for compatibility
+   */
+  async startAudioCapture(): Promise<void> {
+    try {
+      console.log('[RealtimeVoice] Starting audio capture...');
+      
+      // Get microphone access
+      this.mediaStream = await navigator.mediaDevices.getUserMedia({ 
+        audio: {
+          sampleRate: 24000,
+          channelCount: 1,
+          echoCancellation: true,
+          noiseSuppression: true
+        } 
+      });
+
+      // Create MediaRecorder for PCM16 audio
+      this.mediaRecorder = new MediaRecorder(this.mediaStream, {
+        mimeType: 'audio/webm;codecs=opus',
+        audioBitsPerSecond: 128000
+      });
+
+      this.mediaRecorder.ondataavailable = async (event) => {
+        if (event.data.size > 0 && this.transport) {
+          // Convert audio to base64 PCM16 format required by Realtime API
+          const arrayBuffer = await event.data.arrayBuffer();
+          const base64Audio = this.arrayBufferToBase64(arrayBuffer);
+          
+          // Send input_audio_buffer.append event
+          this.transport.send({
+            type: 'input_audio_buffer.append',
+            audio: base64Audio
+          });
+        }
+      };
+
+      // Capture audio in chunks
+      this.mediaRecorder.start(100); // 100ms chunks
+      
+      console.log('[RealtimeVoice] ✅ Audio capture started');
+      
+    } catch (error) {
+      console.error('[RealtimeVoice] ❌ Failed to start audio capture:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Alias for startAudioCapture for compatibility with ChatWindow
+   */
+  async startRecording(): Promise<void> {
+    return this.startAudioCapture();
+  }
+
+  /**
+   * Stop capturing audio from microphone
+   */
+  stopAudioCapture(): void {
+    console.log('[RealtimeVoice] Stopping audio capture...');
+    
     if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
       this.mediaRecorder.stop();
     }
@@ -235,23 +416,29 @@ class RealtimeVoiceService {
       this.mediaStream.getTracks().forEach(track => track.stop());
       this.mediaStream = null;
     }
-
-    // Commit the audio buffer
-    this.sendEvent({
-      type: 'input_audio_buffer.commit'
-    });
-
-    // Request response generation
-    this.sendEvent({
-      type: 'response.create'
-    });
+    
+    this.mediaRecorder = null;
+    console.log('[RealtimeVoice] ✅ Audio capture stopped');
   }
 
   /**
-   * Send text message
+   * Alias for stopAudioCapture for compatibility with ChatWindow
    */
-  async sendTextMessage(text: string): Promise<void> {
-    this.sendEvent({
+  stopRecording(): void {
+    return this.stopAudioCapture();
+  }
+
+  /**
+   * Send a text message to the conversation
+   */
+  sendText(text: string): void {
+    if (!this.transport) {
+      throw new Error('Not connected');
+    }
+
+    console.log('[RealtimeVoice] Sending text:', text);
+    
+    this.transport.send({
       type: 'conversation.item.create',
       item: {
         type: 'message',
@@ -263,61 +450,10 @@ class RealtimeVoiceService {
       }
     });
 
-    // Request response
-    this.sendEvent({
+    // Trigger response
+    this.transport.send({
       type: 'response.create'
     });
-  }
-
-  /**
-   * Play audio delta from server
-   */
-  private async playAudioDelta(base64Audio: string): Promise<void> {
-    if (!this.audioContext) {
-      this.audioContext = new AudioContext({ sampleRate: 24000 });
-    }
-
-    try {
-      // Decode base64 to ArrayBuffer
-      const binaryString = atob(base64Audio);
-      const bytes = new Uint8Array(binaryString.length);
-      for (let i = 0; i < binaryString.length; i++) {
-        bytes[i] = binaryString.charCodeAt(i);
-      }
-
-      // Decode audio data
-      const audioBuffer = await this.audioContext.decodeAudioData(bytes.buffer);
-      
-      // Create and play source
-      const source = this.audioContext.createBufferSource();
-      source.buffer = audioBuffer;
-      source.connect(this.audioContext.destination);
-      source.start();
-    } catch (error) {
-      console.error('Failed to play audio:', error);
-    }
-  }
-
-  /**
-   * Send an event to the server
-   */
-  private sendEvent(event: RealtimeEvent): void {
-    if (!this.ws) {
-      console.error('[RealtimeVoice] ❌ Cannot send event: WebSocket not initialized');
-      console.error('[RealtimeVoice] Event type:', event.type);
-      return;
-    }
-
-    if (this.ws.readyState !== WebSocket.OPEN) {
-      console.error('[RealtimeVoice] ❌ Cannot send event: WebSocket not connected');
-      console.error('[RealtimeVoice] WebSocket readyState:', this.ws.readyState);
-      console.error('[RealtimeVoice] ReadyState meanings: 0=CONNECTING, 1=OPEN, 2=CLOSING, 3=CLOSED');
-      console.error('[RealtimeVoice] Event type:', event.type);
-      return;
-    }
-
-    console.log('[RealtimeVoice] 📤 Sending event:', event.type);
-    this.ws.send(JSON.stringify(event));
   }
 
   /**
@@ -344,12 +480,13 @@ class RealtimeVoiceService {
    * Emit event to registered handlers
    */
   private emit(event: RealtimeEvent): void {
+    // Emit to specific event type handlers
     const handlers = this.eventHandlers.get(event.type);
     if (handlers) {
       handlers.forEach(handler => handler(event));
     }
 
-    // Also emit to wildcard listeners
+    // Emit to wildcard handlers
     const wildcardHandlers = this.eventHandlers.get('*');
     if (wildcardHandlers) {
       wildcardHandlers.forEach(handler => handler(event));
@@ -357,42 +494,55 @@ class RealtimeVoiceService {
   }
 
   /**
+   * Check if connected
+   */
+  isConnected(): boolean {
+    return this.transport !== null && this.transport.socket?.readyState === 1; // WebSocket.OPEN = 1
+  }
+
+  /**
+   * Get connection details
+   */
+  getConnectionStatus(): any {
+    const socketState = this.transport?.socket?.readyState;
+    let status = 'disconnected';
+    if (socketState === 0) status = 'connecting';
+    else if (socketState === 1) status = 'connected';
+    else if (socketState === 2) status = 'closing';
+    else if (socketState === 3) status = 'closed';
+    
+    return {
+      connected: this.isConnected(),
+      status,
+      session_id: this.sessionConfig?.session_id,
+      model: this.sessionConfig?.model
+    };
+  }
+
+  /**
    * Disconnect and cleanup
    */
   async disconnect(): Promise<void> {
-    // Stop recording if active
-    this.stopRecording();
+    console.log('[RealtimeVoice] Disconnecting...');
 
-    // Close WebSocket
-    if (this.ws) {
-      this.ws.close();
-      this.ws = null;
+    this.stopAudioCapture();
+
+    if (this.transport) {
+      await this.transport.close();
+      this.transport = null;
     }
 
-    // Close audio context
     if (this.audioContext) {
       await this.audioContext.close();
       this.audioContext = null;
     }
 
-    // Clear event handlers
-    this.eventHandlers.clear();
-
+    this.audioQueue = [];
+    this.isPlayingAudio = false;
     this.sessionConfig = null;
-  }
 
-  /**
-   * Check if connected
-   */
-  isConnected(): boolean {
-    return this.ws !== null && this.ws.readyState === WebSocket.OPEN;
-  }
-
-  /**
-   * Get current session config
-   */
-  getSessionConfig(): RealtimeSessionConfig | null {
-    return this.sessionConfig;
+    console.log('[RealtimeVoice] ✅ Disconnected');
+    this.emit({ type: 'connection.closed' });
   }
 }
 
