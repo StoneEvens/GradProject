@@ -173,12 +173,35 @@ class RealtimeVoiceService {
 
       console.log('[RealtimeVoice] ✅ Connected successfully');
       console.log('[RealtimeVoice] WebSocket URL:', this.transport.url?.toString());
-      
+
       // Initialize audio context for playback
       this.audioContext = new AudioContext({ sampleRate: 24000 });
-      
+
+      // Update session configuration (voice, modalities, etc.)
+      // These settings weren't included in the initial session creation
+      console.log('[RealtimeVoice] Updating session configuration...');
+      this.transport.send({
+        type: 'session.update',
+        session: {
+          modalities: ['text', 'audio'],
+          voice: this.sessionConfig.voice || 'alloy',
+          input_audio_format: 'pcm16',
+          output_audio_format: 'pcm16',
+          input_audio_transcription: {
+            model: 'whisper-1'
+          },
+          turn_detection: {
+            type: 'server_vad',
+            threshold: 0.5,
+            prefix_padding_ms: 300,
+            silence_duration_ms: 500
+          }
+        }
+      });
+      console.log('[RealtimeVoice] Session configuration updated');
+
       this.emit({ type: 'connection.opened' });
-      
+
     } catch (error) {
       console.error('[RealtimeVoice] ❌ Connection failed:', error);
       this.emit({ type: 'error', error });

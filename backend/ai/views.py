@@ -1010,12 +1010,7 @@ Keep responses natural and conversational for voice interaction. Use the user's 
                         'type': 'realtime',
                         'model': model,
                         'instructions': instructions,
-                        'modalities': ['text', 'audio'],
-                        'temperature': 0.8,
-                        'max_response_output_tokens': 4096,
-                        'tools': tools,
-                        'tool_choice': 'auto',
-                        'voice': voice
+                        'tools': tools
                     }
                 },
                 timeout=10
