@@ -233,6 +233,9 @@ def get_operation_list() -> Dict:
 
 def perform_operation(operation: str, data: Dict) -> Dict:
     try:
+        logger.info(f"[perform_operation] Starting operation: {operation}")
+        logger.debug(f"[perform_operation] Data: {data}")
+
         if operation == "add_pet":
             return _add_pet(data)
         elif operation == "update_pet":
@@ -254,11 +257,17 @@ def perform_operation(operation: str, data: Dict) -> Dict:
         elif operation == "list_plans":
             return _list_plans(data)
         elif operation == "create_social_post":
-            return _create_social_post(data)
+            result = _create_social_post(data)
+            logger.info(f"[perform_operation] create_social_post result: success={result.get('success')}")
+            return result
         else:
-            return {"error": f"Operation '{operation}' is not implemented"}
+            error_msg = f"Operation '{operation}' is not implemented"
+            logger.error(f"[perform_operation] {error_msg}")
+            return {"error": error_msg}
     except Exception as e:
-        return {"error": f"Failed to perform operation: {str(e)}"}
+        error_msg = f"Failed to perform operation: {str(e)}"
+        logger.error(f"[perform_operation] Exception: {error_msg}", exc_info=True)
+        return {"error": error_msg}
 
 
 def _add_pet(data: Dict) -> Dict:
@@ -1147,10 +1156,13 @@ def _create_social_post(data: Dict) -> Dict:
     Returns:
         Dict: 操作結果
     """
+    logger.info(f"[_create_social_post] Starting with data: user_id={data.get('user_id')}, content_length={len(data.get('content', ''))}")
+
     # 驗證必要欄位
     required_fields = ["user_id", "content"]
     missing_fields = [f for f in required_fields if f not in data]
     if missing_fields:
+        logger.warning(f"[_create_social_post] Missing fields: {missing_fields}")
         return {
             "error": "Missing required fields",
             "missing_fields": missing_fields,
@@ -1160,6 +1172,7 @@ def _create_social_post(data: Dict) -> Dict:
     # 驗證內容不為空
     content = data.get("content", "").strip()
     if not content:
+        logger.warning(f"[_create_social_post] Content is empty")
         return {
             "error": "Content is required and cannot be empty",
             "missing_fields": ["content"]
@@ -1168,7 +1181,9 @@ def _create_social_post(data: Dict) -> Dict:
     # 獲取用戶
     try:
         user = CustomUser.objects.get(id=data["user_id"])
+        logger.debug(f"[_create_social_post] Found user: {user.username}")
     except CustomUser.DoesNotExist:
+        logger.error(f"[_create_social_post] User {data['user_id']} not found")
         return {"error": f"User with id {data['user_id']} not found"}
 
     # 獲取可選參數
