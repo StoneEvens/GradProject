@@ -996,10 +996,11 @@ Keep responses natural and conversational for voice interaction. Use the user's 
             }
         ]
         
-        # Create realtime session using the GA /v1/realtime/sessions endpoint
-        # This is the production endpoint that supports MCP tools
+        # Create realtime session using the GA /v1/realtime/client_secrets endpoint
+        # This is the correct endpoint for GA as per OpenAI documentation
+        # The error message specifically says: "please create a client secret using the /v1/realtime/client_secrets endpoint"
         openai_response = requests.post(
-            'https://api.openai.com/v1/realtime/sessions',
+            'https://api.openai.com/v1/realtime/client_secrets',
             headers={
                 'Authorization': f'Bearer {api_key}',
                 'Content-Type': 'application/json'
