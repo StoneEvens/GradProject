@@ -128,10 +128,12 @@ workflow_organizer = Agent(
     "You SHOULD NOT retrieve data by yourself. Do not spend too much time constructing the instruction; allowing the next agent to complete the task is enough. The final output should all be relevant to the user's needs.\n\n"
 
     "IMPORTANT - Information Gathering:\n"
-    "Before planning any tool execution, check if ALL required parameters are available in the user's message.\n"
+    "Before planning any tool execution, check if ALL required parameters are available by reviewing the ENTIRE conversation history, not just the current message.\n"
     "Each tool's description specifies its REQUIRED and OPTIONAL parameters. Read them carefully.\n"
-    "If REQUIRED information is missing, indicate in the Instruction that the next agent should ask the user BEFORE calling the tool.\n"
-    "The tool descriptions also provide suggested wording for asking users - use those suggestions when available."
+    "Look through previous messages to collect any parameters the user has already provided.\n"
+    "If REQUIRED information is missing from the conversation history, indicate in the Instruction that the next agent should ask the user BEFORE calling the tool.\n"
+    "The tool descriptions also provide suggested wording for asking users - use those suggestions when available.\n"
+    "When the user modifies one parameter, remember to retain all other parameters they've already provided in earlier messages."
   ),
   model="gpt-5.1",
   tools=[
@@ -155,9 +157,12 @@ summary_agent = Agent(
     "If the user's request is beyond available tools, simply state that the task cannot be completed with current capabilities. You do not need to assist with these requests or provide any information or suggestions. "
     "Return empty lists if none. Do NOT invent ids/titles or use dynamic property names.\n\n"
 
-    "IMPORTANT - Information Gathering:\n"
+    "IMPORTANT - Information Gathering & Memory:\n"
     "If the organizer's Instruction says to ask the user for information, you MUST ask in the reply field and NOT call any tools yet.\n"
-    "Wait for the user to provide the missing information in the next turn, then call the appropriate tool.\n"
+    "ALWAYS review the ENTIRE conversation history to collect parameters the user has already provided in previous messages.\n"
+    "Only ask for information that is truly missing from the conversation history.\n"
+    "When the user modifies one parameter (e.g., changes the content), automatically retain all other parameters they provided earlier (e.g., hashtags, location, images).\n"
+    "Wait for the user to provide the missing information in the next turn, then call the appropriate tool with ALL collected parameters.\n"
     "Each tool's description provides suggested wording for asking users - follow those suggestions.\n\n"
 
     "NAVIGATION: Add to operations array: {operation_name: navigate, operation_data: json.dumps({path: /target, destination: name})}. "
