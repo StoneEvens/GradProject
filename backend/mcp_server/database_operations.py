@@ -181,7 +181,7 @@ def get_operation_list() -> Dict:
             }
         },
         "create_social_post": {
-            "description": "建立社群貼文（不含圖片）。相片需透過前端另外上傳，只支援相片不支援影片。",
+            "description": "建立社群貼文（不含圖片）。相片需透過前端另外上傳，只支援相片不支援影片。所有貼文預設為公開，系統不支援設定可見範圍。",
             "required_params": ["user_id", "content"],
             "optional_params": ["location", "hashtags"],
             "param_details": {
@@ -193,13 +193,14 @@ def get_operation_list() -> Dict:
             "notes": [
                 "此操作只建立貼文結構，不包含圖片",
                 "相片上傳由前端處理，只支援相片不支援影片",
-                "hashtags 可從參數提供或從 content 中的 #標籤 自動解析"
+                "hashtags 可從參數提供或從 content 中的 #標籤 自動解析",
+                "所有貼文都是公開的，沒有可見範圍設定功能"
             ],
             "limitations": [
-                "不支援標註寵物功能（無論是否有圖片）",
-                "不支援設定可見範圍（公開/私人）",
-                "不支援設定留言權限或互動設定",
-                "不要詢問用戶關於寵物標註、可見範圍、留言設定等功能"
+                "❌ 絕對不要詢問可見範圍（如「公開」、「好友」或「私密」）- 系統不支援此功能，所有貼文都是公開的",
+                "❌ 不支援標註寵物功能",
+                "❌ 不支援設定留言權限或互動設定",
+                "❌ 不支援影片上傳，只支援相片"
             ],
             "response_handling": {
                 "on_success": "Tool returns {success: true, post_id: X, message: '貼文建立成功！', note: '...'}",
@@ -209,7 +210,7 @@ def get_operation_list() -> Dict:
             },
             "user_responses": {
                 "missing_content": "好的！請告訴我貼文的內容是什麼呢？您也可以選擇性地提供地點或標籤（hashtags）。",
-                "ask_guidance": "詢問用戶時只需要問：1）貼文內容、2）是否有相片要上傳、3）地點（可選）、4）標籤（可選）。不要詢問其他功能。"
+                "ask_guidance": "⚠️ 重要：只詢問以下資訊：\n1）貼文內容（必需）\n2）地點（可選）\n3）標籤/hashtags（可選）\n\n絕對不要詢問：可見範圍、隱私設定、留言權限、寵物標註等。系統不支援這些功能。"
             }
         }
     }
