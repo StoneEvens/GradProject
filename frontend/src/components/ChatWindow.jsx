@@ -1136,18 +1136,18 @@ const ChatWindow = ({
         </div>
         <div className={styles.headerActions}>
           {/* 語音通話按鈕 */}
-          <button 
+          <button
             className={`${styles.voiceCallButton} ${isVoiceCallActive ? styles.active : ''} ${isVoiceConnecting ? styles.connecting : ''}`}
             onClick={startVoiceCall}
             disabled={isVoiceConnecting}
             title={isVoiceCallActive ? '結束通話' : '開始語音通話'}
           >
             {isVoiceConnecting ? (
-              <span className={styles.loadingIcon}>⏳</span>
+              <img src="/assets/icon/spinner-of-dots.png" alt="連接中" />
             ) : isVoiceCallActive ? (
-              <span className={styles.micIconActive}>🎤</span>
+              <img src="/assets/icon/telephone.png" alt="通話中" />
             ) : (
-              <span className={styles.micIcon}>🎤</span>
+              <img src="/assets/icon/telephone.png" alt="開始語音通話" />
             )}
           </button>
           <button className={styles.closeButton} onClick={handleChatClose}>
