@@ -181,7 +181,7 @@ def get_operation_list() -> Dict:
             }
         },
         "create_social_post": {
-            "description": "建立社群貼文（不含圖片）。相片需透過前端另外上傳，只支援相片不支援影片。所有貼文預設為公開，系統不支援設定可見範圍。",
+            "description": "建立社群貼文（不含圖片）。所有貼文自動設定為公開，無需詢問或設定可見範圍。相片由前端上傳，只支援相片。",
             "required_params": ["user_id", "content"],
             "optional_params": ["location", "hashtags"],
             "param_details": {
@@ -190,6 +190,17 @@ def get_operation_list() -> Dict:
                 "location": "地點 (字串，例如: '台北大安森林公園')",
                 "hashtags": "標籤 (字串，逗號分隔，例如: '寵物,日常,可愛' 或 '#寵物,#日常')"
             },
+            "FORBIDDEN_params": {
+                "visibility": "此參數不存在！所有貼文自動為公開，絕對不要詢問或嘗試設定此參數",
+                "privacy": "此參數不存在！絕對不要詢問隱私設定",
+                "is_public": "此參數不存在！貼文永遠是公開的",
+                "is_private": "此參數不存在！",
+                "scope": "此參數不存在！",
+                "pet_tags": "此參數不存在！不支援標註寵物",
+                "tagged_pets": "此參數不存在！",
+                "comment_enabled": "此參數不存在！",
+                "images": "此參數不存在！圖片由前端另外上傳，不要在此工具中處理"
+            },
             "notes": [
                 "此操作只建立貼文結構，不包含圖片",
                 "相片上傳由前端處理，只支援相片不支援影片",
@@ -197,10 +208,10 @@ def get_operation_list() -> Dict:
                 "所有貼文都是公開的，沒有可見範圍設定功能"
             ],
             "limitations": [
-                "❌ 絕對不要詢問可見範圍（如「公開」、「好友」或「私密」）- 系統不支援此功能，所有貼文都是公開的",
-                "❌ 不支援標註寵物功能",
-                "❌ 不支援設定留言權限或互動設定",
-                "❌ 不支援影片上傳，只支援相片"
+                "絕對不要詢問可見範圍（如「公開」、「好友」或「私密」）- 系統不支援此功能，所有貼文都是公開的",
+                "不支援標註寵物功能",
+                "不支援設定留言權限或互動設定",
+                "不支援影片上傳，只支援相片"
             ],
             "response_handling": {
                 "on_success": "Tool returns {success: true, post_id: X, message: '貼文建立成功！', note: '...'}",
