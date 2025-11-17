@@ -183,6 +183,7 @@ class RealtimeVoiceService {
       this.transport.send({
         type: 'session.update',
         session: {
+          type: 'realtime',  // Required parameter
           modalities: ['text', 'audio'],
           voice: this.sessionConfig.voice || 'alloy',
           input_audio_format: 'pcm16',
@@ -380,8 +381,14 @@ class RealtimeVoiceService {
     try {
       console.log('[RealtimeVoice] Starting audio capture...');
 
-      if (!this.audioContext) {
-        console.warn('[RealtimeVoice] AudioContext not initialized, creating new one');
+      // Check if we're still connected
+      if (!this.transport) {
+        throw new Error('Not connected to transport');
+      }
+
+      // Check AudioContext state
+      if (!this.audioContext || this.audioContext.state === 'closed') {
+        console.warn('[RealtimeVoice] AudioContext not initialized or closed, creating new one');
         this.audioContext = new AudioContext({ sampleRate: 24000 });
       }
 
@@ -604,8 +611,12 @@ class RealtimeVoiceService {
       this.transport = null;
     }
 
-    if (this.audioContext) {
-      await this.audioContext.close();
+    if (this.audioContext && this.audioContext.state !== 'closed') {
+      try {
+        await this.audioContext.close();
+      } catch (error) {
+        console.warn('[RealtimeVoice] Error closing AudioContext:', error);
+      }
       this.audioContext = null;
     }
 
