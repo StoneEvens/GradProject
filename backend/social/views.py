@@ -468,6 +468,108 @@ class CreatePostAPIView(APIView):
                 status=drf_status.HTTP_400_BAD_REQUEST,
             )
 
+#----------貼文圖片上傳 API----------
+class PostImageUploadAPIView(APIView):
+    """為已存在的貼文上傳圖片（MCP Agent 專用）"""
+    permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
+
+    @transaction.atomic
+    def post(self, request, post_id):
+        """
+        上傳圖片到已存在的貼文
+
+        POST 數據:
+        - images: 圖片檔案列表 (必填)
+        """
+        try:
+            user = request.user
+
+            # 1. 驗證貼文是否存在
+            try:
+                postFrame = PostFrame.objects.get(id=post_id)
+            except PostFrame.DoesNotExist:
+                return APIResponse(
+                    message="貼文不存在",
+                    status=drf_status.HTTP_404_NOT_FOUND,
+                )
+
+            # 2. 驗證權限：只有貼文作者可以上傳圖片
+            if postFrame.user != user:
+                return APIResponse(
+                    message="您沒有權限為此貼文上傳圖片",
+                    status=drf_status.HTTP_403_FORBIDDEN,
+                )
+
+            # 3. 獲取上傳的圖片檔案
+            uploaded_image_files = request.FILES.getlist('images')
+
+            if not uploaded_image_files:
+                return APIResponse(
+                    message="請至少上傳一張圖片",
+                    status=drf_status.HTTP_400_BAD_REQUEST,
+                )
+
+            # 4. 獲取現有圖片數量（用於計算 sort_order）
+            from media.models import Image
+            existing_images_count = Image.objects.filter(postFrame=postFrame).count()
+
+            # 5. 上傳圖片到 Firebase
+            from utils.firebase_service import firebase_storage_service
+            from utils.image_service import ImageService
+
+            success, message, uploaded_images = firebase_storage_service.upload_post_images_batch(
+                user_id=user.id,
+                post_id=postFrame.id,
+                image_files=uploaded_image_files,
+                start_sort_order=existing_images_count  # 從現有數量開始排序
+            )
+
+            if not uploaded_images:
+                return APIResponse(
+                    message=f"圖片上傳失敗: {message}",
+                    status=drf_status.HTTP_400_BAD_REQUEST,
+                )
+
+            # 6. 保存成功上傳的圖片到資料庫
+            saved_images = []
+            for image_data in uploaded_images:
+                try:
+                    image = ImageService.save_post_image(
+                        image_data=image_data,
+                        post_frame_id=postFrame.id,
+                        user_id=user.id
+                    )
+                    saved_images.append({
+                        'id': image.id,
+                        'firebase_url': image.firebase_url,
+                        'firebase_path': image.firebase_path,
+                        'sort_order': image.sort_order
+                    })
+                except Exception as save_error:
+                    logger.error(f"保存圖片記錄失敗: {str(save_error)}")
+
+            # 7. 記錄日誌
+            logger.info(f"用戶 {user.id} 為貼文 {post_id} 上傳了 {len(saved_images)} 張圖片")
+
+            # 8. 返回結果
+            return APIResponse(
+                data={
+                    "success": True,
+                    "uploaded_count": len(saved_images),
+                    "images": saved_images
+                },
+                message=f"成功上傳 {len(saved_images)} 張圖片",
+                status=drf_status.HTTP_201_CREATED,
+            )
+
+        except Exception as e:
+            logger.error(f"上傳貼文圖片時出錯: {str(e)}", exc_info=True)
+            return APIResponse(
+                message=f"上傳圖片失敗: {str(e)}",
+                status=drf_status.HTTP_400_BAD_REQUEST,
+            )
+
 #----------貼文詳情 API----------
 class PostDetailAPIView(generics.RetrieveAPIView):
     """獲取貼文詳情"""

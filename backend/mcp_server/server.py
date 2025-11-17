@@ -443,11 +443,11 @@ def create_mcp_server() -> FastMCP:
 
     @mcp.tool(
         name="perform_database_operation",
-        description="Perform a database operation such as managing pet information, abnormal posts, disease archives, or user plans/schedules. Use database_operation_list tool to see all available operations and their required parameters."
+        description="Perform a database operation such as managing pet information, abnormal posts, disease archives, user plans/schedules, or creating social posts. Use database_operation_list tool to see all available operations and their required parameters."
         "Note that database operations affects personal data; please verify that the user is doing the operation for themself. The easiest way to ensure this is to check the target of the prompt matches the user ID of the requester. The user id was added to the prompt automatically by the backend."
     )
     async def perform_database_operation(
-        operation: Literal["add_pet", "update_pet", "add_abnormal_post", "update_abnormal_post", "delete_abnormal_post", "create_disease_archive", "add_plan", "update_plan", "delete_plan", "list_plans"],
+        operation: Literal["add_pet", "update_pet", "add_abnormal_post", "update_abnormal_post", "delete_abnormal_post", "create_disease_archive", "add_plan", "update_plan", "delete_plan", "list_plans", "create_social_post"],
         data: Dict
     ) -> Dict:
         @sync_to_async
@@ -508,6 +508,5 @@ def create_mcp_server() -> FastMCP:
            - Then use pet_id to query health_report
         """
         return await EntityResolver.resolve(entity_type, user_id, conditions, limit)
-
 
     return mcp

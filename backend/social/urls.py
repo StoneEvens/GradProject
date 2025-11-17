@@ -1,8 +1,8 @@
 from django.urls import path
 from .views import (
-    UserPostsPreviewListAPIView, SearchAPIView, SearchSuggestionAPIView, 
-    CreatePostAPIView, PostDetailAPIView, DeletePostAPIView, UpdatePostAPIView, PostTagPetsAPIView, UserPostListAPIView, PostListAPIView,
-    CheckAnnotationPermissionAPIView, ImageAnnotationListCreateAPIView, 
+    UserPostsPreviewListAPIView, SearchAPIView, SearchSuggestionAPIView,
+    CreatePostAPIView, PostImageUploadAPIView, PostDetailAPIView, DeletePostAPIView, UpdatePostAPIView, PostTagPetsAPIView, UserPostListAPIView, PostListAPIView,
+    CheckAnnotationPermissionAPIView, ImageAnnotationListCreateAPIView,
     ImageAnnotationDetailAPIView, PetRelatedPostsAPIView
 )
 
@@ -20,6 +20,7 @@ urlpatterns = [
     
     # 貼文管理
     path('posts/create/', CreatePostAPIView.as_view(), name='create-post'),
+    path('posts/<int:post_id>/upload-images/', PostImageUploadAPIView.as_view(), name='post-upload-images'),
     path('posts/<int:pk>/', PostDetailAPIView.as_view(), name='post-detail'),
     path('posts/<int:pk>/update/', UpdatePostAPIView.as_view(), name='update-post'),
     path('posts/<int:pk>/delete/', DeletePostAPIView.as_view(), name='delete-post'),
