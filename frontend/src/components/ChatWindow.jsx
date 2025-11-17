@@ -245,18 +245,21 @@ const ChatWindow = ({
     setVoiceError(null);
 
     try {
-      console.log('Starting voice call...');
-      
+      console.log('[ChatWindow] Starting voice call...');
+
       // 創建 realtime session
+      console.log('[ChatWindow] Step 1: Creating session...');
       const sessionConfig = await realtimeVoiceService.createSession({
         conversationId: currentConversationId,
         voice: 'alloy', // 可以改為其他聲音: echo, fable, onyx, nova, shimmer
       });
 
-      console.log('Session created:', sessionConfig.session_id);
+      console.log('[ChatWindow] Step 2: Session created:', sessionConfig.session_id);
 
       // 連接到 OpenAI Realtime API
+      console.log('[ChatWindow] Step 3: Connecting to OpenAI...');
       await realtimeVoiceService.connect();
+      console.log('[ChatWindow] Step 4: Connected successfully');
 
       // 設置事件監聽器
       realtimeVoiceService.on('conversation.updated', (event) => {
@@ -302,15 +305,36 @@ const ChatWindow = ({
       });
 
       // 開始錄音
+      console.log('[ChatWindow] Step 5: Starting audio recording...');
       await realtimeVoiceService.startRecording();
+      console.log('[ChatWindow] Step 6: Recording started');
 
       setIsVoiceCallActive(true);
       setIsVoiceConnecting(false);
-      console.log('Voice call active');
+      console.log('[ChatWindow] ✅ Voice call active!');
 
     } catch (error) {
-      console.error('Failed to start voice call:', error);
-      setVoiceError('無法啟動語音通話');
+      console.error('[ChatWindow] ❌ Failed to start voice call:', error);
+      console.error('[ChatWindow] Error details:', {
+        message: error.message,
+        stack: error.stack,
+        error: error
+      });
+
+      // 顯示具體錯誤訊息
+      const errorMsg = error.message || '無法啟動語音通話';
+      setVoiceError(errorMsg);
+
+      // 添加錯誤訊息到聊天
+      const errorMessage = {
+        id: Date.now(),
+        text: `❌ 語音通話錯誤: ${errorMsg}`,
+        isUser: false,
+        timestamp: new Date(),
+        error: true
+      };
+      setMessages(prev => [...prev, errorMessage]);
+
       setIsVoiceConnecting(false);
       setIsVoiceCallActive(false);
     }
@@ -1132,7 +1156,10 @@ const ChatWindow = ({
           <div className={styles.headerText}>
             <h3>{t('chatWindow.title')}</h3>
             <span className={styles.status}>
-              {isVoiceCallActive ? '🎙️ 通話中...' : t('chatWindow.status')}
+              {isVoiceCallActive ? '🎙️ 通話中...' :
+               isVoiceConnecting ? '🔄 連線中...' :
+               voiceError ? `❌ ${voiceError}` :
+               t('chatWindow.status')}
             </span>
           </div>
         </div>
