@@ -177,29 +177,47 @@ class RealtimeVoiceService {
       // Initialize audio context for playback
       this.audioContext = new AudioContext({ sampleRate: 24000 });
 
-      // Update session configuration (voice, modalities, etc.)
-      // These settings weren't included in the initial session creation
+      // Update session configuration (voice, audio formats, VAD, etc.)
+      // 注意：GA 版本的 Realtime API 不接受 session 物件中的 modalities 與內部 type 欄位
       console.log('[RealtimeVoice] Updating session configuration...');
+      const awaitSessionUpdated = new Promise<void>((resolve, reject) => {
+        const onEvent = (event: any) => {
+          if (event.type === 'session.updated') {
+            this.transport?.off?.('event', onEvent as any);
+            resolve();
+          } else if (event.type === 'error') {
+            this.transport?.off?.('event', onEvent as any);
+            reject(event.error || new Error('Session update error'));
+          }
+        };
+        this.transport!.on('event', onEvent as any);
+        // 安全用 timeout，避免永遠等待
+        setTimeout(() => {
+          this.transport?.off?.('event', onEvent as any);
+          reject(new Error('Session update timeout'));
+        }, 10000);
+      });
+
       this.transport.send({
         type: 'session.update',
         session: {
-          type: 'realtime',  // Required parameter
-          modalities: ['text', 'audio'],
           voice: this.sessionConfig.voice || 'alloy',
           input_audio_format: 'pcm16',
           output_audio_format: 'pcm16',
           input_audio_transcription: {
-            model: 'whisper-1'
+            model: 'whisper-1',
           },
           turn_detection: {
             type: 'server_vad',
             threshold: 0.5,
             prefix_padding_ms: 300,
-            silence_duration_ms: 500
-          }
-        }
+            silence_duration_ms: 500,
+          },
+        },
       });
-      console.log('[RealtimeVoice] Session configuration updated');
+
+      await awaitSessionUpdated;
+      console.log('[RealtimeVoice] Session configuration updated (acknowledged)');
 
       this.emit({ type: 'connection.opened' });
 
@@ -382,7 +400,7 @@ class RealtimeVoiceService {
       console.log('[RealtimeVoice] Starting audio capture...');
 
       // Check if we're still connected
-      if (!this.transport) {
+      if (!this.transport || this.transport.socket?.readyState !== 1) {
         throw new Error('Not connected to transport');
       }
 
@@ -391,10 +409,12 @@ class RealtimeVoiceService {
         console.warn('[RealtimeVoice] AudioContext not initialized or closed, creating new one');
         this.audioContext = new AudioContext({ sampleRate: 24000 });
       }
+      // 鎖定當下使用的 AudioContext，避免斷線時被設為 null 造成 race
+      const localAudioContext = this.audioContext;
 
       // Resume AudioContext if suspended (browser security requirement)
-      if (this.audioContext.state === 'suspended') {
-        await this.audioContext.resume();
+      if (localAudioContext.state === 'suspended') {
+        await localAudioContext.resume();
         console.log('[RealtimeVoice] AudioContext resumed');
       }
 
@@ -409,12 +429,20 @@ class RealtimeVoiceService {
         }
       });
 
+      // 若在等待權限期間連線已中止，直接中止流程
+      if (!this.transport || this.transport.socket?.readyState !== 1) {
+        throw new Error('Disconnected before audio start');
+      }
+
       // Create audio source from microphone
-      const source = this.audioContext.createMediaStreamSource(this.mediaStream);
+      if (!localAudioContext || localAudioContext.state === 'closed') {
+        throw new Error('AudioContext closed before creating media source');
+      }
+      const source = localAudioContext.createMediaStreamSource(this.mediaStream);
 
       // Create ScriptProcessor for audio processing
       // Using 4096 buffer size for good balance between latency and performance
-      const processor = this.audioContext.createScriptProcessor(4096, 1, 1);
+      const processor = localAudioContext.createScriptProcessor(4096, 1, 1);
 
       processor.onaudioprocess = (audioProcessingEvent) => {
         if (!this.isCapturing || !this.transport) return;
@@ -446,7 +474,7 @@ class RealtimeVoiceService {
 
       // Connect nodes: microphone -> processor -> destination
       source.connect(processor);
-      processor.connect(this.audioContext.destination);
+      processor.connect(localAudioContext.destination);
 
       // Store reference for cleanup
       this.audioWorkletNode = processor as any; // Store for later disconnection
