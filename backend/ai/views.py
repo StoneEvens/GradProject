@@ -988,19 +988,25 @@ Keep responses natural and conversational for voice interaction. Use the user's 
             }
         ]
         
-        # Create realtime session with MCP tools
+        # Create realtime session using the beta endpoint
+        # The /v1/realtime/sessions endpoint creates sessions compatible with browser clients
+        # Note: Despite being called "beta", this is the correct endpoint for the JS SDK
         session_response = client.beta.realtime.sessions.create(
             model=model,
             voice=voice,
             instructions=instructions,
-            modalities=["text", "audio"],
+            modalities=['text', 'audio'],
             temperature=0.8,
             max_response_output_tokens=4096,
             tools=tools,
-            tool_choice="auto"
+            tool_choice='auto'
         )
         
-        # Extract session details
+        logger.info(f"Created realtime session via beta SDK for user {request.user.id}")
+        logger.info(f"Session ID: {session_response.id}")
+        logger.info(f"Session has {len(tools)} tools configured")
+        
+        # Extract session details from the SDK response
         session_data = {
             'session_id': session_response.id,
             'client_secret': {
@@ -1010,7 +1016,8 @@ Keep responses natural and conversational for voice interaction. Use the user's 
             'model': session_response.model,
             'voice': voice,
             'instructions': instructions,
-            'modalities': session_response.modalities,
+            'modalities': session_response.modalities if hasattr(session_response, 'modalities') else ['text', 'audio'],
+            'tools': tools,  # Include tools in response so frontend knows what's available
             'user_id': request.user.id,
         }
         
@@ -1019,7 +1026,7 @@ Keep responses natural and conversational for voice interaction. Use the user's 
             session_data['conversation_id'] = conversation.id
             session_data['conversation_title'] = conversation.title
         
-        logger.info(f"Created realtime session for user {request.user.id}: {session_response.id}")
+        logger.info(f"Created realtime session for user {request.user.id}: {session_data['session_id']}")
         
         return Response(session_data, status=status.HTTP_201_CREATED)
         
