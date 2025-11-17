@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import styles from '../styles/ChatWindow.module.css';
 import aiChatService from '../services/aiChatService';
+import { realtimeVoiceService } from '../services/realtimeVoiceService';
 import RecommendedUsersPreview from './RecommendedUsersPreview';
 import RecommendedArticlesPreview from './RecommendedArticlesPreview';
 import ChatSidebar from './ChatSidebar';
@@ -25,10 +26,15 @@ const ChatWindow = ({
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [currentConversationId, setCurrentConversationId] = useState(null);
 
-  // 語音識別相關 state
+  // 語音識別相關 state (original speech-to-text)
   const [isListening, setIsListening] = useState(false);
   const [speechSupported, setSpeechSupported] = useState(false);
   const [interimTranscript, setInterimTranscript] = useState('');
+
+  // 即時語音通話相關 state (Realtime API)
+  const [isVoiceCallActive, setIsVoiceCallActive] = useState(false);
+  const [isVoiceConnecting, setIsVoiceConnecting] = useState(false);
+  const [voiceError, setVoiceError] = useState(null);
 
   // 圖片上傳相關 state
   const [selectedImages, setSelectedImages] = useState([]);
@@ -224,6 +230,112 @@ const ChatWindow = ({
       }
     }
   };
+
+  // ============= 即時語音通話功能 (Realtime API) =============
+  
+  // 開始語音通話
+  const startVoiceCall = async () => {
+    if (isVoiceCallActive) {
+      // 如果已經在通話中，結束通話
+      endVoiceCall();
+      return;
+    }
+
+    setIsVoiceConnecting(true);
+    setVoiceError(null);
+
+    try {
+      console.log('Starting voice call...');
+      
+      // 創建 realtime session
+      const sessionConfig = await realtimeVoiceService.createSession({
+        conversationId: currentConversationId,
+        voice: 'alloy', // 可以改為其他聲音: echo, fable, onyx, nova, shimmer
+      });
+
+      console.log('Session created:', sessionConfig.session_id);
+
+      // 連接到 OpenAI Realtime API
+      await realtimeVoiceService.connect();
+
+      // 設置事件監聽器
+      realtimeVoiceService.on('conversation.updated', (event) => {
+        console.log('Conversation updated:', event);
+      });
+
+      realtimeVoiceService.on('response.audio.delta', (event) => {
+        // 音頻會自動播放
+        console.log('Receiving audio response...');
+      });
+
+      realtimeVoiceService.on('conversation.item.completed', (event) => {
+        // 當對話項目完成時更新轉錄
+        const item = event.item;
+        if (item && item.type === 'message') {
+          const content = item.content?.[0];
+          const text = content?.text || content?.transcript;
+            
+          if (text && item.role) {
+            // 添加訊息到聊天記錄
+            const newMessage = {
+              id: Date.now() + Math.random(),
+              text: text,
+              isUser: item.role === 'user',
+              timestamp: new Date(),
+              source: 'voice'
+            };
+            
+            setMessages(prev => [...prev, newMessage]);
+            
+            // 滾動到底部
+            setTimeout(() => {
+              messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+            }, 100);
+          }
+        }
+      });
+
+      realtimeVoiceService.on('error', (event) => {
+        console.error('Realtime error:', event);
+        setVoiceError('語音通話發生錯誤');
+        endVoiceCall();
+      });
+
+      // 開始錄音
+      await realtimeVoiceService.startRecording();
+
+      setIsVoiceCallActive(true);
+      setIsVoiceConnecting(false);
+      console.log('Voice call active');
+
+    } catch (error) {
+      console.error('Failed to start voice call:', error);
+      setVoiceError('無法啟動語音通話');
+      setIsVoiceConnecting(false);
+      setIsVoiceCallActive(false);
+    }
+  };
+
+  // 結束語音通話
+  const endVoiceCall = () => {
+    console.log('Ending voice call...');
+    realtimeVoiceService.stopRecording();
+    realtimeVoiceService.disconnect();
+    setIsVoiceCallActive(false);
+    setIsVoiceConnecting(false);
+    setVoiceError(null);
+  };
+
+  // 清理函數：當組件卸載時結束通話
+  useEffect(() => {
+    return () => {
+      if (isVoiceCallActive) {
+        endVoiceCall();
+      }
+    };
+  }, [isVoiceCallActive]);
+
+  // ============= 即時語音通話功能結束 =============
 
   // 處理按鍵事件
   const handleKeyPress = (event) => {
@@ -1017,12 +1129,31 @@ const ChatWindow = ({
           />
           <div className={styles.headerText}>
             <h3>{t('chatWindow.title')}</h3>
-            <span className={styles.status}>{t('chatWindow.status')}</span>
+            <span className={styles.status}>
+              {isVoiceCallActive ? '🎙️ 通話中...' : t('chatWindow.status')}
+            </span>
           </div>
         </div>
-        <button className={styles.closeButton} onClick={handleChatClose}>
-          ×
-        </button>
+        <div className={styles.headerActions}>
+          {/* 語音通話按鈕 */}
+          <button 
+            className={`${styles.voiceCallButton} ${isVoiceCallActive ? styles.active : ''} ${isVoiceConnecting ? styles.connecting : ''}`}
+            onClick={startVoiceCall}
+            disabled={isVoiceConnecting}
+            title={isVoiceCallActive ? '結束通話' : '開始語音通話'}
+          >
+            {isVoiceConnecting ? (
+              <span className={styles.loadingIcon}>⏳</span>
+            ) : isVoiceCallActive ? (
+              <span className={styles.micIconActive}>🎤</span>
+            ) : (
+              <span className={styles.micIcon}>🎤</span>
+            )}
+          </button>
+          <button className={styles.closeButton} onClick={handleChatClose}>
+            ×
+          </button>
+        </div>
       </div>
 
       {/* 訊息區域 */}

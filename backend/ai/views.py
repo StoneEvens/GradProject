@@ -843,4 +843,188 @@ def archive_conversation(request, conversation_id):
         return Response({
             'error': f'Failed to archive conversation: {str(e)}'
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_realtime_session(request):
+    """
+    Create an OpenAI Realtime API session for voice interaction.
     
+    This endpoint securely initializes a session with OpenAI and returns
+    the ephemeral session configuration to the frontend, keeping the API key secure.
+    
+    Request body (optional):
+        {
+            "conversation_id": <int>,  # Optional: link to existing conversation
+            "model": "gpt-4o-realtime-preview-2024-12-17",  # Optional: specify model
+            "voice": "alloy"  # Optional: voice selection (alloy, echo, fable, onyx, nova, shimmer)
+        }
+    
+    Response:
+        {
+            "session_id": "<session_id>",
+            "client_secret": {
+                "value": "<ephemeral_key>",
+                "expires_at": <timestamp>
+            },
+            "model": "<model_name>",
+            "conversation_id": <int>,  # If linked to a conversation
+            "instructions": "<system_instructions>"
+        }
+    """
+    try:
+        from openai import OpenAI
+        
+        # Get OpenAI API key from environment
+        api_key = os.getenv('OPENAI_API_KEY')
+        if not api_key:
+            logger.error("OpenAI API key not configured")
+            return Response({
+                'error': 'OpenAI API key not configured'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+        # Initialize OpenAI client
+        client = OpenAI(api_key=api_key)
+        
+        # Get optional parameters
+        conversation_id = request.data.get('conversation_id')
+        model = request.data.get('model', 'gpt-4o-realtime-preview-2024-12-17')
+        voice = request.data.get('voice', 'alloy')
+        
+        # Validate conversation if provided
+        conversation = None
+        if conversation_id:
+            try:
+                conversation = AgentThread.objects.get(
+                    id=conversation_id,
+                    user=request.user
+                )
+            except AgentThread.DoesNotExist:
+                return Response({
+                    'error': 'Conversation not found'
+                }, status=status.HTTP_404_NOT_FOUND)
+        
+        # Prepare system instructions for the realtime agent
+        user_context = {
+            'user_id': request.user.id,
+            'username': request.user.username,
+            'full_name': getattr(request.user, 'full_name', ''),
+        }
+        
+        instructions = f"""You are Peter, a helpful AI assistant for the PETer pet care application.
+
+User Context:
+- User ID: {user_context['user_id']}
+- Username: {user_context['username']}
+- Name: {user_context['full_name'] or 'User'}
+
+Your role:
+- Help users navigate the PETer app and manage their pets' care
+- Answer questions about pet health, feeding, and care
+- Guide users through app features and tutorials
+- Be friendly, concise, and helpful in your responses
+
+When users ask about specific pet information or app features, you can access:
+- Pet profiles and health records
+- Feeding schedules and recommendations
+- Social features and community posts
+- Nearby veterinary hospitals
+- Health monitoring and disease archives
+
+Keep responses natural and conversational for voice interaction. Use the user's name when appropriate."""
+
+        # Define MCP tools for the realtime session
+        # These tools match the ones available in the MCP server
+        tools = [
+            {
+                "type": "function",
+                "name": "get_user_pet_info_detailed",
+                "description": "Get detailed information about a user and their pets, including health records and abnormal posts",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "user_id": {
+                            "type": "integer",
+                            "description": "The ID of the user to fetch information for"
+                        }
+                    },
+                    "required": ["user_id"]
+                }
+            },
+            {
+                "type": "function",
+                "name": "perform_database_operation",
+                "description": "Perform database operations like adding pets, creating abnormal posts, or disease archives",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "operation": {
+                            "type": "string",
+                            "enum": ["add_pet", "update_pet", "add_abnormal_post", "update_abnormal_post", "delete_abnormal_post", "create_disease_archive"],
+                            "description": "The type of database operation to perform"
+                        },
+                        "data": {
+                            "type": "object",
+                            "description": "The data for the operation"
+                        }
+                    },
+                    "required": ["operation", "data"]
+                }
+            },
+            {
+                "type": "function",
+                "name": "get_navigation_paths",
+                "description": "Get available navigation paths in the PETer app",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "feature": {
+                            "type": "string",
+                            "description": "Optional: specific feature to get path for"
+                        }
+                    }
+                }
+            }
+        ]
+        
+        # Create realtime session with MCP tools
+        session_response = client.beta.realtime.sessions.create(
+            model=model,
+            voice=voice,
+            instructions=instructions,
+            modalities=["text", "audio"],
+            temperature=0.8,
+            max_response_output_tokens=4096,
+            tools=tools,
+            tool_choice="auto"
+        )
+        
+        # Extract session details
+        session_data = {
+            'session_id': session_response.id,
+            'client_secret': {
+                'value': session_response.client_secret.value,
+                'expires_at': session_response.client_secret.expires_at
+            },
+            'model': session_response.model,
+            'voice': voice,
+            'instructions': instructions,
+            'modalities': session_response.modalities,
+            'user_id': request.user.id,
+        }
+        
+        # Add conversation_id if linked
+        if conversation:
+            session_data['conversation_id'] = conversation.id
+            session_data['conversation_title'] = conversation.title
+        
+        logger.info(f"Created realtime session for user {request.user.id}: {session_response.id}")
+        
+        return Response(session_data, status=status.HTTP_201_CREATED)
+        
+    except Exception as e:
+        logger.error(f"Error creating realtime session: {str(e)}", exc_info=True)
+        return Response({
+            'error': f'Failed to create realtime session: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

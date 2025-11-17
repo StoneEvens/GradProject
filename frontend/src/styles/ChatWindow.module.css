@@ -109,6 +109,52 @@
   opacity: 0.8;
 }
 
+.headerActions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-left: auto;
+}
+
+.voiceCallButton {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.voiceCallButton:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.voiceCallButton.active {
+  background-color: #ff4444;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.voiceCallButton.active:hover {
+  background-color: #ff3333;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(255, 68, 68, 0.7);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(255, 68, 68, 0);
+  }
+}
+
 .closeButton {
   background: none;
   border: none;
@@ -123,7 +169,6 @@
   align-items: center;
   justify-content: center;
   transition: background-color 0.2s;
-  margin-left: auto;
 }
 
 .closeButton:hover {

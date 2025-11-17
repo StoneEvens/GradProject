@@ -70,6 +70,9 @@ class RecommendedUser(BaseModel):
   user_id: str | int = Field(..., description="Unique identifier of the user.")
   display_name: str = Field(..., description="User-facing display name (e.g., nickname).")
   user_details: str = Field(..., description="Short rationale or description why this user is recommended.")
+  headshot_url: str | None = Field(None, description="URL of the user's profile picture/headshot if available.")
+  user_account: str | None = Field(None, description="User's account name/username if available.")
+  user_fullname: str | None = Field(None, description="User's full name if available.")
 
 
 class PostRecommendation(BaseModel):
@@ -101,7 +104,7 @@ class SummaryAgentSchema(BaseModel):
   )
   recommended_users: list[RecommendedUser] = Field(
     default_factory=list,
-    description="List of recommended users. Each item includes user_id, display_name, user_details."
+    description="List of recommended users. Each item includes user_id, display_name, user_details, headshot_url, user_account, user_fullname."
   )
   recommended_social_posts: list[PostRecommendation] = Field(
     default_factory=list,
