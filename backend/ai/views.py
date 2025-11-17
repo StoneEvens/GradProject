@@ -1031,43 +1031,49 @@ Keep responses natural and conversational for voice interaction. Use the user's 
         session_response_data = openai_response.json()
 
         # Debug: Log the actual response structure
-        logger.info(f"OpenAI Response Data: {session_response_data}")
-        logger.info(f"Response keys: {session_response_data.keys()}")
+        logger.info(f"OpenAI Response keys: {session_response_data.keys()}")
 
-        # Extract session details from GA endpoint response
-        # The response structure may vary, so we need to handle different formats
-        session_id = (session_response_data.get('id') or
-                     session_response_data.get('session_id') or
-                     session_response_data.get('session', {}).get('id'))
+        # The /v1/realtime/client_secrets endpoint returns:
+        # {
+        #   'value': '<ephemeral_key>',
+        #   'expires_at': <timestamp>,
+        #   'session': { 'id': '...', 'model': '...', ... }
+        # }
+
+        # Extract session details
+        session_info = session_response_data.get('session', {})
+        session_id = session_info.get('id')
 
         if not session_id:
-            logger.error(f"No session ID found in response: {session_response_data}")
+            logger.error(f"No session ID found in response")
             return Response({
                 'error': 'Invalid response from OpenAI: missing session ID'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        logger.info(f"Created GA realtime session for user {request.user.id}")
-        logger.info(f"Session ID: {session_id}")
-        logger.info(f"Tools configured: {len(tools)}")
+        # Extract client secret (at top level)
+        client_secret_value = session_response_data.get('value')
+        expires_at = session_response_data.get('expires_at')
 
-        # Extract client_secret (handle different response structures)
-        client_secret_data = session_response_data.get('client_secret', {})
-        if not client_secret_data:
-            logger.error(f"No client_secret in response: {session_response_data}")
+        if not client_secret_value:
+            logger.error(f"No client_secret value in response")
             return Response({
                 'error': 'Invalid response from OpenAI: missing client_secret'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+        logger.info(f"✅ Created GA realtime session for user {request.user.id}")
+        logger.info(f"Session ID: {session_id}")
+        logger.info(f"Tools configured: {len(tools)}")
+
         session_data = {
             'session_id': session_id,
             'client_secret': {
-                'value': client_secret_data.get('value'),
-                'expires_at': client_secret_data.get('expires_at')
+                'value': client_secret_value,
+                'expires_at': expires_at
             },
-            'model': session_response_data.get('model', model),
-            'voice': voice,
-            'instructions': instructions,
-            'modalities': session_response_data.get('modalities', ['text', 'audio']),
+            'model': session_info.get('model', model),
+            'voice': session_info.get('audio', {}).get('output', {}).get('voice', voice),
+            'instructions': session_info.get('instructions', instructions),
+            'modalities': session_info.get('output_modalities', ['text', 'audio']),
             'tools': tools,
             'user_id': request.user.id,
         }
