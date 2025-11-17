@@ -36,10 +36,15 @@ const ChatWindow = ({
   const [isVoiceConnecting, setIsVoiceConnecting] = useState(false);
   const [voiceError, setVoiceError] = useState(null);
 
+  // 圖片上傳相關 state
+  const [selectedImages, setSelectedImages] = useState([]);
+  const [isUploadingImages, setIsUploadingImages] = useState(false);
+
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
   const recognitionRef = useRef(null);
   const restoredRef = useRef(false);
+  const fileInputRef = useRef(null);
 
   // 簡易本地快取鍵
   const LAST_CONV_ID_KEY = 'aiChat.lastConversationId';
@@ -340,6 +345,63 @@ const ChatWindow = ({
     }
   };
 
+  // 圖片處理函數
+  const handleImageSelect = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (event) => {
+    const files = Array.from(event.target.files);
+    if (files.length > 0) {
+      const imageFiles = files.filter(file => file.type.startsWith('image/'));
+
+      // 檢查是否超過9張圖片限制
+      const currentImageCount = selectedImages.length;
+      const availableSlots = 9 - currentImageCount;
+
+      if (availableSlots <= 0) {
+        alert('最多只能上傳 9 張圖片');
+        event.target.value = '';
+        return;
+      }
+
+      // 限制新選擇的圖片數量
+      const limitedImageFiles = imageFiles.slice(0, availableSlots);
+
+      if (imageFiles.length > availableSlots) {
+        alert(`最多只能再選擇 ${availableSlots} 張圖片`);
+      }
+
+      // 建立預覽 URL
+      const imagePreviewPromises = limitedImageFiles.map(file => {
+        return new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onload = (e) => resolve({
+            file,
+            preview: e.target.result,
+            id: Date.now() + Math.random()
+          });
+          reader.readAsDataURL(file);
+        });
+      });
+
+      Promise.all(imagePreviewPromises).then(imagePreviews => {
+        setSelectedImages(prev => [...prev, ...imagePreviews]);
+      });
+    }
+
+    // 清空 input 的值
+    event.target.value = '';
+  };
+
+  const removeImage = (imageId) => {
+    setSelectedImages(prev => prev.filter(img => img.id !== imageId));
+  };
+
+  const clearAllImages = () => {
+    setSelectedImages([]);
+  };
+
   // 發送訊息
   const handleSendMessage = async () => {
     if (!inputText.trim()) return;
@@ -433,6 +495,138 @@ const ChatWindow = ({
       if (aiResult.conversationId) {
         setCurrentConversationId(aiResult.conversationId);
         try { localStorage.setItem(LAST_CONV_ID_KEY, String(aiResult.conversationId)); } catch (e) {}
+      }
+
+      // 檢測 post_created operation 並自動上傳圖片
+      if (aiResult.operations && Array.isArray(aiResult.operations)) {
+        const postCreatedOp = aiResult.operations.find(
+          op => op.operation_name === 'post_created'
+        );
+
+        if (postCreatedOp && selectedImages.length > 0) {
+          console.log('[ChatWindow] 檢測到 post_created operation，開始上傳圖片');
+
+          try {
+            const opData = typeof postCreatedOp.operation_data === 'string'
+              ? JSON.parse(postCreatedOp.operation_data)
+              : postCreatedOp.operation_data;
+
+            const postId = opData.post_id;
+
+            if (postId) {
+              setIsUploadingImages(true);
+
+              // 上傳圖片
+              const uploadResult = await aiChatService.uploadPostImages(
+                postId,
+                selectedImages
+              );
+
+              console.log('[ChatWindow] 圖片上傳成功:', uploadResult);
+
+              // 清空已上傳的圖片
+              clearAllImages();
+              setIsUploadingImages(false);
+
+              // 添加系統訊息通知用戶
+              const uploadSuccessMessage = {
+                id: Date.now() + 2,
+                text: `✅ 已成功上傳 ${uploadResult.data.uploaded_count} 張圖片到您的貼文！`,
+                isUser: false,
+                timestamp: new Date(),
+                operations: [],
+                operationType: null
+              };
+
+              setMessages(prev => [...prev, uploadSuccessMessage]);
+
+            } else {
+              console.error('[ChatWindow] post_created operation 中缺少 post_id');
+            }
+
+          } catch (uploadError) {
+            console.error('[ChatWindow] 圖片上傳失敗:', uploadError);
+            setIsUploadingImages(false);
+
+            // 添加錯誤訊息
+            const uploadErrorMessage = {
+              id: Date.now() + 2,
+              text: `❌ 圖片上傳失敗：${uploadError.message || '未知錯誤'}。您可以稍後在貼文頁面手動上傳。`,
+              isUser: false,
+              timestamp: new Date(),
+              error: true,
+              operations: [],
+              operationType: null
+            };
+
+            setMessages(prev => [...prev, uploadErrorMessage]);
+          }
+        }
+
+        // 檢測 abnormal_post_created operation 並自動上傳圖片
+        const abnormalPostCreatedOp = aiResult.operations.find(
+          op => op.operation_name === 'abnormal_post_created'
+        );
+
+        if (abnormalPostCreatedOp && selectedImages.length > 0) {
+          console.log('[ChatWindow] 檢測到 abnormal_post_created operation，開始上傳圖片');
+
+          try {
+            const opData = typeof abnormalPostCreatedOp.operation_data === 'string'
+              ? JSON.parse(abnormalPostCreatedOp.operation_data)
+              : abnormalPostCreatedOp.operation_data;
+
+            const abnormalPostId = opData.abnormal_post_id;
+
+            if (abnormalPostId) {
+              setIsUploadingImages(true);
+
+              // 上傳圖片
+              const uploadResult = await aiChatService.uploadAbnormalPostImages(
+                abnormalPostId,
+                selectedImages
+              );
+
+              console.log('[ChatWindow] 異常記錄圖片上傳成功:', uploadResult);
+
+              // 清空已上傳的圖片
+              clearAllImages();
+              setIsUploadingImages(false);
+
+              // 添加系統訊息通知用戶
+              const uploadSuccessMessage = {
+                id: Date.now() + 3,
+                text: `✅ 已成功上傳 ${uploadResult.data.uploaded_count} 張圖片到您的異常記錄！`,
+                isUser: false,
+                timestamp: new Date(),
+                operations: [],
+                operationType: null
+              };
+
+              setMessages(prev => [...prev, uploadSuccessMessage]);
+
+            } else {
+              console.error('[ChatWindow] abnormal_post_created operation 中缺少 abnormal_post_id');
+            }
+
+          } catch (uploadError) {
+            console.error('[ChatWindow] 異常記錄圖片上傳失敗:', uploadError);
+            setIsUploadingImages(false);
+
+            // 添加錯誤訊息
+            const uploadErrorMessage = {
+              id: Date.now() + 3,
+              text: `❌ 圖片上傳失敗：${uploadError.message || '未知錯誤'}。您可以稍後在異常記錄頁面手動上傳。`,
+              isUser: false,
+              timestamp: new Date(),
+              error: true,
+              operations: [],
+              operationType: null
+            };
+
+            setMessages(prev => [...prev, uploadErrorMessage]);
+          }
+        }
       }
 
     } catch (error) {
@@ -1151,6 +1345,31 @@ const ChatWindow = ({
 
       {/* 輸入區域 */}
       <div className={styles.inputSection}>
+        {/* 圖片預覽區域 */}
+        {selectedImages.length > 0 && (
+          <div className={styles.imagePreviewContainer}>
+            {selectedImages.map((image) => (
+              <div key={image.id} className={styles.imagePreviewItem}>
+                <img src={image.preview} alt="預覽圖片" className={styles.previewImage} />
+                <button
+                  className={styles.removeImageBtn}
+                  onClick={() => removeImage(image.id)}
+                  title="移除圖片"
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* 圖片上傳進度提示 */}
+        {isUploadingImages && (
+          <div className={styles.uploadingIndicator}>
+            <span>正在上傳圖片...</span>
+          </div>
+        )}
+
         <div className={styles.inputContainer}>
           <div className={styles.inputUserAvatar}>
             <img
@@ -1176,6 +1395,13 @@ const ChatWindow = ({
             />
           </div>
           <div className={styles.inputActions}>
+            <button
+              className={styles.photoBtn}
+              onClick={handleImageSelect}
+              title="新增圖片"
+            >
+              <img src="/assets/icon/CommentPhotoIcon.png" alt="新增圖片" />
+            </button>
             {speechSupported && (
               <button
                 className={`${styles.voiceBtn} ${isListening ? styles.active : ''}`}
@@ -1195,6 +1421,16 @@ const ChatWindow = ({
             </button>
           </div>
         </div>
+
+        {/* Hidden file input */}
+        <input
+          type="file"
+          ref={fileInputRef}
+          onChange={handleFileChange}
+          multiple
+          accept="image/*"
+          style={{ display: 'none' }}
+        />
       </div>
 
       {/* 側邊欄 */}

@@ -613,6 +613,122 @@ class CreateAbnormalPostAPIView(APIView):
                 status=drf_status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
+# 為已存在的異常記錄上傳圖片
+class AbnormalPostImageUploadAPIView(APIView):
+    """為已存在的異常記錄上傳圖片（MCP Agent 專用）"""
+    permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
+
+    @transaction.atomic
+    def post(self, request, abnormal_post_id):
+        """
+        上傳圖片到已存在的異常記錄
+
+        POST 數據:
+        - images: 圖片檔案列表 (必填)
+        """
+        try:
+            user = request.user
+
+            # 1. 驗證異常記錄是否存在
+            try:
+                abnormal_post = AbnormalPost.objects.get(id=abnormal_post_id)
+            except AbnormalPost.DoesNotExist:
+                return APIResponse(
+                    message="異常記錄不存在",
+                    status=drf_status.HTTP_404_NOT_FOUND,
+                )
+
+            # 2. 驗證權限：只有記錄作者可以上傳圖片
+            if abnormal_post.user != user:
+                return APIResponse(
+                    message="您沒有權限為此異常記錄上傳圖片",
+                    status=drf_status.HTTP_403_FORBIDDEN,
+                )
+
+            # 3. 獲取上傳的圖片檔案
+            uploaded_image_files = request.FILES.getlist('images')
+
+            if not uploaded_image_files:
+                return APIResponse(
+                    message="請至少上傳一張圖片",
+                    status=drf_status.HTTP_400_BAD_REQUEST,
+                )
+
+            # 4. 獲取現有圖片數量（用於計算 sort_order）
+            existing_images_count = AbnormalPostImage.objects.filter(abnormal_post=abnormal_post).count()
+
+            # 5. 上傳圖片到 Firebase
+            from utils.firebase_service import firebase_storage_service
+
+            saved_images = []
+            for index, image_file in enumerate(uploaded_image_files):
+                try:
+                    sort_order = existing_images_count + index
+
+                    # 上傳到 Firebase
+                    success, message, firebase_url, firebase_path = firebase_storage_service.upload_abnormal_record_image(
+                        user_id=user.id,
+                        pet_id=abnormal_post.pet.id,
+                        image_file=image_file,
+                        sort_order=sort_order
+                    )
+
+                    if success:
+                        # 保存圖片記錄到資料庫
+                        abnormal_image = AbnormalPostImage.create_from_upload(
+                            abnormal_post=abnormal_post,
+                            firebase_url=firebase_url,
+                            firebase_path=firebase_path,
+                            sort_order=sort_order,
+                            original_filename=image_file.name,
+                            content_type=image_file.content_type,
+                            file_size=image_file.size
+                        )
+
+                        saved_images.append({
+                            'id': abnormal_image.id,
+                            'firebase_url': abnormal_image.firebase_url,
+                            'firebase_path': abnormal_image.firebase_path,
+                            'sort_order': abnormal_image.sort_order
+                        })
+
+                        logger.info(f"異常記錄圖片上傳成功: {firebase_url}")
+                    else:
+                        logger.error(f"異常記錄圖片上傳到 Firebase 失敗: {message}")
+
+                except Exception as img_error:
+                    logger.error(f"保存異常記錄圖片時出錯: {str(img_error)}", exc_info=True)
+                    # 單張圖片失敗不影響其他圖片上傳
+
+            if not saved_images:
+                return APIResponse(
+                    message="所有圖片上傳失敗",
+                    status=drf_status.HTTP_400_BAD_REQUEST,
+                )
+
+            # 6. 記錄日誌
+            logger.info(f"用戶 {user.id} 為異常記錄 {abnormal_post_id} 上傳了 {len(saved_images)} 張圖片")
+
+            # 7. 返回結果
+            return APIResponse(
+                data={
+                    "success": True,
+                    "uploaded_count": len(saved_images),
+                    "images": saved_images,
+                    "abnormal_post_id": abnormal_post_id
+                },
+                message=f"成功上傳 {len(saved_images)} 張圖片",
+                status=drf_status.HTTP_201_CREATED,
+            )
+
+        except Exception as e:
+            logger.error(f"上傳異常記錄圖片時出錯: {str(e)}", exc_info=True)
+            return APIResponse(
+                message=f"上傳圖片失敗: {str(e)}",
+                status=drf_status.HTTP_400_BAD_REQUEST,
+            )
+
 # 獲取所有症狀列表
 class SymptomListAPIView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]

@@ -122,9 +122,17 @@ class SummaryAgentSchema(BaseModel):
 #---------------------------------------------------------------------
 workflow_organizer = Agent(
   name="Workflow Organizer",
-  instructions="Understand the user's intention, then plan out the workflow by checking what tools the mcp server provides and how these tools can help achieve the user's intention. " \
-  "If the user's request is beyond available tools, simply state that the task cannot be completed with current capabilities. You do not need to assist with these requests or provide any information or suggestions." \
-  "You SHOULD NOT retrieve data by yourself. Do not spend too much time constructing the instruction; allowing the next agent to complete the task is enough. The final output should all be relevant to the user's needs.",
+  instructions=(
+    "Understand the user's intention, then plan out the workflow by checking what tools the mcp server provides and how these tools can help achieve the user's intention. "
+    "If the user's request is beyond available tools, simply state that the task cannot be completed with current capabilities. You do not need to assist with these requests or provide any information or suggestions. "
+    "You SHOULD NOT retrieve data by yourself. Do not spend too much time constructing the instruction; allowing the next agent to complete the task is enough. The final output should all be relevant to the user's needs.\n\n"
+
+    "IMPORTANT - Information Gathering:\n"
+    "Before planning any tool execution, check if ALL required parameters are available in the user's message.\n"
+    "Each tool's description specifies its REQUIRED and OPTIONAL parameters. Read them carefully.\n"
+    "If REQUIRED information is missing, indicate in the Instruction that the next agent should ask the user BEFORE calling the tool.\n"
+    "The tool descriptions also provide suggested wording for asking users - use those suggestions when available."
+  ),
   model="gpt-5.1",
   tools=[
     mcp
@@ -143,9 +151,14 @@ summary_agent = Agent(
   instructions=(
     "Understand user intent, filter irrelevant tool outputs. Use organizer's Instruction to decide which MCP tools to call. Populate ONLY JSON schema fields. "
     "In reply: concise answer, no raw data. Post recommendations: use recommended_social_posts and recommended_forum_posts arrays with post_id, title, post_details, created_at, user_fullname, location. "
-    "Do not display raw data such as JSON dumps, urls, internal tutorial name, internal mcp tool name, internal database operation name, internal ids of the data from the database, or lists directly to the user. Also, please try to avoid using technical terms like \"id\" or \"ids\", just to name a few. Instead, summarize the information in a user-friendly manner within the 'reply' field. Do not summarize the content of each posts."
-    "If the user's request is beyond available tools, simply state that the task cannot be completed with current capabilities. You do not need to assist with these requests or provide any information or suggestions." 
+    "Do not display raw data such as JSON dumps, urls, internal tutorial name, internal mcp tool name, internal database operation name, internal ids of the data from the database, or lists directly to the user. Also, please try to avoid using technical terms like \"id\" or \"ids\", just to name a few. Instead, summarize the information in a user-friendly manner within the 'reply' field. Do not summarize the content of each posts. "
+    "If the user's request is beyond available tools, simply state that the task cannot be completed with current capabilities. You do not need to assist with these requests or provide any information or suggestions. "
     "Return empty lists if none. Do NOT invent ids/titles or use dynamic property names.\n\n"
+
+    "IMPORTANT - Information Gathering:\n"
+    "If the organizer's Instruction says to ask the user for information, you MUST ask in the reply field and NOT call any tools yet.\n"
+    "Wait for the user to provide the missing information in the next turn, then call the appropriate tool.\n"
+    "Each tool's description provides suggested wording for asking users - follow those suggestions.\n\n"
 
     "NAVIGATION: Add to operations array: {operation_name: navigate, operation_data: json.dumps({path: /target, destination: name})}. "
     "User will see a button to navigate - do NOT say 'navigating' or 'redirecting'. Instead say: 您可以點擊下方按鈕前往[頁面]。\n"
