@@ -1,16 +1,16 @@
 /**
- * Realtime Voice Service using OpenAI SDK
+ * Realtime Voice Service using OpenAI GA Endpoint
  * 
- * Uses the official openai package (v6.7.0+) realtime WebSocket support:
+ * Uses the OpenAI Realtime GA API with full MCP tool support:
  * - Ephemeral token authentication via client_secret
- * - MCP tool integration (tools configured on backend)
+ * - MCP tool integration (tools configured in backend session)
  * - Audio streaming and playback
  * - Session management
  * 
  * Architecture:
- * 1. Backend creates session via /v1/realtime/client_secrets with tools
- * 2. Frontend connects using OpenAIRealtimeWebSocket with client_secret
- * 3. MCP tools execute server-side automatically
+ * 1. Backend creates session via /v1/realtime/sessions (GA) with MCP tools configured
+ * 2. Frontend connects to GA WebSocket endpoint with ephemeral token
+ * 3. MCP tools are registered in the session and callable by the AI
  * 4. Audio handled via Web Audio API
  */
 
@@ -47,8 +47,8 @@ export interface RealtimeEvent {
 type EventHandler = (event: RealtimeEvent) => void;
 
 class RealtimeVoiceService {
-  private transport: OpenAIRealtimeWebSocket | null = null;
   private sessionConfig: RealtimeSessionConfig | null = null;
+  private transport: OpenAIRealtimeWebSocket | null = null;
   private audioContext: AudioContext | null = null;
   private mediaStream: MediaStream | null = null;
   private mediaRecorder: MediaRecorder | null = null;
@@ -107,16 +107,17 @@ class RealtimeVoiceService {
     console.log('[RealtimeVoice] MCP Tools:', this.sessionConfig.tools?.length || 0);
 
     try {
-      // Create WebSocket using the ephemeral client_secret
-      // The constructor connects immediately
+      // Create WebSocket using the ephemeral client_secret from GA endpoint
+      // Use GA baseURL to connect to wss://api.openai.com/v1/realtime
+      // This matches the backend's /v1/realtime/sessions endpoint
       this.transport = new OpenAIRealtimeWebSocket(
         {
           model: model,
           dangerouslyAllowBrowser: true,  // Required for browser usage
         },
         {
-          apiKey: token,  // Use the ephemeral client_secret from /v1/realtime/client_secrets
-          baseURL: 'https://api.openai.com/v1',  // GA endpoint base
+          apiKey: token,  // Use the ephemeral client_secret from GA endpoint
+          baseURL: 'https://api.openai.com/v1',  // GA endpoint
         }
       );
 

@@ -996,36 +996,50 @@ Keep responses natural and conversational for voice interaction. Use the user's 
             }
         ]
         
-        # Create realtime session using the beta endpoint
-        # The /v1/realtime/sessions endpoint creates sessions compatible with browser clients
-        # Note: Despite being called "beta", this is the correct endpoint for the JS SDK
-        session_response = client.beta.realtime.sessions.create(
-            model=model,
-            voice=voice,
-            instructions=instructions,
-            modalities=['text', 'audio'],
-            temperature=0.8,
-            max_response_output_tokens=4096,
-            tools=tools,
-            tool_choice='auto'
+        # Create realtime session using the GA /v1/realtime/sessions endpoint
+        # This is the production endpoint that supports MCP tools
+        openai_response = requests.post(
+            'https://api.openai.com/v1/realtime/sessions',
+            headers={
+                'Authorization': f'Bearer {api_key}',
+                'Content-Type': 'application/json'
+            },
+            json={
+                'model': model,
+                'voice': voice,
+                'instructions': instructions,
+                'modalities': ['text', 'audio'],
+                'temperature': 0.8,
+                'max_response_output_tokens': 4096,
+                'tools': tools,
+                'tool_choice': 'auto'
+            }
         )
         
-        logger.info(f"Created realtime session via beta SDK for user {request.user.id}")
-        logger.info(f"Session ID: {session_response.id}")
-        logger.info(f"Session has {len(tools)} tools configured")
+        if openai_response.status_code != 200:
+            logger.error(f"Failed to create realtime session: {openai_response.status_code}")
+            logger.error(f"Response body: {openai_response.text}")
+            return Response({
+                'error': f'Failed to create realtime session: {openai_response.text}'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
-        # Extract session details from the SDK response
+        session_response_data = openai_response.json()
+        logger.info(f"Created GA realtime session for user {request.user.id}")
+        logger.info(f"Session ID: {session_response_data.get('id')}")
+        logger.info(f"Tools configured: {len(tools)}")
+        
+        # Extract session details from GA endpoint response
         session_data = {
-            'session_id': session_response.id,
+            'session_id': session_response_data['id'],
             'client_secret': {
-                'value': session_response.client_secret.value,
-                'expires_at': session_response.client_secret.expires_at
+                'value': session_response_data['client_secret']['value'],
+                'expires_at': session_response_data['client_secret']['expires_at']
             },
-            'model': session_response.model,
+            'model': session_response_data['model'],
             'voice': voice,
             'instructions': instructions,
-            'modalities': session_response.modalities if hasattr(session_response, 'modalities') else ['text', 'audio'],
-            'tools': tools,  # Include tools in response so frontend knows what's available
+            'modalities': session_response_data.get('modalities', ['text', 'audio']),
+            'tools': tools,
             'user_id': request.user.id,
         }
         
