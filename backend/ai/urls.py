@@ -10,6 +10,9 @@ urlpatterns = [
     # Main chat endpoint - compatible with aiChatService (mimics aiAgent format)
     path('chat/', views.main_chat, name='main-chat'),
     
+    # Realtime session endpoint - for voice interaction with OpenAI Realtime API
+    path('realtime/session/create/', views.create_realtime_session, name='create-realtime-session'),
+    
     # Conversation management endpoints
     path('conversations/create/', views.create_conversation, name='create-conversation'),
     path('conversations/', views.get_conversations, name='get-conversations'),
