@@ -19,4 +19,12 @@ export default defineConfig({
     }
   },
   assetsInclude: ['**/*.glb'],
+  optimizeDeps: {
+    exclude: ['openai']
+  },
+  build: {
+    commonjsOptions: {
+      include: [/openai/, /node_modules/]
+    }
+  }
 }) 
