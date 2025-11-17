@@ -55,6 +55,8 @@ class RealtimeVoiceService {
   private eventHandlers: Map<string, Set<EventHandler>> = new Map();
   private audioQueue: Float32Array[] = [];
   private isPlayingAudio: boolean = false;
+  private audioWorkletNode: AudioWorkletNode | null = null;
+  private isCapturing: boolean = false;
 
   /**
    * Create a new realtime session through the backend
@@ -349,47 +351,79 @@ class RealtimeVoiceService {
 
   /**
    * Start capturing audio from microphone and sending to server
-   * Alias for compatibility
+   * Uses Web Audio API to capture raw PCM16 audio
    */
   async startAudioCapture(): Promise<void> {
     try {
       console.log('[RealtimeVoice] Starting audio capture...');
-      
+
+      if (!this.audioContext) {
+        console.warn('[RealtimeVoice] AudioContext not initialized, creating new one');
+        this.audioContext = new AudioContext({ sampleRate: 24000 });
+      }
+
+      // Resume AudioContext if suspended (browser security requirement)
+      if (this.audioContext.state === 'suspended') {
+        await this.audioContext.resume();
+        console.log('[RealtimeVoice] AudioContext resumed');
+      }
+
       // Get microphone access
-      this.mediaStream = await navigator.mediaDevices.getUserMedia({ 
+      this.mediaStream = await navigator.mediaDevices.getUserMedia({
         audio: {
           sampleRate: 24000,
           channelCount: 1,
           echoCancellation: true,
-          noiseSuppression: true
-        } 
+          noiseSuppression: true,
+          autoGainControl: true
+        }
       });
 
-      // Create MediaRecorder for PCM16 audio
-      this.mediaRecorder = new MediaRecorder(this.mediaStream, {
-        mimeType: 'audio/webm;codecs=opus',
-        audioBitsPerSecond: 128000
-      });
+      // Create audio source from microphone
+      const source = this.audioContext.createMediaStreamSource(this.mediaStream);
 
-      this.mediaRecorder.ondataavailable = async (event) => {
-        if (event.data.size > 0 && this.transport) {
-          // Convert audio to base64 PCM16 format required by Realtime API
-          const arrayBuffer = await event.data.arrayBuffer();
-          const base64Audio = this.arrayBufferToBase64(arrayBuffer);
-          
-          // Send input_audio_buffer.append event
+      // Create ScriptProcessor for audio processing
+      // Using 4096 buffer size for good balance between latency and performance
+      const processor = this.audioContext.createScriptProcessor(4096, 1, 1);
+
+      processor.onaudioprocess = (audioProcessingEvent) => {
+        if (!this.isCapturing || !this.transport) return;
+
+        const inputBuffer = audioProcessingEvent.inputBuffer;
+        const inputData = inputBuffer.getChannelData(0); // Float32Array
+
+        // Convert Float32 to Int16 (PCM16)
+        const pcm16 = new Int16Array(inputData.length);
+        for (let i = 0; i < inputData.length; i++) {
+          // Clamp values to [-1, 1] and convert to Int16 range
+          const s = Math.max(-1, Math.min(1, inputData[i]));
+          pcm16[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+        }
+
+        // Convert to base64
+        const base64Audio = this.arrayBufferToBase64(pcm16.buffer);
+
+        // Send to Realtime API
+        try {
           this.transport.send({
             type: 'input_audio_buffer.append',
             audio: base64Audio
           });
+        } catch (error) {
+          console.error('[RealtimeVoice] Error sending audio:', error);
         }
       };
 
-      // Capture audio in chunks
-      this.mediaRecorder.start(100); // 100ms chunks
-      
-      console.log('[RealtimeVoice] ✅ Audio capture started');
-      
+      // Connect nodes: microphone -> processor -> destination
+      source.connect(processor);
+      processor.connect(this.audioContext.destination);
+
+      // Store reference for cleanup
+      this.audioWorkletNode = processor as any; // Store for later disconnection
+      this.isCapturing = true;
+
+      console.log('[RealtimeVoice] ✅ Audio capture started (PCM16 24kHz)');
+
     } catch (error) {
       console.error('[RealtimeVoice] ❌ Failed to start audio capture:', error);
       throw error;
@@ -408,16 +442,30 @@ class RealtimeVoiceService {
    */
   stopAudioCapture(): void {
     console.log('[RealtimeVoice] Stopping audio capture...');
-    
+
+    this.isCapturing = false;
+
+    // Disconnect audio worklet/processor
+    if (this.audioWorkletNode) {
+      try {
+        this.audioWorkletNode.disconnect();
+      } catch (error) {
+        console.warn('[RealtimeVoice] Error disconnecting audio node:', error);
+      }
+      this.audioWorkletNode = null;
+    }
+
+    // Stop media recorder (legacy)
     if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
       this.mediaRecorder.stop();
     }
-    
+
+    // Stop all media stream tracks
     if (this.mediaStream) {
       this.mediaStream.getTracks().forEach(track => track.stop());
       this.mediaStream = null;
     }
-    
+
     this.mediaRecorder = null;
     console.log('[RealtimeVoice] ✅ Audio capture stopped');
   }

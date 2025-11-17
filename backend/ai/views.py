@@ -996,27 +996,24 @@ Keep responses natural and conversational for voice interaction. Use the user's 
             }
         ]
         
-        # Create realtime session using the GA /v1/realtime/client_secrets endpoint
-        # This endpoint wraps the session config in a 'session' object
+        # Create realtime session using the /v1/realtime/sessions endpoint
+        # This endpoint creates ephemeral tokens for secure client-side usage
         try:
             openai_response = requests.post(
-                'https://api.openai.com/v1/realtime/client_secrets',
+                'https://api.openai.com/v1/realtime/sessions',
                 headers={
                     'Authorization': f'Bearer {api_key}',
                     'Content-Type': 'application/json'
                 },
                 json={
-                    'session': {
-                        'type': 'realtime',
-                        'model': model,
-                        'voice': voice,
-                        'instructions': instructions,
-                        'modalities': ['text', 'audio'],
-                        'temperature': 0.8,
-                        'max_response_output_tokens': 4096,
-                        'tools': tools,
-                        'tool_choice': 'auto'
-                    }
+                    'model': model,
+                    'voice': voice,
+                    'instructions': instructions,
+                    'modalities': ['text', 'audio'],
+                    'temperature': 0.8,
+                    'max_response_output_tokens': 4096,
+                    'tools': tools,
+                    'tool_choice': 'auto'
                 },
                 timeout=10
             )
