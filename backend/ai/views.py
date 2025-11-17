@@ -997,25 +997,33 @@ Keep responses natural and conversational for voice interaction. Use the user's 
         ]
         
         # Create realtime session using the GA /v1/realtime/client_secrets endpoint
-        # This is the correct endpoint for GA as per OpenAI documentation
-        # The error message specifically says: "please create a client secret using the /v1/realtime/client_secrets endpoint"
-        openai_response = requests.post(
-            'https://api.openai.com/v1/realtime/client_secrets',
-            headers={
-                'Authorization': f'Bearer {api_key}',
-                'Content-Type': 'application/json'
-            },
-            json={
-                'model': model,
-                'voice': voice,
-                'instructions': instructions,
-                'modalities': ['text', 'audio'],
-                'temperature': 0.8,
-                'max_response_output_tokens': 4096,
-                'tools': tools,
-                'tool_choice': 'auto'
-            }
-        )
+        # This endpoint wraps the session config in a 'session' object
+        try:
+            openai_response = requests.post(
+                'https://api.openai.com/v1/realtime/client_secrets',
+                headers={
+                    'Authorization': f'Bearer {api_key}',
+                    'Content-Type': 'application/json'
+                },
+                json={
+                    'session': {
+                        'model': model,
+                        'voice': voice,
+                        'instructions': instructions,
+                        'modalities': ['text', 'audio'],
+                        'temperature': 0.8,
+                        'max_response_output_tokens': 4096,
+                        'tools': tools,
+                        'tool_choice': 'auto'
+                    }
+                },
+                timeout=10
+            )
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Request to OpenAI failed: {str(e)}")
+            return Response({
+                'error': f'Failed to connect to OpenAI: {str(e)}'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
         if openai_response.status_code != 200:
             logger.error(f"Failed to create realtime session: {openai_response.status_code}")
