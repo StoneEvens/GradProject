@@ -487,7 +487,7 @@ def create_mcp_server() -> FastMCP:
 
     @mcp.tool(
         name="perform_database_operation",
-        description="Perform a database operation such as managing pet information, abnormal posts, disease archives, user plans/schedules, or creating social posts. Use database_operation_list tool to see all available operations and their required parameters."
+        description="Perform a database operation such as: add_pet, update_pet (modify pet info), add_abnormal_post (health records), update_abnormal_post, delete_abnormal_post, create_disease_archive, add_plan (create schedule/calendar event), update_plan (modify schedule), delete_plan (remove schedule), list_plans (view all schedules), create_social_post. IMPORTANT: Use 'add_plan' for creating schedules/calendar events, NOT 'create_schedule'. Always call database_operation_list first to see exact parameter requirements."
         "Note that database operations affects personal data; please verify that the user is doing the operation for themself. The easiest way to ensure this is to check the target of the prompt matches the user ID of the requester. The user id was added to the prompt automatically by the backend."
     )
     async def perform_database_operation(

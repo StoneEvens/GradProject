@@ -221,9 +221,9 @@ class RealtimeVoiceService extends EventEmitter {
         
         tool({
           name: 'perform_database_operation',
-          description: 'Perform a database operation such as managing pet information, abnormal posts, disease archives, user plans/schedules, or creating social posts',
+          description: 'Perform database operations: add_pet (create new pet), update_pet (modify pet), add_abnormal_post (health record), update_abnormal_post, delete_abnormal_post, create_disease_archive, add_plan (CREATE schedule/calendar event), update_plan (modify schedule), delete_plan (remove schedule), list_plans (view schedules), create_social_post. CRITICAL: For schedules use "add_plan" NOT "create_schedule". Call database_operation_list first to see required parameters.',
           parameters: z.object({
-            operation: z.string().describe('The type of database operation to perform'),
+            operation: z.string().describe('Exact operation name: add_pet, update_pet, add_abnormal_post, update_abnormal_post, delete_abnormal_post, create_disease_archive, add_plan, update_plan, delete_plan, list_plans, create_social_post'),
             data: z.any().describe('The data for the operation'),
           }),
           execute: async ({ operation, data }) => executeViaMCP('perform_database_operation', { operation, data }),
