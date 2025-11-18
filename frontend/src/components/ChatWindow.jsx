@@ -273,33 +273,9 @@ const ChatWindow = ({
         console.log('Receiving audio response...');
       });
 
-      realtimeVoiceService.on('conversation.item.completed', (event) => {
-        // 當對話項目完成時更新轉錄
-        const item = event.item;
-        if (item && item.type === 'message') {
-          const content = item.content?.[0];
-          const text = content?.text || content?.transcript;
-            
-          if (text && item.role) {
-            // 添加訊息到聊天記錄
-            const newMessage = {
-              id: Date.now() + Math.random(),
-              text: text,
-              isUser: item.role === 'user',
-              timestamp: new Date(),
-              source: 'voice'
-            };
-            
-            setMessages(prev => [...prev, newMessage]);
-            
-            // 滾動到底部
-            setTimeout(() => {
-              messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-            }, 100);
-          }
-        }
-      });
-
+      // Note: conversation items are handled automatically by the SDK
+      // We don't need to manually process them here
+      
       realtimeVoiceService.on('error', (event) => {
         console.error('Realtime error:', event);
         setVoiceError('語音通話發生錯誤');

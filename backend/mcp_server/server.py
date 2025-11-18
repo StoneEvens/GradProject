@@ -236,7 +236,7 @@ def create_mcp_server() -> FastMCP:
         name="get_user_pet_types",
         description="Fetch the types of pets owned by a user."
     )
-    async def get_user_pet_types(user_ids: list[int]) -> Dict:
+    async def get_user_pet_types(user_ids: list[int]) -> str:
         @sync_to_async
         def fetch() -> Dict:
             try:
