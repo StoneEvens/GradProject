@@ -5,7 +5,7 @@
  * Uses WebRTC for automatic audio handling (microphone + speaker)
  */
 
-import { realtime, hostedMcpTool } from '@openai/agents';
+import { realtime } from '@openai/agents';
 import axiosInstance from '../utils/axios';
 
 const { RealtimeAgent, RealtimeSession } = realtime;
@@ -115,19 +115,17 @@ class RealtimeVoiceService extends EventEmitter {
     try {
       console.log('[RealtimeVoice] Creating RealtimeAgent...');
       
-      // Create MCP tool connection for automatic tool execution
-      const mcpTool = hostedMcpTool({
-        serverLabel: 'peter-mcp',
-        serverUrl: 'https://peter.geniusbee.net/mcp/sse',
-        requireApproval: 'never', // Auto-approve all tool calls
-      });
+      // Note: We're NOT using hostedMcpTool because our MCP server is not publicly accessible
+      // OpenAI's servers cannot reach our local/private backend
+      // Instead, the backend already configured tools in the session
+      // Tools will be available through the session config from backend
       
-      // Create RealtimeAgent with instructions and MCP tools
+      // Create RealtimeAgent with instructions (tools already configured by backend)
       this.agent = new RealtimeAgent({
         name: 'peter',
         instructions: this.sessionConfig.instructions,
         voice: this.sessionConfig.voice as any,
-        tools: [mcpTool], // SDK automatically handles tool execution
+        // Not adding tools here - they're in the session config from backend
       });
 
       console.log('[RealtimeVoice] Creating RealtimeSession...');
@@ -143,11 +141,13 @@ class RealtimeVoiceService extends EventEmitter {
       console.log('[RealtimeVoice] Connecting with ephemeral token...');
       
       // Connect using the ephemeral token from backend
+      // The token already has the tools configured
       await this.session.connect({
         apiKey: this.sessionConfig.client_secret.value,
       });
       
       console.log('[RealtimeVoice] ✅ Connected successfully (WebRTC auto-handling audio)');
+      console.log('[RealtimeVoice] Tools are configured in the backend session');
 
       // Send greeting if available
       if (this.sessionConfig.greeting) {

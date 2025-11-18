@@ -5,6 +5,7 @@ from typing import get_type_hints, get_origin, get_args
 from asgiref.sync import sync_to_async
 from fastmcp import FastMCP
 import os
+import logging
 
 from accounts.models import CustomUser
 from pets.models import Pet, DiseaseArchiveContent
@@ -17,6 +18,9 @@ from feeds.models import Feed
 from django.forms.models import model_to_dict
 from mcp_server.database_operations import get_operation_list, perform_operation
 from mcp_server.entity_resolver import EntityResolver
+
+# Setup logger
+logger = logging.getLogger(__name__)
 
 # Server configuration
 SERVER_NAME = "PETer MCP Server"
@@ -31,17 +35,24 @@ def create_mcp_server() -> FastMCP:
         description="Fetch a user's basic profile and their pets (including related entities)."
         "Note that this operation requires verification that the user is performing the operation for themself. The easiest way to ensure this is to check the target of the prompt matches the user ID of the requester. The user id was added to the prompt automatically by the backend."
     )
-    async def get_user_pet_info_detailed(user_id: int) -> Dict:
+    async def get_user_pet_info_detailed(user_id: int) -> str:
+        """Returns a JSON string with user and pet information, or error message."""
+        logger.info(f"[MCP Tool] get_user_pet_info_detailed called with user_id={user_id}")
+        
         @sync_to_async
         def fetch() -> Dict:
             try:
+                logger.info(f"[MCP Tool] Fetching user with id={user_id}")
                 user = CustomUser.objects.filter(
                     id=user_id
                 ).first()
 
                 if not user:
-                    return {"error": "User not found."}
+                    logger.warning(f"[MCP Tool] User {user_id} not found")
+                    return {"error": f"User with ID {user_id} not found."}
 
+                logger.info(f"[MCP Tool] Found user: {user.username}")
+                
                 # Get user's pets with related data (keep model instances to access relations)
                 pets_qs = (Pet.objects
                            .filter(owner=user)
@@ -50,6 +61,9 @@ def create_mcp_server() -> FastMCP:
 
                 pets_data: list[dict] = []
                 all_abnormal_posts_data: list[dict] = []
+                
+                logger.info(f"[MCP Tool] Processing {pets_qs.count()} pets")
+                
                 for pet in pets_qs:
                     pet_dict = model_to_dict(pet)
                     # Serialize related abnormal posts (prefetched)
@@ -63,15 +77,29 @@ def create_mcp_server() -> FastMCP:
                 # Ensure JSON-serializable primitives
                 pets_data = json.loads(json.dumps(pets_data, default=str))
 
-                return {
+                result = {
+                    "success": True,
                     "user": user.username,
+                    "user_id": user_id,
                     "pets": pets_data,
                     "abnormal_posts": all_abnormal_posts_data
                 }
+                
+                logger.info(f"[MCP Tool] Successfully fetched data for user {user.username}: {len(pets_data)} pets, {len(all_abnormal_posts_data)} abnormal posts")
+                return result
+                
             except Exception as e:
-                raise
+                logger.error(f"[MCP Tool] Error in get_user_pet_info_detailed: {type(e).__name__}: {str(e)}", exc_info=True)
+                return {
+                    "success": False,
+                    "error": f"{type(e).__name__}: {str(e)}"
+                }
 
-        return await fetch()
+        result_dict = await fetch()
+        # Return as JSON string for the agent
+        result_json = json.dumps(result_dict, ensure_ascii=False, indent=2)
+        logger.info(f"[MCP Tool] Returning result (length: {len(result_json)} chars)")
+        return result_json
     
     @mcp.tool(
         name="get_user_pet_list",
