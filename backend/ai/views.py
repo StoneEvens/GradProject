@@ -1021,7 +1021,7 @@ Keep responses natural and conversational for voice interaction. Use the user's 
                                 },
                                 'turn_detection': {
                                     'type': 'server_vad',
-                                    'threshold': 0.2,  # Very sensitive (0.0-1.0, lower = more sensitive)
+                                    'threshold': 0.5,  # Very sensitive (0.0-1.0, lower = more sensitive)
                                     'prefix_padding_ms': 300,
                                     'silence_duration_ms': 1000,  # Wait 1 second of silence before considering speech ended
                                     'create_response': True
