@@ -6,9 +6,10 @@
  */
 
 import { realtime } from '@openai/agents';
+import { z } from 'zod';
 import axiosInstance from '../utils/axios';
 
-const { RealtimeAgent, RealtimeSession } = realtime;
+const { RealtimeAgent, RealtimeSession, tool } = realtime;
 
 // Simple EventEmitter implementation for browser
 class EventEmitter {
@@ -115,17 +116,64 @@ class RealtimeVoiceService extends EventEmitter {
     try {
       console.log('[RealtimeVoice] Creating RealtimeAgent...');
       
-      // Note: We're NOT using hostedMcpTool because our MCP server is not publicly accessible
-      // OpenAI's servers cannot reach our local/private backend
-      // Instead, the backend already configured tools in the session
-      // Tools will be available through the session config from backend
+      // Define tools that execute via backend
+      // The SDK will handle calling these automatically
+      const getUserPetInfoTool = tool({
+        name: 'get_user_pet_info_detailed',
+        description: 'Get detailed information about a user and their pets, including health records and abnormal posts',
+        parameters: z.object({
+          user_id: z.number().describe('The ID of the user to fetch information for'),
+        }),
+        execute: async ({ user_id }: { user_id: number }) => {
+          console.log('[RealtimeVoice] Executing get_user_pet_info_detailed via backend');
+          const response = await axiosInstance.post('/ai/realtime/execute-tool/', {
+            tool_name: 'get_user_pet_info_detailed',
+            arguments: { user_id },
+          });
+          return JSON.stringify(response.data);
+        },
+      });
+
+      const performDatabaseOperationTool = tool({
+        name: 'perform_database_operation',
+        description: 'Perform database operations like adding pets, creating abnormal posts, or disease archives',
+        parameters: z.object({
+          operation: z.string().describe('The type of database operation to perform'),
+          data: z.any().describe('The data for the operation'),
+        }),
+        execute: async ({ operation, data = {} }: { operation: string; data?: any }) => {
+          console.log('[RealtimeVoice] Executing perform_database_operation via backend');
+          const response = await axiosInstance.post('/ai/realtime/execute-tool/', {
+            tool_name: 'perform_database_operation',
+            arguments: { operation, data },
+          });
+          return JSON.stringify(response.data);
+        },
+      });
+
+      const getNavigationPathsTool = tool({
+        name: 'get_navigation_paths',
+        description: 'Get available navigation paths in the PETer app',
+        parameters: z.object({
+          feature: z.string().optional().describe('Optional: specific feature to get path for'),
+        }),
+        execute: async ({ feature }: { feature?: string }) => {
+          console.log('[RealtimeVoice] Executing get_navigation_paths via backend');
+          const response = await axiosInstance.post('/ai/realtime/execute-tool/', {
+            tool_name: 'get_navigation_paths',
+            arguments: { feature },
+          });
+          return JSON.stringify(response.data);
+        },
+      });
       
-      // Create RealtimeAgent with instructions (tools already configured by backend)
+      // Create RealtimeAgent with instructions and tools
+      // The SDK will automatically handle tool execution
       this.agent = new RealtimeAgent({
         name: 'peter',
         instructions: this.sessionConfig.instructions,
         voice: this.sessionConfig.voice as any,
-        // Not adding tools here - they're in the session config from backend
+        tools: [getUserPetInfoTool, performDatabaseOperationTool, getNavigationPathsTool],
       });
 
       console.log('[RealtimeVoice] Creating RealtimeSession...');
@@ -141,13 +189,12 @@ class RealtimeVoiceService extends EventEmitter {
       console.log('[RealtimeVoice] Connecting with ephemeral token...');
       
       // Connect using the ephemeral token from backend
-      // The token already has the tools configured
       await this.session.connect({
         apiKey: this.sessionConfig.client_secret.value,
       });
       
       console.log('[RealtimeVoice] ✅ Connected successfully (WebRTC auto-handling audio)');
-      console.log('[RealtimeVoice] Tools are configured in the backend session');
+      console.log('[RealtimeVoice] Tools registered and will execute automatically via backend');
 
       // Send greeting if available
       if (this.sessionConfig.greeting) {
@@ -201,19 +248,53 @@ class RealtimeVoiceService extends EventEmitter {
       console.log('[RealtimeVoice] Audio interrupted');
     });
 
-    // Listen for tool approval requests (shouldn't happen with requireApproval: 'never')
-    this.session.on('tool_approval_requested', (context, agent, request) => {
-      console.log('[RealtimeVoice] Tool approval requested:', request);
-    });
-
-    // Listen for guardrail trips
-    this.session.on('guardrail_tripped', (details) => {
-      console.log('[RealtimeVoice] Guardrail tripped:', details);
-    });
-
-    // Access the transport layer to listen to all raw events
-    this.session.transport.on('*', (event: any) => {
-      // Log important events
+    // Access the transport layer to intercept function call events
+    this.session.transport.on('*', async (event: any) => {
+      // Log all events for debugging
+      if (event.type && event.type.includes('function')) {
+        console.log('[RealtimeVoice] Function-related event:', event.type, event);
+      }
+      
+      // Intercept function call requests
+      if (event.type === 'response.function_call_arguments.done') {
+        const { call_id, name, arguments: args } = event;
+        console.log('[RealtimeVoice] Function call detected:', { call_id, name, args });
+        
+        try {
+          // Execute tool via backend
+          const result = await this.executeToolViaBackend(name, args);
+          console.log('[RealtimeVoice] Tool result:', result);
+          
+          // Send the result back to the session
+          this.session!.transport.sendEvent({
+            type: 'conversation.item.create',
+            item: {
+              type: 'function_call_output',
+              call_id: call_id,
+              output: JSON.stringify(result),
+            },
+          });
+          
+          // Trigger a new response with the tool output
+          this.session!.transport.sendEvent({
+            type: 'response.create',
+          });
+        } catch (error) {
+          console.error('[RealtimeVoice] Tool execution failed:', error);
+          
+          // Send error back to session
+          this.session!.transport.sendEvent({
+            type: 'conversation.item.create',
+            item: {
+              type: 'function_call_output',
+              call_id: call_id,
+              output: JSON.stringify({ error: String(error) }),
+            },
+          });
+        }
+      }
+      
+      // Forward other important events
       if (event.type === 'response.audio.delta') {
         this.emit('response.audio.delta', event);
       } else if (event.type === 'conversation.updated') {
@@ -225,6 +306,27 @@ class RealtimeVoiceService extends EventEmitter {
     });
 
     console.log('[RealtimeVoice] ✅ Event listeners configured');
+  }
+
+  /**
+   * Execute a tool call via the backend
+   */
+  private async executeToolViaBackend(toolName: string, args: string): Promise<any> {
+    console.log('[RealtimeVoice] Executing tool via backend:', toolName);
+    
+    try {
+      const parsedArgs = typeof args === 'string' ? JSON.parse(args) : args;
+      
+      const response = await axiosInstance.post('/ai/realtime/execute-tool/', {
+        tool_name: toolName,
+        arguments: parsedArgs,
+      });
+      
+      return response.data;
+    } catch (error) {
+      console.error('[RealtimeVoice] Backend tool execution error:', error);
+      throw error;
+    }
   }
 
   /**
