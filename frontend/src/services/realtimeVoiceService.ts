@@ -18,19 +18,30 @@ import { OpenAIRealtimeWebSocket } from 'openai/realtime/websocket';
 import axiosInstance from '../utils/axios';
 
 export interface RealtimeSessionConfig {
-  session_id: string;
   client_secret: {
-    value: string;
+    value: string;  // This is the ephemeral API key to use for connection
     expires_at: number;
   };
   model: string;
   voice: string;
   instructions: string;
-  modalities: string[];
-  tools: any[];
+  tools_count: number;  // Number of tools configured (not the full tool definitions)
   user_id: number;
   conversation_id?: number;
   conversation_title?: string;
+  audio?: {  // Audio configuration from backend (includes turn_detection)
+    input?: {
+      format?: any;
+      turn_detection?: {
+        type: string;
+        threshold?: number;
+        prefix_padding_ms?: number;
+        silence_duration_ms?: number;
+        create_response?: boolean;
+      };
+    };
+    output?: any;
+  };
 }
 
 export interface CreateSessionOptions {
@@ -57,6 +68,7 @@ class RealtimeVoiceService {
   private isPlayingAudio: boolean = false;
   private audioWorkletNode: AudioWorkletNode | null = null;
   private isCapturing: boolean = false;
+  private isSessionReady: boolean = false;
 
   /**
    * Create a new realtime session through the backend
@@ -74,13 +86,15 @@ class RealtimeVoiceService {
         throw new Error('Invalid session config received');
       }
 
-      console.log('[RealtimeVoice] ✅ Session created:', {
-        session_id: this.sessionConfig.session_id,
+      console.log('[RealtimeVoice] ✅ Session configuration received:', {
         model: this.sessionConfig.model,
         voice: this.sessionConfig.voice,
-        modalities: this.sessionConfig.modalities,
-        tools_count: this.sessionConfig.tools?.length || 0,
-        conversation_id: this.sessionConfig.conversation_id
+        tools_count: this.sessionConfig.tools_count,
+        conversation_id: this.sessionConfig.conversation_id,
+        has_audio_config: !!this.sessionConfig.audio,
+        has_turn_detection: !!this.sessionConfig.audio?.input?.turn_detection,
+        turn_detection_type: this.sessionConfig.audio?.input?.turn_detection?.type,
+        expires_at: new Date(this.sessionConfig.client_secret.expires_at * 1000).toISOString()
       });
 
       return this.sessionConfig;
@@ -99,27 +113,27 @@ class RealtimeVoiceService {
       throw new Error('No session config. Call createSession() first.');
     }
 
-    const token = this.sessionConfig.client_secret.value;
+    const ephemeralKey = this.sessionConfig.client_secret.value;
     const model = this.sessionConfig.model;
     
     console.log('[RealtimeVoice] Connecting to OpenAI Realtime API...');
     console.log('[RealtimeVoice] Model:', model);
-    console.log('[RealtimeVoice] Session ID:', this.sessionConfig.session_id);
-    console.log('[RealtimeVoice] Token type:', token.startsWith('ek_') ? 'ephemeral' : 'unknown');
-    console.log('[RealtimeVoice] MCP Tools:', this.sessionConfig.tools?.length || 0);
+    console.log('[RealtimeVoice] Ephemeral key type:', ephemeralKey.startsWith('ek_') ? 'ek (ephemeral)' : 'unknown');
+    console.log('[RealtimeVoice] MCP Tools configured on backend:', this.sessionConfig.tools_count);
+    console.log('[RealtimeVoice] Key expires at:', new Date(this.sessionConfig.client_secret.expires_at * 1000).toLocaleString());
 
     try {
-      // Create WebSocket using the ephemeral client_secret from GA endpoint
-      // Use GA baseURL to connect to wss://api.openai.com/v1/realtime
-      // This matches the backend's /v1/realtime/sessions endpoint
+      // Create WebSocket using the ephemeral key as the API key
+      // The ephemeral key contains the full session configuration (including tools)
+      // When we connect, OpenAI will automatically create a session with those tools
       this.transport = new OpenAIRealtimeWebSocket(
         {
           model: model,
-          dangerouslyAllowBrowser: true,  // Required for browser usage
+          dangerouslyAllowBrowser: true,  // The ephemeral key is safe to use in browser
         },
         {
-          apiKey: token,  // Use the ephemeral client_secret from GA endpoint
-          baseURL: 'https://api.openai.com/v1',  // GA endpoint
+          apiKey: ephemeralKey,  // Use the ephemeral key from /v1/realtime/client_secrets
+          baseURL: 'https://api.openai.com/v1',
         }
       );
 
@@ -177,47 +191,14 @@ class RealtimeVoiceService {
       // Initialize audio context for playback
       this.audioContext = new AudioContext({ sampleRate: 24000 });
 
-      // Update session configuration (voice, audio formats, VAD, etc.)
-      // 注意：GA 版本的 Realtime API 不接受 session 物件中的 modalities 與內部 type 欄位
-      console.log('[RealtimeVoice] Updating session configuration...');
-      const awaitSessionUpdated = new Promise<void>((resolve, reject) => {
-        const onEvent = (event: any) => {
-          if (event.type === 'session.updated') {
-            this.transport?.off?.('event', onEvent as any);
-            resolve();
-          } else if (event.type === 'error') {
-            this.transport?.off?.('event', onEvent as any);
-            reject(event.error || new Error('Session update error'));
-          }
-        };
-        this.transport!.on('event', onEvent as any);
-        // 安全用 timeout，避免永遠等待
-        setTimeout(() => {
-          this.transport?.off?.('event', onEvent as any);
-          reject(new Error('Session update timeout'));
-        }, 10000);
-      });
-
-      this.transport.send({
-        type: 'session.update',
-        session: {
-          voice: this.sessionConfig.voice || 'alloy',
-          input_audio_format: 'pcm16',
-          output_audio_format: 'pcm16',
-          input_audio_transcription: {
-            model: 'whisper-1',
-          },
-          turn_detection: {
-            type: 'server_vad',
-            threshold: 0.5,
-            prefix_padding_ms: 300,
-            silence_duration_ms: 500,
-          },
-        },
-      });
-
-      await awaitSessionUpdated;
-      console.log('[RealtimeVoice] Session configuration updated (acknowledged)');
+      // The session is automatically created with the configuration we specified
+      // in the backend when creating the client_secret, including:
+      // - Model, instructions, tools (MCP tools included!)
+      // - Audio input/output format and voice
+      // - Output modalities
+      // We wait for session.created event to confirm the session is ready
+      console.log('[RealtimeVoice] Waiting for session.created event...');
+      console.log('[RealtimeVoice] Session will include', this.sessionConfig.tools_count, 'MCP tools');
 
       this.emit({ type: 'connection.opened' });
 
@@ -237,7 +218,8 @@ class RealtimeVoiceService {
 
     // Listen to all server events (uses 'event' listener for all events)
     this.transport.on('event', (event: any) => {
-      console.log('[RealtimeVoice] Server event:', event.type);
+      // Log ALL events to see what we're getting
+      console.log('[RealtimeVoice] 📥 RAW EVENT:', event.type);
       
       // Forward to our event handlers
       this.emit(event);
@@ -245,7 +227,35 @@ class RealtimeVoiceService {
       // Handle specific events
       switch (event.type) {
         case 'session.created':
-          console.log('[RealtimeVoice] Session created on server');
+          this.isSessionReady = true;
+          console.log('[RealtimeVoice] ✅ Session created on server');
+          
+          // Check if VAD/turn detection is properly configured
+          const session = event.session;
+          
+          // First check the event session, then fall back to our stored config
+          const turnDetectionFromEvent = session?.turn_detection || session?.audio?.input?.turn_detection;
+          const turnDetectionFromConfig = this.sessionConfig?.audio?.input?.turn_detection;
+          const turnDetection = turnDetectionFromEvent || turnDetectionFromConfig;
+          
+          console.log('[RealtimeVoice] 📋 Session configuration:', {
+            model: session?.model,
+            modalities: session?.modalities,
+            instructions_preview: session?.instructions?.substring(0, 100) + '...',
+            tools_count: session?.tools?.length || 0,
+            turn_detection_from_event: turnDetectionFromEvent,
+            turn_detection_from_config: turnDetectionFromConfig,
+            turn_detection_final: turnDetection,
+            full_session: session
+          });
+          
+          if (!turnDetection) {
+            console.error('[RealtimeVoice] ⚠️ WARNING: No VAD/turn_detection configured! The AI will not auto-respond.');
+            console.error('[RealtimeVoice] Expected turn_detection config but got:', turnDetection);
+          } else {
+            console.log('[RealtimeVoice] 🎤 Server VAD is active - speak naturally, AI will respond when you pause');
+            console.log('[RealtimeVoice] VAD config:', turnDetection);
+          }
           break;
           
         case 'session.updated':
@@ -265,18 +275,35 @@ class RealtimeVoiceService {
           break;
           
         case 'response.created':
-          console.log('[RealtimeVoice] Response created');
+          console.log('[RealtimeVoice] 🤖 Response created:', event.response?.id);
           break;
           
         case 'response.done':
-          console.log('[RealtimeVoice] Response done');
+          console.log('[RealtimeVoice] ✅ Response done:', {
+            response_id: event.response?.id,
+            status: event.response?.status,
+            output: event.response?.output
+          });
           break;
           
         case 'response.audio.delta':
+          console.log('[RealtimeVoice] 🔊 Audio delta received, length:', event.delta?.length);
           // Handle audio delta - play the audio
           if (event.delta) {
             this.handleAudioDelta(event.delta);
           }
+          break;
+          
+        case 'response.audio.done':
+          console.log('[RealtimeVoice] 🔊 Audio response complete');
+          break;
+          
+        case 'response.output_item.added':
+          console.log('[RealtimeVoice] Output item added:', event.item?.type);
+          break;
+          
+        case 'response.output_item.done':
+          console.log('[RealtimeVoice] Output item done:', event.item?.type);
           break;
           
         case 'response.audio_transcript.delta':
@@ -288,15 +315,24 @@ class RealtimeVoiceService {
           break;
           
         case 'input_audio_buffer.speech_started':
-          console.log('[RealtimeVoice] User started speaking');
+          console.log('[RealtimeVoice] 🎤 User started speaking');
           break;
           
         case 'input_audio_buffer.speech_stopped':
-          console.log('[RealtimeVoice] User stopped speaking');
+          console.log('[RealtimeVoice] 🔇 User stopped speaking');
+          break;
+          
+        case 'input_audio_buffer.committed':
+          console.log('[RealtimeVoice] ✅ Audio buffer committed');
           break;
           
         case 'error':
           console.error('[RealtimeVoice] Server error:', event.error);
+          break;
+          
+        default:
+          // Log any unhandled events
+          console.log('[RealtimeVoice] ⚠️ Unhandled event type:', event.type, event);
           break;
       }
     });
@@ -325,7 +361,10 @@ class RealtimeVoiceService {
    * Convert base64 audio to PCM16 and play it
    */
   private handleAudioDelta(deltaBase64: string): void {
-    if (!this.audioContext) return;
+    if (!this.audioContext) {
+      console.warn('[RealtimeVoice] ⚠️ No AudioContext for playback');
+      return;
+    }
 
     try {
       // Decode base64 to binary
@@ -343,16 +382,25 @@ class RealtimeVoiceService {
         float32[i] = pcm16[i] / 32768.0;
       }
 
+      console.log('[RealtimeVoice] 🎵 Decoded audio:', {
+        base64_length: deltaBase64.length,
+        bytes_length: bytes.length,
+        samples: pcm16.length,
+        duration_ms: (pcm16.length / 24000 * 1000).toFixed(2)
+      });
+
       // Add to playback queue
       this.audioQueue.push(float32);
+      console.log('[RealtimeVoice] Queue size:', this.audioQueue.length);
       
       // Start playback if not already playing
       if (!this.isPlayingAudio) {
+        console.log('[RealtimeVoice] ▶️ Starting playback');
         this.playNextAudioChunk();
       }
       
     } catch (error) {
-      console.error('[RealtimeVoice] Error handling audio delta:', error);
+      console.error('[RealtimeVoice] ❌ Error handling audio delta:', error);
     }
   }
 
@@ -362,11 +410,21 @@ class RealtimeVoiceService {
   private playNextAudioChunk(): void {
     if (!this.audioContext || this.audioQueue.length === 0) {
       this.isPlayingAudio = false;
+      console.log('[RealtimeVoice] ⏹️ Playback stopped, queue empty');
       return;
     }
 
     this.isPlayingAudio = true;
     const audioData = this.audioQueue.shift()!;
+
+    // Only log first chunk and then every 5th chunk
+    if (this.audioQueue.length === 0 || this.audioQueue.length % 5 === 0) {
+      console.log('[RealtimeVoice] 🎵 Playing chunk:', {
+        samples: audioData.length,
+        duration_ms: (audioData.length / 24000 * 1000).toFixed(2),
+        remaining_chunks: this.audioQueue.length
+      });
+    }
 
     // Create audio buffer
     const audioBuffer = this.audioContext.createBuffer(
@@ -444,6 +502,7 @@ class RealtimeVoiceService {
       // Using 4096 buffer size for good balance between latency and performance
       const processor = localAudioContext.createScriptProcessor(4096, 1, 1);
 
+      let audioChunkCount = 0;
       processor.onaudioprocess = (audioProcessingEvent) => {
         if (!this.isCapturing || !this.transport) return;
 
@@ -461,6 +520,12 @@ class RealtimeVoiceService {
         // Convert to base64
         const base64Audio = this.arrayBufferToBase64(pcm16.buffer);
 
+        // Log every 50th chunk to avoid spam (about once every 10 seconds)
+        audioChunkCount++;
+        if (audioChunkCount % 50 === 0) {
+          console.log('[RealtimeVoice] 📤 Audio streaming active (chunk #' + audioChunkCount + ')');
+        }
+
         // Send to Realtime API
         try {
           this.transport.send({
@@ -468,7 +533,7 @@ class RealtimeVoiceService {
             audio: base64Audio
           });
         } catch (error) {
-          console.error('[RealtimeVoice] Error sending audio:', error);
+          console.error('[RealtimeVoice] ❌ Error sending audio:', error);
         }
       };
 
@@ -481,6 +546,8 @@ class RealtimeVoiceService {
       this.isCapturing = true;
 
       console.log('[RealtimeVoice] ✅ Audio capture started (PCM16 24kHz)');
+      console.log('[RealtimeVoice] ℹ️ Audio is continuously streamed to server for VAD detection');
+      console.log('[RealtimeVoice] ℹ️ Server will detect when you speak and auto-respond when you pause');
 
     } catch (error) {
       console.error('[RealtimeVoice] ❌ Failed to start audio capture:', error);
@@ -621,8 +688,8 @@ class RealtimeVoiceService {
     return {
       connected: this.isConnected(),
       status,
-      session_id: this.sessionConfig?.session_id,
-      model: this.sessionConfig?.model
+      model: this.sessionConfig?.model,
+      tools_count: this.sessionConfig?.tools_count
     };
   }
 

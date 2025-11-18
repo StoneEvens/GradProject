@@ -996,8 +996,9 @@ Keep responses natural and conversational for voice interaction. Use the user's 
             }
         ]
         
-        # Create realtime session using the /v1/realtime/client_secrets endpoint (GA API)
-        # This endpoint creates ephemeral client secrets for secure client-side usage
+        # Create realtime client secret using the /v1/realtime/client_secrets endpoint (GA API)
+        # This endpoint creates an ephemeral key that can be used client-side to create sessions
+        # with the specified configuration (including tools)
         try:
             openai_response = requests.post(
                 'https://api.openai.com/v1/realtime/client_secrets',
@@ -1010,7 +1011,29 @@ Keep responses natural and conversational for voice interaction. Use the user's 
                         'type': 'realtime',
                         'model': model,
                         'instructions': instructions,
-                        'tools': tools
+                        'tools': tools,
+                        'audio': {
+                            'input': {
+                                'format': {
+                                    'type': 'audio/pcm',
+                                    'rate': 24000
+                                },
+                                'turn_detection': {
+                                    'type': 'server_vad',
+                                    'threshold': 0.5,
+                                    'prefix_padding_ms': 300,
+                                    'silence_duration_ms': 500,
+                                    'create_response': True
+                                }
+                            },
+                            'output': {
+                                'format': {
+                                    'type': 'audio/pcm',
+                                    'rate': 24000
+                                },
+                                'voice': voice
+                            }
+                        }
                     }
                 },
                 timeout=10
@@ -1035,24 +1058,15 @@ Keep responses natural and conversational for voice interaction. Use the user's 
 
         # The /v1/realtime/client_secrets endpoint returns:
         # {
-        #   'value': '<ephemeral_key>',
+        #   'value': '<ephemeral_key>',  # This is the key to use as apiKey in frontend
         #   'expires_at': <timestamp>,
-        #   'session': { 'id': '...', 'model': '...', ... }
+        #   'session': { full session configuration with tools }
         # }
-
-        # Extract session details
-        session_info = session_response_data.get('session', {})
-        session_id = session_info.get('id')
-
-        if not session_id:
-            logger.error(f"No session ID found in response")
-            return Response({
-                'error': 'Invalid response from OpenAI: missing session ID'
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         # Extract client secret (at top level)
         client_secret_value = session_response_data.get('value')
         expires_at = session_response_data.get('expires_at')
+        session_config = session_response_data.get('session', {})
 
         if not client_secret_value:
             logger.error(f"No client_secret value in response")
@@ -1060,22 +1074,24 @@ Keep responses natural and conversational for voice interaction. Use the user's 
                 'error': 'Invalid response from OpenAI: missing client_secret'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        logger.info(f"✅ Created GA realtime session for user {request.user.id}")
-        logger.info(f"Session ID: {session_id}")
+        logger.info(f"✅ Created realtime client secret for user {request.user.id}")
+        logger.info(f"Ephemeral key created (expires at {expires_at})")
         logger.info(f"Tools configured: {len(tools)}")
+        logger.info(f"Session config includes: model={session_config.get('model')}, tools={len(session_config.get('tools', []))}")
 
+        # Return the ephemeral key and session configuration
+        # The frontend will use the 'value' as the apiKey to connect
         session_data = {
-            'session_id': session_id,
             'client_secret': {
-                'value': client_secret_value,
+                'value': client_secret_value,  # This is the ephemeral API key
                 'expires_at': expires_at
             },
-            'model': session_info.get('model', model),
-            'voice': session_info.get('audio', {}).get('output', {}).get('voice', voice),
-            'instructions': session_info.get('instructions', instructions),
-            'modalities': session_info.get('output_modalities', ['text', 'audio']),
-            'tools': tools,
+            'model': session_config.get('model', model),
+            'voice': voice,
+            'instructions': session_config.get('instructions', instructions),
+            'tools_count': len(session_config.get('tools', [])),  # Don't send full tools to frontend
             'user_id': request.user.id,
+            'audio': session_config.get('audio', {}),  # Include audio config with turn_detection
         }
         
         # Add conversation_id if linked
@@ -1083,7 +1099,7 @@ Keep responses natural and conversational for voice interaction. Use the user's 
             session_data['conversation_id'] = conversation.id
             session_data['conversation_title'] = conversation.title
         
-        logger.info(f"Created realtime session for user {request.user.id}: {session_data['session_id']}")
+        logger.info(f"Returning realtime client secret for user {request.user.id}")
         
         return Response(session_data, status=status.HTTP_201_CREATED)
         
