@@ -1102,63 +1102,108 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
   }, [tutorialType, onComplete]);
 
   // 處理下一步
-  const handleNextStep = useCallback(() => {
-    console.log('handleNextStep 被調用:', {
-      tutorial: !!tutorial,
-      isTransitioning,
-      currentStep,
-      tutorialType
-    });
+  // const handleNextStep = useCallback(() => {
+  //   console.log('handleNextStep 被調用:', {
+  //     tutorial: !!tutorial,
+  //     isTransitioning,
+  //     currentStep,
+  //     tutorialType
+  //   });
 
-    if (!tutorial || isTransitioning) {
-      console.log('handleNextStep 提早返回:', { tutorial: !!tutorial, isTransitioning });
-      return;
-    }
+  //   if (!tutorial || isTransitioning) {
+  //     console.log('handleNextStep 提早返回:', { tutorial: !!tutorial, isTransitioning });
+  //     return;
+  //   }
+
+  //   setIsTransitioning(true);
+
+  //   const nextStep = tutorialUtils.getNextStep(tutorialType, currentStep);
+  //   console.log('下一步驟:', nextStep, '當前步驟:', currentStep);
+
+  //   if (nextStep && nextStep.id > currentStep) {  // 確保是前進，不是回退
+  //     const isNextLastStep = tutorialUtils.isLastStep(tutorialType, nextStep.id);
+  //     // 執行步驟動作
+  //     if (stepData && stepData.action === 'click' && stepData.expectedPath) {
+  //       // 如果需要導航，讓導航先發生
+  //       setTimeout(() => {
+  //         // 在切換步驟時，暫時凍結聊天泡泡的重新定位，避免卡頓
+  //         const now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+  //         chatFreezeUntilRef.current = now + 220;
+  //         setStepData(nextStep);
+  //         setCurrentStep(nextStep.id);
+  //         // 若為最後一步，避免將第 10 步同步到 localStorage，改為維持上一階段狀態
+  //         if (isNextLastStep) {
+  //           tutorialUtils.saveTutorialProgress(tutorialType, currentStep, 'awaiting_confirm');
+  //         } else {
+  //           tutorialUtils.saveTutorialProgress(tutorialType, nextStep.id, 'in_progress');
+  //         }
+  //         setIsTransitioning(false);
+  //       }, 100);
+  //     } else {
+  //       // 在切換步驟時，暫時凍結聊天泡泡的重新定位，避免卡頓
+  //       const now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+  //       chatFreezeUntilRef.current = now + 220;
+  //       setStepData(nextStep);
+  //       setCurrentStep(nextStep.id);
+  //       // 若為最後一步，避免將第 10 步同步到 localStorage，改為維持上一階段狀態
+  //       if (isNextLastStep) {
+  //         tutorialUtils.saveTutorialProgress(tutorialType, currentStep, 'awaiting_confirm');
+  //       } else {
+  //         tutorialUtils.saveTutorialProgress(tutorialType, nextStep.id, 'in_progress');
+  //       }
+  //       setIsTransitioning(false);
+  //     }
+  //   } else {
+  //     // 到達最後一步，保持 overlay 顯示，等待用戶主動關閉
+  //     console.log('到達教學最後一步，等待用戶關閉');
+  //     setIsTransitioning(false);
+  //   }
+  // }, [tutorial, tutorialType, currentStep, stepData, isTransitioning, handleComplete]);
+  // 處理下一步（含自動滾動）
+  const handleNextStep = useCallback(async () => {
+    if (!tutorial || isTransitioning) return;
 
     setIsTransitioning(true);
 
     const nextStep = tutorialUtils.getNextStep(tutorialType, currentStep);
-    console.log('下一步驟:', nextStep, '當前步驟:', currentStep);
-
-    if (nextStep && nextStep.id > currentStep) {  // 確保是前進，不是回退
-      const isNextLastStep = tutorialUtils.isLastStep(tutorialType, nextStep.id);
-      // 執行步驟動作
-      if (stepData && stepData.action === 'click' && stepData.expectedPath) {
-        // 如果需要導航，讓導航先發生
-        setTimeout(() => {
-          // 在切換步驟時，暫時凍結聊天泡泡的重新定位，避免卡頓
-          const now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
-          chatFreezeUntilRef.current = now + 220;
-          setStepData(nextStep);
-          setCurrentStep(nextStep.id);
-          // 若為最後一步，避免將第 10 步同步到 localStorage，改為維持上一階段狀態
-          if (isNextLastStep) {
-            tutorialUtils.saveTutorialProgress(tutorialType, currentStep, 'awaiting_confirm');
-          } else {
-            tutorialUtils.saveTutorialProgress(tutorialType, nextStep.id, 'in_progress');
-          }
-          setIsTransitioning(false);
-        }, 100);
-      } else {
-        // 在切換步驟時，暫時凍結聊天泡泡的重新定位，避免卡頓
-        const now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
-        chatFreezeUntilRef.current = now + 220;
-        setStepData(nextStep);
-        setCurrentStep(nextStep.id);
-        // 若為最後一步，避免將第 10 步同步到 localStorage，改為維持上一階段狀態
-        if (isNextLastStep) {
-          tutorialUtils.saveTutorialProgress(tutorialType, currentStep, 'awaiting_confirm');
-        } else {
-          tutorialUtils.saveTutorialProgress(tutorialType, nextStep.id, 'in_progress');
-        }
-        setIsTransitioning(false);
-      }
-    } else {
-      // 到達最後一步，保持 overlay 顯示，等待用戶主動關閉
-      console.log('到達教學最後一步，等待用戶關閉');
+    if (!nextStep || nextStep.id <= currentStep) {
       setIsTransitioning(false);
+      return;
     }
-  }, [tutorial, tutorialType, currentStep, stepData, isTransitioning, handleComplete]);
+
+    // 切換到下一步
+    setStepData(nextStep);
+    setCurrentStep(nextStep.id);
+
+    // 儲存進度
+    tutorialUtils.saveTutorialProgress(tutorialType, nextStep.id, 'in_progress');
+
+    // ⏳ 等 React 重新 render 完成
+    await new Promise(r => setTimeout(r, 300));
+
+    // 🔽 自動滾動到下一步的目標元素
+    const selector = nextStep.targetElement?.selector;
+    if (selector) {
+      let el = null;
+
+      // 支援 :contains()
+      if (selector.includes(':contains(')) {
+        el = findElementWithSelector(selector);
+      } else {
+        el = document.querySelector(selector);
+      }
+
+      if (el) {
+        el.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center'
+        });
+      }
+    }
+
+    setIsTransitioning(false);
+  }, [tutorial, tutorialType, currentStep, isTransitioning]);
+
 
   // 條件監聽
   const startConditionMonitoring = useCallback((condition) => {
@@ -1545,13 +1590,6 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
 
           break;
         }
-
-
-
-
-
-
-
 
         case 'editorOpen':
           // 檢查是否有圖片編輯器打開
