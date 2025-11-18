@@ -1121,12 +1121,12 @@ def execute_realtime_tool(request):
     Execute MCP tool for realtime agent
     
     Called by frontend when the realtime AI wants to execute a function.
-    This forwards the call to the MCP server and returns the result.
+    This executes the tool directly by importing and calling it.
     
     Request body:
         {
             "tool_name": "get_user_pet_info_detailed",
-            "arguments": {"user_id": "123"}
+            "arguments": {"user_id": 123}
         }
     
     Response:
@@ -1134,6 +1134,8 @@ def execute_realtime_tool(request):
             "result": {...}  # Tool execution result
         }
     """
+    import asyncio
+    
     try:
         tool_name = request.data.get('tool_name')
         arguments = request.data.get('arguments', {})
@@ -1146,30 +1148,61 @@ def execute_realtime_tool(request):
         logger.info(f"🔧 Executing MCP tool: {tool_name}")
         logger.info(f"   Arguments: {arguments}")
         
-        # Add user_id to arguments if the tool needs it
-        if 'user_id' in arguments or tool_name in ['get_user_pet_info_detailed', 'get_user_information']:
-            arguments['user_id'] = str(request.user.id)
+        # Add user_id to arguments if not present and tool needs it
+        if tool_name in ['get_user_pet_info_detailed', 'get_user_information']:
+            if 'user_id' not in arguments:
+                arguments['user_id'] = request.user.id
+            logger.info(f"   Added user_id: {arguments['user_id']}")
         
-        # Execute the tool via MCP server
-        import requests as http_requests
-        mcp_response = http_requests.post(
-            f"{settings.MCP_SERVER_URL}/execute",
-            json={
-                'tool': tool_name,
-                'arguments': arguments
-            },
-            timeout=30
-        )
+        # Import tool directly from mcp_server module
+        # The tools are defined as decorated functions in server.py
+        from mcp_server import server as mcp_module
         
-        if mcp_response.status_code != 200:
-            logger.error(f"MCP tool execution failed: {mcp_response.status_code}")
-            logger.error(f"Response: {mcp_response.text}")
+        # Map tool names to actual function names
+        tool_map = {
+            'get_user_pet_info_detailed': 'get_user_pet_info_detailed',
+            'perform_database_operation': 'perform_database_operation',
+            'get_navigation_paths': 'get_navigation_paths',
+        }
+        
+        if tool_name not in tool_map:
+            logger.error(f"Tool {tool_name} not found")
             return Response({
-                'error': f'Tool execution failed: {mcp_response.text}'
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                'error': f'Tool {tool_name} not found'
+            }, status=status.HTTP_404_NOT_FOUND)
         
-        result = mcp_response.json()
+        # Get the MCP server instance and find the tool
+        mcp_server = mcp_module.create_mcp_server()
+        
+        # FastMCP stores tools in ._tools list
+        tool_func = None
+        for tool in mcp_server._tools:
+            if tool.name == tool_name:
+                tool_func = tool.fn
+                break
+        
+        if not tool_func:
+            logger.error(f"Tool {tool_name} not found in MCP server")
+            return Response({
+                'error': f'Tool {tool_name} not found'
+            }, status=status.HTTP_404_NOT_FOUND)
+        
+        # Execute the tool
+        logger.info(f"Calling tool function: {tool_name}")
+        
+        # Run async function
+        if asyncio.iscoroutinefunction(tool_func):
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                result = loop.run_until_complete(tool_func(**arguments))
+            finally:
+                loop.close()
+        else:
+            result = tool_func(**arguments)
+        
         logger.info(f"✅ Tool executed successfully: {tool_name}")
+        logger.info(f"   Result type: {type(result)}")
         
         return Response({
             'result': result
