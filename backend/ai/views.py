@@ -1121,7 +1121,7 @@ def execute_realtime_tool(request):
     Execute MCP tool for realtime agent
     
     Called by frontend when the realtime AI wants to execute a function.
-    This executes the tool directly by importing and calling it.
+    This connects to the remote MCP server via SSE and calls the tool.
     
     Request body:
         {
@@ -1135,6 +1135,9 @@ def execute_realtime_tool(request):
         }
     """
     import asyncio
+    from mcp import ClientSession
+    from mcp.client.sse import sse_client
+    from django.conf import settings
     
     try:
         tool_name = request.data.get('tool_name')
@@ -1154,59 +1157,57 @@ def execute_realtime_tool(request):
                 arguments['user_id'] = request.user.id
             logger.info(f"   Added user_id: {arguments['user_id']}")
         
-        # Import tool directly from mcp_server module
-        # The tools are defined as decorated functions in server.py
-        from mcp_server import server as mcp_module
+        # Connect to the remote MCP server via SSE
+        async def call_mcp_tool():
+            # Get MCP server URL from settings
+            mcp_url = settings.MCP_SERVER_URL
+            if not mcp_url.endswith('/sse'):
+                mcp_url = f"{mcp_url}/sse"
+            
+            logger.info(f"   Connecting to MCP server: {mcp_url}")
+            
+            async with sse_client(mcp_url) as (read, write):
+                async with ClientSession(read, write) as session:
+                    # Initialize the session
+                    await session.initialize()
+                    logger.info(f"   ✅ Connected to MCP server")
+                    
+                    # List available tools (optional, for debugging)
+                    # tools_response = await session.list_tools()
+                    # logger.info(f"   Available tools: {[t.name for t in tools_response.tools]}")
+                    
+                    # Call the tool
+                    logger.info(f"   Calling tool: {tool_name}")
+                    result = await session.call_tool(tool_name, arguments=arguments)
+                    logger.info(f"   ✅ Tool executed successfully")
+                    
+                    return result
         
-        # Map tool names to actual function names
-        tool_map = {
-            'get_user_pet_info_detailed': 'get_user_pet_info_detailed',
-            'perform_database_operation': 'perform_database_operation',
-            'get_navigation_paths': 'get_navigation_paths',
-        }
-        
-        if tool_name not in tool_map:
-            logger.error(f"Tool {tool_name} not found")
+        # Run the async function
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        try:
+            result = loop.run_until_complete(call_mcp_tool())
+            
+            # Extract the content from the MCP result
+            # MCP returns CallToolResult with content array
+            if hasattr(result, 'content') and result.content:
+                # Get the first text content
+                content = result.content[0]
+                if hasattr(content, 'text'):
+                    result_data = content.text
+                else:
+                    result_data = str(content)
+            else:
+                result_data = str(result)
+            
+            logger.info(f"   Result: {result_data[:200]}...")
+            
             return Response({
-                'error': f'Tool {tool_name} not found'
-            }, status=status.HTTP_404_NOT_FOUND)
-        
-        # Get the MCP server instance and find the tool
-        mcp_server = mcp_module.create_mcp_server()
-        
-        # FastMCP stores tools in ._tool_manager._tools dict
-        tool_func = None
-        for tool_name_key, tool_obj in mcp_server._tool_manager._tools.items():
-            if tool_name_key == tool_name:
-                tool_func = tool_obj.fn
-                break
-        
-        if not tool_func:
-            logger.error(f"Tool {tool_name} not found in MCP server")
-            return Response({
-                'error': f'Tool {tool_name} not found'
-            }, status=status.HTTP_404_NOT_FOUND)
-        
-        # Execute the tool
-        logger.info(f"Calling tool function: {tool_name}")
-        
-        # Run async function
-        if asyncio.iscoroutinefunction(tool_func):
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-            try:
-                result = loop.run_until_complete(tool_func(**arguments))
-            finally:
-                loop.close()
-        else:
-            result = tool_func(**arguments)
-        
-        logger.info(f"✅ Tool executed successfully: {tool_name}")
-        logger.info(f"   Result type: {type(result)}")
-        
-        return Response({
-            'result': result
-        }, status=status.HTTP_200_OK)
+                'result': result_data
+            }, status=status.HTTP_200_OK)
+        finally:
+            loop.close()
         
     except Exception as e:
         logger.error(f"Error executing tool: {str(e)}", exc_info=True)

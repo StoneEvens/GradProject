@@ -318,18 +318,29 @@ class RealtimeVoiceService extends EventEmitter {
    */
   private async executeToolViaBackend(toolName: string, args: string): Promise<any> {
     console.log('[RealtimeVoice] Executing tool via backend:', toolName);
+    console.log('[RealtimeVoice] Raw args type:', typeof args);
+    console.log('[RealtimeVoice] Raw args value:', args);
     
     try {
       const parsedArgs = typeof args === 'string' ? JSON.parse(args) : args;
+      console.log('[RealtimeVoice] Parsed args:', parsedArgs);
       
-      const response = await axiosInstance.post('/ai/realtime/execute-tool/', {
+      const payload = {
         tool_name: toolName,
         arguments: parsedArgs,
-      });
+      };
+      console.log('[RealtimeVoice] Sending payload:', payload);
       
+      const response = await axiosInstance.post('/ai/realtime/execute-tool/', payload);
+      
+      console.log('[RealtimeVoice] Backend response:', response.data);
       return response.data;
-    } catch (error) {
+    } catch (error: any) {
       console.error('[RealtimeVoice] Backend tool execution error:', error);
+      if (error.response) {
+        console.error('[RealtimeVoice] Error response data:', error.response.data);
+        console.error('[RealtimeVoice] Error response status:', error.response.status);
+      }
       throw error;
     }
   }
