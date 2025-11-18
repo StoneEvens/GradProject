@@ -992,6 +992,8 @@ When users ask about specific pet information or app features, you can access:
 
 Keep responses natural and conversational for voice interaction. Use the user's name when appropriate. Always respond in English."""
 
+        logger.info(f"Session language: {language}, Greeting: {greeting[:30]}...")
+
         # Define MCP tools for the realtime session
         # These tools match the ones available in the MCP server
         tools = [
@@ -1070,9 +1072,9 @@ Keep responses natural and conversational for voice interaction. Use the user's 
                                 },
                                 'turn_detection': {
                                     'type': 'server_vad',
-                                    'threshold': 0.3,  # Lower threshold = more sensitive (0.0-1.0)
+                                    'threshold': 0.2,  # Very sensitive (0.0-1.0, lower = more sensitive)
                                     'prefix_padding_ms': 300,
-                                    'silence_duration_ms': 800,  # Wait longer before considering speech ended
+                                    'silence_duration_ms': 1000,  # Wait 1 second of silence before considering speech ended
                                     'create_response': True
                                 }
                             },
@@ -1161,3 +1163,72 @@ Keep responses natural and conversational for voice interaction. Use the user's 
         return Response({
             'error': f'Failed to create realtime session: {str(e)}'
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def execute_realtime_tool(request):
+    """
+    Execute MCP tool for realtime agent
+    
+    Called by frontend when the realtime AI wants to execute a function.
+    This forwards the call to the MCP server and returns the result.
+    
+    Request body:
+        {
+            "tool_name": "get_user_pet_info_detailed",
+            "arguments": {"user_id": "123"}
+        }
+    
+    Response:
+        {
+            "result": {...}  # Tool execution result
+        }
+    """
+    try:
+        tool_name = request.data.get('tool_name')
+        arguments = request.data.get('arguments', {})
+        
+        if not tool_name:
+            return Response({
+                'error': 'tool_name is required'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        logger.info(f"🔧 Executing MCP tool: {tool_name}")
+        logger.info(f"   Arguments: {arguments}")
+        
+        # Add user_id to arguments if the tool needs it
+        if 'user_id' in arguments or tool_name in ['get_user_pet_info_detailed', 'get_user_information']:
+            arguments['user_id'] = str(request.user.id)
+        
+        # Execute the tool via MCP server
+        import requests as http_requests
+        mcp_response = http_requests.post(
+            f"{settings.MCP_SERVER_URL}/execute",
+            json={
+                'tool': tool_name,
+                'arguments': arguments
+            },
+            timeout=30
+        )
+        
+        if mcp_response.status_code != 200:
+            logger.error(f"MCP tool execution failed: {mcp_response.status_code}")
+            logger.error(f"Response: {mcp_response.text}")
+            return Response({
+                'error': f'Tool execution failed: {mcp_response.text}'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+        result = mcp_response.json()
+        logger.info(f"✅ Tool executed successfully: {tool_name}")
+        
+        return Response({
+            'result': result
+        }, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        logger.error(f"Error executing tool: {str(e)}", exc_info=True)
+        return Response({
+            'error': f'Failed to execute tool: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+

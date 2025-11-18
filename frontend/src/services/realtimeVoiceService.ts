@@ -375,7 +375,18 @@ class RealtimeVoiceService {
           break;
           
         case 'response.function_call_arguments.delta':
-          console.log('[RealtimeVoice] Function call args delta:', event.delta);
+          // Function arguments are being streamed
+          console.log('[RealtimeVoice] 📞 Function call args delta:', event.delta);
+          break;
+          
+        case 'response.function_call_arguments.done':
+          // Function call is complete, execute it
+          console.log('[RealtimeVoice] 📞 Function call complete:', {
+            call_id: event.call_id,
+            name: event.name,
+            arguments: event.arguments
+          });
+          this.handleFunctionCall(event.call_id, event.name, event.arguments);
           break;
           
         case 'input_audio_buffer.speech_started':
@@ -571,11 +582,19 @@ class RealtimeVoiceService {
       const processor = localAudioContext.createScriptProcessor(4096, 1, 1);
 
       let audioChunkCount = 0;
+      let maxAmplitude = 0;
       processor.onaudioprocess = (audioProcessingEvent) => {
         if (!this.isCapturing || !this.transport) return;
 
         const inputBuffer = audioProcessingEvent.inputBuffer;
         const inputData = inputBuffer.getChannelData(0); // Float32Array
+
+        // Calculate max amplitude for monitoring
+        let chunkMax = 0;
+        for (let i = 0; i < inputData.length; i++) {
+          chunkMax = Math.max(chunkMax, Math.abs(inputData[i]));
+        }
+        maxAmplitude = Math.max(maxAmplitude, chunkMax);
 
         // Convert Float32 to Int16 (PCM16)
         const pcm16 = new Int16Array(inputData.length);
@@ -592,6 +611,11 @@ class RealtimeVoiceService {
         audioChunkCount++;
         if (audioChunkCount % 50 === 0) {
           console.log('[RealtimeVoice] 📤 Audio streaming active (chunk #' + audioChunkCount + ')');
+          console.log('[RealtimeVoice] 🎚️ Max audio level in last 50 chunks:', (maxAmplitude * 100).toFixed(1) + '%');
+          if (maxAmplitude < 0.01) {
+            console.warn('[RealtimeVoice] ⚠️ Audio level very low! Microphone might not be working or volume is too low.');
+          }
+          maxAmplitude = 0; // Reset for next batch
         }
 
         // Send to Realtime API
@@ -673,6 +697,9 @@ class RealtimeVoiceService {
   /**
    * Send a text message to the conversation
    */
+  /**
+   * Send text message to the conversation
+   */
   sendText(text: string): void {
     if (!this.transport) {
       throw new Error('Not connected');
@@ -696,6 +723,69 @@ class RealtimeVoiceService {
     this.transport.send({
       type: 'response.create'
     });
+  }
+
+  /**
+   * Handle function call from the AI
+   * Executes the MCP tool via backend and returns result to the conversation
+   */
+  private async handleFunctionCall(callId: string, functionName: string, args: string): Promise<void> {
+    try {
+      console.log('[RealtimeVoice] 🔧 Executing MCP tool:', functionName);
+      console.log('[RealtimeVoice] 🔧 Arguments:', args);
+
+      // Parse arguments
+      const parsedArgs = JSON.parse(args);
+
+      // Call backend to execute the MCP tool
+      const response = await axiosInstance.post('/ai/realtime/execute-tool/', {
+        tool_name: functionName,
+        arguments: parsedArgs
+      });
+
+      const result = response.data;
+      console.log('[RealtimeVoice] ✅ Tool execution result:', result);
+
+      // Send the function result back to the conversation
+      if (this.transport) {
+        this.transport.send({
+          type: 'conversation.item.create',
+          item: {
+            type: 'function_call_output',
+            call_id: callId,
+            output: JSON.stringify(result)
+          }
+        });
+
+        // Trigger response to continue the conversation with the function result
+        this.transport.send({
+          type: 'response.create'
+        });
+
+        console.log('[RealtimeVoice] ✅ Function result sent back to AI');
+      }
+
+    } catch (error) {
+      console.error('[RealtimeVoice] ❌ Error executing tool:', error);
+      
+      // Send error back to the AI
+      if (this.transport) {
+        this.transport.send({
+          type: 'conversation.item.create',
+          item: {
+            type: 'function_call_output',
+            call_id: callId,
+            output: JSON.stringify({ 
+              error: error instanceof Error ? error.message : 'Unknown error executing tool'
+            })
+          }
+        });
+
+        this.transport.send({
+          type: 'response.create'
+        });
+      }
+    }
   }
 
   /**

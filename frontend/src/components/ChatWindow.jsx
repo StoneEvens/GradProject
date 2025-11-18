@@ -17,7 +17,7 @@ const ChatWindow = ({
   onToggleFloating,
   onDismissFloating
 }) => {
-  const { t, ready } = useTranslation('main');
+  const { t, ready, i18n } = useTranslation('main');
   const navigate = useNavigate();
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState('');
@@ -252,8 +252,9 @@ const ChatWindow = ({
       const sessionConfig = await realtimeVoiceService.createSession({
         conversationId: currentConversationId,
         voice: 'alloy', // 可以改為其他聲音: echo, fable, onyx, nova, shimmer
-        language: ready ? (t('language_code') || 'zh-TW') : 'zh-TW', // Pass current UI language
+        language: i18n.language || 'zh-TW', // Use i18n.language directly
       });
+      console.log('[ChatWindow] Using language:', i18n.language);
 
       console.log('[ChatWindow] Step 2: Session created:', sessionConfig.session_id);
 

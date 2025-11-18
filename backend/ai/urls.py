@@ -13,6 +13,9 @@ urlpatterns = [
     # Realtime session endpoint - for voice interaction with OpenAI Realtime API
     path('realtime/session/create/', views.create_realtime_session, name='create-realtime-session'),
     
+    # Realtime tool execution endpoint - execute MCP tools for realtime agent
+    path('realtime/execute-tool/', views.execute_realtime_tool, name='execute-realtime-tool'),
+    
     # Conversation management endpoints
     path('conversations/create/', views.create_conversation, name='create-conversation'),
     path('conversations/', views.get_conversations, name='get-conversations'),
