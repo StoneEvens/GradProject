@@ -105,7 +105,7 @@ def create_mcp_server() -> FastMCP:
         name="get_user_pet_list",
         description="Fetch a user's list of pets."
     )
-    async def get_user_pet_list(user_id: int) -> Dict:
+    async def get_user_pet_list(user_id: int) -> str:
         @sync_to_async
         def fetch() -> Dict:
             try:
@@ -121,28 +121,35 @@ def create_mcp_server() -> FastMCP:
                 pets_data: list[dict] = []
                 for pet in pets_qs:
                     pets_data.append({
-                        'name': pet.name,
-                        'type': pet.type
+                        'id': pet.id,
+                        'name': pet.pet_name,
+                        'type': pet.pet_type,
+                        'breed': pet.breed,
+                        'age': pet.age,
+                        'weight': pet.weight,
                     })
 
                 # Ensure JSON-serializable primitives
                 pets_data = json.loads(json.dumps(pets_data, default=str))
 
                 return {
+                    "success": True,
                     "user": user.username,
+                    "user_id": user_id,
                     "pets": pets_data
                 }
             except Exception as e:
                 return {"error": f"Failed to fetch pet list: {str(e)}"}
 
-        return await fetch()
+        result_dict = await fetch()
+        return json.dumps(result_dict, ensure_ascii=False, indent=2)
     
     @mcp.tool(
         name="get_post_recommendations",
         description="Get recommended social posts based on a natural-language content description. Please use keywords; vague descriptions may yield poor results. Fetch both social and forum posts if no specific instruction was given."
         "You can also use this tool to get the posts related to specific pet type, then use the result to filter such pet type owned by users."
     )
-    async def get_post_recommendations(content_description: str, hashtags: list[str], isSocial: bool, isForum: bool) -> list[dict]:
+    async def get_post_recommendations(content_description: str, hashtags: list[str], isSocial: bool, isForum: bool) -> str:
         @sync_to_async
         def fetch() -> list[dict]:
             try:
@@ -177,13 +184,14 @@ def create_mcp_server() -> FastMCP:
             except Exception as e:
                 return [{"error": f"Failed to get recommendations: {str(e)}"}]
 
-        return await fetch()
+        result = await fetch()
+        return json.dumps(result, ensure_ascii=False, indent=2)
     
     @mcp.tool(
         name="get_user_information",
         description="Fetch basic information of a user by their user ID."
     )
-    async def get_user_information(user_ids: list[int]) -> Dict:
+    async def get_user_information(user_ids: list[int]) -> str:
         @sync_to_async
         def fetch() -> Dict:
             try:
@@ -221,7 +229,8 @@ def create_mcp_server() -> FastMCP:
             except Exception as e:
                 return {"error": f"Failed to fetch user information: {str(e)}"}
 
-        return await fetch()
+        result_dict = await fetch()
+        return json.dumps(result_dict, ensure_ascii=False, indent=2)
     
     @mcp.tool(
         name="get_user_pet_types",
@@ -238,19 +247,20 @@ def create_mcp_server() -> FastMCP:
                 pet_types = {}
                 for user in users:
                     pets = Pet.objects.filter(owner=user)
-                    pet_types[user.id] = [pet.type for pet in pets]
+                    pet_types[user.id] = [pet.pet_type for pet in pets]
 
                 return {"pet_types": pet_types}
             except Exception as e:
                 return {"error": f"Failed to fetch user pet types: {str(e)}"}
 
-        return await fetch()
+        result_dict = await fetch()
+        return json.dumps(result_dict, ensure_ascii=False, indent=2)
     
     @mcp.tool(
         name="get_pet_foods_details",
         description="Fetch detailed information about pet foods"
     )
-    async def get_pet_foods_details() -> list[dict]:
+    async def get_pet_foods_details() -> str:
         @sync_to_async
         def fetch() -> list[dict]:
             try:
@@ -264,7 +274,8 @@ def create_mcp_server() -> FastMCP:
             except Exception as e:
                 return [{"error": f"Failed to fetch pet foods details: {str(e)}"}]
 
-        return await fetch()
+        result = await fetch()
+        return json.dumps(result, ensure_ascii=False, indent=2)
 
     @mcp.tool(
         name="list_available_tools",
@@ -345,7 +356,7 @@ def create_mcp_server() -> FastMCP:
         name="list_tutorial_topics",
         description="List available tutorial topics for users as an id->description mapping."
     )
-    async def list_tutorial_topics() -> Dict[str, str]:
+    async def list_tutorial_topics() -> str:
         @sync_to_async
         def fetch() -> Dict[str, str]:
             try:
@@ -361,13 +372,14 @@ def create_mcp_server() -> FastMCP:
             except Exception as e:
                 return {"error": f"Failed to list tutorial topics: {str(e)}"}
 
-        return await fetch()
+        result_dict = await fetch()
+        return json.dumps(result_dict, ensure_ascii=False, indent=2)
 
     @mcp.tool(
         name="get_navigation_paths",
         description="Get all available page paths and their mappings. Use this to find the correct path for user navigation requests."
     )
-    async def get_navigation_paths() -> Dict:
+    async def get_navigation_paths() -> str:
         """
         返回所有可用的頁面路徑和對應的關鍵字映射
 
@@ -393,13 +405,14 @@ def create_mcp_server() -> FastMCP:
             with open(json_path, 'r', encoding='utf-8') as f:
                 paths_data = json.load(f)
 
-            return paths_data
+            return json.dumps(paths_data, ensure_ascii=False, indent=2)
         except Exception as e:
-            return {
+            result = {
                 "error": f"Failed to load navigation paths: {str(e)}",
                 "available_paths": [],
                 "dynamic_paths": []
             }
+            return json.dumps(result, ensure_ascii=False, indent=2)
 
     @mcp.tool(
         name="prepare_navigate",
@@ -408,7 +421,7 @@ def create_mcp_server() -> FastMCP:
     async def prepare_navigate(
         path: str,
         reason: Optional[str] = None
-    ) -> Dict:
+    ) -> str:
         import uuid
         from datetime import datetime, timezone, timedelta
 
@@ -442,7 +455,7 @@ def create_mcp_server() -> FastMCP:
         if reason:
             confirmation_msg += f"\n\n{reason}"
 
-        return {
+        result = {
             "operation_id": operation_id,
             "type": "navigate",
             "params": {
@@ -457,17 +470,20 @@ def create_mcp_server() -> FastMCP:
             "requires_confirmation": True,
             "expires_at": expires_at
         }
+        
+        return json.dumps(result, ensure_ascii=False, indent=2)
     
     @mcp.tool(
         name="database_operation_list",
         description="List available database operations as well as the parameters required."
     )
-    async def database_operation_list() -> Dict:
+    async def database_operation_list() -> str:
         @sync_to_async
         def fetch() -> Dict:
             return get_operation_list()
 
-        return await fetch()
+        result_dict = await fetch()
+        return json.dumps(result_dict, ensure_ascii=False, indent=2)
 
     @mcp.tool(
         name="perform_database_operation",
@@ -477,12 +493,13 @@ def create_mcp_server() -> FastMCP:
     async def perform_database_operation(
         operation: Literal["add_pet", "update_pet", "add_abnormal_post", "update_abnormal_post", "delete_abnormal_post", "create_disease_archive", "add_plan", "update_plan", "delete_plan", "list_plans", "create_social_post"],
         data: Dict
-    ) -> Dict:
+    ) -> str:
         @sync_to_async
         def execute() -> Dict:
             return perform_operation(operation, data)
 
-        return await execute()
+        result_dict = await execute()
+        return json.dumps(result_dict, ensure_ascii=False, indent=2)
 
     @mcp.tool(
         name="resolve_entity_context",
