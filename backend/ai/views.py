@@ -1174,11 +1174,11 @@ def execute_realtime_tool(request):
         # Get the MCP server instance and find the tool
         mcp_server = mcp_module.create_mcp_server()
         
-        # FastMCP stores tools in ._tools list
+        # FastMCP stores tools in ._tool_manager._tools dict
         tool_func = None
-        for tool in mcp_server._tools:
-            if tool.name == tool_name:
-                tool_func = tool.fn
+        for tool_name_key, tool_obj in mcp_server._tool_manager._tools.items():
+            if tool_name_key == tool_name:
+                tool_func = tool_obj.fn
                 break
         
         if not tool_func:
