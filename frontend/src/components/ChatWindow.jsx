@@ -252,6 +252,7 @@ const ChatWindow = ({
       const sessionConfig = await realtimeVoiceService.createSession({
         conversationId: currentConversationId,
         voice: 'alloy', // 可以改為其他聲音: echo, fable, onyx, nova, shimmer
+        language: ready ? (t('language_code') || 'zh-TW') : 'zh-TW', // Pass current UI language
       });
 
       console.log('[ChatWindow] Step 2: Session created:', sessionConfig.session_id);

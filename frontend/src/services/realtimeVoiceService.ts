@@ -29,6 +29,8 @@ export interface RealtimeSessionConfig {
   user_id: number;
   conversation_id?: number;
   conversation_title?: string;
+  greeting?: string;  // Initial greeting message for the agent to speak
+  language?: string;  // User's language preference
   audio?: {  // Audio configuration from backend (includes turn_detection)
     input?: {
       format?: any;
@@ -48,6 +50,7 @@ export interface CreateSessionOptions {
   conversationId?: number;
   model?: string;
   voice?: 'alloy' | 'echo' | 'fable' | 'onyx' | 'nova' | 'shimmer';
+  language?: string; // User's current language (e.g., 'zh-TW', 'en', 'ja')
 }
 
 export interface RealtimeEvent {
@@ -91,6 +94,8 @@ class RealtimeVoiceService {
         voice: this.sessionConfig.voice,
         tools_count: this.sessionConfig.tools_count,
         conversation_id: this.sessionConfig.conversation_id,
+        greeting: this.sessionConfig.greeting,
+        language: this.sessionConfig.language,
         has_audio_config: !!this.sessionConfig.audio,
         has_turn_detection: !!this.sessionConfig.audio?.input?.turn_detection,
         turn_detection_type: this.sessionConfig.audio?.input?.turn_detection?.type,
@@ -249,13 +254,52 @@ class RealtimeVoiceService {
             full_session: session
           });
           
+          // Force enable VAD if not already configured
           if (!turnDetection) {
-            console.error('[RealtimeVoice] ⚠️ WARNING: No VAD/turn_detection configured! The AI will not auto-respond.');
-            console.error('[RealtimeVoice] Expected turn_detection config but got:', turnDetection);
+            console.warn('[RealtimeVoice] ⚠️ VAD not configured, sending session.update to enable it');
+            this.transport!.send({
+              type: 'session.update',
+              session: {
+                turn_detection: {
+                  type: 'server_vad',
+                  threshold: 0.5,
+                  prefix_padding_ms: 300,
+                  silence_duration_ms: 500
+                }
+              } as any
+            });
           } else {
             console.log('[RealtimeVoice] 🎤 Server VAD is active - speak naturally, AI will respond when you pause');
             console.log('[RealtimeVoice] VAD config:', turnDetection);
           }
+          
+          // Send initial greeting from the agent (using the working test message approach)
+          console.log('[RealtimeVoice] 👋 Sending initial greeting...');
+          setTimeout(() => {
+            if (this.transport) {
+              const greetingText = this.sessionConfig?.greeting || 'Hi！我是 PETer 專員 Peter，很高興為您服務！有什麼問題都可以問我喔～';
+              
+              this.transport.send({
+                type: 'conversation.item.create',
+                item: {
+                  type: 'message',
+                  role: 'user',
+                  content: [{
+                    type: 'input_text',
+                    text: greetingText
+                  }]
+                }
+              });
+              
+              // Trigger response generation
+              this.transport.send({
+                type: 'response.create'
+              });
+              
+              console.log('[RealtimeVoice] 👋 Greeting sent, waiting for audio response...');
+            }
+          }, 1000);
+          
           break;
           
         case 'session.updated':
@@ -287,14 +331,21 @@ class RealtimeVoiceService {
           break;
           
         case 'response.audio.delta':
-          console.log('[RealtimeVoice] 🔊 Audio delta received, length:', event.delta?.length);
-          // Handle audio delta - play the audio
-          if (event.delta) {
-            this.handleAudioDelta(event.delta);
+        case 'response.output_audio.delta':
+          // Handle both event names (API may use either)
+          // The audio data is in event.audio for response.output_audio.delta
+          // and event.delta for response.audio.delta
+          const audioDelta = event.audio || event.delta;
+          if (audioDelta) {
+            console.log('[RealtimeVoice] 🔊 Audio delta received, base64 length:', audioDelta.length);
+            this.handleAudioDelta(audioDelta);
+          } else {
+            console.warn('[RealtimeVoice] ⚠️ Audio delta event with no audio data:', event);
           }
           break;
           
         case 'response.audio.done':
+        case 'response.output_audio.done':
           console.log('[RealtimeVoice] 🔊 Audio response complete');
           break;
           
@@ -307,7 +358,20 @@ class RealtimeVoiceService {
           break;
           
         case 'response.audio_transcript.delta':
-          console.log('[RealtimeVoice] Audio transcript delta:', event.delta);
+        case 'response.output_audio_transcript.delta':
+          console.log('[RealtimeVoice] 📝 Audio transcript delta:', event.delta);
+          break;
+          
+        case 'response.output_audio_transcript.done':
+          console.log('[RealtimeVoice] 📝 Full transcript:', event.transcript);
+          break;
+          
+        case 'response.content_part.added':
+        case 'response.content_part.done':
+        case 'conversation.item.added':
+        case 'conversation.item.done':
+        case 'rate_limits.updated':
+          // Informational events, no action needed
           break;
           
         case 'response.function_call_arguments.delta':
@@ -316,10 +380,14 @@ class RealtimeVoiceService {
           
         case 'input_audio_buffer.speech_started':
           console.log('[RealtimeVoice] 🎤 User started speaking');
+          console.log('[RealtimeVoice] 🎤 VAD detected voice activity!');
+          this.emit({ type: 'speech.started' });
           break;
           
         case 'input_audio_buffer.speech_stopped':
-          console.log('[RealtimeVoice] 🔇 User stopped speaking');
+          console.log('[RealtimeVoice] 🎤 User stopped speaking');
+          console.log('[RealtimeVoice] 🔇 VAD detected end of speech');
+          this.emit({ type: 'speech.stopped' });
           break;
           
         case 'input_audio_buffer.committed':

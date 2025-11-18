@@ -899,6 +899,7 @@ def create_realtime_session(request):
         conversation_id = request.data.get('conversation_id')
         model = request.data.get('model', 'gpt-4o-realtime-preview-2024-12-17')
         voice = request.data.get('voice', 'alloy')
+        language = request.data.get('language', 'zh-TW')  # Default to Traditional Chinese
         
         # Validate conversation if provided
         conversation = None
@@ -920,7 +921,56 @@ def create_realtime_session(request):
             'full_name': getattr(request.user, 'full_name', ''),
         }
         
-        instructions = f"""You are Peter, a helpful AI assistant for the PETer pet care application.
+        # Language-specific instructions and greeting
+        if language.startswith('zh'):  # Chinese (Traditional or Simplified)
+            greeting = "Hi！我是 PETer 專員 Peter，很高興為您服務！有什麼問題都可以問我喔～"
+            instructions = f"""你是 Peter，PETer 寵物照護應用程式的 AI 助手。
+
+使用者資訊：
+- 使用者 ID: {user_context['user_id']}
+- 使用者名稱: {user_context['username']}
+- 姓名: {user_context['full_name'] or '使用者'}
+
+你的職責：
+- 協助使用者操作 PETer 應用程式及管理寵物照護
+- 回答關於寵物健康、餵食和照護的問題
+- 引導使用者使用應用程式功能和教學
+- 用友善、簡潔、有幫助的方式回應
+
+當使用者詢問特定寵物資訊或應用程式功能時，你可以存取：
+- 寵物檔案和健康紀錄
+- 餵食排程和建議
+- 社群功能和貼文
+- 附近的動物醫院
+- 健康監測和疾病資料庫
+
+請用自然對話的方式回應，適合語音互動。必要時使用使用者的名字。請始終使用繁體中文回應。"""
+        elif language.startswith('ja'):  # Japanese
+            greeting = "こんにちは！PETer サポート担当の Peter です。お手伝いできることがあれば何でも聞いてくださいね～"
+            instructions = f"""あなたは Peter です。PETer ペットケアアプリの AI アシスタントです。
+
+ユーザー情報：
+- ユーザー ID: {user_context['user_id']}
+- ユーザー名: {user_context['username']}
+- 名前: {user_context['full_name'] or 'ユーザー'}
+
+あなたの役割：
+- ユーザーが PETer アプリを操作し、ペットのケアを管理するのを手伝う
+- ペットの健康、給餌、ケアに関する質問に答える
+- アプリの機能とチュートリアルをガイドする
+- フレンドリーで簡潔で役立つ応答をする
+
+ユーザーが特定のペット情報やアプリ機能について質問した場合、以下にアクセスできます：
+- ペットのプロフィールと健康記録
+- 給餌スケジュールと推奨事項
+- ソーシャル機能とコミュニティ投稿
+- 近くの動物病院
+- 健康モニタリングと疾病アーカイブ
+
+音声インタラクションに適した自然な会話で応答してください。必要に応じてユーザーの名前を使用してください。常に日本語で応答してください。"""
+        else:  # English or other languages
+            greeting = "Hi! I'm Peter, your PETer support specialist. How can I help you today?"
+            instructions = f"""You are Peter, a helpful AI assistant for the PETer pet care application.
 
 User Context:
 - User ID: {user_context['user_id']}
@@ -940,7 +990,7 @@ When users ask about specific pet information or app features, you can access:
 - Nearby veterinary hospitals
 - Health monitoring and disease archives
 
-Keep responses natural and conversational for voice interaction. Use the user's name when appropriate."""
+Keep responses natural and conversational for voice interaction. Use the user's name when appropriate. Always respond in English."""
 
         # Define MCP tools for the realtime session
         # These tools match the ones available in the MCP server
@@ -1020,9 +1070,9 @@ Keep responses natural and conversational for voice interaction. Use the user's 
                                 },
                                 'turn_detection': {
                                     'type': 'server_vad',
-                                    'threshold': 0.5,
+                                    'threshold': 0.3,  # Lower threshold = more sensitive (0.0-1.0)
                                     'prefix_padding_ms': 300,
-                                    'silence_duration_ms': 500,
+                                    'silence_duration_ms': 800,  # Wait longer before considering speech ended
                                     'create_response': True
                                 }
                             },
@@ -1092,6 +1142,8 @@ Keep responses natural and conversational for voice interaction. Use the user's 
             'tools_count': len(session_config.get('tools', [])),  # Don't send full tools to frontend
             'user_id': request.user.id,
             'audio': session_config.get('audio', {}),  # Include audio config with turn_detection
+            'greeting': greeting,  # Initial greeting message for the agent to speak
+            'language': language,  # User's language preference
         }
         
         # Add conversation_id if linked
@@ -1100,6 +1152,7 @@ Keep responses natural and conversational for voice interaction. Use the user's 
             session_data['conversation_title'] = conversation.title
         
         logger.info(f"Returning realtime client secret for user {request.user.id}")
+        logger.info(f"  - Language: {language}, Greeting: {greeting[:50]}...")
         
         return Response(session_data, status=status.HTTP_201_CREATED)
         
