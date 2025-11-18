@@ -116,67 +116,138 @@ class RealtimeVoiceService extends EventEmitter {
     try {
       console.log('[RealtimeVoice] Creating RealtimeAgent...');
       
-      // Define tools that execute via backend
+      // Define ALL MCP tools that execute via backend
       // The SDK will handle calling these automatically when the agent needs them
-      const getUserPetInfoTool = tool({
-        name: 'get_user_pet_info_detailed',
-        description: 'Get detailed information about a user and their pets, including health records and abnormal posts',
-        parameters: z.object({
-          user_id: z.number().describe('The ID of the user to fetch information for'),
-        }),
-        execute: async ({ user_id }: { user_id: number }) => {
-          console.log('[RealtimeVoice] 🔧 Executing get_user_pet_info_detailed via backend');
-          const response = await axiosInstance.post('/ai/realtime/execute-tool/', {
-            tool_name: 'get_user_pet_info_detailed',
-            arguments: { user_id },
-          });
-          console.log('[RealtimeVoice] ✅ Tool result received');
-          return JSON.stringify(response.data);
-        },
-      });
-
-      const performDatabaseOperationTool = tool({
-        name: 'perform_database_operation',
-        description: 'Perform database operations like adding pets, creating abnormal posts, or disease archives',
-        parameters: z.object({
-          operation: z.string().describe('The type of database operation to perform'),
-          data: z.any().describe('The data for the operation'),
-        }),
-        execute: async ({ operation, data = {} }: { operation: string; data?: any }) => {
-          console.log('[RealtimeVoice] 🔧 Executing perform_database_operation via backend');
-          const response = await axiosInstance.post('/ai/realtime/execute-tool/', {
-            tool_name: 'perform_database_operation',
-            arguments: { operation, data },
-          });
-          console.log('[RealtimeVoice] ✅ Tool result received');
-          return JSON.stringify(response.data);
-        },
-      });
-
-      const getNavigationPathsTool = tool({
-        name: 'get_navigation_paths',
-        description: 'Get available navigation paths in the PETer app',
-        parameters: z.object({
-          feature: z.string().optional().describe('Optional: specific feature to get path for'),
-        }),
-        execute: async ({ feature }: { feature?: string }) => {
-          console.log('[RealtimeVoice] 🔧 Executing get_navigation_paths via backend');
-          const response = await axiosInstance.post('/ai/realtime/execute-tool/', {
-            tool_name: 'get_navigation_paths',
-            arguments: { feature },
-          });
-          console.log('[RealtimeVoice] ✅ Tool result received');
-          return JSON.stringify(response.data);
-        },
-      });
       
-      // Create RealtimeAgent with instructions and tools
+      // Helper function to execute any tool via backend
+      const executeViaMCP = async (toolName: string, args: any) => {
+        console.log(`[RealtimeVoice] 🔧 Executing ${toolName} via backend`);
+        console.log(`[RealtimeVoice] Arguments:`, args);
+        const response = await axiosInstance.post('/ai/realtime/execute-tool/', {
+          tool_name: toolName,
+          arguments: args,
+        });
+        console.log('[RealtimeVoice] ✅ Tool result received:', response.data);
+        // Backend returns {result: "..."}, we want just the result string
+        return response.data.result || JSON.stringify(response.data);
+      };
+
+      const tools = [
+        tool({
+          name: 'get_user_pet_info_detailed',
+          description: 'Fetch a user\'s basic profile and their pets (including related entities)',
+          parameters: z.object({
+            user_id: z.number().describe('The ID of the user to fetch information for'),
+          }),
+          execute: async ({ user_id }) => executeViaMCP('get_user_pet_info_detailed', { user_id }),
+        }),
+        
+        tool({
+          name: 'get_user_pet_list',
+          description: 'Fetch a user\'s list of pets',
+          parameters: z.object({
+            user_id: z.number().describe('The ID of the user'),
+          }),
+          execute: async ({ user_id }) => executeViaMCP('get_user_pet_list', { user_id }),
+        }),
+        
+        tool({
+          name: 'get_post_recommendations',
+          description: 'Get recommended social posts based on a natural-language content description. Use keywords for better results.',
+          parameters: z.object({
+            content_description: z.string().describe('Content description with keywords'),
+            hashtags: z.array(z.string()).describe('Array of hashtags'),
+            isSocial: z.boolean().describe('Include social posts'),
+            isForum: z.boolean().describe('Include forum posts'),
+          }),
+          execute: async (args) => executeViaMCP('get_post_recommendations', args),
+        }),
+        
+        tool({
+          name: 'get_user_information',
+          description: 'Fetch basic information of a user by their user ID',
+          parameters: z.object({
+            user_ids: z.array(z.number()).describe('Array of user IDs to fetch'),
+          }),
+          execute: async ({ user_ids }) => executeViaMCP('get_user_information', { user_ids }),
+        }),
+        
+        tool({
+          name: 'get_user_pet_types',
+          description: 'Fetch the types of pets owned by a user',
+          parameters: z.object({
+            user_ids: z.array(z.number()).describe('Array of user IDs'),
+          }),
+          execute: async ({ user_ids }) => executeViaMCP('get_user_pet_types', { user_ids }),
+        }),
+        
+        tool({
+          name: 'get_pet_foods_details',
+          description: 'Fetch detailed information about pet foods',
+          parameters: z.object({}),
+          execute: async () => executeViaMCP('get_pet_foods_details', {}),
+        }),
+        
+        tool({
+          name: 'list_tutorial_topics',
+          description: 'List available tutorial topics for users as an id->description mapping',
+          parameters: z.object({}),
+          execute: async () => executeViaMCP('list_tutorial_topics', {}),
+        }),
+        
+        tool({
+          name: 'get_navigation_paths',
+          description: 'Get all available page paths and their mappings. Use this to find the correct path for user navigation requests',
+          parameters: z.object({}),
+          execute: async () => executeViaMCP('get_navigation_paths', {}),
+        }),
+        
+        tool({
+          name: 'prepare_navigate',
+          description: 'Prepare a page navigation operation that requires user confirmation. Call get_navigation_paths first to find the correct path',
+          parameters: z.object({
+            path: z.string().describe('The navigation path'),
+            reason: z.string().optional().describe('Reason for navigation'),
+          }),
+          execute: async (args) => executeViaMCP('prepare_navigate', args),
+        }),
+        
+        tool({
+          name: 'database_operation_list',
+          description: 'List available database operations as well as the parameters required',
+          parameters: z.object({}),
+          execute: async () => executeViaMCP('database_operation_list', {}),
+        }),
+        
+        tool({
+          name: 'perform_database_operation',
+          description: 'Perform a database operation such as managing pet information, abnormal posts, disease archives, user plans/schedules, or creating social posts',
+          parameters: z.object({
+            operation: z.string().describe('The type of database operation to perform'),
+            data: z.any().describe('The data for the operation'),
+          }),
+          execute: async ({ operation, data }) => executeViaMCP('perform_database_operation', { operation, data }),
+        }),
+        
+        tool({
+          name: 'resolve_entity_context',
+          description: 'Resolve dynamic path parameters by finding entities based on natural language descriptions. Supports: social_post, feed, pet, user, health_report, disease_archive',
+          parameters: z.object({
+            entity_type: z.string().describe('Type of entity to resolve'),
+            description: z.string().describe('Natural language description'),
+            user_id: z.number().optional().describe('User ID for context'),
+          }),
+          execute: async (args) => executeViaMCP('resolve_entity_context', args),
+        }),
+      ];
+      
+      // Create RealtimeAgent with instructions and ALL tools
       // The SDK will automatically handle tool execution
       this.agent = new RealtimeAgent({
         name: 'peter',
         instructions: this.sessionConfig.instructions,
         voice: this.sessionConfig.voice as any,
-        tools: [getUserPetInfoTool, performDatabaseOperationTool, getNavigationPathsTool],
+        tools: tools,
       });
 
       console.log('[RealtimeVoice] ✅ Created agent with 3 tools');

@@ -1191,6 +1191,9 @@ def execute_realtime_tool(request):
             
             # Extract the content from the MCP result
             # MCP returns CallToolResult with content array
+            logger.info(f"   Raw result type: {type(result)}")
+            logger.info(f"   Raw result: {result}")
+            
             if hasattr(result, 'content') and result.content:
                 # Get the first text content
                 content = result.content[0]
@@ -1201,7 +1204,7 @@ def execute_realtime_tool(request):
             else:
                 result_data = str(result)
             
-            logger.info(f"   Result: {result_data[:200]}...")
+            logger.info(f"   Extracted result_data: {result_data[:500] if len(result_data) > 500 else result_data}")
             
             return Response({
                 'result': result_data
@@ -1210,8 +1213,12 @@ def execute_realtime_tool(request):
             loop.close()
         
     except Exception as e:
-        logger.error(f"Error executing tool: {str(e)}", exc_info=True)
+        import traceback
+        error_details = traceback.format_exc()
+        logger.error(f"❌ Error executing tool: {str(e)}")
+        logger.error(f"Full traceback:\n{error_details}")
         return Response({
-            'error': f'Failed to execute tool: {str(e)}'
+            'error': f'Failed to execute tool: {str(e)}',
+            'details': error_details
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
