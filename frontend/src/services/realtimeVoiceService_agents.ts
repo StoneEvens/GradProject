@@ -117,7 +117,7 @@ class RealtimeVoiceService extends EventEmitter {
       console.log('[RealtimeVoice] Creating RealtimeAgent...');
       
       // Define tools that execute via backend
-      // The SDK will handle calling these automatically
+      // The SDK will handle calling these automatically when the agent needs them
       const getUserPetInfoTool = tool({
         name: 'get_user_pet_info_detailed',
         description: 'Get detailed information about a user and their pets, including health records and abnormal posts',
@@ -125,11 +125,12 @@ class RealtimeVoiceService extends EventEmitter {
           user_id: z.number().describe('The ID of the user to fetch information for'),
         }),
         execute: async ({ user_id }: { user_id: number }) => {
-          console.log('[RealtimeVoice] Executing get_user_pet_info_detailed via backend');
+          console.log('[RealtimeVoice] 🔧 Executing get_user_pet_info_detailed via backend');
           const response = await axiosInstance.post('/ai/realtime/execute-tool/', {
             tool_name: 'get_user_pet_info_detailed',
             arguments: { user_id },
           });
+          console.log('[RealtimeVoice] ✅ Tool result received');
           return JSON.stringify(response.data);
         },
       });
@@ -142,11 +143,12 @@ class RealtimeVoiceService extends EventEmitter {
           data: z.any().describe('The data for the operation'),
         }),
         execute: async ({ operation, data = {} }: { operation: string; data?: any }) => {
-          console.log('[RealtimeVoice] Executing perform_database_operation via backend');
+          console.log('[RealtimeVoice] 🔧 Executing perform_database_operation via backend');
           const response = await axiosInstance.post('/ai/realtime/execute-tool/', {
             tool_name: 'perform_database_operation',
             arguments: { operation, data },
           });
+          console.log('[RealtimeVoice] ✅ Tool result received');
           return JSON.stringify(response.data);
         },
       });
@@ -158,11 +160,12 @@ class RealtimeVoiceService extends EventEmitter {
           feature: z.string().optional().describe('Optional: specific feature to get path for'),
         }),
         execute: async ({ feature }: { feature?: string }) => {
-          console.log('[RealtimeVoice] Executing get_navigation_paths via backend');
+          console.log('[RealtimeVoice] 🔧 Executing get_navigation_paths via backend');
           const response = await axiosInstance.post('/ai/realtime/execute-tool/', {
             tool_name: 'get_navigation_paths',
             arguments: { feature },
           });
+          console.log('[RealtimeVoice] ✅ Tool result received');
           return JSON.stringify(response.data);
         },
       });
@@ -175,6 +178,8 @@ class RealtimeVoiceService extends EventEmitter {
         voice: this.sessionConfig.voice as any,
         tools: [getUserPetInfoTool, performDatabaseOperationTool, getNavigationPathsTool],
       });
+
+      console.log('[RealtimeVoice] ✅ Created agent with 3 tools');
 
       console.log('[RealtimeVoice] Creating RealtimeSession...');
       
@@ -194,7 +199,7 @@ class RealtimeVoiceService extends EventEmitter {
       });
       
       console.log('[RealtimeVoice] ✅ Connected successfully (WebRTC auto-handling audio)');
-      console.log('[RealtimeVoice] Tools registered and will execute automatically via backend');
+      console.log('[RealtimeVoice] 🛠️  Tools registered and ready for automatic execution');
 
       // Send greeting if available
       if (this.sessionConfig.greeting) {

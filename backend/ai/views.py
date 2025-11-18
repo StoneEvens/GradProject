@@ -994,59 +994,9 @@ Keep responses natural and conversational for voice interaction. Use the user's 
 
         logger.info(f"Session language: {language}, Greeting: {greeting[:30]}...")
 
-        # Define MCP tools for the realtime session
-        # These tools match the ones available in the MCP server
-        tools = [
-            {
-                "type": "function",
-                "name": "get_user_pet_info_detailed",
-                "description": "Get detailed information about a user and their pets, including health records and abnormal posts",
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "user_id": {
-                            "type": "integer",
-                            "description": "The ID of the user to fetch information for"
-                        }
-                    },
-                    "required": ["user_id"]
-                }
-            },
-            {
-                "type": "function",
-                "name": "perform_database_operation",
-                "description": "Perform database operations like adding pets, creating abnormal posts, or disease archives",
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "operation": {
-                            "type": "string",
-                            "enum": ["add_pet", "update_pet", "add_abnormal_post", "update_abnormal_post", "delete_abnormal_post", "create_disease_archive"],
-                            "description": "The type of database operation to perform"
-                        },
-                        "data": {
-                            "type": "object",
-                            "description": "The data for the operation"
-                        }
-                    },
-                    "required": ["operation", "data"]
-                }
-            },
-            {
-                "type": "function",
-                "name": "get_navigation_paths",
-                "description": "Get available navigation paths in the PETer app",
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "feature": {
-                            "type": "string",
-                            "description": "Optional: specific feature to get path for"
-                        }
-                    }
-                }
-            }
-        ]
+        # NOTE: Tools are NOT defined here for SDK-based clients
+        # The TypeScript agents SDK handles tool registration client-side
+        # Tools will be executed via the /ai/realtime/execute-tool/ endpoint
         
         # Create realtime client secret using the /v1/realtime/client_secrets endpoint (GA API)
         # This endpoint creates an ephemeral key that can be used client-side to create sessions
@@ -1063,7 +1013,6 @@ Keep responses natural and conversational for voice interaction. Use the user's 
                         'type': 'realtime',
                         'model': model,
                         'instructions': instructions,
-                        'tools': tools,
                         'audio': {
                             'input': {
                                 'format': {
@@ -1128,8 +1077,8 @@ Keep responses natural and conversational for voice interaction. Use the user's 
 
         logger.info(f"✅ Created realtime client secret for user {request.user.id}")
         logger.info(f"Ephemeral key created (expires at {expires_at})")
-        logger.info(f"Tools configured: {len(tools)}")
-        logger.info(f"Session config includes: model={session_config.get('model')}, tools={len(session_config.get('tools', []))}")
+        logger.info(f"Tools will be registered client-side by SDK")
+        logger.info(f"Session config includes: model={session_config.get('model')}")
 
         # Return the ephemeral key and session configuration
         # The frontend will use the 'value' as the apiKey to connect
