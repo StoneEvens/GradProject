@@ -1,21 +1,23 @@
 /**
- * Realtime Voice Service using OpenAI GA Endpoint
+ * Realtime Voice Service using OpenAI Agents SDK
  * 
- * Uses the OpenAI Realtime GA API with full MCP tool support:
- * - Ephemeral token authentication via client_secret
- * - MCP tool integration (tools configured in backend session)
+ * Uses the @openai/agents SDK for realtime voice interaction:
+ * - RealtimeAgent for agent configuration with MCP tools
+ * - RealtimeSession for managing the conversation
+ * - Automatic MCP tool execution
  * - Audio streaming and playback
- * - Session management
  * 
  * Architecture:
- * 1. Backend creates session via /v1/realtime/sessions (GA) with MCP tools configured
- * 2. Frontend connects to GA WebSocket endpoint with ephemeral token
- * 3. MCP tools are registered in the session and callable by the AI
- * 4. Audio handled via Web Audio API
+ * 1. Backend creates ephemeral token with session config
+ * 2. Frontend creates RealtimeAgent with MCP tools
+ * 3. RealtimeSession connects using the ephemeral token
+ * 4. SDK handles tool calls automatically
  */
 
-import { OpenAIRealtimeWebSocket } from 'openai/realtime/websocket';
+import { realtime } from '@openai/agents';
 import axiosInstance from '../utils/axios';
+
+const { RealtimeAgent, RealtimeSession, OpenAIRealtimeWebSocket } = realtime;
 
 export interface RealtimeSessionConfig {
   client_secret: {

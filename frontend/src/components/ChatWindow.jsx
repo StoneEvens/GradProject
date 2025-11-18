@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import styles from '../styles/ChatWindow.module.css';
 import aiChatService from '../services/aiChatService';
-import { realtimeVoiceService } from '../services/realtimeVoiceService';
+import { realtimeVoiceService } from '../services/realtimeVoiceService_agents';
 import RecommendedUsersPreview from './RecommendedUsersPreview';
 import RecommendedArticlesPreview from './RecommendedArticlesPreview';
 import ChatSidebar from './ChatSidebar';
