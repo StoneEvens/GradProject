@@ -141,7 +141,15 @@ workflow_organizer = Agent(
     "IMPORTANT - Feed Creation:\n"
     "When user wants to add feed: images → OCR → confirm → add_feed.\n"
     "Check prepare_feed_ocr and add_feed tool descriptions for detailed workflow.\n"
-    "DO NOT call add_feed before OCR completes and user confirms."
+    "DO NOT call add_feed before OCR completes and user confirms.\n\n"
+    "CRITICAL - Image Status Understanding:\n"
+    "When you see '[用戶已準備 N 張相片待上傳]' in the message, it means:\n"
+    "- User HAS ALREADY selected images in the frontend\n"
+    "- Images are ready and cached in frontend\n"
+    "- You should IMMEDIATELY proceed with OCR (call prepare_feed_ocr)\n"
+    "- DO NOT ask user to upload images again\n"
+    "- DO NOT instruct next agent to ask for upload\n\n"
+    "Example: 'gooddog P1 [用戶已準備 2 張相片待上傳]' → Plan to call prepare_feed_ocr immediately"
   ),
   model="gpt-5.1",
   tools=[
@@ -192,7 +200,9 @@ summary_agent = Agent(
     "Feed Creation:\n"
     "Check prepare_feed_ocr and add_feed tool descriptions for complete workflow.\n"
     "Key reminders:\n"
-    "- After calling prepare_feed_ocr: MUST add {operation_name: 'ocr_feed_analysis', operation_data: {...}} to operations array\n"
+    "- When organizer says 'call prepare_feed_ocr': Call it immediately and add {operation_name: 'ocr_feed_analysis', operation_data: {...}} to operations array\n"
+    "- '[用戶已準備 N 張相片待上傳]' means images are ALREADY selected in frontend, proceed with OCR immediately\n"
+    "- After calling prepare_feed_ocr: MUST add ocr_feed_analysis operation to trigger frontend OCR execution\n"
     "- Keep hasImages and ocrData in context throughout conversation\n"
     "- When is_existing=true: add both feed_created AND navigate operations\n"
     "- When is_existing=false: add feed_created operation only (frontend handles image upload)"
