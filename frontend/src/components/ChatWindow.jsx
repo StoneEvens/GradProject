@@ -1358,12 +1358,15 @@ const ChatWindow = ({
                   {/* 如果有操作功能，顯示操作按鈕 */}
                   {message.operations && message.operations.length > 0 && (() => {
                     // 找出導航操作
-                    const navigateOp = message.operations.find(op => 
+                    const navigateOp = message.operations.find(op =>
                       op.operation_name === 'navigate' || op.operation_name === 'navigation'
                     );
-                    // 找出其他操作
-                    const otherOps = message.operations.filter(op => 
-                      op.operation_name !== 'navigate' && op.operation_name !== 'navigation'
+                    // 找出其他操作（排除 navigate 和背景自動執行的操作）
+                    const backgroundOps = ['ocr_feed_analysis']; // 背景自動執行，不顯示按鈕
+                    const otherOps = message.operations.filter(op =>
+                      op.operation_name !== 'navigate' &&
+                      op.operation_name !== 'navigation' &&
+                      !backgroundOps.includes(op.operation_name)
                     );
 
                     return (

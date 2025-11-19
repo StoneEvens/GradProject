@@ -264,7 +264,8 @@ class OperationExecutor {
 
       console.log('[OperationExecutor] 辨識兩張圖片以找出營養標示...');
 
-      const axios = (await import('axios')).default;
+      // 使用配置好的 axios instance（包含 baseURL）
+      const axiosInstance = (await import('../utils/axios.js')).default;
 
       // 輔助函數：將 base64 轉換為 Blob
       const base64ToBlob = (base64String, fileType) => {
@@ -304,7 +305,7 @@ class OperationExecutor {
 
           console.log(`[OperationExecutor] 辨識第 ${i + 1} 張圖片...`);
 
-          const response = await axios.post('/feeds/ocr/', formData, {
+          const response = await axiosInstance.post('/feeds/ocr/', formData, {
             headers: {
               'Content-Type': 'multipart/form-data',
             },
