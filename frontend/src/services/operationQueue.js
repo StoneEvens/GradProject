@@ -167,7 +167,7 @@ class OperationQueue {
       return false;
     }
 
-    const validTypes = ['navigate', 'fill_form', 'click', 'display_data'];
+    const validTypes = ['navigate', 'fill_form', 'click', 'display_data', 'ocr_feed_analysis'];
     if (!operation.type || !validTypes.includes(operation.type)) {
       return false;
     }

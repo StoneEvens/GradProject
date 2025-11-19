@@ -60,11 +60,43 @@ class OperationClient {
       return false;
     }
 
-    const success = operationQueue.enqueue(operation);
-    
+    // 轉換後端格式到前端格式
+    // 後端: {operation_name, operation_data}
+    // 前端: {operation_id, type, params}
+    let normalizedOperation = operation;
+
+    if (operation.operation_name && !operation.type) {
+      // 解析 operation_data（可能是 JSON 字串）
+      let params = {};
+      if (operation.operation_data) {
+        try {
+          params = typeof operation.operation_data === 'string'
+            ? JSON.parse(operation.operation_data)
+            : operation.operation_data;
+        } catch (e) {
+          console.error('[OperationClient] Failed to parse operation_data:', e);
+          params = {};
+        }
+      }
+
+      normalizedOperation = {
+        operation_id: `op_${operation.operation_name}_${Date.now()}`,
+        type: operation.operation_name,
+        params: params,
+        requires_confirmation: operation.requires_confirmation || false
+      };
+
+      console.log('[OperationClient] Converted backend operation format:', {
+        from: operation,
+        to: normalizedOperation
+      });
+    }
+
+    const success = operationQueue.enqueue(normalizedOperation);
+
     if (success) {
-      this.emit('operationAdded', operation);
-      
+      this.emit('operationAdded', normalizedOperation);
+
       // Auto-execute if enabled and not currently processing
       if (this.autoExecute && !this.isProcessing) {
         this.executeNext();
