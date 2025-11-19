@@ -251,15 +251,14 @@ class OperationExecutor {
     console.log('[OperationExecutor] Starting OCR feed analysis:', params);
 
     try {
-      // 從 localStorage 獲取使用者選擇的圖片
-      const selectedImagesJson = localStorage.getItem('selectedFeedImages');
-      if (!selectedImagesJson) {
+      // 從 window 物件獲取使用者選擇的圖片
+      const selectedImages = window.__selectedFeedImages;
+
+      if (!selectedImages) {
         throw new Error('沒有找到待辨識的圖片，請先選擇圖片');
       }
 
-      const selectedImages = JSON.parse(selectedImagesJson);
-
-      if (!selectedImages || selectedImages.length < 2) {
+      if (selectedImages.length < 2) {
         throw new Error('請選擇兩張圖片：包裝照片和營養標示照片');
       }
 
@@ -367,9 +366,6 @@ class OperationExecutor {
 
     } catch (error) {
       console.error('[OperationExecutor] OCR analysis failed:', error);
-
-      // 清除圖片快取
-      localStorage.removeItem('selectedFeedImages');
 
       throw new Error(`OCR 辨識失敗：${error.message}`);
     }

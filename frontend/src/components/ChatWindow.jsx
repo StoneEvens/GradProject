@@ -417,8 +417,8 @@ const ChatWindow = ({
       Promise.all(imagePreviewPromises).then(imagePreviews => {
         setSelectedImages(prev => {
           const newImages = [...prev, ...imagePreviews];
-          // 同時存儲到 localStorage 供 operationExecutor 使用
-          localStorage.setItem('selectedFeedImages', JSON.stringify(newImages));
+          // 使用 window 物件儲存（避免 localStorage 容量限制）
+          window.__selectedFeedImages = newImages;
           return newImages;
         });
       });
@@ -431,16 +431,16 @@ const ChatWindow = ({
   const removeImage = (imageId) => {
     setSelectedImages(prev => {
       const newImages = prev.filter(img => img.id !== imageId);
-      // 更新 localStorage
-      localStorage.setItem('selectedFeedImages', JSON.stringify(newImages));
+      // 更新 window 物件
+      window.__selectedFeedImages = newImages;
       return newImages;
     });
   };
 
   const clearAllImages = () => {
     setSelectedImages([]);
-    // 清除 localStorage
-    localStorage.removeItem('selectedFeedImages');
+    // 清除 window 物件和 localStorage
+    delete window.__selectedFeedImages;
     localStorage.removeItem('feedOcrData');
   };
 
