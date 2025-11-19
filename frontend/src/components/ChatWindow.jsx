@@ -442,6 +442,7 @@ const ChatWindow = ({
     // 清除 window 物件和 localStorage
     delete window.__selectedFeedImages;
     localStorage.removeItem('feedOcrData');
+    localStorage.removeItem('feedImageTypeMap');
   };
 
   // 發送訊息

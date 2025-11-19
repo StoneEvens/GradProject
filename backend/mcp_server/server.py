@@ -510,8 +510,16 @@ def create_mcp_server() -> FastMCP:
             "   • 碳水化合物/纖維：{carbohydrate}%\n"
             "   • 鈣：{calcium}%、磷：{phosphorus}%、鎂：{magnesium}%、鈉：{sodium}%\n"
             "   Then ask: 請問這是狗的飼料還是貓的飼料？另外請告訴我品牌和名稱（如果您知道的話）。\n"
-            "6. Collect Confirmation: After user provides pet_type, name, brand, call perform_database_operation('add_feed', {...})\n"
-            "7. Handle Result: Check is_existing flag from add_feed response (see add_feed operation for details)\n\n"
+            "6. Collect Info: After user provides pet_type, name, brand, show COMPLETE summary and ask for confirmation:\n"
+            "   **請確認飼料資訊**：\n"
+            "   • 適用對象：{pet_type}\n"
+            "   • 品牌：{brand}\n"
+            "   • 名稱：{name}\n"
+            "   • [all nutrition data]\n"
+            "   資訊正確嗎？如果正確，請回覆「確認」或「是」，我就會幫您建立飼料。\n"
+            "7. ⚠️ WAIT for User Confirmation: Do NOT call add_feed until user explicitly confirms (e.g., '確認', '是', '正確', '沒問題')\n"
+            "8. After Confirmation: Call perform_database_operation('add_feed', {...complete data...})\n"
+            "9. Handle Result: Check is_existing flag from add_feed response (see add_feed operation for details)\n\n"
             "IMPORTANT: Do NOT call this tool if imageCount ≠ 2. Frontend will validate this."
         )
     )

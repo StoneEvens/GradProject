@@ -342,18 +342,32 @@ class OperationExecutor {
         throw new Error('兩張圖片都無法辨識出營養成分，請確保上傳清晰的營養標示照片');
       }
 
-      console.log(`[OperationExecutor] 選擇第 ${bestResult.index + 1} 張圖片的辨識結果 (營養成分數量: ${bestResult.score})`);
-      console.log('[OperationExecutor] 最終 OCR 結果:', bestResult.nutrients);
+      // 建立圖片類型映射：分數最高的是 nutrition，另一張是 front
+      const nutritionIndex = bestResult.index;
+      const frontIndex = nutritionIndex === 0 ? 1 : 0;
+      
+      const imageTypeMap = {
+        [nutritionIndex]: 'nutrition',  // 營養標示（辨識出營養成分的那張）
+        [frontIndex]: 'front'            // 包裝正面（另一張）
+      };
 
-      // 將 OCR 結果存到 localStorage
+      console.log(`[OperationExecutor] 圖片類型識別結果:`);
+      console.log(`  - 第 ${nutritionIndex + 1} 張圖片: nutrition (營養成分數量: ${bestResult.score})`);
+      console.log(`  - 第 ${frontIndex + 1} 張圖片: front`);
+      console.log('[OperationExecutor] 營養成分:', bestResult.nutrients);
+
+      // 將 OCR 結果和圖片類型映射存到 localStorage
       localStorage.setItem('feedOcrData', JSON.stringify(bestResult.nutrients));
+      localStorage.setItem('feedImageTypeMap', JSON.stringify(imageTypeMap));
 
       // 觸發自訂事件，通知 AI Chat Service OCR 完成
       window.dispatchEvent(new CustomEvent('ocrCompleted', {
         detail: {
           ocrData: bestResult.nutrients,
           rawText: bestResult.rawText,
-          selectedImageIndex: bestResult.index
+          nutritionImageIndex: nutritionIndex,
+          frontImageIndex: frontIndex,
+          imageTypeMap: imageTypeMap
         }
       }));
 
@@ -361,8 +375,10 @@ class OperationExecutor {
         action: 'ocr_feed_analysis',
         success: true,
         ocrData: bestResult.nutrients,
-        selectedImageIndex: bestResult.index,
-        message: `OCR 辨識完成 (使用第 ${bestResult.index + 1} 張圖片)`
+        nutritionImageIndex: nutritionIndex,
+        frontImageIndex: frontIndex,
+        imageTypeMap: imageTypeMap,
+        message: `OCR 辨識完成 (第 ${nutritionIndex + 1} 張為營養標示，第 ${frontIndex + 1} 張為包裝正面)`
       };
 
     } catch (error) {

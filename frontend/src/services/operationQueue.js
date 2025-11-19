@@ -167,7 +167,16 @@ class OperationQueue {
       return false;
     }
 
-    const validTypes = ['navigate', 'fill_form', 'click', 'display_data', 'ocr_feed_analysis'];
+    const validTypes = [
+      'navigate', 
+      'fill_form', 
+      'click', 
+      'display_data', 
+      'ocr_feed_analysis',
+      'feed_created',           // 飼料建立完成
+      'post_created',           // 社群貼文建立完成
+      'abnormal_post_created'   // 異常記錄建立完成
+    ];
     if (!operation.type || !validTypes.includes(operation.type)) {
       return false;
     }

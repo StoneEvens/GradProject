@@ -548,15 +548,46 @@ class AIChatService {
         throw new Error('At least one image is required');
       }
 
+      // 獲取 OCR 識別出的圖片類型映射
+      let imageTypeMap = null;
+      try {
+        const storedMap = localStorage.getItem('feedImageTypeMap');
+        if (storedMap) {
+          imageTypeMap = JSON.parse(storedMap);
+          console.log('[AIChatService] 使用 OCR 識別的圖片類型映射:', imageTypeMap);
+        }
+      } catch (e) {
+        console.warn('[AIChatService] 無法讀取圖片類型映射，使用預設順序');
+      }
+
       // 建立 FormData
       const formData = new FormData();
 
-      // 添加圖片檔案
-      images.forEach((image) => {
-        if (image.file) {
-          formData.append('images', image.file);
+      // 根據圖片類型映射重新排序圖片
+      // 後端期待：第一張 = front, 第二張 = nutrition
+      if (imageTypeMap) {
+        // 找出哪張圖片是 front 和 nutrition
+        const frontIndex = Object.keys(imageTypeMap).find(key => imageTypeMap[key] === 'front');
+        const nutritionIndex = Object.keys(imageTypeMap).find(key => imageTypeMap[key] === 'nutrition');
+
+        // 按照 front, nutrition 的順序添加
+        if (frontIndex !== undefined && images[frontIndex]) {
+          formData.append('images', images[frontIndex].file);
+          console.log(`[AIChatService] 第 1 張（front）: 原始第 ${parseInt(frontIndex) + 1} 張圖片`);
         }
-      });
+        if (nutritionIndex !== undefined && images[nutritionIndex]) {
+          formData.append('images', images[nutritionIndex].file);
+          console.log(`[AIChatService] 第 2 張（nutrition）: 原始第 ${parseInt(nutritionIndex) + 1} 張圖片`);
+        }
+      } else {
+        // 沒有類型映射時，使用原始順序
+        images.forEach((image, index) => {
+          if (image.file) {
+            formData.append('images', image.file);
+            console.log(`[AIChatService] 第 ${index + 1} 張: 原始順序`);
+          }
+        });
+      }
 
       console.log(`[AIChatService] Uploading ${images.length} images to feed ${feedId}`);
 
@@ -572,6 +603,14 @@ class AIChatService {
       );
 
       console.log('[AIChatService] Feed image upload successful:', response.data);
+      
+      // 清除 localStorage 中的圖片類型映射
+      try {
+        localStorage.removeItem('feedImageTypeMap');
+      } catch (e) {
+        console.warn('[AIChatService] 無法清除圖片類型映射');
+      }
+
       return response.data;
 
     } catch (error) {
