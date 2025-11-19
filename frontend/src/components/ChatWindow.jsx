@@ -191,6 +191,33 @@ const ChatWindow = ({
     }
   }, [isOpen]);
 
+  // 監聽 OCR 完成事件（由 operationExecutor 觸發）
+  useEffect(() => {
+    const handleOcrCompleted = async (event) => {
+      const { ocrData, rawText } = event.detail;
+
+      console.log('[ChatWindow] 收到 OCR 完成事件:', ocrData);
+
+      // 將 OCR 結果回傳給 Agent
+      const ocrMessage = "[系統] OCR 分析完成，請協助確認辨識結果";
+      const ocrContext = {
+        ocrCompleted: true,
+        hasImages: true,
+        imageCount: selectedImages.length,
+        ocrData: ocrData
+      };
+
+      // 自動發送給 Agent
+      await handleSendMessage(ocrMessage, ocrContext);
+    };
+
+    window.addEventListener('ocrCompleted', handleOcrCompleted);
+
+    return () => {
+      window.removeEventListener('ocrCompleted', handleOcrCompleted);
+    };
+  }, [selectedImages]);
+
   // 處理輸入變化
   const handleInputChange = (event) => {
     setInputText(event.target.value);
@@ -388,7 +415,12 @@ const ChatWindow = ({
       });
 
       Promise.all(imagePreviewPromises).then(imagePreviews => {
-        setSelectedImages(prev => [...prev, ...imagePreviews]);
+        setSelectedImages(prev => {
+          const newImages = [...prev, ...imagePreviews];
+          // 同時存儲到 localStorage 供 operationExecutor 使用
+          localStorage.setItem('selectedFeedImages', JSON.stringify(newImages));
+          return newImages;
+        });
       });
     }
 
@@ -397,11 +429,19 @@ const ChatWindow = ({
   };
 
   const removeImage = (imageId) => {
-    setSelectedImages(prev => prev.filter(img => img.id !== imageId));
+    setSelectedImages(prev => {
+      const newImages = prev.filter(img => img.id !== imageId);
+      // 更新 localStorage
+      localStorage.setItem('selectedFeedImages', JSON.stringify(newImages));
+      return newImages;
+    });
   };
 
   const clearAllImages = () => {
     setSelectedImages([]);
+    // 清除 localStorage
+    localStorage.removeItem('selectedFeedImages');
+    localStorage.removeItem('feedOcrData');
   };
 
   // 發送訊息
@@ -648,75 +688,10 @@ const ChatWindow = ({
           }
         }
 
-        // 檢測 ocr_feed_analysis operation 並自動執行 OCR
-        const ocrFeedOp = aiResult.operations.find(
-          op => op.operation_name === 'ocr_feed_analysis'
-        );
-
-        if (ocrFeedOp) {
-          console.log('[ChatWindow] 檢測到 ocr_feed_analysis operation');
-
-          // ✅ 檢查圖片數量必須為 2 張（包裝 + 營養標示）
-          if (selectedImages.length !== 2) {
-            setMessages(prev => [...prev, {
-              id: Date.now() + 3,
-              text: '❌ 請上傳 2 張圖片：飼料包裝照片和營養標示照片各一張。',
-              isUser: false,
-              timestamp: new Date(),
-              error: true
-            }]);
-            return; // 停止處理
-          }
-
-          try {
-            // 顯示進度訊息
-            setMessages(prev => [...prev, {
-              id: Date.now() + 3,
-              text: '🔍 正在辨識營養成分...',
-              isUser: false,
-              timestamp: new Date(),
-              isSystem: true
-            }]);
-
-            // 辨識營養標示（第二張是營養標示）
-            const nutritionImage = selectedImages[1];
-            const ocrResult = await aiChatService.analyzeFeedNutrition(nutritionImage);
-
-            if (ocrResult.success) {
-              console.log('[ChatWindow] OCR 分析成功:', ocrResult.data);
-
-              // 將 OCR 結果回傳給 Agent（注意：不要清空 selectedImages）
-              const ocrMessage = "[系統] OCR 分析完成，請協助確認辨識結果";
-              const ocrContext = {
-                ocrCompleted: true,
-                hasImages: true,
-                imageCount: selectedImages.length,
-                ocrData: ocrResult.data.extracted_nutrients
-              };
-
-              // 自動發送給 Agent
-              await handleSendMessage(ocrMessage, ocrContext);
-
-            } else {
-              setMessages(prev => [...prev, {
-                id: Date.now() + 4,
-                text: `⚠️ OCR 辨識失敗：${ocrResult.error}。您可以手動輸入營養成分。`,
-                isUser: false,
-                timestamp: new Date()
-              }]);
-            }
-
-          } catch (error) {
-            console.error('[ChatWindow] OCR 分析失敗:', error);
-            setMessages(prev => [...prev, {
-              id: Date.now() + 4,
-              text: `❌ OCR 處理失敗: ${error.message}`,
-              isUser: false,
-              timestamp: new Date(),
-              error: true
-            }]);
-          }
-        }
+        // ✅ OCR 處理已移至 operationExecutor，由 operation pipeline 統一處理
+        // operationClient 會將 ocr_feed_analysis operation 加入佇列
+        // operationExecutor 執行 OCR 後會觸發 ocrCompleted 事件
+        // ChatWindow 監聽該事件並回傳結果給 AI Agent (見上方 useEffect)
 
         // 檢測 feed_created operation 並自動上傳圖片（類似 post_created）
         const feedCreatedOp = aiResult.operations.find(

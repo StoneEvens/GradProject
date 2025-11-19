@@ -43,19 +43,23 @@ class OperationExecutor {
         case 'navigate':
           result = await this.executeNavigate(operation.params);
           break;
-        
+
         case 'fill_form':
           result = await this.executeFillForm(operation.params);
           break;
-        
+
         case 'click':
           result = await this.executeClick(operation.params);
           break;
-        
+
         case 'display_data':
           result = await this.executeDisplayData(operation.params);
           break;
-        
+
+        case 'ocr_feed_analysis':
+          result = await this.executeOCRFeedAnalysis(operation.params);
+          break;
+
         default:
           throw new Error(`Unknown operation type: ${operation.type}`);
       }
@@ -235,6 +239,140 @@ class OperationExecutor {
       dataKeys: Object.keys(params),
       dataSize: JSON.stringify(params).length
     };
+  }
+
+  /**
+   * Execute OCR feed analysis operation
+   * @param {Object} params - OCR parameters
+   * @param {string} params.purpose - Purpose of OCR (e.g., 'feed_nutrition')
+   * @returns {Promise<Object>} OCR results with nutrition data
+   */
+  async executeOCRFeedAnalysis(params) {
+    console.log('[OperationExecutor] Starting OCR feed analysis:', params);
+
+    try {
+      // 從 localStorage 獲取使用者選擇的圖片
+      const selectedImagesJson = localStorage.getItem('selectedFeedImages');
+      if (!selectedImagesJson) {
+        throw new Error('沒有找到待辨識的圖片，請先選擇圖片');
+      }
+
+      const selectedImages = JSON.parse(selectedImagesJson);
+
+      if (!selectedImages || selectedImages.length < 2) {
+        throw new Error('請選擇兩張圖片：包裝照片和營養標示照片');
+      }
+
+      console.log('[OperationExecutor] 辨識兩張圖片以找出營養標示...');
+
+      const axios = (await import('axios')).default;
+
+      // 輔助函數：將 base64 轉換為 Blob
+      const base64ToBlob = (base64String, fileType) => {
+        const base64Data = base64String.split(',')[1];
+        const byteCharacters = atob(base64Data);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        return new Blob([byteArray], { type: fileType });
+      };
+
+      // 輔助函數：計算營養成分資料的完整度
+      const calculateNutrientScore = (nutrients) => {
+        let score = 0;
+        const keys = ['protein', 'fat', 'carbohydrate', 'calcium', 'phosphorus', 'magnesium', 'sodium'];
+
+        keys.forEach(key => {
+          if (nutrients[key] !== null && nutrients[key] !== undefined && nutrients[key] > 0) {
+            score++;
+          }
+        });
+
+        return score;
+      };
+
+      // 辨識兩張圖片
+      const ocrResults = [];
+
+      for (let i = 0; i < 2; i++) {
+        try {
+          const image = selectedImages[i];
+          const formData = new FormData();
+          const blob = base64ToBlob(image.preview, image.file.type);
+          formData.append('image', blob, image.file.name);
+
+          console.log(`[OperationExecutor] 辨識第 ${i + 1} 張圖片...`);
+
+          const response = await axios.post('/feeds/ocr/', formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+          });
+
+          const nutrients = response.data.extracted_nutrients || {};
+          const score = calculateNutrientScore(nutrients);
+
+          ocrResults.push({
+            index: i,
+            nutrients,
+            score,
+            rawText: response.data.raw_text
+          });
+
+          console.log(`[OperationExecutor] 第 ${i + 1} 張圖片辨識完成，營養成分數量: ${score}`);
+
+        } catch (error) {
+          console.warn(`[OperationExecutor] 第 ${i + 1} 張圖片辨識失敗:`, error);
+          ocrResults.push({
+            index: i,
+            nutrients: {},
+            score: 0,
+            error: error.message
+          });
+        }
+      }
+
+      // 選擇營養成分最完整的結果
+      ocrResults.sort((a, b) => b.score - a.score);
+      const bestResult = ocrResults[0];
+
+      if (bestResult.score === 0) {
+        throw new Error('兩張圖片都無法辨識出營養成分，請確保上傳清晰的營養標示照片');
+      }
+
+      console.log(`[OperationExecutor] 選擇第 ${bestResult.index + 1} 張圖片的辨識結果 (營養成分數量: ${bestResult.score})`);
+      console.log('[OperationExecutor] 最終 OCR 結果:', bestResult.nutrients);
+
+      // 將 OCR 結果存到 localStorage
+      localStorage.setItem('feedOcrData', JSON.stringify(bestResult.nutrients));
+
+      // 觸發自訂事件，通知 AI Chat Service OCR 完成
+      window.dispatchEvent(new CustomEvent('ocrCompleted', {
+        detail: {
+          ocrData: bestResult.nutrients,
+          rawText: bestResult.rawText,
+          selectedImageIndex: bestResult.index
+        }
+      }));
+
+      return {
+        action: 'ocr_feed_analysis',
+        success: true,
+        ocrData: bestResult.nutrients,
+        selectedImageIndex: bestResult.index,
+        message: `OCR 辨識完成 (使用第 ${bestResult.index + 1} 張圖片)`
+      };
+
+    } catch (error) {
+      console.error('[OperationExecutor] OCR analysis failed:', error);
+
+      // 清除圖片快取
+      localStorage.removeItem('selectedFeedImages');
+
+      throw new Error(`OCR 辨識失敗：${error.message}`);
+    }
   }
 
   /**
