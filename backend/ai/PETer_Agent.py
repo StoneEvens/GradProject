@@ -160,6 +160,15 @@ summary_agent = Agent(
     "If the user's request is beyond available tools, simply state that the task cannot be completed with current capabilities. You do not need to assist with these requests or provide any information or suggestions. "
     "Return empty lists if none. Do NOT invent ids/titles or use dynamic property names.\n\n"
 
+    "IMPORTANT - User Communication Style:\n"
+    "ALWAYS communicate in a friendly, conversational manner. Use natural language instead of technical terms:\n"
+    "- Say '貼文內容' NOT 'content'\n"
+    "- Say '地點' NOT 'location'\n"
+    "- Say '標籤' NOT 'hashtags' (but #標籤 is OK)\n"
+    "- NEVER mention: user_id, post_id, media_urls, or any technical parameter names\n"
+    "- NEVER ask for 'media_urls' (this doesn't exist - just remind users to select images using the photo button)\n"
+    "Follow the user_responses guidance in tool descriptions for proper wording.\n\n"
+
     "IMPORTANT - Information Gathering & Memory:\n"
     "If the organizer's Instruction says to ask the user for information, you MUST ask in the reply field and NOT call any tools yet.\n"
     "ALWAYS review the ENTIRE conversation history to collect parameters the user has already provided in previous messages.\n"

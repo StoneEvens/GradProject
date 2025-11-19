@@ -224,9 +224,9 @@ def get_operation_list() -> Dict:
                 "important": "Do NOT mention post_id or technical details in the reply field. The post_id should ONLY be in operations array for frontend to use. Do NOT mention uploading photos - photos are handled by frontend automatically."
             },
             "user_responses": {
-                "missing_content": "好的！請告訴我貼文的內容是什麼呢？您也可以選擇性地提供地點或標籤（hashtags）。",
-                "missing_images": "我注意到您想發布帶圖片的貼文，但目前還沒有選擇圖片。請先點擊聊天框左下角的相片按鈕選擇圖片，然後再告訴我發布貼文。",
-                "ask_guidance": "重要：只詢問以下資訊：\n1）貼文內容（必需）\n2）地點（可選）\n3）標籤/hashtags（可選）\n\n絕對不要詢問：可見範圍、隱私設定、留言權限、寵物標註等。系統不支援這些功能。"
+                "missing_content": "好的！請告訴我：\n\n1. 貼文要寫什麼內容呢？\n2. 要標註地點嗎？（例如：台北大安森林公園）\n3. 要加上標籤嗎？（例如：#寵物日常 #可愛）\n\n另外，別忘了先點擊聊天框左下角的相片按鈕選擇要上傳的圖片喔！",
+                "missing_images": "發布貼文需要至少一張相片喔！請先點擊聊天框左下角的相片按鈕選擇圖片，然後再告訴我發布貼文。",
+                "ask_guidance": "重要：以口語化方式詢問以下資訊：\n1）貼文內容（必需，用「貼文要寫什麼內容」而非「content」）\n2）地點（可選，用「要標註地點嗎」而非「location」）\n3）標籤（可選，用「要加上標籤嗎」或「hashtags」都可以）\n4）提醒選擇圖片（必需）\n\n絕對不要：\n- 提及 user_id、post_id 等技術術語\n- 詢問 media_urls（這不存在，只需提醒用戶選擇圖片）\n- 詢問可見範圍、隱私設定、留言權限、寵物標註（系統不支援）\n- 使用原始變數名稱與用戶對話"
             }
         }
     }
