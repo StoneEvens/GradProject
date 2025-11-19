@@ -252,6 +252,83 @@
   display: none;
 }
 
+/* 確認頁面樣式 */
+.confirmSection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+  background-color: #ffeed6;
+  border-radius: 10px;
+}
+
+.sectionTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: #89350c;
+  margin: 0 0 4px 0;
+}
+
+.sectionHint {
+  font-size: 13px;
+  color: #b8814a;
+  margin: 0 0 8px 0;
+  font-style: italic;
+}
+
+/* 營養成分網格 */
+.nutrientsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.nutrientInput {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.nutrientInput .inputLabel {
+  font-size: 14px;
+  font-weight: 500;
+  color: #89350c;
+  margin-left: 4px;
+}
+
+.nutrientInput .textInput {
+  background-color: #fff;
+  border: 1px solid #e0c5a0;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 14px;
+  color: #89350c;
+}
+
+/* 圖片預覽網格 */
+.imagesPreviewGrid {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.previewItem {
+  flex: 1;
+  min-width: 140px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.confirmImage {
+  width: 100%;
+  height: 120px;
+  object-fit: contain;
+  border-radius: 8px;
+  background-color: #fff;
+  border: 1px solid #e0c5a0;
+}
+
 /* Modal 底部 */
 .modalFooter {
   background-color: #FFca9c;

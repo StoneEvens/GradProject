@@ -170,18 +170,10 @@ function CalculatorStep2({ onNext, onPrev, selectedPet }) {
   };
 
   // 處理新增飼料
-  const handleCreateFeed = async ({ frontImage, nutritionImage, petType, feedName, feedBrand, feedPrice }) => {
+  const handleCreateFeed = async ({ frontImage, nutritionImage, petType, feedName, feedBrand, feedPrice, nutrients }) => {
     try {
-      // Step 1: OCR
-      const ocrForm = new FormData();
-      ocrForm.append('image', nutritionImage);
-      const ocrRes = await axios.post('/feeds/ocr/', ocrForm, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      });
-      const nutrients = ocrRes.data.extracted_nutrients || {};
-      console.log("OCR 結果：", nutrients);
+      // CreateFeedModal 已經處理了 OCR，直接使用傳遞過來的 nutrients
+      console.log("使用者確認的營養成分：", nutrients || {});
 
       // 將圖片轉換為 base64，參考 abnormal post 的做法
       const convertToBase64 = (file) => {
@@ -197,21 +189,24 @@ function CalculatorStep2({ onNext, onPrev, selectedPet }) {
       const frontImageBase64 = frontImage ? await convertToBase64(frontImage) : null;
       const nutritionImageBase64 = nutritionImage ? await convertToBase64(nutritionImage) : null;
 
-      // Step 2: 建立 Feed（包含自動比對邏輯和圖片數據）
-      const parseNumber = (val) => typeof val === 'number' ? val : 0;
-      const parseMgToG = (val) => (typeof val === 'number' ? val/1000 : 0);
+      // 建立 Feed（包含自動比對邏輯和圖片數據）
+      const parseNumber = (val) => {
+        const num = parseFloat(val);
+        return isNaN(num) ? 0 : num;
+      };
+
       const createFeedPayload = {
         name: feedName || '自訂飼料',
         brand: feedBrand || '未知品牌',
         pet_type: petType, // 傳送寵物類型
         pet_id: selectedPet?.id, // 傳送寵物 ID
-        protein: parseNumber(nutrients.protein),
-        fat: parseNumber(nutrients.fat),
-        carbohydrate: parseNumber(nutrients.carbohydrate),
-        calcium: parseNumber(nutrients.calcium),
-        phosphorus: parseNumber(nutrients.phosphorus),
-        magnesium: parseMgToG(nutrients.magnesium),
-        sodium: parseMgToG(nutrients.sodium),
+        protein: parseNumber(nutrients?.protein),
+        fat: parseNumber(nutrients?.fat),
+        carbohydrate: parseNumber(nutrients?.carbohydrate),
+        calcium: parseNumber(nutrients?.calcium),
+        phosphorus: parseNumber(nutrients?.phosphorus),
+        magnesium: parseNumber(nutrients?.magnesium),
+        sodium: parseNumber(nutrients?.sodium),
         price: feedPrice,
         front_image: frontImageBase64,
         nutrition_image: nutritionImageBase64
