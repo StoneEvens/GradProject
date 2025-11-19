@@ -545,11 +545,17 @@ def create_mcp_server() -> FastMCP:
         operation: Literal["add_pet", "update_pet", "add_abnormal_post", "update_abnormal_post", "delete_abnormal_post", "create_disease_archive", "add_plan", "update_plan", "delete_plan", "list_plans", "create_social_post", "add_feed"],
         data: Dict
     ) -> str:
+        print(f"[MCP Tool] ===== perform_database_operation CALLED =====")
+        print(f"[MCP Tool] operation: {operation}")
+        print(f"[MCP Tool] data: {data}")
+
         @sync_to_async
         def execute() -> Dict:
             return perform_operation(operation, data)
 
         result_dict = await execute()
+        print(f"[MCP Tool] result: {result_dict}")
+        print(f"[MCP Tool] ===== perform_database_operation FINISHED =====")
         return json.dumps(result_dict, ensure_ascii=False, indent=2)
 
     @mcp.tool(

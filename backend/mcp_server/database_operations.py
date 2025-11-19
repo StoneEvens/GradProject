@@ -328,8 +328,11 @@ def perform_operation(operation: str, data: Dict) -> Dict:
             logger.info(f"[perform_operation] create_social_post result: success={result.get('success')}")
             return result
         elif operation == "add_feed":
+            logger.info(f"[perform_operation] ===== STARTING add_feed =====")
+            logger.info(f"[perform_operation] add_feed data: {data}")
             result = _add_feed(data)
-            logger.info(f"[perform_operation] add_feed result: success={result.get('success')}")
+            logger.info(f"[perform_operation] add_feed result: {result}")
+            logger.info(f"[perform_operation] ===== FINISHED add_feed =====")
             return result
         else:
             error_msg = f"Operation '{operation}' is not implemented"
