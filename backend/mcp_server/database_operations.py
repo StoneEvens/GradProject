@@ -230,7 +230,7 @@ def get_operation_list() -> Dict:
             }
         },
         "add_feed": {
-            "description": "新增飼料資料（包含完整資訊和營養成分）。圖片由前端另外上傳。此操作應在用戶確認所有資訊後才執行。系統具備智能匹配功能，會自動檢查資料庫中是否已存在相同營養成分的飼料。",
+            "description": "新增飼料資料（包含完整資訊和營養成分）。⚠️ 重要：此操作必須在用戶明確確認所有資訊後才執行！請先向用戶顯示完整的飼料資訊（包括所有營養成分），並明確詢問「資訊正確嗎？」等待用戶回覆確認後再呼叫此工具。圖片由前端另外上傳。系統具備智能匹配功能，會自動檢查資料庫中是否已存在相同營養成分的飼料。",
             "required_params": ["user_id", "pet_type", "has_images", "name", "brand", "price"],
             "optional_params": [
                 "protein", "fat", "carbohydrate",
@@ -262,7 +262,9 @@ def get_operation_list() -> Dict:
                 "圖片需透過前端另外上傳",
                 "必須在用戶確認所有資訊後才呼叫此操作",
                 "營養成分來自 OCR 辨識",
-                "【重要】營養成分（protein, fat, carbohydrate, calcium, phosphorus, magnesium, sodium）若 OCR 未辨識出來或為 None，請設為 0（不要省略參數）",
+                "【重要】所有營養成分參數都是必填的：protein, fat, carbohydrate, calcium, phosphorus, magnesium, sodium",
+                "如果 OCR 未辨識出某個營養成分，其值會自動為 0（前端已處理），請直接使用 ocrData 中的所有值",
+                "絕對不要省略任何營養成分參數，也不要發明數值，直接使用 ocrData 提供的值",
                 "【智能匹配】系統會根據所有營養成分（protein, fat, carbohydrate, calcium, phosphorus, magnesium, sodium）檢查是否已存在相同的飼料",
                 "如果匹配到已存在的飼料，會回傳 is_existing=true，此時不需要上傳圖片，直接結束流程"
             ],
@@ -279,17 +281,23 @@ def get_operation_list() -> Dict:
                 "missing_images": "新增飼料需要上傳 2 張圖片。請先點擊聊天框左下角的相片按鈕選擇：\n1. 飼料包裝正面照片\n2. 營養標示照片（成分表）",
                 "ask_pet_type": "請問這是狗的飼料還是貓的飼料？",
                 "ask_name_brand": "請告訴我飼料的品牌和名稱（如果您知道的話）",
+                "show_ocr_results_and_confirm": "✅ **營養成分辨識完成！**\n\n**辨識結果**：\n• 蛋白質：{protein}%\n• 脂肪：{fat}%\n• 碳水化合物/纖維：{carbohydrate}%\n• 鈣：{calcium}%、磷：{phosphorus}%、鎂：{magnesium}%、鈉：{sodium}%\n\n請問這是狗的飼料還是貓的飼料？另外請告訴我品牌和名稱。",
+                "final_confirmation": "**請確認飼料資訊**：\n• 適用對象：{pet_type_zh}\n• 品牌：{brand}\n• 名稱：{name}\n• 價格：{price} 元\n• 蛋白質：{protein}%\n• 脂肪：{fat}%\n• 碳水化合物：{carbohydrate}%\n• 鈣：{calcium}%、磷：{phosphorus}%、鎂：{magnesium}%、鈉：{sodium}%\n\n資訊正確嗎？如果正確，請回覆「確認」或「是」，我就會幫您建立飼料。如果需要修改，請告訴我要修改哪些部分。",
                 "created_new": "飼料資料建立成功！正在上傳圖片...",
                 "matched_existing": "已找到資料庫中符合的飼料：[品牌] - [名稱]。您可以直接使用這筆資料，無需重複建立。"
             },
             "workflow": [
-                "1. 用戶選擇圖片 → has_images = true（必須是 2 張圖片）",
-                "2. 呼叫 prepare_feed_ocr() 讓前端執行 OCR",
-                "3. 前端回傳 OCR 結果（ocrData）",
-                "4. Agent 確認資訊並收集其他欄位（pet_type, name, brand）",
-                "5. 用戶確認後才呼叫 add_feed（包含完整資訊）",
-                "6a. 如果 is_existing=false：前端收到 feed_created operation 後上傳圖片",
-                "6b. 如果 is_existing=true：前端清除圖片快取，告知使用者已匹配到現有飼料，結束流程"
+                "【重要】完整工作流程，每個步驟都必須執行：",
+                "1. 用戶選擇圖片 → 確認 has_images=true 且 imageCount=2",
+                "2. 呼叫 prepare_feed_ocr() 並在 operations array 加入 ocr_feed_analysis",
+                "3. 告訴用戶：「收到圖片！正在辨識飼料資訊，請稍候...」",
+                "4. 等待前端回傳 OCR 結果（ocrCompleted=true, ocrData 包含所有營養成分）",
+                "5. 收到 OCR 結果後，使用 show_ocr_results_and_confirm 模板顯示完整辨識結果並詢問 pet_type, name, brand",
+                "6. 收集 pet_type, name, brand 後，使用 final_confirmation 模板顯示完整資訊並明確詢問「資訊正確嗎？」",
+                "7. 【關鍵】等待用戶明確確認（例如回覆「確認」、「是」、「正確」、「沒問題」等）",
+                "8. 用戶確認後才呼叫 perform_database_operation('add_feed', {...完整資料...})",
+                "9a. 如果 is_existing=false：告知「飼料資料建立成功！正在上傳圖片...」，前端會自動上傳",
+                "9b. 如果 is_existing=true：告知已匹配到現有飼料，加入 navigate operation"
             ]
         }
     }

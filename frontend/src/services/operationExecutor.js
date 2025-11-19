@@ -279,6 +279,32 @@ class OperationExecutor {
         return new Blob([byteArray], { type: fileType });
       };
 
+      // 輔助函數：標準化營養成分（將 null/undefined 轉為 0）
+      const normalizeNutrients = (nutrients) => {
+        const normalized = {
+          protein: 0,
+          fat: 0,
+          carbohydrate: 0,
+          calcium: 0,
+          phosphorus: 0,
+          magnesium: 0,
+          sodium: 0
+        };
+
+        // 覆蓋有值的營養成分
+        Object.keys(normalized).forEach(key => {
+          const value = nutrients[key];
+          if (value !== null && value !== undefined && value !== '') {
+            const parsed = parseFloat(value);
+            if (!isNaN(parsed) && parsed >= 0) {
+              normalized[key] = parsed;
+            }
+          }
+        });
+
+        return normalized;
+      };
+
       // 輔助函數：計算營養成分資料的完整度
       const calculateNutrientScore = (nutrients) => {
         let score = 0;
@@ -311,7 +337,9 @@ class OperationExecutor {
             },
           });
 
-          const nutrients = response.data.extracted_nutrients || {};
+          // 標準化營養成分（將 null/undefined 轉為 0）
+          const rawNutrients = response.data.extracted_nutrients || {};
+          const nutrients = normalizeNutrients(rawNutrients);
           const score = calculateNutrientScore(nutrients);
 
           ocrResults.push({
@@ -327,7 +355,7 @@ class OperationExecutor {
           console.warn(`[OperationExecutor] 第 ${i + 1} 張圖片辨識失敗:`, error);
           ocrResults.push({
             index: i,
-            nutrients: {},
+            nutrients: normalizeNutrients({}),  // 使用標準化的空營養成分（全為 0）
             score: 0,
             error: error.message
           });

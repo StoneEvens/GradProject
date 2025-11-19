@@ -501,7 +501,7 @@ def create_mcp_server() -> FastMCP:
             "1. Check Context: User must have hasImages=true and imageCount=2 (package + nutrition label)\n"
             "2. Call this tool + ADD operation to operations array (see above)\n"
             "3. Tell user: '收到圖片！正在辨識飼料資訊，請稍候...'\n"
-            "4. Wait for Results: Frontend sends back ocrCompleted=true with ocrData containing: protein, fat, carbohydrate, calcium, phosphorus, magnesium, sodium\n"
+            "4. Wait for Results: Frontend sends back ocrCompleted=true with ocrData containing: protein, fat, carbohydrate, calcium, phosphorus, magnesium, sodium (all values will be 0 if not detected)\n"
             "5. Display to User: Show formatted OCR results with template:\n"
             "   ✅ **營養成分辨識完成！**\n"
             "   **辨識結果**：\n"
