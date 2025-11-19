@@ -231,9 +231,8 @@ def get_operation_list() -> Dict:
         },
         "add_feed": {
             "description": "新增飼料資料（包含完整資訊和營養成分）。圖片由前端另外上傳。此操作應在用戶確認所有資訊後才執行。系統具備智能匹配功能，會自動檢查資料庫中是否已存在相同營養成分的飼料。",
-            "required_params": ["user_id", "pet_type", "has_images"],
+            "required_params": ["user_id", "pet_type", "has_images", "name", "brand", "price"],
             "optional_params": [
-                "name", "brand", "price",
                 "protein", "fat", "carbohydrate",
                 "calcium", "phosphorus", "magnesium", "sodium"
             ],
@@ -1359,14 +1358,25 @@ def _add_feed(data: Dict) -> Dict:
     logger.info(f"[_add_feed] Creating feed with complete data: user_id={data.get('user_id')}, pet_type={data.get('pet_type')}")
 
     # 1. 驗證必要欄位
-    required_fields = ["user_id", "pet_type", "has_images"]
-    missing_fields = [f for f in required_fields if f not in data]
+    required_fields = ["user_id", "pet_type", "has_images", "name", "brand", "price"]
+    missing_fields = [f for f in required_fields if f not in data or data.get(f) is None or data.get(f) == ""]
     if missing_fields:
         logger.warning(f"[_add_feed] Missing fields: {missing_fields}")
+        # 產生友善的錯誤訊息
+        field_names = {
+            "user_id": "用戶ID",
+            "pet_type": "寵物類型",
+            "has_images": "圖片",
+            "name": "飼料名稱",
+            "brand": "品牌",
+            "price": "價格"
+        }
+        missing_names = [field_names.get(f, f) for f in missing_fields]
         return {
             "error": "Missing required fields",
             "missing_fields": missing_fields,
-            "help": "user_id, pet_type, and has_images are required"
+            "user_message": f"請提供以下資訊：{', '.join(missing_names)}",
+            "help": "name, brand, price 為必填欄位"
         }
 
     # 2. 檢查是否有圖片
@@ -1396,10 +1406,13 @@ def _add_feed(data: Dict) -> Dict:
         logger.error(f"[_add_feed] User {data['user_id']} not found")
         return {"error": f"User with id {data['user_id']} not found"}
 
-    # 5. 解析營養成分（OCR 提供）
+    # 5. 解析營養成分（OCR 提供，若為 None 則設為 0）
     def parse_float(value):
+        """將值轉換為浮點數，None 或無效值轉為 0.0"""
+        if value is None or value == "":
+            return 0.0
         try:
-            return float(value) if value is not None else 0.0
+            return float(value)
         except (TypeError, ValueError):
             return 0.0
 
@@ -1411,15 +1424,51 @@ def _add_feed(data: Dict) -> Dict:
     magnesium = parse_float(data.get("magnesium"))
     sodium = parse_float(data.get("sodium"))
 
-    # 6. 獲取其他資訊
-    name = data.get("name", "未命名").strip() or "未命名"
-    brand = data.get("brand", "未知品牌").strip() or "未知品牌"
+    # 6. 獲取必填資訊（已在步驟 1 驗證存在）
+    name = data.get("name").strip()
+    brand = data.get("brand").strip()
     price = parse_float(data.get("price"))
 
-    # 7. 智能匹配：檢查是否已存在相同營養成分的飼料
+    # 7. 智能匹配：先檢查 brand+name+pet_type，再檢查營養成分
     from feeds.models import Feed
 
-    existing_feed = Feed.objects.filter(
+    # 7.1 優先檢查：是否已存在相同 brand+name+pet_type 的飼料（避免 unique_together 衝突）
+    existing_by_identity = Feed.objects.filter(
+        name=name,
+        brand=brand,
+        pet_type=pet_type
+    ).first()
+
+    if existing_by_identity:
+        logger.info(f"[_add_feed] Found existing feed by identity {existing_by_identity.id}: {existing_by_identity.brand} - {existing_by_identity.name}")
+        return {
+            "success": True,
+            "message": f"資料庫中已有此飼料：{existing_by_identity.brand} - {existing_by_identity.name}",
+            "feed_id": existing_by_identity.id,
+            "is_existing": True,
+            "matched_feed": {
+                "id": existing_by_identity.id,
+                "name": existing_by_identity.name,
+                "brand": existing_by_identity.brand,
+                "pet_type": existing_by_identity.pet_type,
+                "protein": existing_by_identity.protein,
+                "fat": existing_by_identity.fat,
+                "carbohydrate": existing_by_identity.carbohydrate,
+                "calcium": existing_by_identity.calcium,
+                "phosphorus": existing_by_identity.phosphorus,
+                "magnesium": existing_by_identity.magnesium,
+                "sodium": existing_by_identity.sodium,
+                "price": existing_by_identity.price
+            },
+            "navigation": {
+                "path": f"/feeds/{existing_by_identity.id}",
+                "destination": "飼料詳情頁面"
+            },
+            "note": "已找到相同品牌和名稱的飼料。"
+        }
+
+    # 7.2 次要檢查：是否已存在相同營養成分的飼料
+    existing_by_nutrition = Feed.objects.filter(
         pet_type=pet_type,
         protein=protein,
         fat=fat,
@@ -1430,32 +1479,32 @@ def _add_feed(data: Dict) -> Dict:
         sodium=sodium
     ).first()
 
-    if existing_feed:
-        logger.info(f"[_add_feed] Matched existing feed {existing_feed.id}: {existing_feed.brand} - {existing_feed.name}")
+    if existing_by_nutrition:
+        logger.info(f"[_add_feed] Matched existing feed by nutrition {existing_by_nutrition.id}: {existing_by_nutrition.brand} - {existing_by_nutrition.name}")
         return {
             "success": True,
-            "message": f"資料庫中已有符合的飼料：{existing_feed.brand} - {existing_feed.name}",
-            "feed_id": existing_feed.id,
+            "message": f"資料庫中已有營養成分相同的飼料：{existing_by_nutrition.brand} - {existing_by_nutrition.name}",
+            "feed_id": existing_by_nutrition.id,
             "is_existing": True,
             "matched_feed": {
-                "id": existing_feed.id,
-                "name": existing_feed.name,
-                "brand": existing_feed.brand,
-                "pet_type": existing_feed.pet_type,
-                "protein": existing_feed.protein,
-                "fat": existing_feed.fat,
-                "carbohydrate": existing_feed.carbohydrate,
-                "calcium": existing_feed.calcium,
-                "phosphorus": existing_feed.phosphorus,
-                "magnesium": existing_feed.magnesium,
-                "sodium": existing_feed.sodium,
-                "price": existing_feed.price
+                "id": existing_by_nutrition.id,
+                "name": existing_by_nutrition.name,
+                "brand": existing_by_nutrition.brand,
+                "pet_type": existing_by_nutrition.pet_type,
+                "protein": existing_by_nutrition.protein,
+                "fat": existing_by_nutrition.fat,
+                "carbohydrate": existing_by_nutrition.carbohydrate,
+                "calcium": existing_by_nutrition.calcium,
+                "phosphorus": existing_by_nutrition.phosphorus,
+                "magnesium": existing_by_nutrition.magnesium,
+                "sodium": existing_by_nutrition.sodium,
+                "price": existing_by_nutrition.price
             },
             "navigation": {
-                "path": f"/feeds/{existing_feed.id}",
+                "path": f"/feeds/{existing_by_nutrition.id}",
                 "destination": "飼料詳情頁面"
             },
-            "note": "已智能匹配到現有飼料，無需重複建立。"
+            "note": "已智能匹配到營養成分相同的現有飼料。"
         }
 
     # 8. 建立新的 Feed 記錄（如果沒有匹配到）
