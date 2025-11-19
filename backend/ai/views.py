@@ -84,9 +84,15 @@ def _run_agent_plug_and_play(message: str, user_id: str, username: str, session_
     # Append context information to the message if provided
     context_str = ""
     if context:
+        # Image selection status
         if context.get('hasImages'):
             image_count = context.get('imageCount', 0)
-            context_str = f" [用戶已準備 {image_count} 張相片待上傳]"
+            context_str += f" [用戶已準備 {image_count} 張相片待上傳]"
+
+        # OCR completion status
+        if context.get('ocrCompleted'):
+            ocr_data = context.get('ocrData', {})
+            context_str += f" [OCR 已完成 - 營養成分: 蛋白質:{ocr_data.get('protein')}% 脂肪:{ocr_data.get('fat')}% 碳水:{ocr_data.get('carbohydrate')}% 鈣:{ocr_data.get('calcium')}% 磷:{ocr_data.get('phosphorus')}% 鎂:{ocr_data.get('magnesium')}% 鈉:{ocr_data.get('sodium')}%]"
 
     message_with_context = message + context_str
     workflow_input = WorkflowInput(input_as_text=message_with_context)

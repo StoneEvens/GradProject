@@ -405,35 +405,50 @@ const ChatWindow = ({
   };
 
   // 發送訊息
-  const handleSendMessage = async () => {
-    if (!inputText.trim()) return;
+  const handleSendMessage = async (customMessage = null, customContext = null) => {
+    // 使用自訂訊息或 inputText
+    const messageText = customMessage || inputText;
+
+    if (!messageText.trim()) return;
 
     // 如果正在錄音，先停止錄音
     stopVoiceRecording();
 
     const userMessage = {
       id: Date.now(),
-      text: inputText,
+      text: messageText,
       isUser: true,
       timestamp: new Date()
     };
 
-    const userInput = inputText; // 保存輸入內容
+    const userInput = messageText; // 保存輸入內容
 
     // 添加用戶訊息
     const newMessages = [...messages, userMessage];
     setMessages(newMessages);
-    setInputText('');
+
+    // 只有在使用預設 inputText 時才清空（不清空自訂訊息）
+    if (!customMessage) {
+      setInputText('');
+    }
+
     setIsTyping(true);
 
     try {
-      // 使用正式後端 AI Chat Service
-      const aiResult = await aiChatService.processMessage(userInput, {
+      // 合併預設 context 和自訂 context
+      const defaultContext = {
         user: user,
         petId: user?.pets?.[0]?.id || null,
         hasImages: selectedImages.length > 0,
         imageCount: selectedImages.length
-      });
+      };
+
+      const finalContext = customContext
+        ? { ...defaultContext, ...customContext }
+        : defaultContext;
+
+      // 使用正式後端 AI Chat Service
+      const aiResult = await aiChatService.processMessage(userInput, finalContext);
 
       console.log('AI 回應結果:', aiResult); // Debug 用
 
