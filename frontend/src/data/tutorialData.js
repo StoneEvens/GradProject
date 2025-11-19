@@ -675,7 +675,7 @@ const tutorialData = {
       instruction: '',
       targetElement: {
         component: 'CreateFeedModal',
-        selector: '[class*="inputSection"]:nth-of-type(1) input[class*="textInput"]:not([disabled])',
+        selector: '[data-step="feed-name"] input[class*="textInput"]:not([disabled])',
         className: 'textInput',
         fallbackSelector: '[class*="inputSection"]:first-of-type label + input[type="text"]:not([disabled])'
       },
@@ -692,7 +692,7 @@ const tutorialData = {
       instruction: '',
       targetElement: {
         component: 'CreateFeedModal',
-        selector: '[class*="inputSection"]:first-of-type + [class*="inputSection"] input[class*="textInput"]:not([disabled]), label:has-text("品牌") + input[class*="textInput"]:not([disabled])',
+        selector: '[data-step="feed-brand"] input[class*="textInput"]:not([disabled])',
         className: 'textInput',
         fallbackSelector: 'label:contains("品牌") + input[type="text"]:not([disabled])'
       },
@@ -726,16 +726,15 @@ const tutorialData = {
       instruction: '',
       targetElement: {
         component: 'CreateFeedModal',
-        selector: '[class*="uploadSection"]:first-of-type [class*="noImageState"] button[class*="uploadButton"]:not([disabled])',
+        selector: '[data-step="upload-front"] button[class*="uploadButton"]:not([disabled])',
         className: 'uploadButton',
-        fallbackSelector: '[class*="uploadSection"]:first-of-type [class*="imagePreview"] button[class*="removeImageBtn"]:not([disabled]), [class*="uploadSection"]:first-of-type [class*="imageSection"] button:not([disabled])'
+        fallbackSelector: '[data-step="upload-front"] button:not([disabled])'
       },
       highlight: {
         type: 'rectangle',
         position: 'button'
       },
-      action: 'click',
-      showPointer: true
+      nextCondition: 'imageAdded'
     },
     {
       id: 14,
@@ -743,16 +742,15 @@ const tutorialData = {
       instruction: '',
       targetElement: {
         component: 'CreateFeedModal',
-        selector: '[class*="uploadSection"]:first-of-type + [class*="uploadSection"] [class*="noImageState"] button[class*="uploadButton"]:not([disabled])',
+        selector: '[data-step="upload-nutrition"] button[class*="uploadButton"]:not([disabled])',
         className: 'uploadButton',
-        fallbackSelector: '[class*="uploadSection"]:first-of-type + [class*="uploadSection"] [class*="imagePreview"] button[class*="removeImageBtn"]:not([disabled]), [class*="uploadSection"]:first-of-type + [class*="uploadSection"] [class*="imageSection"] button:not([disabled])'
+        fallbackSelector: '[data-step="upload-nutrition"] button:not([disabled])'
       },
       highlight: {
         type: 'rectangle',
         position: 'button'
       },
-      action: 'click',
-      showPointer: true
+      nextCondition: 'imageAdded'
     },
     {
       id: 15,
@@ -769,7 +767,7 @@ const tutorialData = {
         position: 'button'
       },
       action: 'click',
-      showPointer: true
+      nextCondition: 'imageAdded'
     },
     {
       id: 16,

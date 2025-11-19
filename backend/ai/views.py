@@ -1,7 +1,6 @@
 import os
 import uuid
 import requests
-import asyncio
 from django.shortcuts import render
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
@@ -12,6 +11,7 @@ import logging
 from .models import AgentThread, AgentMessage
 from .PETer_Agent import WorkflowInput, run_workflow
 from datetime import datetime, timezone
+from asgiref.sync import async_to_sync
 
 logger = logging.getLogger(__name__)
 
@@ -77,18 +77,24 @@ def _generate_conversation_title(user_message: str, tutorial: str = None, operat
         return '新對話'
 
 
-def _run_agent_plug_and_play(message: str, user_id: str, username: str, session_id: str | None):
+def _run_agent_plug_and_play(message: str, user_id: str, username: str, session_id: str | None, context: dict = None):
     """Wrapper to invoke PETer_Agent.run_workflow and normalize response structure.
     Returns dict with keys similar to legacy format.
     """
-    workflow_input = WorkflowInput(input_as_text=message)
-    result = asyncio.run(
-        run_workflow(
-            workflow_input,
-            user_id=int(user_id) if str(user_id).isdigit() else user_id,
-            username=username,
-            session_id=session_id,
-        )
+    # Append context information to the message if provided
+    context_str = ""
+    if context:
+        if context.get('hasImages'):
+            image_count = context.get('imageCount', 0)
+            context_str = f" [用戶已準備 {image_count} 張相片待上傳]"
+
+    message_with_context = message + context_str
+    workflow_input = WorkflowInput(input_as_text=message_with_context)
+    result = async_to_sync(run_workflow)(
+        workflow_input,
+        user_id=int(user_id) if str(user_id).isdigit() else user_id,
+        username=username,
+        session_id=session_id,
     )
     parsed = result.get('output_parsed', {})
     session_id_final = result.get('session_id') or session_id
@@ -185,7 +191,6 @@ def _run_agent_plug_and_play(message: str, user_id: str, username: str, session_
     return {
         'response': parsed.get('reply', ''),
         'tutorial': parsed.get('tutorial'),
-        'has_calculator': parsed.get('has_calculator', False),
         'operation_type': parsed.get('operation_type'),
         'operations': operations,
     'recommended_users': recommended_users,
@@ -297,7 +302,6 @@ def agent_chat(request):
             content=result.get('response', ''),
             has_tutorial=bool(result.get('tutorial')),
             tutorial_type=result.get('tutorial'),
-            has_calculator=result.get('has_calculator', False),
             operation_type=result.get('operation_type'),
             additional_data={
                 'operations': result.get('operations', []),
@@ -308,7 +312,6 @@ def agent_chat(request):
                     'response': result.get('response', ''),
                     'operations': result.get('operations', []),
                     'tutorial': result.get('tutorial'),
-                    'hasCalculator': result.get('has_calculator', False),
                     'operationType': result.get('operation_type'),
                     'recommendedUsers': result.get('recommended_users', []),
                     'recommendedSocialPosts': result.get('recommended_social_posts', {}),
@@ -410,7 +413,7 @@ def main_chat(request):
         session_id_for_agent = openai_session_id if (isinstance(openai_session_id, str) and openai_session_id.startswith('conv_')) else None
         print(f"[main_chat] → Passing session_id_for_agent to PETer: {session_id_for_agent}")
         logger.info(f"→ Passing session_id_for_agent to PETer: {session_id_for_agent}")
-        result = _run_agent_plug_and_play(user_message, str(request.user.id), request.user.username, session_id_for_agent)
+        result = _run_agent_plug_and_play(user_message, str(request.user.id), request.user.username, session_id_for_agent, context)
 
         if 'error' in result:
             err_payload = dict(result)
@@ -421,7 +424,6 @@ def main_chat(request):
         # 5. Extract structured fields
         operations = result.get('operations', [])
         tutorial = result.get('tutorial')
-        has_calculator = result.get('has_calculator', False)
         operation_type = result.get('operation_type')
         recommended_users = result.get('recommended_users', [])
         recommended_social_posts = result.get('recommended_social_posts', {})
@@ -489,7 +491,6 @@ def main_chat(request):
                 'response': result.get('response', ''),
                 'operations': operations,
                 'tutorial': tutorial,
-                'hasCalculator': has_calculator,
                 'operationType': operation_type,
                 'recommendedUsers': recommended_users,
                 'recommendedSocialPosts': recommended_social_posts,
@@ -504,7 +505,6 @@ def main_chat(request):
                 content=result.get('response', ''),
                 has_tutorial=bool(tutorial) if tutorial is not None else False,
                 tutorial_type=tutorial,
-                has_calculator=has_calculator,
                 operation_type=operation_type,
                 additional_data={
                     'recommendedUsers': recommended_users,
@@ -520,7 +520,6 @@ def main_chat(request):
                 'response': result.get('response', ''),
                 'operations': operations,
                 'tutorial': tutorial,
-                'hasCalculator': has_calculator,
                 'operationType': operation_type,
                 'recommendedUsers': recommended_users,
                 'recommendedSocialPosts': recommended_social_posts,
@@ -611,7 +610,6 @@ def get_conversation_detail(request, conversation_id):
                         'response': msg.content,
                         'conversationId': conversation.id,
                         'tutorial': msg.tutorial_type,  # keep single field only
-                        'hasCalculator': msg.has_calculator,
                         'operationType': msg.operation_type,
                         'operations': msg_additional.get('operations', []),
                         'recommendedUsers': msg_additional.get('recommendedUsers', {}),
@@ -626,7 +624,6 @@ def get_conversation_detail(request, conversation_id):
                 'created_at': msg.created_at.isoformat(),
                 'has_tutorial': msg.has_tutorial,
                 'tutorial_type': msg.tutorial_type,
-                'has_calculator': msg.has_calculator,
                 'operation_type': msg.operation_type,
                 # Structured data (recommended posts/users, operations, etc.)
                 'additional_data': msg_additional,
@@ -781,7 +778,6 @@ def create_conversation(request):
                 content=welcome_text,
                 has_tutorial=False,
                 tutorial_type=None,
-                has_calculator=False,
                 operation_type=None,
                 additional_data={
                     'recommendedUsers': {},
@@ -794,7 +790,6 @@ def create_conversation(request):
                         'response': welcome_text,
                         'conversationId': thread.id,
                         'tutorial': None,
-                        'hasCalculator': False,
                         'operationType': None,
                         'operations': [],
                         'recommendedUsers': {},
@@ -856,4 +851,374 @@ def archive_conversation(request, conversation_id):
         return Response({
             'error': f'Failed to archive conversation: {str(e)}'
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_realtime_session(request):
+    """
+    Create an OpenAI Realtime API session for voice interaction.
     
+    This endpoint securely initializes a session with OpenAI and returns
+    the ephemeral session configuration to the frontend, keeping the API key secure.
+    
+    Request body (optional):
+        {
+            "conversation_id": <int>,  # Optional: link to existing conversation
+            "model": "gpt-4o-realtime-preview-2024-12-17",  # Optional: specify model
+            "voice": "alloy"  # Optional: voice selection (alloy, echo, fable, onyx, nova, shimmer)
+        }
+    
+    Response:
+        {
+            "session_id": "<session_id>",
+            "client_secret": {
+                "value": "<ephemeral_key>",
+                "expires_at": <timestamp>
+            },
+            "model": "<model_name>",
+            "conversation_id": <int>,  # If linked to a conversation
+            "instructions": "<system_instructions>"
+        }
+    """
+    try:
+        from openai import OpenAI
+        
+        # Get OpenAI API key from environment
+        api_key = os.getenv('OPENAI_API_KEY')
+        if not api_key:
+            logger.error("OpenAI API key not configured")
+            return Response({
+                'error': 'OpenAI API key not configured'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+        # Initialize OpenAI client
+        client = OpenAI(api_key=api_key)
+        
+        # Get optional parameters
+        conversation_id = request.data.get('conversation_id')
+        model = request.data.get('model', 'gpt-4o-realtime-preview-2024-12-17')
+        voice = request.data.get('voice', 'alloy')
+        language = request.data.get('language', 'zh-TW')  # Default to Traditional Chinese
+        
+        # Validate conversation if provided
+        conversation = None
+        if conversation_id:
+            try:
+                conversation = AgentThread.objects.get(
+                    id=conversation_id,
+                    user=request.user
+                )
+            except AgentThread.DoesNotExist:
+                return Response({
+                    'error': 'Conversation not found'
+                }, status=status.HTTP_404_NOT_FOUND)
+        
+        # Prepare system instructions for the realtime agent
+        user_context = {
+            'user_id': request.user.id,
+            'username': request.user.username,
+            'full_name': getattr(request.user, 'full_name', ''),
+        }
+        
+        # Language-specific instructions and greeting
+        if language.startswith('zh'):  # Chinese (Traditional or Simplified)
+            greeting = "Hi！我是 PETer 專員 Peter，很高興為您服務！有什麼問題都可以問我喔～"
+            instructions = f"""你是 Peter，PETer 寵物照護應用程式的 AI 助手。
+
+使用者資訊：
+- 使用者 ID: {user_context['user_id']}
+- 使用者名稱: {user_context['username']}
+- 姓名: {user_context['full_name'] or '使用者'}
+
+你的職責：
+- 協助使用者操作 PETer 應用程式及管理寵物照護
+- 回答關於寵物健康、餵食和照護的問題
+- 引導使用者使用應用程式功能和教學
+- 用友善、簡潔、有幫助的方式回應
+
+當使用者詢問特定寵物資訊或應用程式功能時，你可以存取：
+- 寵物檔案和健康紀錄
+- 餵食排程和建議
+- 社群功能和貼文
+- 附近的動物醫院
+- 健康監測和疾病資料庫
+
+請用自然對話的方式回應，適合語音互動。必要時使用使用者的名字。請始終使用繁體中文回應。"""
+        elif language.startswith('ja'):  # Japanese
+            greeting = "こんにちは！PETer サポート担当の Peter です。お手伝いできることがあれば何でも聞いてくださいね～"
+            instructions = f"""あなたは Peter です。PETer ペットケアアプリの AI アシスタントです。
+
+ユーザー情報：
+- ユーザー ID: {user_context['user_id']}
+- ユーザー名: {user_context['username']}
+- 名前: {user_context['full_name'] or 'ユーザー'}
+
+あなたの役割：
+- ユーザーが PETer アプリを操作し、ペットのケアを管理するのを手伝う
+- ペットの健康、給餌、ケアに関する質問に答える
+- アプリの機能とチュートリアルをガイドする
+- フレンドリーで簡潔で役立つ応答をする
+
+ユーザーが特定のペット情報やアプリ機能について質問した場合、以下にアクセスできます：
+- ペットのプロフィールと健康記録
+- 給餌スケジュールと推奨事項
+- ソーシャル機能とコミュニティ投稿
+- 近くの動物病院
+- 健康モニタリングと疾病アーカイブ
+
+音声インタラクションに適した自然な会話で応答してください。必要に応じてユーザーの名前を使用してください。常に日本語で応答してください。"""
+        else:  # English or other languages
+            greeting = "Hi! I'm Peter, your PETer support specialist. How can I help you today?"
+            instructions = f"""You are Peter, a helpful AI assistant for the PETer pet care application.
+
+User Context:
+- User ID: {user_context['user_id']}
+- Username: {user_context['username']}
+- Name: {user_context['full_name'] or 'User'}
+
+Your role:
+- Help users navigate the PETer app and manage their pets' care
+- Answer questions about pet health, feeding, and care
+- Guide users through app features and tutorials
+- Be friendly, concise, and helpful in your responses
+
+When users ask about specific pet information or app features, you can access:
+- Pet profiles and health records
+- Feeding schedules and recommendations
+- Social features and community posts
+- Nearby veterinary hospitals
+- Health monitoring and disease archives
+
+Keep responses natural and conversational for voice interaction. Use the user's name when appropriate. Always respond in English."""
+
+        logger.info(f"Session language: {language}, Greeting: {greeting[:30]}...")
+
+        # NOTE: Tools are NOT defined here for SDK-based clients
+        # The TypeScript agents SDK handles tool registration client-side
+        # Tools will be executed via the /ai/realtime/execute-tool/ endpoint
+        
+        # Create realtime client secret using the /v1/realtime/client_secrets endpoint (GA API)
+        # This endpoint creates an ephemeral key that can be used client-side to create sessions
+        # with the specified configuration (including tools)
+        try:
+            openai_response = requests.post(
+                'https://api.openai.com/v1/realtime/client_secrets',
+                headers={
+                    'Authorization': f'Bearer {api_key}',
+                    'Content-Type': 'application/json'
+                },
+                json={
+                    'session': {
+                        'type': 'realtime',
+                        'model': model,
+                        'instructions': instructions,
+                        'audio': {
+                            'input': {
+                                'format': {
+                                    'type': 'audio/pcm',
+                                    'rate': 24000
+                                },
+                                'turn_detection': {
+                                    'type': 'server_vad',
+                                    'threshold': 0.5,  # Very sensitive (0.0-1.0, lower = more sensitive)
+                                    'prefix_padding_ms': 300,
+                                    'silence_duration_ms': 1000,  # Wait 1 second of silence before considering speech ended
+                                    'create_response': True
+                                }
+                            },
+                            'output': {
+                                'format': {
+                                    'type': 'audio/pcm',
+                                    'rate': 24000
+                                },
+                                'voice': voice
+                            }
+                        }
+                    }
+                },
+                timeout=10
+            )
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Request to OpenAI failed: {str(e)}")
+            return Response({
+                'error': f'Failed to connect to OpenAI: {str(e)}'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+        if openai_response.status_code != 200:
+            logger.error(f"Failed to create realtime session: {openai_response.status_code}")
+            logger.error(f"Response body: {openai_response.text}")
+            return Response({
+                'error': f'Failed to create realtime session: {openai_response.text}'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+        session_response_data = openai_response.json()
+
+        # Debug: Log the actual response structure
+        logger.info(f"OpenAI Response keys: {session_response_data.keys()}")
+
+        # The /v1/realtime/client_secrets endpoint returns:
+        # {
+        #   'value': '<ephemeral_key>',  # This is the key to use as apiKey in frontend
+        #   'expires_at': <timestamp>,
+        #   'session': { full session configuration with tools }
+        # }
+
+        # Extract client secret (at top level)
+        client_secret_value = session_response_data.get('value')
+        expires_at = session_response_data.get('expires_at')
+        session_config = session_response_data.get('session', {})
+
+        if not client_secret_value:
+            logger.error(f"No client_secret value in response")
+            return Response({
+                'error': 'Invalid response from OpenAI: missing client_secret'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        logger.info(f"✅ Created realtime client secret for user {request.user.id}")
+        logger.info(f"Ephemeral key created (expires at {expires_at})")
+        logger.info(f"Tools will be registered client-side by SDK")
+        logger.info(f"Session config includes: model={session_config.get('model')}")
+
+        # Return the ephemeral key and session configuration
+        # The frontend will use the 'value' as the apiKey to connect
+        session_data = {
+            'client_secret': {
+                'value': client_secret_value,  # This is the ephemeral API key
+                'expires_at': expires_at
+            },
+            'model': session_config.get('model', model),
+            'voice': voice,
+            'instructions': session_config.get('instructions', instructions),
+            'tools_count': len(session_config.get('tools', [])),  # Don't send full tools to frontend
+            'user_id': request.user.id,
+            'audio': session_config.get('audio', {}),  # Include audio config with turn_detection
+            'greeting': greeting,  # Initial greeting message for the agent to speak
+            'language': language,  # User's language preference
+        }
+        
+        # Add conversation_id if linked
+        if conversation:
+            session_data['conversation_id'] = conversation.id
+            session_data['conversation_title'] = conversation.title
+        
+        logger.info(f"Returning realtime client secret for user {request.user.id}")
+        logger.info(f"  - Language: {language}, Greeting: {greeting[:50]}...")
+        
+        return Response(session_data, status=status.HTTP_201_CREATED)
+        
+    except Exception as e:
+        logger.error(f"Error creating realtime session: {str(e)}", exc_info=True)
+        return Response({
+            'error': f'Failed to create realtime session: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def execute_realtime_tool(request):
+    """
+    Execute MCP tool for realtime agent
+    
+    Called by frontend when the realtime AI wants to execute a function.
+    This connects to the remote MCP server via SSE and calls the tool.
+    
+    Request body:
+        {
+            "tool_name": "get_user_pet_info_detailed",
+            "arguments": {"user_id": 123}
+        }
+    
+    Response:
+        {
+            "result": {...}  # Tool execution result
+        }
+    """
+    import asyncio
+    from mcp import ClientSession
+    from mcp.client.sse import sse_client
+    from django.conf import settings
+    
+    try:
+        tool_name = request.data.get('tool_name')
+        arguments = request.data.get('arguments', {})
+        
+        if not tool_name:
+            return Response({
+                'error': 'tool_name is required'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        logger.info(f"🔧 Executing MCP tool: {tool_name}")
+        logger.info(f"   Arguments: {arguments}")
+        
+        # Add user_id to arguments if not present and tool needs it
+        if tool_name in ['get_user_pet_info_detailed', 'get_user_information']:
+            if 'user_id' not in arguments:
+                arguments['user_id'] = request.user.id
+            logger.info(f"   Added user_id: {arguments['user_id']}")
+        
+        # Connect to the remote MCP server via SSE
+        async def call_mcp_tool():
+            # Get MCP server URL from settings
+            mcp_url = settings.MCP_SERVER_URL
+            if not mcp_url.endswith('/sse'):
+                mcp_url = f"{mcp_url}/sse"
+            
+            logger.info(f"   Connecting to MCP server: {mcp_url}")
+            
+            async with sse_client(mcp_url) as (read, write):
+                async with ClientSession(read, write) as session:
+                    # Initialize the session
+                    await session.initialize()
+                    logger.info(f"   ✅ Connected to MCP server")
+                    
+                    # List available tools (optional, for debugging)
+                    # tools_response = await session.list_tools()
+                    # logger.info(f"   Available tools: {[t.name for t in tools_response.tools]}")
+                    
+                    # Call the tool
+                    logger.info(f"   Calling tool: {tool_name}")
+                    result = await session.call_tool(tool_name, arguments=arguments)
+                    logger.info(f"   ✅ Tool executed successfully")
+                    
+                    return result
+        
+        # Run the async function
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        try:
+            result = loop.run_until_complete(call_mcp_tool())
+            
+            # Extract the content from the MCP result
+            # MCP returns CallToolResult with content array
+            logger.info(f"   Raw result type: {type(result)}")
+            logger.info(f"   Raw result: {result}")
+            
+            if hasattr(result, 'content') and result.content:
+                # Get the first text content
+                content = result.content[0]
+                if hasattr(content, 'text'):
+                    result_data = content.text
+                else:
+                    result_data = str(content)
+            else:
+                result_data = str(result)
+            
+            logger.info(f"   Extracted result_data: {result_data[:500] if len(result_data) > 500 else result_data}")
+            
+            return Response({
+                'result': result_data
+            }, status=status.HTTP_200_OK)
+        finally:
+            loop.close()
+        
+    except Exception as e:
+        import traceback
+        error_details = traceback.format_exc()
+        logger.error(f"❌ Error executing tool: {str(e)}")
+        logger.error(f"Full traceback:\n{error_details}")
+        return Response({
+            'error': f'Failed to execute tool: {str(e)}',
+            'details': error_details
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+

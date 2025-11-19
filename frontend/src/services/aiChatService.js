@@ -226,10 +226,9 @@ class AIChatService {
    */
   async loadConversation(conversationId) {
     try {
-      // Guard: if missing/invalid id, auto-create a new AI conversation in正确的命名空间
+      // Guard: if missing/invalid id, throw error (don't auto-create)
       if (!conversationId || String(conversationId) === 'undefined') {
-        const created = await this.createConversation({ title: '新對話' });
-        conversationId = created.id;
+        throw new Error('Invalid conversation id - no conversation to load');
       }
       const conversation = await this.getConversationDetail(conversationId);
 
@@ -434,6 +433,102 @@ class AIChatService {
     } catch (error) {
       console.error('Get Disease Archive Details Error:', error);
       return [];
+    }
+  }
+
+  /**
+   * 為貼文上傳圖片（AI Agent 建立貼文後使用）
+   * @param {number} postId - 貼文 ID
+   * @param {Array<Object>} images - 圖片陣列 [{file, preview, id}]
+   * @returns {Promise<Object>} 上傳結果
+   */
+  async uploadPostImages(postId, images) {
+    try {
+      if (!postId) {
+        throw new Error('Post ID is required');
+      }
+
+      if (!images || images.length === 0) {
+        throw new Error('At least one image is required');
+      }
+
+      // 建立 FormData
+      const formData = new FormData();
+
+      // 添加圖片檔案
+      images.forEach((image, index) => {
+        if (image.file) {
+          formData.append('images', image.file);
+        }
+      });
+
+      console.log(`[AIChatService] Uploading ${images.length} images to post ${postId}`);
+
+      // 調用上傳 API
+      const response = await this.apiClient.post(
+        `/social/posts/${postId}/upload-images/`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+
+      console.log('[AIChatService] Image upload successful:', response.data);
+      return response.data;
+
+    } catch (error) {
+      console.error('Upload Post Images Error:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * 為異常記錄上傳圖片（AI Agent 建立異常記錄後使用）
+   * @param {number} abnormalPostId - 異常記錄 ID
+   * @param {Array<Object>} images - 圖片陣列 [{file, preview, id}]
+   * @returns {Promise<Object>} 上傳結果
+   */
+  async uploadAbnormalPostImages(abnormalPostId, images) {
+    try {
+      if (!abnormalPostId) {
+        throw new Error('Abnormal post ID is required');
+      }
+
+      if (!images || images.length === 0) {
+        throw new Error('At least one image is required');
+      }
+
+      // 建立 FormData
+      const formData = new FormData();
+
+      // 添加圖片檔案
+      images.forEach((image, index) => {
+        if (image.file) {
+          formData.append('images', image.file);
+        }
+      });
+
+      console.log(`[AIChatService] Uploading ${images.length} images to abnormal post ${abnormalPostId}`);
+
+      // 調用上傳 API
+      const response = await this.apiClient.post(
+        `/pets/abnormal-posts/${abnormalPostId}/upload-images/`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+
+      console.log('[AIChatService] Abnormal post image upload successful:', response.data);
+      return response.data;
+
+    } catch (error) {
+      console.error('Upload Abnormal Post Images Error:', error);
+      throw error;
     }
   }
 }

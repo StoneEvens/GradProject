@@ -88,6 +88,11 @@
     "operation": {
       "executing": "Executing {{operationDesc}}... Please wait",
       "buttons": {
+        "navigate": "Go to Page",
+        "navigate_social": "Go to Post Page",
+        "navigate_pet_profile": "Go to Pet Profile",
+        "navigate_health": "Go to Health Records",
+        "navigate_schedule": "Go to Feeding Schedule",
         "findAbnormalPosts": "Let's Go!",
         "findHealthRecords": "View Records",
         "setFeedingReminder": "Set Reminder",

@@ -109,6 +109,73 @@
   opacity: 0.8;
 }
 
+.headerActions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-left: auto;
+}
+
+.voiceCallButton {
+  background: white;
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.voiceCallButton:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.4);
+}
+
+.voiceCallButton.active {
+  background-color: #4CAF50;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.voiceCallButton.active:hover {
+  background-color: #45a049;
+  transform: scale(1.05);
+}
+
+.voiceCallButton img {
+  width: 16px;
+  height: 16px;
+}
+
+.voiceCallButton.active img {
+  animation: phoneRing 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(76, 175, 80, 0);
+  }
+}
+
+@keyframes phoneRing {
+  0%, 100% {
+    transform: scale(1) rotate(0deg);
+  }
+  25% {
+    transform: scale(1.1) rotate(-10deg);
+  }
+  75% {
+    transform: scale(1.1) rotate(10deg);
+  }
+}
+
 .closeButton {
   background: none;
   border: none;
@@ -123,7 +190,6 @@
   align-items: center;
   justify-content: center;
   transition: background-color 0.2s;
-  margin-left: auto;
 }
 
 .closeButton:hover {
@@ -267,6 +333,82 @@
   }
 }
 
+/* 圖片預覽容器 */
+.imagePreviewContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px;
+  background-color: #f8f8f8;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.imagePreviewItem {
+  position: relative;
+  display: inline-block;
+}
+
+.previewImage {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+}
+
+.removeImageBtn {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: #ff4444;
+  color: white;
+  border: none;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.2s;
+}
+
+.removeImageBtn:hover {
+  background-color: #cc0000;
+}
+
+/* 上傳進度指示器 */
+.uploadingIndicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  background: linear-gradient(135deg, #fff6ea, #ffe8d6);
+  border-radius: 12px;
+  margin-bottom: 10px;
+  border: 2px solid #f08651;
+}
+
+.uploadingIndicator span {
+  color: #f08651;
+  font-weight: 600;
+  font-size: 14px;
+  animation: uploadPulse 1.5s infinite;
+}
+
+@keyframes uploadPulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
 /* 輸入區域 */
 .inputSection {
   background: #fff6ea;
@@ -383,6 +525,32 @@
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+/* 圖片上傳按鈕 */
+.photoBtn {
+  background: linear-gradient(135deg, #f08651, #ff9a56);
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.photoBtn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(240, 134, 81, 0.4);
+}
+
+.photoBtn img {
+  width: 16px;
+  height: 16px;
+  filter: brightness(0) invert(1);
 }
 
 .sendBtn {
@@ -547,6 +715,26 @@ body:has(.chatOverlay) {
     width: 14px;
     height: 14px;
   }
+
+  .photoBtn {
+    width: 28px;
+    height: 28px;
+  }
+
+  .photoBtn img {
+    width: 14px;
+    height: 14px;
+  }
+
+  .voiceCallButton {
+    width: 28px;
+    height: 28px;
+  }
+
+  .voiceCallButton img {
+    width: 14px;
+    height: 14px;
+  }
 }
 
 /* 針對更小的手機優化 */
@@ -638,6 +826,26 @@ body:has(.chatOverlay) {
   }
 
   .voiceBtn img {
+    width: 13px;
+    height: 13px;
+  }
+
+  .photoBtn {
+    width: 26px;
+    height: 26px;
+  }
+
+  .photoBtn img {
+    width: 13px;
+    height: 13px;
+  }
+
+  .voiceCallButton {
+    width: 26px;
+    height: 26px;
+  }
+
+  .voiceCallButton img {
     width: 13px;
     height: 13px;
   }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import styles from '../styles/RecommendedArticlesPreview.module.css';
@@ -15,16 +15,10 @@ const RecommendedArticlesPreview = ({
   const [articles, setArticles] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Debug: log counts to verify presence of social vs forum posts
-  useEffect(() => {
-    try {
-      const socialCount = socialPosts ? Object.keys(socialPosts).length : 0;
-      const forumCount = forumPosts ? Object.keys(forumPosts).length : 0;
-      console.log('[RecommendedArticlesPreview] counts:', { socialCount, forumCount });
-    } catch (e) {
-      // no-op
-    }
-  }, [socialPosts, forumPosts]);
+  // Stabilize dependencies by stringifying objects to prevent infinite loops
+  const socialPostsStr = useMemo(() => JSON.stringify(socialPosts || {}), [socialPosts]);
+  const forumPostsStr = useMemo(() => JSON.stringify(forumPosts || {}), [forumPosts]);
+  const articleIdsStr = useMemo(() => JSON.stringify(articleIds || []), [articleIds]);
 
   // 獲取推薦文章詳情
   useEffect(() => {
@@ -33,14 +27,19 @@ const RecommendedArticlesPreview = ({
 
       try {
         let articleDetails = [];
+        
+        // Parse back the stabilized strings
+        const socialPostsObj = JSON.parse(socialPostsStr);
+        const forumPostsObj = JSON.parse(forumPostsStr);
+        const articleIdsArr = JSON.parse(articleIdsStr);
 
         // 新格式: 直接使用傳入的字典
-        if (Object.keys(socialPosts).length > 0 || Object.keys(forumPosts).length > 0) {
+        if (Object.keys(socialPostsObj).length > 0 || Object.keys(forumPostsObj).length > 0) {
           // 合併社交貼文和論壇貼文
           const allPosts = [];
           
           // 添加社交貼文 (標記類型)
-          Object.values(socialPosts).forEach(post => {
+          Object.values(socialPostsObj).forEach(post => {
             const id = post.id ?? post.post_id ?? post.postId;
             allPosts.push({
               ...post,
@@ -50,7 +49,7 @@ const RecommendedArticlesPreview = ({
           });
           
           // 添加論壇貼文 (標記類型)
-          Object.values(forumPosts).forEach(post => {
+          Object.values(forumPostsObj).forEach(post => {
             const id = post.id ?? post.post_id ?? post.postId;
             allPosts.push({
               ...post,
@@ -62,9 +61,9 @@ const RecommendedArticlesPreview = ({
           articleDetails = allPosts;
         }
         // 舊格式: 使用 article IDs 從後端獲取
-        else if (articleIds && articleIds.length > 0) {
+        else if (articleIdsArr && articleIdsArr.length > 0) {
           // 從後端 API 獲取疾病檔案詳情
-          articleDetails = await aiChatService.getDiseaseArchiveDetails(articleIds);
+          articleDetails = await aiChatService.getDiseaseArchiveDetails(articleIdsArr);
           // 標記為論壇類型
           articleDetails = articleDetails.map(article => ({
             ...article,
@@ -82,7 +81,7 @@ const RecommendedArticlesPreview = ({
     };
 
     fetchArticleDetails();
-  }, [articleIds, socialPosts, forumPosts]);
+  }, [socialPostsStr, forumPostsStr, articleIdsStr]);
 
   // 處理文章點擊 - 根據類型跳轉
   const handleArticleClick = (article) => {

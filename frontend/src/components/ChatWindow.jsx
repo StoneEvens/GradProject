@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import styles from '../styles/ChatWindow.module.css';
 import aiChatService from '../services/aiChatService';
+import { realtimeVoiceService } from '../services/realtimeVoiceService_agents';
 import RecommendedUsersPreview from './RecommendedUsersPreview';
 import RecommendedArticlesPreview from './RecommendedArticlesPreview';
 import ChatSidebar from './ChatSidebar';
@@ -16,7 +17,7 @@ const ChatWindow = ({
   onToggleFloating,
   onDismissFloating
 }) => {
-  const { t, ready } = useTranslation('main');
+  const { t, ready, i18n } = useTranslation('main');
   const navigate = useNavigate();
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState('');
@@ -25,15 +26,25 @@ const ChatWindow = ({
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [currentConversationId, setCurrentConversationId] = useState(null);
 
-  // 語音識別相關 state
+  // 語音識別相關 state (original speech-to-text)
   const [isListening, setIsListening] = useState(false);
   const [speechSupported, setSpeechSupported] = useState(false);
   const [interimTranscript, setInterimTranscript] = useState('');
+
+  // 即時語音通話相關 state (Realtime API)
+  const [isVoiceCallActive, setIsVoiceCallActive] = useState(false);
+  const [isVoiceConnecting, setIsVoiceConnecting] = useState(false);
+  const [voiceError, setVoiceError] = useState(null);
+
+  // 圖片上傳相關 state
+  const [selectedImages, setSelectedImages] = useState([]);
+  const [isUploadingImages, setIsUploadingImages] = useState(false);
 
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
   const recognitionRef = useRef(null);
   const restoredRef = useRef(false);
+  const fileInputRef = useRef(null);
 
   // 簡易本地快取鍵
   const LAST_CONV_ID_KEY = 'aiChat.lastConversationId';
@@ -220,12 +231,177 @@ const ChatWindow = ({
     }
   };
 
+  // ============= 即時語音通話功能 (Realtime API) =============
+  
+  // 開始語音通話
+  const startVoiceCall = async () => {
+    if (isVoiceCallActive) {
+      // 如果已經在通話中，結束通話
+      endVoiceCall();
+      return;
+    }
+
+    setIsVoiceConnecting(true);
+    setVoiceError(null);
+
+    try {
+      console.log('[ChatWindow] Starting voice call...');
+
+      // 創建 realtime session
+      console.log('[ChatWindow] Step 1: Creating session...');
+      const sessionConfig = await realtimeVoiceService.createSession({
+        conversationId: currentConversationId,
+        voice: 'alloy', // 可以改為其他聲音: echo, fable, onyx, nova, shimmer
+        language: i18n.language || 'zh-TW', // Use i18n.language directly
+      });
+      console.log('[ChatWindow] Using language:', i18n.language);
+
+      console.log('[ChatWindow] Step 2: Session created:', sessionConfig.session_id);
+
+      // 連接到 OpenAI Realtime API
+      console.log('[ChatWindow] Step 3: Connecting to OpenAI...');
+      await realtimeVoiceService.connect();
+      console.log('[ChatWindow] Step 4: Connected successfully');
+
+      // 設置事件監聽器
+      realtimeVoiceService.on('conversation.updated', (event) => {
+        console.log('Conversation updated:', event);
+      });
+
+      realtimeVoiceService.on('response.audio.delta', (event) => {
+        // 音頻會自動播放
+        console.log('Receiving audio response...');
+      });
+
+      // Note: conversation items are handled automatically by the SDK
+      // We don't need to manually process them here
+      
+      realtimeVoiceService.on('error', (event) => {
+        console.error('Realtime error:', event);
+        setVoiceError('語音通話發生錯誤');
+        endVoiceCall();
+      });
+
+      // 開始錄音
+      console.log('[ChatWindow] Step 5: Starting audio recording...');
+      await realtimeVoiceService.startRecording();
+      console.log('[ChatWindow] Step 6: Recording started');
+
+      setIsVoiceCallActive(true);
+      setIsVoiceConnecting(false);
+      console.log('[ChatWindow] ✅ Voice call active!');
+
+    } catch (error) {
+      console.error('[ChatWindow] ❌ Failed to start voice call:', error);
+      console.error('[ChatWindow] Error details:', {
+        message: error.message,
+        stack: error.stack,
+        error: error
+      });
+
+      // 顯示具體錯誤訊息
+      const errorMsg = error.message || '無法啟動語音通話';
+      setVoiceError(errorMsg);
+
+      // 添加錯誤訊息到聊天
+      const errorMessage = {
+        id: Date.now(),
+        text: `❌ 語音通話錯誤: ${errorMsg}`,
+        isUser: false,
+        timestamp: new Date(),
+        error: true
+      };
+      setMessages(prev => [...prev, errorMessage]);
+
+      setIsVoiceConnecting(false);
+      setIsVoiceCallActive(false);
+    }
+  };
+
+  // 結束語音通話
+  const endVoiceCall = () => {
+    console.log('Ending voice call...');
+    realtimeVoiceService.stopRecording();
+    realtimeVoiceService.disconnect();
+    setIsVoiceCallActive(false);
+    setIsVoiceConnecting(false);
+    setVoiceError(null);
+  };
+
+  // 清理函數：當組件卸載時結束通話
+  useEffect(() => {
+    return () => {
+      if (isVoiceCallActive) {
+        endVoiceCall();
+      }
+    };
+  }, [isVoiceCallActive]);
+
+  // ============= 即時語音通話功能結束 =============
+
   // 處理按鍵事件
   const handleKeyPress = (event) => {
     if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault();
       handleSendMessage();
     }
+  };
+
+  // 圖片處理函數
+  const handleImageSelect = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (event) => {
+    const files = Array.from(event.target.files);
+    if (files.length > 0) {
+      const imageFiles = files.filter(file => file.type.startsWith('image/'));
+
+      // 檢查是否超過9張圖片限制
+      const currentImageCount = selectedImages.length;
+      const availableSlots = 9 - currentImageCount;
+
+      if (availableSlots <= 0) {
+        alert('最多只能上傳 9 張圖片');
+        event.target.value = '';
+        return;
+      }
+
+      // 限制新選擇的圖片數量
+      const limitedImageFiles = imageFiles.slice(0, availableSlots);
+
+      if (imageFiles.length > availableSlots) {
+        alert(`最多只能再選擇 ${availableSlots} 張圖片`);
+      }
+
+      // 建立預覽 URL
+      const imagePreviewPromises = limitedImageFiles.map(file => {
+        return new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onload = (e) => resolve({
+            file,
+            preview: e.target.result,
+            id: Date.now() + Math.random()
+          });
+          reader.readAsDataURL(file);
+        });
+      });
+
+      Promise.all(imagePreviewPromises).then(imagePreviews => {
+        setSelectedImages(prev => [...prev, ...imagePreviews]);
+      });
+    }
+
+    // 清空 input 的值
+    event.target.value = '';
+  };
+
+  const removeImage = (imageId) => {
+    setSelectedImages(prev => prev.filter(img => img.id !== imageId));
+  };
+
+  const clearAllImages = () => {
+    setSelectedImages([]);
   };
 
   // 發送訊息
@@ -254,7 +430,9 @@ const ChatWindow = ({
       // 使用正式後端 AI Chat Service
       const aiResult = await aiChatService.processMessage(userInput, {
         user: user,
-        petId: user?.pets?.[0]?.id || null
+        petId: user?.pets?.[0]?.id || null,
+        hasImages: selectedImages.length > 0,
+        imageCount: selectedImages.length
       });
 
       console.log('AI 回應結果:', aiResult); // Debug 用
@@ -311,37 +489,9 @@ const ChatWindow = ({
 
       const finalMessages = [...newMessages, aiMessage];
 
-      // 自動執行 navigate 操作
-      const navigateOp = (aiResult.operations || []).find(op =>
-        op.operation_name === 'navigate' || op.operation_name === 'navigation'
-      );
+      // NOTE: Navigation operations are no longer auto-executed.
+      // They will be shown as buttons for user to click manually.
 
-      if (navigateOp) {
-        try {
-          const opData = typeof navigateOp.operation_data === 'string'
-            ? JSON.parse(navigateOp.operation_data)
-            : navigateOp.operation_data;
-
-          if (opData.path) {
-            console.log('自動執行頁面跳轉:', opData.path);
-
-            // 延遲一下讓用戶看到 AI 的回應訊息
-            setTimeout(() => {
-              // 啟動浮動模式
-              window.dispatchEvent(new CustomEvent('forceFloatingMode'));
-
-              // 停止語音錄音並關閉聊天室
-              stopVoiceRecording();
-              onClose();
-
-              // 執行導航
-              navigate(opData.path);
-            }, 1000);
-          }
-        } catch (error) {
-          console.error('解析 navigate 操作失敗:', error, navigateOp);
-        }
-      }
       setMessages(finalMessages);
       setIsTyping(false);
 
@@ -349,6 +499,138 @@ const ChatWindow = ({
       if (aiResult.conversationId) {
         setCurrentConversationId(aiResult.conversationId);
         try { localStorage.setItem(LAST_CONV_ID_KEY, String(aiResult.conversationId)); } catch (e) {}
+      }
+
+      // 檢測 post_created operation 並自動上傳圖片
+      if (aiResult.operations && Array.isArray(aiResult.operations)) {
+        const postCreatedOp = aiResult.operations.find(
+          op => op.operation_name === 'post_created'
+        );
+
+        if (postCreatedOp && selectedImages.length > 0) {
+          console.log('[ChatWindow] 檢測到 post_created operation，開始上傳圖片');
+
+          try {
+            const opData = typeof postCreatedOp.operation_data === 'string'
+              ? JSON.parse(postCreatedOp.operation_data)
+              : postCreatedOp.operation_data;
+
+            const postId = opData.post_id;
+
+            if (postId) {
+              setIsUploadingImages(true);
+
+              // 上傳圖片
+              const uploadResult = await aiChatService.uploadPostImages(
+                postId,
+                selectedImages
+              );
+
+              console.log('[ChatWindow] 圖片上傳成功:', uploadResult);
+
+              // 清空已上傳的圖片
+              clearAllImages();
+              setIsUploadingImages(false);
+
+              // 添加系統訊息通知用戶
+              const uploadSuccessMessage = {
+                id: Date.now() + 2,
+                text: `✅ 已成功上傳 ${uploadResult.data.uploaded_count} 張圖片到您的貼文！`,
+                isUser: false,
+                timestamp: new Date(),
+                operations: [],
+                operationType: null
+              };
+
+              setMessages(prev => [...prev, uploadSuccessMessage]);
+
+            } else {
+              console.error('[ChatWindow] post_created operation 中缺少 post_id');
+            }
+
+          } catch (uploadError) {
+            console.error('[ChatWindow] 圖片上傳失敗:', uploadError);
+            setIsUploadingImages(false);
+
+            // 添加錯誤訊息
+            const uploadErrorMessage = {
+              id: Date.now() + 2,
+              text: `❌ 圖片上傳失敗：${uploadError.message || '未知錯誤'}。您可以稍後在貼文頁面手動上傳。`,
+              isUser: false,
+              timestamp: new Date(),
+              error: true,
+              operations: [],
+              operationType: null
+            };
+
+            setMessages(prev => [...prev, uploadErrorMessage]);
+          }
+        }
+
+        // 檢測 abnormal_post_created operation 並自動上傳圖片
+        const abnormalPostCreatedOp = aiResult.operations.find(
+          op => op.operation_name === 'abnormal_post_created'
+        );
+
+        if (abnormalPostCreatedOp && selectedImages.length > 0) {
+          console.log('[ChatWindow] 檢測到 abnormal_post_created operation，開始上傳圖片');
+
+          try {
+            const opData = typeof abnormalPostCreatedOp.operation_data === 'string'
+              ? JSON.parse(abnormalPostCreatedOp.operation_data)
+              : abnormalPostCreatedOp.operation_data;
+
+            const abnormalPostId = opData.abnormal_post_id;
+
+            if (abnormalPostId) {
+              setIsUploadingImages(true);
+
+              // 上傳圖片
+              const uploadResult = await aiChatService.uploadAbnormalPostImages(
+                abnormalPostId,
+                selectedImages
+              );
+
+              console.log('[ChatWindow] 異常記錄圖片上傳成功:', uploadResult);
+
+              // 清空已上傳的圖片
+              clearAllImages();
+              setIsUploadingImages(false);
+
+              // 添加系統訊息通知用戶
+              const uploadSuccessMessage = {
+                id: Date.now() + 3,
+                text: `✅ 已成功上傳 ${uploadResult.data.uploaded_count} 張圖片到您的異常記錄！`,
+                isUser: false,
+                timestamp: new Date(),
+                operations: [],
+                operationType: null
+              };
+
+              setMessages(prev => [...prev, uploadSuccessMessage]);
+
+            } else {
+              console.error('[ChatWindow] abnormal_post_created operation 中缺少 abnormal_post_id');
+            }
+
+          } catch (uploadError) {
+            console.error('[ChatWindow] 異常記錄圖片上傳失敗:', uploadError);
+            setIsUploadingImages(false);
+
+            // 添加錯誤訊息
+            const uploadErrorMessage = {
+              id: Date.now() + 3,
+              text: `❌ 圖片上傳失敗：${uploadError.message || '未知錯誤'}。您可以稍後在異常記錄頁面手動上傳。`,
+              isUser: false,
+              timestamp: new Date(),
+              error: true,
+              operations: [],
+              operationType: null
+            };
+
+            setMessages(prev => [...prev, uploadErrorMessage]);
+          }
+        }
       }
 
     } catch (error) {
@@ -519,38 +801,28 @@ const ChatWindow = ({
             setMessages(formatted);
             setCurrentConversationId(Number(lastId));
           } catch (loadErr) {
-            // 快取對話已不存在：建立新對話
-            try {
-              const newConv = await aiChatService.createConversation({ title: '新對話', welcome_message: t('chatWindow.welcomeMessage') });
-              setCurrentConversationId(newConv.id);
-              try { localStorage.setItem(LAST_CONV_ID_KEY, String(newConv.id)); } catch {}
+            // Cached conversation no longer exists: start fresh (no DB creation)
+            console.log('[ChatWindow] Cached conversation not found, starting fresh');
+            setCurrentConversationId(null);
+            try { localStorage.removeItem(LAST_CONV_ID_KEY); } catch {}
 
-              // 若無快取訊息，顯示歡迎訊息
-              if (!localStorage.getItem(LAST_MESSAGES_KEY)) {
-                setMessages([
-                  {
-                    id: 1,
-                    text: t('chatWindow.welcomeMessage'),
-                    isUser: false,
-                    timestamp: new Date()
-                  }
-                ]);
-              }
-            } catch (createErr) {
-              // 無法建立新對話時，保持現狀
-              console.warn('建立新對話失敗:', createErr);
+            // If no cached messages, show welcome message
+            if (!localStorage.getItem(LAST_MESSAGES_KEY)) {
+              setMessages([
+                {
+                  id: 1,
+                  text: t('chatWindow.welcomeMessage'),
+                  isUser: false,
+                  timestamp: new Date()
+                }
+              ]);
             }
           }
         } else {
-          // 無快取對話：建立新對話
-          try {
-            const newConv = await aiChatService.createConversation({ title: '新對話', welcome_message: t('chatWindow.welcomeMessage') });
-            setCurrentConversationId(newConv.id);
-            try { localStorage.setItem(LAST_CONV_ID_KEY, String(newConv.id)); } catch {}
-            // 不覆蓋已存在的訊息（例如已預先顯示的歡迎訊息或本地快取）
-          } catch (createErr) {
-            console.warn('建立新對話失敗（無快取情況）:', createErr);
-          }
+          // No cached conversation: start fresh (no DB creation)
+          console.log('[ChatWindow] No cached conversation, starting fresh');
+          setCurrentConversationId(null);
+          // Don't overwrite existing messages (e.g., pre-displayed welcome message or local cache)
         }
       } catch (e) {
         // 無法還原時保持當前狀態
@@ -692,6 +964,37 @@ const ChatWindow = ({
     }, 500);
   };
 
+  // 處理導航按鈕點擊
+  const handleNavigationClick = (operation) => {
+    console.log('執行導航操作:', operation);
+
+    try {
+      const opData = typeof operation.operation_data === 'string'
+        ? JSON.parse(operation.operation_data)
+        : operation.operation_data;
+
+      if (!opData.path) {
+        console.error('導航操作缺少路徑:', operation);
+        return;
+      }
+
+      // 延遲一下讓用戶看到訊息，然後關閉聊天室並導航
+      setTimeout(() => {
+        // 啟動浮動模式
+        window.dispatchEvent(new CustomEvent('forceFloatingMode'));
+
+        // 停止語音錄音並關閉聊天室
+        stopVoiceRecording();
+        onClose();
+
+        // 執行導航
+        navigate(opData.path);
+      }, 300);
+    } catch (error) {
+      console.error('解析導航操作失敗:', error, operation);
+    }
+  };
+
 
   // 處理側邊欄
   const handleToggleSidebar = () => {
@@ -753,10 +1056,10 @@ const ChatWindow = ({
   };
 
   const handleNewConversation = async () => {
-    // 重置 AI Chat Service 的會話狀態
+    // Reset AI Chat Service session state (in-memory only, no DB call yet)
     aiChatService.startNewConversation();
 
-    // 預設顯示歡迎訊息
+    // Show welcome message locally
     setMessages([
       {
         id: 1,
@@ -766,17 +1069,11 @@ const ChatWindow = ({
       }
     ]);
 
-    // 立刻在後端建立新對話，避免「新對話」在列表中消失
-    try {
-      const newConv = await aiChatService.createConversation({ title: '新對話', welcome_message: t('chatWindow.welcomeMessage') });
-      setCurrentConversationId(newConv.id);
-      try { localStorage.setItem(LAST_CONV_ID_KEY, String(newConv.id)); } catch (e) {}
-    } catch (err) {
-      console.warn('建立新對話失敗（按下新對話）:', err);
-      // 失敗時，至少清掉舊的快取，讓下次開啟時會自動建立
-      setCurrentConversationId(null);
-      try { localStorage.removeItem(LAST_CONV_ID_KEY); } catch (e) {}
-    }
+    // Clear conversation ID - new conversation will be created in DB when user sends first message
+    setCurrentConversationId(null);
+    try { localStorage.removeItem(LAST_CONV_ID_KEY); } catch (e) {}
+    
+    console.log('[ChatWindow] Started new conversation (no DB creation yet)');
   };
 
   // 處理浮動頭像點擊
@@ -836,12 +1133,34 @@ const ChatWindow = ({
           />
           <div className={styles.headerText}>
             <h3>{t('chatWindow.title')}</h3>
-            <span className={styles.status}>{t('chatWindow.status')}</span>
+            <span className={styles.status}>
+              {isVoiceCallActive ? '🎙️ 通話中...' :
+               isVoiceConnecting ? '🔄 連線中...' :
+               voiceError ? `❌ ${voiceError}` :
+               t('chatWindow.status')}
+            </span>
           </div>
         </div>
-        <button className={styles.closeButton} onClick={handleChatClose}>
-          ×
-        </button>
+        <div className={styles.headerActions}>
+          {/* 語音通話按鈕 */}
+          <button
+            className={`${styles.voiceCallButton} ${isVoiceCallActive ? styles.active : ''} ${isVoiceConnecting ? styles.connecting : ''}`}
+            onClick={startVoiceCall}
+            disabled={isVoiceConnecting}
+            title={isVoiceCallActive ? '結束通話' : '開始語音通話'}
+          >
+            {isVoiceConnecting ? (
+              <img src="/assets/icon/spinner-of-dots.png" alt="連接中" />
+            ) : isVoiceCallActive ? (
+              <img src="/assets/icon/telephone.png" alt="通話中" />
+            ) : (
+              <img src="/assets/icon/telephone.png" alt="開始語音通話" />
+            )}
+          </button>
+          <button className={styles.closeButton} onClick={handleChatClose}>
+            ×
+          </button>
+        </div>
       </div>
 
       {/* 訊息區域 */}
@@ -874,7 +1193,11 @@ const ChatWindow = ({
                       className={styles.tutorialButton}
                       onClick={() => handleStartTutorial(message.tutorial)}
                     >
-                      {t('chatWindow.tutorial.startButton')}
+                      {t(`chatWindow.tutorial.titles.${message.tutorial}`) 
+                        ? t('chatWindow.tutorial.startButtonWithTitle', { 
+                            tutorialTitle: t(`chatWindow.tutorial.titles.${message.tutorial}`)
+                          })
+                        : t('chatWindow.tutorial.startButton')}
                     </button>
                   )}
                   {/* 如果有營養計算機，顯示營養計算機按鈕 */}
@@ -887,14 +1210,52 @@ const ChatWindow = ({
                     </button>
                   )}
                   {/* 如果有操作功能，顯示操作按鈕 */}
-                  {message.operations && message.operations.length > 0 && (
-                    <button
-                      className={styles.tutorialButton}
-                      onClick={() => handleOperationClick(message.operationType)}
-                    >
-                      {t(`chatWindow.operation.buttons.${message.operationType}`)}
-                    </button>
-                  )}
+                  {message.operations && message.operations.length > 0 && (() => {
+                    // 找出導航操作
+                    const navigateOp = message.operations.find(op => 
+                      op.operation_name === 'navigate' || op.operation_name === 'navigation'
+                    );
+                    // 找出其他操作
+                    const otherOps = message.operations.filter(op => 
+                      op.operation_name !== 'navigate' && op.operation_name !== 'navigation'
+                    );
+
+                    return (
+                      <>
+                        {/* 顯示導航按鈕 */}
+                        {navigateOp && (() => {
+                          try {
+                            const opData = typeof navigateOp.operation_data === 'string'
+                              ? JSON.parse(navigateOp.operation_data)
+                              : navigateOp.operation_data;
+                            
+                            return (
+                              <button
+                                className={styles.tutorialButton}
+                                onClick={() => handleNavigationClick(navigateOp)}
+                              >
+                                {opData.destination 
+                                  ? `前往${opData.destination}` 
+                                  : t('chatWindow.operation.buttons.navigate', '前往頁面')}
+                              </button>
+                            );
+                          } catch (e) {
+                            console.error('解析導航操作失敗:', e);
+                            return null;
+                          }
+                        })()}
+                        {/* 顯示其他操作按鈕 */}
+                        {otherOps.length > 0 && message.operationType && (
+                          <button
+                            className={styles.tutorialButton}
+                            onClick={() => handleOperationClick(message.operationType)}
+                          >
+                            {t(`chatWindow.operation.buttons.${message.operationType}`)}
+                          </button>
+                        )}
+                      </>
+                    );
+                  })()}
                   {/* 如果有推薦用戶，顯示推薦用戶預覽 */}
                   {Array.isArray(message.recommendedUsers) && message.recommendedUsers.length > 0 && (
                     <RecommendedUsersPreview
@@ -991,6 +1352,31 @@ const ChatWindow = ({
 
       {/* 輸入區域 */}
       <div className={styles.inputSection}>
+        {/* 圖片預覽區域 */}
+        {selectedImages.length > 0 && (
+          <div className={styles.imagePreviewContainer}>
+            {selectedImages.map((image) => (
+              <div key={image.id} className={styles.imagePreviewItem}>
+                <img src={image.preview} alt="預覽圖片" className={styles.previewImage} />
+                <button
+                  className={styles.removeImageBtn}
+                  onClick={() => removeImage(image.id)}
+                  title="移除圖片"
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* 圖片上傳進度提示 */}
+        {isUploadingImages && (
+          <div className={styles.uploadingIndicator}>
+            <span>正在上傳圖片...</span>
+          </div>
+        )}
+
         <div className={styles.inputContainer}>
           <div className={styles.inputUserAvatar}>
             <img
@@ -1016,6 +1402,13 @@ const ChatWindow = ({
             />
           </div>
           <div className={styles.inputActions}>
+            <button
+              className={styles.photoBtn}
+              onClick={handleImageSelect}
+              title="新增圖片"
+            >
+              <img src="/assets/icon/CommentPhotoIcon.png" alt="新增圖片" />
+            </button>
             {speechSupported && (
               <button
                 className={`${styles.voiceBtn} ${isListening ? styles.active : ''}`}
@@ -1035,6 +1428,16 @@ const ChatWindow = ({
             </button>
           </div>
         </div>
+
+        {/* Hidden file input */}
+        <input
+          type="file"
+          ref={fileInputRef}
+          onChange={handleFileChange}
+          multiple
+          accept="image/*"
+          style={{ display: 'none' }}
+        />
       </div>
 
       {/* 側邊欄 */}

@@ -5,6 +5,7 @@ from typing import get_type_hints, get_origin, get_args
 from asgiref.sync import sync_to_async
 from fastmcp import FastMCP
 import os
+import logging
 
 from accounts.models import CustomUser
 from pets.models import Pet, DiseaseArchiveContent
@@ -18,6 +19,9 @@ from django.forms.models import model_to_dict
 from mcp_server.database_operations import get_operation_list, perform_operation
 from mcp_server.entity_resolver import EntityResolver
 
+# Setup logger
+logger = logging.getLogger(__name__)
+
 # Server configuration
 SERVER_NAME = "PETer MCP Server"
 SERVER_INSTRUCTIONS = "MCP Server providing tools for the PETer app."
@@ -28,21 +32,27 @@ def create_mcp_server() -> FastMCP:
 
     @mcp.tool(
         name="get_user_pet_info_detailed",
-        description="Fetch a public user's basic profile and their pets (including related entities)."
+        description="Fetch a user's basic profile and their pets (including related entities)."
+        "Note that this operation requires verification that the user is performing the operation for themself. The easiest way to ensure this is to check the target of the prompt matches the user ID of the requester. The user id was added to the prompt automatically by the backend."
     )
-    async def get_user_pet_info_detailed(user_id: int) -> Dict:
+    async def get_user_pet_info_detailed(user_id: int) -> str:
+        """Returns a JSON string with user and pet information, or error message."""
+        logger.info(f"[MCP Tool] get_user_pet_info_detailed called with user_id={user_id}")
+        
         @sync_to_async
         def fetch() -> Dict:
             try:
-                # Query for public user profile
+                logger.info(f"[MCP Tool] Fetching user with id={user_id}")
                 user = CustomUser.objects.filter(
-                    id=user_id, 
-                    account_privacy='public'
+                    id=user_id
                 ).first()
 
                 if not user:
-                    return {"error": "User not found or not public."}
+                    logger.warning(f"[MCP Tool] User {user_id} not found")
+                    return {"error": f"User with ID {user_id} not found."}
 
+                logger.info(f"[MCP Tool] Found user: {user.username}")
+                
                 # Get user's pets with related data (keep model instances to access relations)
                 pets_qs = (Pet.objects
                            .filter(owner=user)
@@ -51,6 +61,9 @@ def create_mcp_server() -> FastMCP:
 
                 pets_data: list[dict] = []
                 all_abnormal_posts_data: list[dict] = []
+                
+                logger.info(f"[MCP Tool] Processing {pets_qs.count()} pets")
+                
                 for pet in pets_qs:
                     pet_dict = model_to_dict(pet)
                     # Serialize related abnormal posts (prefetched)
@@ -64,21 +77,79 @@ def create_mcp_server() -> FastMCP:
                 # Ensure JSON-serializable primitives
                 pets_data = json.loads(json.dumps(pets_data, default=str))
 
-                return {
+                result = {
+                    "success": True,
                     "user": user.username,
+                    "user_id": user_id,
                     "pets": pets_data,
                     "abnormal_posts": all_abnormal_posts_data
                 }
+                
+                logger.info(f"[MCP Tool] Successfully fetched data for user {user.username}: {len(pets_data)} pets, {len(all_abnormal_posts_data)} abnormal posts")
+                return result
+                
             except Exception as e:
-                raise
+                logger.error(f"[MCP Tool] Error in get_user_pet_info_detailed: {type(e).__name__}: {str(e)}", exc_info=True)
+                return {
+                    "success": False,
+                    "error": f"{type(e).__name__}: {str(e)}"
+                }
 
-        return await fetch()
+        result_dict = await fetch()
+        # Return as JSON string for the agent
+        result_json = json.dumps(result_dict, ensure_ascii=False, indent=2)
+        logger.info(f"[MCP Tool] Returning result (length: {len(result_json)} chars)")
+        return result_json
+    
+    @mcp.tool(
+        name="get_user_pet_list",
+        description="Fetch a user's list of pets."
+    )
+    async def get_user_pet_list(user_id: int) -> str:
+        @sync_to_async
+        def fetch() -> Dict:
+            try:
+                user = CustomUser.objects.filter(
+                    id=user_id
+                ).first()
+
+                if not user:
+                    return {"error": "User not found."}
+
+                pets_qs = Pet.objects.filter(owner=user)
+
+                pets_data: list[dict] = []
+                for pet in pets_qs:
+                    pets_data.append({
+                        'id': pet.id,
+                        'name': pet.pet_name,
+                        'type': pet.pet_type,
+                        'breed': pet.breed,
+                        'age': pet.age,
+                        'weight': pet.weight,
+                    })
+
+                # Ensure JSON-serializable primitives
+                pets_data = json.loads(json.dumps(pets_data, default=str))
+
+                return {
+                    "success": True,
+                    "user": user.username,
+                    "user_id": user_id,
+                    "pets": pets_data
+                }
+            except Exception as e:
+                return {"error": f"Failed to fetch pet list: {str(e)}"}
+
+        result_dict = await fetch()
+        return json.dumps(result_dict, ensure_ascii=False, indent=2)
     
     @mcp.tool(
         name="get_post_recommendations",
         description="Get recommended social posts based on a natural-language content description. Please use keywords; vague descriptions may yield poor results. Fetch both social and forum posts if no specific instruction was given."
+        "You can also use this tool to get the posts related to specific pet type, then use the result to filter such pet type owned by users."
     )
-    async def get_post_recommendations(content_description: str, hashtags: list[str], isSocial: bool, isForum: bool) -> list[dict]:
+    async def get_post_recommendations(content_description: str, hashtags: list[str], isSocial: bool, isForum: bool) -> str:
         @sync_to_async
         def fetch() -> list[dict]:
             try:
@@ -92,7 +163,7 @@ def create_mcp_server() -> FastMCP:
 
                 if (isSocial):
                     recommended_post_ids = recommendation_service.recommend_posts(user_vec=embedded_description, content_type='social')
-                    top_post_ids = recommended_post_ids[:5]
+                    top_post_ids = recommended_post_ids[:3]
 
                     posts = PostFrame.get_postFrames(idList=top_post_ids)
                     serializer = PostFrameSerializer(posts, many=True)
@@ -100,7 +171,7 @@ def create_mcp_server() -> FastMCP:
 
                 if (isForum):
                     recommended_post_ids = recommendation_service.recommend_posts(user_vec=embedded_description, content_type='forum')
-                    top_post_ids = recommended_post_ids[:5]
+                    top_post_ids = recommended_post_ids[:3]
 
                     archives = DiseaseArchiveContent.get_content(ids=top_post_ids)
                     serializer = DiseaseArchiveContentSerializer(archives, many=True)
@@ -113,13 +184,14 @@ def create_mcp_server() -> FastMCP:
             except Exception as e:
                 return [{"error": f"Failed to get recommendations: {str(e)}"}]
 
-        return await fetch()
+        result = await fetch()
+        return json.dumps(result, ensure_ascii=False, indent=2)
     
     @mcp.tool(
         name="get_user_information",
         description="Fetch basic information of a user by their user ID."
     )
-    async def get_user_information(user_ids: list[int]) -> Dict:
+    async def get_user_information(user_ids: list[int]) -> str:
         @sync_to_async
         def fetch() -> Dict:
             try:
@@ -157,13 +229,14 @@ def create_mcp_server() -> FastMCP:
             except Exception as e:
                 return {"error": f"Failed to fetch user information: {str(e)}"}
 
-        return await fetch()
+        result_dict = await fetch()
+        return json.dumps(result_dict, ensure_ascii=False, indent=2)
     
     @mcp.tool(
         name="get_user_pet_types",
         description="Fetch the types of pets owned by a user."
     )
-    async def get_user_pet_types(user_ids: list[int]) -> Dict:
+    async def get_user_pet_types(user_ids: list[int]) -> str:
         @sync_to_async
         def fetch() -> Dict:
             try:
@@ -174,19 +247,20 @@ def create_mcp_server() -> FastMCP:
                 pet_types = {}
                 for user in users:
                     pets = Pet.objects.filter(owner=user)
-                    pet_types[user.id] = [pet.type for pet in pets]
+                    pet_types[user.id] = [pet.pet_type for pet in pets]
 
                 return {"pet_types": pet_types}
             except Exception as e:
                 return {"error": f"Failed to fetch user pet types: {str(e)}"}
 
-        return await fetch()
+        result_dict = await fetch()
+        return json.dumps(result_dict, ensure_ascii=False, indent=2)
     
     @mcp.tool(
         name="get_pet_foods_details",
         description="Fetch detailed information about pet foods"
     )
-    async def get_pet_foods_details() -> list[dict]:
+    async def get_pet_foods_details() -> str:
         @sync_to_async
         def fetch() -> list[dict]:
             try:
@@ -200,7 +274,8 @@ def create_mcp_server() -> FastMCP:
             except Exception as e:
                 return [{"error": f"Failed to fetch pet foods details: {str(e)}"}]
 
-        return await fetch()
+        result = await fetch()
+        return json.dumps(result, ensure_ascii=False, indent=2)
 
     @mcp.tool(
         name="list_available_tools",
@@ -281,7 +356,7 @@ def create_mcp_server() -> FastMCP:
         name="list_tutorial_topics",
         description="List available tutorial topics for users as an id->description mapping."
     )
-    async def list_tutorial_topics() -> Dict[str, str]:
+    async def list_tutorial_topics() -> str:
         @sync_to_async
         def fetch() -> Dict[str, str]:
             try:
@@ -297,13 +372,14 @@ def create_mcp_server() -> FastMCP:
             except Exception as e:
                 return {"error": f"Failed to list tutorial topics: {str(e)}"}
 
-        return await fetch()
+        result_dict = await fetch()
+        return json.dumps(result_dict, ensure_ascii=False, indent=2)
 
     @mcp.tool(
         name="get_navigation_paths",
         description="Get all available page paths and their mappings. Use this to find the correct path for user navigation requests."
     )
-    async def get_navigation_paths() -> Dict:
+    async def get_navigation_paths() -> str:
         """
         返回所有可用的頁面路徑和對應的關鍵字映射
 
@@ -329,13 +405,14 @@ def create_mcp_server() -> FastMCP:
             with open(json_path, 'r', encoding='utf-8') as f:
                 paths_data = json.load(f)
 
-            return paths_data
+            return json.dumps(paths_data, ensure_ascii=False, indent=2)
         except Exception as e:
-            return {
+            result = {
                 "error": f"Failed to load navigation paths: {str(e)}",
                 "available_paths": [],
                 "dynamic_paths": []
             }
+            return json.dumps(result, ensure_ascii=False, indent=2)
 
     @mcp.tool(
         name="prepare_navigate",
@@ -344,7 +421,7 @@ def create_mcp_server() -> FastMCP:
     async def prepare_navigate(
         path: str,
         reason: Optional[str] = None
-    ) -> Dict:
+    ) -> str:
         import uuid
         from datetime import datetime, timezone, timedelta
 
@@ -378,7 +455,7 @@ def create_mcp_server() -> FastMCP:
         if reason:
             confirmation_msg += f"\n\n{reason}"
 
-        return {
+        result = {
             "operation_id": operation_id,
             "type": "navigate",
             "params": {
@@ -393,31 +470,36 @@ def create_mcp_server() -> FastMCP:
             "requires_confirmation": True,
             "expires_at": expires_at
         }
+        
+        return json.dumps(result, ensure_ascii=False, indent=2)
     
     @mcp.tool(
         name="database_operation_list",
         description="List available database operations as well as the parameters required."
     )
-    async def database_operation_list() -> Dict:
+    async def database_operation_list() -> str:
         @sync_to_async
         def fetch() -> Dict:
             return get_operation_list()
 
-        return await fetch()
+        result_dict = await fetch()
+        return json.dumps(result_dict, ensure_ascii=False, indent=2)
 
     @mcp.tool(
         name="perform_database_operation",
-        description="Perform a database operation such as managing pet information, abnormal posts, disease archives, or user plans/schedules. Use database_operation_list tool to see all available operations and their required parameters."
+        description="Perform a database operation such as: add_pet, update_pet (modify pet info), add_abnormal_post (health records), update_abnormal_post, delete_abnormal_post, create_disease_archive, add_plan (create schedule/calendar event), update_plan (modify schedule), delete_plan (remove schedule), list_plans (view all schedules), create_social_post. IMPORTANT: Use 'add_plan' for creating schedules/calendar events, NOT 'create_schedule'. Always call database_operation_list first to see exact parameter requirements."
+        "Note that database operations affects personal data; please verify that the user is doing the operation for themself. The easiest way to ensure this is to check the target of the prompt matches the user ID of the requester. The user id was added to the prompt automatically by the backend."
     )
     async def perform_database_operation(
-        operation: Literal["add_pet", "update_pet", "add_abnormal_post", "update_abnormal_post", "delete_abnormal_post", "create_disease_archive", "add_plan", "update_plan", "delete_plan", "list_plans"],
+        operation: Literal["add_pet", "update_pet", "add_abnormal_post", "update_abnormal_post", "delete_abnormal_post", "create_disease_archive", "add_plan", "update_plan", "delete_plan", "list_plans", "create_social_post"],
         data: Dict
-    ) -> Dict:
+    ) -> str:
         @sync_to_async
         def execute() -> Dict:
             return perform_operation(operation, data)
 
-        return await execute()
+        result_dict = await execute()
+        return json.dumps(result_dict, ensure_ascii=False, indent=2)
 
     @mcp.tool(
         name="resolve_entity_context",
@@ -471,6 +553,5 @@ def create_mcp_server() -> FastMCP:
            - Then use pet_id to query health_report
         """
         return await EntityResolver.resolve(entity_type, user_id, conditions, limit)
-
 
     return mcp

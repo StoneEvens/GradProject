@@ -5,10 +5,11 @@ from pets.models import (
     Pet, AbnormalPost, DiseaseArchiveContent, Symptom, Illness,
     PostSymptomsRelation, ArchiveAbnormalPostRelation, ArchiveIllnessRelation
 )
-from social.models import PostFrame
+from social.models import PostFrame, SoLContent, PostHashtag
 from media.models import AbnormalPostImage
 from django.db import transaction
 import logging
+import re
 
 logger = logging.getLogger(__name__)
 
@@ -57,7 +58,7 @@ def get_operation_list() -> Dict:
             }
         },
         "add_abnormal_post": {
-            "description": "新增異常記錄（寵物健康異常情況的記錄）",
+            "description": "新增異常記錄（寵物健康異常情況的記錄，不含圖片）。圖片需透過前端另外上傳。",
             "required_params": ["user_id", "pet_id", "symptoms"],
             "optional_params": ["content", "weight", "body_temperature", "water_amount", "is_emergency", "record_date", "is_private"],
             "param_details": {
@@ -71,6 +72,20 @@ def get_operation_list() -> Dict:
                 "is_emergency": "是否為就醫記錄 (布林值，預設: False)",
                 "record_date": "記錄日期 (字串，ISO格式，例如: '2025-01-15T10:30:00Z')",
                 "is_private": "是否為私人記錄 (布林值，預設: True)"
+            },
+            "notes": [
+                "此操作只建立異常記錄結構，不包含圖片",
+                "如需上傳圖片，請告知用戶在異常記錄建立後可以上傳圖片"
+            ],
+            "response_handling": {
+                "on_success": "Tool returns {success: true, abnormal_post_id: X, message: '異常記錄建立成功！', note: '...'}",
+                "tell_user": "異常記錄建立成功！ + include the note field if present + mention symptoms_added if any",
+                "operations_array": "MUST add operation: {operation_name: 'abnormal_post_created', operation_data: json.dumps({abnormal_post_id: X, pet_id: Y, status: 'pending_images'})}",
+                "important": "Do NOT mention abnormal_post_id or technical details in the reply field. The abnormal_post_id should ONLY be in operations array for frontend to use."
+            },
+            "user_responses": {
+                "missing_symptoms": "好的！請告訴我寵物出現了哪些症狀呢？",
+                "want_upload_images": "異常記錄已建立，您也可以上傳圖片來記錄寵物的狀況喔！"
             }
         },
         "create_disease_archive": {
@@ -164,6 +179,55 @@ def get_operation_list() -> Dict:
                 "end_date": "結束日期 (字串，格式: 'YYYY-MM-DD'，用於篩選日期範圍)",
                 "is_completed": "篩選已完成/未完成 (布林值，不提供則返回全部)"
             }
+        },
+        "create_social_post": {
+            "description": "建立社群貼文（不含圖片）。所有貼文自動設定為公開，無需詢問或設定可見範圍。相片由前端上傳，只支援相片。重要：社群貼文必須包含至少一張圖片，如果用戶尚未選擇圖片（has_images=false），必須先提示用戶選擇圖片。",
+            "required_params": ["user_id", "content", "has_images"],
+            "optional_params": ["location", "hashtags"],
+            "param_details": {
+                "user_id": "用戶ID (整數)",
+                "content": "貼文內容 (字串，必填)",
+                "has_images": "用戶是否已選擇圖片 (布林值，必填。從訊息上下文中的「用戶已準備 N 張相片待上傳」判斷，如果有此訊息則為 true，否則為 false)",
+                "location": "地點 (字串，例如: '台北大安森林公園')",
+                "hashtags": "標籤 (字串，逗號分隔，例如: '寵物,日常,可愛' 或 '#寵物,#日常')"
+            },
+            "FORBIDDEN_params": {
+                "visibility": "此參數不存在！所有貼文自動為公開，絕對不要詢問或嘗試設定此參數",
+                "privacy": "此參數不存在！絕對不要詢問隱私設定",
+                "is_public": "此參數不存在！貼文永遠是公開的",
+                "is_private": "此參數不存在！",
+                "scope": "此參數不存在！",
+                "pet_tags": "此參數不存在！不支援標註寵物",
+                "tagged_pets": "此參數不存在！",
+                "comment_enabled": "此參數不存在！",
+                "images": "此參數不存在！圖片由前端另外上傳，不要在此工具中處理"
+            },
+            "notes": [
+                "此操作只建立貼文結構，不包含圖片",
+                "相片上傳由前端處理，只支援相片不支援影片",
+                "hashtags 可從參數提供或從 content 中的 #標籤 自動解析",
+                "所有貼文都是公開的，沒有可見範圍設定功能",
+                "【重要】社群貼文必須包含至少一張圖片。如果 has_images=false，工具會返回錯誤並要求用戶先選擇圖片"
+            ],
+            "limitations": [
+                "絕對不要詢問可見範圍（如「公開」、「好友」或「私密」）- 系統不支援此功能，所有貼文都是公開的",
+                "不支援標註寵物功能",
+                "不支援設定留言權限或互動設定",
+                "不支援影片上傳，只支援相片",
+                "【必要限制】所有社群貼文都必須包含至少一張圖片，沒有圖片無法發布貼文"
+            ],
+            "response_handling": {
+                "on_success": "Tool returns {success: true, post_id: X, message: '貼文建立成功！', note: '...'}",
+                "on_missing_images": "Tool returns {error: '...', user_message: '發布社群貼文需要至少一張圖片。請先點擊聊天框左下角的相片按鈕選擇圖片，然後再告訴我發布貼文。', should_ask_user: true}. You MUST use the user_message in your reply to guide the user.",
+                "tell_user": "回覆格式：「貼文建立成功！\n\n內容：[content]\n地點：[location]\n標籤：[hashtags]\n\n您可以點擊下方按鈕前往貼文頁面，並標註寵物。」圖片已由前端自動上傳，不要提及圖片上傳。",
+                "operations_array": "MUST add operation: {operation_name: 'post_created', operation_data: json.dumps({post_id: X, status: 'pending_images'})}",
+                "important": "Do NOT mention post_id or technical details in the reply field. The post_id should ONLY be in operations array for frontend to use. Do NOT mention uploading photos - photos are handled by frontend automatically."
+            },
+            "user_responses": {
+                "missing_content": "好的！請告訴我：\n\n1. 貼文要寫什麼內容呢？\n2. 要標註地點嗎？（例如：台北大安森林公園）\n3. 要加上標籤嗎？（例如：#寵物日常 #可愛）\n\n另外，別忘了先點擊聊天框左下角的相片按鈕選擇要上傳的圖片喔！",
+                "missing_images": "發布貼文需要至少一張相片喔！請先點擊聊天框左下角的相片按鈕選擇圖片，然後再告訴我發布貼文。",
+                "ask_guidance": "重要：以口語化方式詢問以下資訊：\n1）貼文內容（必需，用「貼文要寫什麼內容」而非「content」）\n2）地點（可選，用「要標註地點嗎」而非「location」）\n3）標籤（可選，用「要加上標籤嗎」或「hashtags」都可以）\n4）提醒選擇圖片（必需）\n\n絕對不要：\n- 提及 user_id、post_id 等技術術語\n- 詢問 media_urls（這不存在，只需提醒用戶選擇圖片）\n- 詢問可見範圍、隱私設定、留言權限、寵物標註（系統不支援）\n- 使用原始變數名稱與用戶對話"
+            }
         }
     }
     return {
@@ -174,6 +238,9 @@ def get_operation_list() -> Dict:
 
 def perform_operation(operation: str, data: Dict) -> Dict:
     try:
+        logger.info(f"[perform_operation] Starting operation: {operation}")
+        logger.debug(f"[perform_operation] Data: {data}")
+
         if operation == "add_pet":
             return _add_pet(data)
         elif operation == "update_pet":
@@ -194,10 +261,18 @@ def perform_operation(operation: str, data: Dict) -> Dict:
             return _delete_plan(data)
         elif operation == "list_plans":
             return _list_plans(data)
+        elif operation == "create_social_post":
+            result = _create_social_post(data)
+            logger.info(f"[perform_operation] create_social_post result: success={result.get('success')}")
+            return result
         else:
-            return {"error": f"Operation '{operation}' is not implemented"}
+            error_msg = f"Operation '{operation}' is not implemented"
+            logger.error(f"[perform_operation] {error_msg}")
+            return {"error": error_msg}
     except Exception as e:
-        return {"error": f"Failed to perform operation: {str(e)}"}
+        error_msg = f"Failed to perform operation: {str(e)}"
+        logger.error(f"[perform_operation] Exception: {error_msg}", exc_info=True)
+        return {"error": error_msg}
 
 
 def _add_pet(data: Dict) -> Dict:
@@ -397,6 +472,7 @@ def _add_abnormal_post(data: Dict) -> Dict:
     result = {
         "success": True,
         "message": f"Abnormal post created successfully for pet '{pet.pet_name}'",
+        "note": "如需上傳圖片記錄寵物狀況，請在異常記錄建立後使用圖片上傳功能。",
         "abnormal_post_id": abnormal_post.id,
         "post_data": {
             "id": abnormal_post.id,
@@ -410,13 +486,14 @@ def _add_abnormal_post(data: Dict) -> Dict:
             "record_date": abnormal_post.record_date.isoformat() if abnormal_post.record_date else None,
             "is_private": abnormal_post.is_private,
             "created_at": abnormal_post.created_at.isoformat(),
-            "symptoms_added": symptoms_added
+            "symptoms_added": symptoms_added,
+            "status": "created_without_images"
         }
     }
-    
+
     if symptoms_not_found:
         result["warning"] = f"Some symptoms were not found in database: {', '.join(symptoms_not_found)}"
-    
+
     return result
 
 
@@ -1068,4 +1145,130 @@ def _list_plans(data: Dict) -> Dict:
         "message": f"Found {len(plans_data)} plan(s)",
         "total_count": len(plans_data),
         "plans": plans_data
+    }
+
+
+# ==================== Social Post Operations ====================
+
+@transaction.atomic
+def _create_social_post(data: Dict) -> Dict:
+    """
+    建立社群貼文（不含圖片）
+
+    Args:
+        data: 包含貼文資訊的字典
+
+    Returns:
+        Dict: 操作結果
+    """
+    logger.info(f"[_create_social_post] Starting with data: user_id={data.get('user_id')}, content_length={len(data.get('content', ''))}, has_images={data.get('has_images')}")
+
+    # 驗證必要欄位
+    required_fields = ["user_id", "content", "has_images"]
+    missing_fields = [f for f in required_fields if f not in data]
+    if missing_fields:
+        logger.warning(f"[_create_social_post] Missing fields: {missing_fields}")
+        return {
+            "error": "Missing required fields",
+            "missing_fields": missing_fields,
+            "help": "user_id, content, and has_images are required"
+        }
+
+    # 驗證內容不為空
+    content = data.get("content", "").strip()
+    if not content:
+        logger.warning(f"[_create_social_post] Content is empty")
+        return {
+            "error": "Content is required and cannot be empty",
+            "missing_fields": ["content"]
+        }
+
+    # 檢查用戶是否已選擇圖片（社群貼文必須帶圖片）
+    has_images = data.get("has_images")
+    if not has_images:
+        logger.warning(f"[_create_social_post] User has not selected images")
+        return {
+            "error": "社群貼文必須包含圖片",
+            "user_message": "發布社群貼文需要至少一張圖片。請先點擊聊天框左下角的相片按鈕選擇圖片，然後再告訴我發布貼文。",
+            "should_ask_user": True
+        }
+
+    # 獲取用戶
+    try:
+        user = CustomUser.objects.get(id=data["user_id"])
+        logger.debug(f"[_create_social_post] Found user: {user.username}")
+    except CustomUser.DoesNotExist:
+        logger.error(f"[_create_social_post] User {data['user_id']} not found")
+        return {"error": f"User with id {data['user_id']} not found"}
+
+    # 獲取可選參數
+    location = data.get("location", "").strip() or None
+    hashtags_param = data.get("hashtags", "")
+
+    # 1. 建立 PostFrame
+    post_frame = PostFrame.objects.create(user=user)
+
+    # 2. 建立 SoLContent
+    sol_content = SoLContent.objects.create(
+        postFrame=post_frame,
+        content_text=content,
+        location=location
+    )
+
+    # 3. 解析並建立標籤
+    created_hashtags = []
+
+    # 從參數解析標籤
+    tag_list = []
+    if hashtags_param:
+        tag_list = [tag.strip().lstrip('#') for tag in hashtags_param.split(',')]
+
+    # 從內容中提取 #標籤
+    implicit_tags = re.findall(r'#([\w\u4e00-\u9fff]+)', content)
+
+    # 合併並去重
+    all_tags = list(set(tag_list + implicit_tags))
+
+    for tag in all_tags:
+        if tag:  # 確保標籤不為空
+            hashtag_obj = PostHashtag.objects.create(
+                postFrame=post_frame,
+                tag=tag.strip()
+            )
+            created_hashtags.append(tag)
+
+    # 4. 觸發推薦服務嵌入（可選）
+    try:
+        from social.apps import SocialConfig
+        recommendation_service = SocialConfig.get_recommendation_service()
+        if recommendation_service:
+            recommendation_service.embed_new_post(
+                post_id=post_frame.id,
+                content=content,
+                content_type="social"
+            )
+    except Exception as embed_error:
+        # 嵌入失敗不影響貼文建立
+        logger.warning(f"Failed to embed post for recommendations: {embed_error}")
+
+    logger.info(f"User {user.id} created social post {post_frame.id}")
+
+    return {
+        "success": True,
+        "message": "貼文建立成功！",
+        "note": "如需上傳圖片或標註寵物，請在貼文建立後使用圖片上傳功能。",
+        "post_id": post_frame.id,
+        "post_frame_id": post_frame.id,
+        "status": "created_without_images",
+        "post_data": {
+            "id": post_frame.id,
+            "content": content,
+            "location": location,
+            "hashtags": created_hashtags,
+            "created_at": post_frame.created_at.isoformat(),
+            "user": {
+                "id": user.id,
+                "username": user.username
+            }
+        }
     }

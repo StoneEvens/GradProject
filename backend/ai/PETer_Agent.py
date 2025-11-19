@@ -70,6 +70,9 @@ class RecommendedUser(BaseModel):
   user_id: str | int = Field(..., description="Unique identifier of the user.")
   display_name: str = Field(..., description="User-facing display name (e.g., nickname).")
   user_details: str = Field(..., description="Short rationale or description why this user is recommended.")
+  headshot_url: str | None = Field(None, description="URL of the user's profile picture/headshot if available.")
+  user_account: str | None = Field(None, description="User's account name/username if available.")
+  user_fullname: str | None = Field(None, description="User's full name if available.")
 
 
 class PostRecommendation(BaseModel):
@@ -94,7 +97,6 @@ class SummaryAgentSchema(BaseModel):
   """
   reply: str = Field(..., description="Natural language reply for the user (do not dump raw data here).")
   tutorial: str = Field(..., description="If a tutorial is applicable, set its id or slug; else use an empty string.")
-  has_calculator: bool = Field(..., description="Whether to surface the nutrition calculator UI toggle.")
   operation_type: str = Field(..., description="High-level operation type for quick UI routing, e.g., 'navigate_social'.")
   operations: list[SummaryAgentSchema__OperationsItem] = Field(
     default_factory=list,
@@ -102,7 +104,7 @@ class SummaryAgentSchema(BaseModel):
   )
   recommended_users: list[RecommendedUser] = Field(
     default_factory=list,
-    description="List of recommended users. Each item includes user_id, display_name, user_details."
+    description="List of recommended users. Each item includes user_id, display_name, user_details, headshot_url, user_account, user_fullname."
   )
   recommended_social_posts: list[PostRecommendation] = Field(
     default_factory=list,
@@ -120,8 +122,23 @@ class SummaryAgentSchema(BaseModel):
 #---------------------------------------------------------------------
 workflow_organizer = Agent(
   name="Workflow Organizer",
-  instructions="Understand the user's intention, then plan out the workflow by checking what tools the mcp server provides and how these tools can help achieve the user's intention. You SHOULD NOT retrieve data by yourself. Do not spend too much time constructing the instruction; allowing the next agent to complete the task is enough. The final output should all be relevant to the user's needs.",
-  model="gpt-5",
+  instructions=(
+    "Understand the user's intention, then plan out the workflow by checking what tools the mcp server provides and how these tools can help achieve the user's intention. "
+    "If the user's request is beyond available tools, simply state that the task cannot be completed with current capabilities. You do not need to assist with these requests or provide any information or suggestions. "
+    "You SHOULD NOT retrieve data by yourself. Do not spend too much time constructing the instruction; allowing the next agent to complete the task is enough. The final output should all be relevant to the user's needs.\n\n"
+
+    "IMPORTANT - Information Gathering:\n"
+    "Before planning any tool execution, check if ALL required parameters are available by reviewing the ENTIRE conversation history, not just the current message.\n"
+    "Each tool's description specifies its REQUIRED and OPTIONAL parameters. Read them carefully.\n"
+    "ONLY collect parameters that are explicitly listed in required_params or optional_params.\n"
+    "DO NOT collect or ask for parameters that are not listed, even if they seem logical or common (e.g., visibility, privacy settings).\n"
+    "If a tool has a FORBIDDEN_params section, absolutely DO NOT collect or ask for those parameters.\n"
+    "Look through previous messages to collect any parameters the user has already provided.\n"
+    "If REQUIRED information is missing from the conversation history, indicate in the Instruction that the next agent should ask the user BEFORE calling the tool.\n"
+    "The tool descriptions also provide suggested wording for asking users - use those suggestions when available.\n"
+    "When the user modifies one parameter, remember to retain all other parameters they've already provided in earlier messages."
+  ),
+  model="gpt-5.1",
   tools=[
     mcp
   ],
@@ -137,49 +154,37 @@ workflow_organizer = Agent(
 summary_agent = Agent(
   name="Summary Agent",
   instructions=(
-    "Please understand the user's intent and filter out any irrelevant information from the tool outputs."
-    "Use the organizer's Instruction to decide which MCP tools to call. Populate ONLY the JSON schema fields. "
-    "In 'reply', provide a concise user-facing answer (no raw data tables). For post recommendations, return lists: "
-    "'recommended_social_posts' and 'recommended_forum_posts' as arrays of objects each with post_id, title, post_details, created_at. If available, also include user_fullname (author display name) and location. "
-    "Return empty lists when no recommendations. Do NOT invent placeholder ids or titles. Do not use dynamic property names keyed by ids.\n\n"
+    "Understand user intent, filter irrelevant tool outputs. Use organizer's Instruction to decide which MCP tools to call. Populate ONLY JSON schema fields. "
+    "In reply: concise answer, no raw data. Post recommendations: use recommended_social_posts and recommended_forum_posts arrays with post_id, title, post_details, created_at, user_fullname, location. "
+    "Do not display raw data such as JSON dumps, urls, internal tutorial name, internal mcp tool name, internal database operation name, internal ids of the data from the database, or lists directly to the user. Also, please try to avoid using technical terms like \"id\" or \"ids\", just to name a few. Instead, summarize the information in a user-friendly manner within the 'reply' field. Do not summarize the content of each posts. "
+    "If the user's request is beyond available tools, simply state that the task cannot be completed with current capabilities. You do not need to assist with these requests or provide any information or suggestions. "
+    "Return empty lists if none. Do NOT invent ids/titles or use dynamic property names.\n\n"
 
-    "**NAVIGATION HANDLING - IMPORTANT:**\n"
-    "When the user requests to navigate to a page, the app will AUTOMATICALLY execute the navigation. No user confirmation needed.\n\n"
+    "IMPORTANT - User Communication Style:\n"
+    "ALWAYS communicate in a friendly, conversational manner. Use natural language instead of technical terms:\n"
+    "- Say '貼文內容' NOT 'content'\n"
+    "- Say '地點' NOT 'location'\n"
+    "- Say '標籤' NOT 'hashtags' (but #標籤 is OK)\n"
+    "- NEVER mention: user_id, post_id, media_urls, or any technical parameter names\n"
+    "- NEVER ask for 'media_urls' (this doesn't exist - just remind users to select images using the photo button)\n"
+    "Follow the user_responses guidance in tool descriptions for proper wording.\n\n"
 
-    "1. **Static Paths (no parameters needed):**\n"
-    "   - Call get_navigation_paths to get all available paths\n"
-    "   - Match the user's intent with keywords to find the target path\n"
-    "   - Add a navigation operation to the 'operations' array:\n"
-    "     operations.append({\n"
-    "       'operation_name': 'navigate',\n"
-    "       'operation_data': json.dumps({'path': '/matched/path', 'destination': 'friendly name'})\n"
-    "     })\n"
-    "   - In reply, inform user: '正在為您跳轉到[頁面名稱]...'\n\n"
+    "IMPORTANT - Information Gathering & Memory:\n"
+    "If the organizer's Instruction says to ask the user for information, you MUST ask in the reply field and NOT call any tools yet.\n"
+    "ALWAYS review the ENTIRE conversation history to collect parameters the user has already provided in previous messages.\n"
+    "Only ask for information that is truly missing from the conversation history.\n"
+    "When the user modifies one parameter (e.g., changes the content), automatically retain all other parameters they provided earlier (e.g., hashtags, location, images).\n"
+    "Wait for the user to provide the missing information in the next turn, then call the appropriate tool with ALL collected parameters.\n"
+    "Each tool's description provides suggested wording for asking users - follow those suggestions.\n\n"
 
-    "2. **Dynamic Paths (require IDs):**\n"
-    "   Examples: 'jump to my post from last Sunday', 'go to the feed I last viewed'\n"
-    "   - First, use resolve_entity_context to find the entity:\n"
-    "     * For posts: resolve_entity_context(entity_type='social_post', user_id=USER_ID, conditions={'time_range': 'last_sunday'})\n"
-    "     * For feeds: resolve_entity_context(entity_type='feed', user_id=USER_ID, conditions={'newest': true})\n"
-    "     * For pets: resolve_entity_context(entity_type='pet', user_id=USER_ID, conditions={'pet_name': 'name'})\n"
-    "   - The tool returns results with 'resolved_path' field (e.g., '/post/123/edit')\n"
-    "   - If found: add navigation operation to 'operations' array:\n"
-    "     operations.append({\n"
-    "       'operation_name': 'navigate',\n"
-    "       'operation_data': json.dumps({'path': resolved_path, 'destination': 'entity description'})\n"
-    "     })\n"
-    "   - If multiple results: use the first one and mention in reply\n"
-    "   - In reply: '已找到您的[實體]，正在跳轉...'\n\n"
-
-    "3. **If entity not found:**\n"
-    "   - In reply, inform user you couldn't find the entity\n"
-    "   - Suggest alternatives or navigate to a related list page\n"
-    "   - Example: operations.append({'operation_name': 'navigate', 'operation_data': json.dumps({'path': '/social'})})\n\n"
-
-    "IMPORTANT: Always use the 'operations' array for navigation, NOT prepare_navigate tool.\n"
-    "Available entity types for resolve_entity_context: social_post, feed, pet, user, health_report, disease_archive, abnormal_post"
+    "NAVIGATION: Add to operations array: {operation_name: navigate, operation_data: json.dumps({path: /target, destination: name})}. "
+    "User will see a button to navigate - do NOT say 'navigating' or 'redirecting'. Instead say: 您可以點擊下方按鈕前往[頁面]。\n"
+    "Static paths: get_navigation_paths, match intent, add to operations.\n"
+    "Dynamic paths: resolve_entity_context(entity_type, user_id, conditions), use resolved_path.\n"
+    "Not found: inform user, suggest alternatives.\n"
+    "Entities: social_post, feed, pet, user, health_report, disease_archive, abnormal_post, plan"
   ),
-  model="gpt-5-mini",
+  model="gpt-5.1",
   tools=[
     mcp
   ],

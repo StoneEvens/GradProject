@@ -523,6 +523,8 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
           // 對於 menuOpen、pageNavigate 和 imageAdded 條件，需要讓點擊事件正常執行
           if (stepData.nextCondition === 'menuOpen' || 
               stepData.nextCondition === 'manualNext' ||
+              stepData.nextCondition === 'nutritionImageUploaded' || 
+              stepData.nextCondition === 'frontImageUploaded' ||
               stepData.nextCondition === 'selectedPet' || 
               stepData.nextCondition === 'pageNavigateToCalculator' ||
               stepData.nextCondition === 'pageNavigate' || 
@@ -665,10 +667,19 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
         targetElementRef.current = cachedEl;
 
         // 影像流程：在步驟 3 或 4 建立查找範圍（使用貼文建立頁面的主要容器）
-        if (stepData?.id === 3 || stepData?.id === 4) {
-          const scopeCandidate = cachedEl.closest('[class*="CreatePost"], [class*="createPost"], [class*="postContainer"], main, form');
+        if (stepData?.id === 3 || stepData?.id === 4 || stepData?.id === 13 || stepData?.id === 14) {
+          const scopeCandidate = cachedEl.closest(
+            '[class*="CreatePost"], [class*="createPost"], [class*="createFeed"], [class*="postContainer"], main, form'
+          );
           imageFlowScopeRef.current = scopeCandidate || document.getElementById('root') || document.body;
         }
+
+        // if (stepData?.id === 3 || stepData?.id === 4) {
+        //   const scopeCandidate = cachedEl.closest('[class*="CreatePost"], [class*="createPost"], [class*="postContainer"], main, form');
+        //   imageFlowScopeRef.current = scopeCandidate || document.getElementById('root') || document.body;
+        // }
+        
+
 
         // 在渲染 spotlight 前等待（僅在關鍵步驟）
         (async () => {
@@ -876,6 +887,24 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
           if (!targetElement.isConnected) return;
 
           const rect = targetElement.getBoundingClientRect();
+          // 🔽 若目標元素不在可視範圍中，平滑滾動讓它進入視野
+          const rectCheck = targetElement.getBoundingClientRect();
+          const isOutOfView =
+            rectCheck.top < 0 || rectCheck.bottom > window.innerHeight ||
+            rectCheck.left < 0 || rectCheck.right > window.innerWidth;
+
+          if (isOutOfView) {
+            console.log('🔽 自動滾動到目標元素中 (findAndHighlightElement)');
+            targetElement.scrollIntoView({
+              behavior: 'smooth',
+              block: 'center',
+              inline: 'nearest'
+            });
+
+            // 🕒 等滾動動畫結束 + DOM 穩定後再繼續
+            await new Promise(r => setTimeout(r, 800));
+          }
+
 
           // 設置 spotlight 位置（viewport 相對座標，因為 overlay 是 fixed）
           const spotlightRect = {
@@ -890,6 +919,17 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
             const chatPos = calculateChatPosition(rect);
             setChatPositionStable(chatPos);
           });
+          // 🔽 自動滾動到目標元素 (若不在可視範圍)
+          const viewportHeight = window.innerHeight;
+          if (rect.top < 0 || rect.bottom > viewportHeight) {
+            console.log('🔽 自動滾動到目標元素中...');
+            targetElement.scrollIntoView({
+              behavior: 'smooth',
+              block: 'center',
+              inline: 'nearest'
+            });
+          }
+
         })();
 
           // 🌟 若是可輸入元件（例如 textarea/input），允許互動與聚焦
@@ -1062,63 +1102,108 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
   }, [tutorialType, onComplete]);
 
   // 處理下一步
-  const handleNextStep = useCallback(() => {
-    console.log('handleNextStep 被調用:', {
-      tutorial: !!tutorial,
-      isTransitioning,
-      currentStep,
-      tutorialType
-    });
+  // const handleNextStep = useCallback(() => {
+  //   console.log('handleNextStep 被調用:', {
+  //     tutorial: !!tutorial,
+  //     isTransitioning,
+  //     currentStep,
+  //     tutorialType
+  //   });
 
-    if (!tutorial || isTransitioning) {
-      console.log('handleNextStep 提早返回:', { tutorial: !!tutorial, isTransitioning });
-      return;
-    }
+  //   if (!tutorial || isTransitioning) {
+  //     console.log('handleNextStep 提早返回:', { tutorial: !!tutorial, isTransitioning });
+  //     return;
+  //   }
+
+  //   setIsTransitioning(true);
+
+  //   const nextStep = tutorialUtils.getNextStep(tutorialType, currentStep);
+  //   console.log('下一步驟:', nextStep, '當前步驟:', currentStep);
+
+  //   if (nextStep && nextStep.id > currentStep) {  // 確保是前進，不是回退
+  //     const isNextLastStep = tutorialUtils.isLastStep(tutorialType, nextStep.id);
+  //     // 執行步驟動作
+  //     if (stepData && stepData.action === 'click' && stepData.expectedPath) {
+  //       // 如果需要導航，讓導航先發生
+  //       setTimeout(() => {
+  //         // 在切換步驟時，暫時凍結聊天泡泡的重新定位，避免卡頓
+  //         const now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+  //         chatFreezeUntilRef.current = now + 220;
+  //         setStepData(nextStep);
+  //         setCurrentStep(nextStep.id);
+  //         // 若為最後一步，避免將第 10 步同步到 localStorage，改為維持上一階段狀態
+  //         if (isNextLastStep) {
+  //           tutorialUtils.saveTutorialProgress(tutorialType, currentStep, 'awaiting_confirm');
+  //         } else {
+  //           tutorialUtils.saveTutorialProgress(tutorialType, nextStep.id, 'in_progress');
+  //         }
+  //         setIsTransitioning(false);
+  //       }, 100);
+  //     } else {
+  //       // 在切換步驟時，暫時凍結聊天泡泡的重新定位，避免卡頓
+  //       const now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+  //       chatFreezeUntilRef.current = now + 220;
+  //       setStepData(nextStep);
+  //       setCurrentStep(nextStep.id);
+  //       // 若為最後一步，避免將第 10 步同步到 localStorage，改為維持上一階段狀態
+  //       if (isNextLastStep) {
+  //         tutorialUtils.saveTutorialProgress(tutorialType, currentStep, 'awaiting_confirm');
+  //       } else {
+  //         tutorialUtils.saveTutorialProgress(tutorialType, nextStep.id, 'in_progress');
+  //       }
+  //       setIsTransitioning(false);
+  //     }
+  //   } else {
+  //     // 到達最後一步，保持 overlay 顯示，等待用戶主動關閉
+  //     console.log('到達教學最後一步，等待用戶關閉');
+  //     setIsTransitioning(false);
+  //   }
+  // }, [tutorial, tutorialType, currentStep, stepData, isTransitioning, handleComplete]);
+  // 處理下一步（含自動滾動）
+  const handleNextStep = useCallback(async () => {
+    if (!tutorial || isTransitioning) return;
 
     setIsTransitioning(true);
 
     const nextStep = tutorialUtils.getNextStep(tutorialType, currentStep);
-    console.log('下一步驟:', nextStep, '當前步驟:', currentStep);
-
-    if (nextStep && nextStep.id > currentStep) {  // 確保是前進，不是回退
-      const isNextLastStep = tutorialUtils.isLastStep(tutorialType, nextStep.id);
-      // 執行步驟動作
-      if (stepData && stepData.action === 'click' && stepData.expectedPath) {
-        // 如果需要導航，讓導航先發生
-        setTimeout(() => {
-          // 在切換步驟時，暫時凍結聊天泡泡的重新定位，避免卡頓
-          const now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
-          chatFreezeUntilRef.current = now + 220;
-          setStepData(nextStep);
-          setCurrentStep(nextStep.id);
-          // 若為最後一步，避免將第 10 步同步到 localStorage，改為維持上一階段狀態
-          if (isNextLastStep) {
-            tutorialUtils.saveTutorialProgress(tutorialType, currentStep, 'awaiting_confirm');
-          } else {
-            tutorialUtils.saveTutorialProgress(tutorialType, nextStep.id, 'in_progress');
-          }
-          setIsTransitioning(false);
-        }, 100);
-      } else {
-        // 在切換步驟時，暫時凍結聊天泡泡的重新定位，避免卡頓
-        const now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
-        chatFreezeUntilRef.current = now + 220;
-        setStepData(nextStep);
-        setCurrentStep(nextStep.id);
-        // 若為最後一步，避免將第 10 步同步到 localStorage，改為維持上一階段狀態
-        if (isNextLastStep) {
-          tutorialUtils.saveTutorialProgress(tutorialType, currentStep, 'awaiting_confirm');
-        } else {
-          tutorialUtils.saveTutorialProgress(tutorialType, nextStep.id, 'in_progress');
-        }
-        setIsTransitioning(false);
-      }
-    } else {
-      // 到達最後一步，保持 overlay 顯示，等待用戶主動關閉
-      console.log('到達教學最後一步，等待用戶關閉');
+    if (!nextStep || nextStep.id <= currentStep) {
       setIsTransitioning(false);
+      return;
     }
-  }, [tutorial, tutorialType, currentStep, stepData, isTransitioning, handleComplete]);
+
+    // 切換到下一步
+    setStepData(nextStep);
+    setCurrentStep(nextStep.id);
+
+    // 儲存進度
+    tutorialUtils.saveTutorialProgress(tutorialType, nextStep.id, 'in_progress');
+
+    // ⏳ 等 React 重新 render 完成
+    await new Promise(r => setTimeout(r, 300));
+
+    // 🔽 自動滾動到下一步的目標元素
+    const selector = nextStep.targetElement?.selector;
+    if (selector) {
+      let el = null;
+
+      // 支援 :contains()
+      if (selector.includes(':contains(')) {
+        el = findElementWithSelector(selector);
+      } else {
+        el = document.querySelector(selector);
+      }
+
+      if (el) {
+        el.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center'
+        });
+      }
+    }
+
+    setIsTransitioning(false);
+  }, [tutorial, tutorialType, currentStep, isTransitioning]);
+
 
   // 條件監聽
   const startConditionMonitoring = useCallback((condition) => {
@@ -1176,22 +1261,68 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
       let conditionMet = false;
 
       switch (condition) {
-        case 'manualNext':
-          // 手動下一步模式：讓畫面可互動、不被遮罩蓋掉
-          const overlayEls = document.querySelectorAll('.tutorial-overlay, .tutorial-highlight');
-          overlayEls.forEach(el => {
-            el.style.pointerEvents = 'none';
-          });
+        case 'manualNext': {
+          // 判斷是否為上傳圖片的步驟（正面圖 or 營養標示圖）
+          const isUploadStep =
+            stepData?.targetElement?.selector?.includes('upload-front') ||
+            stepData?.targetElement?.selector?.includes('upload-nutrition');
 
-          // 若有目標元素，確保它能點擊
-          const target = document.querySelector(stepData?.targetElement?.selector);
-          if (target) {
-            target.style.pointerEvents = 'auto';
-          }
+          setTimeout(() => {
+            // 關閉所有教學遮罩的互動
+            const overlays = document.querySelectorAll('.tutorial-overlay, .tutorial-highlight');
+            overlays.forEach(el => {
+              // 上傳步驟：直接關閉整層遮罩，讓使用者真實點擊 input
+              // 其他步驟：保留遮罩，但允許目標元素互動
+              if (isUploadStep) {
+                el.style.display = 'none'; // 🔥 關鍵：整層消失才能開啟檔案總管
+              } else {
+                el.style.pointerEvents = 'none';
+              }
+            });
 
-          // manualNext 不自動通過條件，由按鈕 handleNextStep 控制
+            // 找目標元素
+            const target = document.querySelector(stepData?.targetElement?.selector);
+            if (target) {
+              target.style.pointerEvents = 'auto';
+              target.style.zIndex = '999999';
+              console.log('🟢 開放互動目標元素:', target);
+            }
+          }, 150);
+
+          // manualNext 步驟永遠不自動通過
           conditionMet = false;
           break;
+        }
+
+        // case 'manualNext':
+        //   // 手動下一步模式：讓畫面可互動、不被遮罩蓋掉
+        //   const overlayEls = document.querySelectorAll('.tutorial-overlay, .tutorial-highlight');
+        //   overlayEls.forEach(el => {
+        //     el.style.pointerEvents = 'none';
+        //   });
+
+        //   // 若有目標元素，確保它能點擊
+        //   const target = document.querySelector(stepData?.targetElement?.selector);
+        //   if (target) {
+        //     target.style.pointerEvents = 'auto';
+        //   }
+
+        //   // manualNext 不自動通過條件，由按鈕 handleNextStep 控制
+        //   conditionMet = false;
+        //   break;
+        case 'frontImageUploaded': {
+          const img = document.querySelector('[data-step="upload-front"] img');
+          conditionMet = !!img;
+          if (conditionMet) console.log('🟢 frontImageUploaded 條件達成');
+          break;
+        }
+
+        case 'nutritionImageUploaded': {
+          const img = document.querySelector('[data-step="upload-nutrition"] img');
+          conditionMet = !!img;
+          if (conditionMet) console.log('🟢 nutritionImageUploaded 條件達成');
+          break;
+        }
 
         case 'menuOpen':
           // 檢查是否有選單元素出現
@@ -1319,73 +1450,147 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
           break;
         }
 
-        case 'imageAdded':
-          // 檢查是否有圖片預覽元素出現（限定影像流程範圍）
+        // case 'imageAdded':
+        //   // 檢查是否有圖片預覽元素出現（限定影像流程範圍）
+        //   const scopeRoot = getImageFlowRoot();
+          
+        //   // 主要檢查：尋找圖片預覽容器中的實際圖片
+        //   const imagePreviewContainers = scopeRoot.querySelectorAll('[class*="imagePreviewContainer"], [class*="imageContainer"]');
+        //   let hasValidImages = false;
+          
+        //   // 檢查預覽容器中是否有用戶上傳的圖片
+        //   Array.from(imagePreviewContainers).forEach(container => {
+        //     const imagesInContainer = container.querySelectorAll('img');
+        //     Array.from(imagesInContainer).forEach(img => {
+        //       const src = img.src || '';
+        //       const isUserImage = src.startsWith('blob:') || 
+        //                          src.startsWith('data:image') || 
+        //                          (!src.includes('/assets/') && !src.includes('/icon/') && src.length > 0);
+        //       if (isUserImage) {
+        //         hasValidImages = true;
+        //         console.log('✅ 發現用戶上傳的圖片:', {
+        //           src: src.substring(0, 50) + '...',
+        //           className: img.className
+        //         });
+        //       }
+        //     });
+        //   });
+
+        //   // 備用檢查：直接查找帶有特定類名的圖片元素
+        //   if (!hasValidImages) {
+        //     const imagePreviewElements = scopeRoot.querySelectorAll('[class*="imagePreview"] img, [class*="clickableImage"]');
+        //     Array.from(imagePreviewElements).forEach(img => {
+        //       const src = img.src || '';
+        //       const isUserImage = src.startsWith('blob:') || 
+        //                          src.startsWith('data:image') || 
+        //                          (!src.includes('/assets/') && !src.includes('/icon/') && src.length > 0);
+        //       if (isUserImage) {
+        //         hasValidImages = true;
+        //         console.log('✅ 備用檢查發現用戶上傳的圖片:', {
+        //           src: src.substring(0, 50) + '...',
+        //           className: img.className
+        //         });
+        //       }
+        //     });
+        //   }
+
+        //   // 最終檢查：查找所有 blob: 或 data:image 開頭的圖片
+        //   if (!hasValidImages) {
+        //     const allImages = scopeRoot.querySelectorAll('img');
+        //     Array.from(allImages).forEach(img => {
+        //       const src = img.src || '';
+        //       if (src.startsWith('blob:') || src.startsWith('data:image')) {
+        //         hasValidImages = true;
+        //         console.log('✅ 最終檢查發現用戶上傳的圖片:', {
+        //           src: src.substring(0, 50) + '...',
+        //           className: img.className
+        //         });
+        //       }
+        //     });
+        //   }
+
+        //   console.log('imageAdded 條件檢查結果:', {
+        //     hasValidImages,
+        //     imagePreviewContainersCount: imagePreviewContainers.length,
+        //     totalImagesInScope: scopeRoot.querySelectorAll('img').length
+        //   });
+
+        //   conditionMet = hasValidImages;
+        //   break;
+        case 'imageAdded': {
           const scopeRoot = getImageFlowRoot();
-          
-          // 主要檢查：尋找圖片預覽容器中的實際圖片
-          const imagePreviewContainers = scopeRoot.querySelectorAll('[class*="imagePreviewContainer"], [class*="imageContainer"]');
+          if (!scopeRoot) {
+            console.warn('⚠️ 無法取得影像流程根節點');
+            conditionMet = false;
+            break;
+          }
+
+          const isUserImage = src =>
+            src.startsWith('blob:') ||
+            src.startsWith('data:image') ||
+            (!src.includes('/assets/') && !src.includes('/icon/') && src.length > 0);
+
           let hasValidImages = false;
-          
-          // 檢查預覽容器中是否有用戶上傳的圖片
-          Array.from(imagePreviewContainers).forEach(container => {
-            const imagesInContainer = container.querySelectorAll('img');
-            Array.from(imagesInContainer).forEach(img => {
-              const src = img.src || '';
-              const isUserImage = src.startsWith('blob:') || 
-                                 src.startsWith('data:image') || 
-                                 (!src.includes('/assets/') && !src.includes('/icon/') && src.length > 0);
-              if (isUserImage) {
-                hasValidImages = true;
-                console.log('✅ 發現用戶上傳的圖片:', {
-                  src: src.substring(0, 50) + '...',
-                  className: img.className
-                });
-              }
-            });
-          });
 
-          // 備用檢查：直接查找帶有特定類名的圖片元素
-          if (!hasValidImages) {
-            const imagePreviewElements = scopeRoot.querySelectorAll('[class*="imagePreview"] img, [class*="clickableImage"]');
-            Array.from(imagePreviewElements).forEach(img => {
-              const src = img.src || '';
-              const isUserImage = src.startsWith('blob:') || 
-                                 src.startsWith('data:image') || 
-                                 (!src.includes('/assets/') && !src.includes('/icon/') && src.length > 0);
-              if (isUserImage) {
-                hasValidImages = true;
-                console.log('✅ 備用檢查發現用戶上傳的圖片:', {
-                  src: src.substring(0, 50) + '...',
-                  className: img.className
-                });
-              }
-            });
+          const allImages = Array.from(scopeRoot.querySelectorAll('img'));
+          for (const img of allImages) {
+            if (isUserImage(img.src)) {
+              hasValidImages = true;
+              console.log('✅ 發現用戶上傳的圖片:', img.src.substring(0, 100) + '...');
+              break;
+            }
           }
-
-          // 最終檢查：查找所有 blob: 或 data:image 開頭的圖片
-          if (!hasValidImages) {
-            const allImages = scopeRoot.querySelectorAll('img');
-            Array.from(allImages).forEach(img => {
-              const src = img.src || '';
-              if (src.startsWith('blob:') || src.startsWith('data:image')) {
-                hasValidImages = true;
-                console.log('✅ 最終檢查發現用戶上傳的圖片:', {
-                  src: src.substring(0, 50) + '...',
-                  className: img.className
-                });
-              }
-            });
-          }
-
-          console.log('imageAdded 條件檢查結果:', {
-            hasValidImages,
-            imagePreviewContainersCount: imagePreviewContainers.length,
-            totalImagesInScope: scopeRoot.querySelectorAll('img').length
-          });
 
           conditionMet = hasValidImages;
+          console.log('🧩 imageAdded 檢查結果:', hasValidImages);
+
+          if (hasValidImages) {
+            // ✅ 通知導引系統可以進下一步
+            if (typeof goToNextStep === 'function') {
+              console.log('➡️ 觸發導引進入下一步（步驟 14）');
+              goToNextStep(); // <-- 這行才是真正切換步驟的關鍵！
+            } else {
+              console.warn('⚠️ 找不到 goToNextStep() 方法，請確認導引系統是否暴露此函式');
+            }
+
+            // ✅ 自動滾到下一步的按鈕區域
+            if (typeof nextStep === 'object' && nextStep?.targetElement) {
+              const nextSelector = nextStep.targetElement.selector || nextStep.targetElement.fallbackSelector;
+
+              // 等待步驟 14 元素出現後再滾動
+              const waitForElement = (selector, maxAttempts = 10, interval = 300) => {
+                return new Promise(resolve => {
+                  let attempts = 0;
+                  const timer = setInterval(() => {
+                    const el = document.querySelector(selector);
+                    if (el) {
+                      clearInterval(timer);
+                      resolve(el);
+                    }
+                    attempts++;
+                    if (attempts >= maxAttempts) {
+                      clearInterval(timer);
+                      resolve(null);
+                    }
+                  }, interval);
+                });
+              };
+
+              (async () => {
+                const el = await waitForElement(nextSelector);
+                if (!el) {
+                  console.warn('⚠️ 找不到步驟 14 的目標元素');
+                  return;
+                }
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                console.log('🔽 自動滾動到步驟 14 的按鈕');
+              })();
+            }
+          }
+
           break;
+        }
+
         case 'editorOpen':
           // 檢查是否有圖片編輯器打開
           const editorElements = document.querySelectorAll('[class*="imageEditor"], [class*="editor"], [class*="modal"][class*="open"], [class*="editImage"], [class*="modalOverlay"], [class*="modalContainer"]');
@@ -1848,8 +2053,28 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
       return false;
     };
 
+    // const stopIfBackground = (e) => {
+    //   if (isAllowedTarget(e.target)) return;
+    //   e.preventDefault();
+    //   e.stopPropagation();
+    //   if (typeof e.stopImmediatePropagation === 'function') {
+    //     e.stopImmediatePropagation();
+    //   }
+    //   console.log('教學模式：已攔截背景互動事件', { type: e.type, target: e.target });
+    // };
     const stopIfBackground = (e) => {
-      if (isAllowedTarget(e.target)) return;
+      const target = e.target;
+
+      // ✅ 放行「教學目標」與「檔案上傳 input」
+      if (
+        isAllowedTarget(target) ||
+        target.closest('.tutorial-target') ||
+        (target.tagName === 'INPUT' && target.type === 'file')
+      ) {
+        return;
+      }
+
+      // ❌ 其他全部攔截
       e.preventDefault();
       e.stopPropagation();
       if (typeof e.stopImmediatePropagation === 'function') {
@@ -1857,6 +2082,7 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
       }
       console.log('教學模式：已攔截背景互動事件', { type: e.type, target: e.target });
     };
+
 
     const events = ['pointerdown', 'pointerup', 'click', 'mousedown', 'mouseup', 'touchstart', 'touchend', 'contextmenu', 'keydown', 'keyup'];
     events.forEach(evt => document.addEventListener(evt, stopIfBackground, true));

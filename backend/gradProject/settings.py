@@ -259,6 +259,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'gradProject.wsgi.application'
+ASGI_APPLICATION = 'gradProject.asgi.application'
 
 
 # Database
@@ -416,6 +417,10 @@ OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY', '')
 # Create a workflow at https://platform.openai.com
 # ChatKit uses workflows instead of assistants
 OPENAI_WORKFLOW_ID = os.environ.get('OPENAI_WORKFLOW_ID', '')
+
+# MCP Server Configuration
+# The MCP server runs on port 5000 by default (see backend/mcp_server/start.py)
+MCP_SERVER_URL = os.environ.get('MCP_SERVER_URL', 'https://peter.geniusbee.net/mcp')
 
 # Optional: ChatKit API base URL (defaults to https://api.openai.com)
 CHATKIT_API_BASE = os.environ.get('CHATKIT_API_BASE', 'https://api.openai.com')
