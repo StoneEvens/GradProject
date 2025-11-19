@@ -228,6 +228,69 @@ def get_operation_list() -> Dict:
                 "missing_images": "發布貼文需要至少一張相片喔！請先點擊聊天框左下角的相片按鈕選擇圖片，然後再告訴我發布貼文。",
                 "ask_guidance": "重要：以口語化方式詢問以下資訊：\n1）貼文內容（必需，用「貼文要寫什麼內容」而非「content」）\n2）地點（可選，用「要標註地點嗎」而非「location」）\n3）標籤（可選，用「要加上標籤嗎」或「hashtags」都可以）\n4）提醒選擇圖片（必需）\n\n絕對不要：\n- 提及 user_id、post_id 等技術術語\n- 詢問 media_urls（這不存在，只需提醒用戶選擇圖片）\n- 詢問可見範圍、隱私設定、留言權限、寵物標註（系統不支援）\n- 使用原始變數名稱與用戶對話"
             }
+        },
+        "add_feed": {
+            "description": "新增飼料資料（包含完整資訊和營養成分）。圖片由前端另外上傳。此操作應在用戶確認所有資訊後才執行。系統具備智能匹配功能，會自動檢查資料庫中是否已存在相同營養成分的飼料。",
+            "required_params": ["user_id", "pet_type", "has_images"],
+            "optional_params": [
+                "name", "brand", "price",
+                "protein", "fat", "carbohydrate",
+                "calcium", "phosphorus", "magnesium", "sodium"
+            ],
+            "param_details": {
+                "user_id": "用戶ID (整數)",
+                "pet_type": "適用寵物類型 (字串: 'dog' 或 'cat')",
+                "has_images": "用戶是否已選擇圖片 (布林值，從上下文判斷。必須是 2 張圖片：包裝照片和營養標示照片)",
+                "name": "飼料名稱 (字串)",
+                "brand": "品牌 (字串)",
+                "price": "價格 (浮點數)",
+                "protein": "蛋白質 (浮點數，%)",
+                "fat": "脂肪 (浮點數，%)",
+                "carbohydrate": "碳水化合物/纖維 (浮點數，%)",
+                "calcium": "鈣 (浮點數，%)",
+                "phosphorus": "磷 (浮點數，%)",
+                "magnesium": "鎂 (浮點數，%)",
+                "sodium": "鈉 (浮點數，%)"
+            },
+            "FORBIDDEN_params": {
+                "visibility": "此參數不存在",
+                "privacy": "此參數不存在",
+                "is_public": "此參數不存在",
+                "is_private": "此參數不存在"
+            },
+            "notes": [
+                "此操作建立完整的飼料記錄（包含營養成分）",
+                "圖片需透過前端另外上傳",
+                "必須在用戶確認所有資訊後才呼叫此操作",
+                "營養成分來自 OCR 辨識",
+                "【智能匹配】系統會根據所有營養成分（protein, fat, carbohydrate, calcium, phosphorus, magnesium, sodium）檢查是否已存在相同的飼料",
+                "如果匹配到已存在的飼料，會回傳 is_existing=true，此時不需要上傳圖片，直接結束流程"
+            ],
+            "response_handling": {
+                "on_success_new": "Tool returns {success: true, feed_id: X, is_existing: false, message: '飼料建立成功！'}",
+                "on_success_matched": "Tool returns {success: true, feed_id: X, is_existing: true, matched_feed: {...}, navigation: {path: '/feeds/{id}', destination: '飼料詳情頁面'}, message: '資料庫中已有符合的飼料：品牌 - 名稱'}",
+                "tell_user_new": "飼料資料建立成功！正在上傳圖片...",
+                "tell_user_matched": "已找到資料庫中符合的飼料：[品牌] - [名稱]。您可以點擊下方按鈕前往查看飼料詳情。",
+                "operations_array_new": "MUST add operation: {operation_name: 'feed_created', operation_data: json.dumps({feed_id: X, is_existing: false, status: 'pending_images'})}",
+                "operations_array_matched": "MUST add TWO operations: 1) {operation_name: 'feed_created', operation_data: json.dumps({feed_id: X, is_existing: true, status: 'matched'})} AND 2) {operation_name: 'navigate', operation_data: json.dumps({path: '/feeds/{id}', destination: '飼料詳情頁面'})}",
+                "important": "Do NOT mention feed_id in reply field. Only in operations array. When is_existing=true, add BOTH feed_created AND navigate operations so user can navigate to the matched feed."
+            },
+            "user_responses": {
+                "missing_images": "新增飼料需要上傳 2 張圖片。請先點擊聊天框左下角的相片按鈕選擇：\n1. 飼料包裝正面照片\n2. 營養標示照片（成分表）",
+                "ask_pet_type": "請問這是狗的飼料還是貓的飼料？",
+                "ask_name_brand": "請告訴我飼料的品牌和名稱（如果您知道的話）",
+                "created_new": "飼料資料建立成功！正在上傳圖片...",
+                "matched_existing": "已找到資料庫中符合的飼料：[品牌] - [名稱]。您可以直接使用這筆資料，無需重複建立。"
+            },
+            "workflow": [
+                "1. 用戶選擇圖片 → has_images = true（必須是 2 張圖片）",
+                "2. 呼叫 prepare_feed_ocr() 讓前端執行 OCR",
+                "3. 前端回傳 OCR 結果（ocrData）",
+                "4. Agent 確認資訊並收集其他欄位（pet_type, name, brand）",
+                "5. 用戶確認後才呼叫 add_feed（包含完整資訊）",
+                "6a. 如果 is_existing=false：前端收到 feed_created operation 後上傳圖片",
+                "6b. 如果 is_existing=true：前端清除圖片快取，告知使用者已匹配到現有飼料，結束流程"
+            ]
         }
     }
     return {
@@ -264,6 +327,10 @@ def perform_operation(operation: str, data: Dict) -> Dict:
         elif operation == "create_social_post":
             result = _create_social_post(data)
             logger.info(f"[perform_operation] create_social_post result: success={result.get('success')}")
+            return result
+        elif operation == "add_feed":
+            result = _add_feed(data)
+            logger.info(f"[perform_operation] add_feed result: success={result.get('success')}")
             return result
         else:
             error_msg = f"Operation '{operation}' is not implemented"
@@ -1271,4 +1338,150 @@ def _create_social_post(data: Dict) -> Dict:
                 "username": user.username
             }
         }
+    }
+
+
+# ==================== Feed Operations ====================
+
+@transaction.atomic
+def _add_feed(data: Dict) -> Dict:
+    """
+    建立飼料記錄（包含完整資訊和營養成分）
+
+    此函數應在用戶確認所有資訊（包含 OCR 結果）後才被呼叫
+
+    Args:
+        data: 包含飼料資訊的字典
+
+    Returns:
+        Dict: 操作結果
+    """
+    logger.info(f"[_add_feed] Creating feed with complete data: user_id={data.get('user_id')}, pet_type={data.get('pet_type')}")
+
+    # 1. 驗證必要欄位
+    required_fields = ["user_id", "pet_type", "has_images"]
+    missing_fields = [f for f in required_fields if f not in data]
+    if missing_fields:
+        logger.warning(f"[_add_feed] Missing fields: {missing_fields}")
+        return {
+            "error": "Missing required fields",
+            "missing_fields": missing_fields,
+            "help": "user_id, pet_type, and has_images are required"
+        }
+
+    # 2. 檢查是否有圖片
+    has_images = data.get("has_images")
+    if not has_images:
+        logger.warning(f"[_add_feed] User has not selected images")
+        return {
+            "error": "飼料必須包含圖片",
+            "user_message": "新增飼料需要上傳圖片。請先點擊聊天框左下角的相片按鈕選擇：\n1. 飼料包裝正面照片\n2. 營養標示照片（成分表）",
+            "should_ask_user": True
+        }
+
+    # 3. 驗證 pet_type
+    pet_type = data.get("pet_type", "").lower()
+    if pet_type not in ['dog', 'cat']:
+        logger.warning(f"[_add_feed] Invalid pet_type: {pet_type}")
+        return {
+            "error": "Invalid pet_type",
+            "user_message": "請指定寵物類型為「狗」或「貓」。"
+        }
+
+    # 4. 獲取用戶
+    try:
+        user = CustomUser.objects.get(id=data["user_id"])
+        logger.debug(f"[_add_feed] Found user: {user.username}")
+    except CustomUser.DoesNotExist:
+        logger.error(f"[_add_feed] User {data['user_id']} not found")
+        return {"error": f"User with id {data['user_id']} not found"}
+
+    # 5. 解析營養成分（OCR 提供）
+    def parse_float(value):
+        try:
+            return float(value) if value is not None else 0.0
+        except (TypeError, ValueError):
+            return 0.0
+
+    protein = parse_float(data.get("protein"))
+    fat = parse_float(data.get("fat"))
+    carbohydrate = parse_float(data.get("carbohydrate"))
+    calcium = parse_float(data.get("calcium"))
+    phosphorus = parse_float(data.get("phosphorus"))
+    magnesium = parse_float(data.get("magnesium"))
+    sodium = parse_float(data.get("sodium"))
+
+    # 6. 獲取其他資訊
+    name = data.get("name", "未命名").strip() or "未命名"
+    brand = data.get("brand", "未知品牌").strip() or "未知品牌"
+    price = parse_float(data.get("price"))
+
+    # 7. 智能匹配：檢查是否已存在相同營養成分的飼料
+    from feeds.models import Feed
+
+    existing_feed = Feed.objects.filter(
+        pet_type=pet_type,
+        protein=protein,
+        fat=fat,
+        carbohydrate=carbohydrate,
+        calcium=calcium,
+        phosphorus=phosphorus,
+        magnesium=magnesium,
+        sodium=sodium
+    ).first()
+
+    if existing_feed:
+        logger.info(f"[_add_feed] Matched existing feed {existing_feed.id}: {existing_feed.brand} - {existing_feed.name}")
+        return {
+            "success": True,
+            "message": f"資料庫中已有符合的飼料：{existing_feed.brand} - {existing_feed.name}",
+            "feed_id": existing_feed.id,
+            "is_existing": True,
+            "matched_feed": {
+                "id": existing_feed.id,
+                "name": existing_feed.name,
+                "brand": existing_feed.brand,
+                "pet_type": existing_feed.pet_type,
+                "protein": existing_feed.protein,
+                "fat": existing_feed.fat,
+                "carbohydrate": existing_feed.carbohydrate,
+                "calcium": existing_feed.calcium,
+                "phosphorus": existing_feed.phosphorus,
+                "magnesium": existing_feed.magnesium,
+                "sodium": existing_feed.sodium,
+                "price": existing_feed.price
+            },
+            "navigation": {
+                "path": f"/feeds/{existing_feed.id}",
+                "destination": "飼料詳情頁面"
+            },
+            "note": "已智能匹配到現有飼料，無需重複建立。"
+        }
+
+    # 8. 建立新的 Feed 記錄（如果沒有匹配到）
+    feed = Feed.objects.create(
+        pet_type=pet_type,
+        name=name,
+        brand=brand,
+        price=price,
+        created_by=user,
+        # 營養成分（來自 OCR）
+        protein=protein,
+        fat=fat,
+        carbohydrate=carbohydrate,
+        calcium=calcium,
+        phosphorus=phosphorus,
+        magnesium=magnesium,
+        sodium=sodium
+    )
+
+    logger.info(f"User {user.id} created feed {feed.id}: {feed.brand} - {feed.name}")
+
+    return {
+        "success": True,
+        "message": f"飼料「{feed.brand} - {feed.name}」建立成功！",
+        "feed_id": feed.id,
+        "is_existing": False,
+        "status": "pending_images",
+        "note": "圖片正在上傳中..."
     }

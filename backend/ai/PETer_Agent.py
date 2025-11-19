@@ -136,7 +136,12 @@ workflow_organizer = Agent(
     "Look through previous messages to collect any parameters the user has already provided.\n"
     "If REQUIRED information is missing from the conversation history, indicate in the Instruction that the next agent should ask the user BEFORE calling the tool.\n"
     "The tool descriptions also provide suggested wording for asking users - use those suggestions when available.\n"
-    "When the user modifies one parameter, remember to retain all other parameters they've already provided in earlier messages."
+    "When the user modifies one parameter, remember to retain all other parameters they've already provided in earlier messages.\n\n"
+
+    "IMPORTANT - Feed Creation:\n"
+    "When user wants to add feed: images → OCR → confirm → add_feed.\n"
+    "Check prepare_feed_ocr and add_feed tool descriptions for detailed workflow.\n"
+    "DO NOT call add_feed before OCR completes and user confirms."
   ),
   model="gpt-5.1",
   tools=[
@@ -182,7 +187,14 @@ summary_agent = Agent(
     "Static paths: get_navigation_paths, match intent, add to operations.\n"
     "Dynamic paths: resolve_entity_context(entity_type, user_id, conditions), use resolved_path.\n"
     "Not found: inform user, suggest alternatives.\n"
-    "Entities: social_post, feed, pet, user, health_report, disease_archive, abnormal_post, plan"
+    "Entities: social_post, feed, pet, user, health_report, disease_archive, abnormal_post, plan\n\n"
+
+    "Feed Creation:\n"
+    "Check prepare_feed_ocr and add_feed tool descriptions for complete workflow.\n"
+    "Key reminders:\n"
+    "- Keep hasImages and ocrData in context throughout conversation\n"
+    "- When is_existing=true: add both feed_created AND navigate operations\n"
+    "- When is_existing=false: add feed_created operation only (frontend handles image upload)"
   ),
   model="gpt-5.1",
   tools=[

@@ -486,12 +486,56 @@ def create_mcp_server() -> FastMCP:
         return json.dumps(result_dict, ensure_ascii=False, indent=2)
 
     @mcp.tool(
+        name="prepare_feed_ocr",
+        description=(
+            "Trigger OCR analysis for feed nutrition label images.\n\n"
+            "【Complete Workflow】:\n"
+            "1. Check Context: User must have hasImages=true and imageCount=2 (package + nutrition label)\n"
+            "2. Call this tool: Frontend will automatically analyze nutrition label (2nd image)\n"
+            "3. Wait for Results: Frontend sends back ocrCompleted=true with ocrData containing: protein, fat, carbohydrate, calcium, phosphorus, magnesium, sodium\n"
+            "4. Display to User: Show formatted OCR results with template:\n"
+            "   ✅ **營養成分辨識完成！**\n"
+            "   **辨識結果**：\n"
+            "   • 蛋白質：{protein}%\n"
+            "   • 脂肪：{fat}%\n"
+            "   • 碳水化合物/纖維：{carbohydrate}%\n"
+            "   • 鈣：{calcium}%、磷：{phosphorus}%、鎂：{magnesium}%、鈉：{sodium}%\n"
+            "   Then ask: 請問這是狗的飼料還是貓的飼料？另外請告訴我品牌和名稱（如果您知道的話）。\n"
+            "5. Collect Confirmation: After user provides pet_type, name, brand, call perform_database_operation('add_feed', {...})\n"
+            "6. Handle Result: Check is_existing flag from add_feed response (see add_feed operation for details)\n\n"
+            "IMPORTANT: Do NOT call this tool if imageCount ≠ 2. Frontend will validate this."
+        )
+    )
+    async def prepare_feed_ocr(
+        reason: str = "辨識飼料營養成分"
+    ) -> str:
+        """
+        Returns an operation instruction for frontend to execute feed OCR analysis.
+
+        Args:
+            reason: Analysis reason (displayed to user)
+
+        Returns:
+            JSON string with operation details
+        """
+        from datetime import datetime
+
+        result = {
+            "operation_id": f"ocr_{int(datetime.now().timestamp())}",
+            "type": "ocr_feed_analysis",
+            "purpose": "feed_nutrition",
+            "requires_user_action": False,
+            "next_step": "前端將自動辨識並回傳結果"
+        }
+        return json.dumps(result, ensure_ascii=False, indent=2)
+
+    @mcp.tool(
         name="perform_database_operation",
-        description="Perform a database operation such as: add_pet, update_pet (modify pet info), add_abnormal_post (health records), update_abnormal_post, delete_abnormal_post, create_disease_archive, add_plan (create schedule/calendar event), update_plan (modify schedule), delete_plan (remove schedule), list_plans (view all schedules), create_social_post. IMPORTANT: Use 'add_plan' for creating schedules/calendar events, NOT 'create_schedule'. Always call database_operation_list first to see exact parameter requirements."
+        description="Perform a database operation such as: add_pet, update_pet (modify pet info), add_abnormal_post (health records), update_abnormal_post, delete_abnormal_post, create_disease_archive, add_plan (create schedule/calendar event), update_plan (modify schedule), delete_plan (remove schedule), list_plans (view all schedules), create_social_post, add_feed (add feed after OCR confirmation). IMPORTANT: Use 'add_plan' for creating schedules/calendar events, NOT 'create_schedule'. Always call database_operation_list first to see exact parameter requirements."
         "Note that database operations affects personal data; please verify that the user is doing the operation for themself. The easiest way to ensure this is to check the target of the prompt matches the user ID of the requester. The user id was added to the prompt automatically by the backend."
     )
     async def perform_database_operation(
-        operation: Literal["add_pet", "update_pet", "add_abnormal_post", "update_abnormal_post", "delete_abnormal_post", "create_disease_archive", "add_plan", "update_plan", "delete_plan", "list_plans", "create_social_post"],
+        operation: Literal["add_pet", "update_pet", "add_abnormal_post", "update_abnormal_post", "delete_abnormal_post", "create_disease_archive", "add_plan", "update_plan", "delete_plan", "list_plans", "create_social_post", "add_feed"],
         data: Dict
     ) -> str:
         @sync_to_async

@@ -531,6 +531,95 @@ class AIChatService {
       throw error;
     }
   }
+
+  /**
+   * 為飼料上傳圖片（AI Agent 建立飼料後使用）
+   * @param {number} feedId - 飼料 ID
+   * @param {Array<Object>} images - 圖片陣列 [{file, preview, id}]
+   * @returns {Promise<Object>} 上傳結果
+   */
+  async uploadFeedImages(feedId, images) {
+    try {
+      if (!feedId) {
+        throw new Error('Feed ID is required');
+      }
+
+      if (!images || images.length === 0) {
+        throw new Error('At least one image is required');
+      }
+
+      // 建立 FormData
+      const formData = new FormData();
+
+      // 添加圖片檔案
+      images.forEach((image) => {
+        if (image.file) {
+          formData.append('images', image.file);
+        }
+      });
+
+      console.log(`[AIChatService] Uploading ${images.length} images to feed ${feedId}`);
+
+      // 調用上傳 API
+      const response = await this.apiClient.post(
+        `/feeds/${feedId}/upload-images/`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+
+      console.log('[AIChatService] Feed image upload successful:', response.data);
+      return response.data;
+
+    } catch (error) {
+      console.error('Upload Feed Images Error:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * 辨識飼料營養標示（使用現有的 OCR API）
+   * @param {Object} nutritionImage - 營養標示圖片 {file, preview, id}
+   * @returns {Promise<Object>} OCR 辨識結果
+   */
+  async analyzeFeedNutrition(nutritionImage) {
+    try {
+      if (!nutritionImage || !nutritionImage.file) {
+        throw new Error('Nutrition image is required');
+      }
+
+      const formData = new FormData();
+      formData.append('image', nutritionImage.file);
+
+      console.log(`[AIChatService] Analyzing nutrition label with OCR`);
+
+      const response = await this.apiClient.post(
+        `/feeds/ocr/`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+
+      console.log('[AIChatService] OCR analysis successful:', response.data);
+      return {
+        success: true,
+        data: response.data
+      };
+
+    } catch (error) {
+      console.error('Analyze Feed Nutrition Error:', error);
+      return {
+        success: false,
+        error: error.message
+      };
+    }
+  }
 }
 
 // 導出單例
