@@ -489,11 +489,18 @@ def create_mcp_server() -> FastMCP:
         name="prepare_feed_ocr",
         description=(
             "Trigger OCR analysis for feed nutrition label images.\n\n"
+            "CRITICAL - After calling this tool, you MUST add an operation to the operations array:\n"
+            "{\n"
+            "  operation_name: 'ocr_feed_analysis',\n"
+            "  operation_data: json.dumps({purpose: 'feed_nutrition'})\n"
+            "}\n"
+            "Without this operation, frontend will NOT execute OCR!\n\n"
             "【Complete Workflow】:\n"
             "1. Check Context: User must have hasImages=true and imageCount=2 (package + nutrition label)\n"
-            "2. Call this tool: Frontend will automatically analyze nutrition label (2nd image)\n"
-            "3. Wait for Results: Frontend sends back ocrCompleted=true with ocrData containing: protein, fat, carbohydrate, calcium, phosphorus, magnesium, sodium\n"
-            "4. Display to User: Show formatted OCR results with template:\n"
+            "2. Call this tool + ADD operation to operations array (see above)\n"
+            "3. Tell user: '收到圖片！正在辨識飼料資訊，請稍候...'\n"
+            "4. Wait for Results: Frontend sends back ocrCompleted=true with ocrData containing: protein, fat, carbohydrate, calcium, phosphorus, magnesium, sodium\n"
+            "5. Display to User: Show formatted OCR results with template:\n"
             "   ✅ **營養成分辨識完成！**\n"
             "   **辨識結果**：\n"
             "   • 蛋白質：{protein}%\n"
@@ -501,8 +508,8 @@ def create_mcp_server() -> FastMCP:
             "   • 碳水化合物/纖維：{carbohydrate}%\n"
             "   • 鈣：{calcium}%、磷：{phosphorus}%、鎂：{magnesium}%、鈉：{sodium}%\n"
             "   Then ask: 請問這是狗的飼料還是貓的飼料？另外請告訴我品牌和名稱（如果您知道的話）。\n"
-            "5. Collect Confirmation: After user provides pet_type, name, brand, call perform_database_operation('add_feed', {...})\n"
-            "6. Handle Result: Check is_existing flag from add_feed response (see add_feed operation for details)\n\n"
+            "6. Collect Confirmation: After user provides pet_type, name, brand, call perform_database_operation('add_feed', {...})\n"
+            "7. Handle Result: Check is_existing flag from add_feed response (see add_feed operation for details)\n\n"
             "IMPORTANT: Do NOT call this tool if imageCount ≠ 2. Frontend will validate this."
         )
     )

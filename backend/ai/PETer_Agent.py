@@ -192,6 +192,7 @@ summary_agent = Agent(
     "Feed Creation:\n"
     "Check prepare_feed_ocr and add_feed tool descriptions for complete workflow.\n"
     "Key reminders:\n"
+    "- After calling prepare_feed_ocr: MUST add {operation_name: 'ocr_feed_analysis', operation_data: {...}} to operations array\n"
     "- Keep hasImages and ocrData in context throughout conversation\n"
     "- When is_existing=true: add both feed_created AND navigate operations\n"
     "- When is_existing=false: add feed_created operation only (frontend handles image upload)"
