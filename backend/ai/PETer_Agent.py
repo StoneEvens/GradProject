@@ -19,7 +19,8 @@ mcp = HostedMCPTool(tool_config={
     "get_navigation_paths",
     "resolve_entity_context",
     "database_operation_list",
-    "perform_database_operation"
+    "perform_database_operation",
+    "prepare_feed_ocr"
   ],
   "require_approval": "never",
   "server_description": "MCP",
