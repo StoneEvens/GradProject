@@ -1669,18 +1669,24 @@ class FeedImageUploadAPIView(APIView):
 
                 try:
                     # 上傳到 Firebase
-                    image_url = firebase_service.upload_feed_image(
-                        image_file,
-                        feed.id,
-                        image_type
+                    success, message, firebase_url, firebase_path = firebase_service.upload_feed_photo(
+                        feed_id=feed.id,
+                        photo_file=image_file,
+                        photo_type=image_type,
+                        pet_type=feed.pet_type
                     )
+
+                    if not success:
+                        print(f"[FeedImageUpload] Failed to upload {image_type} image: {message}")
+                        continue
 
                     # 建立 FeedImage 記錄
                     from media.models import FeedImage
                     feed_image = FeedImage.objects.create(
                         feed=feed,
                         image_type=image_type,
-                        firebase_url=image_url,
+                        firebase_url=firebase_url,
+                        firebase_path=firebase_path,
                         original_filename=image_file.name,
                         file_size=image_file.size,
                         content_type_mime=image_file.content_type
@@ -1688,7 +1694,7 @@ class FeedImageUploadAPIView(APIView):
 
                     uploaded_images.append({
                         'id': feed_image.id,
-                        'firebase_url': image_url,
+                        'firebase_url': firebase_url,
                         'image_type': image_type
                     })
 

@@ -489,11 +489,13 @@ def create_mcp_server() -> FastMCP:
         name="prepare_feed_ocr",
         description=(
             "Trigger OCR analysis for feed nutrition label images.\n\n"
-            "CRITICAL - After calling this tool, you MUST add an operation to the operations array:\n"
+            "CRITICAL - After calling this tool, you MUST add an operation to the operations array with EXACT format:\n"
             "{\n"
-            "  operation_name: 'ocr_feed_analysis',\n"
-            "  operation_data: json.dumps({purpose: 'feed_nutrition'})\n"
+            "  'operation_name': 'ocr_feed_analysis',\n"
+            "  'operation_data': json.dumps({'purpose': 'feed_nutrition'})\n"
             "}\n"
+            "Note: operation_data MUST be a JSON string created with json.dumps().\n"
+            "Do NOT use {operation_id, type, params} format - frontend will convert automatically.\n"
             "Without this operation, frontend will NOT execute OCR!\n\n"
             "【Complete Workflow】:\n"
             "1. Check Context: User must have hasImages=true and imageCount=2 (package + nutrition label)\n"
