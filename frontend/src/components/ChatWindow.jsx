@@ -409,7 +409,8 @@ const ChatWindow = ({
     // 使用自訂訊息或 inputText
     const messageText = customMessage || inputText;
 
-    if (!messageText.trim()) return;
+    // 確保 messageText 是字串並且不為空
+    if (typeof messageText !== 'string' || !messageText.trim()) return;
 
     // 如果正在錄音，先停止錄音
     stopVoiceRecording();
