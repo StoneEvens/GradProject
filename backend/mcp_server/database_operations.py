@@ -181,12 +181,13 @@ def get_operation_list() -> Dict:
             }
         },
         "create_social_post": {
-            "description": "建立社群貼文（不含圖片）。所有貼文自動設定為公開，無需詢問或設定可見範圍。相片由前端上傳，只支援相片。",
-            "required_params": ["user_id", "content"],
+            "description": "建立社群貼文（不含圖片）。所有貼文自動設定為公開，無需詢問或設定可見範圍。相片由前端上傳，只支援相片。重要：社群貼文必須包含至少一張圖片，如果用戶尚未選擇圖片（has_images=false），必須先提示用戶選擇圖片。",
+            "required_params": ["user_id", "content", "has_images"],
             "optional_params": ["location", "hashtags"],
             "param_details": {
                 "user_id": "用戶ID (整數)",
                 "content": "貼文內容 (字串，必填)",
+                "has_images": "用戶是否已選擇圖片 (布林值，必填。從訊息上下文中的「用戶已準備 N 張相片待上傳」判斷，如果有此訊息則為 true，否則為 false)",
                 "location": "地點 (字串，例如: '台北大安森林公園')",
                 "hashtags": "標籤 (字串，逗號分隔，例如: '寵物,日常,可愛' 或 '#寵物,#日常')"
             },
@@ -205,22 +206,26 @@ def get_operation_list() -> Dict:
                 "此操作只建立貼文結構，不包含圖片",
                 "相片上傳由前端處理，只支援相片不支援影片",
                 "hashtags 可從參數提供或從 content 中的 #標籤 自動解析",
-                "所有貼文都是公開的，沒有可見範圍設定功能"
+                "所有貼文都是公開的，沒有可見範圍設定功能",
+                "【重要】社群貼文必須包含至少一張圖片。如果 has_images=false，工具會返回錯誤並要求用戶先選擇圖片"
             ],
             "limitations": [
                 "絕對不要詢問可見範圍（如「公開」、「好友」或「私密」）- 系統不支援此功能，所有貼文都是公開的",
                 "不支援標註寵物功能",
                 "不支援設定留言權限或互動設定",
-                "不支援影片上傳，只支援相片"
+                "不支援影片上傳，只支援相片",
+                "【必要限制】所有社群貼文都必須包含至少一張圖片，沒有圖片無法發布貼文"
             ],
             "response_handling": {
                 "on_success": "Tool returns {success: true, post_id: X, message: '貼文建立成功！', note: '...'}",
+                "on_missing_images": "Tool returns {error: '...', user_message: '發布社群貼文需要至少一張圖片。請先點擊聊天框左下角的相片按鈕選擇圖片，然後再告訴我發布貼文。', should_ask_user: true}. You MUST use the user_message in your reply to guide the user.",
                 "tell_user": "回覆格式：「貼文建立成功！\n\n內容：[content]\n地點：[location]\n標籤：[hashtags]\n\n您可以點擊下方按鈕前往貼文頁面，並標註寵物。」圖片已由前端自動上傳，不要提及圖片上傳。",
                 "operations_array": "MUST add operation: {operation_name: 'post_created', operation_data: json.dumps({post_id: X, status: 'pending_images'})}",
                 "important": "Do NOT mention post_id or technical details in the reply field. The post_id should ONLY be in operations array for frontend to use. Do NOT mention uploading photos - photos are handled by frontend automatically."
             },
             "user_responses": {
                 "missing_content": "好的！請告訴我貼文的內容是什麼呢？您也可以選擇性地提供地點或標籤（hashtags）。",
+                "missing_images": "我注意到您想發布帶圖片的貼文，但目前還沒有選擇圖片。請先點擊聊天框左下角的相片按鈕選擇圖片，然後再告訴我發布貼文。",
                 "ask_guidance": "重要：只詢問以下資訊：\n1）貼文內容（必需）\n2）地點（可選）\n3）標籤/hashtags（可選）\n\n絕對不要詢問：可見範圍、隱私設定、留言權限、寵物標註等。系統不支援這些功能。"
             }
         }
@@ -1156,17 +1161,17 @@ def _create_social_post(data: Dict) -> Dict:
     Returns:
         Dict: 操作結果
     """
-    logger.info(f"[_create_social_post] Starting with data: user_id={data.get('user_id')}, content_length={len(data.get('content', ''))}")
+    logger.info(f"[_create_social_post] Starting with data: user_id={data.get('user_id')}, content_length={len(data.get('content', ''))}, has_images={data.get('has_images')}")
 
     # 驗證必要欄位
-    required_fields = ["user_id", "content"]
+    required_fields = ["user_id", "content", "has_images"]
     missing_fields = [f for f in required_fields if f not in data]
     if missing_fields:
         logger.warning(f"[_create_social_post] Missing fields: {missing_fields}")
         return {
             "error": "Missing required fields",
             "missing_fields": missing_fields,
-            "help": "content (貼文內容) is required"
+            "help": "user_id, content, and has_images are required"
         }
 
     # 驗證內容不為空
@@ -1176,6 +1181,16 @@ def _create_social_post(data: Dict) -> Dict:
         return {
             "error": "Content is required and cannot be empty",
             "missing_fields": ["content"]
+        }
+
+    # 檢查用戶是否已選擇圖片（社群貼文必須帶圖片）
+    has_images = data.get("has_images")
+    if not has_images:
+        logger.warning(f"[_create_social_post] User has not selected images")
+        return {
+            "error": "社群貼文必須包含圖片",
+            "user_message": "發布社群貼文需要至少一張圖片。請先點擊聊天框左下角的相片按鈕選擇圖片，然後再告訴我發布貼文。",
+            "should_ask_user": True
         }
 
     # 獲取用戶
