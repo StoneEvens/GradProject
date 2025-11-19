@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import axios from 'axios';
+import axios from '../utils/axios';
 import styles from '../styles/CreateFeedModal.module.css';
 import NotificationComponent from './Notification';
 
