@@ -15,7 +15,12 @@ class OperationClient {
     this.autoExecute = false; // Whether to auto-execute without user trigger
     this.confirmationCallbacks = {}; // Callbacks for confirmation dialogs
     this.eventListeners = {}; // Custom event listeners
-    
+
+    // 自動執行白名單：這些操作類型無論 autoExecute 設定如何都會自動執行
+    this.autoExecuteWhitelist = [
+      'ocr_feed_analysis'  // OCR 辨識需要立即執行
+    ];
+
     // Bind methods
     this.handleQueueChange = this.handleQueueChange.bind(this);
   }
@@ -97,8 +102,13 @@ class OperationClient {
     if (success) {
       this.emit('operationAdded', normalizedOperation);
 
-      // Auto-execute if enabled and not currently processing
-      if (this.autoExecute && !this.isProcessing) {
+      // 檢查是否需要自動執行
+      const shouldAutoExecute =
+        this.autoExecute || // 全域設定啟用
+        this.autoExecuteWhitelist.includes(normalizedOperation.type); // 或在白名單中
+
+      if (shouldAutoExecute && !this.isProcessing) {
+        console.log(`[OperationClient] Auto-executing operation: ${normalizedOperation.type}`);
         this.executeNext();
       }
     }

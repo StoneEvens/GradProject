@@ -65,7 +65,7 @@ const OperationInitializer = () => {
     // Initialize operation client with navigate function
     operationClient.initialize({
       navigate,
-      autoExecute: false // Manual execution for now
+      autoExecute: false // Navigate 等操作需要手動確認
     });
     
     console.log('[App] Operation client initialized');
