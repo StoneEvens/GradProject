@@ -81,11 +81,14 @@ def get_operation_list() -> Dict:
                 "on_success": "Tool returns {success: true, abnormal_post_id: X, message: '異常記錄建立成功！', note: '...'}",
                 "tell_user": "異常記錄建立成功！ + include the note field if present + mention symptoms_added if any",
                 "operations_array": "MUST add operation to operations array with EXACT format: {'operation_type': 'abnormal_post_created', 'operation_data': json.dumps({'abnormal_post_id': X, 'pet_id': Y, 'status': 'pending_images'})}. Note: operation_data MUST be a JSON string created with json.dumps().",
-                "important": "CRITICAL: Use {'operation_type': ..., 'operation_data': json.dumps({...})} format. Do NOT use {operation_id, type, params} format. Do NOT mention abnormal_post_id or technical details in the reply field. The abnormal_post_id should ONLY be in operations array for frontend to use."
+                "important": "CRITICAL: Use {'operation_type': ..., 'operation_data': json.dumps({...})} format. Do NOT use {operation_id, type, params} format. Do NOT mention abnormal_post_id or technical details in the reply field. The abnormal_post_id should ONLY be in operations array for frontend to use.",
+                "confirmation_marker": "CRITICAL: When displaying final_confirmation_with_images message to user, you MUST add special marker '[[NEEDS_CONFIRMATION_WITH_IMAGES]]' at the END of your reply text. This marker tells frontend to display cached images in AI message bubble. Example: 'Your confirmation message here\n\n[[NEEDS_CONFIRMATION_WITH_IMAGES]]'. This marker will be hidden from user but frontend will detect it."
             },
             "user_responses": {
                 "missing_symptoms": "好的！請告訴我寵物出現了哪些症狀呢？",
-                "want_upload_images": "異常記錄已建立，您也可以上傳圖片來記錄寵物的狀況喔！"
+                "want_upload_images": "異常記錄已建立，您也可以上傳圖片來記錄寵物的狀況喔！",
+                "final_confirmation_with_images": "請確認異常記錄資訊：\n\n- 寵物名稱：{pet_name}\n- 症狀：{symptoms}\n- 異常描述：{content}\n- 體重：{weight} 公斤\n- 體溫：{body_temperature} 度\n- 飲水量：{water_amount} 毫升\n- 是否就醫：{is_emergency}\n\n已選擇圖片：{imageCount} 張（請查看下方我展示的圖片）\n\n如果所有資訊和圖片都確認無誤，請回覆「確認」或「是」。",
+                "final_confirmation_without_images": "請確認異常記錄資訊：\n\n- 寵物名稱：{pet_name}\n- 症狀：{symptoms}\n- 異常描述：{content}\n- 體重：{weight} 公斤\n- 體溫：{body_temperature} 度\n- 飲水量：{water_amount} 毫升\n- 是否就醫：{is_emergency}\n\n如果資訊正確，請回覆「確認」或「是」。"
             }
         },
         "create_disease_archive": {
@@ -181,13 +184,13 @@ def get_operation_list() -> Dict:
             }
         },
         "create_social_post": {
-            "description": "建立社群貼文（不含圖片）。所有貼文自動設定為公開，無需詢問或設定可見範圍。相片由前端上傳，只支援相片。重要：社群貼文必須包含至少一張圖片，如果用戶尚未選擇圖片（has_images=false），必須先提示用戶選擇圖片。",
+            "description": "建立社群貼文（不含圖片）。【強制規則】1) 社群貼文必須包含至少一張圖片！檢查 context.hasImages 和 context.imageCount，如果為 false/0 則不呼叫此工具。2) 在呼叫此工具前，必須先向用戶顯示完整的貼文預覽（內容、地點、標籤、圖片數量）並明確詢問「確認發布嗎？」等待用戶明確回覆（如「確認」、「是」、「好」、「發布」）後才呼叫此工具。所有貼文自動設定為公開。",
             "required_params": ["user_id", "content", "has_images"],
             "optional_params": ["location", "hashtags"],
             "param_details": {
                 "user_id": "用戶ID (整數)",
                 "content": "貼文內容 (字串，必填)",
-                "has_images": "用戶是否已選擇圖片 (布林值，必填。從訊息上下文中的「用戶已準備 N 張相片待上傳」判斷，如果有此訊息則為 true，否則為 false)",
+                "has_images": "用戶是否已選擇圖片 (布林值，必填且必須為 true)。從 context.hasImages 或 context.imageCount 判斷。如果為 false 或 0，不要呼叫此工具，必須先提示用戶選擇圖片！",
                 "location": "地點 (字串，例如: '台北大安森林公園')",
                 "hashtags": "標籤 (字串，逗號分隔，例如: '寵物,日常,可愛' 或 '#寵物,#日常')"
             },
@@ -203,34 +206,42 @@ def get_operation_list() -> Dict:
                 "images": "此參數不存在！圖片由前端另外上傳，不要在此工具中處理"
             },
             "notes": [
+                "【最重要規則 1】呼叫此工具前必須先檢查 context.hasImages 和 context.imageCount！",
+                "【最重要規則 2】呼叫此工具前必須先向用戶顯示完整預覽並等待明確確認！",
+                "如果 hasImages=false 或 imageCount=0，絕對不要呼叫此工具！",
+                "必須先用 user_responses.missing_images 提示用戶選擇圖片！",
+                "收集完所有資訊後，使用 user_responses.final_confirmation 顯示預覽並詢問確認",
+                "等待用戶明確回覆「確認」、「是」、「好」、「發布」等確認詞彙",
+                "只有在用戶明確確認後才呼叫此工具",
                 "此操作只建立貼文結構，不包含圖片",
                 "相片上傳由前端處理，只支援相片不支援影片",
                 "hashtags 可從參數提供或從 content 中的 #標籤 自動解析",
-                "所有貼文都是公開的，沒有可見範圍設定功能",
-                "【重要】社群貼文必須包含至少一張圖片。如果 has_images=false，工具會返回錯誤並要求用戶先選擇圖片"
+                "所有貼文都是公開的，沒有可見範圍設定功能"
             ],
             "limitations": [
+                "【強制限制】所有社群貼文都必須包含至少一張圖片，沒有圖片絕對不能發布貼文",
                 "絕對不要詢問可見範圍（如「公開」、「好友」或「私密」）- 系統不支援此功能，所有貼文都是公開的",
                 "不支援標註寵物功能",
                 "不支援設定留言權限或互動設定",
-                "不支援影片上傳，只支援相片",
-                "【必要限制】所有社群貼文都必須包含至少一張圖片，沒有圖片無法發布貼文"
+                "不支援影片上傳，只支援相片"
             ],
             "response_handling": {
                 "on_success": "Tool returns {success: true, post_id: X, message: '貼文建立成功！', note: '...'}",
                 "on_missing_images": "Tool returns {error: '...', user_message: '發布社群貼文需要至少一張圖片。請先點擊聊天框左下角的相片按鈕選擇圖片，然後再告訴我發布貼文。', should_ask_user: true}. You MUST use the user_message in your reply to guide the user.",
                 "tell_user": "回覆格式：「貼文建立成功！\n\n內容：[content]\n地點：[location]\n標籤：[hashtags]\n\n您可以點擊下方按鈕前往貼文頁面，並標註寵物。」圖片已由前端自動上傳，不要提及圖片上傳。",
                 "operations_array": "MUST add operation to operations array with EXACT format: {'operation_type': 'post_created', 'operation_data': json.dumps({'post_id': X, 'status': 'pending_images'})}. Note: operation_data MUST be a JSON string created with json.dumps().",
-                "important": "CRITICAL: Use {'operation_type': ..., 'operation_data': json.dumps({...})} format. Do NOT use {operation_id, type, params} format. Do NOT mention post_id or technical details in the reply field. The post_id should ONLY be in operations array for frontend to use. Do NOT mention uploading photos - photos are handled by frontend automatically."
+                "important": "CRITICAL: Use {'operation_type': ..., 'operation_data': json.dumps({...})} format. Do NOT use {operation_id, type, params} format. Do NOT mention post_id or technical details in the reply field. The post_id should ONLY be in operations array for frontend to use. Do NOT mention uploading photos - photos are handled by frontend automatically.",
+                "confirmation_marker": "CRITICAL: When displaying final_confirmation message to user (using final_confirmation template), you MUST add special marker '[[NEEDS_CONFIRMATION_WITH_IMAGES]]' at the END of your reply text. This marker tells frontend to display cached images in AI message bubble. Example: 'Your confirmation message here\n\n[[NEEDS_CONFIRMATION_WITH_IMAGES]]'. This marker will be hidden from user but frontend will detect it."
             },
             "user_responses": {
-                "missing_content": "好的！請告訴我：\n\n1. 貼文要寫什麼內容呢？\n2. 要標註地點嗎？（例如：台北大安森林公園）\n3. 要加上標籤嗎？（例如：#寵物日常 #可愛）\n\n另外，別忘了先點擊聊天框左下角的相片按鈕選擇要上傳的圖片喔！",
-                "missing_images": "發布貼文需要至少一張相片喔！請先點擊聊天框左下角的相片按鈕選擇圖片，然後再告訴我發布貼文。",
-                "ask_guidance": "重要：以口語化方式詢問以下資訊：\n1）貼文內容（必需，用「貼文要寫什麼內容」而非「content」）\n2）地點（可選，用「要標註地點嗎」而非「location」）\n3）標籤（可選，用「要加上標籤嗎」或「hashtags」都可以）\n4）提醒選擇圖片（必需）\n\n絕對不要：\n- 提及 user_id、post_id 等技術術語\n- 詢問 media_urls（這不存在，只需提醒用戶選擇圖片）\n- 詢問可見範圍、隱私設定、留言權限、寵物標註（系統不支援）\n- 使用原始變數名稱與用戶對話"
+                "missing_content": "好的！請告訴我：\n\n1. 貼文要寫什麼內容呢？\n2. 要標註地點嗎？（例如：台北大安森林公園）\n3. 要加上標籤嗎？（例如：#寵物日常 #可愛）\n\n另外，社群貼文一定要有圖片喔！請先點擊聊天框左下角的相片按鈕選擇要上傳的圖片。",
+                "missing_images": "社群貼文一定要包含圖片才能發布！\n\n請先點擊聊天框左下角的相片按鈕選擇圖片，然後再告訴我發布貼文。",
+                "final_confirmation": "請確認您的貼文資訊：\n\n內容：{content}\n\n地點：{location}\n\n標籤：{hashtags}\n\n已選擇圖片：{imageCount} 張（請查看下方我展示的圖片）\n\n如果所有資訊和圖片都確認無誤，請回覆「確認」、「是」或「發布」。",
+                "ask_guidance": "重要規則：\n1. 檢查 context.hasImages 和 context.imageCount\n2. 如果 hasImages=false 或 imageCount=0，必須使用 missing_images 回應\n3. 絕對不要在沒有圖片時呼叫 create_social_post 工具\n4. 收集完所有資訊後，使用 final_confirmation 模板向用戶展示完整預覽\n5. 明確提示用戶查看圖片預覽區域\n6. 等待用戶明確確認（「確認」、「是」、「好」、「發布」等）後才呼叫 create_social_post 工具\n\n以口語化方式詢問以下資訊：\n1）貼文內容（必需，用「貼文要寫什麼內容」而非「content」）\n2）地點（可選，用「要標註地點嗎」而非「location」）\n3）標籤（可選，用「要加上標籤嗎」或「hashtags」都可以）\n4）圖片（必需！必須提醒選擇圖片）\n\n絕對不要：\n- 在沒有圖片（hasImages=false）時呼叫 create_social_post\n- 在用戶未明確確認前呼叫 create_social_post\n- 提及 user_id、post_id 等技術術語\n- 詢問 media_urls（這不存在，只需提醒用戶選擇圖片）\n- 詢問可見範圍、隱私設定、留言權限、寵物標註（系統不支援）\n- 使用原始變數名稱與用戶對話\n- 使用表情符號"
             }
         },
         "add_feed": {
-            "description": "新增飼料資料（包含完整資訊和營養成分）。⚠️ 重要：此操作必須在用戶明確確認所有資訊後才執行！請先向用戶顯示完整的飼料資訊（包括所有營養成分），並明確詢問「資訊正確嗎？」等待用戶回覆確認後再呼叫此工具。圖片由前端另外上傳。系統具備智能匹配功能，會自動檢查資料庫中是否已存在相同營養成分的飼料。",
+            "description": "新增飼料資料（包含完整資訊和營養成分）。重要：此操作必須在用戶明確確認所有資訊後才執行！請先向用戶顯示完整的飼料資訊（包括所有營養成分），並明確詢問「資訊正確嗎？」等待用戶回覆確認後再呼叫此工具。圖片由前端另外上傳。系統具備智能匹配功能，會自動檢查資料庫中是否已存在相同營養成分的飼料。",
             "required_params": ["user_id", "pet_type", "has_images", "name", "brand", "price"],
             "optional_params": [
                 "protein", "fat", "carbohydrate",
@@ -275,14 +286,15 @@ def get_operation_list() -> Dict:
                 "tell_user_matched": "已找到資料庫中符合的飼料：[品牌] - [名稱]。您可以點擊下方按鈕前往查看飼料詳情。",
                 "operations_array_new": "MUST add operation to operations array with EXACT format: {'operation_type': 'feed_created', 'operation_data': json.dumps({'feed_id': X, 'is_existing': False, 'status': 'pending_images'})}. Note: operation_data MUST be a JSON string created with json.dumps().",
                 "operations_array_matched": "MUST add TWO operations to operations array: 1) {'operation_type': 'feed_created', 'operation_data': json.dumps({'feed_id': X, 'is_existing': True, 'status': 'matched'})} AND 2) {'operation_type': 'navigate', 'operation_data': json.dumps({'path': '/feeds/{id}', 'destination': '飼料詳情頁面'})}. Both operation_data MUST be JSON strings.",
-                "important": "CRITICAL: Use {'operation_type': ..., 'operation_data': json.dumps({...})} format. Do NOT use {operation_id, type, params, requires_confirmation} format - frontend will convert automatically. Do NOT mention feed_id in reply field. Only in operations array. When is_existing=true, add BOTH feed_created AND navigate operations so user can navigate to the matched feed."
+                "important": "CRITICAL: Use {'operation_type': ..., 'operation_data': json.dumps({...})} format. Do NOT use {operation_id, type, params, requires_confirmation} format - frontend will convert automatically. Do NOT mention feed_id in reply field. Only in operations array. When is_existing=true, add BOTH feed_created AND navigate operations so user can navigate to the matched feed.",
+                "confirmation_marker": "CRITICAL: When displaying final_confirmation message to user (using final_confirmation template), you MUST add special marker '[[NEEDS_CONFIRMATION_WITH_IMAGES]]' at the END of your reply text. This marker tells frontend to display cached images in AI message bubble. Example: 'Your confirmation message here\n\n[[NEEDS_CONFIRMATION_WITH_IMAGES]]'. This marker will be hidden from user but frontend will detect it."
             },
             "user_responses": {
                 "missing_images": "新增飼料需要上傳 2 張圖片。請先點擊聊天框左下角的相片按鈕選擇：\n1. 飼料包裝正面照片\n2. 營養標示照片（成分表）",
                 "ask_pet_type": "請問這是狗的飼料還是貓的飼料？",
                 "ask_name_brand": "請告訴我飼料的品牌和名稱（如果您知道的話）",
-                "show_ocr_results_and_confirm": "✅ **營養成分辨識完成！**\n\n**辨識結果**：\n• 蛋白質：{protein}%\n• 脂肪：{fat}%\n• 碳水化合物/纖維：{carbohydrate}%\n• 鈣：{calcium}%、磷：{phosphorus}%、鎂：{magnesium}%、鈉：{sodium}%\n\n請問這是狗的飼料還是貓的飼料？另外請告訴我品牌和名稱。",
-                "final_confirmation": "**請確認飼料資訊**：\n• 適用對象：{pet_type_zh}\n• 品牌：{brand}\n• 名稱：{name}\n• 價格：{price} 元\n• 蛋白質：{protein}%\n• 脂肪：{fat}%\n• 碳水化合物：{carbohydrate}%\n• 鈣：{calcium}%、磷：{phosphorus}%、鎂：{magnesium}%、鈉：{sodium}%\n\n資訊正確嗎？如果正確，請回覆「確認」或「是」，我就會幫您建立飼料。如果需要修改，請告訴我要修改哪些部分。",
+                "show_ocr_results_and_confirm": "營養成分辨識完成！\n\n辨識結果：\n- 蛋白質：{protein}%\n- 脂肪：{fat}%\n- 碳水化合物/纖維：{carbohydrate}%\n- 鈣：{calcium}%、磷：{phosphorus}%、鎂：{magnesium}%、鈉：{sodium}%\n\n請問這是狗的飼料還是貓的飼料？另外請告訴我品牌和名稱。",
+                "final_confirmation": "請確認飼料資訊：\n\n- 適用對象：{pet_type_zh}\n- 品牌：{brand}\n- 名稱：{name}\n- 價格：{price} 元\n- 蛋白質：{protein}%\n- 脂肪：{fat}%\n- 碳水化合物：{carbohydrate}%\n- 鈣：{calcium}%、磷：{phosphorus}%、鎂：{magnesium}%、鈉：{sodium}%\n\n已選擇圖片：2 張（請查看下方我展示的圖片：包裝照片和營養標示照片）\n\n如果所有資訊和圖片都確認無誤，請回覆「確認」或「是」。如果需要修改，請告訴我要修改哪些部分。",
                 "created_new": "飼料資料建立成功！正在上傳圖片...",
                 "matched_existing": "已找到資料庫中符合的飼料：[品牌] - [名稱]。您可以直接使用這筆資料，無需重複建立。"
             },

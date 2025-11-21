@@ -258,7 +258,7 @@
 }
 
 .userMessage .messageContent {
-  align-items: flex-start;
+  align-items: flex-end;
 }
 
 .aiMessage .messageContent {
@@ -333,52 +333,67 @@
   }
 }
 
-/* 圖片預覽容器 */
+/* 圖片預覽容器 - 響應式設計 */
 .imagePreviewContainer {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  padding: 8px;
+  gap: 8px;
+  padding: 10px;
   background-color: #f8f8f8;
   border-radius: 8px;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
   border: 1px solid #e0e0e0;
+  max-height: 120px;
+  overflow-y: auto;
 }
 
 .imagePreviewItem {
   position: relative;
   display: inline-block;
+  flex-shrink: 0;
 }
 
 .previewImage {
-  width: 60px;
-  height: 60px;
+  width: 70px;
+  height: 70px;
   object-fit: cover;
   border-radius: 6px;
   border: 1px solid #ddd;
+  transition: transform 0.2s ease;
+}
+
+.previewImage:hover {
+  transform: scale(1.05);
 }
 
 .removeImageBtn {
   position: absolute;
-  top: -5px;
-  right: -5px;
-  width: 20px;
-  height: 20px;
+  top: -6px;
+  right: -6px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   background-color: #ff4444;
   color: white;
   border: none;
-  font-size: 12px;
+  font-size: 14px;
+  font-weight: bold;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  transition: background-color 0.2s;
+  transition: all 0.2s;
+  line-height: 1;
 }
 
 .removeImageBtn:hover {
   background-color: #cc0000;
+  transform: scale(1.1);
+}
+
+.removeImageBtn:active {
+  transform: scale(0.95);
 }
 
 /* 上傳進度指示器 */
@@ -590,20 +605,25 @@
 }
 
 /* 滾動條樣式 */
-.messagesContainer::-webkit-scrollbar {
+.messagesContainer::-webkit-scrollbar,
+.imagePreviewContainer::-webkit-scrollbar {
   width: 6px;
+  height: 6px;
 }
 
-.messagesContainer::-webkit-scrollbar-track {
+.messagesContainer::-webkit-scrollbar-track,
+.imagePreviewContainer::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.messagesContainer::-webkit-scrollbar-thumb {
+.messagesContainer::-webkit-scrollbar-thumb,
+.imagePreviewContainer::-webkit-scrollbar-thumb {
   background: #d1d5db;
   border-radius: 3px;
 }
 
-.messagesContainer::-webkit-scrollbar-thumb:hover {
+.messagesContainer::-webkit-scrollbar-thumb:hover,
+.imagePreviewContainer::-webkit-scrollbar-thumb:hover {
   background: #9ca3af;
 }
 
@@ -735,6 +755,27 @@ body:has(.chatOverlay) {
     width: 14px;
     height: 14px;
   }
+
+  /* 圖片預覽響應式 - 小螢幕 */
+  .imagePreviewContainer {
+    gap: 6px;
+    padding: 8px;
+    margin-bottom: 8px;
+    max-height: 100px;
+  }
+
+  .previewImage {
+    width: 55px;
+    height: 55px;
+  }
+
+  .removeImageBtn {
+    width: 18px;
+    height: 18px;
+    font-size: 12px;
+    top: -4px;
+    right: -4px;
+  }
 }
 
 /* 針對更小的手機優化 */
@@ -855,6 +896,27 @@ body:has(.chatOverlay) {
     height: 28px;
     font-size: 20px;
   }
+
+  /* 圖片預覽響應式 - 極小螢幕 */
+  .imagePreviewContainer {
+    gap: 5px;
+    padding: 6px;
+    margin-bottom: 6px;
+    max-height: 90px;
+  }
+
+  .previewImage {
+    width: 50px;
+    height: 50px;
+  }
+
+  .removeImageBtn {
+    width: 16px;
+    height: 16px;
+    font-size: 11px;
+    top: -3px;
+    right: -3px;
+  }
 }
 
 /* iOS 安全區域支持 */
@@ -892,6 +954,25 @@ body:has(.chatOverlay) {
 
   .closeButton:active {
     background-color: rgba(255, 255, 255, 0.3);
+  }
+
+  /* 圖片預覽觸控優化 */
+  .previewImage:hover {
+    transform: none;
+  }
+
+  .previewImage:active {
+    transform: scale(0.95);
+  }
+
+  .removeImageBtn:hover {
+    transform: none;
+    background-color: #ff4444;
+  }
+
+  .removeImageBtn:active {
+    transform: scale(0.9);
+    background-color: #cc0000;
   }
 }
 
