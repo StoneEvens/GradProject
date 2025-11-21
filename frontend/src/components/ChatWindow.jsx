@@ -540,8 +540,7 @@ const ChatWindow = ({
         // 加入營養計算機相關資訊
         hasCalculator: aiResult.hasCalculator || false,
         // 加入操作功能相關資訊 (operations array)
-        operations: aiResult.operations || [],
-        operationType: aiResult.operationType || null
+        operations: aiResult.operations || []
       };
 
       const finalMessages = [...newMessages, aiMessage];
@@ -1432,15 +1431,6 @@ const ChatWindow = ({
                             return null;
                           }
                         })()}
-                        {/* 顯示其他操作按鈕 */}
-                        {otherOps.length > 0 && message.operationType && (
-                          <button
-                            className={styles.tutorialButton}
-                            onClick={() => handleOperationClick(message.operationType)}
-                          >
-                            {t(`chatWindow.operation.buttons.${message.operationType}`)}
-                          </button>
-                        )}
                       </>
                     );
                   })()}

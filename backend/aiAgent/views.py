@@ -83,7 +83,6 @@ class AIAgentChatView(APIView):
                         'hasRecommendedArticles': openapi.Schema(type=openapi.TYPE_BOOLEAN),
                         'hasCalculator': openapi.Schema(type=openapi.TYPE_BOOLEAN),
                         'hasOperation': openapi.Schema(type=openapi.TYPE_BOOLEAN),
-                        'operationType': openapi.Schema(type=openapi.TYPE_STRING),
                         'recommendedUserIds': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Items(type=openapi.TYPE_INTEGER)),
                         'recommendedArticleIds': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Items(type=openapi.TYPE_INTEGER)),
                         'socialPostDetails': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Items(type=openapi.TYPE_OBJECT)),
@@ -209,7 +208,6 @@ class AIAgentChatView(APIView):
                 has_recommended_articles=response_data.get('hasRecommendedArticles', False),
                 has_calculator=response_data.get('hasCalculator', False),
                 has_operation=response_data.get('hasOperation', False),
-                operation_type=response_data.get('operationType'),
                 additional_data={
                     'recommended_user_ids': response_data.get('recommendedUserIds', []),
                     'recommended_user_details': response_data.get('recommendedUserDetails', []),  # 保存完整用戶詳情

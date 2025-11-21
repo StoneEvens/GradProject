@@ -219,8 +219,7 @@ class OpenAIService:
         "hasRecommendedUsers": false,
         "hasRecommendedArticles": true,
         "hasCalculator": false,
-        "hasOperation": false,
-        "operationType": null
+        "hasOperation": false
     },
     "additional_data": {
         "recommended_user_ids": [],
@@ -270,8 +269,7 @@ class OpenAIService:
         "hasRecommendedUsers": false,
         "hasRecommendedArticles": false,
         "hasCalculator": true,  // 如果找到飼料資料為 true；找不到為 false
-        "hasOperation": false,  // 如果找不到飼料資料為 true；找到為 false
-        "operationType": null   // 如果找不到飼料資料為 "addFeed"；找到為 null
+        "hasOperation": false   // 如果找不到飼料資料為 true；找到為 false
     },
     "additional_data": {
         "recommended_user_ids": [],
@@ -367,8 +365,7 @@ class OpenAIService:
         "hasRecommendedUsers": false,
         "hasRecommendedArticles": false,
         "hasCalculator": false,
-        "hasOperation": false,
-        "operationType": null
+        "hasOperation": false
     },
     "additional_data": {
         "recommended_user_ids": [],
