@@ -594,8 +594,7 @@ const ChatWindow = ({
                 text: `✅ 已成功上傳 ${uploadResult.data.uploaded_count} 張圖片到您的貼文！`,
                 isUser: false,
                 timestamp: new Date(),
-                operations: [],
-                operationType: null
+                operations: []
               };
 
               setMessages(prev => [...prev, uploadSuccessMessage]);
@@ -615,8 +614,7 @@ const ChatWindow = ({
               isUser: false,
               timestamp: new Date(),
               error: true,
-              operations: [],
-              operationType: null
+              operations: []
             };
 
             setMessages(prev => [...prev, uploadErrorMessage]);
@@ -659,8 +657,7 @@ const ChatWindow = ({
                 text: `✅ 已成功上傳 ${uploadResult.data.uploaded_count} 張圖片到您的異常記錄！`,
                 isUser: false,
                 timestamp: new Date(),
-                operations: [],
-                operationType: null
+                operations: []
               };
 
               setMessages(prev => [...prev, uploadSuccessMessage]);
@@ -680,8 +677,7 @@ const ChatWindow = ({
               isUser: false,
               timestamp: new Date(),
               error: true,
-              operations: [],
-              operationType: null
+              operations: []
             };
 
             setMessages(prev => [...prev, uploadErrorMessage]);
@@ -723,8 +719,7 @@ const ChatWindow = ({
               isUser: false,
               timestamp: new Date(),
               error: true,
-              operations: [],
-              operationType: null
+              operations: []
             };
 
             setMessages(prev => [...prev, ocrErrorMessage]);
@@ -759,8 +754,7 @@ const ChatWindow = ({
                   text: `✅ 已智能匹配到資料庫中現有的飼料，無需重複上傳圖片。`,
                   isUser: false,
                   timestamp: new Date(),
-                  operations: [],
-                  operationType: null
+                  operations: []
                 };
 
                 setMessages(prev => [...prev, matchedMessage]);
@@ -786,8 +780,7 @@ const ChatWindow = ({
                   text: `✅ 已成功上傳 ${uploadResult.data.uploaded_count} 張圖片到您的飼料！`,
                   isUser: false,
                   timestamp: new Date(),
-                  operations: [],
-                  operationType: null
+                  operations: []
                 };
 
                 setMessages(prev => [...prev, uploadSuccessMessage]);
@@ -808,8 +801,7 @@ const ChatWindow = ({
               isUser: false,
               timestamp: new Date(),
               error: true,
-              operations: [],
-              operationType: null
+              operations: []
             };
 
             setMessages(prev => [...prev, uploadErrorMessage]);
@@ -952,7 +944,6 @@ const ChatWindow = ({
           recommendedForumPosts,
           hasCalculator: (messageData?.hasCalculator ?? msg.has_calculator) || false,
           operations: messageData?.operations || additionalData?.operations || [],
-          operationType: messageData?.operationType ?? msg.operation_type ?? null,
           operationParams: additionalData?.operationParams || additionalData?.operation_params || {}
         };
       }));

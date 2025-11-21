@@ -288,7 +288,6 @@ class OpenAIService:
 7. **如果使用者詢問的飼料在資料庫中找不到（recommended_feeds 為空列表）**：
    - 設置 hasCalculator 為 false
    - 設置 hasOperation 為 true
-   - 設置 operationType 為 "addFeed"
    - **只告訴使用者**：「很抱歉，我們的資料庫中目前沒有這款飼料的資料。您可以點擊下方的『前往新增』按鈕，幫助我們新增這款飼料的資訊！」
    - **不要提及寵物類型匹配問題**，因為沒有飼料資料就無法判斷類型
 8. **如果飼料是未驗證的（is_verified 為 false）**：
