@@ -175,7 +175,7 @@ def _run_agent_plug_and_play(message: str, user_id: str, username: str, session_
             return []
         return out
 
-    # Normalize operation list shape (each item has operation_name / operation_data)
+    # Normalize operation list shape (each item has operation_type / operation_data)
     operations_raw = parsed.get('operations') or []
     operations = []
     for op in operations_raw:
@@ -187,7 +187,7 @@ def _run_agent_plug_and_play(message: str, user_id: str, username: str, session_
                 operations.append(op.model_dump())
             except Exception:
                 operations.append({
-                    'operation_name': getattr(op, 'operation_name', ''),
+                    'operation_type': getattr(op, 'operation_type', ''),
                     'operation_data': getattr(op, 'operation_data', ''),
                 })
     # Sanitize recommendations: drop blank placeholders; if empty -> []

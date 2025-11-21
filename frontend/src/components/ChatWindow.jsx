@@ -561,7 +561,7 @@ const ChatWindow = ({
       // 檢測 post_created operation 並自動上傳圖片
       if (aiResult.operations && Array.isArray(aiResult.operations)) {
         const postCreatedOp = aiResult.operations.find(
-          op => op.operation_name === 'post_created'
+          op => op.operation_type === 'post_created'
         );
 
         if (postCreatedOp && selectedImages.length > 0) {
@@ -626,7 +626,7 @@ const ChatWindow = ({
 
         // 檢測 abnormal_post_created operation 並自動上傳圖片
         const abnormalPostCreatedOp = aiResult.operations.find(
-          op => op.operation_name === 'abnormal_post_created'
+          op => op.operation_type === 'abnormal_post_created'
         );
 
         if (abnormalPostCreatedOp && selectedImages.length > 0) {
@@ -691,7 +691,7 @@ const ChatWindow = ({
 
         // 檢測 ocr_feed_analysis operation 並執行 OCR 分析
         const ocrOp = aiResult.operations.find(
-          op => op.operation_name === 'ocr_feed_analysis'
+          op => op.operation_type === 'ocr_feed_analysis'
         );
 
         if (ocrOp && selectedImages.length >= 2) {
@@ -734,7 +734,7 @@ const ChatWindow = ({
 
         // 檢測 feed_created operation 並自動上傳圖片（類似 post_created）
         const feedCreatedOp = aiResult.operations.find(
-          op => op.operation_name === 'feed_created'
+          op => op.operation_type === 'feed_created'
         );
 
         if (feedCreatedOp && selectedImages.length > 0) {
@@ -1398,14 +1398,14 @@ const ChatWindow = ({
                   {message.operations && message.operations.length > 0 && (() => {
                     // 找出導航操作
                     const navigateOp = message.operations.find(op =>
-                      op.operation_name === 'navigate' || op.operation_name === 'navigation'
+                      op.operation_type === 'navigate' || op.operation_type === 'navigation'
                     );
                     // 找出其他操作（排除 navigate 和背景自動執行的操作）
                     const backgroundOps = ['ocr_feed_analysis']; // 背景自動執行，不顯示按鈕
                     const otherOps = message.operations.filter(op =>
-                      op.operation_name !== 'navigate' &&
-                      op.operation_name !== 'navigation' &&
-                      !backgroundOps.includes(op.operation_name)
+                      op.operation_type !== 'navigate' &&
+                      op.operation_type !== 'navigation' &&
+                      !backgroundOps.includes(op.operation_type)
                     );
 
                     return (
