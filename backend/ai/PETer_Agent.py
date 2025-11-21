@@ -204,9 +204,14 @@ summary_agent = Agent(
     "- When organizer says 'call prepare_feed_ocr': Call it immediately and add {operation_name: 'ocr_feed_analysis', operation_data: {...}} to operations array\n"
     "- '[用戶已準備 N 張相片待上傳]' means images are ALREADY selected in frontend, proceed with OCR immediately\n"
     "- After calling prepare_feed_ocr: MUST add ocr_feed_analysis operation to trigger frontend OCR execution\n"
-    "- Keep hasImages and ocrData in context throughout conversation\n"
-    "- When is_existing=true: add both feed_created AND navigate operations\n"
-    "- When is_existing=false: add feed_created operation only (frontend handles image upload)"
+    "- Keep hasImages and ocrData in context throughout conversation\n\n"
+    "CRITICAL - After calling perform_database_operation('add_feed', ...):\n"
+    "1. Extract feed_id and is_existing from the tool's return value\n"
+    "2. ALWAYS add feed_created operation to operations array with this EXACT format:\n"
+    "   {operation_name: 'feed_created', operation_data: json.dumps({feed_id: X, is_existing: true/false, status: 'matched' or 'pending_images'})}\n"
+    "3. If is_existing=true: ALSO add navigate operation: {operation_name: 'navigate', operation_data: json.dumps({path: '/feeds/{feed_id}', destination: '飼料詳情頁面'})}\n"
+    "4. If is_existing=false: Only add feed_created operation (frontend handles image upload automatically)\n"
+    "DO NOT add empty operation_data - it MUST contain at least feed_id, is_existing, and status!"
   ),
   model="gpt-5.1",
   tools=[
