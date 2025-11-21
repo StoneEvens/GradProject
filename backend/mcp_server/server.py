@@ -548,8 +548,37 @@ def create_mcp_server() -> FastMCP:
 
     @mcp.tool(
         name="perform_database_operation",
-        description="Perform a database operation such as: add_pet, update_pet (modify pet info), add_abnormal_post (health records), update_abnormal_post, delete_abnormal_post, create_disease_archive, add_plan (create schedule/calendar event), update_plan (modify schedule), delete_plan (remove schedule), list_plans (view all schedules), create_social_post, add_feed (add feed after OCR confirmation). IMPORTANT: Use 'add_plan' for creating schedules/calendar events, NOT 'create_schedule'. Always call database_operation_list first to see exact parameter requirements."
-        "Note that database operations affects personal data; please verify that the user is doing the operation for themself. The easiest way to ensure this is to check the target of the prompt matches the user ID of the requester. The user id was added to the prompt automatically by the backend."
+        description=(
+            "Perform a database operation such as: add_pet, update_pet (modify pet info), add_abnormal_post (health records), "
+            "update_abnormal_post, delete_abnormal_post, create_disease_archive, add_plan (create schedule/calendar event), "
+            "update_plan (modify schedule), delete_plan (remove schedule), list_plans (view all schedules), create_social_post, "
+            "add_feed (add feed after OCR confirmation).\n\n"
+            "IMPORTANT: Use 'add_plan' for creating schedules/calendar events, NOT 'create_schedule'.\n"
+            "Always call database_operation_list first to see exact parameter requirements.\n\n"
+            "CRITICAL - Parameter Structure:\n"
+            "This tool requires TWO parameters:\n"
+            "1. operation: The operation type (e.g., 'add_feed', 'add_pet')\n"
+            "2. data: A dictionary containing ALL the operation-specific parameters\n\n"
+            "Example for add_feed:\n"
+            "  operation: 'add_feed'\n"
+            "  data: {\n"
+            "    'user_id': 123,\n"
+            "    'pet_type': 'dog',\n"
+            "    'has_images': True,\n"
+            "    'name': 'Feed Name',\n"
+            "    'brand': 'Brand Name',\n"
+            "    'price': 500.0,\n"
+            "    'protein': 25.0,\n"
+            "    'fat': 15.0,\n"
+            "    'carbohydrate': 40.0,\n"
+            "    'calcium': 1.2,\n"
+            "    'phosphorus': 1.0,\n"
+            "    'magnesium': 0.1,\n"
+            "    'sodium': 0.3\n"
+            "  }\n\n"
+            "DO NOT flatten the parameters - ALL operation parameters must be inside the 'data' dictionary.\n\n"
+            "Note that database operations affects personal data; please verify that the user is doing the operation for themself."
+        )
     )
     async def perform_database_operation(
         operation: Literal["add_pet", "update_pet", "add_abnormal_post", "update_abnormal_post", "delete_abnormal_post", "create_disease_archive", "add_plan", "update_plan", "delete_plan", "list_plans", "create_social_post", "add_feed"],
