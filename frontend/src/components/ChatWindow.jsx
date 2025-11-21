@@ -419,6 +419,30 @@ const ChatWindow = ({
           const newImages = [...prev, ...imagePreviews];
           // 使用 window 物件儲存（避免 localStorage 容量限制）
           window.__selectedFeedImages = newImages;
+
+          // 🎨 自動在聊天記錄中添加一個包含圖片的用戶訊息
+          const totalCount = newImages.length;
+          const imageCountText = totalCount === 1
+            ? '已選擇 1 張圖片'
+            : `已選擇 ${totalCount} 張圖片`;
+
+          const imageMessage = {
+            id: Date.now(),
+            text: imageCountText,
+            isUser: true,
+            timestamp: new Date(),
+            images: newImages, // 添加所有圖片資料（包括之前選擇的）
+            operations: [],
+            operationType: null,
+            isImageMessage: true // 標記為圖片訊息
+          };
+
+          setMessages(prev => {
+            // 移除之前的圖片訊息（如果有）
+            const filteredMessages = prev.filter(msg => !msg.isImageMessage);
+            return [...filteredMessages, imageMessage];
+          });
+
           return newImages;
         });
       });
@@ -443,6 +467,9 @@ const ChatWindow = ({
     delete window.__selectedFeedImages;
     localStorage.removeItem('feedOcrData');
     localStorage.removeItem('feedImageTypeMap');
+
+    // 🎨 同時移除聊天記錄中的圖片訊息
+    setMessages(prev => prev.filter(msg => !msg.isImageMessage));
   };
 
   // 發送訊息
@@ -1497,6 +1524,22 @@ const ChatWindow = ({
                       </React.Fragment>
                     ))}
                   </div>
+
+                  {/* 🎨 顯示用戶選擇的圖片（類似留言區的圖片網格） */}
+                  {message.images && message.images.length > 0 && (
+                    <div className={styles.messageImagesGrid}>
+                      {message.images.map((image, idx) => (
+                        <div key={image.id || idx} className={styles.messageImageItem}>
+                          <img
+                            src={image.preview}
+                            alt={`選擇的圖片 ${idx + 1}`}
+                            className={styles.messageImage}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
                   <div className={styles.messageTime}>
                     {formatTime(message.timestamp)}
                   </div>
@@ -1540,8 +1583,8 @@ const ChatWindow = ({
 
       {/* 輸入區域 */}
       <div className={styles.inputSection}>
-        {/* 圖片預覽區域 */}
-        {selectedImages.length > 0 && (
+        {/* 圖片預覽區域 - 已隱藏，圖片現在顯示在聊天記錄中 */}
+        {/* {selectedImages.length > 0 && (
           <div className={styles.imagePreviewContainer}>
             {selectedImages.map((image) => (
               <div key={image.id} className={styles.imagePreviewItem}>
@@ -1556,7 +1599,7 @@ const ChatWindow = ({
               </div>
             ))}
           </div>
-        )}
+        )} */}
 
         {/* 圖片上傳進度提示 */}
         {isUploadingImages && (
