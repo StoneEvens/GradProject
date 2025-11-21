@@ -191,7 +191,7 @@ const ChatWindow = ({
     }
   }, [isOpen]);
 
-  // 監聽 OCR 完成事件（由 operationExecutor 觸發）
+  // 監聽 OCR 完成事件
   useEffect(() => {
     const handleOcrCompleted = async (event) => {
       const { ocrData, rawText } = event.detail;
@@ -689,10 +689,48 @@ const ChatWindow = ({
           }
         }
 
-        // ✅ OCR 處理已移至 operationExecutor，由 operation pipeline 統一處理
-        // operationClient 會將 ocr_feed_analysis operation 加入佇列
-        // operationExecutor 執行 OCR 後會觸發 ocrCompleted 事件
-        // ChatWindow 監聽該事件並回傳結果給 AI Agent (見上方 useEffect)
+        // 檢測 ocr_feed_analysis operation 並執行 OCR 分析
+        const ocrOp = aiResult.operations.find(
+          op => op.operation_name === 'ocr_feed_analysis'
+        );
+
+        if (ocrOp && selectedImages.length >= 2) {
+          console.log('[ChatWindow] 檢測到 ocr_feed_analysis operation，開始執行 OCR 分析');
+
+          try {
+            // 調用 aiChatService 執行 OCR 分析
+            const ocrResult = await aiChatService.analyzeFeedWithOCR(selectedImages);
+
+            console.log('[ChatWindow] OCR 分析完成:', ocrResult);
+
+            // 觸發 ocrCompleted 事件，供 useEffect 監聽並回傳給 Agent
+            window.dispatchEvent(new CustomEvent('ocrCompleted', {
+              detail: {
+                ocrData: ocrResult.ocrData,
+                rawText: ocrResult.rawText,
+                nutritionImageIndex: ocrResult.nutritionImageIndex,
+                frontImageIndex: ocrResult.frontImageIndex,
+                imageTypeMap: ocrResult.imageTypeMap
+              }
+            }));
+
+          } catch (ocrError) {
+            console.error('[ChatWindow] OCR 分析失敗:', ocrError);
+
+            // 添加錯誤訊息
+            const ocrErrorMessage = {
+              id: Date.now() + 5,
+              text: `❌ OCR 分析失敗：${ocrError.message || '未知錯誤'}`,
+              isUser: false,
+              timestamp: new Date(),
+              error: true,
+              operations: [],
+              operationType: null
+            };
+
+            setMessages(prev => [...prev, ocrErrorMessage]);
+          }
+        }
 
         // 檢測 feed_created operation 並自動上傳圖片（類似 post_created）
         const feedCreatedOp = aiResult.operations.find(

@@ -3,6 +3,8 @@
  * 包含所有教學流程的步驟定義
  */
 
+import { act } from "react";
+
 const tutorialData = {
   // 標註寵物教學
   tagPet: {
@@ -571,7 +573,7 @@ const tutorialData = {
     },
     {
       id: 4,
-      title: '步驟 4：切換頁面',
+      title: '步驟 4：切換頁面TESTTEST',
       instruction: '切換到「寵物狀況」頁面',
       targetElement: {
         component: 'Calculate',
@@ -584,7 +586,7 @@ const tutorialData = {
         position: 'center'
       },
       action: 'click',
-      showPointer: true
+      nextCondition: 'tabSwitchedToCondition',
     },
     {
       id: 5,
@@ -621,26 +623,9 @@ const tutorialData = {
     },
     {
       id: 7,
-      title: '步驟 7：選擇飼料或新增飼料',
+      title: '步驟 7：新增飼料',
       instruction: '若已經新增過飼料，您可以直接點選「選擇飼料」，若需要新增飼料，就點選「新增飼料」，這邊教學新增飼料',
-      targetElement: {
-        component: 'Calculate',
-        selector: '[class*="feedActions"] button[class*="feedActionBtn"]:nth-of-type(2)',
-        className: 'feedActionBtn',
-        fallbackSelector: '[class*="feedActions"] button:last-of-type'
-      },
-      highlight: {
-        type: 'rectangle',
-        position: 'center'
-      },
-      nextCondition: 'manualNext',
-      showPointer: true
-    },
-    {
-      id: 8,
-      title: '步驟 8：新增飼料',
-      instruction: '若需要新增飼料，請點選「新增飼料」',
-      targetElement: {
+      ttargetElement: {
         component: 'Calculate',
         selector: '[class*="feedActions"] button[class*="feedActionBtn"]:nth-of-type(2)',
         className: 'feedActionBtn',
@@ -654,8 +639,8 @@ const tutorialData = {
       showPointer: true
     },
     {
-      id: 9,
-      title: '步驟 9：選擇寵物類型',
+      id: 8,
+      title: '步驟 8：選擇寵物類型',
       instruction: '選擇這隻寵物是貓還是狗',
       targetElement: {
         component: 'CreateFeedModal',
@@ -670,8 +655,8 @@ const tutorialData = {
       nextCondition: 'manualNext'
     },
     {
-      id: 10,
-      title: '步驟 10：輸入飼料名稱',
+      id: 9,
+      title: '步驟 9：輸入飼料名稱',
       instruction: '',
       targetElement: {
         component: 'CreateFeedModal',
@@ -687,8 +672,8 @@ const tutorialData = {
       showPointer: true
     },
     {
-      id: 11,
-      title: '步驟 11：輸入飼料品牌',
+      id: 10,
+      title: '步驟 10：輸入飼料品牌',
       instruction: '',
       targetElement: {
         component: 'CreateFeedModal',
@@ -704,8 +689,8 @@ const tutorialData = {
       showPointer: true
     },
     {
-      id: 12,
-      title: '步驟 12：輸入飼料價格',
+      id: 11,
+      title: '步驟 11：輸入飼料價格',
       instruction: '',
       targetElement: {
         component: 'CreateFeedModal',
@@ -721,8 +706,8 @@ const tutorialData = {
       showPointer: true
     },
     {
-      id: 13,
-      title: '步驟 13：上傳飼料正面圖片',
+      id: 12,
+      title: '步驟 12：上傳飼料正面圖片',
       instruction: '',
       targetElement: {
         component: 'CreateFeedModal',
@@ -734,11 +719,14 @@ const tutorialData = {
         type: 'rectangle',
         position: 'button'
       },
-      nextCondition: 'imageAdded'
+      nextCondition: {
+        type: 'imageAdded',
+        scope: 'front'
+      }
     },
     {
-      id: 14,
-      title: '步驟 14：上傳飼料營養標示',
+      id: 13,
+      title: '步驟 13：上傳飼料營養標示',
       instruction: '',
       targetElement: {
         component: 'CreateFeedModal',
@@ -750,11 +738,15 @@ const tutorialData = {
         type: 'rectangle',
         position: 'button'
       },
-      nextCondition: 'imageAdded'
+      action: 'click',
+      nextCondition: {
+        type: 'imageAdded',
+        scope: 'nutrition'
+      }
     },
     {
-      id: 15,
-      title: '步驟 15：完成「新增飼料」',
+      id: 14,
+      title: '步驟 14：完成「新增飼料」',
       instruction: '按下「確認新增」按鈕',
       targetElement: {
         component: 'CreateFeedModal',
@@ -767,11 +759,11 @@ const tutorialData = {
         position: 'button'
       },
       action: 'click',
-      nextCondition: 'imageAdded'
+
     },
     {
-      id: 16,
-      title: '步驟 16：點選「開始計算」按鈕',
+      id: 15,
+      title: '步驟 15：點選「開始計算」按鈕',
       instruction: '開始依數據計算結果',
       targetElement: {
         component: 'Calculate',
@@ -787,7 +779,7 @@ const tutorialData = {
       showPointer: true
     },
     {
-      id: 17,
+      id: 16,
       title: '完成！',
       instruction: '恭喜！您已成功獲得計算結果！',
       targetElement: null,
