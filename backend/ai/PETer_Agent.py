@@ -98,7 +98,6 @@ class SummaryAgentSchema(BaseModel):
   """
   reply: str = Field(..., description="Natural language reply for the user (do not dump raw data here).")
   tutorial: str = Field(..., description="If a tutorial is applicable, set its id or slug; else use an empty string.")
-  operation_type: str = Field(..., description="High-level operation type for quick UI routing, e.g., 'navigate_social'.")
   operations: list[SummaryAgentSchema__OperationsItem] = Field(
     default_factory=list,
     description="List of concrete operations for the client to perform."

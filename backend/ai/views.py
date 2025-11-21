@@ -314,17 +314,8 @@ def agent_chat(request):
                 'recommendedUsers': result.get('recommended_users', []),
                 'recommendedSocialPosts': result.get('recommended_social_posts', {}),
                 'recommendedForumPosts': result.get('recommended_forum_posts', {}),
-                'message_data': {
-                    'response': result.get('response', ''),
-                    'operations': result.get('operations', []),
-                    'tutorial': result.get('tutorial'),
-                    'operationType': result.get('operation_type'),
-                    'recommendedUsers': result.get('recommended_users', []),
-                    'recommendedSocialPosts': result.get('recommended_social_posts', {}),
-                    'recommendedForumPosts': result.get('recommended_forum_posts', {}),
-                    'session_id': returned_session_id,
-                    'conversationId': thread.id,
-                }
+                'session_id': returned_session_id,
+                'conversationId': thread.id,
             }
         )
 
@@ -497,28 +488,26 @@ def main_chat(request):
                 'response': result.get('response', ''),
                 'operations': operations,
                 'tutorial': tutorial,
-                'operationType': operation_type,
                 'recommendedUsers': recommended_users,
                 'recommendedSocialPosts': recommended_social_posts,
                 'recommendedForumPosts': recommended_forum_posts,
                 'session_id': returned_session_id,
                 'conversationId': conversation_id,
             }
-            response_payload.setdefault('pendingOperation', None)
             AgentMessage.objects.create(
                 conversation=thread,
                 role='assistant',
-                content=result.get('response', ''),
+                content=result.get('repostsponse', ''),
                 has_tutorial=bool(tutorial) if tutorial is not None else False,
                 tutorial_type=tutorial,
                 operation_type=operation_type,
                 additional_data={
+                    'operations': operations,
                     'recommendedUsers': recommended_users,
                     'recommendedSocialPosts': recommended_social_posts,
                     'recommendedForumPosts': recommended_forum_posts,
-                    'operations': operations,
-                    'operationParams': {},
-                    'message_data': response_payload,
+                    'session_id': returned_session_id,
+                    'conversationId': conversation_id,
                 }
             )
         else:
@@ -526,13 +515,11 @@ def main_chat(request):
                 'response': result.get('response', ''),
                 'operations': operations,
                 'tutorial': tutorial,
-                'operationType': operation_type,
                 'recommendedUsers': recommended_users,
                 'recommendedSocialPosts': recommended_social_posts,
                 'recommendedForumPosts': recommended_forum_posts,
                 'session_id': returned_session_id,
                 'conversationId': conversation_id,
-                'pendingOperation': None,
                 'warning': 'Session not yet established; conversation not persisted until valid session_id (conv_) is returned.'
             }
 
@@ -606,22 +593,17 @@ def get_conversation_detail(request, conversation_id):
             msg_additional = msg.additional_data or {}
             message_data_payload = None
             if msg.role == 'assistant':
-                # Prefer saved standardized payload if present, else reconstruct
-                saved_payload = msg_additional.get('message_data')
-                if isinstance(saved_payload, dict):
-                    message_data_payload = saved_payload
-                else:
-                    # Reconstruct a standardized payload matching live response format
-                    message_data_payload = {
-                        'response': msg.content,
-                        'conversationId': conversation.id,
-                        'tutorial': msg.tutorial_type,  # keep single field only
-                        'operationType': msg.operation_type,
-                        'operations': msg_additional.get('operations', []),
-                        'recommendedUsers': msg_additional.get('recommendedUsers', {}),
-                        'recommendedSocialPosts': msg_additional.get('recommendedSocialPosts', {}),
-                        'recommendedForumPosts': msg_additional.get('recommendedForumPosts', {})
-                    }
+                # Always reconstruct message_data from stored fields (no duplicates)
+                message_data_payload = {
+                    'response': msg.content,
+                    'conversationId': conversation.id,
+                    'tutorial': msg.tutorial_type,
+                    'operations': msg_additional.get('operations', []),
+                    'recommendedUsers': msg_additional.get('recommendedUsers', []),
+                    'recommendedSocialPosts': msg_additional.get('recommendedSocialPosts', {}),
+                    'recommendedForumPosts': msg_additional.get('recommendedForumPosts', {}),
+                    'session_id': msg_additional.get('session_id')
+                }
 
             messages_data.append({
                 'id': msg.id,
@@ -786,22 +768,11 @@ def create_conversation(request):
                 tutorial_type=None,
                 operation_type=None,
                 additional_data={
+                    'operations': [],
                     'recommendedUsers': {},
                     'recommendedSocialPosts': {},
                     'recommendedForumPosts': {},
-                    'operations': [],
-                    'operationParams': {},
-                    # Store a standardized payload to match live responses
-                    'message_data': {
-                        'response': welcome_text,
-                        'conversationId': thread.id,
-                        'tutorial': None,
-                        'operationType': None,
-                        'operations': [],
-                        'recommendedUsers': {},
-                        'recommendedSocialPosts': {},
-                        'recommendedForumPosts': {}
-                    }
+                    'conversationId': thread.id,
                 }
             )
             logger.info(f"Seeded welcome message for conversation {thread.id}")

@@ -224,7 +224,7 @@ class AIChatService {
       // 設定為當前對話
       this.currentConversationId = conversationId;
 
-      // 提取並設定 OpenAI Session ID（從任一訊息的 message_data 中）
+      // 提取並設定 OpenAI Session ID（從訊息的 message_data 或 additional_data 中）
       // 這樣可以延續同一個 OpenAI 對話，而不是每次重開都建立新對話
       this.currentSessionId = null;
       if (conversation.messages && conversation.messages.length > 0) {
@@ -232,9 +232,11 @@ class AIChatService {
         // 從最後一條助手訊息中提取 session_id
         for (let i = conversation.messages.length - 1; i >= 0; i--) {
           const msg = conversation.messages[i];
-          console.log(`[AIChatService] Message ${i}: role=${msg.role}, has_message_data=${!!msg.message_data}, session_id=${msg.message_data?.session_id}`);
-          if (msg.role === 'assistant' && msg.message_data && msg.message_data.session_id) {
-            this.currentSessionId = msg.message_data.session_id;
+          // Try message_data first (for compatibility), then additional_data
+          const sessionId = msg.message_data?.session_id || msg.additional_data?.session_id;
+          console.log(`[AIChatService] Message ${i}: role=${msg.role}, session_id=${sessionId}`);
+          if (msg.role === 'assistant' && sessionId) {
+            this.currentSessionId = sessionId;
             console.log(`[AIChatService] ✓ Restored session_id: ${this.currentSessionId}`);
             break;
           }

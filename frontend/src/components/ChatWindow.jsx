@@ -567,8 +567,7 @@ const ChatWindow = ({
         // 加入營養計算機相關資訊
         hasCalculator: aiResult.hasCalculator || false,
         // 加入操作功能相關資訊 (operations array)
-        operations: aiResult.operations || [],
-        operationType: aiResult.operationType || null
+        operations: aiResult.operations || []
       };
 
       const finalMessages = [...newMessages, aiMessage];
@@ -622,8 +621,7 @@ const ChatWindow = ({
                 text: `✅ 已成功上傳 ${uploadResult.data.uploaded_count} 張圖片到您的貼文！`,
                 isUser: false,
                 timestamp: new Date(),
-                operations: [],
-                operationType: null
+                operations: []
               };
 
               setMessages(prev => [...prev, uploadSuccessMessage]);
@@ -643,8 +641,7 @@ const ChatWindow = ({
               isUser: false,
               timestamp: new Date(),
               error: true,
-              operations: [],
-              operationType: null
+              operations: []
             };
 
             setMessages(prev => [...prev, uploadErrorMessage]);
@@ -687,8 +684,7 @@ const ChatWindow = ({
                 text: `✅ 已成功上傳 ${uploadResult.data.uploaded_count} 張圖片到您的異常記錄！`,
                 isUser: false,
                 timestamp: new Date(),
-                operations: [],
-                operationType: null
+                operations: []
               };
 
               setMessages(prev => [...prev, uploadSuccessMessage]);
@@ -708,8 +704,7 @@ const ChatWindow = ({
               isUser: false,
               timestamp: new Date(),
               error: true,
-              operations: [],
-              operationType: null
+              operations: []
             };
 
             setMessages(prev => [...prev, uploadErrorMessage]);
@@ -751,8 +746,7 @@ const ChatWindow = ({
               isUser: false,
               timestamp: new Date(),
               error: true,
-              operations: [],
-              operationType: null
+              operations: []
             };
 
             setMessages(prev => [...prev, ocrErrorMessage]);
@@ -787,8 +781,7 @@ const ChatWindow = ({
                   text: `✅ 已智能匹配到資料庫中現有的飼料，無需重複上傳圖片。`,
                   isUser: false,
                   timestamp: new Date(),
-                  operations: [],
-                  operationType: null
+                  operations: []
                 };
 
                 setMessages(prev => [...prev, matchedMessage]);
@@ -814,8 +807,7 @@ const ChatWindow = ({
                   text: `✅ 已成功上傳 ${uploadResult.data.uploaded_count} 張圖片到您的飼料！`,
                   isUser: false,
                   timestamp: new Date(),
-                  operations: [],
-                  operationType: null
+                  operations: []
                 };
 
                 setMessages(prev => [...prev, uploadSuccessMessage]);
@@ -836,8 +828,7 @@ const ChatWindow = ({
               isUser: false,
               timestamp: new Date(),
               error: true,
-              operations: [],
-              operationType: null
+              operations: []
             };
 
             setMessages(prev => [...prev, uploadErrorMessage]);
@@ -980,7 +971,6 @@ const ChatWindow = ({
           recommendedForumPosts,
           hasCalculator: (messageData?.hasCalculator ?? msg.has_calculator) || false,
           operations: messageData?.operations || additionalData?.operations || [],
-          operationType: messageData?.operationType ?? msg.operation_type ?? null,
           operationParams: additionalData?.operationParams || additionalData?.operation_params || {}
         };
       }));
@@ -1459,15 +1449,6 @@ const ChatWindow = ({
                             return null;
                           }
                         })()}
-                        {/* 顯示其他操作按鈕 */}
-                        {otherOps.length > 0 && message.operationType && (
-                          <button
-                            className={styles.tutorialButton}
-                            onClick={() => handleOperationClick(message.operationType)}
-                          >
-                            {t(`chatWindow.operation.buttons.${message.operationType}`)}
-                          </button>
-                        )}
                       </>
                     );
                   })()}

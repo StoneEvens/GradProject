@@ -50,7 +50,6 @@ class ResponseService:
             'hasRecommendedArticles': ui_controls.get('hasRecommendedArticles', False),
             'hasCalculator': ui_controls.get('hasCalculator', False),
             'hasOperation': ui_controls.get('hasOperation', False),
-            'operationType': ui_controls.get('operationType'),
 
             # 附加資料
             'recommendedUserIds': additional_data.get('recommended_user_ids', []),
