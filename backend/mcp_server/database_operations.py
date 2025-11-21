@@ -80,8 +80,8 @@ def get_operation_list() -> Dict:
             "response_handling": {
                 "on_success": "Tool returns {success: true, abnormal_post_id: X, message: '異常記錄建立成功！', note: '...'}",
                 "tell_user": "異常記錄建立成功！ + include the note field if present + mention symptoms_added if any",
-                "operations_array": "MUST add operation to operations array with EXACT format: {'operation_name': 'abnormal_post_created', 'operation_data': json.dumps({'abnormal_post_id': X, 'pet_id': Y, 'status': 'pending_images'})}. Note: operation_data MUST be a JSON string created with json.dumps().",
-                "important": "CRITICAL: Use {'operation_name': ..., 'operation_data': json.dumps({...})} format. Do NOT use {operation_id, type, params} format. Do NOT mention abnormal_post_id or technical details in the reply field. The abnormal_post_id should ONLY be in operations array for frontend to use."
+                "operations_array": "MUST add operation to operations array with EXACT format: {'operation_type': 'abnormal_post_created', 'operation_data': json.dumps({'abnormal_post_id': X, 'pet_id': Y, 'status': 'pending_images'})}. Note: operation_data MUST be a JSON string created with json.dumps().",
+                "important": "CRITICAL: Use {'operation_type': ..., 'operation_data': json.dumps({...})} format. Do NOT use {operation_id, type, params} format. Do NOT mention abnormal_post_id or technical details in the reply field. The abnormal_post_id should ONLY be in operations array for frontend to use."
             },
             "user_responses": {
                 "missing_symptoms": "好的！請告訴我寵物出現了哪些症狀呢？",
@@ -220,8 +220,8 @@ def get_operation_list() -> Dict:
                 "on_success": "Tool returns {success: true, post_id: X, message: '貼文建立成功！', note: '...'}",
                 "on_missing_images": "Tool returns {error: '...', user_message: '發布社群貼文需要至少一張圖片。請先點擊聊天框左下角的相片按鈕選擇圖片，然後再告訴我發布貼文。', should_ask_user: true}. You MUST use the user_message in your reply to guide the user.",
                 "tell_user": "回覆格式：「貼文建立成功！\n\n內容：[content]\n地點：[location]\n標籤：[hashtags]\n\n您可以點擊下方按鈕前往貼文頁面，並標註寵物。」圖片已由前端自動上傳，不要提及圖片上傳。",
-                "operations_array": "MUST add operation to operations array with EXACT format: {'operation_name': 'post_created', 'operation_data': json.dumps({'post_id': X, 'status': 'pending_images'})}. Note: operation_data MUST be a JSON string created with json.dumps().",
-                "important": "CRITICAL: Use {'operation_name': ..., 'operation_data': json.dumps({...})} format. Do NOT use {operation_id, type, params} format. Do NOT mention post_id or technical details in the reply field. The post_id should ONLY be in operations array for frontend to use. Do NOT mention uploading photos - photos are handled by frontend automatically."
+                "operations_array": "MUST add operation to operations array with EXACT format: {'operation_type': 'post_created', 'operation_data': json.dumps({'post_id': X, 'status': 'pending_images'})}. Note: operation_data MUST be a JSON string created with json.dumps().",
+                "important": "CRITICAL: Use {'operation_type': ..., 'operation_data': json.dumps({...})} format. Do NOT use {operation_id, type, params} format. Do NOT mention post_id or technical details in the reply field. The post_id should ONLY be in operations array for frontend to use. Do NOT mention uploading photos - photos are handled by frontend automatically."
             },
             "user_responses": {
                 "missing_content": "好的！請告訴我：\n\n1. 貼文要寫什麼內容呢？\n2. 要標註地點嗎？（例如：台北大安森林公園）\n3. 要加上標籤嗎？（例如：#寵物日常 #可愛）\n\n另外，別忘了先點擊聊天框左下角的相片按鈕選擇要上傳的圖片喔！",
@@ -273,9 +273,9 @@ def get_operation_list() -> Dict:
                 "on_success_matched": "Tool returns {success: true, feed_id: X, is_existing: true, matched_feed: {...}, navigation: {path: '/feeds/{id}', destination: '飼料詳情頁面'}, message: '資料庫中已有符合的飼料：品牌 - 名稱'}",
                 "tell_user_new": "飼料資料建立成功！正在上傳圖片...",
                 "tell_user_matched": "已找到資料庫中符合的飼料：[品牌] - [名稱]。您可以點擊下方按鈕前往查看飼料詳情。",
-                "operations_array_new": "MUST add operation to operations array with EXACT format: {'operation_name': 'feed_created', 'operation_data': json.dumps({'feed_id': X, 'is_existing': False, 'status': 'pending_images'})}. Note: operation_data MUST be a JSON string created with json.dumps().",
-                "operations_array_matched": "MUST add TWO operations to operations array: 1) {'operation_name': 'feed_created', 'operation_data': json.dumps({'feed_id': X, 'is_existing': True, 'status': 'matched'})} AND 2) {'operation_name': 'navigate', 'operation_data': json.dumps({'path': '/feeds/{id}', 'destination': '飼料詳情頁面'})}. Both operation_data MUST be JSON strings.",
-                "important": "CRITICAL: Use {'operation_name': ..., 'operation_data': json.dumps({...})} format. Do NOT use {operation_id, type, params, requires_confirmation} format - frontend will convert automatically. Do NOT mention feed_id in reply field. Only in operations array. When is_existing=true, add BOTH feed_created AND navigate operations so user can navigate to the matched feed."
+                "operations_array_new": "MUST add operation to operations array with EXACT format: {'operation_type': 'feed_created', 'operation_data': json.dumps({'feed_id': X, 'is_existing': False, 'status': 'pending_images'})}. Note: operation_data MUST be a JSON string created with json.dumps().",
+                "operations_array_matched": "MUST add TWO operations to operations array: 1) {'operation_type': 'feed_created', 'operation_data': json.dumps({'feed_id': X, 'is_existing': True, 'status': 'matched'})} AND 2) {'operation_type': 'navigate', 'operation_data': json.dumps({'path': '/feeds/{id}', 'destination': '飼料詳情頁面'})}. Both operation_data MUST be JSON strings.",
+                "important": "CRITICAL: Use {'operation_type': ..., 'operation_data': json.dumps({...})} format. Do NOT use {operation_id, type, params, requires_confirmation} format - frontend will convert automatically. Do NOT mention feed_id in reply field. Only in operations array. When is_existing=true, add BOTH feed_created AND navigate operations so user can navigate to the matched feed."
             },
             "user_responses": {
                 "missing_images": "新增飼料需要上傳 2 張圖片。請先點擊聊天框左下角的相片按鈕選擇：\n1. 飼料包裝正面照片\n2. 營養標示照片（成分表）",

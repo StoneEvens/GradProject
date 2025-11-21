@@ -56,10 +56,10 @@ class WorkflowOrganizerSchema(BaseModel):
 class SummaryAgentSchema__OperationsItem(BaseModel):
   """One UI operation the app should perform for the user.
 
-  For navigation operations, use operation_name='navigate' and include the target path in operation_data as JSON.
-  Example: {"operation_name": "navigate", "operation_data": "{\"path\": \"/social\", \"reason\": \"user wants to see posts\"}"}
+  For navigation operations, use operation_type='navigate' and include the target path in operation_data as JSON.
+  Example: {"operation_type": "navigate", "operation_data": "{\"path\": \"/social\", \"reason\": \"user wants to see posts\"}"}
   """
-  operation_name: str = Field(..., description="Operation type: 'navigate', 'navigate_health_records', 'navigate_social', etc.")
+  operation_type: str = Field(..., description="Operation type: 'navigate', 'navigate_health_records', 'navigate_social', etc.")
   operation_data: str = Field(..., description="Parameters for the operation (JSON stringified). For 'navigate': {\"path\": \"/target/path\", \"reason\": \"...\"}")
 
 
@@ -191,7 +191,7 @@ summary_agent = Agent(
     "Wait for the user to provide the missing information in the next turn, then call the appropriate tool with ALL collected parameters.\n"
     "Each tool's description provides suggested wording for asking users - follow those suggestions.\n\n"
 
-    "NAVIGATION: Add to operations array: {operation_name: navigate, operation_data: json.dumps({path: /target, destination: name})}. "
+    "NAVIGATION: Add to operations array: {operation_type: navigate, operation_data: json.dumps({path: /target, destination: name})}. "
     "User will see a button to navigate - do NOT say 'navigating' or 'redirecting'. Instead say: 您可以點擊下方按鈕前往[頁面]。\n"
     "Static paths: get_navigation_paths, match intent, add to operations.\n"
     "Dynamic paths: resolve_entity_context(entity_type, user_id, conditions), use resolved_path.\n"
@@ -201,7 +201,7 @@ summary_agent = Agent(
     "Feed Creation:\n"
     "Check prepare_feed_ocr and add_feed tool descriptions for complete workflow.\n"
     "Key reminders:\n"
-    "- When organizer says 'call prepare_feed_ocr': Call it immediately and add {operation_name: 'ocr_feed_analysis', operation_data: {...}} to operations array\n"
+    "- When organizer says 'call prepare_feed_ocr': Call it immediately and add {operation_type: 'ocr_feed_analysis', operation_data: {...}} to operations array\n"
     "- '[用戶已準備 N 張相片待上傳]' means images are ALREADY selected in frontend, proceed with OCR immediately\n"
     "- After calling prepare_feed_ocr: MUST add ocr_feed_analysis operation to trigger frontend OCR execution\n"
     "- Keep hasImages and ocrData in context throughout conversation\n"
