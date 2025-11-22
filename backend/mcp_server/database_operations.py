@@ -185,7 +185,7 @@ def get_operation_list() -> Dict:
             }
         },
         "create_social_post": {
-            "description": "建立社群貼文（不含圖片）。【強制規則】1) 社群貼文必須包含至少一張圖片！檢查 context.hasImages 和 context.imageCount，如果為 false/0 則不呼叫此工具。2) 在呼叫此工具前，必須先向用戶顯示完整的貼文預覽（內容、地點、標籤、圖片數量）並明確詢問「確認發布嗎？」等待用戶明確回覆（如「確認」、「是」、「好」、「發布」）後才呼叫此工具。所有貼文自動設定為公開。",
+            "description": "建立社群貼文（不含圖片）。【強制規則】1) 社群貼文必須包含至少一張圖片！檢查 context.hasImages 和 context.imageCount，如果為 false/0 則不呼叫此工具。2) 在呼叫此工具前，必須先向用戶顯示完整的貼文預覽（內容、地點、標籤、圖片數量）並明確詢問「確認發布嗎？」等待用戶明確回覆（如「確認」、「是」、「好」、「發布」）後才呼叫此工具。3)不准自作主張詢問用戶 required_params 和 optional_params 以外的要素。4)非所有貼文是否公開是由使用者帳號隱私設定決定，你不用管。",
             "required_params": ["user_id", "content", "has_images"],
             "optional_params": ["location", "hashtags"],
             "param_details": {
