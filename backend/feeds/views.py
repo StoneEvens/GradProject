@@ -1617,3 +1617,108 @@ class AddFeedToUserView(APIView):
                 "error": f"加入飼料時發生錯誤：{str(e)}"
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
+class FeedImageUploadAPIView(APIView):
+    """為已存在的飼料上傳圖片（Agent 專用，類似 PostImageUploadAPIView）"""
+    permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
+
+    @transaction.atomic
+    def post(self, request, feed_id):
+        """
+        上傳圖片到已存在的飼料
+
+        POST 數據:
+        - images: 圖片檔案列表 (必填)
+        """
+        try:
+            user = request.user
+
+            # 1. 驗證飼料是否存在
+            try:
+                feed = Feed.objects.get(id=feed_id)
+            except Feed.DoesNotExist:
+                return Response({
+                    "success": False,
+                    "message": "飼料不存在"
+                }, status=status.HTTP_404_NOT_FOUND)
+
+            # 2. 驗證權限：只有建立者可以上傳圖片
+            if feed.created_by != user:
+                return Response({
+                    "success": False,
+                    "message": "您沒有權限為此飼料上傳圖片"
+                }, status=status.HTTP_403_FORBIDDEN)
+
+            # 3. 獲取上傳的圖片檔案
+            uploaded_image_files = request.FILES.getlist('images')
+
+            if not uploaded_image_files:
+                return Response({
+                    "success": False,
+                    "message": "請至少上傳一張圖片"
+                }, status=status.HTTP_400_BAD_REQUEST)
+
+            # 4. 上傳圖片到 Firebase（類似社群貼文）
+            firebase_service = FirebaseStorageService()
+            uploaded_images = []
+
+            for index, image_file in enumerate(uploaded_image_files):
+                # 第一張視為 front，第二張視為 nutrition
+                image_type = 'front' if index == 0 else 'nutrition'
+
+                try:
+                    # 上傳到 Firebase
+                    success, message, firebase_url, firebase_path = firebase_service.upload_feed_photo(
+                        feed_id=feed.id,
+                        photo_file=image_file,
+                        photo_type=image_type,
+                        pet_type=feed.pet_type
+                    )
+
+                    if not success:
+                        print(f"[FeedImageUpload] Failed to upload {image_type} image: {message}")
+                        continue
+
+                    # 建立 FeedImage 記錄
+                    from media.models import FeedImage
+                    feed_image = FeedImage.objects.create(
+                        feed=feed,
+                        image_type=image_type,
+                        firebase_url=firebase_url,
+                        firebase_path=firebase_path,
+                        original_filename=image_file.name,
+                        file_size=image_file.size,
+                        content_type_mime=image_file.content_type
+                    )
+
+                    uploaded_images.append({
+                        'id': feed_image.id,
+                        'firebase_url': firebase_url,
+                        'image_type': image_type
+                    })
+
+                    print(f"[FeedImageUpload] Uploaded {image_type} image for feed {feed_id}")
+
+                except Exception as e:
+                    print(f"[FeedImageUpload] Failed to upload {image_type} image: {str(e)}")
+
+            # 5. 返回結果
+            return Response({
+                "success": True,
+                "data": {
+                    "uploaded_count": len(uploaded_images),
+                    "images": uploaded_images
+                },
+                "message": f"成功上傳 {len(uploaded_images)} 張圖片"
+            }, status=status.HTTP_201_CREATED)
+
+        except Exception as e:
+            print(f"[FeedImageUpload] Error: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            return Response({
+                "success": False,
+                "message": f"上傳圖片失敗: {str(e)}"
+            }, status=status.HTTP_400_BAD_REQUEST)
+

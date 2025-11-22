@@ -321,16 +321,9 @@ const FeedPage = () => {
   // 處理新增飼料確認 (使用正確的 API)
   const handleCreateFeedConfirm = async (feedData) => {
     try {
-      // Step 1: OCR 處理
-      const ocrForm = new FormData();
-      ocrForm.append('image', feedData.nutritionImage);
-      const ocrRes = await axios.post('/feeds/ocr/', ocrForm, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      });
-      const nutrients = ocrRes.data.extracted_nutrients || {};
-      console.log("OCR 結果：", nutrients);
+      // CreateFeedModal 已經處理了 OCR，直接使用傳遞過來的 nutrients
+      const nutrients = feedData.nutrients || {};
+      console.log("使用者確認的營養成分：", nutrients);
 
       // 將圖片轉換為 base64
       const convertToBase64 = (file) => {
@@ -346,8 +339,12 @@ const FeedPage = () => {
       const frontImageBase64 = feedData.frontImage ? await convertToBase64(feedData.frontImage) : null;
       const nutritionImageBase64 = feedData.nutritionImage ? await convertToBase64(feedData.nutritionImage) : null;
 
-      // Step 2: 建立 Feed (使用正確的 API 端點)
-      const parseNumber = (val) => typeof val === 'number' ? val : 0;
+      // 建立 Feed (使用正確的 API 端點)
+      const parseNumber = (val) => {
+        const num = parseFloat(val);
+        return isNaN(num) ? 0 : num;
+      };
+
       const createFeedPayload = {
         name: feedData.feedName || '自訂飼料',
         brand: feedData.feedBrand || '未知品牌',

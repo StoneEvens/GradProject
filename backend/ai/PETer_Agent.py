@@ -19,7 +19,8 @@ mcp = HostedMCPTool(tool_config={
     "get_navigation_paths",
     "resolve_entity_context",
     "database_operation_list",
-    "perform_database_operation"
+    "perform_database_operation",
+    "prepare_feed_ocr"
   ],
   "require_approval": "never",
   "server_description": "MCP",
@@ -55,10 +56,10 @@ class WorkflowOrganizerSchema(BaseModel):
 class SummaryAgentSchema__OperationsItem(BaseModel):
   """One UI operation the app should perform for the user.
 
-  For navigation operations, use operation_name='navigate' and include the target path in operation_data as JSON.
-  Example: {"operation_name": "navigate", "operation_data": "{\"path\": \"/social\", \"reason\": \"user wants to see posts\"}"}
+  For navigation operations, use operation_type='navigate' and include the target path in operation_data as JSON.
+  Example: {"operation_type": "navigate", "operation_data": "{\"path\": \"/social\", \"reason\": \"user wants to see posts\"}"}
   """
-  operation_name: str = Field(..., description="Operation type: 'navigate', 'navigate_health_records', 'navigate_social', etc.")
+  operation_type: str = Field(..., description="Operation type: 'navigate', 'navigate_health_records', 'navigate_social', etc.")
   operation_data: str = Field(..., description="Parameters for the operation (JSON stringified). For 'navigate': {\"path\": \"/target/path\", \"reason\": \"...\"}")
 
 
@@ -97,7 +98,6 @@ class SummaryAgentSchema(BaseModel):
   """
   reply: str = Field(..., description="Natural language reply for the user (do not dump raw data here).")
   tutorial: str = Field(..., description="If a tutorial is applicable, set its id or slug; else use an empty string.")
-  operation_type: str = Field(..., description="High-level operation type for quick UI routing, e.g., 'navigate_social'.")
   operations: list[SummaryAgentSchema__OperationsItem] = Field(
     default_factory=list,
     description="List of concrete operations for the client to perform."
@@ -136,7 +136,20 @@ workflow_organizer = Agent(
     "Look through previous messages to collect any parameters the user has already provided.\n"
     "If REQUIRED information is missing from the conversation history, indicate in the Instruction that the next agent should ask the user BEFORE calling the tool.\n"
     "The tool descriptions also provide suggested wording for asking users - use those suggestions when available.\n"
-    "When the user modifies one parameter, remember to retain all other parameters they've already provided in earlier messages."
+    "When the user modifies one parameter, remember to retain all other parameters they've already provided in earlier messages.\n\n"
+
+    "IMPORTANT - Feed Creation:\n"
+    "When user wants to add feed: images → OCR → confirm → add_feed.\n"
+    "Check prepare_feed_ocr and add_feed tool descriptions for detailed workflow.\n"
+    "DO NOT call add_feed before OCR completes and user confirms.\n\n"
+    "CRITICAL - Image Status Understanding:\n"
+    "When you see '[用戶已準備 N 張相片待上傳]' in the message, it means:\n"
+    "- User HAS ALREADY selected images in the frontend\n"
+    "- Images are ready and cached in frontend\n"
+    "- You should IMMEDIATELY proceed with OCR (call prepare_feed_ocr)\n"
+    "- DO NOT ask user to upload images again\n"
+    "- DO NOT instruct next agent to ask for upload\n\n"
+    "Example: 'gooddog P1 [用戶已準備 2 張相片待上傳]' → Plan to call prepare_feed_ocr immediately"
   ),
   model="gpt-5.1",
   tools=[
@@ -160,6 +173,15 @@ summary_agent = Agent(
     "If the user's request is beyond available tools, simply state that the task cannot be completed with current capabilities. You do not need to assist with these requests or provide any information or suggestions. "
     "Return empty lists if none. Do NOT invent ids/titles or use dynamic property names.\n\n"
 
+    "IMPORTANT - User Communication Style:\n"
+    "ALWAYS communicate in a friendly, conversational manner. Use natural language instead of technical terms:\n"
+    "- Say '貼文內容' NOT 'content'\n"
+    "- Say '地點' NOT 'location'\n"
+    "- Say '標籤' NOT 'hashtags' (but #標籤 is OK)\n"
+    "- NEVER mention: user_id, post_id, media_urls, or any technical parameter names\n"
+    "- NEVER ask for 'media_urls' (this doesn't exist - just remind users to select images using the photo button)\n"
+    "Follow the user_responses guidance in tool descriptions for proper wording.\n\n"
+
     "IMPORTANT - Information Gathering & Memory:\n"
     "If the organizer's Instruction says to ask the user for information, you MUST ask in the reply field and NOT call any tools yet.\n"
     "ALWAYS review the ENTIRE conversation history to collect parameters the user has already provided in previous messages.\n"
@@ -168,12 +190,27 @@ summary_agent = Agent(
     "Wait for the user to provide the missing information in the next turn, then call the appropriate tool with ALL collected parameters.\n"
     "Each tool's description provides suggested wording for asking users - follow those suggestions.\n\n"
 
-    "NAVIGATION: Add to operations array: {operation_name: navigate, operation_data: json.dumps({path: /target, destination: name})}. "
+    "NAVIGATION: Add to operations array: {operation_type: navigate, operation_data: json.dumps({path: /target, destination: name})}. "
     "User will see a button to navigate - do NOT say 'navigating' or 'redirecting'. Instead say: 您可以點擊下方按鈕前往[頁面]。\n"
     "Static paths: get_navigation_paths, match intent, add to operations.\n"
     "Dynamic paths: resolve_entity_context(entity_type, user_id, conditions), use resolved_path.\n"
     "Not found: inform user, suggest alternatives.\n"
-    "Entities: social_post, feed, pet, user, health_report, disease_archive, abnormal_post, plan"
+    "Entities: social_post, feed, pet, user, health_report, disease_archive, abnormal_post, plan\n\n"
+
+    "Feed Creation:\n"
+    "Check prepare_feed_ocr and add_feed tool descriptions for complete workflow.\n"
+    "Key reminders:\n"
+    "- When organizer says 'call prepare_feed_ocr': Call it immediately and add {operation_type: 'ocr_feed_analysis', operation_data: {...}} to operations array\n"
+    "- '[用戶已準備 N 張相片待上傳]' means images are ALREADY selected in frontend, proceed with OCR immediately\n"
+    "- After calling prepare_feed_ocr: MUST add ocr_feed_analysis operation to trigger frontend OCR execution\n"
+    "- Keep hasImages and ocrData in context throughout conversation\n\n"
+    "CRITICAL - After calling perform_database_operation('add_feed', ...):\n"
+    "1. Extract feed_id and is_existing from the tool's return value\n"
+    "2. ALWAYS add feed_created operation to operations array with this EXACT format:\n"
+    "   {operation_name: 'feed_created', operation_data: json.dumps({feed_id: X, is_existing: true/false, status: 'matched' or 'pending_images'})}\n"
+    "3. If is_existing=true: ALSO add navigate operation: {operation_name: 'navigate', operation_data: json.dumps({path: '/feeds/{feed_id}', destination: '飼料詳情頁面'})}\n"
+    "4. If is_existing=false: Only add feed_created operation (frontend handles image upload automatically)\n"
+    "DO NOT add empty operation_data - it MUST contain at least feed_id, is_existing, and status!"
   ),
   model="gpt-5.1",
   tools=[

@@ -116,6 +116,216 @@
       "has_tutorial": false,
       "tutorial_type": null,
       "category": "pet"
+    },
+    {
+      "id": 7,
+      "name": "帳號隱私設定",
+      "description": "設定帳號是否公開，保護個人隱私",
+      "keywords": ["帳號設定", "帳號隱私", "不公開帳號", "私人帳號"],
+      "use_cases": [
+        "如何設定帳號不公開",
+        "帳號隱私在哪裡設定",
+        "將帳號變成私人"
+      ],
+      "answer": "點選右下角「設定」，在帳號設定中找到「帳號隱私」，將公開狀態切換為不公開即可。",
+      "has_tutorial": false,
+      "tutorial_type": null,
+      "category": "setting"
+    },
+    {
+      "id": 8,
+      "name": "查看收藏與按讚內容",
+      "description": "在設定頁面查看收藏或按讚的貼文與文章",
+      "keywords": ["收藏", "按讚", "我的互動", "瀏覽收藏"],
+      "use_cases": [
+        "查看收藏的貼文",
+        "查看按讚的文章",
+        "在哪裡看我收藏的論壇文"
+      ],
+      "answer": "點選右下角「設定」，在「我的互動」區塊即可看到你按讚或收藏過的貼文與論壇文章。",
+      "has_tutorial": false,
+      "tutorial_type": null,
+      "category": "setting"
+    },
+    {
+      "id": 9,
+      "name": "更改系統語言",
+      "description": "調整系統介面的語言設定",
+      "keywords": ["語言", "系統語言", "更換語言"],
+      "use_cases": [
+        "如何更改語言",
+        "系統語言在哪裡換",
+        "切換介面語言"
+      ],
+      "answer": "點選右下角「設定」，在「系統語言」區塊中選擇所需語言即可。",
+      "has_tutorial": false,
+      "tutorial_type": null,
+      "category": "setting"
+    },
+    {
+      "id": 10,
+      "name": "編輯寵物資料",
+      "description": "修改寵物主頁中的基本資訊",
+      "keywords": ["寵物資料", "編輯寵物", "修改資料", "寵物資訊"],
+      "use_cases": [
+        "更改寵物基本資料",
+        "在哪裡編輯寵物資訊",
+        "修改寵物生日或名稱"
+      ],
+      "answer": "點選下方寵物手掌圖示進入寵物主頁，點選「編輯資料」，即可調整寵物的基本資訊。",
+      "has_tutorial": false,
+      "tutorial_type": null,
+      "category": "pet"
+    },
+    {
+      "id": 11,
+      "name": "查看寵物相關貼文",
+      "description": "在寵物主頁閱覽被標註該寵物的所有貼文",
+      "keywords": ["相關貼文", "寵物貼文", "標註寵物"],
+      "use_cases": [
+        "查看與寵物相關的貼文",
+        "如何讓貼文出現在寵物主頁",
+        "標註寵物的貼文在哪看"
+      ],
+      "answer": "進入寵物主頁後，在發布貼文時標註該寵物，貼文即會出現在寵物主頁的「相關貼文」區域。",
+      "has_tutorial": false,
+      "tutorial_type": null,
+      "category": "pet"
+    },
+    {
+      "id": 12,
+      "name": "找不到以前的相關貼文",
+      "description": "說明為何寵物主頁無法顯示過去的貼文",
+      "keywords": ["貼文不見", "找不到貼文", "相關貼文", "寵物標註"],
+      "use_cases": [
+        "為什麼寵物主頁看不到貼文",
+        "貼文沒有顯示在寵物頁面",
+        "補標註寵物貼文"
+      ],
+      "answer": "只有在發布貼文時標註該寵物，貼文才會顯示於「相關貼文」。若貼文已發布，可前往個人頁面找到貼文後補上寵物標註即可。",
+      "has_tutorial": false,
+      "tutorial_type": null,
+      "category": "pet"
+    },
+    {
+      "id": 13,
+      "name": "建立疾病檔案",
+      "description": "在寵物主頁建立完整病史，供就醫與健康評估使用",
+      "keywords": ["疾病檔案", "寵物病史", "AI統整", "異常紀錄"],
+      "use_cases": [
+        "建立寵物病史",
+        "如何填寫疾病檔案",
+        "疾病檔案怎麼用"
+      ],
+      "answer": "點選寵物手掌圖示進入寵物主頁，選擇「疾病檔案」。依序填寫病狀與日期，選擇症狀持續時間與相關異常紀錄後，AI將自動生成描述，確認內容後即可完成建立。",
+      "has_tutorial": false,
+      "tutorial_type": null,
+      "category": "pet"
+    },
+    {
+      "id": 14,
+      "name": "發布論壇文章",
+      "description": "將疾病檔案公開發布為論壇文章",
+      "keywords": ["論壇發布", "病史公開", "發布文章"],
+      "use_cases": [
+        "如何發布論壇文章",
+        "疾病檔案怎麼公開",
+        "論壇貼文在哪裡發布"
+      ],
+      "answer": "流程為「建立異常紀錄 → 疾病檔案 → 論壇貼文」。在寵物主頁點選「疾病檔案」，選擇想公開的檔案並點擊右上角「公開發布」。",
+      "has_tutorial": false,
+      "tutorial_type": null,
+      "category": "forum"
+    },
+    {
+      "id": 15,
+      "name": "更改論壇文章公開狀態",
+      "description": "將已發布的論壇文章改為私人或刪除",
+      "keywords": ["不公開文章", "刪除文章", "論壇管理"],
+      "use_cases": [
+        "將論壇文章改成不公開",
+        "怎麼刪除論壇文章",
+        "調整文章隱私"
+      ],
+      "answer": "前往下方最左側圖示進入「寵物論壇」，點選欲更改文章右上角的三個點，可選擇刪除或轉為私人。",
+      "has_tutorial": false,
+      "tutorial_type": null,
+      "category": "forum"
+    },
+    {
+      "id": 16,
+      "name": "查看異常紀錄",
+      "description": "在寵物主頁瀏覽所有異常紀錄",
+      "keywords": ["異常紀錄", "寵物症狀", "健康狀況"],
+      "use_cases": [
+        "查看異常紀錄",
+        "寵物症狀紀錄在哪裡看",
+        "紀錄寵物異常"
+      ],
+      "answer": "點選寵物手掌圖示進入寵物主頁，即可看到目前所有的異常紀錄。",
+      "has_tutorial": false,
+      "tutorial_type": null,
+      "category": "pet"
+    },
+    {
+      "id": 17,
+      "name": "上傳健康報告",
+      "description": "利用OCR圖片辨識功能，自動分析健康報告內容",
+      "keywords": ["健康報告", "OCR辨識", "檢查數值", "上傳報告"],
+      "use_cases": [
+        "如何上傳健康報告",
+        "OCR辨識健康檢查",
+        "寵物健康報告怎麼看"
+      ],
+      "answer": "點選寵物主頁的「健康報告」，填寫檢查類型、時間與地點後，上傳健康檢查文件至 OCR 辨識，確認資料無誤後按下「確認上傳」。",
+      "has_tutorial": false,
+      "tutorial_type": null,
+      "category": "pet"
+    },
+    {
+      "id": 18,
+      "name": "健康報告類型說明",
+      "description": "說明健康報告中包含的檢查項目及內容",
+      "keywords": ["健康檢查", "全血記數", "血液生化", "尿液分析", "其他檢查"],
+      "use_cases": [
+        "健康報告有哪些種類",
+        "什麼是全血記數",
+        "寵物健康檢查內容"
+      ],
+      "answer": "健康報告包含全血記數、血液生化、尿液分析及其他檢查。其他檢查包括X光片、醫師診斷報告及其他相關文件。",
+      "has_tutorial": false,
+      "tutorial_type": null,
+      "category": "pet"
+    },
+    {
+      "id": 19,
+      "name": "個人頁面功能",
+      "description": "管理個人資料並查看已發布內容",
+      "keywords": ["個人頁面", "編輯個人資料", "查看貼文", "論壇文章"],
+      "use_cases": [
+        "在哪編輯個人資料",
+        "查看我發布的貼文",
+        "查看我的論壇文章"
+      ],
+      "answer": "點選右上角個人圖像即可進入個人頁面，可編輯個人資料並查看所有發布過的貼文與論壇文章。",
+      "has_tutorial": false,
+      "tutorial_type": null,
+      "category": "setting"
+    },
+    {
+      "id": 20,
+      "name": "AI Agent-Peter專員",
+      "description": "系統內的AI導覽員，可協助問題解決與操作指引",
+      "keywords": ["AI Agent", "Peter", "操作導覽", "AI客服"],
+      "use_cases": [
+        "如何與AI專員互動",
+        "操作不會時怎麼辦",
+        "AI導覽在哪裡"
+      ],
+      "answer": "Peter為系統的AI導覽專員，有任何操作疑問可在主頁點選貓咪圖示，透過文字、語音或圖片描述問題，亦可進行逐步操作引導。",
+      "has_tutorial": false,
+      "tutorial_type": null,
+      "category": "system"
     }
   ]
 }

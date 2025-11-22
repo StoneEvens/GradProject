@@ -80,12 +80,15 @@ def get_operation_list() -> Dict:
             "response_handling": {
                 "on_success": "Tool returns {success: true, abnormal_post_id: X, message: '異常記錄建立成功！', note: '...'}",
                 "tell_user": "異常記錄建立成功！ + include the note field if present + mention symptoms_added if any",
-                "operations_array": "MUST add operation: {operation_name: 'abnormal_post_created', operation_data: json.dumps({abnormal_post_id: X, pet_id: Y, status: 'pending_images'})}",
-                "important": "Do NOT mention abnormal_post_id or technical details in the reply field. The abnormal_post_id should ONLY be in operations array for frontend to use."
+                "operations_array": "MUST add operation to operations array with EXACT format: {'operation_type': 'abnormal_post_created', 'operation_data': json.dumps({'abnormal_post_id': X, 'pet_id': Y, 'status': 'pending_images'})}. Note: operation_data MUST be a JSON string created with json.dumps().",
+                "important": "CRITICAL: Use {'operation_type': ..., 'operation_data': json.dumps({...})} format. Do NOT use {operation_id, type, params} format. Do NOT mention abnormal_post_id or technical details in the reply field. The abnormal_post_id should ONLY be in operations array for frontend to use.",
+                "confirmation_marker": "CRITICAL: When displaying final_confirmation_with_images message to user, you MUST add special marker '[[NEEDS_CONFIRMATION_WITH_IMAGES]]' at the END of your reply text. This marker tells frontend to display cached images in AI message bubble. Example: 'Your confirmation message here\n\n[[NEEDS_CONFIRMATION_WITH_IMAGES]]'. This marker will be hidden from user but frontend will detect it."
             },
             "user_responses": {
                 "missing_symptoms": "好的！請告訴我寵物出現了哪些症狀呢？",
-                "want_upload_images": "異常記錄已建立，您也可以上傳圖片來記錄寵物的狀況喔！"
+                "want_upload_images": "異常記錄已建立，您也可以上傳圖片來記錄寵物的狀況喔！",
+                "final_confirmation_with_images": "請確認異常記錄資訊：\n\n- 寵物名稱：{pet_name}\n- 症狀：{symptoms}\n- 異常描述：{content}\n- 體重：{weight} 公斤\n- 體溫：{body_temperature} 度\n- 飲水量：{water_amount} 毫升\n- 是否就醫：{is_emergency}\n\n已選擇圖片：{imageCount} 張（請查看下方我展示的圖片）\n\n如果所有資訊和圖片都確認無誤，請回覆「確認」或「是」。",
+                "final_confirmation_without_images": "請確認異常記錄資訊：\n\n- 寵物名稱：{pet_name}\n- 症狀：{symptoms}\n- 異常描述：{content}\n- 體重：{weight} 公斤\n- 體溫：{body_temperature} 度\n- 飲水量：{water_amount} 毫升\n- 是否就醫：{is_emergency}\n\n如果資訊正確，請回覆「確認」或「是」。"
             }
         },
         "create_disease_archive": {
@@ -181,12 +184,13 @@ def get_operation_list() -> Dict:
             }
         },
         "create_social_post": {
-            "description": "建立社群貼文（不含圖片）。所有貼文自動設定為公開，無需詢問或設定可見範圍。相片由前端上傳，只支援相片。",
-            "required_params": ["user_id", "content"],
+            "description": "建立社群貼文（不含圖片）。【強制規則】1) 社群貼文必須包含至少一張圖片！檢查 context.hasImages 和 context.imageCount，如果為 false/0 則不呼叫此工具。2) 在呼叫此工具前，必須先向用戶顯示完整的貼文預覽（內容、地點、標籤、圖片數量）並明確詢問「確認發布嗎？」等待用戶明確回覆（如「確認」、「是」、「好」、「發布」）後才呼叫此工具。3)不准自作主張詢問用戶 required_params 和 optional_params 以外的要素。4)非所有貼文是否公開是由使用者帳號隱私設定決定，你不用管。",
+            "required_params": ["user_id", "content", "has_images"],
             "optional_params": ["location", "hashtags"],
             "param_details": {
                 "user_id": "用戶ID (整數)",
                 "content": "貼文內容 (字串，必填)",
+                "has_images": "用戶是否已選擇圖片 (布林值，必填且必須為 true)。從 context.hasImages 或 context.imageCount 判斷。如果為 false 或 0，不要呼叫此工具，必須先提示用戶選擇圖片！",
                 "location": "地點 (字串，例如: '台北大安森林公園')",
                 "hashtags": "標籤 (字串，逗號分隔，例如: '寵物,日常,可愛' 或 '#寵物,#日常')"
             },
@@ -202,12 +206,20 @@ def get_operation_list() -> Dict:
                 "images": "此參數不存在！圖片由前端另外上傳，不要在此工具中處理"
             },
             "notes": [
+                "【最重要規則 1】呼叫此工具前必須先檢查 context.hasImages 和 context.imageCount！",
+                "【最重要規則 2】呼叫此工具前必須先向用戶顯示完整預覽並等待明確確認！",
+                "如果 hasImages=false 或 imageCount=0，絕對不要呼叫此工具！",
+                "必須先用 user_responses.missing_images 提示用戶選擇圖片！",
+                "收集完所有資訊後，使用 user_responses.final_confirmation 顯示預覽並詢問確認",
+                "等待用戶明確回覆「確認」、「是」、「好」、「發布」等確認詞彙",
+                "只有在用戶明確確認後才呼叫此工具",
                 "此操作只建立貼文結構，不包含圖片",
                 "相片上傳由前端處理，只支援相片不支援影片",
                 "hashtags 可從參數提供或從 content 中的 #標籤 自動解析",
                 "所有貼文都是公開的，沒有可見範圍設定功能"
             ],
             "limitations": [
+                "【強制限制】所有社群貼文都必須包含至少一張圖片，沒有圖片絕對不能發布貼文",
                 "絕對不要詢問可見範圍（如「公開」、「好友」或「私密」）- 系統不支援此功能，所有貼文都是公開的",
                 "不支援標註寵物功能",
                 "不支援設定留言權限或互動設定",
@@ -215,14 +227,90 @@ def get_operation_list() -> Dict:
             ],
             "response_handling": {
                 "on_success": "Tool returns {success: true, post_id: X, message: '貼文建立成功！', note: '...'}",
+                "on_missing_images": "Tool returns {error: '...', user_message: '發布社群貼文需要至少一張圖片。請先點擊聊天框左下角的相片按鈕選擇圖片，然後再告訴我發布貼文。', should_ask_user: true}. You MUST use the user_message in your reply to guide the user.",
                 "tell_user": "回覆格式：「貼文建立成功！\n\n內容：[content]\n地點：[location]\n標籤：[hashtags]\n\n您可以點擊下方按鈕前往貼文頁面，並標註寵物。」圖片已由前端自動上傳，不要提及圖片上傳。",
-                "operations_array": "MUST add operation: {operation_name: 'post_created', operation_data: json.dumps({post_id: X, status: 'pending_images'})}",
-                "important": "Do NOT mention post_id or technical details in the reply field. The post_id should ONLY be in operations array for frontend to use. Do NOT mention uploading photos - photos are handled by frontend automatically."
+                "operations_array": "MUST add operation to operations array with EXACT format: {'operation_type': 'post_created', 'operation_data': json.dumps({'post_id': X, 'status': 'pending_images'})}. Note: operation_data MUST be a JSON string created with json.dumps().",
+                "important": "CRITICAL: Use {'operation_type': ..., 'operation_data': json.dumps({...})} format. Do NOT use {operation_id, type, params} format. Do NOT mention post_id or technical details in the reply field. The post_id should ONLY be in operations array for frontend to use. Do NOT mention uploading photos - photos are handled by frontend automatically.",
+                "confirmation_marker": "CRITICAL: When displaying final_confirmation message to user (using final_confirmation template), you MUST add special marker '[[NEEDS_CONFIRMATION_WITH_IMAGES]]' at the END of your reply text. This marker tells frontend to display cached images in AI message bubble. Example: 'Your confirmation message here\n\n[[NEEDS_CONFIRMATION_WITH_IMAGES]]'. This marker will be hidden from user but frontend will detect it."
             },
             "user_responses": {
-                "missing_content": "好的！請告訴我貼文的內容是什麼呢？您也可以選擇性地提供地點或標籤（hashtags）。",
-                "ask_guidance": "重要：只詢問以下資訊：\n1）貼文內容（必需）\n2）地點（可選）\n3）標籤/hashtags（可選）\n\n絕對不要詢問：可見範圍、隱私設定、留言權限、寵物標註等。系統不支援這些功能。"
+                "missing_content": "好的！請告訴我：\n\n1. 貼文要寫什麼內容呢？\n2. 要標註地點嗎？（例如：台北大安森林公園）\n3. 要加上標籤嗎？（例如：#寵物日常 #可愛）\n\n另外，社群貼文一定要有圖片喔！請先點擊聊天框左下角的相片按鈕選擇要上傳的圖片。",
+                "missing_images": "社群貼文一定要包含圖片才能發布！\n\n請先點擊聊天框左下角的相片按鈕選擇圖片，然後再告訴我發布貼文。",
+                "final_confirmation": "請確認您的貼文資訊：\n\n內容：{content}\n\n地點：{location}\n\n標籤：{hashtags}\n\n已選擇圖片：{imageCount} 張（請查看下方我展示的圖片）\n\n如果所有資訊和圖片都確認無誤，請回覆「確認」、「是」或「發布」。",
+                "ask_guidance": "重要規則：\n1. 檢查 context.hasImages 和 context.imageCount\n2. 如果 hasImages=false 或 imageCount=0，必須使用 missing_images 回應\n3. 絕對不要在沒有圖片時呼叫 create_social_post 工具\n4. 收集完所有資訊後，使用 final_confirmation 模板向用戶展示完整預覽\n5. 明確提示用戶查看圖片預覽區域\n6. 等待用戶明確確認（「確認」、「是」、「好」、「發布」等）後才呼叫 create_social_post 工具\n\n以口語化方式詢問以下資訊：\n1）貼文內容（必需，用「貼文要寫什麼內容」而非「content」）\n2）地點（可選，用「要標註地點嗎」而非「location」）\n3）標籤（可選，用「要加上標籤嗎」或「hashtags」都可以）\n4）圖片（必需！必須提醒選擇圖片）\n\n絕對不要：\n- 在沒有圖片（hasImages=false）時呼叫 create_social_post\n- 在用戶未明確確認前呼叫 create_social_post\n- 提及 user_id、post_id 等技術術語\n- 詢問 media_urls（這不存在，只需提醒用戶選擇圖片）\n- 詢問可見範圍、隱私設定、留言權限、寵物標註（系統不支援）\n- 使用原始變數名稱與用戶對話\n- 使用表情符號"
             }
+        },
+        "add_feed": {
+            "description": "新增飼料資料（包含完整資訊和營養成分）。重要：此操作必須在用戶明確確認所有資訊後才執行！請先向用戶顯示完整的飼料資訊（包括所有營養成分），並明確詢問「資訊正確嗎？」等待用戶回覆確認後再呼叫此工具。圖片由前端另外上傳。系統具備智能匹配功能，會自動檢查資料庫中是否已存在相同營養成分的飼料。",
+            "required_params": ["user_id", "pet_type", "has_images", "name", "brand", "price"],
+            "optional_params": [
+                "protein", "fat", "carbohydrate",
+                "calcium", "phosphorus", "magnesium", "sodium"
+            ],
+            "param_details": {
+                "user_id": "用戶ID (整數)",
+                "pet_type": "適用寵物類型 (字串: 'dog' 或 'cat')",
+                "has_images": "用戶是否已選擇圖片 (布林值，從上下文判斷。必須是 2 張圖片：包裝照片和營養標示照片)",
+                "name": "飼料名稱 (字串)",
+                "brand": "品牌 (字串)",
+                "price": "價格 (浮點數)",
+                "protein": "蛋白質 (浮點數，%)",
+                "fat": "脂肪 (浮點數，%)",
+                "carbohydrate": "碳水化合物/纖維 (浮點數，%)",
+                "calcium": "鈣 (浮點數，%)",
+                "phosphorus": "磷 (浮點數，%)",
+                "magnesium": "鎂 (浮點數，%)",
+                "sodium": "鈉 (浮點數，%)"
+            },
+            "FORBIDDEN_params": {
+                "visibility": "此參數不存在",
+                "privacy": "此參數不存在",
+                "is_public": "此參數不存在",
+                "is_private": "此參數不存在"
+            },
+            "notes": [
+                "此操作建立完整的飼料記錄（包含營養成分）",
+                "圖片需透過前端另外上傳",
+                "必須在用戶確認所有資訊後才呼叫此操作",
+                "營養成分來自 OCR 辨識",
+                "【重要】所有營養成分參數都是必填的：protein, fat, carbohydrate, calcium, phosphorus, magnesium, sodium",
+                "如果 OCR 未辨識出某個營養成分，其值會自動為 0（前端已處理），請直接使用 ocrData 中的所有值",
+                "絕對不要省略任何營養成分參數，也不要發明數值，直接使用 ocrData 提供的值",
+                "【智能匹配】系統會根據所有營養成分（protein, fat, carbohydrate, calcium, phosphorus, magnesium, sodium）檢查是否已存在相同的飼料",
+                "如果匹配到已存在的飼料，會回傳 is_existing=true，此時不需要上傳圖片，直接結束流程"
+            ],
+            "response_handling": {
+                "on_success_new": "Tool returns {success: true, feed_id: X, is_existing: false, message: '飼料建立成功！'}",
+                "on_success_matched": "Tool returns {success: true, feed_id: X, is_existing: true, matched_feed: {...}, navigation: {path: '/feeds/{id}', destination: '飼料詳情頁面'}, message: '資料庫中已有符合的飼料：品牌 - 名稱'}",
+                "tell_user_new": "飼料資料建立成功！正在上傳圖片...",
+                "tell_user_matched": "已找到資料庫中符合的飼料：[品牌] - [名稱]。您可以點擊下方按鈕前往查看飼料詳情。",
+                "operations_array_new": "MUST add operation to operations array with EXACT format: {'operation_type': 'feed_created', 'operation_data': json.dumps({'feed_id': X, 'is_existing': False, 'status': 'pending_images'})}. Note: operation_data MUST be a JSON string created with json.dumps().",
+                "operations_array_matched": "MUST add TWO operations to operations array: 1) {'operation_type': 'feed_created', 'operation_data': json.dumps({'feed_id': X, 'is_existing': True, 'status': 'matched'})} AND 2) {'operation_type': 'navigate', 'operation_data': json.dumps({'path': '/feeds/{id}', 'destination': '飼料詳情頁面'})}. Both operation_data MUST be JSON strings.",
+                "important": "CRITICAL: Use {'operation_type': ..., 'operation_data': json.dumps({...})} format. Do NOT use {operation_id, type, params, requires_confirmation} format - frontend will convert automatically. Do NOT mention feed_id in reply field. Only in operations array. When is_existing=true, add BOTH feed_created AND navigate operations so user can navigate to the matched feed.",
+                "confirmation_marker": "CRITICAL: When displaying final_confirmation message to user (using final_confirmation template), you MUST add special marker '[[NEEDS_CONFIRMATION_WITH_IMAGES]]' at the END of your reply text. This marker tells frontend to display cached images in AI message bubble. Example: 'Your confirmation message here\n\n[[NEEDS_CONFIRMATION_WITH_IMAGES]]'. This marker will be hidden from user but frontend will detect it."
+            },
+            "user_responses": {
+                "missing_images": "新增飼料需要上傳 2 張圖片。請先點擊聊天框左下角的相片按鈕選擇：\n1. 飼料包裝正面照片\n2. 營養標示照片（成分表）",
+                "ask_pet_type": "請問這是狗的飼料還是貓的飼料？",
+                "ask_name_brand": "請告訴我飼料的品牌和名稱（如果您知道的話）",
+                "show_ocr_results_and_confirm": "營養成分辨識完成！\n\n辨識結果：\n- 蛋白質：{protein}%\n- 脂肪：{fat}%\n- 碳水化合物/纖維：{carbohydrate}%\n- 鈣：{calcium}%、磷：{phosphorus}%、鎂：{magnesium}%、鈉：{sodium}%\n\n請問這是狗的飼料還是貓的飼料？另外請告訴我品牌和名稱。",
+                "final_confirmation": "請確認飼料資訊：\n\n- 適用對象：{pet_type_zh}\n- 品牌：{brand}\n- 名稱：{name}\n- 價格：{price} 元\n- 蛋白質：{protein}%\n- 脂肪：{fat}%\n- 碳水化合物：{carbohydrate}%\n- 鈣：{calcium}%、磷：{phosphorus}%、鎂：{magnesium}%、鈉：{sodium}%\n\n已選擇圖片：2 張（請查看下方我展示的圖片：包裝照片和營養標示照片）\n\n如果所有資訊和圖片都確認無誤，請回覆「確認」或「是」。如果需要修改，請告訴我要修改哪些部分。",
+                "created_new": "飼料資料建立成功！正在上傳圖片...",
+                "matched_existing": "已找到資料庫中符合的飼料：[品牌] - [名稱]。您可以直接使用這筆資料，無需重複建立。"
+            },
+            "workflow": [
+                "【重要】完整工作流程，每個步驟都必須執行：",
+                "1. 用戶選擇圖片 → 確認 has_images=true 且 imageCount=2",
+                "2. 呼叫 prepare_feed_ocr() 並在 operations array 加入 ocr_feed_analysis",
+                "3. 告訴用戶：「收到圖片！正在辨識飼料資訊，請稍候...」",
+                "4. 等待前端回傳 OCR 結果（ocrCompleted=true, ocrData 包含所有營養成分）",
+                "5. 收到 OCR 結果後，使用 show_ocr_results_and_confirm 模板顯示完整辨識結果並詢問 pet_type, name, brand",
+                "6. 收集 pet_type, name, brand 後，使用 final_confirmation 模板顯示完整資訊並明確詢問「資訊正確嗎？」",
+                "7. 【關鍵】等待用戶明確確認（例如回覆「確認」、「是」、「正確」、「沒問題」等）",
+                "8. 用戶確認後才呼叫 perform_database_operation('add_feed', {...完整資料...})",
+                "9a. 如果 is_existing=false：告知「飼料資料建立成功！正在上傳圖片...」，前端會自動上傳",
+                "9b. 如果 is_existing=true：告知已匹配到現有飼料，加入 navigate operation"
+            ]
         }
     }
     return {
@@ -259,6 +347,13 @@ def perform_operation(operation: str, data: Dict) -> Dict:
         elif operation == "create_social_post":
             result = _create_social_post(data)
             logger.info(f"[perform_operation] create_social_post result: success={result.get('success')}")
+            return result
+        elif operation == "add_feed":
+            logger.info(f"[perform_operation] ===== STARTING add_feed =====")
+            logger.info(f"[perform_operation] add_feed data: {data}")
+            result = _add_feed(data)
+            logger.info(f"[perform_operation] add_feed result: {result}")
+            logger.info(f"[perform_operation] ===== FINISHED add_feed =====")
             return result
         else:
             error_msg = f"Operation '{operation}' is not implemented"
@@ -1156,17 +1251,17 @@ def _create_social_post(data: Dict) -> Dict:
     Returns:
         Dict: 操作結果
     """
-    logger.info(f"[_create_social_post] Starting with data: user_id={data.get('user_id')}, content_length={len(data.get('content', ''))}")
+    logger.info(f"[_create_social_post] Starting with data: user_id={data.get('user_id')}, content_length={len(data.get('content', ''))}, has_images={data.get('has_images')}")
 
     # 驗證必要欄位
-    required_fields = ["user_id", "content"]
+    required_fields = ["user_id", "content", "has_images"]
     missing_fields = [f for f in required_fields if f not in data]
     if missing_fields:
         logger.warning(f"[_create_social_post] Missing fields: {missing_fields}")
         return {
             "error": "Missing required fields",
             "missing_fields": missing_fields,
-            "help": "content (貼文內容) is required"
+            "help": "user_id, content, and has_images are required"
         }
 
     # 驗證內容不為空
@@ -1176,6 +1271,16 @@ def _create_social_post(data: Dict) -> Dict:
         return {
             "error": "Content is required and cannot be empty",
             "missing_fields": ["content"]
+        }
+
+    # 檢查用戶是否已選擇圖片（社群貼文必須帶圖片）
+    has_images = data.get("has_images")
+    if not has_images:
+        logger.warning(f"[_create_social_post] User has not selected images")
+        return {
+            "error": "社群貼文必須包含圖片",
+            "user_message": "發布社群貼文需要至少一張圖片。請先點擊聊天框左下角的相片按鈕選擇圖片，然後再告訴我發布貼文。",
+            "should_ask_user": True
         }
 
     # 獲取用戶
@@ -1256,4 +1361,200 @@ def _create_social_post(data: Dict) -> Dict:
                 "username": user.username
             }
         }
+    }
+
+
+# ==================== Feed Operations ====================
+
+@transaction.atomic
+def _add_feed(data: Dict) -> Dict:
+    """
+    建立飼料記錄（包含完整資訊和營養成分）
+
+    此函數應在用戶確認所有資訊（包含 OCR 結果）後才被呼叫
+
+    Args:
+        data: 包含飼料資訊的字典
+
+    Returns:
+        Dict: 操作結果
+    """
+    logger.info(f"[_add_feed] Creating feed with complete data: user_id={data.get('user_id')}, pet_type={data.get('pet_type')}")
+
+    # 1. 驗證必要欄位
+    required_fields = ["user_id", "pet_type", "has_images", "name", "brand", "price"]
+    missing_fields = [f for f in required_fields if f not in data or data.get(f) is None or data.get(f) == ""]
+    if missing_fields:
+        logger.warning(f"[_add_feed] Missing fields: {missing_fields}")
+        # 產生友善的錯誤訊息
+        field_names = {
+            "user_id": "用戶ID",
+            "pet_type": "寵物類型",
+            "has_images": "圖片",
+            "name": "飼料名稱",
+            "brand": "品牌",
+            "price": "價格"
+        }
+        missing_names = [field_names.get(f, f) for f in missing_fields]
+        return {
+            "error": "Missing required fields",
+            "missing_fields": missing_fields,
+            "user_message": f"請提供以下資訊：{', '.join(missing_names)}",
+            "help": "name, brand, price 為必填欄位"
+        }
+
+    # 2. 檢查是否有圖片
+    has_images = data.get("has_images")
+    if not has_images:
+        logger.warning(f"[_add_feed] User has not selected images")
+        return {
+            "error": "飼料必須包含圖片",
+            "user_message": "新增飼料需要上傳圖片。請先點擊聊天框左下角的相片按鈕選擇：\n1. 飼料包裝正面照片\n2. 營養標示照片（成分表）",
+            "should_ask_user": True
+        }
+
+    # 3. 驗證 pet_type
+    pet_type = data.get("pet_type", "").lower()
+    if pet_type not in ['dog', 'cat']:
+        logger.warning(f"[_add_feed] Invalid pet_type: {pet_type}")
+        return {
+            "error": "Invalid pet_type",
+            "user_message": "請指定寵物類型為「狗」或「貓」。"
+        }
+
+    # 4. 獲取用戶
+    try:
+        user = CustomUser.objects.get(id=data["user_id"])
+        logger.debug(f"[_add_feed] Found user: {user.username}")
+    except CustomUser.DoesNotExist:
+        logger.error(f"[_add_feed] User {data['user_id']} not found")
+        return {"error": f"User with id {data['user_id']} not found"}
+
+    # 5. 解析營養成分（OCR 提供，若為 None 則設為 0）
+    def parse_float(value):
+        """將值轉換為浮點數，None 或無效值轉為 0.0"""
+        if value is None or value == "":
+            return 0.0
+        try:
+            return float(value)
+        except (TypeError, ValueError):
+            return 0.0
+
+    protein = parse_float(data.get("protein"))
+    fat = parse_float(data.get("fat"))
+    carbohydrate = parse_float(data.get("carbohydrate"))
+    calcium = parse_float(data.get("calcium"))
+    phosphorus = parse_float(data.get("phosphorus"))
+    magnesium = parse_float(data.get("magnesium"))
+    sodium = parse_float(data.get("sodium"))
+
+    # 6. 獲取必填資訊（已在步驟 1 驗證存在）
+    name = data.get("name").strip()
+    brand = data.get("brand").strip()
+    price = parse_float(data.get("price"))
+
+    # 7. 智能匹配：先檢查 brand+name+pet_type，再檢查營養成分
+    from feeds.models import Feed
+
+    # 7.1 優先檢查：是否已存在相同 brand+name+pet_type 的飼料（避免 unique_together 衝突）
+    existing_by_identity = Feed.objects.filter(
+        name=name,
+        brand=brand,
+        pet_type=pet_type
+    ).first()
+
+    if existing_by_identity:
+        logger.info(f"[_add_feed] Found existing feed by identity {existing_by_identity.id}: {existing_by_identity.brand} - {existing_by_identity.name}")
+        return {
+            "success": True,
+            "message": f"資料庫中已有此飼料：{existing_by_identity.brand} - {existing_by_identity.name}",
+            "feed_id": existing_by_identity.id,
+            "is_existing": True,
+            "matched_feed": {
+                "id": existing_by_identity.id,
+                "name": existing_by_identity.name,
+                "brand": existing_by_identity.brand,
+                "pet_type": existing_by_identity.pet_type,
+                "protein": existing_by_identity.protein,
+                "fat": existing_by_identity.fat,
+                "carbohydrate": existing_by_identity.carbohydrate,
+                "calcium": existing_by_identity.calcium,
+                "phosphorus": existing_by_identity.phosphorus,
+                "magnesium": existing_by_identity.magnesium,
+                "sodium": existing_by_identity.sodium,
+                "price": existing_by_identity.price
+            },
+            "navigation": {
+                "path": f"/feeds/{existing_by_identity.id}",
+                "destination": "飼料詳情頁面"
+            },
+            "note": "已找到相同品牌和名稱的飼料。"
+        }
+
+    # 7.2 次要檢查：是否已存在相同營養成分的飼料
+    existing_by_nutrition = Feed.objects.filter(
+        pet_type=pet_type,
+        protein=protein,
+        fat=fat,
+        carbohydrate=carbohydrate,
+        calcium=calcium,
+        phosphorus=phosphorus,
+        magnesium=magnesium,
+        sodium=sodium
+    ).first()
+
+    if existing_by_nutrition:
+        logger.info(f"[_add_feed] Matched existing feed by nutrition {existing_by_nutrition.id}: {existing_by_nutrition.brand} - {existing_by_nutrition.name}")
+        return {
+            "success": True,
+            "message": f"資料庫中已有營養成分相同的飼料：{existing_by_nutrition.brand} - {existing_by_nutrition.name}",
+            "feed_id": existing_by_nutrition.id,
+            "is_existing": True,
+            "matched_feed": {
+                "id": existing_by_nutrition.id,
+                "name": existing_by_nutrition.name,
+                "brand": existing_by_nutrition.brand,
+                "pet_type": existing_by_nutrition.pet_type,
+                "protein": existing_by_nutrition.protein,
+                "fat": existing_by_nutrition.fat,
+                "carbohydrate": existing_by_nutrition.carbohydrate,
+                "calcium": existing_by_nutrition.calcium,
+                "phosphorus": existing_by_nutrition.phosphorus,
+                "magnesium": existing_by_nutrition.magnesium,
+                "sodium": existing_by_nutrition.sodium,
+                "price": existing_by_nutrition.price
+            },
+            "navigation": {
+                "path": f"/feeds/{existing_by_nutrition.id}",
+                "destination": "飼料詳情頁面"
+            },
+            "note": "已智能匹配到營養成分相同的現有飼料。"
+        }
+
+    # 8. 建立新的 Feed 記錄（如果沒有匹配到）
+    feed = Feed.objects.create(
+        pet_type=pet_type,
+        name=name,
+        brand=brand,
+        price=price,
+        created_by=user,
+        # 營養成分（來自 OCR）
+        protein=protein,
+        fat=fat,
+        carbohydrate=carbohydrate,
+        calcium=calcium,
+        phosphorus=phosphorus,
+        magnesium=magnesium,
+        sodium=sodium
+    )
+
+    logger.info(f"User {user.id} created feed {feed.id}: {feed.brand} - {feed.name}")
+
+    return {
+        "success": True,
+        "message": f"飼料「{feed.brand} - {feed.name}」建立成功！",
+        "feed_id": feed.id,
+        "is_existing": False,
+        "status": "pending_images",
+        "note": "圖片正在上傳中..."
     }

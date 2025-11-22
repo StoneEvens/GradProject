@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import './App.css';
 import './i18n/i18n';
-import operationClient from './services/operationClient';
 import HomePage from './pages/HomePage';
 import RegisterPage from './pages/RegisterPage';
 import LoginPage from './pages/LoginPage';
@@ -52,32 +51,9 @@ import DiseaseArchiveDetailPage from './pages/DiseaseArchiveDetailPage';
 import InteractiveCityPage from './pages/InteractiveCityPage';
 import CheckpointDetailPage from './pages/CheckpointDetailPage';
 import { UserProvider } from './context/UserContext';
-import { OperationProvider } from './context/OperationContext';
 import TutorialOverlay from './components/TutorialOverlay';
 import FloatingAIAvatar from './components/FloatingAIAvatar';
 import ChatWindow from './components/ChatWindow';
-
-// Operation Client Initializer - Must be inside BrowserRouter to use useNavigate
-const OperationInitializer = () => {
-  const navigate = useNavigate();
-  
-  useEffect(() => {
-    // Initialize operation client with navigate function
-    operationClient.initialize({
-      navigate,
-      autoExecute: false // Manual execution for now
-    });
-    
-    console.log('[App] Operation client initialized');
-    
-    return () => {
-      // Cleanup on unmount
-      operationClient.reset();
-    };
-  }, [navigate]);
-  
-  return null; // This component doesn't render anything
-};
 
 // 全局浮動AI頭像管理器
 const GlobalFloatingAI = ({ user }) => {
@@ -340,8 +316,6 @@ const App = () => {
   return (
     <UserProvider>
       <BrowserRouter>
-        <OperationProvider>
-          <OperationInitializer />
           <Routes>
         {/* 根路徑：已登入導向MainPage，未登入導向HomePage */}
         <Route 
@@ -615,7 +589,6 @@ const App = () => {
 
       {/* 全局浮動 AI 頭像 - 最高層級 */}
       {isUserAuthenticated && <GlobalFloatingAI user={currentUser} />}
-        </OperationProvider>
     </BrowserRouter>
     </UserProvider>
   );

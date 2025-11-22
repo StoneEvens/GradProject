@@ -362,11 +362,11 @@ def create_mcp_server() -> FastMCP:
             try:
                 # Return values aligned with frontend tutorialOptionsMap.json
                 topics_map: Dict[str, str] = {
-                    "tagPet": "學習如何在照片中標記您的寵物",
-                    "createPost": "學習如何創建和發布貼文",
-                    "calculate": "學習如何使用計算機計算寵物一天所需攝取之飼料量",
-                    "addAbnormalPost": "學習如何新增一篇異常記錄",
-                    "addPet": "學習如何將您的寵物新增到系統裡"
+                    "tagPet": "學習如何標註寵物",
+                    "createPost": "學習如何建立發布貼文",
+                    "calculate": "學習如何使用計算機計算寵物天數及餵食量",
+                    "addAbnormalPost": "學習如何新增一篇異常貼文",
+                    "addPet": "學習如何將您的寵物新增到系統中"
                 }
                 return json.loads(json.dumps(topics_map, ensure_ascii=False))
             except Exception as e:
@@ -380,25 +380,8 @@ def create_mcp_server() -> FastMCP:
         description="Get all available page paths and their mappings. Use this to find the correct path for user navigation requests."
     )
     async def get_navigation_paths() -> str:
-        """
-        返回所有可用的頁面路徑和對應的關鍵字映射
-
-        Returns:
-        {
-            "available_paths": [
-                {
-                    "path": "/social",
-                    "name": "社群頁面",
-                    "keywords": ["社群", "社交", "貼文"],
-                    "description": "查看和發布社群貼文"
-                },
-                ...
-            ],
-            "dynamic_paths": [...]
-        }
-        """
         try:
-            # 讀取 navigation_paths.json
+            # 讀??navigation_paths.json
             current_dir = os.path.dirname(__file__)
             json_path = os.path.join(current_dir, 'navigation_paths.json')
 
@@ -425,18 +408,17 @@ def create_mcp_server() -> FastMCP:
         import uuid
         from datetime import datetime, timezone, timedelta
 
-        # 路徑對應的友善名稱
+        # 路徑對應友善名稱
         path_names = {
             "/social": "社群頁面",
             "/pets": "寵物列表",
             "/profile": "個人檔案",
-            "/calculator": "營養計算機",
+            "/calculator": "寵物計算器",
             "/health": "健康記錄",
             "/schedule": "餵食排程",
-            "/interactive-city": "互動城市"
         }
 
-        # 處理動態路徑
+        # 路徑對應友善名稱
         friendly_name = path_names.get(path)
         if not friendly_name:
             if path.startswith("/pets/"):
@@ -451,7 +433,7 @@ def create_mcp_server() -> FastMCP:
         operation_id = f"nav_{uuid.uuid4().hex[:12]}"
         expires_at = (datetime.now(timezone.utc) + timedelta(minutes=5)).isoformat()
 
-        confirmation_msg = f"確認要前往「{friendly_name}」嗎？"
+        confirmation_msg = f"確定要前往{friendly_name}嗎？"
         if reason:
             confirmation_msg += f"\n\n{reason}"
 
@@ -465,7 +447,7 @@ def create_mcp_server() -> FastMCP:
             "preview": {
                 "destination": friendly_name,
                 "path": path,
-                "reason": reason or "用戶要求前往此頁面"
+                "reason": reason or "用戶要導航到此頁面"
             },
             "requires_confirmation": True,
             "expires_at": expires_at
@@ -486,19 +468,118 @@ def create_mcp_server() -> FastMCP:
         return json.dumps(result_dict, ensure_ascii=False, indent=2)
 
     @mcp.tool(
+        name="prepare_feed_ocr",
+        description=(
+            "Trigger OCR analysis for feed nutrition label images.\n\n"
+            "CRITICAL - After calling this tool, you MUST add an operation to the operations array with EXACT format:\n"
+            "{\n"
+            "  'operation_type': 'ocr_feed_analysis',\n"
+            "  'operation_data': json.dumps({'purpose': 'feed_nutrition'})\n"
+            "}\n"
+            "Note: operation_data MUST be a JSON string created with json.dumps().\n"
+            "Do NOT use {operation_id, type, params} format - frontend will convert automatically.\n"
+            "Without this operation, frontend will NOT execute OCR!\n\n"
+            "?�Complete Workflow??\n"
+            "1. Check Context: User must have hasImages=true and imageCount=2 (package + nutrition label)\n"
+            "2. Call this tool + ADD operation to operations array (see above)\n"
+            "3. Tell user: '收到圖片！正在辨識飼料資訊，請稍候...'\n"
+            "4. Wait for Results: Frontend sends back ocrCompleted=true with ocrData containing: protein, fat, carbohydrate, calcium, phosphorus, magnesium, sodium (all values will be 0 if not detected)\n"
+            "5. Display to User: Show formatted OCR results with template:\n"
+            "   **飼料資訊辨識完成**\n"
+            "   **辨識結果**：\n"
+            "   蛋白質：{protein}%\n"
+            "   脂肪：{fat}%\n"
+            "   碳水化合物：{carbohydrate}%\n"
+            "   鈣：{calcium}%\n"
+            "   磷：{phosphorus}%\n"
+            "   鎂：{magnesium}%\n"
+            "   鈉：{sodium}%\n"
+            "   Then ask: 請問這是狗飼料還是貓飼料？另外請告訴我飼料名稱（如果您知道的話）。\n"
+            "6. Collect Info: After user provides pet_type, name, brand, show COMPLETE summary and ask for confirmation:\n"
+            "   **請確認飼料資訊**：\n"
+            "   用對象：{pet_type}\n"
+            "   品牌：{brand}\n"
+            "   名稱：{name}\n"
+            "   [all nutrition data]\n"
+            "   資料如有誤，請點選「返回修改」或「取消」，確認無誤就點選「確認」幫您建立飼料。\n"
+            "7. 請 WAIT for User Confirmation: Do NOT call add_feed until user explicitly confirms (e.g., '確定', '是', '好', '沒問題')\n"
+            "8. After Confirmation: Call perform_database_operation('add_feed', {...complete data...})\n"
+            "9. Handle Result: Check is_existing flag from add_feed response (see add_feed operation for details)\n\n"
+            "IMPORTANT: Do NOT call this tool if imageCount ??2. Frontend will validate this."
+        )
+    )
+    async def prepare_feed_ocr(
+        reason: str = "辨識飼料資訊"
+    ) -> str:
+        """
+        Returns an operation instruction for frontend to execute feed OCR analysis.
+
+        Args:
+            reason: Analysis reason (displayed to user)
+
+        Returns:
+            JSON string with operation details
+        """
+        from datetime import datetime
+
+        result = {
+            "operation_id": f"ocr_{int(datetime.now().timestamp())}",
+            "type": "ocr_feed_analysis",
+            "purpose": "feed_nutrition",
+            "requires_user_action": False,
+            "next_step": "前端將自動辨識並回傳結果"
+        }
+        return json.dumps(result, ensure_ascii=False, indent=2)
+
+    @mcp.tool(
         name="perform_database_operation",
-        description="Perform a database operation such as: add_pet, update_pet (modify pet info), add_abnormal_post (health records), update_abnormal_post, delete_abnormal_post, create_disease_archive, add_plan (create schedule/calendar event), update_plan (modify schedule), delete_plan (remove schedule), list_plans (view all schedules), create_social_post. IMPORTANT: Use 'add_plan' for creating schedules/calendar events, NOT 'create_schedule'. Always call database_operation_list first to see exact parameter requirements."
-        "Note that database operations affects personal data; please verify that the user is doing the operation for themself. The easiest way to ensure this is to check the target of the prompt matches the user ID of the requester. The user id was added to the prompt automatically by the backend."
+        description=(
+            "Perform a database operation such as: add_pet, update_pet (modify pet info), add_abnormal_post (health records), "
+            "update_abnormal_post, delete_abnormal_post, create_disease_archive, add_plan (create schedule/calendar event), "
+            "update_plan (modify schedule), delete_plan (remove schedule), list_plans (view all schedules), create_social_post, "
+            "add_feed (add feed after OCR confirmation).\n\n"
+            "IMPORTANT: Use 'add_plan' for creating schedules/calendar events, NOT 'create_schedule'.\n"
+            "Always call database_operation_list first to see exact parameter requirements.\n\n"
+            "CRITICAL - Parameter Structure:\n"
+            "This tool requires TWO parameters:\n"
+            "1. operation: The operation type (e.g., 'add_feed', 'add_pet')\n"
+            "2. data: A dictionary containing ALL the operation-specific parameters\n\n"
+            "Example for add_feed:\n"
+            "  operation: 'add_feed'\n"
+            "  data: {\n"
+            "    'user_id': 123,\n"
+            "    'pet_type': 'dog',\n"
+            "    'has_images': True,\n"
+            "    'name': 'Feed Name',\n"
+            "    'brand': 'Brand Name',\n"
+            "    'price': 500.0,\n"
+            "    'protein': 25.0,\n"
+            "    'fat': 15.0,\n"
+            "    'carbohydrate': 40.0,\n"
+            "    'calcium': 1.2,\n"
+            "    'phosphorus': 1.0,\n"
+            "    'magnesium': 0.1,\n"
+            "    'sodium': 0.3\n"
+            "  }\n\n"
+            "DO NOT flatten the parameters - ALL operation parameters must be inside the 'data' dictionary.\n\n"
+            "Note that database operations affects personal data; please verify that the user is doing the operation for themself."
+        )
     )
     async def perform_database_operation(
-        operation: Literal["add_pet", "update_pet", "add_abnormal_post", "update_abnormal_post", "delete_abnormal_post", "create_disease_archive", "add_plan", "update_plan", "delete_plan", "list_plans", "create_social_post"],
+        operation: Literal["add_pet", "update_pet", "add_abnormal_post", "update_abnormal_post", "delete_abnormal_post", "create_disease_archive", "add_plan", "update_plan", "delete_plan", "list_plans", "create_social_post", "add_feed"],
         data: Dict
     ) -> str:
+        print(f"[MCP Tool] ===== perform_database_operation CALLED =====")
+        print(f"[MCP Tool] operation: {operation}")
+        print(f"[MCP Tool] data: {data}")
+
         @sync_to_async
         def execute() -> Dict:
             return perform_operation(operation, data)
 
         result_dict = await execute()
+        print(f"[MCP Tool] result: {result_dict}")
+        print(f"[MCP Tool] ===== perform_database_operation FINISHED =====")
         return json.dumps(result_dict, ensure_ascii=False, indent=2)
 
     @mcp.tool(
@@ -534,24 +615,6 @@ def create_mcp_server() -> FastMCP:
         conditions: Dict,
         limit: int = 5
     ) -> Dict:
-        """
-        統一的動態路徑參數解析工具
-
-        Examples:
-
-        1. "幫我跳轉到上禮拜天發的貼文編輯頁面"
-           - entity_type: "social_post"
-           - conditions: {"time_range": "last_sunday"}
-
-        2. "前往我最後查看的飼料頁面"
-           - entity_type: "feed"
-           - conditions: {"usage": "last_viewed"}
-
-        3. "帶我去我第一隻寵物的健康報告"
-           - entity_type: "pet"
-           - conditions: {"oldest": true}
-           - Then use pet_id to query health_report
-        """
         return await EntityResolver.resolve(entity_type, user_id, conditions, limit)
 
     return mcp

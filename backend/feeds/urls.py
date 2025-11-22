@@ -1,9 +1,10 @@
 from django.urls import path
 from .views import (
     FeedOCRView, FeedReviewView, FeedErrorReportView, UserFeedMarkView,
-    MyMarkedFeedsView, MyMarkedFeedsPreviewView, RecentlyUsedFeedsView, 
+    MyMarkedFeedsView, MyMarkedFeedsPreviewView, RecentlyUsedFeedsView,
     AllFeedsView, AllFeedsPreviewView, CheckUserReviewView, FeedDetailView,
-    FeedSearchView, CreateFeedView, UnifiedFeedCreateView, AddFeedToUserView
+    FeedSearchView, CreateFeedView, UnifiedFeedCreateView, AddFeedToUserView,
+    FeedImageUploadAPIView
 )
 
 urlpatterns = [
@@ -35,4 +36,7 @@ urlpatterns = [
     
     # 將飼料加入使用者清單
     path('add-to-user/', AddFeedToUserView.as_view(), name='add-feed-to-user'),
+
+    # 飼料圖片上傳（Agent 專用）
+    path('<int:feed_id>/upload-images/', FeedImageUploadAPIView.as_view(), name='feed-upload-images'),
 ]

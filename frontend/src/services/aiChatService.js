@@ -2,7 +2,6 @@
 // 整合 OpenAI Agents SDK with MCP tools
 
 import axiosInstance from '../utils/axios';
-import operationClient from './operationClient';
 
 class AIChatService {
   constructor() {
@@ -62,16 +61,6 @@ class AIChatService {
 
       // 更新會話上下文
       this.updateSessionContext(userMessage, response.data);
-
-      // Check if backend returned operations and add them to operation client
-      if (response.data.operations && Array.isArray(response.data.operations)) {
-        console.log('[AIChatService] Received operations from backend:', response.data.operations);
-        const result = operationClient.addOperations(response.data.operations);
-        console.log(`[AIChatService] Added ${result.success} operations to queue, ${result.failed} failed`);
-        
-        // Add operation count info to response for logging
-        response.data.operationCount = result.success;
-      }
 
       return response.data;
 
@@ -235,7 +224,7 @@ class AIChatService {
       // 設定為當前對話
       this.currentConversationId = conversationId;
 
-      // 提取並設定 OpenAI Session ID（從任一訊息的 message_data 中）
+      // 提取並設定 OpenAI Session ID（從訊息的 message_data 或 additional_data 中）
       // 這樣可以延續同一個 OpenAI 對話，而不是每次重開都建立新對話
       this.currentSessionId = null;
       if (conversation.messages && conversation.messages.length > 0) {
@@ -243,9 +232,11 @@ class AIChatService {
         // 從最後一條助手訊息中提取 session_id
         for (let i = conversation.messages.length - 1; i >= 0; i--) {
           const msg = conversation.messages[i];
-          console.log(`[AIChatService] Message ${i}: role=${msg.role}, has_message_data=${!!msg.message_data}, session_id=${msg.message_data?.session_id}`);
-          if (msg.role === 'assistant' && msg.message_data && msg.message_data.session_id) {
-            this.currentSessionId = msg.message_data.session_id;
+          // Try message_data first (for compatibility), then additional_data
+          const sessionId = msg.message_data?.session_id || msg.additional_data?.session_id;
+          console.log(`[AIChatService] Message ${i}: role=${msg.role}, session_id=${sessionId}`);
+          if (msg.role === 'assistant' && sessionId) {
+            this.currentSessionId = sessionId;
             console.log(`[AIChatService] ✓ Restored session_id: ${this.currentSessionId}`);
             break;
           }
@@ -528,6 +519,287 @@ class AIChatService {
 
     } catch (error) {
       console.error('Upload Abnormal Post Images Error:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * 為飼料上傳圖片（AI Agent 建立飼料後使用）
+   * @param {number} feedId - 飼料 ID
+   * @param {Array<Object>} images - 圖片陣列 [{file, preview, id}]
+   * @returns {Promise<Object>} 上傳結果
+   */
+  async uploadFeedImages(feedId, images) {
+    try {
+      if (!feedId) {
+        throw new Error('Feed ID is required');
+      }
+
+      if (!images || images.length === 0) {
+        throw new Error('At least one image is required');
+      }
+
+      // 獲取 OCR 識別出的圖片類型映射
+      let imageTypeMap = null;
+      try {
+        const storedMap = localStorage.getItem('feedImageTypeMap');
+        if (storedMap) {
+          imageTypeMap = JSON.parse(storedMap);
+          console.log('[AIChatService] 使用 OCR 識別的圖片類型映射:', imageTypeMap);
+        }
+      } catch (e) {
+        console.warn('[AIChatService] 無法讀取圖片類型映射，使用預設順序');
+      }
+
+      // 建立 FormData
+      const formData = new FormData();
+
+      // 根據圖片類型映射重新排序圖片
+      // 後端期待：第一張 = front, 第二張 = nutrition
+      if (imageTypeMap) {
+        // 找出哪張圖片是 front 和 nutrition
+        const frontIndex = Object.keys(imageTypeMap).find(key => imageTypeMap[key] === 'front');
+        const nutritionIndex = Object.keys(imageTypeMap).find(key => imageTypeMap[key] === 'nutrition');
+
+        // 按照 front, nutrition 的順序添加
+        if (frontIndex !== undefined && images[frontIndex]) {
+          formData.append('images', images[frontIndex].file);
+          console.log(`[AIChatService] 第 1 張（front）: 原始第 ${parseInt(frontIndex) + 1} 張圖片`);
+        }
+        if (nutritionIndex !== undefined && images[nutritionIndex]) {
+          formData.append('images', images[nutritionIndex].file);
+          console.log(`[AIChatService] 第 2 張（nutrition）: 原始第 ${parseInt(nutritionIndex) + 1} 張圖片`);
+        }
+      } else {
+        // 沒有類型映射時，使用原始順序
+        images.forEach((image, index) => {
+          if (image.file) {
+            formData.append('images', image.file);
+            console.log(`[AIChatService] 第 ${index + 1} 張: 原始順序`);
+          }
+        });
+      }
+
+      console.log(`[AIChatService] Uploading ${images.length} images to feed ${feedId}`);
+
+      // 調用上傳 API
+      const response = await this.apiClient.post(
+        `/feeds/${feedId}/upload-images/`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+
+      console.log('[AIChatService] Feed image upload successful:', response.data);
+      
+      // 清除 localStorage 中的圖片類型映射
+      try {
+        localStorage.removeItem('feedImageTypeMap');
+      } catch (e) {
+        console.warn('[AIChatService] 無法清除圖片類型映射');
+      }
+
+      return response.data;
+
+    } catch (error) {
+      console.error('Upload Feed Images Error:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * 辨識飼料營養標示（使用現有的 OCR API）
+   * @param {Object} nutritionImage - 營養標示圖片 {file, preview, id}
+   * @returns {Promise<Object>} OCR 辨識結果
+   */
+  async analyzeFeedNutrition(nutritionImage) {
+    try {
+      if (!nutritionImage || !nutritionImage.file) {
+        throw new Error('Nutrition image is required');
+      }
+
+      const formData = new FormData();
+      formData.append('image', nutritionImage.file);
+
+      console.log(`[AIChatService] Analyzing nutrition label with OCR`);
+
+      const response = await this.apiClient.post(
+        `/feeds/ocr/`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+
+      console.log('[AIChatService] OCR analysis successful:', response.data);
+      return {
+        success: true,
+        data: response.data
+      };
+
+    } catch (error) {
+      console.error('Analyze Feed Nutrition Error:', error);
+      return {
+        success: false,
+        error: error.message
+      };
+    }
+  }
+
+  /**
+   * 分析飼料圖片（兩張圖片：包裝正面 + 營養標示）
+   * 自動識別哪張是營養標示並提取營養成分
+   * @param {Array<Object>} images - 圖片陣列 [{file, preview, id}]
+   * @returns {Promise<Object>} OCR 結果
+   */
+  async analyzeFeedWithOCR(images) {
+    console.log('[AIChatService] Starting OCR feed analysis');
+
+    try {
+      if (!images || images.length < 2) {
+        throw new Error('請選擇兩張圖片：包裝照片和營養標示照片');
+      }
+
+      console.log('[AIChatService] 辨識兩張圖片以找出營養標示...');
+
+      // 輔助函數：將 base64 轉換為 Blob
+      const base64ToBlob = (base64String, fileType) => {
+        const base64Data = base64String.split(',')[1];
+        const byteCharacters = atob(base64Data);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        return new Blob([byteArray], { type: fileType });
+      };
+
+      // 輔助函數：標準化營養成分（將 null/undefined 轉為 0）
+      const normalizeNutrients = (nutrients) => {
+        const normalized = {
+          protein: 0,
+          fat: 0,
+          carbohydrate: 0,
+          calcium: 0,
+          phosphorus: 0,
+          magnesium: 0,
+          sodium: 0
+        };
+
+        // 覆蓋有值的營養成分
+        Object.keys(normalized).forEach(key => {
+          const value = nutrients[key];
+          if (value !== null && value !== undefined && value !== '') {
+            const parsed = parseFloat(value);
+            if (!isNaN(parsed) && parsed >= 0) {
+              normalized[key] = parsed;
+            }
+          }
+        });
+
+        return normalized;
+      };
+
+      // 輔助函數：計算營養成分資料的完整度
+      const calculateNutrientScore = (nutrients) => {
+        let score = 0;
+        const keys = ['protein', 'fat', 'carbohydrate', 'calcium', 'phosphorus', 'magnesium', 'sodium'];
+
+        keys.forEach(key => {
+          if (nutrients[key] !== null && nutrients[key] !== undefined && nutrients[key] > 0) {
+            score++;
+          }
+        });
+
+        return score;
+      };
+
+      // 辨識兩張圖片
+      const ocrResults = [];
+
+      for (let i = 0; i < 2; i++) {
+        try {
+          const image = images[i];
+          const formData = new FormData();
+          const blob = base64ToBlob(image.preview, image.file.type);
+          formData.append('image', blob, image.file.name);
+
+          console.log(`[AIChatService] 辨識第 ${i + 1} 張圖片...`);
+
+          const response = await this.apiClient.post('/feeds/ocr/', formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+          });
+
+          // 標準化營養成分（將 null/undefined 轉為 0）
+          const rawNutrients = response.data.extracted_nutrients || {};
+          const nutrients = normalizeNutrients(rawNutrients);
+          const score = calculateNutrientScore(nutrients);
+
+          ocrResults.push({
+            index: i,
+            nutrients,
+            score,
+            rawText: response.data.raw_text
+          });
+
+          console.log(`[AIChatService] 第 ${i + 1} 張圖片辨識完成，營養成分數量: ${score}`);
+
+        } catch (error) {
+          console.warn(`[AIChatService] 第 ${i + 1} 張圖片辨識失敗:`, error);
+          ocrResults.push({
+            index: i,
+            nutrients: normalizeNutrients({}),  // 使用標準化的空營養成分（全為 0）
+            score: 0,
+            error: error.message
+          });
+        }
+      }
+
+      // 選擇營養成分最完整的結果
+      ocrResults.sort((a, b) => b.score - a.score);
+      const bestResult = ocrResults[0];
+
+      if (bestResult.score === 0) {
+        throw new Error('兩張圖片都無法辨識出營養成分，請確保上傳清晰的營養標示照片');
+      }
+
+      // 建立圖片類型映射：分數最高的是 nutrition，另一張是 front
+      const nutritionIndex = bestResult.index;
+      const frontIndex = nutritionIndex === 0 ? 1 : 0;
+      
+      const imageTypeMap = {
+        [nutritionIndex]: 'nutrition',  // 營養標示（辨識出營養成分的那張）
+        [frontIndex]: 'front'            // 包裝正面（另一張）
+      };
+
+      console.log(`[AIChatService] 圖片類型識別結果:`);
+      console.log(`  - 第 ${nutritionIndex + 1} 張圖片: nutrition (營養成分數量: ${bestResult.score})`);
+      console.log(`  - 第 ${frontIndex + 1} 張圖片: front`);
+      console.log('[AIChatService] 營養成分:', bestResult.nutrients);
+
+      // 將 OCR 結果和圖片類型映射存到 localStorage
+      localStorage.setItem('feedOcrData', JSON.stringify(bestResult.nutrients));
+      localStorage.setItem('feedImageTypeMap', JSON.stringify(imageTypeMap));
+
+      return {
+        success: true,
+        ocrData: bestResult.nutrients,
+        rawText: bestResult.rawText,
+        nutritionImageIndex: nutritionIndex,
+        frontImageIndex: frontIndex,
+        imageTypeMap: imageTypeMap,
+        message: `OCR 辨識完成 (第 ${nutritionIndex + 1} 張為營養標示，第 ${frontIndex + 1} 張為包裝正面)`
+      };
+
+    } catch (error) {
+      console.error('[AIChatService] OCR analysis failed:', error);
       throw error;
     }
   }

@@ -191,6 +191,33 @@ const ChatWindow = ({
     }
   }, [isOpen]);
 
+  // 監聽 OCR 完成事件
+  useEffect(() => {
+    const handleOcrCompleted = async (event) => {
+      const { ocrData, rawText, imageCount = 0 } = event.detail;
+
+      console.log('[ChatWindow] 收到 OCR 完成事件:', ocrData);
+
+      // 將 OCR 結果回傳給 Agent
+      const ocrMessage = "[系統] OCR 分析完成，請協助確認辨識結果";
+      const ocrContext = {
+        ocrCompleted: true,
+        hasImages: imageCount > 0,
+        imageCount: imageCount,
+        ocrData: ocrData
+      };
+
+      // 自動發送給 Agent
+      await handleSendMessage(ocrMessage, ocrContext);
+    };
+
+    window.addEventListener('ocrCompleted', handleOcrCompleted);
+
+    return () => {
+      window.removeEventListener('ocrCompleted', handleOcrCompleted);
+    };
+  }, []);
+
   // 處理輸入變化
   const handleInputChange = (event) => {
     setInputText(event.target.value);
@@ -306,7 +333,7 @@ const ChatWindow = ({
       // 添加錯誤訊息到聊天
       const errorMessage = {
         id: Date.now(),
-        text: `❌ 語音通話錯誤: ${errorMsg}`,
+        text: `語音通話錯誤: ${errorMsg}`,
         isUser: false,
         timestamp: new Date(),
         error: true
@@ -388,7 +415,12 @@ const ChatWindow = ({
       });
 
       Promise.all(imagePreviewPromises).then(imagePreviews => {
-        setSelectedImages(prev => [...prev, ...imagePreviews]);
+        setSelectedImages(prev => {
+          const newImages = [...prev, ...imagePreviews];
+          // 使用 window 物件儲存（避免 localStorage 容量限制）
+          window.__selectedFeedImages = newImages;
+          return newImages;
+        });
       });
     }
 
@@ -397,43 +429,90 @@ const ChatWindow = ({
   };
 
   const removeImage = (imageId) => {
-    setSelectedImages(prev => prev.filter(img => img.id !== imageId));
+    setSelectedImages(prev => {
+      const newImages = prev.filter(img => img.id !== imageId);
+      // 更新 window 物件
+      window.__selectedFeedImages = newImages;
+      return newImages;
+    });
   };
 
   const clearAllImages = () => {
     setSelectedImages([]);
+    // 清除 window 物件和 localStorage
+    delete window.__selectedFeedImages;
+    localStorage.removeItem('feedOcrData');
+    localStorage.removeItem('feedImageTypeMap');
   };
 
   // 發送訊息
-  const handleSendMessage = async () => {
-    if (!inputText.trim()) return;
+  const handleSendMessage = async (customMessage = null, customContext = null) => {
+    // 使用自訂訊息或 inputText
+    const messageText = customMessage || inputText;
+
+    // 確保至少有文字或圖片
+    if ((typeof messageText !== 'string' || !messageText.trim()) && selectedImages.length === 0) return;
 
     // 如果正在錄音，先停止錄音
     stopVoiceRecording();
 
+    // 保存當前的圖片數據，用於後續上傳
+    const currentImages = selectedImages.length > 0 ? [...selectedImages] : [];
+
+    // 確保 text 永遠是字符串
+    const messageDisplayText = messageText?.trim()
+      ? messageText
+      : (currentImages.length > 0 ? `[${currentImages.length} 張圖片]` : '');
+
     const userMessage = {
       id: Date.now(),
-      text: inputText,
+      text: messageDisplayText,
       isUser: true,
-      timestamp: new Date()
+      timestamp: new Date(),
+      images: currentImages.length > 0 ? currentImages : undefined
     };
 
-    const userInput = inputText; // 保存輸入內容
+    // 確保傳到後端的只是純文字，沒有任何對象引用
+    const userInput = String(messageText || '').trim();
 
     // 添加用戶訊息
     const newMessages = [...messages, userMessage];
     setMessages(newMessages);
-    setInputText('');
+
+    // 清空輸入框和圖片預覽
+    if (!customMessage) {
+      setInputText('');
+    }
+    // 立即清空圖片預覽區域（圖片已保存在 currentImages 和 userMessage 中）
+    setSelectedImages([]);
+
     setIsTyping(true);
 
     try {
+      // 合併預設 context 和自訂 context
+      // 只傳遞可序列化的基本數據類型到後端，避免循環引用錯誤
+      const defaultContext = {
+        userId: Number(user?.id) || null,
+        petId: Number(user?.pets?.[0]?.id) || null,
+        hasImages: Boolean(currentImages.length > 0),
+        imageCount: Number(currentImages.length) || 0
+      };
+
+      // 合併並清理 customContext，確保只包含可序列化的數據
+      let finalContext = defaultContext;
+      if (customContext) {
+        try {
+          // 深拷貝並清理循環引用（這會移除不可序列化的數據）
+          const cleanCustomContext = JSON.parse(JSON.stringify(customContext));
+          finalContext = { ...defaultContext, ...cleanCustomContext };
+        } catch (e) {
+          console.warn('[ChatWindow] customContext 包含不可序列化的數據，使用默認 context:', e);
+          finalContext = defaultContext;
+        }
+      }
+
       // 使用正式後端 AI Chat Service
-      const aiResult = await aiChatService.processMessage(userInput, {
-        user: user,
-        petId: user?.pets?.[0]?.id || null,
-        hasImages: selectedImages.length > 0,
-        imageCount: selectedImages.length
-      });
+      const aiResult = await aiChatService.processMessage(userInput, finalContext);
 
       console.log('AI 回應結果:', aiResult); // Debug 用
 
@@ -452,11 +531,20 @@ const ChatWindow = ({
       const normSocial = normalizePostList(aiResult.recommendedSocialPosts, 'social');
       const normForum = normalizePostList(aiResult.recommendedForumPosts, 'forum');
 
+      // 檢測是否需要展示確認圖片
+      const needsConfirmationWithImages = aiResult.response?.includes('[[NEEDS_CONFIRMATION_WITH_IMAGES]]');
+      const cleanedResponse = needsConfirmationWithImages
+        ? aiResult.response.replace('[[NEEDS_CONFIRMATION_WITH_IMAGES]]', '').trim()
+        : aiResult.response;
+
       const aiMessage = {
         id: Date.now() + 1,
-        text: aiResult.response,
+        text: cleanedResponse,
         isUser: false,
         timestamp: new Date(),
+        // 加入確認相關資訊
+        needsConfirmation: needsConfirmationWithImages,
+        confirmationImages: needsConfirmationWithImages ? [...currentImages] : undefined,
         // 加入教學相關資訊（新：使用單一 tutorial 欄位）
         tutorial: aiResult.tutorial || null,
         // 推薦用戶標準化為陣列
@@ -483,8 +571,7 @@ const ChatWindow = ({
         // 加入營養計算機相關資訊
         hasCalculator: aiResult.hasCalculator || false,
         // 加入操作功能相關資訊 (operations array)
-        operations: aiResult.operations || [],
-        operationType: aiResult.operationType || null
+        operations: aiResult.operations || []
       };
 
       const finalMessages = [...newMessages, aiMessage];
@@ -504,131 +591,300 @@ const ChatWindow = ({
       // 檢測 post_created operation 並自動上傳圖片
       if (aiResult.operations && Array.isArray(aiResult.operations)) {
         const postCreatedOp = aiResult.operations.find(
-          op => op.operation_name === 'post_created'
+          op => op.operation_type === 'post_created'
         );
 
-        if (postCreatedOp && selectedImages.length > 0) {
-          console.log('[ChatWindow] 檢測到 post_created operation，開始上傳圖片');
+        if (postCreatedOp) {
+          if (currentImages.length > 0) {
+            // 有圖片，執行上傳
+            console.log('[ChatWindow] 檢測到 post_created operation，開始上傳圖片');
 
-          try {
-            const opData = typeof postCreatedOp.operation_data === 'string'
-              ? JSON.parse(postCreatedOp.operation_data)
-              : postCreatedOp.operation_data;
+            try {
+              const opData = typeof postCreatedOp.operation_data === 'string'
+                ? JSON.parse(postCreatedOp.operation_data)
+                : postCreatedOp.operation_data;
 
-            const postId = opData.post_id;
+              const postId = opData.post_id;
 
-            if (postId) {
-              setIsUploadingImages(true);
+              if (postId) {
+                setIsUploadingImages(true);
 
-              // 上傳圖片
-              const uploadResult = await aiChatService.uploadPostImages(
-                postId,
-                selectedImages
-              );
+                // 上傳圖片
+                const uploadResult = await aiChatService.uploadPostImages(
+                  postId,
+                  currentImages
+                );
 
-              console.log('[ChatWindow] 圖片上傳成功:', uploadResult);
+                console.log('[ChatWindow] 圖片上傳成功:', uploadResult);
 
-              // 清空已上傳的圖片
-              clearAllImages();
+                // 清空已上傳的圖片
+                clearAllImages();
+                setIsUploadingImages(false);
+
+                // 添加系統訊息通知用戶
+                const uploadSuccessMessage = {
+                  id: Date.now() + 2,
+                  text: `已成功上傳 ${uploadResult.data.uploaded_count} 張圖片到您的貼文！`,
+                  isUser: false,
+                  timestamp: new Date(),
+                  operations: []
+                };
+
+                setMessages(prev => [...prev, uploadSuccessMessage]);
+
+              } else {
+                console.error('[ChatWindow] post_created operation 中缺少 post_id');
+              }
+
+            } catch (uploadError) {
+              console.error('[ChatWindow] 圖片上傳失敗:', uploadError);
               setIsUploadingImages(false);
 
-              // 添加系統訊息通知用戶
-              const uploadSuccessMessage = {
+              // 添加錯誤訊息
+              const uploadErrorMessage = {
                 id: Date.now() + 2,
-                text: `✅ 已成功上傳 ${uploadResult.data.uploaded_count} 張圖片到您的貼文！`,
+                text: `圖片上傳失敗：${uploadError.message || '未知錯誤'}。您可以稍後在貼文頁面手動上傳。`,
                 isUser: false,
                 timestamp: new Date(),
-                operations: [],
-                operationType: null
+                error: true,
+                operations: []
               };
 
-              setMessages(prev => [...prev, uploadSuccessMessage]);
-
-            } else {
-              console.error('[ChatWindow] post_created operation 中缺少 post_id');
+              setMessages(prev => [...prev, uploadErrorMessage]);
             }
+          } else {
+            // 沒有圖片，但 AI 以為有圖片
+            console.warn('[ChatWindow] 檢測到 post_created operation，但用戶沒有選擇圖片');
 
-          } catch (uploadError) {
-            console.error('[ChatWindow] 圖片上傳失敗:', uploadError);
-            setIsUploadingImages(false);
-
-            // 添加錯誤訊息
-            const uploadErrorMessage = {
+            const noImageWarning = {
               id: Date.now() + 2,
-              text: `❌ 圖片上傳失敗：${uploadError.message || '未知錯誤'}。您可以稍後在貼文頁面手動上傳。`,
+              text: `貼文已創建，但您沒有選擇任何圖片。如需添加圖片，請稍後在貼文頁面手動上傳。`,
               isUser: false,
               timestamp: new Date(),
-              error: true,
-              operations: [],
-              operationType: null
+              operations: []
             };
 
-            setMessages(prev => [...prev, uploadErrorMessage]);
+            setMessages(prev => [...prev, noImageWarning]);
           }
         }
 
         // 檢測 abnormal_post_created operation 並自動上傳圖片
         const abnormalPostCreatedOp = aiResult.operations.find(
-          op => op.operation_name === 'abnormal_post_created'
+          op => op.operation_type === 'abnormal_post_created'
         );
 
-        if (abnormalPostCreatedOp && selectedImages.length > 0) {
-          console.log('[ChatWindow] 檢測到 abnormal_post_created operation，開始上傳圖片');
+        if (abnormalPostCreatedOp) {
+          if (currentImages.length > 0) {
+            // 有圖片，執行上傳
+            console.log('[ChatWindow] 檢測到 abnormal_post_created operation，開始上傳圖片');
 
-          try {
-            const opData = typeof abnormalPostCreatedOp.operation_data === 'string'
-              ? JSON.parse(abnormalPostCreatedOp.operation_data)
-              : abnormalPostCreatedOp.operation_data;
+            try {
+              const opData = typeof abnormalPostCreatedOp.operation_data === 'string'
+                ? JSON.parse(abnormalPostCreatedOp.operation_data)
+                : abnormalPostCreatedOp.operation_data;
 
-            const abnormalPostId = opData.abnormal_post_id;
+              const abnormalPostId = opData.abnormal_post_id;
 
-            if (abnormalPostId) {
-              setIsUploadingImages(true);
+              if (abnormalPostId) {
+                setIsUploadingImages(true);
 
-              // 上傳圖片
-              const uploadResult = await aiChatService.uploadAbnormalPostImages(
-                abnormalPostId,
-                selectedImages
-              );
+                // 上傳圖片
+                const uploadResult = await aiChatService.uploadAbnormalPostImages(
+                  abnormalPostId,
+                  currentImages
+                );
 
-              console.log('[ChatWindow] 異常記錄圖片上傳成功:', uploadResult);
+                console.log('[ChatWindow] 異常記錄圖片上傳成功:', uploadResult);
 
-              // 清空已上傳的圖片
-              clearAllImages();
+                // 清空已上傳的圖片
+                clearAllImages();
+                setIsUploadingImages(false);
+
+                // 添加系統訊息通知用戶
+                const uploadSuccessMessage = {
+                  id: Date.now() + 3,
+                  text: `已成功上傳 ${uploadResult.data.uploaded_count} 張圖片到您的異常記錄！`,
+                  isUser: false,
+                  timestamp: new Date(),
+                  operations: []
+                };
+
+                setMessages(prev => [...prev, uploadSuccessMessage]);
+
+              } else {
+                console.error('[ChatWindow] abnormal_post_created operation 中缺少 abnormal_post_id');
+              }
+
+            } catch (uploadError) {
+              console.error('[ChatWindow] 異常記錄圖片上傳失敗:', uploadError);
               setIsUploadingImages(false);
 
-              // 添加系統訊息通知用戶
-              const uploadSuccessMessage = {
+              // 添加錯誤訊息
+              const uploadErrorMessage = {
                 id: Date.now() + 3,
-                text: `✅ 已成功上傳 ${uploadResult.data.uploaded_count} 張圖片到您的異常記錄！`,
+                text: `圖片上傳失敗：${uploadError.message || '未知錯誤'}。您可以稍後在異常記錄頁面手動上傳。`,
                 isUser: false,
                 timestamp: new Date(),
-                operations: [],
-                operationType: null
+                error: true,
+                operations: []
               };
 
-              setMessages(prev => [...prev, uploadSuccessMessage]);
-
-            } else {
-              console.error('[ChatWindow] abnormal_post_created operation 中缺少 abnormal_post_id');
+              setMessages(prev => [...prev, uploadErrorMessage]);
             }
+          } else {
+            // 沒有圖片，但 AI 以為有圖片
+            console.warn('[ChatWindow] 檢測到 abnormal_post_created operation，但用戶沒有選擇圖片');
 
-          } catch (uploadError) {
-            console.error('[ChatWindow] 異常記錄圖片上傳失敗:', uploadError);
-            setIsUploadingImages(false);
+            const noImageWarning = {
+              id: Date.now() + 3,
+              text: `異常記錄已創建，但您沒有選擇任何圖片。如需添加圖片，請稍後在異常記錄頁面手動上傳。`,
+              isUser: false,
+              timestamp: new Date(),
+              operations: []
+            };
+
+            setMessages(prev => [...prev, noImageWarning]);
+          }
+        }
+
+        // 檢測 ocr_feed_analysis operation 並執行 OCR 分析
+        const ocrOp = aiResult.operations.find(
+          op => op.operation_type === 'ocr_feed_analysis'
+        );
+
+        if (ocrOp && currentImages.length >= 2) {
+          console.log('[ChatWindow] 檢測到 ocr_feed_analysis operation，開始執行 OCR 分析');
+
+          try {
+            // 調用 aiChatService 執行 OCR 分析
+            const ocrResult = await aiChatService.analyzeFeedWithOCR(currentImages);
+
+            console.log('[ChatWindow] OCR 分析完成:', ocrResult);
+
+            // 觸發 ocrCompleted 事件，供 useEffect 監聽並回傳給 Agent
+            window.dispatchEvent(new CustomEvent('ocrCompleted', {
+              detail: {
+                ocrData: ocrResult.ocrData,
+                rawText: ocrResult.rawText,
+                nutritionImageIndex: ocrResult.nutritionImageIndex,
+                frontImageIndex: ocrResult.frontImageIndex,
+                imageTypeMap: ocrResult.imageTypeMap,
+                imageCount: currentImages.length
+              }
+            }));
+
+          } catch (ocrError) {
+            console.error('[ChatWindow] OCR 分析失敗:', ocrError);
 
             // 添加錯誤訊息
-            const uploadErrorMessage = {
-              id: Date.now() + 3,
-              text: `❌ 圖片上傳失敗：${uploadError.message || '未知錯誤'}。您可以稍後在異常記錄頁面手動上傳。`,
+            const ocrErrorMessage = {
+              id: Date.now() + 5,
+              text: `OCR 分析失敗：${ocrError.message || '未知錯誤'}`,
               isUser: false,
               timestamp: new Date(),
               error: true,
-              operations: [],
-              operationType: null
+              operations: []
             };
 
-            setMessages(prev => [...prev, uploadErrorMessage]);
+            setMessages(prev => [...prev, ocrErrorMessage]);
+          }
+        }
+
+        // 檢測 feed_created operation 並自動上傳圖片（類似 post_created）
+        const feedCreatedOp = aiResult.operations.find(
+          op => op.operation_type === 'feed_created'
+        );
+
+        if (feedCreatedOp) {
+          if (currentImages.length > 0) {
+            // 有圖片，執行上傳或匹配邏輯
+            try {
+              const opData = typeof feedCreatedOp.operation_data === 'string'
+                ? JSON.parse(feedCreatedOp.operation_data)
+                : feedCreatedOp.operation_data;
+
+              const feedId = opData.feed_id || opData.feedId;
+              const isExisting = opData.is_existing || false;
+
+              if (feedId) {
+                // ✅ 檢查是否為智能匹配到的已存在飼料
+                if (isExisting) {
+                  console.log('[ChatWindow] 智能匹配到已存在的飼料，清除圖片快取');
+
+                  // 清除圖片快取（不上傳）
+                  clearAllImages();
+
+                  // 添加系統訊息通知用戶
+                  const matchedMessage = {
+                    id: Date.now() + 5,
+                    text: `已智能匹配到資料庫中現有的飼料，無需重複上傳圖片。`,
+                    isUser: false,
+                    timestamp: new Date(),
+                    operations: []
+                  };
+
+                  setMessages(prev => [...prev, matchedMessage]);
+
+                } else {
+                  // 新建立的飼料，上傳圖片
+                  console.log('[ChatWindow] 檢測到 feed_created operation，開始上傳圖片');
+
+                  setIsUploadingImages(true);
+
+                  // 上傳圖片
+                  const uploadResult = await aiChatService.uploadFeedImages(feedId, currentImages);
+
+                  console.log('[ChatWindow] 飼料圖片上傳成功:', uploadResult);
+
+                  // 清空已上傳的圖片
+                  clearAllImages();
+                  setIsUploadingImages(false);
+
+                  // 添加系統訊息通知用戶
+                  const uploadSuccessMessage = {
+                    id: Date.now() + 5,
+                    text: `已成功上傳 ${uploadResult.data.uploaded_count} 張圖片到您的飼料！`,
+                    isUser: false,
+                    timestamp: new Date(),
+                    operations: []
+                  };
+
+                  setMessages(prev => [...prev, uploadSuccessMessage]);
+                }
+
+              } else {
+                console.error('[ChatWindow] feed_created operation 中缺少 feed_id');
+              }
+
+            } catch (uploadError) {
+              console.error('[ChatWindow] 飼料圖片上傳失敗:', uploadError);
+              setIsUploadingImages(false);
+
+              // 添加錯誤訊息
+              const uploadErrorMessage = {
+                id: Date.now() + 5,
+                text: `圖片上傳失敗：${uploadError.message || '未知錯誤'}。`,
+                isUser: false,
+                timestamp: new Date(),
+                error: true,
+                operations: []
+              };
+
+              setMessages(prev => [...prev, uploadErrorMessage]);
+            }
+          } else {
+            // 沒有圖片，但 AI 以為有圖片
+            console.warn('[ChatWindow] 檢測到 feed_created operation，但用戶沒有選擇圖片');
+
+            const noImageWarning = {
+              id: Date.now() + 5,
+              text: `飼料記錄已創建，但您沒有選擇任何圖片。如需添加飼料圖片，請稍後手動上傳。`,
+              isUser: false,
+              timestamp: new Date(),
+              operations: []
+            };
+
+            setMessages(prev => [...prev, noImageWarning]);
           }
         }
       }
@@ -768,7 +1024,6 @@ const ChatWindow = ({
           recommendedForumPosts,
           hasCalculator: (messageData?.hasCalculator ?? msg.has_calculator) || false,
           operations: messageData?.operations || additionalData?.operations || [],
-          operationType: messageData?.operationType ?? msg.operation_type ?? null,
           operationParams: additionalData?.operationParams || additionalData?.operation_params || {}
         };
       }));
@@ -1134,9 +1389,9 @@ const ChatWindow = ({
           <div className={styles.headerText}>
             <h3>{t('chatWindow.title')}</h3>
             <span className={styles.status}>
-              {isVoiceCallActive ? '🎙️ 通話中...' :
-               isVoiceConnecting ? '🔄 連線中...' :
-               voiceError ? `❌ ${voiceError}` :
+              {isVoiceCallActive ? '通話中...' :
+               isVoiceConnecting ? '連線中...' :
+               voiceError ? voiceError :
                t('chatWindow.status')}
             </span>
           </div>
@@ -1180,13 +1435,27 @@ const ChatWindow = ({
                 />
                 <div className={styles.messageContent}>
                   <div className={styles.messageBubble}>
-                    {message.text.split('\n').map((line, index) => (
+                    {String(message.text || '').split('\n').map((line, index) => (
                       <React.Fragment key={index}>
                         {line}
-                        {index < message.text.split('\n').length - 1 && <br />}
+                        {index < String(message.text || '').split('\n').length - 1 && <br />}
                       </React.Fragment>
                     ))}
                   </div>
+                  {/* 如果有確認圖片，顯示圖片預覽 */}
+                  {message.confirmationImages && message.confirmationImages.length > 0 && (
+                    <div className={styles.messageImagesGrid}>
+                      {message.confirmationImages.map((image, idx) => (
+                        <div key={image.id || idx} className={styles.messageImageItem}>
+                          <img
+                            src={image.preview}
+                            alt={`確認圖片 ${idx + 1}`}
+                            className={styles.messageImage}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  )}
                   {/* 如果有教學模式，顯示開始教學按鈕 */}
                   {message.tutorial && (
                     <button
@@ -1212,12 +1481,15 @@ const ChatWindow = ({
                   {/* 如果有操作功能，顯示操作按鈕 */}
                   {message.operations && message.operations.length > 0 && (() => {
                     // 找出導航操作
-                    const navigateOp = message.operations.find(op => 
-                      op.operation_name === 'navigate' || op.operation_name === 'navigation'
+                    const navigateOp = message.operations.find(op =>
+                      op.operation_type === 'navigate' || op.operation_type === 'navigation'
                     );
-                    // 找出其他操作
-                    const otherOps = message.operations.filter(op => 
-                      op.operation_name !== 'navigate' && op.operation_name !== 'navigation'
+                    // 找出其他操作（排除 navigate 和背景自動執行的操作）
+                    const backgroundOps = ['ocr_feed_analysis']; // 背景自動執行，不顯示按鈕
+                    const otherOps = message.operations.filter(op =>
+                      op.operation_type !== 'navigate' &&
+                      op.operation_type !== 'navigation' &&
+                      !backgroundOps.includes(op.operation_type)
                     );
 
                     return (
@@ -1244,15 +1516,6 @@ const ChatWindow = ({
                             return null;
                           }
                         })()}
-                        {/* 顯示其他操作按鈕 */}
-                        {otherOps.length > 0 && message.operationType && (
-                          <button
-                            className={styles.tutorialButton}
-                            onClick={() => handleOperationClick(message.operationType)}
-                          >
-                            {t(`chatWindow.operation.buttons.${message.operationType}`)}
-                          </button>
-                        )}
                       </>
                     );
                   })()}
@@ -1302,13 +1565,29 @@ const ChatWindow = ({
               <>
                 <div className={styles.messageContent}>
                   <div className={styles.messageBubble}>
-                    {message.text.split('\n').map((line, index) => (
+                    {String(message.text || '').split('\n').map((line, index) => (
                       <React.Fragment key={index}>
                         {line}
-                        {index < message.text.split('\n').length - 1 && <br />}
+                        {index < String(message.text || '').split('\n').length - 1 && <br />}
                       </React.Fragment>
                     ))}
                   </div>
+
+                  {/* 🎨 顯示用戶選擇的圖片（類似留言區的圖片網格） */}
+                  {message.images && message.images.length > 0 && (
+                    <div className={styles.messageImagesGrid}>
+                      {message.images.map((image, idx) => (
+                        <div key={image.id || idx} className={styles.messageImageItem}>
+                          <img
+                            src={image.preview}
+                            alt={`選擇的圖片 ${idx + 1}`}
+                            className={styles.messageImage}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
                   <div className={styles.messageTime}>
                     {formatTime(message.timestamp)}
                   </div>
@@ -1421,7 +1700,7 @@ const ChatWindow = ({
             <button
               className={styles.sendBtn}
               onClick={handleSendMessage}
-              disabled={!inputText.trim()}
+              disabled={!inputText.trim() && selectedImages.length === 0}
               title={t('chatWindow.sendButton')}
             >
               <img src="/assets/icon/CommentSendIcon.png" alt={t('chatWindow.sendButton')} />
