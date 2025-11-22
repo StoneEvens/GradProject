@@ -39,6 +39,7 @@ const ChatWindow = ({
   // 圖片上傳相關 state
   const [selectedImages, setSelectedImages] = useState([]);
   const [isUploadingImages, setIsUploadingImages] = useState(false);
+  const [isWaitingForFeedImageReplacement, setIsWaitingForFeedImageReplacement] = useState(false);
 
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
@@ -211,10 +212,31 @@ const ChatWindow = ({
       await handleSendMessage(ocrMessage, ocrContext);
     };
 
+    const handleHealthReportOcrCompleted = async (event) => {
+      const { ocrData, petId, imageCount = 0 } = event.detail;
+
+      console.log('[ChatWindow] 收到健康報告 OCR 完成事件:', ocrData);
+
+      // 將 OCR 結果回傳給 Agent
+      const ocrMessage = "[系統] 健康報告 OCR 分析完成，請協助確認辨識結果";
+      const ocrContext = {
+        healthReportOcrCompleted: true,
+        hasImages: imageCount > 0,
+        imageCount: imageCount,
+        healthReportOcrData: ocrData,
+        petId: petId
+      };
+
+      // 自動發送給 Agent
+      await handleSendMessage(ocrMessage, ocrContext);
+    };
+
     window.addEventListener('ocrCompleted', handleOcrCompleted);
+    window.addEventListener('healthReportOcrCompleted', handleHealthReportOcrCompleted);
 
     return () => {
       window.removeEventListener('ocrCompleted', handleOcrCompleted);
+      window.removeEventListener('healthReportOcrCompleted', handleHealthReportOcrCompleted);
     };
   }, []);
 
@@ -421,6 +443,18 @@ const ChatWindow = ({
           window.__selectedFeedImages = newImages;
           return newImages;
         });
+
+        // 如果正在等待替換飼料圖片，自動發送訊息給 AI 重新進行 OCR
+        if (isWaitingForFeedImageReplacement) {
+          console.log('[ChatWindow] 檢測到用戶選擇新的飼料圖片，自動通知 AI 重新進行 OCR');
+          setIsWaitingForFeedImageReplacement(false);
+
+          // 自動發送訊息給 AI，告訴它重新進行 OCR 分析
+          setTimeout(() => {
+            const autoMessage = '[系統] 用戶已選擇新的圖片，請重新進行 OCR 分析';
+            handleSendMessage(autoMessage);
+          }, 500);
+        }
       });
     }
 
@@ -586,6 +620,87 @@ const ChatWindow = ({
       if (aiResult.conversationId) {
         setCurrentConversationId(aiResult.conversationId);
         try { localStorage.setItem(LAST_CONV_ID_KEY, String(aiResult.conversationId)); } catch (e) {}
+      }
+
+      // 檢測 remove_image operation 並移除特定圖片
+      if (aiResult.operations && Array.isArray(aiResult.operations)) {
+        const removeImageOp = aiResult.operations.find(
+          op => op.operation_type === 'remove_image'
+        );
+
+        if (removeImageOp) {
+          try {
+            const opData = typeof removeImageOp.operation_data === 'string'
+              ? JSON.parse(removeImageOp.operation_data)
+              : removeImageOp.operation_data;
+
+            const imageIndex = opData.index - 1; // 轉換為 0-based 索引
+
+            console.log(`[ChatWindow] 檢測到 remove_image operation，移除第 ${opData.index} 張圖片（索引 ${imageIndex}）`);
+
+            setSelectedImages(prev => {
+              const newImages = [...prev];
+              if (imageIndex >= 0 && imageIndex < newImages.length) {
+                newImages.splice(imageIndex, 1);
+                // 同步更新 window 物件
+                window.__selectedFeedImages = newImages;
+                console.log(`[ChatWindow] 已移除圖片，剩餘 ${newImages.length} 張`);
+                return newImages;
+              }
+              return prev;
+            });
+
+            // 如果移除的是飼料圖片，清除 OCR 相關快取
+            if (imageIndex === 0 || imageIndex === 1) {
+              localStorage.removeItem('feedOcrData');
+              localStorage.removeItem('feedImageTypeMap');
+              console.log('[ChatWindow] 已清除 OCR 快取');
+            }
+
+          } catch (error) {
+            console.error('[ChatWindow] 解析 remove_image operation 失敗:', error);
+          }
+        }
+
+        // 檢測 replace_image operation 並移除特定圖片（等待用戶選擇新圖片）
+        const replaceImageOp = aiResult.operations.find(
+          op => op.operation_type === 'replace_image'
+        );
+
+        if (replaceImageOp) {
+          try {
+            const opData = typeof replaceImageOp.operation_data === 'string'
+              ? JSON.parse(replaceImageOp.operation_data)
+              : replaceImageOp.operation_data;
+
+            const imageIndex = opData.index - 1; // 轉換為 0-based 索引
+
+            console.log(`[ChatWindow] 檢測到 replace_image operation，移除第 ${opData.index} 張圖片（索引 ${imageIndex}）並等待用戶選擇新圖片`);
+
+            setSelectedImages(prev => {
+              const newImages = [...prev];
+              if (imageIndex >= 0 && imageIndex < newImages.length) {
+                newImages.splice(imageIndex, 1);
+                // 同步更新 window 物件
+                window.__selectedFeedImages = newImages;
+                console.log(`[ChatWindow] 已移除圖片，剩餘 ${newImages.length} 張，等待用戶選擇新圖片`);
+                return newImages;
+              }
+              return prev;
+            });
+
+            // 如果替換的是飼料圖片，清除 OCR 相關快取並設置等待狀態
+            if (imageIndex === 0 || imageIndex === 1) {
+              localStorage.removeItem('feedOcrData');
+              localStorage.removeItem('feedImageTypeMap');
+              setIsWaitingForFeedImageReplacement(true);
+              console.log('[ChatWindow] 已清除 OCR 快取，等待用戶選擇新的飼料圖片並重新進行 OCR');
+            }
+
+          } catch (error) {
+            console.error('[ChatWindow] 解析 replace_image operation 失敗:', error);
+          }
+        }
       }
 
       // 檢測 post_created operation 並自動上傳圖片
@@ -780,6 +895,59 @@ const ChatWindow = ({
             const ocrErrorMessage = {
               id: Date.now() + 5,
               text: `OCR 分析失敗：${ocrError.message || '未知錯誤'}`,
+              isUser: false,
+              timestamp: new Date(),
+              error: true,
+              operations: []
+            };
+
+            setMessages(prev => [...prev, ocrErrorMessage]);
+          }
+        }
+
+        // 檢測 ocr_health_report_analysis operation 並執行健康報告 OCR 分析
+        const healthOcrOp = aiResult.operations.find(
+          op => op.operation_type === 'ocr_health_report_analysis'
+        );
+
+        if (healthOcrOp && currentImages.length >= 1) {
+          console.log('[ChatWindow] 檢測到 ocr_health_report_analysis operation，開始執行健康報告 OCR 分析');
+
+          try {
+            // 從 operation_data 中獲取 pet_id
+            const opData = typeof healthOcrOp.operation_data === 'string'
+              ? JSON.parse(healthOcrOp.operation_data)
+              : healthOcrOp.operation_data;
+
+            const petId = opData.pet_id;
+
+            if (!petId) {
+              throw new Error('缺少寵物 ID，無法進行 OCR 分析');
+            }
+
+            console.log(`[ChatWindow] 使用寵物 ID ${petId} 進行健康報告 OCR 分析`);
+
+            // 調用 aiChatService 執行健康報告 OCR 分析（只需要第一張圖片）
+            const ocrResult = await aiChatService.analyzeHealthReportWithOCR(currentImages[0], petId);
+
+            console.log('[ChatWindow] 健康報告 OCR 分析完成:', ocrResult);
+
+            // 觸發 healthReportOcrCompleted 事件，供 useEffect 監聽並回傳給 Agent
+            window.dispatchEvent(new CustomEvent('healthReportOcrCompleted', {
+              detail: {
+                ocrData: ocrResult.ocrData,
+                petId: petId,
+                imageCount: currentImages.length
+              }
+            }));
+
+          } catch (ocrError) {
+            console.error('[ChatWindow] 健康報告 OCR 分析失敗:', ocrError);
+
+            // 添加錯誤訊息
+            const ocrErrorMessage = {
+              id: Date.now() + 5,
+              text: `健康報告 OCR 分析失敗：${ocrError.message || '未知錯誤'}`,
               isUser: false,
               timestamp: new Date(),
               error: true,
@@ -1442,11 +1610,12 @@ const ChatWindow = ({
                       </React.Fragment>
                     ))}
                   </div>
-                  {/* 如果有確認圖片，顯示圖片預覽 */}
+                  {/* 如果有確認圖片，顯示圖片預覽（帶編號） */}
                   {message.confirmationImages && message.confirmationImages.length > 0 && (
                     <div className={styles.messageImagesGrid}>
                       {message.confirmationImages.map((image, idx) => (
                         <div key={image.id || idx} className={styles.messageImageItem}>
+                          <div className={styles.imageNumberLabel}>第 {idx + 1} 張</div>
                           <img
                             src={image.preview}
                             alt={`確認圖片 ${idx + 1}`}
@@ -1485,7 +1654,7 @@ const ChatWindow = ({
                       op.operation_type === 'navigate' || op.operation_type === 'navigation'
                     );
                     // 找出其他操作（排除 navigate 和背景自動執行的操作）
-                    const backgroundOps = ['ocr_feed_analysis']; // 背景自動執行，不顯示按鈕
+                    const backgroundOps = ['ocr_feed_analysis', 'ocr_health_report_analysis']; // 背景自動執行，不顯示按鈕
                     const otherOps = message.operations.filter(op =>
                       op.operation_type !== 'navigate' &&
                       op.operation_type !== 'navigation' &&
