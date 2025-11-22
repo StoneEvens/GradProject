@@ -416,9 +416,23 @@ class EntityResolver:
 
                 results = []
                 for report in reports:
+                    # 檢查類型中文對照
+                    check_type_mapping = {
+                        "cbc": "全血計數",
+                        "biochemistry": "血液生化檢查",
+                        "urinalysis": "尿液分析",
+                        "other": "其他"
+                    }
+                    check_type_zh = check_type_mapping.get(report.check_type, report.check_type)
+
                     results.append({
                         "id": report.id,
                         "pet_id": report.pet_id,
+                        "pet_name": report.pet.pet_name,
+                        "check_date": report.check_date.strftime("%Y-%m-%d") if report.check_date else None,
+                        "check_type": report.check_type,
+                        "check_type_zh": check_type_zh,
+                        "check_location": report.check_location or "",
                         "created_at": report.created_at.isoformat() if report.created_at else None,
                         "path_template": "/pet/{pet_id}/health-report/{id}",
                         "resolved_path": f"/pet/{report.pet_id}/health-report/{report.id}"
