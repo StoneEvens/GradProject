@@ -401,6 +401,100 @@ def get_operation_list() -> Dict:
                 "urinalysis": "尿液分析",
                 "other": "其他"
             }
+        },
+        "update_health_report": {
+            "description": "更新健康報告記錄。重要：用戶必須是該健康報告的擁有者（透過寵物關聯驗證）。",
+            "required_params": ["user_id", "report_id"],
+            "optional_params": ["check_date", "check_type", "check_location", "notes", "health_data"],
+            "param_details": {
+                "user_id": "用戶 ID（整數）",
+                "report_id": "健康報告 ID（整數）- 重要：不要直接向用戶詢問 report_id！應該先詢問要修改哪份報告（例如「最近的」、「上週的血液檢查」），然後使用 resolve_entity_context 工具將描述解析為 report_id",
+                "check_date": "檢查日期（字串，格式：YYYY-MM-DD）",
+                "check_type": "檢查類型（字串，選項：'cbc'（全血計數）、'biochemistry'（血液生化檢查）、'urinalysis'（尿液分析）、'other'（其他））",
+                "check_location": "檢查地點（字串，例如：台北動物醫院）",
+                "health_data": "健康數據（字典，OCR 辨識的結果）",
+                "notes": "備註（字串）"
+            },
+            "notes": [
+                "只能更新屬於用戶自己寵物的健康報告",
+                "所有參數都是選填的，只更新有提供的欄位",
+                "health_data 如果提供，會完全取代原有的數據"
+            ],
+            "response_handling": {
+                "on_success": "Tool returns {success: true, message: '健康報告更新成功！', report_id: X, updated_fields: [...]}",
+                "tell_user": "告知用戶「健康報告已更新！」並列出更新的欄位",
+                "important": "更新前應先向用戶確認要修改的內容"
+            },
+            "user_responses": {
+                "ask_which_report": "請問您想修改哪一份健康報告？（例如：最近的、上週的血液檢查、小白的全血計數報告、2025-01-15的報告）",
+                "ask_what_to_update": "請告訴我您想修改哪些資訊？例如：檢查日期、檢查類型、檢查地點、備註、或健康數據。",
+                "confirm_update": "請確認要將以下資訊更新：\n{update_summary}\n\n確認要更新嗎？"
+            },
+            "workflow": [
+                "【重要】完整工作流程：",
+                "1. 詢問用戶想修改哪份健康報告（使用 ask_which_report 模板）",
+                "2. 收到用戶描述後（例如「最近的」、「上週的血液檢查」、「小白的報告」）：",
+                "   2.1. 使用 resolve_entity_context 工具查詢：resolve_entity_context(entity_type='health_report', user_id=context.userId, conditions={...}, limit=5)",
+                "   2.2. 常見查詢條件：",
+                "       - newest: true（最新的報告）",
+                "       - time_range: 'last_week'（上週的）",
+                "       - pet_id: X（特定寵物的，需先解析寵物名稱）",
+                "   2.3. 如果找到多份報告，列出報告資訊並請用戶確認是哪一份",
+                "   2.4. 如果找到一份報告，從 results[0].id 取得 report_id",
+                "   2.5. 如果找不到報告，告知用戶並建議可能的原因",
+                "3. 取得 report_id 後，詢問用戶想修改哪些資訊（使用 ask_what_to_update 模板）",
+                "4. 收集要更新的資訊",
+                "5. 使用 confirm_update 模板顯示更新摘要並請用戶確認",
+                "6. 用戶確認後呼叫 perform_database_operation('update_health_report', {...})",
+                "7. 告知用戶「健康報告已更新！」並列出更新的欄位"
+            ],
+            "check_type_mapping": {
+                "cbc": "全血計數",
+                "biochemistry": "血液生化檢查",
+                "urinalysis": "尿液分析",
+                "other": "其他"
+            }
+        },
+        "delete_health_report": {
+            "description": "刪除健康報告記錄。重要：用戶必須是該健康報告的擁有者（透過寵物關聯驗證）。",
+            "required_params": ["user_id", "report_id"],
+            "optional_params": [],
+            "param_details": {
+                "user_id": "用戶 ID（整數）",
+                "report_id": "健康報告 ID（整數）- 重要：不要直接向用戶詢問 report_id！應該先詢問要刪除哪份報告（例如「最近的」、「上週的血液檢查」），然後使用 resolve_entity_context 工具將描述解析為 report_id"
+            },
+            "notes": [
+                "只能刪除屬於用戶自己寵物的健康報告",
+                "刪除操作無法復原，建議刪除前再次確認",
+                "刪除健康報告不會刪除寵物本身"
+            ],
+            "response_handling": {
+                "on_success": "Tool returns {success: true, message: '健康報告已刪除', deleted_report_id: X, details: {...}}",
+                "tell_user": "告知用戶「健康報告已成功刪除」",
+                "important": "刪除前必須向用戶確認"
+            },
+            "user_responses": {
+                "ask_which_report": "請問您想刪除哪一份健康報告？（例如：最近的、上週的血液檢查、小白的全血計數報告、2025-01-15的報告）",
+                "confirm_delete": "確定要刪除這份健康報告嗎？\n\n- 寵物名稱：{pet_name}\n- 檢查日期：{check_date}\n- 檢查類型：{check_type_zh}\n\n刪除後無法復原，請確認是否繼續？"
+            },
+            "workflow": [
+                "【重要】完整工作流程：",
+                "1. 詢問用戶想刪除哪份健康報告（使用 ask_which_report 模板）",
+                "2. 收到用戶描述後（例如「最近的」、「上週的血液檢查」、「小白的報告」）：",
+                "   2.1. 使用 resolve_entity_context 工具查詢：resolve_entity_context(entity_type='health_report', user_id=context.userId, conditions={...}, limit=5)",
+                "   2.2. 常見查詢條件：",
+                "       - newest: true（最新的報告）",
+                "       - time_range: 'last_week'（上週的）",
+                "       - pet_id: X（特定寵物的，需先解析寵物名稱）",
+                "   2.3. 如果找到多份報告，列出報告資訊並請用戶確認是哪一份",
+                "   2.4. 如果找到一份報告，從 results[0].id 取得 report_id",
+                "   2.5. 如果找不到報告，告知用戶並建議可能的原因",
+                "3. 取得 report_id 後，從查詢結果中獲取報告資訊（寵物名稱、檢查日期、檢查類型）",
+                "4. 使用 confirm_delete 模板顯示報告資訊並請用戶確認刪除",
+                "5. 【關鍵】等待用戶明確確認（例如回覆「確認」、「是」、「刪除」等）",
+                "6. 用戶確認後呼叫 perform_database_operation('delete_health_report', {'user_id': X, 'report_id': Y})",
+                "7. 告知用戶「健康報告已成功刪除」"
+            ]
         }
     }
     return {
@@ -456,6 +550,20 @@ def perform_operation(operation: str, data: Dict) -> Dict:
             result = _add_health_report(data)
             logger.info(f"[perform_operation] add_health_report result: {result}")
             logger.info(f"[perform_operation] ===== FINISHED add_health_report =====")
+            return result
+        elif operation == "update_health_report":
+            logger.info(f"[perform_operation] ===== STARTING update_health_report =====")
+            logger.info(f"[perform_operation] update_health_report data: {data}")
+            result = _update_health_report(data)
+            logger.info(f"[perform_operation] update_health_report result: {result}")
+            logger.info(f"[perform_operation] ===== FINISHED update_health_report =====")
+            return result
+        elif operation == "delete_health_report":
+            logger.info(f"[perform_operation] ===== STARTING delete_health_report =====")
+            logger.info(f"[perform_operation] delete_health_report data: {data}")
+            result = _delete_health_report(data)
+            logger.info(f"[perform_operation] delete_health_report result: {result}")
+            logger.info(f"[perform_operation] ===== FINISHED delete_health_report =====")
             return result
         else:
             error_msg = f"Operation '{operation}' is not implemented"
@@ -1795,4 +1903,224 @@ def _add_health_report(data: Dict) -> Dict:
         "check_date": check_date_str,
         "check_location": check_location,
         "data_count": len([v for v in health_data.values() if v is not None])
+    }
+
+
+@transaction.atomic
+def _update_health_report(data: Dict) -> Dict:
+    """
+    更新健康報告記錄
+
+    Args:
+        data: 包含更新資訊的字典
+
+    Returns:
+        Dict: 操作結果
+    """
+    from ocrapp.models import HealthReport
+    from pets.models import Pet
+    from datetime import datetime
+
+    logger.info(f"[_update_health_report] Starting with data: {data}")
+
+    # 驗證必要欄位
+    required_fields = ["user_id", "report_id"]
+    missing_fields = [field for field in required_fields if field not in data]
+    if missing_fields:
+        error_msg = f"缺少必要欄位: {', '.join(missing_fields)}"
+        logger.error(f"[_update_health_report] {error_msg}")
+        return {"error": error_msg}
+
+    # 取得用戶
+    user_id = data.get("user_id")
+    try:
+        user = CustomUser.objects.get(id=user_id)
+    except CustomUser.DoesNotExist:
+        error_msg = f"找不到用戶 ID: {user_id}"
+        logger.error(f"[_update_health_report] {error_msg}")
+        return {"error": error_msg}
+
+    # 取得健康報告並驗證所有權
+    report_id = data.get("report_id")
+    try:
+        report = HealthReport.objects.get(id=report_id)
+
+        # 確認報告的寵物屬於該用戶
+        if report.pet.owner_id != user.id:
+            error_msg = f"健康報告 {report_id} 不屬於用戶 {user_id}"
+            logger.error(f"[_update_health_report] {error_msg}")
+            return {
+                "error": "權限不足",
+                "user_message": "這不是您的寵物的健康報告，無法修改。"
+            }
+    except HealthReport.DoesNotExist:
+        error_msg = f"找不到健康報告 ID: {report_id}"
+        logger.error(f"[_update_health_report] {error_msg}")
+        return {
+            "error": error_msg,
+            "user_message": "找不到這份健康報告。"
+        }
+
+    # 更新欄位
+    updated_fields = []
+
+    # 更新檢查日期
+    if "check_date" in data and data["check_date"]:
+        check_date_str = data["check_date"]
+        try:
+            check_date = datetime.strptime(check_date_str, '%Y-%m-%d').date()
+            report.check_date = check_date
+            updated_fields.append("檢查日期")
+        except (ValueError, TypeError) as e:
+            error_msg = f"日期格式錯誤：{check_date_str}，應為 YYYY-MM-DD"
+            logger.error(f"[_update_health_report] {error_msg}")
+            return {
+                "error": error_msg,
+                "user_message": "日期格式錯誤，請使用 YYYY-MM-DD 格式（例如：2025-01-15）"
+            }
+
+    # 更新檢查類型
+    if "check_type" in data and data["check_type"]:
+        check_type = data["check_type"]
+        valid_types = ['cbc', 'biochemistry', 'urinalysis', 'other']
+        if check_type not in valid_types:
+            error_msg = f"無效的檢查類型：{check_type}，有效選項：{valid_types}"
+            logger.error(f"[_update_health_report] {error_msg}")
+            return {
+                "error": error_msg,
+                "user_message": "無效的檢查類型，請選擇：全血計數、血液生化檢查、尿液分析、或其他"
+            }
+        report.check_type = check_type
+        updated_fields.append("檢查類型")
+
+    # 更新檢查地點
+    if "check_location" in data:
+        report.check_location = data["check_location"] or ""
+        updated_fields.append("檢查地點")
+
+    # 更新備註
+    if "notes" in data:
+        report.notes = data["notes"] or ""
+        updated_fields.append("備註")
+
+    # 更新健康數據
+    if "health_data" in data:
+        health_data = data["health_data"]
+        if not isinstance(health_data, dict):
+            error_msg = f"health_data 必須是字典，收到：{type(health_data)}"
+            logger.error(f"[_update_health_report] {error_msg}")
+            return {
+                "error": error_msg,
+                "user_message": "健康數據格式錯誤"
+            }
+        report.data = health_data
+        updated_fields.append("健康數據")
+
+    # 儲存更新
+    report.save()
+
+    logger.info(f"User {user.id} updated health report {report.id}, fields: {updated_fields}")
+
+    # 準備檢查類型的中文名稱
+    check_type_mapping = {
+        "cbc": "全血計數",
+        "biochemistry": "血液生化檢查",
+        "urinalysis": "尿液分析",
+        "other": "其他"
+    }
+    check_type_zh = check_type_mapping.get(report.check_type, report.check_type)
+
+    return {
+        "success": True,
+        "message": "健康報告更新成功！",
+        "report_id": report.id,
+        "pet_name": report.pet.pet_name,
+        "check_type_zh": check_type_zh,
+        "updated_fields": updated_fields,
+        "updated_count": len(updated_fields)
+    }
+
+
+@transaction.atomic
+def _delete_health_report(data: Dict) -> Dict:
+    """
+    刪除健康報告記錄
+
+    Args:
+        data: 包含刪除資訊的字典
+
+    Returns:
+        Dict: 操作結果
+    """
+    from ocrapp.models import HealthReport
+    from pets.models import Pet
+
+    logger.info(f"[_delete_health_report] Starting with data: {data}")
+
+    # 驗證必要欄位
+    required_fields = ["user_id", "report_id"]
+    missing_fields = [field for field in required_fields if field not in data]
+    if missing_fields:
+        error_msg = f"缺少必要欄位: {', '.join(missing_fields)}"
+        logger.error(f"[_delete_health_report] {error_msg}")
+        return {"error": error_msg}
+
+    # 取得用戶
+    user_id = data.get("user_id")
+    try:
+        user = CustomUser.objects.get(id=user_id)
+    except CustomUser.DoesNotExist:
+        error_msg = f"找不到用戶 ID: {user_id}"
+        logger.error(f"[_delete_health_report] {error_msg}")
+        return {"error": error_msg}
+
+    # 取得健康報告並驗證所有權
+    report_id = data.get("report_id")
+    try:
+        report = HealthReport.objects.get(id=report_id)
+
+        # 確認報告的寵物屬於該用戶
+        if report.pet.owner_id != user.id:
+            error_msg = f"健康報告 {report_id} 不屬於用戶 {user_id}"
+            logger.error(f"[_delete_health_report] {error_msg}")
+            return {
+                "error": "權限不足",
+                "user_message": "這不是您的寵物的健康報告，無法刪除。"
+            }
+    except HealthReport.DoesNotExist:
+        error_msg = f"找不到健康報告 ID: {report_id}"
+        logger.error(f"[_delete_health_report] {error_msg}")
+        return {
+            "error": error_msg,
+            "user_message": "找不到這份健康報告。"
+        }
+
+    # 記錄一些資訊用於回傳
+    pet_name = report.pet.pet_name
+    check_date = report.check_date.strftime('%Y-%m-%d') if report.check_date else "未知日期"
+    check_type = report.check_type
+
+    # 準備檢查類型的中文名稱
+    check_type_mapping = {
+        "cbc": "全血計數",
+        "biochemistry": "血液生化檢查",
+        "urinalysis": "尿液分析",
+        "other": "其他"
+    }
+    check_type_zh = check_type_mapping.get(check_type, check_type)
+
+    # 刪除健康報告
+    report.delete()
+
+    logger.info(f"User {user.id} deleted health report {report_id} for pet {pet_name}")
+
+    return {
+        "success": True,
+        "message": "健康報告已刪除",
+        "deleted_report_id": report_id,
+        "details": {
+            "pet_name": pet_name,
+            "check_date": check_date,
+            "check_type_zh": check_type_zh
+        }
     }
