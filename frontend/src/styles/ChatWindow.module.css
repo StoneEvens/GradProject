@@ -258,7 +258,7 @@
 }
 
 .userMessage .messageContent {
-  align-items: flex-start;
+  align-items: flex-end;
 }
 
 .aiMessage .messageContent {
@@ -333,52 +333,67 @@
   }
 }
 
-/* 圖片預覽容器 */
+/* 圖片預覽容器 - 響應式設計 */
 .imagePreviewContainer {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  padding: 8px;
+  gap: 8px;
+  padding: 10px;
   background-color: #f8f8f8;
   border-radius: 8px;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
   border: 1px solid #e0e0e0;
+  max-height: 120px;
+  overflow-y: auto;
 }
 
 .imagePreviewItem {
   position: relative;
   display: inline-block;
+  flex-shrink: 0;
 }
 
 .previewImage {
-  width: 60px;
-  height: 60px;
+  width: 70px;
+  height: 70px;
   object-fit: cover;
   border-radius: 6px;
   border: 1px solid #ddd;
+  transition: transform 0.2s ease;
+}
+
+.previewImage:hover {
+  transform: scale(1.05);
 }
 
 .removeImageBtn {
   position: absolute;
-  top: -5px;
-  right: -5px;
-  width: 20px;
-  height: 20px;
+  top: -6px;
+  right: -6px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   background-color: #ff4444;
   color: white;
   border: none;
-  font-size: 12px;
+  font-size: 14px;
+  font-weight: bold;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  transition: background-color 0.2s;
+  transition: all 0.2s;
+  line-height: 1;
 }
 
 .removeImageBtn:hover {
   background-color: #cc0000;
+  transform: scale(1.1);
+}
+
+.removeImageBtn:active {
+  transform: scale(0.95);
 }
 
 /* 上傳進度指示器 */
@@ -590,20 +605,25 @@
 }
 
 /* 滾動條樣式 */
-.messagesContainer::-webkit-scrollbar {
+.messagesContainer::-webkit-scrollbar,
+.imagePreviewContainer::-webkit-scrollbar {
   width: 6px;
+  height: 6px;
 }
 
-.messagesContainer::-webkit-scrollbar-track {
+.messagesContainer::-webkit-scrollbar-track,
+.imagePreviewContainer::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.messagesContainer::-webkit-scrollbar-thumb {
+.messagesContainer::-webkit-scrollbar-thumb,
+.imagePreviewContainer::-webkit-scrollbar-thumb {
   background: #d1d5db;
   border-radius: 3px;
 }
 
-.messagesContainer::-webkit-scrollbar-thumb:hover {
+.messagesContainer::-webkit-scrollbar-thumb:hover,
+.imagePreviewContainer::-webkit-scrollbar-thumb:hover {
   background: #9ca3af;
 }
 
@@ -735,6 +755,27 @@ body:has(.chatOverlay) {
     width: 14px;
     height: 14px;
   }
+
+  /* 圖片預覽響應式 - 小螢幕 */
+  .imagePreviewContainer {
+    gap: 6px;
+    padding: 8px;
+    margin-bottom: 8px;
+    max-height: 100px;
+  }
+
+  .previewImage {
+    width: 55px;
+    height: 55px;
+  }
+
+  .removeImageBtn {
+    width: 18px;
+    height: 18px;
+    font-size: 12px;
+    top: -4px;
+    right: -4px;
+  }
 }
 
 /* 針對更小的手機優化 */
@@ -855,6 +896,27 @@ body:has(.chatOverlay) {
     height: 28px;
     font-size: 20px;
   }
+
+  /* 圖片預覽響應式 - 極小螢幕 */
+  .imagePreviewContainer {
+    gap: 5px;
+    padding: 6px;
+    margin-bottom: 6px;
+    max-height: 90px;
+  }
+
+  .previewImage {
+    width: 50px;
+    height: 50px;
+  }
+
+  .removeImageBtn {
+    width: 16px;
+    height: 16px;
+    font-size: 11px;
+    top: -3px;
+    right: -3px;
+  }
 }
 
 /* iOS 安全區域支持 */
@@ -892,6 +954,25 @@ body:has(.chatOverlay) {
 
   .closeButton:active {
     background-color: rgba(255, 255, 255, 0.3);
+  }
+
+  /* 圖片預覽觸控優化 */
+  .previewImage:hover {
+    transform: none;
+  }
+
+  .previewImage:active {
+    transform: scale(0.95);
+  }
+
+  .removeImageBtn:hover {
+    transform: none;
+    background-color: #ff4444;
+  }
+
+  .removeImageBtn:active {
+    transform: scale(0.9);
+    background-color: #cc0000;
   }
 }
 
@@ -1136,4 +1217,105 @@ body:has(.chatOverlay) {
 .operationQueueButton:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+/* 🎨 訊息中的圖片網格（類似留言區樣式） - 響應式設計 */
+.messageImagesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 6px;
+  margin-top: 10px;
+  max-width: 100%;
+}
+
+/* 單張圖片最多佔滿寬度 */
+.messageImagesGrid:has(:only-child) {
+  grid-template-columns: 1fr;
+  max-width: 200px;
+}
+
+/* 兩張圖片並排 */
+.messageImagesGrid:has(:nth-child(2):last-child) {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.messageImageItem {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #f5f5f5;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.messageImageItem:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.messageImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* 📱 平板尺寸 (>= 480px) */
+@media (min-width: 480px) {
+  .messageImagesGrid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 8px;
+  }
+
+  .messageImagesGrid:has(:only-child) {
+    max-width: 240px;
+  }
+
+  .messageImageItem {
+    border-radius: 10px;
+  }
+}
+
+/* 💻 桌面尺寸 (>= 768px) */
+@media (min-width: 768px) {
+  .messageImagesGrid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 10px;
+  }
+
+  .messageImagesGrid:has(:only-child) {
+    max-width: 280px;
+  }
+
+  .messageImageItem {
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* 🖥️ 大螢幕 (>= 1024px) */
+@media (min-width: 1024px) {
+  .messageImagesGrid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 12px;
+  }
+
+  .messageImagesGrid:has(:only-child) {
+    max-width: 300px;
+  }
+}
+
+/* 📱 觸控裝置優化 */
+@media (hover: none) and (pointer: coarse) {
+  /* 移除 hover 效果，避免觸控裝置上的問題 */
+  .messageImageItem:hover {
+    transform: none;
+  }
+
+  /* 增加點擊區域 */
+  .messageImageItem {
+    min-height: 100px;
+  }
 }

@@ -219,8 +219,7 @@ class OpenAIService:
         "hasRecommendedUsers": false,
         "hasRecommendedArticles": true,
         "hasCalculator": false,
-        "hasOperation": false,
-        "operationType": null
+        "hasOperation": false
     },
     "additional_data": {
         "recommended_user_ids": [],
@@ -270,8 +269,7 @@ class OpenAIService:
         "hasRecommendedUsers": false,
         "hasRecommendedArticles": false,
         "hasCalculator": true,  // 如果找到飼料資料為 true；找不到為 false
-        "hasOperation": false,  // 如果找不到飼料資料為 true；找到為 false
-        "operationType": null   // 如果找不到飼料資料為 "addFeed"；找到為 null
+        "hasOperation": false   // 如果找不到飼料資料為 true；找到為 false
     },
     "additional_data": {
         "recommended_user_ids": [],
@@ -290,7 +288,6 @@ class OpenAIService:
 7. **如果使用者詢問的飼料在資料庫中找不到（recommended_feeds 為空列表）**：
    - 設置 hasCalculator 為 false
    - 設置 hasOperation 為 true
-   - 設置 operationType 為 "addFeed"
    - **只告訴使用者**：「很抱歉，我們的資料庫中目前沒有這款飼料的資料。您可以點擊下方的『前往新增』按鈕，幫助我們新增這款飼料的資訊！」
    - **不要提及寵物類型匹配問題**，因為沒有飼料資料就無法判斷類型
 8. **如果飼料是未驗證的（is_verified 為 false）**：
@@ -367,8 +364,7 @@ class OpenAIService:
         "hasRecommendedUsers": false,
         "hasRecommendedArticles": false,
         "hasCalculator": false,
-        "hasOperation": false,
-        "operationType": null
+        "hasOperation": false
     },
     "additional_data": {
         "recommended_user_ids": [],
