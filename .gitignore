@@ -34,3 +34,6 @@ backend/feeds/ai-project-454107-a1e8b881803e.json
 backend/ocrapp/ai-project-454107-a1e8b881803e.json
 backend/feeds/ai-project-454107-a1e8b881803e.json
 backend/ocrapp/ai-project-454107-a1e8b881803e.json
+
+# BERT model files
+backend/utils/bert-base-chinese/
