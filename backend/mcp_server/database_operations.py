@@ -58,18 +58,47 @@ def get_operation_list() -> Dict:
             }
         },
         "update_user": {
-            "description": "更新用戶資訊",
+            "description": "更新用戶資訊（包含帳號隱私設定）",
             "required_params": ["user_id"],
-            "optional_params": ["username", "user_fullname", "bio"],
+            "optional_params": ["username", "user_fullname", "bio", "account_privacy"],
             "param_details": {
                 "username": "用戶名稱 (字串，唯一)",
                 "user_fullname": "用戶真實全名 (字串)",
-                "bio": "用戶個人簡介 (字串)"
+                "bio": "用戶個人簡介 (字串)",
+                "account_privacy": "帳號隱私設定 (字串，選項: 'public' 或 'private')"
             },
             "notes": [
                 "username必須是唯一的",
-                "至少需要提供一個可選參數來更新"
-            ]
+                "至少需要提供一個可選參數來更新",
+                "account_privacy 決定其他用戶是否可以查看您的個人資料"
+            ],
+            "conversation_flow": {
+                "privacy_setting": {
+                    "description": "調整用戶隱私設定",
+                    "trigger_keywords": ["隱私", "隱私設定", "公開", "私人", "privacy", "設定帳號"],
+                    "agent_questions": [
+                        "當用戶提到隱私設定時，詢問：「請問您想將帳號設定為公開還是私人？」",
+                        "如果用戶說「公開」→ 設定 account_privacy='public'",
+                        "如果用戶說「私人」或「私密」→ 設定 account_privacy='private'"
+                    ],
+                    "current_status_query": "可以先告訴用戶目前的隱私狀態（從 context 或查詢 get_user_information 獲取）",
+                    "confirmation": "設定後告知：「已將您的帳號設定為{公開/私人}。{公開時：其他用戶可以查看您的個人資料 / 私人時：只有您自己可以查看您的完整個人資料}」"
+                },
+                "example_conversations": [
+                    {
+                        "user": "我想調整隱私設定",
+                        "agent": "好的！您目前的帳號是{公開/私人}的。請問您想將帳號設定為公開還是私人？\n\n- 公開：其他用戶可以查看您的個人資料\n- 私人：只有您自己可以查看您的完整個人資料"
+                    },
+                    {
+                        "user": "設定為私人",
+                        "agent": "[調用 update_user，account_privacy='private'] 已將您的帳號設定為私人。現在只有您自己可以查看您的完整個人資料。"
+                    },
+                    {
+                        "user": "我想讓別人看到我的資料",
+                        "agent": "了解！我會將您的帳號設定為公開。[調用 update_user，account_privacy='public'] 已將您的帳號設定為公開，其他用戶現在可以查看您的個人資料了。"
+                    }
+                ]
+            }
         },
         "update_user_headshot": {
             "description": "更新用戶頭像（大頭照）。此操作只建立更新請求，實際圖片需透過前端上傳。",
@@ -171,19 +200,127 @@ def get_operation_list() -> Dict:
             }
         },
         "create_disease_archive": {
-            "description": "建立疾病檔案（將多個異常記錄整合成一個疾病檔案）",
+            "description": "建立疾病檔案（將多個異常記錄整合成一個疾病檔案）- 必須先生成格式化內容並經用戶確認後才能建立",
             "required_params": ["user_id", "pet_id", "archive_title", "content", "abnormal_post_ids"],
             "optional_params": ["main_cause", "go_to_doctor", "health_status", "is_private"],
             "param_details": {
                 "user_id": "用戶ID (整數)",
                 "pet_id": "寵物ID (整數)",
                 "archive_title": "檔案標題 (字串)",
-                "content": "檔案內容/統整描述 (字串)",
+                "content": "檔案內容/統整描述 (字串) - 必須是格式化的病程記錄，以第一人稱主人視角撰寫",
                 "abnormal_post_ids": "包含的異常記錄ID列表 (整數陣列，例如: [1, 2, 3])",
                 "main_cause": "主要病因 (字串)",
                 "go_to_doctor": "是否有就醫 (布林值，預設: False)",
                 "health_status": "健康狀態 (字串，例如: '已康復', '治療中')",
                 "is_private": "是否為私人記錄 (布林值，預設: True)"
+            },
+            "important_notes": [
+                "此操作必須遵循完整的確認流程，不可直接建立檔案",
+                "必須先收集資訊、生成格式化內容、顯示給用戶確認、確認後才建立",
+                "content 欄位必須是格式化的病程記錄，不可是原始異常記錄的簡單拼接"
+            ],
+            "conversation_flow": {
+                "step1_collect_info": {
+                    "description": "收集建立疾病檔案所需的基本資訊",
+                    "agent_action": "詢問用戶並收集以下資訊",
+                    "required_info": {
+                        "pet_id": "寵物ID - 可從 context.petId 獲取，或使用 get_user_pet_info_detailed 查詢",
+                        "abnormal_post_ids": "要整合的異常記錄ID列表 - 詢問用戶想整合哪些異常記錄",
+                        "archive_title": "疾病檔案標題 - 例如：「2024年11月感冒記錄」",
+                        "main_cause": "主要病因 - 例如：「上呼吸道感染」（可選）",
+                        "symptoms": "主要症狀列表 - 例如：['咳嗽', '流鼻涕', '發燒']（可選，用於生成內容）"
+                    },
+                    "example_questions": [
+                        "請問您想為哪隻寵物建立疾病檔案？",
+                        "請問您想整合哪些異常記錄？（可以說「最近3筆」或指定日期範圍）",
+                        "請問要如何命名這個疾病檔案？",
+                        "請問主要病因是什麼？（例如：感冒、腸胃炎等）"
+                    ]
+                },
+                "step2_fetch_abnormal_posts": {
+                    "description": "獲取異常記錄的詳細資料",
+                    "agent_action": "使用 database_operation_list 查詢可用的查詢操作，或直接使用已知的異常記錄 ID",
+                    "data_needed": [
+                        "每筆異常記錄的日期 (record_date)",
+                        "症狀列表 (symptoms)",
+                        "異常描述 (content)",
+                        "體重 (weight)",
+                        "體溫 (body_temperature)",
+                        "飲水量 (water_amount)",
+                        "是否就醫 (is_emergency)"
+                    ],
+                    "note": "如果無法直接查詢異常記錄詳情，可以詢問用戶提供摘要"
+                },
+                "step3_generate_content": {
+                    "description": "使用 GPT 能力生成格式化的疾病檔案內容",
+                    "agent_action": "整理異常記錄資料，生成符合格式要求的病程記錄",
+                    "content_format_requirements": {
+                        "perspective": "第一人稱主人視角撰寫，以「我」的角度描述觀察到的寵物狀況",
+                        "tone": "親切自然，充滿關愛之情，就像主人在寫寵物的日記",
+                        "structure": "按時間順序整理病程發展",
+                        "date_format": "使用「X月X日」格式（例如：12月3日），不要使用完整日期",
+                        "transitions": "使用過渡詞描述不同時期的症狀變化，如「期間」、「接下來幾天」、「症狀持續」等",
+                        "style": "詳細但簡潔，避免重複，不使用 markdown 格式",
+                        "no_title": "直接開始內容，不加標題前綴（如「xxx的病程記錄」）"
+                    },
+                    "example_structure": "12月3日，我發現{寵物名}開始出現{症狀}的情況。當時牠的體溫是{溫度}度，體重{體重}公斤。我很擔心，馬上記錄下來。\n\n接下來幾天，{症狀變化描述}。到了12月5日，情況{改善/惡化}...\n\n期間我帶牠去看了醫生，醫生說是{病因}...",
+                    "input_data_format": {
+                        "pet_info": "{寵物名}（{寵物類型}，{年齡}歲）",
+                        "main_cause": "主要病因",
+                        "main_symptoms": "主要症狀（用頓號分隔）",
+                        "duration": "病程時間範圍",
+                        "posts_data": "按時間排序的異常記錄詳細資料"
+                    }
+                },
+                "step4_display_confirmation": {
+                    "description": "顯示生成的內容給用戶確認",
+                    "agent_response_format": "我已經為{寵物名}整理好疾病檔案了，內容如下：\n\n【檔案標題】\n{archive_title}\n\n【主要病因】\n{main_cause}\n\n【病程記錄】\n{generated_content}\n\n請確認以上內容是否正確？如果正確，請回覆「確認」或「是」，我就會為您建立這份疾病檔案。",
+                    "confirmation_marker": "CRITICAL: 在確認訊息末尾必須添加特殊標記 '[[NEEDS_CONFIRMATION_DISEASE_ARCHIVE]]'，這會告訴前端顯示確認用的格式化內容。範例：'您的確認訊息\n\n[[NEEDS_CONFIRMATION_DISEASE_ARCHIVE]]'",
+                    "user_responses": {
+                        "confirm": "用戶回覆「確認」、「是」、「好」、「沒問題」等肯定詞 → 執行 step5",
+                        "modify": "用戶要求修改 → 重新生成內容或詢問修改細節",
+                        "cancel": "用戶取消 → 告知已取消建立"
+                    }
+                },
+                "step5_create_archive": {
+                    "description": "用戶確認後建立疾病檔案",
+                    "agent_action": "調用 perform_database_operation，operation='create_disease_archive'",
+                    "required_params": {
+                        "user_id": "用戶ID（從 context 獲取）",
+                        "pet_id": "寵物ID（從步驟1收集）",
+                        "archive_title": "檔案標題（從步驟1收集）",
+                        "content": "格式化的病程記錄內容（從步驟3生成）",
+                        "abnormal_post_ids": "異常記錄ID列表（從步驟1收集）"
+                    },
+                    "optional_params": {
+                        "main_cause": "主要病因（從步驟1收集）",
+                        "go_to_doctor": "是否有就醫（根據異常記錄中的 is_emergency 判斷）",
+                        "health_status": "健康狀態（可詢問用戶：已康復/治療中/觀察中）",
+                        "is_private": "是否為私人記錄（預設 true）"
+                    },
+                    "success_response": "疾病檔案「{archive_title}」已成功建立！您可以在健康記錄頁面查看完整的病程記錄。",
+                    "error_handling": "如果建立失敗，告知用戶錯誤原因並詢問是否重試"
+                }
+            },
+            "example_conversation": {
+                "user_1": "我想為我的狗狗建立一個疾病檔案",
+                "agent_1": "好的！我來幫您建立疾病檔案。請問您想為哪隻寵物建立？您有以下寵物：[列出寵物清單]",
+                "user_2": "Charlie",
+                "agent_2": "了解！請問您想整合哪些異常記錄？我可以幫您查詢最近的異常記錄。",
+                "user_3": "最近一週的記錄",
+                "agent_3": "[查詢後] 我找到了3筆異常記錄：\n1. 11月15日 - 咳嗽、流鼻涕\n2. 11月17日 - 持續咳嗽\n3. 11月20日 - 症狀改善\n\n請問要如何命名這個疾病檔案？",
+                "user_4": "11月感冒記錄",
+                "agent_4": "好的！請問主要病因是什麼？（例如：上呼吸道感染、感冒等）",
+                "user_5": "感冒",
+                "agent_5": "[生成內容後] 我已經為 Charlie 整理好疾病檔案了，內容如下：\n\n【檔案標題】\n11月感冒記錄\n\n【主要病因】\n感冒\n\n【病程記錄】\n11月15日，我發現 Charlie 開始出現咳嗽和流鼻涕的情況...[完整病程記錄]\n\n請確認以上內容是否正確？如果正確，請回覆「確認」。\n\n[[NEEDS_CONFIRMATION_DISEASE_ARCHIVE]]",
+                "user_6": "確認",
+                "agent_6": "[調用 create_disease_archive] 疾病檔案「11月感冒記錄」已成功建立！您可以在健康記錄頁面查看完整的病程記錄。"
+            },
+            "validation_rules": {
+                "must_follow_flow": "必須按照 step1 → step2 → step3 → step4 → step5 的順序執行",
+                "no_skip_confirmation": "不可跳過步驟4的確認流程，直接建立檔案",
+                "content_quality": "生成的 content 必須是格式化的病程記錄，不是原始資料的簡單拼接",
+                "user_confirmation_required": "必須等待用戶明確確認後才能執行 create_disease_archive"
             }
         },
         "update_abnormal_post": {
@@ -763,53 +900,61 @@ def _update_pet(data: Dict) -> Dict:
 
 def _update_user(data: Dict) -> Dict:
     """
-    更新用戶資訊
-    
+    更新用戶資訊（包含帳號隱私設定）
+
     Args:
         data: 包含更新資訊的字典
-        
+
     Returns:
         Dict: 操作結果
     """
     # 驗證必要欄位
     if "user_id" not in data:
         return {"error": "Missing required field: user_id"}
-    
+
     # 獲取用戶
     try:
         user = CustomUser.objects.get(id=data["user_id"])
     except CustomUser.DoesNotExist:
         return {"error": f"User with id {data['user_id']} not found"}
-    
+
     # 檢查是否至少提供一個可選參數
-    updatable_fields = ["username", "user_fullname", "bio"]
+    updatable_fields = ["username", "user_fullname", "bio", "account_privacy"]
     if not any(field in data for field in updatable_fields):
-        return {"error": "At least one field must be provided to update (username, user_fullname, or bio)"}
-    
+        return {"error": "At least one field must be provided to update (username, user_fullname, bio, or account_privacy)"}
+
     # 更新用戶資訊
     updated_fields = []
-    
+
     if "username" in data:
         # 檢查username是否已存在（排除當前用戶）
         if CustomUser.objects.filter(user_account=data["username"]).exclude(id=user.id).exists():
             return {"error": f"Username '{data['username']}' is already taken"}
         user.user_account = data["username"]
         updated_fields.append("username")
-    
+
     if "user_fullname" in data:
         user.user_fullname = data["user_fullname"]
         updated_fields.append("user_fullname")
-    
+
     if "bio" in data:
         user.user_intro = data["bio"]
         updated_fields.append("bio")
-    
+
+    if "account_privacy" in data:
+        privacy_value = data["account_privacy"]
+        # 驗證隱私設定值
+        if privacy_value not in ["public", "private"]:
+            return {"error": f"Invalid account_privacy value: '{privacy_value}'. Must be 'public' or 'private'"}
+        user.account_privacy = privacy_value
+        updated_fields.append("account_privacy")
+
     # 保存更新
     user.save(update_fields=[
-        field.replace("username", "user_account").replace("bio", "user_intro") 
+        field.replace("username", "user_account").replace("bio", "user_intro")
         for field in updated_fields
     ])
-    
+
     # 重新獲取更新後的用戶
     user.refresh_from_db()
     
@@ -822,7 +967,8 @@ def _update_user(data: Dict) -> Dict:
             "id": user.id,
             "username": user.user_account,
             "user_fullname": user.user_fullname,
-            "bio": user.user_intro
+            "bio": user.user_intro,
+            "account_privacy": user.account_privacy
         }
     }
 
@@ -1005,10 +1151,10 @@ def _add_abnormal_post(data: Dict) -> Dict:
 def _create_disease_archive(data: Dict) -> Dict:
     """
     建立疾病檔案
-    
+
     Args:
         data: 包含疾病檔案資訊的字典
-        
+
     Returns:
         Dict: 操作結果
     """

@@ -44,7 +44,6 @@ const ChatWindow = ({
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
   const recognitionRef = useRef(null);
-  const restoredRef = useRef(false);
   const fileInputRef = useRef(null);
 
   // 簡易本地快取鍵
@@ -157,21 +156,7 @@ const ChatWindow = ({
     scrollToBottom();
   }, [messages]);
 
-  // 當翻譯準備好時初始化歡迎訊息
-  useEffect(() => {
-    // 若已有快取或已還原，不顯示歡迎訊息
-    const hasCache = !!localStorage.getItem(LAST_CONV_ID_KEY) || !!localStorage.getItem(LAST_MESSAGES_KEY);
-    if (ready && messages.length === 0 && !hasCache) {
-      setMessages([
-        {
-          id: 1,
-          text: t('chatWindow.welcomeMessage'),
-          isUser: false,
-          timestamp: new Date()
-        }
-      ]);
-    }
-  }, [ready, t, messages.length]);
+  // 注意：歡迎訊息現在由 isOpen 的 useEffect 處理
 
   // 當用戶改變時重置頭像錯誤狀態
   useEffect(() => {
@@ -1284,65 +1269,37 @@ const ChatWindow = ({
     return formattedMessages;
   };
 
-  // 開啟聊天視窗時嘗試還原最近一次會話
+  // 開啟聊天視窗時顯示歡迎訊息並開始新對話
   useEffect(() => {
-    if (!isOpen || restoredRef.current) return;
+    if (!isOpen) return;
 
-    const restore = async () => {
+    // 每次打開聊天視窗時，重置為新對話並顯示歡迎訊息
+    if (messages.length === 0 && ready) {
+      // 清除舊的對話 ID 和快取
+      setCurrentConversationId(null);
       try {
-        const lastId = localStorage.getItem(LAST_CONV_ID_KEY);
-        const cachedMessagesRaw = localStorage.getItem(LAST_MESSAGES_KEY);
-
-        if (cachedMessagesRaw && messages.length === 0) {
-          try {
-            const cached = JSON.parse(cachedMessagesRaw);
-            if (Array.isArray(cached) && cached.length > 0) {
-              setMessages(cached.map(m => ({ ...m, timestamp: new Date(m.timestamp) })));
-            }
-          } catch {}
-        }
-
-        if (lastId) {
-          try {
-            const conversationDetail = await aiChatService.loadConversation(lastId);
-            const formatted = await formatMessagesFromConversationDetail(conversationDetail);
-            setMessages(formatted);
-            setCurrentConversationId(Number(lastId));
-          } catch (loadErr) {
-            // Cached conversation no longer exists: start fresh (no DB creation)
-            console.log('[ChatWindow] Cached conversation not found, starting fresh');
-            setCurrentConversationId(null);
-            try { localStorage.removeItem(LAST_CONV_ID_KEY); } catch {}
-
-            // If no cached messages, show welcome message
-            if (!localStorage.getItem(LAST_MESSAGES_KEY)) {
-              setMessages([
-                {
-                  id: 1,
-                  text: t('chatWindow.welcomeMessage'),
-                  isUser: false,
-                  timestamp: new Date()
-                }
-              ]);
-            }
-          }
-        } else {
-          // No cached conversation: start fresh (no DB creation)
-          console.log('[ChatWindow] No cached conversation, starting fresh');
-          setCurrentConversationId(null);
-          // Don't overwrite existing messages (e.g., pre-displayed welcome message or local cache)
-        }
+        localStorage.removeItem(LAST_CONV_ID_KEY);
+        localStorage.removeItem(LAST_MESSAGES_KEY);
       } catch (e) {
-        // 無法還原時保持當前狀態
-      } finally {
-        restoredRef.current = true;
+        console.warn('[ChatWindow] 無法清除快取:', e);
       }
-    };
 
-    restore();
-    // 僅在首次打開時運行
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen]);
+      // 重置 AI Chat Service 的會話狀態
+      aiChatService.startNewConversation();
+
+      // 顯示歡迎訊息
+      setMessages([
+        {
+          id: 1,
+          text: t('chatWindow.welcomeMessage'),
+          isUser: false,
+          timestamp: new Date()
+        }
+      ]);
+
+      console.log('[ChatWindow] 開始新對話並顯示歡迎訊息');
+    }
+  }, [isOpen, ready, t]);
 
   // 將當前訊息快取到本地（限制條數以避免過大）
   useEffect(() => {
@@ -1960,7 +1917,11 @@ const ChatWindow = ({
             )}
             <button
               className={styles.sendBtn}
-              onClick={handleSendMessage}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleSendMessage();
+              }}
               disabled={!inputText.trim() && selectedImages.length === 0}
               title={t('chatWindow.sendButton')}
             >
