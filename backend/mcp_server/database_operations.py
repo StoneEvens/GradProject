@@ -200,15 +200,17 @@ def get_operation_list() -> Dict:
             }
         },
         "create_disease_archive": {
-            "description": "建立疾病檔案（將多個異常記錄整合成一個疾病檔案）- 必須先生成格式化內容並經用戶確認後才能建立",
-            "required_params": ["user_id", "pet_id", "archive_title", "content", "abnormal_post_ids"],
-            "optional_params": ["main_cause", "go_to_doctor", "health_status", "is_private"],
+            "description": "建立疾病檔案（將多個異常記錄整合成一個疾病檔案）。如果未提供content，系統會使用AI自動生成統整內容。- 必須先生成格式化內容並經用戶確認後才能建立",
+            "required_params": ["user_id", "pet_id", "archive_title", "abnormal_post_ids"],
+            "optional_params": ["content", "symptoms", "main_cause", "go_to_doctor", "health_status", "is_private", "diagnosis_status", "treatment_status"],
             "param_details": {
                 "user_id": "用戶ID (整數)",
                 "pet_id": "寵物ID (整數)",
                 "archive_title": "檔案標題 (字串)",
                 "content": "檔案內容/統整描述 (字串) - 必須是格式化的病程記錄，以第一人稱主人視角撰寫",
                 "abnormal_post_ids": "包含的異常記錄ID列表 (整數陣列，例如: [1, 2, 3])",
+                "content": "檔案內容/統整描述 (字串，可選。若未提供，系統會自動使用AI生成)",
+                "symptoms": "主要症狀列表 (字串陣列，例如: ['打噴嚏', '咳嗽']，用於AI生成內容)",
                 "main_cause": "主要病因 (字串)",
                 "go_to_doctor": "是否有就醫 (布林值，預設: False)",
                 "health_status": "健康狀態 (字串，例如: '已康復', '治療中')",
@@ -1158,22 +1160,19 @@ def _create_disease_archive(data: Dict) -> Dict:
     Returns:
         Dict: 操作結果
     """
-    # 驗證必要欄位
-    required_fields = ["user_id", "pet_id", "archive_title", "content", "abnormal_post_ids"]
+    # 驗證必要欄位（content現在是可選的）
+    required_fields = ["user_id", "pet_id", "archive_title", "abnormal_post_ids"]
     missing_fields = [f for f in required_fields if f not in data]
     if missing_fields:
         return {"error": f"Missing required fields: {', '.join(missing_fields)}"}
     
     # 驗證資料
     archive_title = data.get("archive_title", "").strip()
-    content = data.get("content", "").strip()
+    content = data.get("content", "").strip()  # 現在可以是空的
     abnormal_post_ids = data.get("abnormal_post_ids", [])
     
     if not archive_title:
         return {"error": "Archive title cannot be empty"}
-    
-    if not content:
-        return {"error": "Archive content cannot be empty"}
     
     if not abnormal_post_ids or not isinstance(abnormal_post_ids, list):
         return {"error": "At least one abnormal post ID is required"}
@@ -1195,12 +1194,25 @@ def _create_disease_archive(data: Dict) -> Dict:
         id__in=abnormal_post_ids,
         pet=pet,
         user=user
-    ).order_by('record_date')
+    ).prefetch_related('symptoms__symptom').order_by('record_date')
     
     if abnormal_posts.count() != len(abnormal_post_ids):
         return {
             "error": "Some abnormal post IDs are invalid or do not belong to the specified pet and user"
         }
+    
+    # 如果沒有提供content，使用AI自動生成
+    if not content:
+        logger.info(f"[_create_disease_archive] No content provided, generating with AI...")
+        content = _generate_disease_archive_content_with_ai(
+            pet=pet,
+            abnormal_posts=abnormal_posts,
+            symptoms=data.get("symptoms", []),
+            main_cause=data.get("main_cause", "")
+        )
+        
+        if not content:
+            return {"error": "Failed to generate archive content automatically. Please provide content manually."}
     
     # 建立PostFrame
     post_frame = PostFrame.objects.create(user=user)
@@ -1255,9 +1267,125 @@ def _create_disease_archive(data: Dict) -> Dict:
             "is_private": disease_archive.is_private,
             "main_cause": main_cause if main_cause else None,
             "included_abnormal_post_ids": list(abnormal_posts.values_list('id', flat=True)),
-            "post_frame_id": post_frame.id
+            "post_frame_id": post_frame.id,
+            "was_auto_generated": not bool(data.get("content"))
         }
     }
+
+
+def _generate_disease_archive_content_with_ai(pet, abnormal_posts, symptoms, main_cause):
+    """
+    使用GPT生成疾病檔案內容（與網頁版使用相同邏輯）
+    
+    Args:
+        pet: Pet對象
+        abnormal_posts: QuerySet of AbnormalPost
+        symptoms: 症狀列表
+        main_cause: 主要病因
+        
+    Returns:
+        str: 生成的內容，失敗時返回None
+    """
+    try:
+        from openai import OpenAI
+        import os
+        
+        # 初始化 OpenAI client
+        api_key = os.getenv('OPENAI_API_KEY')
+        if not api_key:
+            logger.error("[_generate_disease_archive_content_with_ai] OpenAI API key not found")
+            return None
+            
+        client = OpenAI(api_key=api_key)
+        
+        # 準備寵物資訊
+        pet_info = f"{pet.pet_name}（{pet.pet_type}，{pet.age}歲）"
+        
+        # 準備症狀資訊
+        symptom_list = symptoms if isinstance(symptoms, list) else []
+        symptoms_text = '、'.join(symptom_list) if symptom_list else '未指定'
+        
+        # 準備異常記錄資訊
+        posts_data = []
+        for post in abnormal_posts:
+            post_symptoms = [rel.symptom.symptom_name for rel in post.symptoms.all()]
+            post_data = {
+                'date': post.record_date.strftime('%Y年%m月%d日'),
+                'symptoms': '、'.join(post_symptoms) if post_symptoms else '無症狀記錄',
+                'content': post.content or '無補充描述',
+                'weight': f"{post.weight}公斤" if post.weight else '未記錄',
+                'body_temperature': f"{post.body_temperature}度" if post.body_temperature else '未記錄',
+                'water_amount': f"{post.water_amount/1000}公升" if post.water_amount else '未記錄',
+                'is_emergency': '是就醫記錄' if post.is_emergency else '非就醫記錄'
+            }
+            posts_data.append(post_data)
+        
+        # 構建詳細異常記錄文本
+        posts_detail = "\n\n".join([
+            f"【{post['date']}】\n"
+            f"症狀: {post['symptoms']}\n"
+            f"補充描述: {post['content']}\n"
+            f"體重: {post['weight']}\n"
+            f"體溫: {post['body_temperature']}\n"
+            f"喝水量: {post['water_amount']}\n"
+            f"就醫情況: {post['is_emergency']}"
+            for post in posts_data
+        ])
+        
+        # 計算病程時間
+        duration = f"從{posts_data[0]['date']}到{posts_data[-1]['date']}" if len(posts_data) > 1 else posts_data[0]['date']
+        
+        # 構建prompt
+        prompt = f"""請幫我整理以下寵物的疾病檔案資料：
+
+寵物基本資訊：
+{pet_info}
+
+主要病因：{main_cause or '未指定主要病因'}
+主要症狀：{symptoms_text}
+病程時間：{duration}
+
+詳細異常記錄：
+{posts_detail}
+
+請按照以下要求整理這些資料：
+
+1. 使用繁體中文撰寫
+2. 以時間順序整理病程發展
+3. 日期格式使用「X月X日」格式（例如：12月3日）
+4. 在描述不同時期的症狀變化時，可使用過渡詞如「期間」、「接下來幾天」、「症狀持續」等
+5. 以第一人稱主人視角撰寫，就像寵物主人在記錄觀察
+6. 語調親切自然，充滿關愛
+7. 內容要詳細但簡潔，避免重複
+8. 不使用markdown格式，使用純文字
+9. 直接開始內容，不加標題前綴
+
+請用繁體中文回覆。"""
+        
+        logger.info("[_generate_disease_archive_content_with_ai] Calling GPT API...")
+        
+        # 調用 GPT API
+        response = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {
+                    "role": "system",
+                    "content": "你是一名專業的寵物醫療記錄整理師。請用繁體中文提供清楚、詳細的內容整理。內容必須使用第一人稱主人視角撰寫，以「我」的角度描述觀察到的寵物狀況，就像主人在寫寵物的日記。語調要親切自然，充滿關愛之情。請不要使用markdown格式，使用純文字格式即可。請直接開始內容，不要加上任何標題前綴如'xxx的病程記錄'等。"
+                },
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.7,
+            max_tokens=2000
+        )
+        
+        generated_content = response.choices[0].message.content.strip()
+        logger.info(f"[_generate_disease_archive_content_with_ai] Successfully generated content ({len(generated_content)} chars)")
+        
+        return generated_content
+        
+    except Exception as e:
+        logger.error(f"[_generate_disease_archive_content_with_ai] Failed to generate content: {str(e)}", exc_info=True)
+        return None
 
 
 @transaction.atomic
