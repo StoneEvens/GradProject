@@ -566,7 +566,7 @@ def create_mcp_server() -> FastMCP:
         )
     )
     async def perform_database_operation(
-        operation: Literal["add_pet", "update_pet", "add_abnormal_post", "update_abnormal_post", "delete_abnormal_post", "create_disease_archive", "add_plan", "update_plan", "delete_plan", "list_plans", "create_social_post", "add_feed"],
+        operation: Literal["add_pet", "update_pet", "update_user", "add_abnormal_post", "update_abnormal_post", "delete_abnormal_post", "create_disease_archive", "add_plan", "update_plan", "delete_plan", "list_plans", "create_social_post", "add_feed"],
         data: Dict
     ) -> str:
         print(f"[MCP Tool] ===== perform_database_operation CALLED =====")

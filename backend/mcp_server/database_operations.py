@@ -57,6 +57,20 @@ def get_operation_list() -> Dict:
                 "description": "寵物描述 (字串)"
             }
         },
+        "update_user": {
+            "description": "更新用戶資訊",
+            "required_params": ["user_id"],
+            "optional_params": ["username", "user_fullname", "bio"],
+            "param_details": {
+                "username": "用戶名稱 (字串，唯一)",
+                "user_fullname": "用戶真實全名 (字串)",
+                "bio": "用戶個人簡介 (字串)"
+            },
+            "notes": [
+                "username必須是唯一的",
+                "至少需要提供一個可選參數來更新"
+            ]
+        },
         "add_abnormal_post": {
             "description": "新增異常記錄（寵物健康異常情況的記錄，不含圖片）。圖片需透過前端另外上傳。",
             "required_params": ["user_id", "pet_id", "symptoms"],
@@ -328,6 +342,8 @@ def perform_operation(operation: str, data: Dict) -> Dict:
             return _add_pet(data)
         elif operation == "update_pet":
             return _update_pet(data)
+        elif operation == "update_user":
+            return _update_user(data)
         elif operation == "add_abnormal_post":
             return _add_abnormal_post(data)
         elif operation == "update_abnormal_post":
@@ -465,6 +481,72 @@ def _update_pet(data: Dict) -> Dict:
             "breed": pet.breed,
             "age": pet.age,
             "description": pet.description
+        }
+    }
+
+
+def _update_user(data: Dict) -> Dict:
+    """
+    更新用戶資訊
+    
+    Args:
+        data: 包含更新資訊的字典
+        
+    Returns:
+        Dict: 操作結果
+    """
+    # 驗證必要欄位
+    if "user_id" not in data:
+        return {"error": "Missing required field: user_id"}
+    
+    # 獲取用戶
+    try:
+        user = CustomUser.objects.get(id=data["user_id"])
+    except CustomUser.DoesNotExist:
+        return {"error": f"User with id {data['user_id']} not found"}
+    
+    # 檢查是否至少提供一個可選參數
+    updatable_fields = ["username", "user_fullname", "bio"]
+    if not any(field in data for field in updatable_fields):
+        return {"error": "At least one field must be provided to update (username, user_fullname, or bio)"}
+    
+    # 更新用戶資訊
+    updated_fields = []
+    
+    if "username" in data:
+        # 檢查username是否已存在（排除當前用戶）
+        if CustomUser.objects.filter(user_account=data["username"]).exclude(id=user.id).exists():
+            return {"error": f"Username '{data['username']}' is already taken"}
+        user.user_account = data["username"]
+        updated_fields.append("username")
+    
+    if "user_fullname" in data:
+        user.user_fullname = data["user_fullname"]
+        updated_fields.append("user_fullname")
+    
+    if "bio" in data:
+        user.user_intro = data["bio"]
+        updated_fields.append("bio")
+    
+    # 保存更新
+    user.save(update_fields=[
+        field.replace("username", "user_account").replace("bio", "user_intro") 
+        for field in updated_fields
+    ])
+    
+    # 重新獲取更新後的用戶
+    user.refresh_from_db()
+    
+    return {
+        "success": True,
+        "message": f"User information updated successfully",
+        "user_id": user.id,
+        "updated_fields": updated_fields,
+        "user_data": {
+            "id": user.id,
+            "username": user.user_account,
+            "user_fullname": user.user_fullname,
+            "bio": user.user_intro
         }
     }
 
