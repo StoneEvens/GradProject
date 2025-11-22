@@ -57,6 +57,84 @@ def get_operation_list() -> Dict:
                 "description": "寵物描述 (字串)"
             }
         },
+        "update_user": {
+            "description": "更新用戶資訊",
+            "required_params": ["user_id"],
+            "optional_params": ["username", "user_fullname", "bio"],
+            "param_details": {
+                "username": "用戶名稱 (字串，唯一)",
+                "user_fullname": "用戶真實全名 (字串)",
+                "bio": "用戶個人簡介 (字串)"
+            },
+            "notes": [
+                "username必須是唯一的",
+                "至少需要提供一個可選參數來更新"
+            ]
+        },
+        "update_user_headshot": {
+            "description": "更新用戶頭像（大頭照）。此操作只建立更新請求，實際圖片需透過前端上傳。",
+            "required_params": ["user_id", "has_image"],
+            "optional_params": [],
+            "param_details": {
+                "user_id": "用戶ID (整數)",
+                "has_image": "用戶是否已選擇圖片 (布林值)"
+            },
+            "notes": [
+                "此操作只建立頭像更新結構，不包含圖片上傳",
+                "必須確認用戶已選擇圖片（has_image=true）才能建立",
+                "圖片會由前端自動上傳到 Firebase Storage"
+            ],
+            "response_handling": {
+                "on_success": "Tool returns {success: true, message: '準備更新頭像！'}",
+                "tell_user": "好的！請確認您選擇的頭像照片，確認後我就會幫您更新。",
+                "operations_array": "MUST add operation to operations array with EXACT format: {'operation_type': 'update_user_headshot', 'operation_data': json.dumps({'user_id': X, 'status': 'pending_upload'})}. Note: operation_data MUST be a JSON string created with json.dumps().",
+                "important": "CRITICAL: Use {'operation_type': ..., 'operation_data': json.dumps({...})} format. Wait for user confirmation before finalizing.",
+                "confirmation_marker": "CRITICAL: When displaying final_confirmation message to user, you MUST add special marker '[[NEEDS_CONFIRMATION_HEADSHOT]]' at the END of your reply text. This marker tells frontend to display cached image in AI message bubble. Example: 'Your confirmation message here\n\n[[NEEDS_CONFIRMATION_HEADSHOT]]'. This marker will be hidden from user but frontend will detect it."
+            },
+            "conversation_flow": {
+                "step1_ask": {
+                    "condition": "User mentions wanting to change/update headshot/profile picture/avatar",
+                    "agent_response": "好的！請點擊聊天框左下角的相片按鈕，選擇您想要設定為頭像的照片。",
+                    "check_images": "檢查 context.hasImages 和 context.imageCount"
+                },
+                "step2_missing_image": {
+                    "condition": "hasImages=false OR imageCount=0",
+                    "agent_response": "我還沒看到您選擇的照片喔！請點擊聊天框左下角的相片按鈕來選擇頭像照片。",
+                    "do_not_call_tool": True
+                },
+                "step3_has_image_no_confirmation": {
+                    "condition": "hasImages=true AND imageCount=1 AND user has NOT confirmed yet",
+                    "agent_response": "我看到您選擇的照片了！這張照片會成為您的新頭像。\n\n請確認是否要使用這張照片作為您的頭像？\n\n[[NEEDS_CONFIRMATION_HEADSHOT]]",
+                    "operations_array": [{"operation_type": "update_user_headshot", "operation_data": "{\"user_id\": X, \"status\": \"pending_upload\"}"}],
+                    "wait_for_confirmation": True,
+                    "do_not_call_tool_yet": True
+                },
+                "step4_multiple_images": {
+                    "condition": "imageCount > 1",
+                    "agent_response": "我看到您選擇了多張照片。頭像只能設定一張照片喔！\n\n請點擊照片預覽區的 ✕ 按鈕移除多餘的照片，只保留一張您想要設定為頭像的照片。",
+                    "do_not_call_tool": True
+                },
+                "step5_user_confirms": {
+                    "condition": "User says 確認/是/好/確定/更新/換 AND hasImages=true AND imageCount=1",
+                    "call_tool": "update_user_headshot with {user_id: X, has_image: true}",
+                    "agent_response_after_tool": "頭像更新成功！您的新頭像已經生效了。"
+                },
+                "step6_user_wants_change": {
+                    "condition": "User wants to change the selected image (換一張/重選/選別的)",
+                    "operations_array": [{"operation_type": "remove_image", "operation_data": "{\"index\": 1}"}],
+                    "agent_response": "好的，已移除照片。請重新點擊聊天框左下角的相片按鈕選擇新的頭像照片。"
+                }
+            },
+            "critical_rules": [
+                "頭像只能有一張圖片，如果 imageCount > 1，必須要求用戶只保留一張",
+                "絕對不要在 hasImages=false 或 imageCount=0 時呼叫 update_user_headshot 工具",
+                "絕對不要在 imageCount > 1 時呼叫 update_user_headshot 工具",
+                "必須等待用戶明確確認（確認/是/好/確定）後才呼叫 update_user_headshot 工具",
+                "確認訊息必須包含 [[NEEDS_CONFIRMATION_HEADSHOT]] 標記以顯示圖片預覽",
+                "不要提及 user_id、firebase、upload 等技術術語",
+                "使用口語化、友善的語氣與用戶對話"
+            ]
+        },
         "add_abnormal_post": {
             "description": "新增異常記錄（寵物健康異常情況的記錄，不含圖片）。圖片需透過前端另外上傳。",
             "required_params": ["user_id", "pet_id", "symptoms"],
@@ -512,6 +590,10 @@ def perform_operation(operation: str, data: Dict) -> Dict:
             return _add_pet(data)
         elif operation == "update_pet":
             return _update_pet(data)
+        elif operation == "update_user":
+            return _update_user(data)
+        elif operation == "update_user_headshot":
+            return _update_user_headshot(data)
         elif operation == "add_abnormal_post":
             return _add_abnormal_post(data)
         elif operation == "update_abnormal_post":
@@ -675,6 +757,128 @@ def _update_pet(data: Dict) -> Dict:
             "breed": pet.breed,
             "age": pet.age,
             "description": pet.description
+        }
+    }
+
+
+def _update_user(data: Dict) -> Dict:
+    """
+    更新用戶資訊
+    
+    Args:
+        data: 包含更新資訊的字典
+        
+    Returns:
+        Dict: 操作結果
+    """
+    # 驗證必要欄位
+    if "user_id" not in data:
+        return {"error": "Missing required field: user_id"}
+    
+    # 獲取用戶
+    try:
+        user = CustomUser.objects.get(id=data["user_id"])
+    except CustomUser.DoesNotExist:
+        return {"error": f"User with id {data['user_id']} not found"}
+    
+    # 檢查是否至少提供一個可選參數
+    updatable_fields = ["username", "user_fullname", "bio"]
+    if not any(field in data for field in updatable_fields):
+        return {"error": "At least one field must be provided to update (username, user_fullname, or bio)"}
+    
+    # 更新用戶資訊
+    updated_fields = []
+    
+    if "username" in data:
+        # 檢查username是否已存在（排除當前用戶）
+        if CustomUser.objects.filter(user_account=data["username"]).exclude(id=user.id).exists():
+            return {"error": f"Username '{data['username']}' is already taken"}
+        user.user_account = data["username"]
+        updated_fields.append("username")
+    
+    if "user_fullname" in data:
+        user.user_fullname = data["user_fullname"]
+        updated_fields.append("user_fullname")
+    
+    if "bio" in data:
+        user.user_intro = data["bio"]
+        updated_fields.append("bio")
+    
+    # 保存更新
+    user.save(update_fields=[
+        field.replace("username", "user_account").replace("bio", "user_intro") 
+        for field in updated_fields
+    ])
+    
+    # 重新獲取更新後的用戶
+    user.refresh_from_db()
+    
+    return {
+        "success": True,
+        "message": f"User information updated successfully",
+        "user_id": user.id,
+        "updated_fields": updated_fields,
+        "user_data": {
+            "id": user.id,
+            "username": user.user_account,
+            "user_fullname": user.user_fullname,
+            "bio": user.user_intro
+        }
+    }
+
+
+def _update_user_headshot(data: Dict) -> Dict:
+    """
+    更新用戶頭像（不含圖片上傳，由前端處理）
+    
+    Args:
+        data: 包含用戶資訊的字典
+        
+    Returns:
+        Dict: 操作結果
+    """
+    logger.info(f"[_update_user_headshot] Starting with data: user_id={data.get('user_id')}, has_image={data.get('has_image')}")
+    
+    # 驗證必要欄位
+    required_fields = ["user_id", "has_image"]
+    missing_fields = [f for f in required_fields if f not in data]
+    if missing_fields:
+        logger.warning(f"[_update_user_headshot] Missing fields: {missing_fields}")
+        return {
+            "error": "Missing required fields",
+            "missing_fields": missing_fields,
+            "help": "user_id and has_image are required"
+        }
+    
+    # 檢查用戶是否已選擇圖片
+    has_image = data.get("has_image")
+    if not has_image:
+        logger.warning(f"[_update_user_headshot] User has not selected image")
+        return {
+            "error": "用戶尚未選擇頭像圖片",
+            "user_message": "請先點擊聊天框左下角的相片按鈕選擇您想要設定為頭像的照片。",
+            "should_ask_user": True
+        }
+    
+    # 獲取用戶
+    try:
+        user = CustomUser.objects.get(id=data["user_id"])
+        logger.debug(f"[_update_user_headshot] Found user: {user.username}")
+    except CustomUser.DoesNotExist:
+        logger.error(f"[_update_user_headshot] User {data['user_id']} not found")
+        return {"error": f"User with id {data['user_id']} not found"}
+    
+    logger.info(f"User {user.id} is ready to update headshot")
+    
+    return {
+        "success": True,
+        "message": "準備更新頭像！",
+        "note": "圖片會由前端自動上傳。",
+        "user_id": user.id,
+        "status": "ready_for_upload",
+        "user_data": {
+            "id": user.id,
+            "username": user.user_account
         }
     }
 
