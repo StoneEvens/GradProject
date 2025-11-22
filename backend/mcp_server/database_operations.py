@@ -102,7 +102,8 @@ def get_operation_list() -> Dict:
                 "missing_symptoms": "好的！請告訴我寵物出現了哪些症狀呢？",
                 "want_upload_images": "異常記錄已建立，您也可以上傳圖片來記錄寵物的狀況喔！",
                 "final_confirmation_with_images": "請確認異常記錄資訊：\n\n- 寵物名稱：{pet_name}\n- 症狀：{symptoms}\n- 異常描述：{content}\n- 體重：{weight} 公斤\n- 體溫：{body_temperature} 度\n- 飲水量：{water_amount} 毫升\n- 是否就醫：{is_emergency}\n\n已選擇圖片：{imageCount} 張（請查看下方我展示的圖片）\n\n如果所有資訊和圖片都確認無誤，請回覆「確認」或「是」。",
-                "final_confirmation_without_images": "請確認異常記錄資訊：\n\n- 寵物名稱：{pet_name}\n- 症狀：{symptoms}\n- 異常描述：{content}\n- 體重：{weight} 公斤\n- 體溫：{body_temperature} 度\n- 飲水量：{water_amount} 毫升\n- 是否就醫：{is_emergency}\n\n如果資訊正確，請回覆「確認」或「是」。"
+                "final_confirmation_without_images": "請確認異常記錄資訊：\n\n- 寵物名稱：{pet_name}\n- 症狀：{symptoms}\n- 異常描述：{content}\n- 體重：{weight} 公斤\n- 體溫：{body_temperature} 度\n- 飲水量：{water_amount} 毫升\n- 是否就醫：{is_emergency}\n\n如果資訊正確，請回覆「確認」或「是」。",
+                "image_management": "圖片管理操作：\n- 移除特定照片：如果用戶想移除特定照片（例如「移除第 3 張照片」、「刪掉第 2 張」），在 operations array 加入：{'operation_type': 'remove_image', 'operation_data': json.dumps({'index': X})}，其中 X 是照片編號（從 1 開始），然後告訴用戶「已移除第 X 張照片。」\n- 替換特定照片：如果用戶想替換特定照片（例如「替換第 1 張照片」、「換掉第 2 張」），在 operations array 加入：{'operation_type': 'replace_image', 'operation_data': json.dumps({'index': X})}，然後告訴用戶「已移除第 X 張照片，請點擊聊天框左下角的相片按鈕選擇新的照片來替換。」\n- 編號從 1 開始計數（第 1 張、第 2 張...）"
             }
         },
         "create_disease_archive": {
@@ -251,7 +252,7 @@ def get_operation_list() -> Dict:
                 "missing_content": "好的！請告訴我：\n\n1. 貼文要寫什麼內容呢？\n2. 要標註地點嗎？（例如：台北大安森林公園）\n3. 要加上標籤嗎？（例如：#寵物日常 #可愛）\n\n另外，社群貼文一定要有圖片喔！請先點擊聊天框左下角的相片按鈕選擇要上傳的圖片。",
                 "missing_images": "社群貼文一定要包含圖片才能發布！\n\n請先點擊聊天框左下角的相片按鈕選擇圖片，然後再告訴我發布貼文。",
                 "final_confirmation": "請確認您的貼文資訊：\n\n內容：{content}\n\n地點：{location}\n\n標籤：{hashtags}\n\n已選擇圖片：{imageCount} 張（請查看下方我展示的圖片）\n\n如果所有資訊和圖片都確認無誤，請回覆「確認」、「是」或「發布」。",
-                "ask_guidance": "重要規則：\n1. 檢查 context.hasImages 和 context.imageCount\n2. 如果 hasImages=false 或 imageCount=0，必須使用 missing_images 回應\n3. 絕對不要在沒有圖片時呼叫 create_social_post 工具\n4. 收集完所有資訊後，使用 final_confirmation 模板向用戶展示完整預覽\n5. 明確提示用戶查看圖片預覽區域\n6. 等待用戶明確確認（「確認」、「是」、「好」、「發布」等）後才呼叫 create_social_post 工具\n\n以口語化方式詢問以下資訊：\n1）貼文內容（必需，用「貼文要寫什麼內容」而非「content」）\n2）地點（可選，用「要標註地點嗎」而非「location」）\n3）標籤（可選，用「要加上標籤嗎」或「hashtags」都可以）\n4）圖片（必需！必須提醒選擇圖片）\n\n絕對不要：\n- 在沒有圖片（hasImages=false）時呼叫 create_social_post\n- 在用戶未明確確認前呼叫 create_social_post\n- 提及 user_id、post_id 等技術術語\n- 詢問 media_urls（這不存在，只需提醒用戶選擇圖片）\n- 詢問可見範圍、隱私設定、留言權限、寵物標註（系統不支援）\n- 使用原始變數名稱與用戶對話\n- 使用表情符號"
+                "ask_guidance": "重要規則：\n1. 檢查 context.hasImages 和 context.imageCount\n2. 如果 hasImages=false 或 imageCount=0，必須使用 missing_images 回應\n3. 絕對不要在沒有圖片時呼叫 create_social_post 工具\n4. 收集完所有資訊後，使用 final_confirmation 模板向用戶展示完整預覽\n5. 明確提示用戶查看圖片預覽區域\n6. 等待用戶明確確認（「確認」、「是」、「好」、「發布」等）後才呼叫 create_social_post 工具\n7. 圖片管理操作：\n   - 如果用戶想移除特定照片（例如「移除第 3 張照片」、「刪掉第 2 張」），在 operations array 加入：{'operation_type': 'remove_image', 'operation_data': json.dumps({'index': X})}，其中 X 是照片編號（從 1 開始），然後告訴用戶「已移除第 X 張照片。」\n   - 如果用戶想替換特定照片（例如「替換第 5 張照片」、「換掉第 1 張」），在 operations array 加入：{'operation_type': 'replace_image', 'operation_data': json.dumps({'index': X})}，然後告訴用戶「已移除第 X 張照片，請點擊聊天框左下角的相片按鈕選擇新的照片來替換。」\n   - 編號從 1 開始計數（第 1 張、第 2 張...），前端會自動轉換為索引\n\n以口語化方式詢問以下資訊：\n1）貼文內容（必需，用「貼文要寫什麼內容」而非「content」）\n2）地點（可選，用「要標註地點嗎」而非「location」）\n3）標籤（可選，用「要加上標籤嗎」或「hashtags」都可以）\n4）圖片（必需！必須提醒選擇圖片）\n\n絕對不要：\n- 在沒有圖片（hasImages=false）時呼叫 create_social_post\n- 在用戶未明確確認前呼叫 create_social_post\n- 提及 user_id、post_id 等技術術語\n- 詢問 media_urls（這不存在，只需提醒用戶選擇圖片）\n- 詢問可見範圍、隱私設定、留言權限、寵物標註（系統不支援）\n- 使用原始變數名稱與用戶對話\n- 使用表情符號"
             }
         },
         "add_feed": {
@@ -321,10 +322,99 @@ def get_operation_list() -> Dict:
                 "5. 收到 OCR 結果後，使用 show_ocr_results_and_confirm 模板顯示完整辨識結果並詢問 pet_type, name, brand",
                 "6. 收集 pet_type, name, brand 後，使用 final_confirmation 模板顯示完整資訊並明確詢問「資訊正確嗎？」",
                 "7. 【關鍵】等待用戶明確確認（例如回覆「確認」、「是」、「正確」、「沒問題」等）",
+                "7.1. 圖片管理操作：",
+                "   - 如果用戶想移除特定照片（例如「移除第 2 張照片」、「刪掉第 1 張」），在 operations array 加入：{'operation_type': 'remove_image', 'operation_data': json.dumps({'index': X})}，其中 X 是照片編號（從 1 開始），然後告訴用戶「已移除第 X 張照片。」",
+                "   - 如果用戶想替換特定照片（例如「替換第 1 張照片」、「換掉第 2 張」、「第 1 張 OCR 辨識錯誤」），在 operations array 加入：{'operation_type': 'replace_image', 'operation_data': json.dumps({'index': X})}，然後告訴用戶「已移除第 X 張照片，請點擊聊天框左下角的相片按鈕選擇新的照片來替換。」如果是包裝照片（第 1 張）被替換，提醒「請選擇新的包裝照片」；如果是營養標示（第 2 張）被替換，提醒「請選擇新的營養標示照片，我會重新進行 OCR 辨識。」",
+                "   - 編號從 1 開始計數（第 1 張 = 包裝照片、第 2 張 = 營養標示照片）",
+                "7.2. 重新 OCR 流程：",
+                "   - 如果收到系統訊息「[系統] 用戶已選擇新的圖片，請重新進行 OCR 分析」，表示用戶已替換圖片",
+                "   - 立即檢查 context.hasImages 和 context.imageCount，確認用戶已選擇新圖片",
+                "   - 如果 hasImages=true 且 imageCount >= 2，立即呼叫 prepare_feed_ocr() 並在 operations array 加入 ocr_feed_analysis",
+                "   - 告訴用戶「已收到新的圖片！正在重新辨識營養標示，請稍候...」",
+                "   - 然後從步驟 4 繼續執行（等待 OCR 結果 → 顯示結果 → 收集資訊 → 最終確認）",
                 "8. 用戶確認後才呼叫 perform_database_operation('add_feed', {...完整資料...})",
                 "9a. 如果 is_existing=false：告知「飼料資料建立成功！正在上傳圖片...」，前端會自動上傳",
                 "9b. 如果 is_existing=true：告知已匹配到現有飼料，加入 navigate operation"
             ]
+        },
+        "prepare_health_report_ocr": {
+            "description": "準備健康報告 OCR 分析（不建立記錄，只觸發前端 OCR）。此函數不執行任何資料庫操作，只是告訴前端開始 OCR 分析。",
+            "required_params": [],
+            "optional_params": [],
+            "notes": [
+                "此函數不需要任何參數",
+                "呼叫此函數後，必須在 operations array 加入 ocr_health_report_analysis operation",
+                "前端會收到這個 operation 並自動觸發健康報告 OCR 分析",
+                "OCR 完成後，前端會發送系統訊息回傳 OCR 結果"
+            ],
+            "response_handling": {
+                "success": "Always returns {success: true, message: '正在進行 OCR 分析...'}",
+                "tell_user": "告訴用戶「收到圖片！正在辨識健康報告資訊，請稍候...」",
+                "operations_array": "MUST add operation to operations array: {'operation_type': 'ocr_health_report_analysis', 'operation_data': json.dumps({'status': 'pending'})}",
+                "important": "This function ONLY triggers OCR. Do NOT create health report record. Wait for OCR result from frontend."
+            }
+        },
+        "add_health_report": {
+            "description": "新增健康報告記錄（包含 OCR 辨識的健康數據）。重要：此操作必須在用戶明確確認所有資訊後才執行！圖片不需要額外儲存到 Firebase，只需儲存 OCR 辨識的數據。",
+            "required_params": ["user_id", "pet_id", "check_date", "check_type", "check_location", "health_data"],
+            "optional_params": ["notes"],
+            "param_details": {
+                "user_id": "用戶 ID（整數）",
+                "pet_id": "寵物 ID（整數）- 重要：不要直接向用戶詢問 pet_id！應該先詢問寵物名稱，然後使用 resolve_entity_context 工具將寵物名稱解析為 pet_id",
+                "check_date": "檢查日期（字串，格式：YYYY-MM-DD）",
+                "check_type": "檢查類型（字串，選項：'cbc'（全血計數）、'biochemistry'（血液生化檢查）、'urinalysis'（尿液分析）、'other'（其他））",
+                "check_location": "檢查地點（字串，例如：台北動物醫院）",
+                "health_data": "健康數據（字典，OCR 辨識的結果）",
+                "notes": "備註（字串，選填）"
+            },
+            "notes": [
+                "此操作建立健康報告記錄，儲存 OCR 辨識的健康數據",
+                "圖片本身不需要額外儲存到 Firebase",
+                "必須先呼叫 prepare_health_report_ocr() 進行 OCR 分析",
+                "等待前端回傳 OCR 結果後，再收集其他必要資訊",
+                "所有資訊收集完成並經用戶確認後才呼叫此操作"
+            ],
+            "response_handling": {
+                "on_success": "Tool returns {success: true, report_id: X, message: '健康報告建立成功！'}",
+                "tell_user": "回覆格式：「健康報告建立成功！\n\n檢查類型：[check_type_zh]\n檢查日期：[check_date]\n檢查地點：[check_location]\n\n您可以在健康管理頁面查看詳細的健康數據。」",
+                "operations_array": "MUST add operation to operations array with EXACT format: {'operation_type': 'health_report_created', 'operation_data': json.dumps({'report_id': X, 'status': 'completed'})}. Note: operation_data MUST be a JSON string created with json.dumps().",
+                "important": "Do NOT mention report_id or technical details in the reply field. The report_id should ONLY be in operations array for frontend to use."
+            },
+            "user_responses": {
+                "missing_image": "新增健康報告需要上傳檢查報告圖片。請先點擊聊天框左下角的相片按鈕選擇健康報告圖片。",
+                "ask_pet_name": "請問這是哪隻寵物的健康報告？（請告訴我寵物的名字）",
+                "ask_check_info": "請告訴我以下資訊：\n\n1. 檢查類型（全血計數、血液生化檢查、尿液分析、或其他）\n2. 檢查日期（例如：2025-01-15）\n3. 檢查地點（例如：台北動物醫院）\n4. 有沒有要補充的備註？（選填）",
+                "show_ocr_results": "健康報告辨識完成！\n\n辨識到以下健康數據：\n{ocr_summary}\n\n請確認以上資訊，並告訴我：\n1. 檢查類型（全血計數、血液生化檢查、尿液分析、或其他）\n2. 檢查日期\n3. 檢查地點",
+                "final_confirmation": "請確認健康報告資訊：\n\n- 寵物名稱：{pet_name}\n- 檢查類型：{check_type_zh}\n- 檢查日期：{check_date}\n- 檢查地點：{check_location}\n- 備註：{notes}\n- 辨識到的健康數據項目：{data_count} 項\n\n已選擇圖片：1 張（請查看下方我展示的圖片）\n\n如果所有資訊都確認無誤，請回覆「確認」或「是」。",
+                "image_management": "圖片管理操作：\n- 替換圖片：如果用戶想替換圖片（例如「換照片」、「重新選擇圖片」、「OCR 辨識錯誤」），在 operations array 加入：{'operation_type': 'replace_image', 'operation_data': json.dumps({'index': 1})}，然後告訴用戶「已移除圖片，請點擊聊天框左下角的相片按鈕選擇新的健康報告圖片，我會重新進行 OCR 辨識。」"
+            },
+            "workflow": [
+                "【重要】完整工作流程，每個步驟都必須執行：",
+                "1. 用戶選擇健康報告圖片 → 確認 has_images=true 且 imageCount >= 1",
+                "2. 使用 ask_pet_name 模板詢問用戶：「請問這是哪隻寵物的健康報告？（請告訴我寵物的名字）」",
+                "3. 收到用戶回覆的寵物名字後（例如「小白」、「我的狗」、「Lucky」）：",
+                "   3.1. 使用 resolve_entity_context 工具查詢寵物：resolve_entity_context(entity_type='pet', user_id=context.userId, conditions={'pet_name': '用戶提供的名字'}, limit=5)",
+                "   3.2. 如果找到多隻寵物（count > 1），列出所有寵物名稱和品種並請用戶確認是哪一隻（例如：「我找到 2 隻寵物：1. 小白（黃金獵犬）2. 小黑（貴賓犬）。請問是哪一隻？」）",
+                "   3.3. 如果找到一隻寵物（count = 1），從 results[0].id 取得 pet_id，並記錄寵物名稱（results[0].pet_name）",
+                "   3.4. 如果找不到寵物（count = 0），禮貌地告知用戶「找不到名為『XXX』的寵物，請確認寵物名稱是否正確，或者您可以先新增寵物資料。」",
+                "   3.5. 對於「我的狗」、「我的貓」等描述，可以使用 conditions={'pet_type': 'dog'} 或 conditions={'pet_type': 'cat'} 查詢",
+                "4. 取得 pet_id 後，呼叫 prepare_health_report_ocr() 並在 operations array 加入：{'operation_type': 'ocr_health_report_analysis', 'operation_data': json.dumps({'pet_id': X})}",
+                "5. 告訴用戶：「收到圖片！正在辨識健康報告資訊，請稍候...」",
+                "6. 等待前端回傳 OCR 結果（healthReportOcrCompleted=true, healthReportOcrData 包含健康數據）",
+                "7. 收到 OCR 結果後，使用 show_ocr_results 模板顯示辨識結果摘要，並詢問：檢查類型、檢查日期、檢查地點",
+                "8. 收集所有必要資訊後，使用 final_confirmation 模板顯示完整資訊（包含寵物名稱）並明確詢問「資訊正確嗎？」",
+                "9. 【關鍵】等待用戶明確確認（例如回覆「確認」、「是」、「正確」、「沒問題」等）",
+                "9.1. 圖片管理：如果用戶想替換圖片，在 operations array 加入 replace_image operation，然後等待用戶選擇新圖片",
+                "9.2. 重新 OCR：如果收到系統訊息「[系統] 用戶已選擇新的圖片，請重新進行 OCR 分析」，立即呼叫 prepare_health_report_ocr() 重新分析（使用已知的 pet_id）",
+                "10. 用戶確認後才呼叫 perform_database_operation('add_health_report', {...完整資料...})（使用之前解析到的 pet_id）",
+                "11. 告知「健康報告建立成功！」"
+            ],
+            "check_type_mapping": {
+                "cbc": "全血計數",
+                "biochemistry": "血液生化檢查",
+                "urinalysis": "尿液分析",
+                "other": "其他"
+            }
         }
     }
     return {
@@ -370,6 +460,18 @@ def perform_operation(operation: str, data: Dict) -> Dict:
             result = _add_feed(data)
             logger.info(f"[perform_operation] add_feed result: {result}")
             logger.info(f"[perform_operation] ===== FINISHED add_feed =====")
+            return result
+        elif operation == "prepare_health_report_ocr":
+            logger.info(f"[perform_operation] ===== STARTING prepare_health_report_ocr =====")
+            result = _prepare_health_report_ocr(data)
+            logger.info(f"[perform_operation] prepare_health_report_ocr result: {result}")
+            return result
+        elif operation == "add_health_report":
+            logger.info(f"[perform_operation] ===== STARTING add_health_report =====")
+            logger.info(f"[perform_operation] add_health_report data: {data}")
+            result = _add_health_report(data)
+            logger.info(f"[perform_operation] add_health_report result: {result}")
+            logger.info(f"[perform_operation] ===== FINISHED add_health_report =====")
             return result
         else:
             error_msg = f"Operation '{operation}' is not implemented"
@@ -1639,4 +1741,140 @@ def _add_feed(data: Dict) -> Dict:
         "is_existing": False,
         "status": "pending_images",
         "note": "圖片正在上傳中..."
+    }
+
+
+# ==================== Health Report Operations ====================
+
+def _prepare_health_report_ocr(data: Dict) -> Dict:
+    """
+    準備健康報告 OCR 分析（不執行資料庫操作，只觸發前端 OCR）
+    """
+    logger.info("[_prepare_health_report_ocr] Preparing health report OCR analysis")
+    
+    return {
+        "success": True,
+        "message": "正在進行 OCR 分析..."
+    }
+
+
+@transaction.atomic
+def _add_health_report(data: Dict) -> Dict:
+    """
+    新增健康報告記錄（包含 OCR 辨識的健康數據）
+    """
+    from ocrapp.models import HealthReport
+    
+    logger.info(f"[_add_health_report] Starting with data: {data}")
+    
+    # 驗證必要欄位
+    required_fields = ["user_id", "pet_id", "check_date", "check_type", "check_location", "health_data"]
+    missing_fields = [field for field in required_fields if field not in data]
+    if missing_fields:
+        error_msg = f"缺少必要欄位: {', '.join(missing_fields)}"
+        logger.error(f"[_add_health_report] {error_msg}")
+        return {
+            "error": error_msg,
+            "user_message": f"資料不完整，缺少：{', '.join(missing_fields)}",
+            "should_ask_user": True
+        }
+    
+    # 取得用戶
+    user_id = data.get("user_id")
+    try:
+        user = CustomUser.objects.get(id=user_id)
+    except CustomUser.DoesNotExist:
+        error_msg = f"找不到用戶 ID: {user_id}"
+        logger.error(f"[_add_health_report] {error_msg}")
+        return {"error": error_msg}
+    
+    # 取得寵物
+    pet_id = data.get("pet_id")
+    try:
+        from pets.models import Pet
+        pet = Pet.objects.get(id=pet_id)
+        
+        # 確認寵物屬於該用戶
+        if pet.owner_id != user.id:
+            error_msg = f"寵物 {pet_id} 不屬於用戶 {user_id}"
+            logger.error(f"[_add_health_report] {error_msg}")
+            return {
+                "error": "權限不足",
+                "user_message": "這不是您的寵物，無法建立健康報告。"
+            }
+    except Pet.DoesNotExist:
+        error_msg = f"找不到寵物 ID: {pet_id}"
+        logger.error(f"[_add_health_report] {error_msg}")
+        return {"error": error_msg}
+    
+    # 取得其他欄位
+    check_date_str = data.get("check_date")
+    check_type = data.get("check_type")
+    check_location = data.get("check_location")
+    health_data = data.get("health_data")
+    notes = data.get("notes", "")
+    
+    # 驗證 check_date 格式
+    try:
+        from datetime import datetime
+        check_date = datetime.strptime(check_date_str, '%Y-%m-%d').date()
+    except (ValueError, TypeError) as e:
+        error_msg = f"日期格式錯誤：{check_date_str}，應為 YYYY-MM-DD"
+        logger.error(f"[_add_health_report] {error_msg}")
+        return {
+            "error": error_msg,
+            "user_message": "日期格式錯誤，請使用 YYYY-MM-DD 格式（例如：2025-01-15）"
+        }
+    
+    # 驗證 check_type
+    valid_types = ['cbc', 'biochemistry', 'urinalysis', 'other']
+    if check_type not in valid_types:
+        error_msg = f"無效的檢查類型：{check_type}，有效選項：{valid_types}"
+        logger.error(f"[_add_health_report] {error_msg}")
+        return {
+            "error": error_msg,
+            "user_message": "無效的檢查類型，請選擇：全血計數、血液生化檢查、尿液分析、或其他"
+        }
+    
+    # 驗證 health_data 是字典
+    if not isinstance(health_data, dict):
+        error_msg = f"health_data 必須是字典，收到：{type(health_data)}"
+        logger.error(f"[_add_health_report] {error_msg}")
+        return {
+            "error": error_msg,
+            "user_message": "健康數據格式錯誤"
+        }
+    
+    # 建立健康報告
+    logger.info(f"[_add_health_report] Creating health report for pet {pet_id} (user {user_id})")
+    
+    report = HealthReport.objects.create(
+        pet=pet,
+        check_date=check_date,
+        check_type=check_type,
+        check_location=check_location,
+        notes=notes,
+        data=health_data
+    )
+    
+    logger.info(f"User {user.id} created health report {report.id} for pet {pet.pet_name}")
+    
+    # 準備檢查類型的中文名稱
+    check_type_mapping = {
+        "cbc": "全血計數",
+        "biochemistry": "血液生化檢查",
+        "urinalysis": "尿液分析",
+        "other": "其他"
+    }
+    check_type_zh = check_type_mapping.get(check_type, check_type)
+    
+    return {
+        "success": True,
+        "message": "健康報告建立成功！",
+        "report_id": report.id,
+        "pet_name": pet.pet_name,
+        "check_type_zh": check_type_zh,
+        "check_date": check_date_str,
+        "check_location": check_location,
+        "data_count": len([v for v in health_data.values() if v is not None])
     }

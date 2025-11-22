@@ -803,6 +803,62 @@ class AIChatService {
       throw error;
     }
   }
+
+  /**
+   * 分析健康報告圖片（使用 OCR 辨識健康數據）
+   * @param {Object} image - 健康報告圖片 {file, preview, id}
+   * @param {number} petId - 寵物 ID
+   * @returns {Promise<Object>} OCR 結果
+   */
+  async analyzeHealthReportWithOCR(image, petId) {
+    console.log('[AIChatService] Starting health report OCR analysis');
+
+    try {
+      if (!image || !image.file) {
+        throw new Error('請選擇健康報告圖片');
+      }
+
+      if (!petId) {
+        throw new Error('請先選擇寵物');
+      }
+
+      console.log('[AIChatService] 辨識健康報告圖片...');
+
+      // 建立 FormData
+      const formData = new FormData();
+      formData.append('image', image.file);
+      formData.append('pet_id', petId);
+
+      console.log(`[AIChatService] Uploading health report image for pet ${petId}`);
+
+      // 調用健康報告 OCR API
+      const response = await this.apiClient.post(
+        `/ocr/report/upload/`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+
+      console.log('[AIChatService] Health report OCR analysis successful:', response.data);
+
+      // 返回辨識結果
+      return {
+        success: true,
+        ocrData: response.data.extracted_results || {},
+        message: 'OCR 辨識完成'
+      };
+
+    } catch (error) {
+      console.error('[AIChatService] Health report OCR analysis failed:', error);
+      return {
+        success: false,
+        error: error.response?.data?.error || error.message || 'OCR 辨識失敗'
+      };
+    }
+  }
 }
 
 // 導出單例

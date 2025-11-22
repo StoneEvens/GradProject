@@ -1262,6 +1262,22 @@ body:has(.chatOverlay) {
   display: block;
 }
 
+/* 圖片編號標籤 */
+.imageNumberLabel {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  background: rgba(0, 0, 0, 0.75);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  z-index: 1;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
 /* 📱 平板尺寸 (>= 480px) */
 @media (min-width: 480px) {
   .messageImagesGrid {
