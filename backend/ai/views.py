@@ -497,7 +497,7 @@ def main_chat(request):
             AgentMessage.objects.create(
                 conversation=thread,
                 role='assistant',
-                content=result.get('repostsponse', ''),
+                content=result.get('response', ''),
                 has_tutorial=bool(tutorial) if tutorial is not None else False,
                 tutorial_type=tutorial,
                 operation_type=operation_type,
