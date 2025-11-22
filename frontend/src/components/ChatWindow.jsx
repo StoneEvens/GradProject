@@ -567,9 +567,15 @@ const ChatWindow = ({
 
       // 檢測是否需要展示確認圖片
       const needsConfirmationWithImages = aiResult.response?.includes('[[NEEDS_CONFIRMATION_WITH_IMAGES]]');
-      const cleanedResponse = needsConfirmationWithImages
-        ? aiResult.response.replace('[[NEEDS_CONFIRMATION_WITH_IMAGES]]', '').trim()
-        : aiResult.response;
+      const needsConfirmationHeadshot = aiResult.response?.includes('[[NEEDS_CONFIRMATION_HEADSHOT]]');
+      
+      let cleanedResponse = aiResult.response;
+      if (needsConfirmationWithImages) {
+        cleanedResponse = cleanedResponse.replace('[[NEEDS_CONFIRMATION_WITH_IMAGES]]', '').trim();
+      }
+      if (needsConfirmationHeadshot) {
+        cleanedResponse = cleanedResponse.replace('[[NEEDS_CONFIRMATION_HEADSHOT]]', '').trim();
+      }
 
       const aiMessage = {
         id: Date.now() + 1,
@@ -577,8 +583,9 @@ const ChatWindow = ({
         isUser: false,
         timestamp: new Date(),
         // 加入確認相關資訊
-        needsConfirmation: needsConfirmationWithImages,
-        confirmationImages: needsConfirmationWithImages ? [...currentImages] : undefined,
+        needsConfirmation: needsConfirmationWithImages || needsConfirmationHeadshot,
+        confirmationImages: (needsConfirmationWithImages || needsConfirmationHeadshot) ? [...currentImages] : undefined,
+        isHeadshotConfirmation: needsConfirmationHeadshot,
         // 加入教學相關資訊（新：使用單一 tutorial 欄位）
         tutorial: aiResult.tutorial || null,
         // 推薦用戶標準化為陣列
@@ -859,6 +866,84 @@ const ChatWindow = ({
             };
 
             setMessages(prev => [...prev, noImageWarning]);
+          }
+        }
+
+        // 檢測 update_user_headshot operation 並自動上傳頭像
+        const updateHeadshotOp = aiResult.operations.find(
+          op => op.operation_type === 'update_user_headshot'
+        );
+
+        if (updateHeadshotOp) {
+          if (currentImages.length === 1) {
+            // 有圖片且只有一張，執行上傳
+            console.log('[ChatWindow] 檢測到 update_user_headshot operation，開始上傳頭像');
+
+            try {
+              setIsUploadingImages(true);
+
+              // 上傳頭像（只傳第一張圖片）
+              const uploadResult = await aiChatService.uploadUserHeadshot(currentImages[0]);
+
+              console.log('[ChatWindow] 頭像上傳成功:', uploadResult);
+
+              // 清空已上傳的圖片
+              clearAllImages();
+              setIsUploadingImages(false);
+
+              // 添加系統訊息通知用戶
+              const uploadSuccessMessage = {
+                id: Date.now() + 3,
+                text: `頭像更新成功！您的新頭像已經生效了。`,
+                isUser: false,
+                timestamp: new Date(),
+                operations: []
+              };
+
+              setMessages(prev => [...prev, uploadSuccessMessage]);
+
+            } catch (uploadError) {
+              console.error('[ChatWindow] 頭像上傳失敗:', uploadError);
+              setIsUploadingImages(false);
+
+              // 添加錯誤訊息
+              const uploadErrorMessage = {
+                id: Date.now() + 3,
+                text: `頭像上傳失敗：${uploadError.message || '未知錯誤'}。請稍後再試或在個人資料頁面手動上傳。`,
+                isUser: false,
+                timestamp: new Date(),
+                error: true,
+                operations: []
+              };
+
+              setMessages(prev => [...prev, uploadErrorMessage]);
+            }
+          } else if (currentImages.length === 0) {
+            // 沒有圖片
+            console.warn('[ChatWindow] 檢測到 update_user_headshot operation，但用戶沒有選擇圖片');
+
+            const noImageWarning = {
+              id: Date.now() + 3,
+              text: `請先點擊聊天框左下角的相片按鈕選擇您想要設定為頭像的照片。`,
+              isUser: false,
+              timestamp: new Date(),
+              operations: []
+            };
+
+            setMessages(prev => [...prev, noImageWarning]);
+          } else {
+            // 圖片超過一張
+            console.warn('[ChatWindow] 檢測到 update_user_headshot operation，但用戶選擇了多張圖片');
+
+            const multipleImageWarning = {
+              id: Date.now() + 3,
+              text: `頭像只能設定一張照片。請點擊照片預覽區的 ✕ 按鈕移除多餘的照片，只保留一張您想要設定為頭像的照片。`,
+              isUser: false,
+              timestamp: new Date(),
+              operations: []
+            };
+
+            setMessages(prev => [...prev, multipleImageWarning]);
           }
         }
 
@@ -1654,7 +1739,14 @@ const ChatWindow = ({
                       op.operation_type === 'navigate' || op.operation_type === 'navigation'
                     );
                     // 找出其他操作（排除 navigate 和背景自動執行的操作）
-                    const backgroundOps = ['ocr_feed_analysis', 'ocr_health_report_analysis']; // 背景自動執行，不顯示按鈕
+                    const backgroundOps = [
+                      'ocr_feed_analysis', 
+                      'ocr_health_report_analysis', 
+                      'abnormal_post_created', 
+                      'update_user_headshot',
+                      'post_created',
+                      'feed_created'
+                    ]; // 背景自動執行，不顯示按鈕
                     const otherOps = message.operations.filter(op =>
                       op.operation_type !== 'navigate' &&
                       op.operation_type !== 'navigation' &&

@@ -372,6 +372,7 @@ class UserImageAPIView(APIView):
             user_image_url = None
         return APIResponse(data={'user_image_url': user_image_url})
 
+
 # 回傳使用者基本資料＋追蹤數、被追蹤數、發文（Post+Archive）數）
 class UserSummaryView(APIView):
     permission_classes = [IsAuthenticated]

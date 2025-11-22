@@ -524,6 +524,44 @@ class AIChatService {
   }
 
   /**
+   * 為用戶上傳頭像（AI Agent 更新頭像使用）
+   * Uses the existing /accounts/me/ endpoint with PUT method
+   * @param {Object} image - 圖片物件 {file, preview, id}
+   * @returns {Promise<Object>} 上傳結果
+   */
+  async uploadUserHeadshot(image) {
+    try {
+      if (!image || !image.file) {
+        throw new Error('Image file is required');
+      }
+
+      // 建立 FormData
+      const formData = new FormData();
+      formData.append('headshot', image.file);
+
+      console.log('[AIChatService] Uploading user headshot via /accounts/me/');
+
+      // 調用現有的 PUT /accounts/me/ API
+      const response = await this.apiClient.put(
+        '/accounts/me/',
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+
+      console.log('[AIChatService] Headshot upload successful:', response.data);
+      return response.data;
+
+    } catch (error) {
+      console.error('Upload Headshot Error:', error);
+      throw error;
+    }
+  }
+
+  /**
    * 為飼料上傳圖片（AI Agent 建立飼料後使用）
    * @param {number} feedId - 飼料 ID
    * @param {Array<Object>} images - 圖片陣列 [{file, preview, id}]
