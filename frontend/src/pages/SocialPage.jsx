@@ -156,6 +156,65 @@ const SocialPage = () => {
 
   // 初始載入資料與代理注入處理
   useEffect(() => {
+    // 若 URL 包含特定貼文 ID，載入該貼文並置頂
+    if (!showSearchResults && postId) {
+      (async () => {
+        try {
+          setLoading(true);
+          setActiveTab('daily');
+
+          // 載入特定貼文
+          const targetPostResult = await getPost(postId);
+          if (targetPostResult.success && targetPostResult.data) {
+            const targetPost = targetPostResult.data;
+
+            // 載入其他貼文補充列表
+            try {
+              const result = await getPosts({ offset: 0, limit: 10 });
+              if (result.success) {
+                const allPosts = result.data.posts || [];
+                const newPosts = allPosts.filter(post => {
+                  const hasImages = post.images && Array.isArray(post.images) && post.images.length > 0;
+                  if (!hasImages) {
+                    console.log(`🚫 過濾掉沒有圖片的項目 (ID: ${post.id || post.post_id})`);
+                  }
+                  return hasImages;
+                });
+
+                // 去除重複（如果載入的貼文中包含目標貼文）
+                const deduped = newPosts.filter(p => (p.id || p.post_id) !== (targetPost.id || targetPost.post_id));
+                // 將目標貼文放在第一位
+                setPosts([targetPost, ...deduped]);
+                setHasMore(result.data.has_more || false);
+                setPage(0);
+              } else {
+                // 如果載入其他貼文失敗，只顯示目標貼文
+                setPosts([targetPost]);
+                setHasMore(false);
+                setPage(0);
+              }
+            } catch (e) {
+              // 如果載入其他貼文失敗，只顯示目標貼文
+              setPosts([targetPost]);
+              setHasMore(false);
+              setPage(0);
+            }
+          } else {
+            // 如果載入目標貼文失敗，顯示錯誤
+            setError(t('socialPage.errors.postNotFound'));
+            setPosts([]);
+          }
+        } catch (err) {
+          console.error('載入特定貼文失敗:', err);
+          setError(t('socialPage.errors.loadFailed'));
+          setPosts([]);
+        } finally {
+          setLoading(false);
+        }
+      })();
+      return; // 已處理特定貼文，不再執行下方一般載入
+    }
+
     // 若來自代理注入貼文，優先處理注入流程
     const injected = location.state?.injectedPost;
     if (!showSearchResults && injected) {
@@ -224,7 +283,7 @@ const SocialPage = () => {
         loadArchives(0, false);
       }
     }
-  }, [showSearchResults, activeTab, location.state]);
+  }, [showSearchResults, activeTab, location.state, postId]);
 
   // 監聽貼文更新
   useEffect(() => {
