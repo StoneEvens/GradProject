@@ -702,9 +702,15 @@ const ChatWindow = ({
         );
 
         if (postCreatedOp) {
-          if (currentImages.length > 0) {
+          // 優先使用 currentImages（當前訊息的圖片），如果為空則使用 window.__selectedFeedImages
+          const imagesToUpload = currentImages.length > 0
+            ? currentImages
+            : (window.__selectedFeedImages || []);
+
+          if (imagesToUpload.length > 0) {
             // 有圖片，執行上傳
             console.log('[ChatWindow] 檢測到 post_created operation，開始上傳圖片');
+            console.log(`[ChatWindow] 使用${currentImages.length > 0 ? 'currentImages' : 'window.__selectedFeedImages'}，共 ${imagesToUpload.length} 張圖片`);
 
             try {
               const opData = typeof postCreatedOp.operation_data === 'string'
@@ -719,7 +725,7 @@ const ChatWindow = ({
                 // 上傳圖片
                 const uploadResult = await aiChatService.uploadPostImages(
                   postId,
-                  currentImages
+                  imagesToUpload
                 );
 
                 console.log('[ChatWindow] 圖片上傳成功:', uploadResult);
@@ -781,9 +787,15 @@ const ChatWindow = ({
         );
 
         if (abnormalPostCreatedOp) {
-          if (currentImages.length > 0) {
+          // 優先使用 currentImages（當前訊息的圖片），如果為空則使用 window.__selectedFeedImages
+          const imagesToUpload = currentImages.length > 0
+            ? currentImages
+            : (window.__selectedFeedImages || []);
+
+          if (imagesToUpload.length > 0) {
             // 有圖片，執行上傳
             console.log('[ChatWindow] 檢測到 abnormal_post_created operation，開始上傳圖片');
+            console.log(`[ChatWindow] 使用${currentImages.length > 0 ? 'currentImages' : 'window.__selectedFeedImages'}，共 ${imagesToUpload.length} 張圖片`);
 
             try {
               const opData = typeof abnormalPostCreatedOp.operation_data === 'string'
@@ -798,7 +810,7 @@ const ChatWindow = ({
                 // 上傳圖片
                 const uploadResult = await aiChatService.uploadAbnormalPostImages(
                   abnormalPostId,
-                  currentImages
+                  imagesToUpload
                 );
 
                 console.log('[ChatWindow] 異常記錄圖片上傳成功:', uploadResult);
