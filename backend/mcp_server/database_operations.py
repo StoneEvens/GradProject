@@ -1252,22 +1252,94 @@ def _create_disease_archive(data: Dict) -> Dict:
     
     logger.info(f"User {user.id} created disease archive {disease_archive.id} for pet {pet.id}")
     
+    # 構建完整的返回數據（匹配前端期望的格式）
+    # 獲取寵物頭像
+    pet_headshot_url = None
+    if hasattr(pet, 'headshot') and pet.headshot:
+        pet_headshot_url = pet.headshot.firebase_url
+    
+    # 獲取用戶頭像
+    from media.models import UserHeadshot
+    user_headshot_url = UserHeadshot.get_headshot_url(user)
+    
+    # 獲取疾病名稱
+    illness_names = [main_cause] if main_cause else []
+    illnesses_data = []
+    if main_cause:
+        illness_relations = ArchiveIllnessRelation.objects.filter(archive=disease_archive).select_related('illness')
+        illnesses_data = [{
+            'id': relation.illness.id,
+            'illness_name': relation.illness.illness_name
+        } for relation in illness_relations]
+    
+    # 構建異常記錄數組
+    abnormal_posts_data = []
+    for post in abnormal_posts:
+        symptoms_data = []
+        for symptom_relation in post.symptoms.all():
+            symptoms_data.append({
+                'id': symptom_relation.symptom.id,
+                'symptom_name': symptom_relation.symptom.symptom_name
+            })
+        
+        abnormal_posts_data.append({
+            'id': post.id,
+            'record_date': post.record_date.isoformat(),
+            'is_emergency': post.is_emergency,
+            'symptoms': symptoms_data,
+            'content': post.content
+        })
+    
     return {
         "success": True,
         "message": f"Disease archive '{archive_title}' created successfully for pet '{pet.pet_name}'",
         "disease_archive_id": disease_archive.id,
         "archive_data": {
             "id": disease_archive.id,
-            "archive_title": disease_archive.archive_title,
-            "pet_id": pet.id,
+            "pet": pet.id,
             "pet_name": pet.pet_name,
+            "user": user.user_account,
+            "archive_title": disease_archive.archive_title,
+            "post_date": post_frame.created_at.isoformat(),
             "content": disease_archive.content,
+            "generated_content": disease_archive.content,  # 前端期望的欄位名稱
             "go_to_doctor": disease_archive.go_to_doctor,
             "health_status": disease_archive.health_status,
+            "updated_at": post_frame.updated_at.isoformat(),
+            "pet_info": {
+                "pet_id": pet.id,
+                "id": pet.id,
+                "pet_name": pet.pet_name,
+                "breed": pet.breed,
+                "pet_type": pet.pet_type,
+                "headshot_url": pet_headshot_url
+            },
+            "user_info": {
+                "user_fullname": user.user_fullname,
+                "user_account": user.user_account,
+                "headshot_url": user_headshot_url
+            },
+            "illness_names": illness_names,
+            "illnesses_data": illnesses_data,
+            "interaction_stats": {
+                "upvotes": 0,
+                "downvotes": 0,
+                "saves": 0,
+                "shares": 0,
+                "likes": 0,
+                "comments": 0
+            },
+            "user_interaction": {
+                "is_liked": False,
+                "is_upvoted": False,
+                "is_downvoted": False,
+                "is_saved": False,
+                "is_shared": False
+            },
             "is_private": disease_archive.is_private,
+            "postFrame": post_frame.id,
+            "abnormal_posts": abnormal_posts_data,
             "main_cause": main_cause if main_cause else None,
-            "included_abnormal_post_ids": list(abnormal_posts.values_list('id', flat=True)),
-            "post_frame_id": post_frame.id,
             "was_auto_generated": not bool(data.get("content"))
         }
     }
@@ -1352,13 +1424,24 @@ def _generate_disease_archive_content_with_ai(pet, abnormal_posts, symptoms, mai
 
 1. 使用繁體中文撰寫
 2. 以時間順序整理病程發展
-3. 日期格式使用「X月X日」格式（例如：12月3日）
-4. 在描述不同時期的症狀變化時，可使用過渡詞如「期間」、「接下來幾天」、「症狀持續」等
-5. 以第一人稱主人視角撰寫，就像寵物主人在記錄觀察
-6. 語調親切自然，充滿關愛
-7. 內容要詳細但簡潔，避免重複
-8. 不使用markdown格式，使用純文字
-9. 直接開始內容，不加標題前綴
+3. **重要**：必須為每一筆異常記錄使用明確的日期標題，格式為「X月X日」（例如：11月9日、12月3日），並且數字前後不要有多餘空格
+4. 每個日期段落應該對應一筆異常記錄，描述當天觀察到的症狀和情況
+5. 可以在日期段落之間使用過渡詞連接（如「接下來」、「幾天後」），但每個異常記錄日期都必須有明確的日期標題
+6. 以第一人稱主人視角撰寫，就像寵物主人在記錄觀察
+7. 語調親切自然，充滿關愛
+8. 內容要詳細但簡潔，避免重複
+9. 不使用markdown格式，使用純文字
+10. 直接開始內容，不加標題前綴
+11. 每個日期標題應該單獨一行，後面接該日期的詳細描述
+
+範例格式：
+11月9日
+
+今天我注意到[寵物名稱]出現了[症狀描述]...
+
+11月11日
+
+這天的情況是...
 
 請用繁體中文回覆。"""
         
