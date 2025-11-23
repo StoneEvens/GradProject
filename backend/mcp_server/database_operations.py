@@ -553,8 +553,8 @@ def get_operation_list() -> Dict:
             "response_handling": {
                 "success": "Always returns {success: true, message: '正在進行 OCR 分析...'}",
                 "tell_user": "告訴用戶「收到圖片！正在辨識健康報告資訊，請稍候...」",
-                "operations_array": "MUST add operation to operations array: {'operation_type': 'ocr_health_report_analysis', 'operation_data': json.dumps({'status': 'pending'})}",
-                "important": "This function ONLY triggers OCR. Do NOT create health report record. Wait for OCR result from frontend."
+                "operations_array": "MUST add operation to operations array: {'operation_type': 'ocr_health_report_analysis', 'operation_data': json.dumps({'pet_id': <pet_id>})} where <pet_id> is the resolved pet ID from the previous step (e.g., from resolve_entity_context result)",
+                "important": "This function ONLY triggers OCR. Do NOT create health report record. Wait for OCR result from frontend. The pet_id is REQUIRED in operation_data for frontend to call OCR API."
             }
         },
         "add_health_report": {
