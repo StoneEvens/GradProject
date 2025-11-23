@@ -563,18 +563,10 @@ const ChatWindow = ({
       // 檢測是否需要展示確認圖片
       const needsConfirmationWithImages = aiResult.response?.includes('[[NEEDS_CONFIRMATION_WITH_IMAGES]]');
       const needsConfirmationHeadshot = aiResult.response?.includes('[[NEEDS_CONFIRMATION_HEADSHOT]]');
-      
-      let cleanedResponse = aiResult.response;
-      if (needsConfirmationWithImages) {
-        cleanedResponse = cleanedResponse.replace('[[NEEDS_CONFIRMATION_WITH_IMAGES]]', '').trim();
-      }
-      if (needsConfirmationHeadshot) {
-        cleanedResponse = cleanedResponse.replace('[[NEEDS_CONFIRMATION_HEADSHOT]]', '').trim();
-      }
 
       const aiMessage = {
         id: Date.now() + 1,
-        text: cleanedResponse,
+        text: aiResult.response, // 保留原始文字（包含指令標記），前端可用於判斷
         isUser: false,
         timestamp: new Date(),
         // 加入確認相關資訊
@@ -1189,6 +1181,18 @@ const ChatWindow = ({
     }
   };
 
+  // 清理訊息中的指令標記
+  const cleanMessageText = (text) => {
+    if (!text || typeof text !== 'string') return text;
+
+    // 移除所有指令標記
+    return text
+      .replace(/\[\[NEEDS_CONFIRMATION_WITH_IMAGES\]\]/g, '')
+      .replace(/\[\[NEEDS_CONFIRMATION_HEADSHOT\]\]/g, '')
+      .replace(/\[\[NEEDS_CONFIRMATION\]\]/g, '')
+      .trim();
+  };
+
   // 將後端會話詳情格式化為前端訊息結構
   const formatMessagesFromConversationDetail = async (conversationDetail) => {
     if (!conversationDetail.messages || !Array.isArray(conversationDetail.messages)) {
@@ -1298,7 +1302,7 @@ const ChatWindow = ({
 
         return {
           id: msg.id || Date.now() + Math.random(),
-          text: messageData?.response || msg.content,
+          text: messageData?.response || msg.content, // 保留原始文字（包含指令標記）
           isUser: msg.role === 'user',
           timestamp: new Date(msg.created_at),
           tutorial: messageData?.tutorial ?? msg.tutorial_type ?? null,
@@ -1803,10 +1807,10 @@ const ChatWindow = ({
                 />
                 <div className={styles.messageContent}>
                   <div className={styles.messageBubble}>
-                    {String(message.text || '').split('\n').map((line, index) => (
+                    {String(cleanMessageText(message.text) || '').split('\n').map((line, index) => (
                       <React.Fragment key={index}>
                         {line}
-                        {index < String(message.text || '').split('\n').length - 1 && <br />}
+                        {index < String(cleanMessageText(message.text) || '').split('\n').length - 1 && <br />}
                       </React.Fragment>
                     ))}
                   </div>
@@ -1941,10 +1945,10 @@ const ChatWindow = ({
               <>
                 <div className={styles.messageContent}>
                   <div className={styles.messageBubble}>
-                    {String(message.text || '').split('\n').map((line, index) => (
+                    {String(cleanMessageText(message.text) || '').split('\n').map((line, index) => (
                       <React.Fragment key={index}>
                         {line}
-                        {index < String(message.text || '').split('\n').length - 1 && <br />}
+                        {index < String(cleanMessageText(message.text) || '').split('\n').length - 1 && <br />}
                       </React.Fragment>
                     ))}
                   </div>
