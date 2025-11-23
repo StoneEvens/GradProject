@@ -426,6 +426,7 @@ const ChatWindow = ({
           const newImages = [...prev, ...imagePreviews];
           // 使用 window 物件儲存（避免 localStorage 容量限制）
           window.__selectedFeedImages = newImages;
+          console.log('[ChatWindow] 圖片已選擇並保存到 window.__selectedFeedImages:', newImages.length, '張');
           return newImages;
         });
 
@@ -478,6 +479,9 @@ const ChatWindow = ({
     // 保存當前的圖片數據，用於後續上傳
     const currentImages = selectedImages.length > 0 ? [...selectedImages] : [];
 
+    console.log('[ChatWindow] handleSendMessage - currentImages:', currentImages.length, '張');
+    console.log('[ChatWindow] handleSendMessage - window.__selectedFeedImages:', window.__selectedFeedImages?.length || 0, '張');
+
     // 確保 text 永遠是字符串
     const messageDisplayText = messageText?.trim()
       ? messageText
@@ -502,8 +506,9 @@ const ChatWindow = ({
     if (!customMessage) {
       setInputText('');
     }
-    // 立即清空圖片預覽區域（圖片已保存在 currentImages 和 userMessage 中）
+    // 立即清空圖片預覽區域（圖片已保存在 currentImages、userMessage 和 window.__selectedFeedImages 中）
     setSelectedImages([]);
+    console.log('[ChatWindow] handleSendMessage - 已清空 selectedImages，但 window.__selectedFeedImages 保留');
 
     setIsTyping(true);
 
@@ -703,67 +708,90 @@ const ChatWindow = ({
 
         if (postCreatedOp) {
           // 優先使用 currentImages（當前訊息的圖片），如果為空則使用 window.__selectedFeedImages
+          console.log('[ChatWindow] 檢測到 post_created operation');
+          console.log('[ChatWindow] currentImages.length:', currentImages.length);
+          console.log('[ChatWindow] window.__selectedFeedImages?.length:', window.__selectedFeedImages?.length || 0);
+
           const imagesToUpload = currentImages.length > 0
             ? currentImages
             : (window.__selectedFeedImages || []);
 
+          console.log('[ChatWindow] imagesToUpload.length:', imagesToUpload.length);
+
           if (imagesToUpload.length > 0) {
-            // 有圖片，執行上傳
-            console.log('[ChatWindow] 檢測到 post_created operation，開始上傳圖片');
-            console.log(`[ChatWindow] 使用${currentImages.length > 0 ? 'currentImages' : 'window.__selectedFeedImages'}，共 ${imagesToUpload.length} 張圖片`);
+            // 驗證圖片對象是否包含 file 屬性
+            const validImages = imagesToUpload.filter(img => img && img.file);
+            console.log('[ChatWindow] 有效圖片數量（包含 file 對象）:', validImages.length);
 
-            try {
-              const opData = typeof postCreatedOp.operation_data === 'string'
-                ? JSON.parse(postCreatedOp.operation_data)
-                : postCreatedOp.operation_data;
-
-              const postId = opData.post_id;
-
-              if (postId) {
-                setIsUploadingImages(true);
-
-                // 上傳圖片
-                const uploadResult = await aiChatService.uploadPostImages(
-                  postId,
-                  imagesToUpload
-                );
-
-                console.log('[ChatWindow] 圖片上傳成功:', uploadResult);
-
-                // 清空已上傳的圖片
-                clearAllImages();
-                setIsUploadingImages(false);
-
-                // 添加系統訊息通知用戶
-                const uploadSuccessMessage = {
-                  id: Date.now() + 2,
-                  text: `已成功上傳 ${uploadResult.data.uploaded_count} 張圖片到您的貼文！`,
-                  isUser: false,
-                  timestamp: new Date(),
-                  operations: []
-                };
-
-                setMessages(prev => [...prev, uploadSuccessMessage]);
-
-              } else {
-                console.error('[ChatWindow] post_created operation 中缺少 post_id');
-              }
-
-            } catch (uploadError) {
-              console.error('[ChatWindow] 圖片上傳失敗:', uploadError);
-              setIsUploadingImages(false);
-
-              // 添加錯誤訊息
-              const uploadErrorMessage = {
+            if (validImages.length === 0) {
+              console.error('[ChatWindow] 圖片對象缺少 file 屬性！');
+              const errorMessage = {
                 id: Date.now() + 2,
-                text: `圖片上傳失敗：${uploadError.message || '未知錯誤'}。您可以稍後在貼文頁面手動上傳。`,
+                text: `圖片上傳失敗：圖片數據無效。請重新選擇圖片。`,
                 isUser: false,
                 timestamp: new Date(),
                 error: true,
                 operations: []
               };
+              setMessages(prev => [...prev, errorMessage]);
+            } else {
+              // 有有效圖片，執行上傳
+              console.log('[ChatWindow] 檢測到 post_created operation，開始上傳圖片');
+              console.log(`[ChatWindow] 使用${currentImages.length > 0 ? 'currentImages' : 'window.__selectedFeedImages'}，共 ${validImages.length} 張圖片`);
 
-              setMessages(prev => [...prev, uploadErrorMessage]);
+              try {
+                const opData = typeof postCreatedOp.operation_data === 'string'
+                  ? JSON.parse(postCreatedOp.operation_data)
+                  : postCreatedOp.operation_data;
+
+                const postId = opData.post_id;
+
+                if (postId) {
+                  setIsUploadingImages(true);
+
+                  // 上傳圖片（使用驗證後的圖片）
+                  const uploadResult = await aiChatService.uploadPostImages(
+                    postId,
+                    validImages
+                  );
+
+                  console.log('[ChatWindow] 圖片上傳成功:', uploadResult);
+
+                  // 清空已上傳的圖片
+                  clearAllImages();
+                  setIsUploadingImages(false);
+
+                  // 添加系統訊息通知用戶
+                  const uploadSuccessMessage = {
+                    id: Date.now() + 2,
+                    text: `已成功上傳 ${uploadResult.data.uploaded_count} 張圖片到您的貼文！`,
+                    isUser: false,
+                    timestamp: new Date(),
+                    operations: []
+                  };
+
+                  setMessages(prev => [...prev, uploadSuccessMessage]);
+
+                } else {
+                  console.error('[ChatWindow] post_created operation 中缺少 post_id');
+                }
+
+              } catch (uploadError) {
+                console.error('[ChatWindow] 圖片上傳失敗:', uploadError);
+                setIsUploadingImages(false);
+
+                // 添加錯誤訊息
+                const uploadErrorMessage = {
+                  id: Date.now() + 2,
+                  text: `圖片上傳失敗：${uploadError.message || '未知錯誤'}。您可以稍後在貼文頁面手動上傳。`,
+                  isUser: false,
+                  timestamp: new Date(),
+                  error: true,
+                  operations: []
+                };
+
+                setMessages(prev => [...prev, uploadErrorMessage]);
+              }
             }
           } else {
             // 沒有圖片，但 AI 以為有圖片
