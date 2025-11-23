@@ -32,7 +32,7 @@ def create_mcp_server() -> FastMCP:
 
     @mcp.tool(
         name="get_user_pet_info_detailed",
-        description="Fetch a user's basic profile and their pets (including related entities)."
+        description="Fetch a user's basic profile and their pets, including the abnormal posts. You are encouraged to use this tool to get abnormal posts data of the user's pets."
         "Note that this operation requires verification that the user is performing the operation for themself. The easiest way to ensure this is to check the target of the prompt matches the user ID of the requester. The user id was added to the prompt automatically by the backend."
     )
     async def get_user_pet_info_detailed(user_id: int) -> str:
