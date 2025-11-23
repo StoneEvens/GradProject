@@ -537,7 +537,8 @@ def create_mcp_server() -> FastMCP:
             "Perform a database operation such as: add_pet, update_pet (modify pet info), add_abnormal_post (health records), "
             "update_abnormal_post, delete_abnormal_post, create_disease_archive, add_plan (create schedule/calendar event), "
             "update_plan (modify schedule), delete_plan (remove schedule), list_plans (view all schedules), create_social_post, "
-            "add_feed (add feed after OCR confirmation).\n\n"
+            "add_feed (add feed after OCR confirmation), add_health_report (create health report with OCR data), "
+            "update_health_report (modify health report), delete_health_report (remove health report).\n\n"
             "IMPORTANT: Use 'add_plan' for creating schedules/calendar events, NOT 'create_schedule'.\n"
             "Always call database_operation_list first to see exact parameter requirements.\n\n"
             "CRITICAL - Parameter Structure:\n"
@@ -566,7 +567,7 @@ def create_mcp_server() -> FastMCP:
         )
     )
     async def perform_database_operation(
-        operation: Literal["add_pet", "update_pet", "update_user", "update_user_headshot", "add_abnormal_post", "update_abnormal_post", "delete_abnormal_post", "create_disease_archive", "add_plan", "update_plan", "delete_plan", "list_plans", "create_social_post", "add_feed"],
+        operation: Literal["add_pet", "update_pet", "update_user", "update_user_headshot", "add_abnormal_post", "update_abnormal_post", "delete_abnormal_post", "create_disease_archive", "add_plan", "update_plan", "delete_plan", "list_plans", "create_social_post", "add_feed", "prepare_health_report_ocr", "add_health_report", "update_health_report", "delete_health_report"],
         data: Dict
     ) -> str:
         print(f"[MCP Tool] ===== perform_database_operation CALLED =====")
