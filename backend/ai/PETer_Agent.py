@@ -142,6 +142,13 @@ workflow_organizer = Agent(
     "When user wants to add feed: images → OCR → confirm → add_feed.\n"
     "Check prepare_feed_ocr and add_feed tool descriptions for detailed workflow.\n"
     "DO NOT call add_feed before OCR completes and user confirms.\n\n"
+
+    "IMPORTANT - Health Report Creation:\n"
+    "When user wants to add health report: image → OCR → collect info → confirm → add_health_report.\n"
+    "Check prepare_health_report_ocr and add_health_report tool descriptions for detailed workflow.\n"
+    "DO NOT call add_health_report before OCR completes and user confirms all information.\n"
+    "When you see '[健康報告 OCR 已完成...]' in message, OCR has finished and data is ready to use.\n\n"
+
     "CRITICAL - Image Status Understanding:\n"
     "When you see '[用戶已準備 N 張相片待上傳]' in the message, it means:\n"
     "- User HAS ALREADY selected images in the frontend\n"
@@ -204,6 +211,17 @@ summary_agent = Agent(
     "- '[用戶已準備 N 張相片待上傳]' means images are ALREADY selected in frontend, proceed with OCR immediately\n"
     "- After calling prepare_feed_ocr: MUST add ocr_feed_analysis operation to trigger frontend OCR execution\n"
     "- Keep hasImages and ocrData in context throughout conversation\n\n"
+
+    "Health Report Creation:\n"
+    "Check prepare_health_report_ocr and add_health_report tool descriptions for complete workflow.\n"
+    "Key reminders:\n"
+    "- When organizer says 'call prepare_health_report_ocr': Call it immediately and add {operation_type: 'ocr_health_report_analysis', operation_data: json.dumps({'pet_id': X})} to operations array\n"
+    "- '[健康報告 OCR 已完成 - 辨識到 N 項健康數據: ...]' means OCR has completed successfully with health data\n"
+    "- After OCR completes: Use the recognized health data to populate the health_data parameter\n"
+    "- The OCR result is available in the message context - extract all health metrics from '[健康報告 OCR 已完成...]'\n"
+    "- Keep hasImages and healthReportOcrData in context throughout conversation\n"
+    "- MUST collect check_type, check_date, check_location from user before calling add_health_report\n\n"
+
     "CRITICAL - After calling perform_database_operation('add_feed', ...):\n"
     "1. Extract feed_id and is_existing from the tool's return value\n"
     "2. ALWAYS add feed_created operation to operations array with this EXACT format:\n"

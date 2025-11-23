@@ -89,10 +89,27 @@ def _run_agent_plug_and_play(message: str, user_id: str, username: str, session_
             image_count = context.get('imageCount', 0)
             context_str += f" [用戶已準備 {image_count} 張相片待上傳]"
 
-        # OCR completion status
+        # OCR completion status (Feed)
         if context.get('ocrCompleted'):
             ocr_data = context.get('ocrData', {})
             context_str += f" [OCR 已完成 - 營養成分: 蛋白質:{ocr_data.get('protein')}% 脂肪:{ocr_data.get('fat')}% 碳水:{ocr_data.get('carbohydrate')}% 鈣:{ocr_data.get('calcium')}% 磷:{ocr_data.get('phosphorus')}% 鎂:{ocr_data.get('magnesium')}% 鈉:{ocr_data.get('sodium')}%]"
+
+        # Health Report OCR completion status
+        if context.get('healthReportOcrCompleted'):
+            health_ocr_data = context.get('healthReportOcrData', {})
+            # 格式化健康數據摘要
+            data_items = []
+            for key, value in health_ocr_data.items():
+                if value is not None and value != '':
+                    data_items.append(f"{key}: {value}")
+
+            if data_items:
+                health_summary = ", ".join(data_items[:10])  # 最多顯示前10項
+                if len(data_items) > 10:
+                    health_summary += f" ... (共 {len(data_items)} 項)"
+                context_str += f" [健康報告 OCR 已完成 - 辨識到 {len(data_items)} 項健康數據: {health_summary}]"
+            else:
+                context_str += f" [健康報告 OCR 已完成 - 辨識結果為空]"
 
     message_with_context = message + context_str
     workflow_input = WorkflowInput(input_as_text=message_with_context)

@@ -8,6 +8,7 @@ import RecommendedUsersPreview from './RecommendedUsersPreview';
 import RecommendedArticlesPreview from './RecommendedArticlesPreview';
 import ChatSidebar from './ChatSidebar';
 import FloatingAIAvatar from './FloatingAIAvatar';
+import ConfirmNotification from './ConfirmNotification';
 
 const ChatWindow = ({
   isOpen,
@@ -40,6 +41,10 @@ const ChatWindow = ({
   const [selectedImages, setSelectedImages] = useState([]);
   const [isUploadingImages, setIsUploadingImages] = useState(false);
   const [isWaitingForFeedImageReplacement, setIsWaitingForFeedImageReplacement] = useState(false);
+
+  // 確認對話框相關 state
+  const [showImageConfirm, setShowImageConfirm] = useState(false);
+  const [pendingAction, setPendingAction] = useState(null); // 'close' 或 { type: 'switch', conversation: {...} }
 
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
@@ -1309,25 +1314,55 @@ const ChatWindow = ({
     return formattedMessages;
   };
 
-  // 開啟聊天視窗時顯示歡迎訊息並開始新對話
+  // 開啟聊天視窗時恢復最後的對話或顯示歡迎訊息
   useEffect(() => {
     if (!isOpen) return;
 
-    // 每次打開聊天視窗時，重置為新對話並顯示歡迎訊息
+    // 只在訊息為空時處理（避免重複載入）
     if (messages.length === 0 && ready) {
-      // 清除舊的對話 ID 和快取
-      setCurrentConversationId(null);
+      // 嘗試從 localStorage 恢復最後的對話
       try {
-        localStorage.removeItem(LAST_CONV_ID_KEY);
-        localStorage.removeItem(LAST_MESSAGES_KEY);
+        const lastConvId = localStorage.getItem(LAST_CONV_ID_KEY);
+
+        if (lastConvId) {
+          console.log('[ChatWindow] 恢復最後的對話:', lastConvId);
+
+          // 載入對話
+          aiChatService.loadConversation(lastConvId)
+            .then(conversationDetail => {
+              // 格式化訊息
+              return formatMessagesFromConversationDetail(conversationDetail);
+            })
+            .then(formattedMessages => {
+              if (formattedMessages && formattedMessages.length > 0) {
+                setMessages(formattedMessages);
+                setCurrentConversationId(lastConvId);
+                console.log('[ChatWindow] 成功恢復對話，訊息數:', formattedMessages.length);
+              } else {
+                // 如果沒有訊息，顯示歡迎訊息
+                showWelcomeMessage();
+              }
+            })
+            .catch(error => {
+              console.warn('[ChatWindow] 載入對話失敗，顯示歡迎訊息:', error);
+              // 載入失敗時顯示歡迎訊息
+              showWelcomeMessage();
+            });
+        } else {
+          // 沒有保存的對話 ID，顯示歡迎訊息
+          showWelcomeMessage();
+        }
       } catch (e) {
-        console.warn('[ChatWindow] 無法清除快取:', e);
+        console.warn('[ChatWindow] 處理對話恢復時出錯:', e);
+        showWelcomeMessage();
       }
+    }
 
-      // 重置 AI Chat Service 的會話狀態
+    // 顯示歡迎訊息的輔助函數
+    function showWelcomeMessage() {
+      console.log('[ChatWindow] 顯示歡迎訊息');
+      setCurrentConversationId(null);
       aiChatService.startNewConversation();
-
-      // 顯示歡迎訊息
       setMessages([
         {
           id: 1,
@@ -1336,8 +1371,6 @@ const ChatWindow = ({
           timestamp: new Date()
         }
       ]);
-
-      console.log('[ChatWindow] 開始新對話並顯示歡迎訊息');
     }
   }, [isOpen, ready, t]);
 
@@ -1538,6 +1571,25 @@ const ChatWindow = ({
   };
 
   const handleConversationSelect = async (conversation) => {
+    // 檢查是否有選擇的圖片
+    if (selectedImages.length > 0) {
+      // 有圖片時顯示確認對話框
+      setPendingAction({ type: 'switch', conversation });
+      setShowImageConfirm(true);
+      return;
+    }
+
+    // 沒有圖片時直接執行切換
+    executeSwitchConversation(conversation);
+  };
+
+  // 實際執行切換對話操作
+  const executeSwitchConversation = async (conversation) => {
+    // 清除選擇的圖片
+    if (selectedImages.length > 0) {
+      setSelectedImages([]);
+    }
+
     try {
       // 從後端載入完整的對話詳情
       const conversationDetail = await aiChatService.loadConversation(conversation.id);
@@ -1561,6 +1613,25 @@ const ChatWindow = ({
   };
 
   const handleNewConversation = async () => {
+    // 檢查是否有選擇的圖片
+    if (selectedImages.length > 0) {
+      // 有圖片時顯示確認對話框
+      setPendingAction({ type: 'new' });
+      setShowImageConfirm(true);
+      return;
+    }
+
+    // 沒有圖片時直接執行新對話
+    executeNewConversation();
+  };
+
+  // 實際執行新對話操作
+  const executeNewConversation = () => {
+    // 清除選擇的圖片
+    if (selectedImages.length > 0) {
+      setSelectedImages([]);
+    }
+
     // Reset AI Chat Service session state (in-memory only, no DB call yet)
     aiChatService.startNewConversation();
 
@@ -1577,8 +1648,31 @@ const ChatWindow = ({
     // Clear conversation ID - new conversation will be created in DB when user sends first message
     setCurrentConversationId(null);
     try { localStorage.removeItem(LAST_CONV_ID_KEY); } catch (e) {}
-    
+
     console.log('[ChatWindow] Started new conversation (no DB creation yet)');
+  };
+
+  // 處理確認離開（清除圖片）
+  const handleConfirmLeave = () => {
+    setShowImageConfirm(false);
+
+    // 根據待執行的操作類型執行相應的動作
+    if (pendingAction === 'close') {
+      executeClose();
+    } else if (pendingAction?.type === 'switch') {
+      executeSwitchConversation(pendingAction.conversation);
+    } else if (pendingAction?.type === 'new') {
+      executeNewConversation();
+    }
+
+    // 清除待執行操作
+    setPendingAction(null);
+  };
+
+  // 處理取消離開（保留圖片）
+  const handleCancelLeave = () => {
+    setShowImageConfirm(false);
+    setPendingAction(null);
   };
 
   // 處理浮動頭像點擊
@@ -1597,8 +1691,32 @@ const ChatWindow = ({
 
   // 處理聊天視窗關閉（支援浮動模式）
   const handleChatClose = () => {
+    // 檢查是否有選擇的圖片
+    if (selectedImages.length > 0) {
+      // 有圖片時顯示確認對話框
+      setPendingAction('close');
+      setShowImageConfirm(true);
+      return;
+    }
+
+    // 沒有圖片時直接執行關閉
+    executeClose();
+  };
+
+  // 實際執行關閉操作
+  const executeClose = () => {
     // 如果正在錄音，先停止錄音
     stopVoiceRecording();
+
+    // 關閉側邊欄（如果開啟）
+    if (isSidebarOpen) {
+      setIsSidebarOpen(false);
+    }
+
+    // 清除選擇的圖片
+    if (selectedImages.length > 0) {
+      setSelectedImages([]);
+    }
 
     if (floatingMode && onToggleFloating) {
       // 浮動模式下收合為頭像
@@ -1989,6 +2107,15 @@ const ChatWindow = ({
         onConversationSelect={handleConversationSelect}
         onNewConversation={handleNewConversation}
       />
+
+      {/* 圖片清除確認對話框 */}
+      {showImageConfirm && (
+        <ConfirmNotification
+          message={`您有 ${selectedImages.length} 張已選擇的圖片。如果離開此對話，下次將需要重新選擇圖片。確定要繼續嗎？`}
+          onConfirm={handleConfirmLeave}
+          onCancel={handleCancelLeave}
+        />
+      )}
     </>
   );
 
