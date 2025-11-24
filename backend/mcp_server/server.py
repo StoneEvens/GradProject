@@ -601,6 +601,140 @@ def create_mcp_server() -> FastMCP:
         return json.dumps(result_dict, ensure_ascii=False, indent=2)
 
     @mcp.tool(
+        name="search_system_faq",
+        description="""
+        Search the system FAQ database to answer user questions about app features and operations.
+
+        Use this tool when users ask questions about:
+        - How to use specific features (e.g., "如何發布貼文", "怎麼新增寵物")
+        - Where to find certain functions (e.g., "設定在哪裡", "如何更改隱私")
+        - System operations and navigation (e.g., "如何標註寵物", "如何計算飼料")
+
+        The tool will search through keywords, use_cases, and descriptions to find relevant FAQ entries.
+        Always use this tool BEFORE providing answers about system features to avoid hallucinations.
+
+        Returns matching FAQ entries with detailed answers and tutorial information if available.
+        """
+    )
+    async def search_system_faq(
+        query: str,
+        category: Optional[str] = None,
+        limit: int = 3
+    ) -> str:
+        """
+        Search system FAQ database
+
+        Args:
+            query: User's question or keywords
+            category: Optional category filter (account, social, pet, health, feed, forum, setting, system)
+            limit: Maximum number of results to return (default: 3)
+
+        Returns:
+            JSON string with matching FAQ entries
+        """
+        @sync_to_async
+        def search():
+            try:
+                # Load FAQ data
+                current_dir = os.path.dirname(__file__)
+                # Navigate to aiAgent/data directory
+                faq_path = os.path.join(os.path.dirname(current_dir), 'aiAgent', 'data', 'system_faq.json')
+
+                with open(faq_path, 'r', encoding='utf-8') as f:
+                    faq_data = json.load(f)
+
+                faqs = faq_data.get('faqs', [])
+                query_lower = query.lower()
+
+                # Score each FAQ based on relevance
+                scored_faqs = []
+                for faq in faqs:
+                    # Skip if category filter doesn't match
+                    if category and faq.get('category') != category:
+                        continue
+
+                    score = 0
+
+                    # Check name match (highest priority)
+                    if query_lower in faq.get('name', '').lower():
+                        score += 10
+
+                    # Check use_cases match (high priority)
+                    for use_case in faq.get('use_cases', []):
+                        if query_lower in use_case.lower() or use_case.lower() in query_lower:
+                            score += 8
+
+                    # Check keywords match (medium priority)
+                    for keyword in faq.get('keywords', []):
+                        if keyword.lower() in query_lower:
+                            score += 3
+
+                    # Check description match (lower priority)
+                    if query_lower in faq.get('description', '').lower():
+                        score += 2
+
+                    if score > 0:
+                        scored_faqs.append({
+                            'faq': faq,
+                            'score': score
+                        })
+
+                # Sort by score (descending) and take top results
+                scored_faqs.sort(key=lambda x: x['score'], reverse=True)
+                top_faqs = scored_faqs[:limit]
+
+                if not top_faqs:
+                    return {
+                        "success": True,
+                        "found": False,
+                        "message": "未找到相關的 FAQ 項目",
+                        "suggestion": "請嘗試使用不同的關鍵字，或直接描述您的問題"
+                    }
+
+                # Format results
+                results = []
+                for item in top_faqs:
+                    faq = item['faq']
+                    result = {
+                        "id": faq.get('id'),
+                        "question": faq.get('name'),
+                        "answer": faq.get('answer'),
+                        "category": faq.get('category'),
+                        "relevance_score": item['score']
+                    }
+
+                    # Add tutorial info if available
+                    if faq.get('has_tutorial'):
+                        result['has_tutorial'] = True
+                        result['tutorial_type'] = faq.get('tutorial_type')
+                        result['tutorial_note'] = "可提供互動式教學"
+
+                    results.append(result)
+
+                return {
+                    "success": True,
+                    "found": True,
+                    "query": query,
+                    "count": len(results),
+                    "results": results,
+                    "message": f"找到 {len(results)} 個相關的 FAQ 項目"
+                }
+
+            except FileNotFoundError:
+                return {
+                    "success": False,
+                    "error": "FAQ 資料庫文件不存在"
+                }
+            except Exception as e:
+                return {
+                    "success": False,
+                    "error": f"搜尋 FAQ 時發生錯誤: {str(e)}"
+                }
+
+        result = await search()
+        return json.dumps(result, ensure_ascii=False, indent=2)
+
+    @mcp.tool(
         name="resolve_entity_context",
         description="""
         Resolve dynamic path parameters by finding entities based on natural language descriptions.
