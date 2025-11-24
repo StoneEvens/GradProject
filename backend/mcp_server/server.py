@@ -601,6 +601,164 @@ def create_mcp_server() -> FastMCP:
         return json.dumps(result_dict, ensure_ascii=False, indent=2)
 
     @mcp.tool(
+        name="search_glossary",
+        description="""
+        Search the system glossary to find definitions and explanations of PETer terminology.
+
+        Use this tool when users ask "什麼是...", "...是什麼意思", or need clarification on system terms.
+
+        Example queries:
+        - "什麼是疾病檔案"
+        - "OCR 是什麼"
+        - "異常記錄是什麼意思"
+
+        The tool searches through term names, aliases, and definitions to find matching entries.
+        Returns detailed explanations including usage examples, related terms, and navigation paths.
+
+        This is different from search_system_faq:
+        - search_glossary: For term definitions and concepts ("什麼是...")
+        - search_system_faq: For how-to questions and operations ("如何...", "怎麼...")
+        """
+    )
+    async def search_glossary(
+        query: str,
+        category: Optional[str] = None,
+        limit: int = 3
+    ) -> str:
+        """
+        Search system glossary for term definitions
+
+        Args:
+            query: Term or keyword to search for
+            category: Optional category filter (health, feed, social, schedule, system)
+            limit: Maximum number of results to return (default: 3)
+
+        Returns:
+            JSON string with matching glossary entries
+        """
+        @sync_to_async
+        def search():
+            try:
+                # Load glossary data
+                current_dir = os.path.dirname(__file__)
+                glossary_path = os.path.join(current_dir, 'glossary.json')
+
+                with open(glossary_path, 'r', encoding='utf-8') as f:
+                    glossary_data = json.load(f)
+
+                terms = glossary_data.get('terms', [])
+                query_lower = query.lower()
+
+                # Score each term based on relevance
+                scored_terms = []
+                for term_entry in terms:
+                    # Skip if category filter doesn't match
+                    if category and term_entry.get('category') != category:
+                        continue
+
+                    score = 0
+
+                    # Check exact term match (highest priority)
+                    if query_lower == term_entry.get('term', '').lower():
+                        score += 20
+
+                    # Check term contains query or query contains term
+                    if query_lower in term_entry.get('term', '').lower():
+                        score += 15
+                    elif term_entry.get('term', '').lower() in query_lower:
+                        score += 12
+
+                    # Check aliases match (high priority)
+                    for alias in term_entry.get('aliases', []):
+                        if query_lower == alias.lower():
+                            score += 18
+                        elif query_lower in alias.lower():
+                            score += 10
+                        elif alias.lower() in query_lower:
+                            score += 8
+
+                    # Check definition match (lower priority)
+                    if query_lower in term_entry.get('definition', '').lower():
+                        score += 3
+
+                    # Check related terms (bonus points)
+                    for related in term_entry.get('related_terms', []):
+                        if query_lower in related.lower():
+                            score += 2
+
+                    if score > 0:
+                        scored_terms.append({
+                            'term': term_entry,
+                            'score': score
+                        })
+
+                # Sort by score (descending) and take top results
+                scored_terms.sort(key=lambda x: x['score'], reverse=True)
+                top_terms = scored_terms[:limit]
+
+                if not top_terms:
+                    return {
+                        "success": True,
+                        "found": False,
+                        "message": "未找到相關的名詞解釋",
+                        "suggestion": "請嘗試使用不同的關鍵字，或確認拼寫是否正確"
+                    }
+
+                # Format results
+                results = []
+                for item in top_terms:
+                    term = item['term']
+                    result = {
+                        "id": term.get('id'),
+                        "term": term.get('term'),
+                        "definition": term.get('definition'),
+                        "category": term.get('category'),
+                        "relevance_score": item['score']
+                    }
+
+                    # Add optional fields if available
+                    if term.get('aliases'):
+                        result['aliases'] = term.get('aliases')
+                    if term.get('usage_example'):
+                        result['usage_example'] = term.get('usage_example')
+                    if term.get('related_terms'):
+                        result['related_terms'] = term.get('related_terms')
+                    if term.get('related_features'):
+                        result['related_features'] = term.get('related_features')
+                    if term.get('navigation_path'):
+                        result['navigation_path'] = term.get('navigation_path')
+                    if term.get('tutorial_types'):
+                        result['tutorial_types'] = term.get('tutorial_types')
+                    if term.get('technical_note'):
+                        result['technical_note'] = term.get('technical_note')
+
+                    results.append(result)
+
+                return {
+                    "success": True,
+                    "found": True,
+                    "query": query,
+                    "count": len(results),
+                    "results": results,
+                    "message": f"找到 {len(results)} 個相關的名詞解釋"
+                }
+
+            except FileNotFoundError:
+                return {
+                    "success": False,
+                    "error": "名詞詞彙表文件不存在"
+                }
+            except Exception as e:
+                logger.error(f"搜尋名詞解釋時發生錯誤: {str(e)}", exc_info=True)
+                return {
+                    "success": False,
+                    "error": f"搜尋名詞解釋時發生錯誤: {str(e)}"
+                }
+
+        result = await search()
+        return json.dumps(result, ensure_ascii=False, indent=2)
+
+    @mcp.tool(
         name="search_system_faq",
         description="""
         Search the system FAQ database to answer user questions about app features and operations.

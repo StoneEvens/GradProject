@@ -1,0 +1,117 @@
+{
+  "description": "PETer 系統名詞解釋詞彙表",
+  "version": "1.0.0",
+  "last_updated": "2025-11-24",
+  "terms": [
+    {
+      "id": "disease_archive",
+      "term": "疾病檔案",
+      "aliases": ["disease archive", "疾病紀錄", "病歷檔案"],
+      "category": "health",
+      "definition": "疾病檔案是將複數異常記錄使用 ai 輔助系統彙整起來的結果。當寵物的一段病症告一段落，您可以將此期間的異常紀錄彙整為疾病檔案，包括症狀描述、患病過程、治療方案等重要醫療資訊，疾病檔案建立完成後可以設為公開選擇與他人分享經驗。",
+      "usage_example": "當您發現寵物出現異常症狀時，可以在疾病檔案中建立新的記錄，記錄症狀、就醫情況和治療過程。",
+      "related_terms": ["異常記錄", "健康報告", "就醫紀錄"],
+      "related_features": ["異常貼文", "健康報告上傳"],
+      "navigation_path": "/disease-archive"
+    },
+    {
+      "id": "abnormal_post",
+      "term": "異常記錄",
+      "aliases": ["abnormal post", "異常貼文", "健康異常"],
+      "category": "health",
+      "definition": "異常記錄用於記錄寵物的日常健康異常狀況，例如食慾不振、精神不佳、嘔吐、腹瀉等症狀。透過定期記錄這些異常，可以幫助您追蹤寵物的健康變化，並在就醫時提供完整的病史資訊。",
+      "usage_example": "如果您的寵物今天沒有食慾或出現嘔吐，可以立即建立一筆異常記錄，記錄時間、症狀描述和嚴重程度。",
+      "related_terms": ["疾病檔案", "健康報告"],
+      "related_features": ["新增異常貼文", "異常記錄管理"],
+      "navigation_path": "/health"
+    },
+    {
+      "id": "health_report",
+      "term": "健康報告",
+      "aliases": ["health report", "檢驗報告", "體檢報告"],
+      "category": "health",
+      "definition": "健康報告功能可以讓您上傳和管理寵物的醫療檢驗報告。系統支援 OCR 自動辨識功能，可以從報告圖片中提取關鍵數據，如血液檢查、尿液檢查等各項指標，幫助您更好地追蹤寵物的健康狀況。",
+      "usage_example": "當您帶寵物去醫院做健康檢查後，可以將檢驗報告拍照上傳，系統會自動辨識報告中的各項數據。",
+      "related_terms": ["疾病檔案", "異常記錄", "OCR 辨識"],
+      "related_features": ["健康報告上傳", "OCR 自動辨識"],
+      "navigation_path": "/pet/{petId}/health-reports"
+    },
+    {
+      "id": "feed_management",
+      "term": "飼料管理",
+      "aliases": ["feed", "飼料", "寵物食品"],
+      "category": "feed",
+      "definition": "飼料管理功能讓您可以記錄和管理寵物的飼料資訊，包括品牌、營養成分、價格等。系統支援 OCR 自動辨識營養標示，只需拍攝飼料包裝和營養標示，即可快速建立飼料資料。注意上傳的飼料是全系統共用的，因此依定要注意上傳正確資訊與謹慎使用他人飼料。",
+      "usage_example": "購買新的飼料時，可以拍攝飼料包裝正面和營養成分表，系統會自動辨識並建立飼料資料。",
+      "related_terms": ["營養計算機", "OCR 辨識"],
+      "related_features": ["飼料 OCR", "飼料搜尋", "飼料評分"],
+      "navigation_path": "/feeds"
+    },
+    {
+      "id": "nutrition_calculator",
+      "term": "營養計算機",
+      "aliases": ["calculator", "營養計算", "飼料計算"],
+      "category": "feed",
+      "definition": "營養計算機是一個實用工具，可以根據您寵物的體重、年齡、身體疾病等因素，計算出每日所需的飼料量和營養攝取量，幫助您科學餵養寵物，維持健康生活。",
+      "usage_example": "輸入您的寵物體重和選擇的飼料並選擇身體疾病狀況，系統會自動計算每日建議餵食量。",
+      "related_terms": ["飼料管理"],
+      "related_features": ["飼料量計算", "營養需求分析"],
+      "navigation_path": "/calculator"
+    },
+    {
+      "id": "social_post",
+      "term": "社群貼文",
+      "aliases": ["post", "貼文", "分享"],
+      "category": "social",
+      "definition": "社群貼文是 PETer 社群功能的核心，您可以在此分享寵物的日常生活、可愛照片、飼養心得等內容，與其他寵物主人交流互動，獲得按讚、留言和支持。",
+      "usage_example": "拍攝寵物可愛的照片，撰寫文字描述，發布到社群與其他飼主分享您的寵物日常。",
+      "related_terms": ["標註寵物", "hashtag", "社群互動"],
+      "related_features": ["發布貼文", "標註寵物", "按讚留言"],
+      "navigation_path": "/social"
+    },
+    {
+      "id": "pet_tagging",
+      "term": "標註寵物",
+      "aliases": ["tag pet", "寵物標籤", "寵物標記"],
+      "category": "social",
+      "definition": "標註寵物功能讓您在發布社群貼文或照片時，可以標記照片中出現的寵物。這不僅可以清楚標示照片中的寵物是誰，也能讓其他用戶更容易找到特定寵物的相關內容。注意若想讓所有人欣賞到您可愛的寵物必須在設定處將帳號設為公開才行喔。",
+      "usage_example": "在上傳寵物照片時，點選照片中的寵物位置，選擇要標註的寵物，即可完成標註。",
+      "related_terms": ["社群貼文", "寵物檔案"],
+      "related_features": ["照片標註", "寵物識別"],
+      "navigation_path": "/social"
+    },
+    {
+      "id": "tutorial_mode",
+      "term": "教學模式",
+      "aliases": ["tutorial", "互動教學", "功能教學"],
+      "category": "system",
+      "definition": "教學模式是系統提供的互動式學習功能，透過逐步引導的方式，教導您如何使用各項功能。每個教學都包含清楚的步驟說明和實際操作演示，讓您快速上手 PETer 的各項功能。",
+      "usage_example": "當您第一次使用某個功能時，可以啟動相對應的教學模式，跟著提示一步步完成操作。",
+      "related_terms": ["系統功能", "使用指南"],
+      "related_features": ["互動式教學", "功能導覽"],
+      "tutorial_types": ["tagPet", "createPost", "calculate", "addAbnormalPost", "addPet"]
+    },
+    {
+      "id": "ocr_recognition",
+      "term": "OCR 辨識",
+      "aliases": ["OCR", "文字辨識", "自動辨識"],
+      "category": "system",
+      "definition": "OCR (光學字元識別) 是系統的智能辨識功能，可以自動從圖片中提取文字資訊。在 PETer 中，OCR 主要用於辨識飼料營養標示和健康報告，大幅減少手動輸入的時間。",
+      "usage_example": "上傳飼料包裝照片後，系統會自動辨識營養成分表中的蛋白質、脂肪等數值。",
+      "related_terms": ["飼料管理", "健康報告"],
+      "related_features": ["飼料 OCR", "健康報告 OCR"],
+      "technical_note": "系統會自動識別哪張圖片是營養標示，並提取關鍵營養數據"
+    },
+    {
+      "id": "pet_forum",
+      "term": "寵物論壇",
+      "aliases": ["forum", "論壇", "分享"],
+      "category": "social",
+      "definition": "寵物論壇是 PETer 社群功能的核心，您可以在此分享寵物的疾病檔案，協助其他寵物主人藉由您的經驗學習如何幫助自家寵物對抗病痛，同時也可以和其他寵物主人交流互動，獲得按讚、留言和支持。",
+      "usage_example": "分享建立完成的疾病檔案，讓他人也可以藉由您的經驗學習如何幫助自家寵物對抗病痛。",
+      "related_terms": ["疾病檔案", "症狀", "他人經驗"],
+      "related_features": ["疾病檔案", "異常紀錄", "按讚留言"],
+      "navigation_path": "/social?tab=forum"
+    }
+  ]
+}
