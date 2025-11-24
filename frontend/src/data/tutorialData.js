@@ -67,7 +67,7 @@ const tutorialData = {
           position: 'center'
         },
         action: 'click',
-        nextCondition: 'imageAdded',
+        nextCondition: 'manualNext',
         // 添加過渡配置來平滑進入
         transition: {
           fadeIn: true,
@@ -270,7 +270,7 @@ const tutorialData = {
           position: 'center'
         },
         action: 'click',
-        nextCondition: 'imageAdded',
+        nextCondition: 'manualNext',
         // 添加過渡配置來平滑進入
         transition: {
           fadeIn: true,
@@ -462,7 +462,7 @@ const tutorialData = {
           type: 'rectangle',
           position: 'form'
         },
-        action: 'none',
+        // action: 'none',
         nextCondition: 'manualNext'
       },
       {
@@ -471,9 +471,9 @@ const tutorialData = {
         instruction: '點擊「發布」按鈕，發布您的貼文',
         targetElement: {
           component: 'PostPreviewPage',
-          selector: 'button[class*="publishButton"], div[class*="actionButtons"] button:last-of-type, div[class*="actionButtons"] > button:nth-of-type(2)',
+          selector: 'button[class*="publishButton"]:not([disabled])',
           className: 'publishButton',
-          fallbackSelector: 'button:not([disabled])[class*="publishButton"], div[class*="actionButtons"] button:not([disabled]):last-of-type'
+          fallbackSelector: 'button[class*="publishButton"]:not([disabled])'
         },
         highlight: {
           type: 'rectangle',
