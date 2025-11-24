@@ -1065,87 +1065,118 @@ const ChatWindow = ({
           }
         }
 
-        // 檢測 feed_created operation 並自動上傳圖片（類似 post_created）
+        // 檢測 feed_created operation 並自動上傳圖片（與 post_created 使用相同的邏輯）
         const feedCreatedOp = aiResult.operations.find(
           op => op.operation_type === 'feed_created'
         );
 
         if (feedCreatedOp) {
-          if (currentImages.length > 0) {
-            // 有圖片，執行上傳或匹配邏輯
-            try {
-              const opData = typeof feedCreatedOp.operation_data === 'string'
-                ? JSON.parse(feedCreatedOp.operation_data)
-                : feedCreatedOp.operation_data;
+          // 優先使用 currentImages（當前訊息的圖片），如果為空則使用 window.__selectedFeedImages
+          console.log('[ChatWindow] 檢測到 feed_created operation');
+          console.log('[ChatWindow] currentImages.length:', currentImages.length);
+          console.log('[ChatWindow] window.__selectedFeedImages?.length:', window.__selectedFeedImages?.length || 0);
 
-              const feedId = opData.feed_id || opData.feedId;
-              const isExisting = opData.is_existing || false;
+          const imagesToUpload = currentImages.length > 0
+            ? currentImages
+            : (window.__selectedFeedImages || []);
 
-              if (feedId) {
-                // ✅ 檢查是否為智能匹配到的已存在飼料
-                if (isExisting) {
-                  console.log('[ChatWindow] 智能匹配到已存在的飼料，清除圖片快取');
+          console.log('[ChatWindow] imagesToUpload.length:', imagesToUpload.length);
 
-                  // 清除圖片快取（不上傳）
-                  clearAllImages();
+          if (imagesToUpload.length > 0) {
+            // 驗證圖片對象是否包含 file 屬性
+            const validImages = imagesToUpload.filter(img => img && img.file);
+            console.log('[ChatWindow] 有效圖片數量（包含 file 對象）:', validImages.length);
 
-                  // 添加系統訊息通知用戶
-                  const matchedMessage = {
-                    id: Date.now() + 5,
-                    text: `已智能匹配到資料庫中現有的飼料，無需重複上傳圖片。`,
-                    isUser: false,
-                    timestamp: new Date(),
-                    operations: []
-                  };
-
-                  setMessages(prev => [...prev, matchedMessage]);
-
-                } else {
-                  // 新建立的飼料，上傳圖片
-                  console.log('[ChatWindow] 檢測到 feed_created operation，開始上傳圖片');
-
-                  setIsUploadingImages(true);
-
-                  // 上傳圖片
-                  const uploadResult = await aiChatService.uploadFeedImages(feedId, currentImages);
-
-                  console.log('[ChatWindow] 飼料圖片上傳成功:', uploadResult);
-
-                  // 清空已上傳的圖片
-                  clearAllImages();
-                  setIsUploadingImages(false);
-
-                  // 添加系統訊息通知用戶
-                  const uploadSuccessMessage = {
-                    id: Date.now() + 5,
-                    text: `已成功上傳 ${uploadResult.data.uploaded_count} 張圖片到您的飼料！`,
-                    isUser: false,
-                    timestamp: new Date(),
-                    operations: []
-                  };
-
-                  setMessages(prev => [...prev, uploadSuccessMessage]);
-                }
-
-              } else {
-                console.error('[ChatWindow] feed_created operation 中缺少 feed_id');
-              }
-
-            } catch (uploadError) {
-              console.error('[ChatWindow] 飼料圖片上傳失敗:', uploadError);
-              setIsUploadingImages(false);
-
-              // 添加錯誤訊息
-              const uploadErrorMessage = {
+            if (validImages.length === 0) {
+              console.error('[ChatWindow] 圖片對象缺少 file 屬性！');
+              const errorMessage = {
                 id: Date.now() + 5,
-                text: `圖片上傳失敗：${uploadError.message || '未知錯誤'}。`,
+                text: `圖片上傳失敗：圖片數據無效。請重新選擇圖片。`,
                 isUser: false,
                 timestamp: new Date(),
                 error: true,
                 operations: []
               };
+              setMessages(prev => [...prev, errorMessage]);
+            } else {
+              // 有有效圖片，執行上傳或匹配邏輯
+              console.log('[ChatWindow] 檢測到 feed_created operation，開始處理圖片');
+              console.log(`[ChatWindow] 使用${currentImages.length > 0 ? 'currentImages' : 'window.__selectedFeedImages'}，共 ${validImages.length} 張圖片`);
 
-              setMessages(prev => [...prev, uploadErrorMessage]);
+              try {
+                const opData = typeof feedCreatedOp.operation_data === 'string'
+                  ? JSON.parse(feedCreatedOp.operation_data)
+                  : feedCreatedOp.operation_data;
+
+                const feedId = opData.feed_id || opData.feedId;
+                const isExisting = opData.is_existing || false;
+
+                if (feedId) {
+                  // ✅ 檢查是否為智能匹配到的已存在飼料
+                  if (isExisting) {
+                    console.log('[ChatWindow] 智能匹配到已存在的飼料，清除圖片快取');
+
+                    // 清除圖片快取（不上傳）
+                    clearAllImages();
+
+                    // 添加系統訊息通知用戶
+                    const matchedMessage = {
+                      id: Date.now() + 5,
+                      text: `已智能匹配到資料庫中現有的飼料，無需重複上傳圖片。`,
+                      isUser: false,
+                      timestamp: new Date(),
+                      operations: []
+                    };
+
+                    setMessages(prev => [...prev, matchedMessage]);
+
+                  } else {
+                    // 新建立的飼料，上傳圖片
+                    console.log('[ChatWindow] 檢測到 feed_created operation，開始上傳圖片');
+
+                    setIsUploadingImages(true);
+
+                    // 上傳圖片（使用驗證後的圖片）
+                    const uploadResult = await aiChatService.uploadFeedImages(feedId, validImages);
+
+                    console.log('[ChatWindow] 飼料圖片上傳成功:', uploadResult);
+
+                    // 清空已上傳的圖片
+                    clearAllImages();
+                    setIsUploadingImages(false);
+
+                    // 添加系統訊息通知用戶
+                    const uploadSuccessMessage = {
+                      id: Date.now() + 5,
+                      text: `已成功上傳 ${uploadResult.data.uploaded_count} 張圖片到您的飼料！`,
+                      isUser: false,
+                      timestamp: new Date(),
+                      operations: []
+                    };
+
+                    setMessages(prev => [...prev, uploadSuccessMessage]);
+                  }
+
+                } else {
+                  console.error('[ChatWindow] feed_created operation 中缺少 feed_id');
+                }
+
+              } catch (uploadError) {
+                console.error('[ChatWindow] 飼料圖片上傳失敗:', uploadError);
+                setIsUploadingImages(false);
+
+                // 添加錯誤訊息
+                const uploadErrorMessage = {
+                  id: Date.now() + 5,
+                  text: `圖片上傳失敗：${uploadError.message || '未知錯誤'}。`,
+                  isUser: false,
+                  timestamp: new Date(),
+                  error: true,
+                  operations: []
+                };
+
+                setMessages(prev => [...prev, uploadErrorMessage]);
+              }
             }
           } else {
             // 沒有圖片，但 AI 以為有圖片
