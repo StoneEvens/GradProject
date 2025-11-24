@@ -573,7 +573,7 @@ const tutorialData = {
     },
     {
       id: 4,
-      title: '步驟 4：切換頁面TESTTEST',
+      title: '步驟 4：切換頁面',
       instruction: '切換到「寵物狀況」頁面',
       targetElement: {
         component: 'Calculate',
@@ -615,7 +615,7 @@ const tutorialData = {
         fallbackSelector: 'img[src*="PetpageFeedButton"]'
       },
       highlight: {
-        type: 'fullImage',
+        type: 'rectangle',
         position: 'center'
       },
       action: 'click',
@@ -625,7 +625,7 @@ const tutorialData = {
       id: 7,
       title: '步驟 7：新增飼料',
       instruction: '若已經新增過飼料，您可以直接點選「選擇飼料」，若需要新增飼料，就點選「新增飼料」，這邊教學新增飼料',
-      ttargetElement: {
+      targetElement: {
         component: 'Calculate',
         selector: '[class*="feedActions"] button[class*="feedActionBtn"]:nth-of-type(2)',
         className: 'feedActionBtn',
@@ -719,10 +719,8 @@ const tutorialData = {
         type: 'rectangle',
         position: 'button'
       },
-      nextCondition: {
-        type: 'imageAdded',
-        scope: 'front'
-      }
+      nextCondition: 'manualNext',
+      showPointer: true
     },
     {
       id: 13,
@@ -738,11 +736,8 @@ const tutorialData = {
         type: 'rectangle',
         position: 'button'
       },
-      action: 'click',
-      nextCondition: {
-        type: 'imageAdded',
-        scope: 'nutrition'
-      }
+      nextCondition: 'manualNext',
+      showPointer: true
     },
     {
       id: 14,
@@ -750,16 +745,16 @@ const tutorialData = {
       instruction: '按下「確認新增」按鈕',
       targetElement: {
         component: 'CreateFeedModal',
-        selector: '[class*="modalFooter"] button[class*="confirmButton"]:not([disabled])',
+        selector: '[class*="modalFooter"] button[class*="confirmButton"]:nth-of-type(2)', // 僅選中可點擊的按鈕
         className: 'confirmButton',
-        fallbackSelector: '[class*="modalFooter"] button + button:not([disabled]), [class*="modalFooter"] button:last-of-type:not([disabled])'
+        fallbackSelector: '[class*="modalFooter"] button:last-of-type:not([disabled])'
       },
       highlight: {
         type: 'rectangle',
         position: 'button'
       },
       action: 'click',
-
+      showPointer: true
     },
     {
       id: 15,
@@ -790,433 +785,433 @@ const tutorialData = {
       action: 'complete'
     }
   ]},
-  // addAbnormalPost: {
-  // id: 'addAbnormalPost',
-  // title: '如何新增異常記錄',
-  // description: '學習如何新增一篇異常記錄',
-  // steps: [
-  //   {
-  //     id: 1,
-  //     title: '步驟 1：開啟發文選單',
-  //     instruction: '點擊底部導覽列中間的「發文」按鈕',
-  //     targetElement: {
-  //       component: 'BottomNavbar',
-  //       selector: 'img[alt*="post"], img[src*="CreatePost"], [class*="createPost"]',
-  //       className: 'createPost',
-  //       fallbackSelector: '.icon'
-  //     },
-  //     highlight: {
-  //       type: 'circle',
-  //       position: 'bottom-center'
-  //     },
-  //     action: 'click',
-  //     nextCondition: 'menuOpen'
-  //   },
-  //   {
-  //     id: 2,
-  //     title: '步驟 2：選擇異常記錄',
-  //     instruction: '在彈出的選單中，選擇「異常記錄」',
-  //     targetElement: {
-  //       component: 'PostMenu',
-  //       selector: '[class*="menuItem"]:second-child, [class*="buttonElement"]:second-child, [class*="menu"] button:second-child, [class*="popup"] button:second-child',
-  //       className: 'menuItem',
-  //       fallbackSelector: 'button:second-child, div:second-child'
-  //     },
-  //     highlight: {
-  //       type: 'rectangle',
-  //       position: 'menu'
-  //     },
-  //     action: 'click',
-  //     nextCondition: 'pageNavigate',
-  //     expectedPath: '/create-abnormal-post',
-  //     // 添加過渡配置來減少閃爍
-  //     transition: {
-  //       fadeOut: true,
-  //       delay: 320
-  //     }
-  //   },
-  //   {
-  //     id: 3,
-  //     title: '步驟 3：選擇寵物',
-  //     instruction: '從這裡點選要建立紀錄的寵物',
-  //     targetElement: {
-  //       component: 'CreateAbnormalPostPage',
-  //       selector: '[class*="petSwitcher"]',
-  //       className: 'petSwitcher',
-  //       fallbackSelector: 'div[class*="section"] [class*="petSwitcher"], [class*="petItem"]'
-  //     },
-  //     highlight: {
-  //       type: 'rectangle',
-  //       position: 'center'
-  //     },
-  //     action: 'click',
-  //     nextCondition: 'petChosen'
-  //   },
-  //   {
-  //     id: 4,
-  //     title: '步驟 4：選擇日期',
-  //     instruction: '選擇此異常狀況發生的日期',
-  //     targetElement: {
-  //       component: 'CreateAbnormalPostPage',
-  //       selector: 'input[class*="dateInput"]:not([disabled])',
-  //       className: 'dateInput',
-  //       fallbackSelector: '[class*="dateInputWrapper"] input[type="date"]:not([disabled])'
-  //     },
-  //     highlight: {
-  //       type: 'rectangle',
-  //       position: 'form'
-  //     },
-  //     action: 'click',
-  //     nextCondition: 'menuOpen'
-  //   },
-  //   {
-  //     id: 5,
-  //     title: '步驟 5：勾選是否為就醫記錄',
-  //     instruction: '',
-  //     targetElement: {
-  //       component: 'CreateAbnormalPostPage',
-  //       selector: 'label[for="emergency"], input#emergency',
-  //       className: 'checkbox',
-  //       fallbackSelector: '[class*="emergencyCheckbox"] input[type="checkbox"]'
-  //     },
-  //     highlight: {
-  //       type: 'rectangle',
-  //       position: 'button'
-  //     },
-  //     action: 'click',
-  //     nextCondition: 'menuOpen'
-  //   },
-  //   {
-  //     id: 7,
-  //     title: '步驟 7：選擇症狀',
-  //     instruction: '從下拉選單選擇一個症狀',
-  //     targetElement: {
-  //       component: 'CreateAbnormalPostPage',
-  //       // 鎖定症狀區塊內的 select
-  //       selector: '[class*="symptomSection"] [class*="symptomSelectContainer"] select[class*="symptomSelect"]:not([disabled])',
-  //       className: 'symptomSelect',
-  //       fallbackSelector: '[class*="symptomInputSection"] select:not([disabled])'
-  //     },
-  //     highlight: { type: 'rectangle', position: 'form' },
-  //     action: 'select',
-  //     nextCondition: 'menuOpen'
-  //   },
-  //   {
-  //     id: 8,
-  //     title: '步驟 8：新增症狀',
-  //     instruction: '按「新增」把剛才選的症狀加入，若需要新增多個症狀請重複步驟7和8',
-  //     targetElement: {
-  //       component: 'CreateAbnormalPostPage',
-  //       selector: '[class*="symptomSection"] [class*="symptomInputSection"] button[class*="addSymptomBtn"]:not([disabled])',
-  //       className: 'addSymptomBtn',
-  //       fallbackSelector: '[class*="symptomInputSection"] button:not([disabled])'
-  //     },
-  //     highlight: { type: 'rectangle', position: 'button' },
-  //     action: 'click',
-  //     nextCondition: 'menuOpen'
-  //   },
-  //   {
-  //     id: 9,
-  //     title: '步驟 9：填寫體重',
-  //     instruction: '',
-  //     targetElement: {
-  //       component: 'CreateAbnormalPostPage',
-  //       selector: '[class*="bodyStatsContainer"] [class*="statRow"]:first-of-type input[class*="statInput"]:not([disabled])',
-  //       className: 'statInput',
-  //       fallbackSelector: '[class*="bodyStatsContainer"] [class*="statRow"]:first-of-type input[type="number"]:not([disabled])'
-  //     },
-  //     highlight: { type: 'rectangle', position: 'form' },
-  //     action: 'click',
-  //     nextCondition: 'menuOpen'
-  //   },
-  //   {
-  //     id: 10,
-  //     title: '步驟 10：填寫喝水量',
-  //     instruction: '',
-  //     targetElement: {
-  //       component: 'CreateAbnormalPostPage',
-  //       selector: '[class*="bodyStatsContainer"] [class*="statRow"]:first-of-type + [class*="statRow"] input[class*="statInput"]:not([disabled])',
-  //       className: 'statInput',
-  //       fallbackSelector: '[class*="bodyStatsContainer"] [class*="statRow"]:first-of-type + [class*="statRow"] input[type="number"]:not([disabled])'
-  //     },
-  //     highlight: { type: 'rectangle', position: 'form' },
-  //     action: 'click',
-  //     nextCondition: 'menuOpen'
-  //   },
-  //   {
-  //     id: 11,
-  //     title: '步驟 11：填寫體溫',
-  //     instruction: '',
-  //     targetElement: {
-  //       component: 'CreateAbnormalPostPage',
-  //       selector: '[class*="bodyStatsContainer"] [class*="statRow"]:first-of-type + [class*="statRow"] + [class*="statRow"] input[class*="statInput"]:not([disabled])',
-  //       className: 'statInput',
-  //       fallbackSelector: '[class*="bodyStatsContainer"] [class*="statRow"]:first-of-type + [class*="statRow"] + [class*="statRow"] input[type="number"]:not([disabled])'
-  //     },
-  //     highlight: { type: 'rectangle', position: 'form' },
-  //     action: 'click',
-  //     nextCondition: 'menuOpen'
-  //   },
-  //   {
-  //     id: 12,
-  //     title: '步驟 12：新增圖片',
-  //     instruction: '點選方框新增寵物需記錄之圖片',
-  //     targetElement: {
-  //       component: 'CreateAbnormalPostPage',
-  //       selector: '[class*="imageControls"] button[class*="addImageBtn"]:not([disabled])',
-  //       className: 'addImageBtn',
-  //       fallbackSelector: '[class*="imageControls"] button:not([disabled])'
-  //     },
-  //     highlight: { type: 'rectangle', position: 'button' },
-  //     action: 'click',
-  //     nextCondition: 'menuOpen'
-  //   },
-  //   {
-  //     id: 13,
-  //     title: '步驟 13：新增補充描述',
-  //     instruction: '將剛才沒記錄到的部分，如寵物精神狀況、醫生提醒、異常行為等填入空格',
-  //      targetElement: {
-  //       component: 'CreateAbnormalPostPage',
-  //       selector: 'textarea[class*="descriptionInput"]:not([disabled])',
-  //       className: 'descriptionInput',
-  //       fallbackSelector: '[class*="descriptionSection"] textarea:not([disabled])'
-  //     },
-  //     highlight: { type: 'rectangle', position: 'form' },
-  //     action: 'click',
-  //     nextCondition: 'menuOpen'
-  //   },
-  //   {
-  //     id: 14,
-  //     title: '步驟 14：建立異常記錄',
-  //     instruction: '點擊「建立」按鈕完成建立動作',
-  //     targetElement: {
-  //       component: 'CreateAbnormalPostPage',
-  //       selector: '[class*="actionButtons"] button[class*="createButton"]:not([disabled])',
-  //       className: 'createButton',
-  //       fallbackSelector: '[class*="actionButtons"] button:last-of-type:not([disabled])'
-  //     },
-  //     highlight: { type: 'rectangle', position: 'button' },
-  //     action: 'click',
-  //     nextCondition: 'menuOpen'
-  //   },
-  //   {
-  //       id: 15,
-  //       title: '完成！',
-  //       instruction: '恭喜！您已成功新增一篇異常記錄！',
-  //       targetElement: null,
-  //       highlight: {
-  //         type: 'none',
-  //         position: 'center'
-  //       },
-  //       action: 'complete'
-  //   }
-  // ]},
-  // addPet: {
-  //   id: 'addPet',
-  //   title: '如何新增一隻寵物',
-  //   description: '學習如何將您的寵物新增到系統裡',
-  //   steps: [
-  //     {
-  //       id: 1,
-  //       title: '步驟 1：開啟寵物頁面',
-  //       instruction: '點擊底部導覽列的「寵物」按鈕',
-  //       targetElement: {
-  //         component: 'BottomNavbar',
-  //         selector: 'img[alt*="pets"], img[src*="CreatePost"], [class*="createPost"]',
-  //         className: 'calculate',
-  //         fallbackSelector: '.icon'
-  //       },
-  //       highlight: {
-  //         type: 'circle',
-  //         position: 'bottom-center'
-  //       },
-  //       action: 'click',
-  //       nextCondition: 'menuOpen'
-  //     },
-  //     {
-  //       id: 2,
-  //       title: '步驟 2：按下「新增寵物」按鈕',
-  //       instruction: '',
-  //       targetElement: {
-  //         component: 'addPet',
-  //         selector: 'button[class*="addFirstPetButton"]:not([disabled])',
-  //         className: 'addFirstPetButton',
-  //         fallbackSelector: 'button[class*="addFirstPetButton"], button[class*="addPetButton"]:not([disabled])'
-  //       },
-  //       highlight: {
-  //         type: 'rectangle',
-  //         position: 'button'
-  //       },
-  //       action: 'click',
-  //       nextCondition: 'menuOpen'
-  //     },
-  //     {
-  //       id: 3,
-  //       title: '步驟 3：選擇您的寵物種類',
-  //       instruction: '請在下方選擇「貓」或「狗」',
-  //       targetElement: {
-  //         component: 'AddPetPage',
-  //         selector: '[class*="phaseOne"] [class*="petTypeButtons"]',
-  //         className: 'petTypeButtons',
-  //         fallbackSelector: '[class*="petTypeSection"] [class*="petTypeButtons"]'
-  //       },
-  //       highlight: {
-  //         type: 'rectangle',
-  //         position: 'center'
-  //       },
-  //       action: 'click',
-  //       nextCondition: 'menuOpen'
-  //     },
-  //     {
-  //       id: 4,
-  //       title: '步驟 4：上傳頭貼',
-  //       instruction: '請上傳您的寵物的照片',
-  //       targetElement: {
-  //         component: 'AddPetPage',
-  //         selector: '[class*="phaseTwo"] [class*="avatarUpload"]',
-  //         className: 'avatarUpload',
-  //         fallbackSelector: '[class*="phaseTwoTopSection"] [class*="avatarUpload"]'
-  //       },
-  //       highlight: {
-  //         type: 'rectangle',
-  //         position: 'image'
-  //       },
-  //       action: 'click',
-  //       nextCondition: 'menuOpen'
-  //     },
-  //     {
-  //       id: 5,
-  //       title: '步驟 5：填入寵物姓名',
-  //       instruction: '',
-  //       targetElement: {
-  //         component: 'AddPetPage',
-  //         selector: '[class*="phaseTwo"] input[name="name"]:not([disabled])',
-  //         className: 'formInput',
-  //         fallbackSelector: '[class*="formFields"] input[name="name"]:not([disabled])'
-  //       },
-  //       highlight: {
-  //         type: 'rectangle',
-  //         position: 'form'
-  //       },
-  //       action: 'click',
-  //       nextCondition: 'menuOpen'
-  //     },
-  //     {
-  //       id: 6,
-  //       title: '步驟 6：選擇寵物品種',
-  //       instruction: '',
-  //       targetElement: {
-  //         component: 'AddPetPage',
-  //         selector: '[class*="phaseTwo"] select[name="breed"]:not([disabled])',
-  //         className: 'formSelect',
-  //         fallbackSelector: '[class*="formFields"] select[name="breed"]:not([disabled])'
-  //       },
-  //       highlight: {
-  //         type: 'rectangle',
-  //         position: 'form'
+  addAbnormalPost: {
+  id: 'addAbnormalPost',
+  title: '如何新增異常記錄',
+  description: '學習如何新增一篇異常記錄',
+  steps: [
+    {
+      id: 1,
+      title: '步驟 1：開啟發文選單',
+      instruction: '點擊底部導覽列中間的「發文」按鈕',
+      targetElement: {
+        component: 'BottomNavbar',
+        selector: 'img[alt*="post"], img[src*="CreatePost"], [class*="createPost"]',
+        className: 'createPost',
+        fallbackSelector: '.icon'
+      },
+      highlight: {
+        type: 'circle',
+        position: 'bottom-center'
+      },
+      action: 'click',
+      nextCondition: 'menuOpen'
+    },
+    {
+      id: 2,
+      title: '步驟 2：選擇異常記錄',
+      instruction: '在彈出的選單中，選擇「異常記錄」',
+      targetElement: {
+        component: 'PostMenu',
+        selector: '[class*="menuItem"]:second-child, [class*="buttonElement"]:second-child, [class*="menu"] button:second-child, [class*="popup"] button:second-child',
+        className: 'menuItem',
+        fallbackSelector: 'button:second-child, div:second-child'
+      },
+      highlight: {
+        type: 'rectangle',
+        position: 'menu'
+      },
+      action: 'click',
+      nextCondition: 'pageNavigate',
+      expectedPath: '/create-abnormal-post',
+      // 添加過渡配置來減少閃爍
+      transition: {
+        fadeOut: true,
+        delay: 320
+      }
+    },
+    {
+      id: 3,
+      title: '步驟 3：選擇寵物',
+      instruction: '從這裡點選要建立紀錄的寵物',
+      targetElement: {
+        component: 'CreateAbnormalPostPage',
+        selector: '[class*="petSwitcher"]',
+        className: 'petSwitcher',
+        fallbackSelector: 'div[class*="section"] [class*="petSwitcher"], [class*="petItem"]'
+      },
+      highlight: {
+        type: 'rectangle',
+        position: 'center'
+      },
+      action: 'click',
+      nextCondition: 'petChosen'
+    },
+    {
+      id: 4,
+      title: '步驟 4：選擇日期',
+      instruction: '選擇此異常狀況發生的日期',
+      targetElement: {
+        component: 'CreateAbnormalPostPage',
+        selector: 'input[class*="dateInput"]:not([disabled])',
+        className: 'dateInput',
+        fallbackSelector: '[class*="dateInputWrapper"] input[type="date"]:not([disabled])'
+      },
+      highlight: {
+        type: 'rectangle',
+        position: 'form'
+      },
+      action: 'click',
+      nextCondition: 'menuOpen'
+    },
+    {
+      id: 5,
+      title: '步驟 5：勾選是否為就醫記錄',
+      instruction: '',
+      targetElement: {
+        component: 'CreateAbnormalPostPage',
+        selector: 'label[for="emergency"], input#emergency',
+        className: 'checkbox',
+        fallbackSelector: '[class*="emergencyCheckbox"] input[type="checkbox"]'
+      },
+      highlight: {
+        type: 'rectangle',
+        position: 'button'
+      },
+      action: 'click',
+      nextCondition: 'menuOpen'
+    },
+    {
+      id: 7,
+      title: '步驟 7：選擇症狀',
+      instruction: '從下拉選單選擇一個症狀',
+      targetElement: {
+        component: 'CreateAbnormalPostPage',
+        // 鎖定症狀區塊內的 select
+        selector: '[class*="symptomSection"] [class*="symptomSelectContainer"] select[class*="symptomSelect"]:not([disabled])',
+        className: 'symptomSelect',
+        fallbackSelector: '[class*="symptomInputSection"] select:not([disabled])'
+      },
+      highlight: { type: 'rectangle', position: 'form' },
+      action: 'select',
+      nextCondition: 'menuOpen'
+    },
+    {
+      id: 8,
+      title: '步驟 8：新增症狀',
+      instruction: '按「新增」把剛才選的症狀加入，若需要新增多個症狀請重複步驟7和8',
+      targetElement: {
+        component: 'CreateAbnormalPostPage',
+        selector: '[class*="symptomSection"] [class*="symptomInputSection"] button[class*="addSymptomBtn"]:not([disabled])',
+        className: 'addSymptomBtn',
+        fallbackSelector: '[class*="symptomInputSection"] button:not([disabled])'
+      },
+      highlight: { type: 'rectangle', position: 'button' },
+      action: 'click',
+      nextCondition: 'menuOpen'
+    },
+    {
+      id: 9,
+      title: '步驟 9：填寫體重',
+      instruction: '',
+      targetElement: {
+        component: 'CreateAbnormalPostPage',
+        selector: '[class*="bodyStatsContainer"] [class*="statRow"]:first-of-type input[class*="statInput"]:not([disabled])',
+        className: 'statInput',
+        fallbackSelector: '[class*="bodyStatsContainer"] [class*="statRow"]:first-of-type input[type="number"]:not([disabled])'
+      },
+      highlight: { type: 'rectangle', position: 'form' },
+      action: 'click',
+      nextCondition: 'menuOpen'
+    },
+    {
+      id: 10,
+      title: '步驟 10：填寫喝水量',
+      instruction: '',
+      targetElement: {
+        component: 'CreateAbnormalPostPage',
+        selector: '[class*="bodyStatsContainer"] [class*="statRow"]:first-of-type + [class*="statRow"] input[class*="statInput"]:not([disabled])',
+        className: 'statInput',
+        fallbackSelector: '[class*="bodyStatsContainer"] [class*="statRow"]:first-of-type + [class*="statRow"] input[type="number"]:not([disabled])'
+      },
+      highlight: { type: 'rectangle', position: 'form' },
+      action: 'click',
+      nextCondition: 'menuOpen'
+    },
+    {
+      id: 11,
+      title: '步驟 11：填寫體溫',
+      instruction: '',
+      targetElement: {
+        component: 'CreateAbnormalPostPage',
+        selector: '[class*="bodyStatsContainer"] [class*="statRow"]:first-of-type + [class*="statRow"] + [class*="statRow"] input[class*="statInput"]:not([disabled])',
+        className: 'statInput',
+        fallbackSelector: '[class*="bodyStatsContainer"] [class*="statRow"]:first-of-type + [class*="statRow"] + [class*="statRow"] input[type="number"]:not([disabled])'
+      },
+      highlight: { type: 'rectangle', position: 'form' },
+      action: 'click',
+      nextCondition: 'menuOpen'
+    },
+    {
+      id: 12,
+      title: '步驟 12：新增圖片',
+      instruction: '點選方框新增寵物需記錄之圖片',
+      targetElement: {
+        component: 'CreateAbnormalPostPage',
+        selector: '[class*="imageControls"] button[class*="addImageBtn"]:not([disabled])',
+        className: 'addImageBtn',
+        fallbackSelector: '[class*="imageControls"] button:not([disabled])'
+      },
+      highlight: { type: 'rectangle', position: 'button' },
+      action: 'click',
+      nextCondition: 'menuOpen'
+    },
+    {
+      id: 13,
+      title: '步驟 13：新增補充描述',
+      instruction: '將剛才沒記錄到的部分，如寵物精神狀況、醫生提醒、異常行為等填入空格',
+       targetElement: {
+        component: 'CreateAbnormalPostPage',
+        selector: 'textarea[class*="descriptionInput"]:not([disabled])',
+        className: 'descriptionInput',
+        fallbackSelector: '[class*="descriptionSection"] textarea:not([disabled])'
+      },
+      highlight: { type: 'rectangle', position: 'form' },
+      action: 'click',
+      nextCondition: 'menuOpen'
+    },
+    {
+      id: 14,
+      title: '步驟 14：建立異常記錄',
+      instruction: '點擊「建立」按鈕完成建立動作',
+      targetElement: {
+        component: 'CreateAbnormalPostPage',
+        selector: '[class*="actionButtons"] button[class*="createButton"]:not([disabled])',
+        className: 'createButton',
+        fallbackSelector: '[class*="actionButtons"] button:last-of-type:not([disabled])'
+      },
+      highlight: { type: 'rectangle', position: 'button' },
+      action: 'click',
+      nextCondition: 'menuOpen'
+    },
+    {
+        id: 15,
+        title: '完成！',
+        instruction: '恭喜！您已成功新增一篇異常記錄！',
+        targetElement: null,
+        highlight: {
+          type: 'none',
+          position: 'center'
+        },
+        action: 'complete'
+    }
+  ]},
+  addPet: {
+    id: 'addPet',
+    title: '如何新增一隻寵物',
+    description: '學習如何將您的寵物新增到系統裡',
+    steps: [
+      {
+        id: 1,
+        title: '步驟 1：開啟寵物頁面',
+        instruction: '點擊底部導覽列的「寵物」按鈕',
+        targetElement: {
+          component: 'BottomNavbar',
+          selector: 'img[alt*="pets"], img[src*="CreatePost"], [class*="createPost"]',
+          className: 'calculate',
+          fallbackSelector: '.icon'
+        },
+        highlight: {
+          type: 'circle',
+          position: 'bottom-center'
+        },
+        action: 'click',
+        nextCondition: 'menuOpen'
+      },
+      {
+        id: 2,
+        title: '步驟 2：按下「新增寵物」按鈕',
+        instruction: '',
+        targetElement: {
+          component: 'addPet',
+          selector: 'button[class*="addFirstPetButton"]:not([disabled])',
+          className: 'addFirstPetButton',
+          fallbackSelector: 'button[class*="addFirstPetButton"], button[class*="addPetButton"]:not([disabled])'
+        },
+        highlight: {
+          type: 'rectangle',
+          position: 'button'
+        },
+        action: 'click',
+        nextCondition: 'menuOpen'
+      },
+      {
+        id: 3,
+        title: '步驟 3：選擇您的寵物種類',
+        instruction: '請在下方選擇「貓」或「狗」',
+        targetElement: {
+          component: 'AddPetPage',
+          selector: '[class*="phaseOne"] [class*="petTypeButtons"]',
+          className: 'petTypeButtons',
+          fallbackSelector: '[class*="petTypeSection"] [class*="petTypeButtons"]'
+        },
+        highlight: {
+          type: 'rectangle',
+          position: 'center'
+        },
+        action: 'click',
+        nextCondition: 'menuOpen'
+      },
+      {
+        id: 4,
+        title: '步驟 4：上傳頭貼',
+        instruction: '請上傳您的寵物的照片',
+        targetElement: {
+          component: 'AddPetPage',
+          selector: '[class*="phaseTwo"] [class*="avatarUpload"]',
+          className: 'avatarUpload',
+          fallbackSelector: '[class*="phaseTwoTopSection"] [class*="avatarUpload"]'
+        },
+        highlight: {
+          type: 'rectangle',
+          position: 'image'
+        },
+        action: 'click',
+        nextCondition: 'menuOpen'
+      },
+      {
+        id: 5,
+        title: '步驟 5：填入寵物姓名',
+        instruction: '',
+        targetElement: {
+          component: 'AddPetPage',
+          selector: '[class*="phaseTwo"] input[name="name"]:not([disabled])',
+          className: 'formInput',
+          fallbackSelector: '[class*="formFields"] input[name="name"]:not([disabled])'
+        },
+        highlight: {
+          type: 'rectangle',
+          position: 'form'
+        },
+        action: 'click',
+        nextCondition: 'menuOpen'
+      },
+      {
+        id: 6,
+        title: '步驟 6：選擇寵物品種',
+        instruction: '',
+        targetElement: {
+          component: 'AddPetPage',
+          selector: '[class*="phaseTwo"] select[name="breed"]:not([disabled])',
+          className: 'formSelect',
+          fallbackSelector: '[class*="formFields"] select[name="breed"]:not([disabled])'
+        },
+        highlight: {
+          type: 'rectangle',
+          position: 'form'
 
-  //       },
-  //       action: 'click',
-  //       nextCondition: 'menuOpen'
-  //     },
-  //     {
-  //       id: 7,
-  //       title: '步驟 7：填入寵物年齡',
-  //       instruction: '',
-  //       targetElement: {
-  //         component: 'AddPetPage',
-  //         selector: '[class*="phaseTwo"] input[name="age"]:not([disabled])',
-  //         className: 'formInput',
-  //         fallbackSelector: '[class*="formFields"] input[name="age"]:not([disabled])'
-  //       },
-  //       highlight: {
-  //         type: 'rectangle',
-  //         position: 'form'
-  //       },
-  //       action: 'click',
-  //       nextCondition: 'menuOpen'
-  //     },
-  //     {
-  //       id: 8,
-  //       title: '步驟 8：填入寵物體重',
-  //       instruction: '',
-  //       targetElement: {
-  //         component: 'AddPetPage',
-  //         selector: '[class*="phaseTwo"] input[name="weight"]:not([disabled])',
-  //         className: 'formInput',
-  //         fallbackSelector: '[class*="formFields"] input[name="weight"]:not([disabled])'
-  //       },
-  //       highlight: {
-  //         type: 'rectangle',
-  //         position: 'form'
-  //       },
-  //       action: 'click',
-  //       nextCondition: 'menuOpen'
-  //     },
-  //     {
-  //       id: 9,
-  //       title: '步驟 9：填入寵物身高',
-  //       instruction: '',
-  //       targetElement: {
-  //         component: 'AddPetPage',
-  //         selector: '[class*="phaseTwo"] input[name="height"]:not([disabled])',
-  //         className: 'formInput',
-  //         fallbackSelector: '[class*="formFields"] input[name="height"]:not([disabled])'
-  //       },
-  //       highlight: {
-  //         type: 'rectangle',
-  //         position: 'form'
-  //       },
-  //       action: 'click',
-  //       nextCondition: 'menuOpen'
-  //     },
-  //     {
-  //       id: 10,
-  //       title: '步驟 10：填入寵物介紹',
-  //       instruction: '',
-  //       targetElement: {
-  //         component: 'AddPetPage',
-  //         selector: '[class*="phaseTwo"] textarea[name="description"]:not([disabled])',
-  //         className: 'formTextarea',
-  //         fallbackSelector: '[class*="descriptionSection"] textarea[name="description"]:not([disabled])'
-  //       },
-  //       highlight: {
-  //         type: 'rectangle',
-  //         position: 'form'
-  //       },
-  //       action: 'click',
-  //       nextCondition: 'menuOpen'
-  //     },
-  //     {
-  //       id: 11,
-  //       title: '步驟 11：完成填寫寵物資料',
-  //       instruction: '按下「完成」按鈕',
-  //       targetElement: {
-  //         component: 'AddPetPage',
-  //         selector: '[class*="actionButtons"] button[class*="submitButton"]:not([disabled])',
-  //         className: 'submitButton',
-  //         fallbackSelector: '[class*="actionButtons"] button:last-of-type:not([disabled])'
-  //       },
-  //       highlight: {
-  //         type: 'rectangle',
-  //         position: 'button'
-  //       },
-  //       action: 'click',
-  //       nextCondition: 'menuOpen'
-  //     },
-  //     {
-  //       id: 12,
-  //       title: '完成！',
-  //       instruction: '恭喜！您已成功新增一隻您的寵物！',
-  //       targetElement: null,
-  //       highlight: {
-  //         type: 'none',
-  //         position: 'center'
-  //       },
-  //       action: 'complete'
-  //     }
-  //   ]
-  // },
+        },
+        action: 'click',
+        nextCondition: 'menuOpen'
+      },
+      {
+        id: 7,
+        title: '步驟 7：填入寵物年齡',
+        instruction: '',
+        targetElement: {
+          component: 'AddPetPage',
+          selector: '[class*="phaseTwo"] input[name="age"]:not([disabled])',
+          className: 'formInput',
+          fallbackSelector: '[class*="formFields"] input[name="age"]:not([disabled])'
+        },
+        highlight: {
+          type: 'rectangle',
+          position: 'form'
+        },
+        action: 'click',
+        nextCondition: 'menuOpen'
+      },
+      {
+        id: 8,
+        title: '步驟 8：填入寵物體重',
+        instruction: '',
+        targetElement: {
+          component: 'AddPetPage',
+          selector: '[class*="phaseTwo"] input[name="weight"]:not([disabled])',
+          className: 'formInput',
+          fallbackSelector: '[class*="formFields"] input[name="weight"]:not([disabled])'
+        },
+        highlight: {
+          type: 'rectangle',
+          position: 'form'
+        },
+        action: 'click',
+        nextCondition: 'menuOpen'
+      },
+      {
+        id: 9,
+        title: '步驟 9：填入寵物身高',
+        instruction: '',
+        targetElement: {
+          component: 'AddPetPage',
+          selector: '[class*="phaseTwo"] input[name="height"]:not([disabled])',
+          className: 'formInput',
+          fallbackSelector: '[class*="formFields"] input[name="height"]:not([disabled])'
+        },
+        highlight: {
+          type: 'rectangle',
+          position: 'form'
+        },
+        action: 'click',
+        nextCondition: 'menuOpen'
+      },
+      {
+        id: 10,
+        title: '步驟 10：填入寵物介紹',
+        instruction: '',
+        targetElement: {
+          component: 'AddPetPage',
+          selector: '[class*="phaseTwo"] textarea[name="description"]:not([disabled])',
+          className: 'formTextarea',
+          fallbackSelector: '[class*="descriptionSection"] textarea[name="description"]:not([disabled])'
+        },
+        highlight: {
+          type: 'rectangle',
+          position: 'form'
+        },
+        action: 'click',
+        nextCondition: 'menuOpen'
+      },
+      {
+        id: 11,
+        title: '步驟 11：完成填寫寵物資料',
+        instruction: '按下「完成」按鈕',
+        targetElement: {
+          component: 'AddPetPage',
+          selector: '[class*="actionButtons"] button[class*="submitButton"]:not([disabled])',
+          className: 'submitButton',
+          fallbackSelector: '[class*="actionButtons"] button:last-of-type:not([disabled])'
+        },
+        highlight: {
+          type: 'rectangle',
+          position: 'button'
+        },
+        action: 'click',
+        nextCondition: 'menuOpen'
+      },
+      {
+        id: 12,
+        title: '完成！',
+        instruction: '恭喜！您已成功新增一隻您的寵物！',
+        targetElement: null,
+        highlight: {
+          type: 'none',
+          position: 'center'
+        },
+        action: 'complete'
+      }
+    ]
+  },
   
 };
 

@@ -242,7 +242,280 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
       }
     };
   }, []);
+  // 讓聊天泡泡「盡量不與 highlight 區域重疊」的通用函式
+  const calculateBubblePosition = ({
+    basePos,          // { top, left, width, placement, description }
+    highlightRect,    // { top, left, width, height }  (viewport 座標)
+    containerRect,    // root 容器的 rect (viewport 座標)
+    bubbleHeight,     // 泡泡高度
+    margin = 20,      // 與容器邊緣保留距離
+  }) => {
+    if (!highlightRect || !basePos) return basePos;
 
+    const chatRect = {
+      top: basePos.top,
+      bottom: basePos.top + bubbleHeight,
+      left: basePos.left,
+      right: basePos.left + basePos.width,
+    };
+
+    const hRect = {
+      top: highlightRect.top,
+      bottom: highlightRect.top + highlightRect.height,
+      left: highlightRect.left,
+      right: highlightRect.left + highlightRect.width,
+    };
+
+    const cTop = containerRect.top ?? 0;
+    const cBottom = cTop + (containerRect.height ?? window.innerHeight);
+
+    const isOverlap = !(
+      chatRect.right <= hRect.left ||
+      chatRect.left >= hRect.right ||
+      chatRect.bottom <= hRect.top ||
+      chatRect.top >= hRect.bottom
+    );
+
+    // 沒有重疊就直接用
+    if (!isOverlap) return basePos;
+
+    const gap = 16;
+
+    const makeResult = (top, placement) => ({
+      ...basePos,
+      top,
+      placement: placement || basePos.placement,
+      description: (basePos.description || '') + ' (已避開高亮)',
+    });
+
+    // 1️⃣ 試著放在 highlight 下方
+    const belowTop = hRect.bottom + gap;
+    if (belowTop + bubbleHeight + margin <= cBottom) {
+      return makeResult(belowTop, 'avoid-overlap-below');
+    }
+
+    // 2️⃣ 再試著放在 highlight 上方
+    const aboveTop = hRect.top - gap - bubbleHeight;
+    if (aboveTop >= cTop + margin) {
+      return makeResult(aboveTop, 'avoid-overlap-above');
+    }
+
+    // 3️⃣ 嘗試貼最上面，只要不碰到 highlight 就好
+    const topTop = cTop + margin;
+    const topBottom = topTop + bubbleHeight;
+    const topOverlaps = !(
+      topBottom <= hRect.top || topTop >= hRect.bottom
+    );
+    if (!topOverlaps) {
+      return makeResult(topTop, 'avoid-overlap-top');
+    }
+
+    // 4️⃣ 嘗試貼最下面，只要不碰到 highlight 就好
+    const bottomTop = cBottom - bubbleHeight - margin;
+    const bottomBottom = bottomTop + bubbleHeight;
+    const bottomOverlaps = !(
+      bottomBottom <= hRect.top || bottomTop >= hRect.bottom
+    );
+    if (!bottomOverlaps) {
+      return makeResult(bottomTop, 'avoid-overlap-bottom');
+    }
+
+    // 5️⃣ 如果 highlight 幾乎佔滿全螢幕，至少把泡泡盡量往上擠
+    return makeResult(cTop + margin, 'force-top-overlap-maybe');
+  };
+
+  // 計算聊天泡泡位置，根據目標元素位置智能選擇高度
+  // const calculateChatPosition = useCallback((targetRect) => {
+  //   // 取得應用程式容器的實際尺寸
+  //   const appContainer = document.getElementById('root');
+  //   const containerRect = appContainer ? appContainer.getBoundingClientRect() : null;
+
+  //   const containerWidth = containerRect ? containerRect.width : Math.min(window.innerWidth, 430);
+  //   const containerHeight = containerRect ? containerRect.height : window.innerHeight;
+  //   const containerLeft = containerRect ? containerRect.left : (window.innerWidth - containerWidth) / 2;
+  //   const containerTop = containerRect ? containerRect.top : 0;
+
+  // const margin = 20;
+  // const baseLeft = containerLeft + margin;
+  //   const chatBubbleHeight = chatBubbleHeightRef.current || 200; // 動態量測後的聊天泡泡高度
+
+  //   // 步驟 5：固定在畫面下方 35% 位置（覆蓋其他定位邏輯）
+  //   if (stepData?.id === 5) {
+  //     const topCandidate = containerHeight * 0.55; // 下方 35%
+  //     const finalTop = Math.max(
+  //       margin,
+  //       Math.min(topCandidate, containerHeight - chatBubbleHeight - margin)
+  //     );
+  //     return {
+  //       top: finalTop,
+  //       left: baseLeft,
+  //       width: containerWidth - (margin * 2),
+  //       placement: 'bottom-35-fixed',
+  //       description: '步驟5：固定在下方35%'
+  //     };
+  //   }
+
+  //   // 特殊處理：對於 fullImage 類型的高亮，根據高光區域動態定位
+  //   if (stepData?.highlight?.type === 'fullImage') {
+  //     if (highlightPosition) {
+  //       const gap = stepData?.id === 5 ? 56 : 20; // 第 5 步進一步加大間距
+  //       const highlightTop = highlightPosition.top;
+  //       const highlightBottom = highlightPosition.top + highlightPosition.height;
+  //       const highlightRatio = highlightPosition.height / containerHeight;
+
+  //       // 第 5 步：若高光占比過大或靠近容器下半部，直接固定在底部，避免遮擋
+  //       if (stepData?.id === 5 && (highlightRatio > 0.5 || highlightBottom > containerHeight * 0.55)) {
+  //         const bottomGap = Math.max(24, margin);
+  //         return {
+  //           top: Math.max(margin, containerHeight - chatBubbleHeight - bottomGap),
+  //           left: baseLeft,
+  //           width: containerWidth - (margin * 2),
+  //           placement: 'bottom-fixed-avoid-highlight',
+  //           description: '步驟5：高光占比大，固定底部'
+  //         };
+  //       }
+
+  //       // 優先放在高光區塊下方，若空間不足則改放上方
+  //       const belowTop = highlightBottom + gap;
+  //       const fitsBelow = belowTop + chatBubbleHeight + margin <= containerHeight;
+  //       if (fitsBelow) {
+  //         return {
+  //           top: belowTop,
+  //           left: baseLeft,
+  //           width: containerWidth - (margin * 2),
+  //           placement: 'below-highlight',
+  //           description: '全圖高亮 - 高光區塊下方'
+  //         };
+  //       }
+
+  //       // 放在上方（留間距），並確保不超出頂部
+  //       const aboveTop = Math.max(margin, highlightTop - gap - chatBubbleHeight);
+  //       const fitsAbove = aboveTop >= margin;
+  //       if (fitsAbove) {
+  //         return {
+  //           top: aboveTop,
+  //           left: baseLeft,
+  //           width: containerWidth - (margin * 2),
+  //           placement: 'above-highlight',
+  //           description: '全圖高亮 - 高光區塊上方'
+  //         };
+  //       }
+
+  //       // 仍然放不下，退回中央或底部固定位置
+  //       const fallbackTop = Math.min(
+  //         (containerHeight - chatBubbleHeight) / 2,
+  //         containerHeight - chatBubbleHeight - margin
+  //       );
+  //       return {
+  //         top: Math.max(margin, fallbackTop),
+  //         left: baseLeft,
+  //         width: containerWidth - (margin * 2),
+  //         placement: 'center',
+  //         description: '全圖高亮 - 空間不足（置中）'
+  //       };
+  //     }
+  //     // 若尚未取得高光位置，退回原本邏輯（置於容器下半部）
+  //     const fallbackTop = containerHeight - 250;
+  //     return {
+  //       top: Math.max(margin, Math.min(fallbackTop, containerHeight - chatBubbleHeight - margin)),
+  //       left: baseLeft,
+  //       width: containerWidth - (margin * 2),
+  //       placement: 'bottom-fixed',
+  //       description: '全圖高亮 - 尚無高光位置（備用）'
+  //     };
+  //   }
+
+  //   if (!targetRect) {
+  //     // 沒有目標元素時（如完成步驟），放在容器中央
+  //     return {
+  //       top: (containerHeight - chatBubbleHeight) / 2,
+  //       left: baseLeft,
+  //       width: containerWidth - (margin * 2),
+  //       placement: 'center-default',
+  //       description: '沒有目標元素 - 中央位置'
+  //     };
+  //   }
+
+  //   // 計算相對於容器的位置
+  //   const targetCenterY = targetRect.top + targetRect.height / 2;
+  //   const targetBottom = targetRect.bottom;
+  //   const targetTop = targetRect.top;
+
+  //   // 計算相對於容器的相對位置
+  //   const relativeTargetTop = targetTop - containerTop;
+  //   const relativeTargetBottom = targetBottom - containerTop;
+  //   const relativeTargetCenterY = targetCenterY - containerTop;
+
+  //   // 定義不同的位置選項（按優先順序）
+  //   const positions = [
+  //     // 1. 在目標元素下方（如果目標在容器上半部且有足夠空間）
+  //     {
+  //       condition: relativeTargetBottom < containerHeight * 0.5 &&
+  //                  (containerHeight - relativeTargetBottom) > (chatBubbleHeight + 60),
+  //       top: relativeTargetBottom + 30,
+  //       placement: 'below-target',
+  //       description: '目標元素下方'
+  //     },
+  //     // 2. 在目標元素上方（如果目標在容器下半部且有足夠空間）
+  //     {
+  //       condition: relativeTargetTop > containerHeight * 0.5 &&
+  //                  relativeTargetTop > (chatBubbleHeight + 60),
+  //       top: relativeTargetTop - chatBubbleHeight - 30,
+  //       placement: 'above-target',
+  //       description: '目標元素上方'
+  //     },
+  //     // 3. 容器上方（如果目標在容器下方）
+  //     {
+  //       condition: relativeTargetTop > containerHeight * 0.75,
+  //       top: 50,
+  //       placement: 'top-fixed',
+  //       description: '容器上方'
+  //     },
+  //     // 4. 容器中央（如果目標在容器中央區域）
+  //     {
+  //       condition: relativeTargetCenterY > containerHeight * 0.25 &&
+  //                  relativeTargetCenterY < containerHeight * 0.75,
+  //       top: (containerHeight - chatBubbleHeight) / 2,
+  //       placement: 'center',
+  //       description: '容器中央'
+  //     },
+  //     // 5. 容器下方（預設位置）
+  //     {
+  //       condition: true,
+  //       top: containerHeight - 250,
+  //       placement: 'bottom-fixed',
+  //       description: '容器下方'
+  //     }
+  //   ];
+
+  //   // 找到第一個符合條件的位置
+  //   for (const pos of positions) {
+  //     if (pos.condition) {
+  //       // 確保不會超出容器範圍（相對於 overlay）
+  //       const finalTop = Math.max(
+  //         margin,
+  //         Math.min(pos.top, containerHeight - chatBubbleHeight - margin)
+  //       );
+
+  //       return {
+  //         top: finalTop,
+  //         left: baseLeft,
+  //         width: containerWidth - (margin * 2),
+  //         placement: pos.placement,
+  //         description: pos.description
+  //       };
+  //     }
+  //   }
+
+  //   // 備用方案
+  //   return {
+  //     top: containerHeight - 250,
+  //     left: baseLeft,
+  //     width: containerWidth - (margin * 2),
+  //     placement: 'bottom-fixed',
+  //     description: '容器下方（備用）'
+  //   };
+  // }, [stepData, highlightPosition]);
   // 計算聊天泡泡位置，根據目標元素位置智能選擇高度
   const calculateChatPosition = useCallback((targetRect) => {
     // 取得應用程式容器的實際尺寸
@@ -254,30 +527,52 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
     const containerLeft = containerRect ? containerRect.left : (window.innerWidth - containerWidth) / 2;
     const containerTop = containerRect ? containerRect.top : 0;
 
-  const margin = 20;
-  const baseLeft = containerLeft + margin;
+    const margin = 20;
+    const baseLeft = containerLeft + margin;
     const chatBubbleHeight = chatBubbleHeightRef.current || 200; // 動態量測後的聊天泡泡高度
 
-    // 步驟 5：固定在畫面下方 35% 位置（覆蓋其他定位邏輯）
+    // 小工具：在計算完「原始位置」後，再套用避免與 highlight 重疊的邏輯
+    const applyAvoidOverlap = (basePos, descriptionExtra) => {
+      if (!highlightPosition) return basePos;
+
+      return calculateBubblePosition({
+        basePos: {
+          ...basePos,
+          description: basePos.description || descriptionExtra || '',
+        },
+        highlightRect: highlightPosition,
+        containerRect: {
+          top: containerTop,
+          left: containerLeft,
+          width: containerWidth,
+          height: containerHeight,
+        },
+        bubbleHeight: chatBubbleHeight,
+        margin,
+      });
+    };
+
+    // 🔹 特例：步驟 5 固定在畫面下方 35% 位置（但之後仍會避免與 highlight 重疊）
     if (stepData?.id === 5) {
       const topCandidate = containerHeight * 0.55; // 下方 35%
       const finalTop = Math.max(
         margin,
         Math.min(topCandidate, containerHeight - chatBubbleHeight - margin)
       );
-      return {
+
+      return applyAvoidOverlap({
         top: finalTop,
         left: baseLeft,
         width: containerWidth - (margin * 2),
         placement: 'bottom-35-fixed',
-        description: '步驟5：固定在下方35%'
-      };
+        description: '步驟5：固定在下方35%',
+      }, '步驟5：固定在下方35%');
     }
 
-    // 特殊處理：對於 fullImage 類型的高亮，根據高光區域動態定位
+    // 🔹 fullImage 類型：優先跟著高亮區域走
     if (stepData?.highlight?.type === 'fullImage') {
       if (highlightPosition) {
-        const gap = stepData?.id === 5 ? 56 : 20; // 第 5 步進一步加大間距
+        const gap = stepData?.id === 5 ? 56 : 20;
         const highlightTop = highlightPosition.top;
         const highlightBottom = highlightPosition.top + highlightPosition.height;
         const highlightRatio = highlightPosition.height / containerHeight;
@@ -285,39 +580,39 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
         // 第 5 步：若高光占比過大或靠近容器下半部，直接固定在底部，避免遮擋
         if (stepData?.id === 5 && (highlightRatio > 0.5 || highlightBottom > containerHeight * 0.55)) {
           const bottomGap = Math.max(24, margin);
-          return {
+          return applyAvoidOverlap({
             top: Math.max(margin, containerHeight - chatBubbleHeight - bottomGap),
             left: baseLeft,
             width: containerWidth - (margin * 2),
             placement: 'bottom-fixed-avoid-highlight',
-            description: '步驟5：高光占比大，固定底部'
-          };
+            description: '步驟5：高光占比大，固定底部',
+          }, '全圖高亮 - 固定底部');
         }
 
         // 優先放在高光區塊下方，若空間不足則改放上方
         const belowTop = highlightBottom + gap;
         const fitsBelow = belowTop + chatBubbleHeight + margin <= containerHeight;
         if (fitsBelow) {
-          return {
+          return applyAvoidOverlap({
             top: belowTop,
             left: baseLeft,
             width: containerWidth - (margin * 2),
             placement: 'below-highlight',
-            description: '全圖高亮 - 高光區塊下方'
-          };
+            description: '全圖高亮 - 高光區塊下方',
+          }, '全圖高亮 - 高光區塊下方');
         }
 
         // 放在上方（留間距），並確保不超出頂部
         const aboveTop = Math.max(margin, highlightTop - gap - chatBubbleHeight);
         const fitsAbove = aboveTop >= margin;
         if (fitsAbove) {
-          return {
+          return applyAvoidOverlap({
             top: aboveTop,
             left: baseLeft,
             width: containerWidth - (margin * 2),
             placement: 'above-highlight',
-            description: '全圖高亮 - 高光區塊上方'
-          };
+            description: '全圖高亮 - 高光區塊上方',
+          }, '全圖高亮 - 高光區塊上方');
         }
 
         // 仍然放不下，退回中央或底部固定位置
@@ -325,34 +620,35 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
           (containerHeight - chatBubbleHeight) / 2,
           containerHeight - chatBubbleHeight - margin
         );
-        return {
+        return applyAvoidOverlap({
           top: Math.max(margin, fallbackTop),
           left: baseLeft,
           width: containerWidth - (margin * 2),
           placement: 'center',
-          description: '全圖高亮 - 空間不足（置中）'
-        };
+          description: '全圖高亮 - 空間不足（置中）',
+        }, '全圖高亮 - 空間不足（置中）');
       }
+
       // 若尚未取得高光位置，退回原本邏輯（置於容器下半部）
       const fallbackTop = containerHeight - 250;
-      return {
+      return applyAvoidOverlap({
         top: Math.max(margin, Math.min(fallbackTop, containerHeight - chatBubbleHeight - margin)),
         left: baseLeft,
         width: containerWidth - (margin * 2),
         placement: 'bottom-fixed',
-        description: '全圖高亮 - 尚無高光位置（備用）'
-      };
+        description: '全圖高亮 - 尚無高光位置（備用）',
+      }, '全圖高亮 - 尚無高光位置（備用）');
     }
 
+    // 🔹 沒有目標元素（例如最後一步），泡泡放中間
     if (!targetRect) {
-      // 沒有目標元素時（如完成步驟），放在容器中央
-      return {
+      return applyAvoidOverlap({
         top: (containerHeight - chatBubbleHeight) / 2,
         left: baseLeft,
         width: containerWidth - (margin * 2),
         placement: 'center-default',
-        description: '沒有目標元素 - 中央位置'
-      };
+        description: '沒有目標元素 - 中央位置',
+      }, '沒有目標元素 - 中央位置');
     }
 
     // 計算相對於容器的位置
@@ -360,81 +656,83 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
     const targetBottom = targetRect.bottom;
     const targetTop = targetRect.top;
 
-    // 計算相對於容器的相對位置
     const relativeTargetTop = targetTop - containerTop;
     const relativeTargetBottom = targetBottom - containerTop;
     const relativeTargetCenterY = targetCenterY - containerTop;
 
-    // 定義不同的位置選項（按優先順序）
+    // 🔹 不同的預設位置策略
     const positions = [
       // 1. 在目標元素下方（如果目標在容器上半部且有足夠空間）
       {
-        condition: relativeTargetBottom < containerHeight * 0.5 &&
-                   (containerHeight - relativeTargetBottom) > (chatBubbleHeight + 60),
+        condition:
+          relativeTargetBottom < containerHeight * 0.5 &&
+          (containerHeight - relativeTargetBottom) > (chatBubbleHeight + 60),
         top: relativeTargetBottom + 30,
         placement: 'below-target',
-        description: '目標元素下方'
+        description: '目標元素下方',
       },
       // 2. 在目標元素上方（如果目標在容器下半部且有足夠空間）
       {
-        condition: relativeTargetTop > containerHeight * 0.5 &&
-                   relativeTargetTop > (chatBubbleHeight + 60),
+        condition:
+          relativeTargetTop > containerHeight * 0.5 &&
+          relativeTargetTop > (chatBubbleHeight + 60),
         top: relativeTargetTop - chatBubbleHeight - 30,
         placement: 'above-target',
-        description: '目標元素上方'
+        description: '目標元素上方',
       },
       // 3. 容器上方（如果目標在容器下方）
       {
         condition: relativeTargetTop > containerHeight * 0.75,
         top: 50,
         placement: 'top-fixed',
-        description: '容器上方'
+        description: '容器上方',
       },
       // 4. 容器中央（如果目標在容器中央區域）
       {
-        condition: relativeTargetCenterY > containerHeight * 0.25 &&
-                   relativeTargetCenterY < containerHeight * 0.75,
+        condition:
+          relativeTargetCenterY > containerHeight * 0.25 &&
+          relativeTargetCenterY < containerHeight * 0.75,
         top: (containerHeight - chatBubbleHeight) / 2,
         placement: 'center',
-        description: '容器中央'
+        description: '容器中央',
       },
       // 5. 容器下方（預設位置）
       {
         condition: true,
         top: containerHeight - 250,
         placement: 'bottom-fixed',
-        description: '容器下方'
-      }
+        description: '容器下方',
+      },
     ];
 
     // 找到第一個符合條件的位置
     for (const pos of positions) {
       if (pos.condition) {
-        // 確保不會超出容器範圍（相對於 overlay）
         const finalTop = Math.max(
           margin,
           Math.min(pos.top, containerHeight - chatBubbleHeight - margin)
         );
 
-        return {
+        return applyAvoidOverlap({
           top: finalTop,
           left: baseLeft,
           width: containerWidth - (margin * 2),
           placement: pos.placement,
-          description: pos.description
-        };
+          description: pos.description,
+        }, pos.description);
       }
     }
 
-    // 備用方案
-    return {
+    // 最後的備用方案
+    return applyAvoidOverlap({
       top: containerHeight - 250,
       left: baseLeft,
       width: containerWidth - (margin * 2),
       placement: 'bottom-fixed',
-      description: '容器下方（備用）'
-    };
+      description: '容器下方（備用）',
+    }, '容器下方（備用）');
   }, [stepData, highlightPosition]);
+
 
   // 量測聊天泡泡實際高度並在高度變更時重新計算定位
   useEffect(() => {
@@ -483,7 +781,7 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
     const { className, selector } = stepData.targetElement;
     console.log('尋找目標元素:', { className, selector });
     
-    if (stepData?.id === 14) {
+    if (stepData?.id === 13) {
         setTimeout(() => {
             const block = document.querySelector('[data-step="upload-nutrition"]');
 
@@ -683,7 +981,7 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
         targetElementRef.current = cachedEl;
 
         // 影像流程：在步驟 3 或 4 建立查找範圍（使用貼文建立頁面的主要容器）
-        if (stepData?.id === 3 || stepData?.id === 4 || stepData?.id === 13 || stepData?.id === 14) {
+        if (stepData?.id === 3 || stepData?.id === 4 || stepData?.id === 13) {
           const scopeCandidate = cachedEl.closest(
             '[class*="CreatePost"], [class*="createPost"], [class*="createFeed"], [class*="postContainer"], main, form'
           );

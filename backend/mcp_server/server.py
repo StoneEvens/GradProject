@@ -737,6 +737,7 @@ def create_mcp_server() -> FastMCP:
     @mcp.tool(
         name="resolve_entity_context",
         description="""
+        This tool should only be used after checking the required fields checking the operation list.
         Resolve dynamic path parameters by finding entities based on natural language descriptions.
 
         This is a UNIVERSAL tool for handling dynamic paths that require IDs or query parameters.

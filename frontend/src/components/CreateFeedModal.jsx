@@ -600,7 +600,6 @@ const CreateFeedModal = ({ isOpen, onClose, onConfirm, defaultPetType = 'cat' })
               <button
                 className={styles.confirmButton}
                 onClick={handleNext}
-                disabled={loading}
               >
                 {loading ? 'OCR 辨識中...' : '下一步'}
               </button>
