@@ -407,28 +407,45 @@ def create_mcp_server() -> FastMCP:
     ) -> str:
         import uuid
         from datetime import datetime, timezone, timedelta
+        import re
 
-        # 路徑對應友善名稱
-        path_names = {
-            "/social": "社群頁面",
-            "/pets": "寵物列表",
-            "/profile": "個人檔案",
-            "/calculator": "寵物計算器",
-            "/health": "健康記錄",
-            "/schedule": "餵食排程",
-        }
+        # 從 navigation_paths.json 讀取路徑資訊
+        current_dir = os.path.dirname(__file__)
+        json_path = os.path.join(current_dir, 'navigation_paths.json')
 
-        # 路徑對應友善名稱
-        friendly_name = path_names.get(path)
+        friendly_name = None
+
+        try:
+            with open(json_path, 'r', encoding='utf-8') as f:
+                paths_data = json.load(f)
+
+            # 先嘗試匹配靜態路徑（available_paths）
+            for path_info in paths_data.get('available_paths', []):
+                if path_info['path'] == path:
+                    friendly_name = path_info['name']
+                    break
+
+            # 如果沒找到，嘗試匹配動態路徑（dynamic_paths）
+            if not friendly_name:
+                for path_info in paths_data.get('dynamic_paths', []):
+                    pattern = path_info['pattern']
+                    # 將路徑模式轉換為正則表達式
+                    # 例如 /pet/{petId}/edit -> ^/pet/[^/?]+/edit$
+                    # /social?q={query} -> ^/social\?q=.+$
+                    regex_pattern = re.escape(pattern)
+                    # 替換轉義後的佔位符為正則模式
+                    regex_pattern = re.sub(r'\\\{[^}]+\\\}', r'[^/?]+', regex_pattern)
+                    regex_pattern = f"^{regex_pattern}$"
+
+                    if re.match(regex_pattern, path):
+                        friendly_name = path_info['name']
+                        break
+        except Exception as e:
+            logger.warning(f"Failed to load navigation paths: {e}")
+
+        # 如果還是沒找到，使用路徑本身作為顯示名稱
         if not friendly_name:
-            if path.startswith("/pets/"):
-                friendly_name = "寵物詳情頁面"
-            elif path.startswith("/user/"):
-                friendly_name = "用戶檔案頁面"
-            elif path.startswith("/disease-archive/"):
-                friendly_name = "疾病檔案頁面"
-            else:
-                friendly_name = path
+            friendly_name = path
 
         operation_id = f"nav_{uuid.uuid4().hex[:12]}"
         expires_at = (datetime.now(timezone.utc) + timedelta(minutes=5)).isoformat()
@@ -452,7 +469,7 @@ def create_mcp_server() -> FastMCP:
             "requires_confirmation": True,
             "expires_at": expires_at
         }
-        
+
         return json.dumps(result, ensure_ascii=False, indent=2)
     
     @mcp.tool(
@@ -588,7 +605,7 @@ def create_mcp_server() -> FastMCP:
         description="""
         Resolve dynamic path parameters by finding entities based on natural language descriptions.
 
-        This is a UNIVERSAL tool for handling dynamic paths that require IDs.
+        This is a UNIVERSAL tool for handling dynamic paths that require IDs or query parameters.
 
         Supported entity types:
         - social_post: User's social posts (for /post/{id}/edit, etc.)
@@ -598,6 +615,7 @@ def create_mcp_server() -> FastMCP:
         - health_report: Health reports (for /pet/{petId}/health-report/{id})
         - disease_archive: Disease archives (for /pet/{petId}/disease-archive/{id})
         - abnormal_post: Abnormal records (for /pet/{petId}/abnormal-post/{id})
+        - search_query: Generate search paths (for /social?q={query} or /feeds/search?q={query})
 
         Common conditions patterns:
         - time_range: "today", "yesterday", "last_week", "last_month", "last_sunday"
@@ -607,11 +625,16 @@ def create_mcp_server() -> FastMCP:
         - newest: true (get most recent)
         - oldest: true (get earliest)
 
+        For search_query entity type:
+        - search_type: "social" or "feed" (required)
+        - keywords: ["keyword1", "keyword2"] (required)
+        - description: "optional description for user-friendly message"
+
         Returns matching entities with their IDs and resolved paths.
         """
     )
     async def resolve_entity_context(
-        entity_type: Literal["social_post", "feed", "pet", "user", "health_report", "disease_archive", "abnormal_post"],
+        entity_type: Literal["social_post", "feed", "pet", "user", "health_report", "disease_archive", "abnormal_post", "search_query"],
         user_id: int,
         conditions: Dict,
         limit: int = 5

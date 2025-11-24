@@ -29,6 +29,7 @@ class EntityResolver:
         "health_report",    # 健康報告
         "disease_archive",  # 疾病檔案
         "abnormal_post",    # 異常記錄
+        "search_query",     # 搜尋查詢
     ]
 
     @staticmethod
@@ -68,6 +69,7 @@ class EntityResolver:
             "health_report": EntityResolver._resolve_health_report,
             "disease_archive": EntityResolver._resolve_disease_archive,
             "abnormal_post": EntityResolver._resolve_abnormal_post,
+            "search_query": EntityResolver._resolve_search_query,
         }
 
         resolver_func = resolver_map[entity_type]
@@ -538,6 +540,99 @@ class EntityResolver:
                 return {
                     "success": False,
                     "error": f"查詢異常記錄失敗: {str(e)}"
+                }
+
+        return await query()
+
+    # ==================== 搜尋查詢解析 ====================
+
+    @staticmethod
+    async def _resolve_search_query(user_id: int, conditions: Dict, limit: int) -> Dict:
+        """
+        解析搜尋查詢，生成搜尋路徑
+
+        支援條件：
+        - search_type: "social", "feed"（必需）
+        - keywords: ["關鍵字1", "關鍵字2"]（必需）
+        - description: "自然語言描述"（可選，用於生成更友善的提示）
+
+        範例：
+        conditions = {
+            "search_type": "social",
+            "keywords": ["貓咪", "生病"]
+        }
+        → 返回 /social?q=貓咪 生病
+
+        conditions = {
+            "search_type": "feed",
+            "keywords": ["皇家", "狗"]
+        }
+        → 返回 /feeds/search?q=皇家 狗
+        """
+
+        @sync_to_async
+        def query():
+            try:
+                # 獲取搜尋類型
+                search_type = conditions.get("search_type")
+                if not search_type:
+                    return {
+                        "success": False,
+                        "error": "必須指定 search_type (social 或 feed)"
+                    }
+
+                # 獲取關鍵字
+                keywords = conditions.get("keywords", [])
+                if not keywords:
+                    return {
+                        "success": False,
+                        "error": "必須提供至少一個關鍵字"
+                    }
+
+                # 將關鍵字組合成查詢字符串
+                query_string = " ".join(keywords)
+
+                # 根據搜尋類型生成路徑
+                if search_type == "social":
+                    resolved_path = f"/social?q={query_string}"
+                    friendly_name = "社群搜尋"
+                    search_scope = "論壇、標籤、用戶、貼文"
+                elif search_type == "feed":
+                    resolved_path = f"/feeds/search?q={query_string}"
+                    friendly_name = "飼料搜尋"
+                    search_scope = "飼料產品"
+                else:
+                    return {
+                        "success": False,
+                        "error": f"不支援的搜尋類型: {search_type}。支援的類型：social, feed"
+                    }
+
+                # 獲取描述（如果有）
+                description = conditions.get("description", f"搜尋{search_scope}：{query_string}")
+
+                result = {
+                    "search_type": search_type,
+                    "query": query_string,
+                    "keywords": keywords,
+                    "search_scope": search_scope,
+                    "description": description,
+                    "path_template": f"/social?q={{query}}" if search_type == "social" else "/feeds/search?q={query}",
+                    "resolved_path": resolved_path,
+                    "friendly_name": friendly_name
+                }
+
+                return {
+                    "success": True,
+                    "entity_type": "search_query",
+                    "count": 1,
+                    "results": [result],
+                    "message": f"已生成{friendly_name}查詢：{query_string}"
+                }
+
+            except Exception as e:
+                return {
+                    "success": False,
+                    "error": f"解析搜尋查詢失敗: {str(e)}"
                 }
 
         return await query()

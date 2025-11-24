@@ -13,12 +13,6 @@
       "description": "查看和發布社群貼文"
     },
     {
-      "path": "/social/search",
-      "name": "社群搜尋",
-      "keywords": ["搜尋社群", "找貼文", "社群搜尋"],
-      "description": "搜尋社群貼文和用戶"
-    },
-    {
       "path": "/pet",
       "name": "寵物頁面",
       "keywords": ["寵物", "我的寵物", "寵物列表", "寵物資訊"],
@@ -79,18 +73,6 @@
       "description": "瀏覽所有可用飼料"
     },
     {
-      "path": "/feeds/search",
-      "name": "飼料搜尋",
-      "keywords": ["搜尋飼料", "找飼料", "飼料搜尋"],
-      "description": "搜尋特定飼料"
-    },
-    {
-      "path": "/interactive-city",
-      "name": "互動城市",
-      "keywords": ["互動城市", "城市", "地圖", "探索"],
-      "description": "探索互動城市地圖"
-    },
-    {
       "path": "/create-post",
       "name": "創建貼文",
       "keywords": ["發文", "創建貼文", "新增貼文", "發布貼文", "寫文章"],
@@ -103,34 +85,16 @@
       "description": "記錄寵物的異常狀況"
     },
     {
-      "path": "/search-posts",
-      "name": "搜尋貼文",
-      "keywords": ["搜尋", "找貼文", "搜尋貼文"],
-      "description": "搜尋社群貼文"
-    },
-    {
       "path": "/liked-posts",
       "name": "按讚的貼文",
       "keywords": ["按讚", "喜歡", "點讚", "liked"],
       "description": "查看按讚的貼文"
     },
     {
-      "path": "/liked-posts-list",
-      "name": "按讚貼文列表",
-      "keywords": ["按讚列表", "點讚列表"],
-      "description": "查看按讚貼文的完整列表"
-    },
-    {
       "path": "/saved-posts",
       "name": "收藏的貼文",
       "keywords": ["收藏", "儲存", "saved", "書籤"],
       "description": "查看收藏的貼文"
-    },
-    {
-      "path": "/saved-posts-list",
-      "name": "收藏貼文列表",
-      "keywords": ["收藏列表", "儲存列表"],
-      "description": "查看收藏貼文的完整列表"
     },
     {
       "path": "/liked-archives",
@@ -185,13 +149,6 @@
       "example": "/pet/123/posts"
     },
     {
-      "pattern": "/pet/{petId}/posts-list",
-      "name": "寵物貼文列表",
-      "keywords": ["寵物貼文列表"],
-      "description": "查看寵物相關貼文的完整列表",
-      "example": "/pet/123/posts-list"
-    },
-    {
       "pattern": "/pet/{petId}/health-reports",
       "name": "健康報告列表",
       "keywords": ["健康報告", "體檢", "醫療記錄", "健康記錄"],
@@ -233,20 +190,6 @@
       "keywords": ["建立疾病檔案", "新增病歷"],
       "description": "建立新的疾病檔案",
       "example": "/pet/123/disease-archive/create"
-    },
-    {
-      "pattern": "/pet/{petId}/disease-archive/edit-content",
-      "name": "編輯疾病檔案內容",
-      "keywords": ["編輯疾病檔案", "修改病歷"],
-      "description": "編輯疾病檔案的內容",
-      "example": "/pet/123/disease-archive/edit-content"
-    },
-    {
-      "pattern": "/pet/{petId}/disease-archive/preview",
-      "name": "預覽疾病檔案",
-      "keywords": ["預覽", "疾病檔案預覽"],
-      "description": "預覽疾病檔案",
-      "example": "/pet/123/disease-archive/preview"
     },
     {
       "pattern": "/pet/{petId}/disease-archive/{archiveId}",
@@ -305,11 +248,20 @@
       "example": "/feeds/789"
     },
     {
-      "pattern": "/checkpoint/{id}",
-      "name": "站點詳情",
-      "keywords": ["站點", "地點", "checkpoint"],
-      "description": "查看互動城市中的站點詳情",
-      "example": "/checkpoint/101"
+      "pattern": "/social?q={query}",
+      "name": "社群搜尋",
+      "keywords": ["搜尋社群", "找貼文", "社群搜尋", "搜尋論壇", "搜尋標籤", "搜尋用戶", "找用戶"],
+      "description": "綜合搜尋論壇、標籤、用戶、貼文",
+      "example": "/social?q=寵物飼養",
+      "note": "可同時搜尋論壇、標籤、用戶和貼文內容"
+    },
+    {
+      "pattern": "/feeds/search?q={query}",
+      "name": "飼料搜尋",
+      "keywords": ["搜尋飼料", "找飼料", "飼料搜尋", "查詢飼料"],
+      "description": "搜尋特定飼料",
+      "example": "/feeds/search?q=皇家",
+      "note": "根據關鍵字搜尋飼料產品"
     }
   ]
 }
