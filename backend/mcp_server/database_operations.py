@@ -2131,6 +2131,10 @@ def _create_social_post(data: Dict) -> Dict:
                 "id": user.id,
                 "username": user.username
             }
+        },
+        "navigation": {
+            "path": "/user-posts",
+            "destination": "我的貼文"
         }
     }
 
