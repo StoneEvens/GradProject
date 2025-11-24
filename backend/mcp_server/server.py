@@ -496,7 +496,7 @@ def create_mcp_server() -> FastMCP:
             "Note: operation_data MUST be a JSON string created with json.dumps().\n"
             "Do NOT use {operation_id, type, params} format - frontend will convert automatically.\n"
             "Without this operation, frontend will NOT execute OCR!\n\n"
-            "?�Complete Workflow??\n"
+            "Complete Workflow??\n"
             "1. Check Context: User must have hasImages=true and imageCount=2 (package + nutrition label)\n"
             "2. Call this tool + ADD operation to operations array (see above)\n"
             "3. Tell user: '收到圖片！正在辨識飼料資訊，請稍候...'\n"
@@ -737,7 +737,6 @@ def create_mcp_server() -> FastMCP:
     @mcp.tool(
         name="resolve_entity_context",
         description="""
-        This tool should only be used after checking the required fields checking the operation list.
         Resolve dynamic path parameters by finding entities based on natural language descriptions.
 
         This is a UNIVERSAL tool for handling dynamic paths that require IDs or query parameters.
