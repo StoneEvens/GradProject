@@ -367,14 +367,9 @@ const App = () => {
           element={isUserAuthenticated ? <SocialPage /> : <Navigate to="/" />} 
         />
         {/* 社群搜尋結果頁面：未登入導向HomePage */}
-        <Route
-          path="/social/search"
-          element={isUserAuthenticated ? <SocialPage /> : <Navigate to="/" />}
-        />
-        {/* 個別貼文頁面：未登入導向HomePage */}
-        <Route
-          path="/social/post/:postId"
-          element={isUserAuthenticated ? <SocialPage /> : <Navigate to="/" />}
+        <Route 
+          path="/social/search" 
+          element={isUserAuthenticated ? <SocialPage /> : <Navigate to="/" />} 
         />
         {/* 搜尋貼文頁面：未登入導向HomePage */}
         <Route 
