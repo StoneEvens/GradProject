@@ -981,7 +981,7 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
         targetElementRef.current = cachedEl;
 
         // 影像流程：在步驟 3 或 4 建立查找範圍（使用貼文建立頁面的主要容器）
-        if (stepData?.id === 3 || stepData?.id === 4 || stepData?.id === 13 || stepData?.id === 15) {
+        if (stepData?.id === 3 || stepData?.id === 4 || stepData?.id === 13 || stepData?.id === 16) {
           const scopeCandidate = cachedEl.closest(
             '[class*="CreatePost"], [class*="createPost"], [class*="createFeed"], [class*="postContainer"], main, form'
           );

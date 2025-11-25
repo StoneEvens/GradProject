@@ -502,7 +502,7 @@
 /* 確保目標元素可點擊 */
 :global(.tutorial-target) {
   position: relative !important;
-  z-index: 10010 !important;
+  z-index: 10000020 !important;
   pointer-events: auto !important;
   user-select: auto !important;
   touch-action: auto !important;

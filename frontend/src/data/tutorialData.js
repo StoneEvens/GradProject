@@ -450,8 +450,8 @@ const tutorialData = {
       },
       {
         id: 14,
-        title: '步驟 14：選擇您的位置',
-        instruction: '在位置清單中，選擇您發文的地點',
+        title: '步驟 14：打開位置清單',
+        instruction: '點選按鈕以選擇貼文位置',
         targetElement: {
           component: 'CreatePostPage',
           selector: 'button[class*="locationButton"], div[class*="userDetails"] > button, div[class*="userInfo"] button',
@@ -462,12 +462,27 @@ const tutorialData = {
           type: 'rectangle',
           position: 'form'
         },
-        // action: 'none',
-        nextCondition: 'manualNext'
+        action: 'click'
       },
       {
         id: 15,
-        title: '步驟 15：發布貼文',
+        title: '步驟 15：選擇您的位置',
+        instruction: '在位置清單中，選擇您發文的地點',
+        targetElement: {
+          component: 'CreatePostPage',
+          selector: 'div[class*="locationModal"]',
+          className: 'locationModal',
+          fallbackSelector: 'div[class*="locationList"]'
+        },
+        highlight: {
+          type: 'rectangle',
+          position: 'form'
+        },
+        action: 'click'
+      },
+      {
+        id: 16,
+        title: '步驟 16：發布貼文',
         instruction: '點擊「發布」按鈕，發布您的貼文',
         targetElement: {
           component: 'PostPreviewPage',
@@ -482,7 +497,7 @@ const tutorialData = {
         action: 'click'
       },
       {
-        id: 16,
+        id: 17,
         title: '完成！',
         instruction: '恭喜！您已成功發布一則貼文。貼文將會顯示在您的主頁。',
         targetElement: null,
