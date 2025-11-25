@@ -460,26 +460,125 @@ class EntityResolver:
 
     @staticmethod
     async def _resolve_disease_archive(user_id: int, conditions: Dict, limit: int) -> Dict:
-        """解析疾病檔案查詢"""
+        """解析疾病檔案查詢
+        
+        支援條件：
+        - pet_id: 寵物 ID（整數）
+        - pet_name: 寵物名稱（字串，會先查詢寵物）
+        - time_range: "last_week", "last_month", "today", "yesterday"
+        - keywords: ["關鍵字1", "關鍵字2"]（搜尋標題和內容）
+        - newest: True（最新的）
+        - oldest: True（最早的）
+        """
 
         @sync_to_async
         def query():
             try:
+                # 獲取用戶的所有寵物
                 user_pets = Pet.objects.filter(owner_id=user_id).values_list('id', flat=True)
-                queryset = DiseaseArchiveContent.objects.filter(pet_id__in=user_pets)
+                if not user_pets:
+                    return {
+                        "success": False,
+                        "error": "您還沒有註冊任何寵物",
+                        "message": "請先新增寵物資料"
+                    }
+                
+                # 基礎查詢 - 使用 select_related 避免 N+1 查詢
+                queryset = DiseaseArchiveContent.objects.filter(
+                    pet_id__in=user_pets
+                ).select_related('pet', 'postFrame')
 
+                # 如果提供了寵物名稱，先解析成 pet_id
+                if "pet_name" in conditions:
+                    pet_name = conditions["pet_name"]
+                    matching_pet = Pet.objects.filter(
+                        owner_id=user_id, 
+                        pet_name__icontains=pet_name
+                    ).first()
+                    if matching_pet:
+                        queryset = queryset.filter(pet_id=matching_pet.id)
+                    else:
+                        return {
+                            "success": False,
+                            "error": f"找不到名為 '{pet_name}' 的寵物",
+                            "message": "請確認寵物名稱是否正確"
+                        }
+
+                # 特定寵物 ID
                 if "pet_id" in conditions:
-                    queryset = queryset.filter(pet_id=conditions["pet_id"])
+                    pet_id = conditions["pet_id"]
+                    # 驗證寵物是否屬於該用戶
+                    if pet_id not in user_pets:
+                        return {
+                            "success": False,
+                            "error": f"寵物 ID {pet_id} 不存在或不屬於您",
+                            "message": "請確認寵物 ID 是否正確"
+                        }
+                    queryset = queryset.filter(pet_id=pet_id)
 
-                queryset = queryset.order_by("-created_at")
+                # 時間範圍篩選（使用 postFrame__created_at）
+                if "time_range" in conditions:
+                    time_range = conditions["time_range"]
+                    now = timezone.now()
+
+                    if time_range == "today":
+                        start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+                        queryset = queryset.filter(postFrame__created_at__gte=start)
+                    elif time_range == "yesterday":
+                        start = (now - timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+                        end = now.replace(hour=0, minute=0, second=0, microsecond=0)
+                        queryset = queryset.filter(postFrame__created_at__gte=start, postFrame__created_at__lt=end)
+                    elif time_range == "last_week":
+                        start = now - timedelta(days=7)
+                        queryset = queryset.filter(postFrame__created_at__gte=start)
+                    elif time_range == "last_month":
+                        start = now - timedelta(days=30)
+                        queryset = queryset.filter(postFrame__created_at__gte=start)
+
+                # 關鍵字搜索（搜尋標題和內容）
+                if "keywords" in conditions:
+                    keywords = conditions["keywords"]
+                    q_objects = Q()
+                    for keyword in keywords:
+                        q_objects |= Q(archive_title__icontains=keyword) | Q(content__icontains=keyword)
+                    queryset = queryset.filter(q_objects)
+
+                # 排序（預設最新）
+                if conditions.get("oldest"):
+                    queryset = queryset.order_by("postFrame__created_at")
+                else:
+                    # 預設或指定 newest 都用最新排序
+                    queryset = queryset.order_by("-postFrame__created_at")
+
+                # 限制數量
                 archives = queryset[:limit]
 
+                if not archives:
+                    return {
+                        "success": True,
+                        "entity_type": "disease_archive",
+                        "count": 0,
+                        "results": [],
+                        "message": "沒有找到符合條件的疾病檔案"
+                    }
+
+                # 構建結果
                 results = []
                 for archive in archives:
+                    # 安全地獲取創建日期
+                    created_at = None
+                    if archive.postFrame and archive.postFrame.created_at:
+                        created_at = archive.postFrame.created_at.isoformat()
+                    
                     results.append({
                         "id": archive.id,
                         "pet_id": archive.pet_id,
-                        "title": archive.title,
+                        "pet_name": archive.pet.pet_name if archive.pet else "未知",
+                        "archive_title": archive.archive_title,
+                        "health_status": archive.health_status or "",
+                        "go_to_doctor": archive.go_to_doctor,
+                        "created_at": created_at,
+                        "content_preview": archive.content[:100] if archive.content else "",
                         "path_template": "/pet/{pet_id}/disease-archive/{id}",
                         "resolved_path": f"/pet/{archive.pet_id}/disease-archive/{archive.id}"
                     })
@@ -493,9 +592,13 @@ class EntityResolver:
                 }
 
             except Exception as e:
+                import traceback
+                error_detail = traceback.format_exc()
                 return {
                     "success": False,
-                    "error": f"查詢疾病檔案失敗: {str(e)}"
+                    "error": f"查詢疾病檔案失敗: {str(e)}",
+                    "error_detail": error_detail,
+                    "message": "查詢過程中發生錯誤，請檢查查詢條件是否正確"
                 }
 
         return await query()

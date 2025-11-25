@@ -166,8 +166,8 @@ def get_operation_list() -> Dict:
         },
         "add_abnormal_post": {
             "description": "新增異常記錄（寵物健康異常情況的記錄，不含圖片）。圖片需透過前端另外上傳。",
-            "required_params": ["user_id", "pet_id", "symptoms"],
-            "optional_params": ["content", "weight", "body_temperature", "water_amount", "is_emergency", "record_date", "is_private"],
+            "required_params": ["user_id", "pet_id", "symptoms","record_date"],
+            "optional_params": ["content", "weight", "body_temperature", "water_amount", "is_emergency", "is_private"],
             "param_details": {
                 "user_id": "用戶ID (整數)",
                 "pet_id": "寵物ID (整數)",

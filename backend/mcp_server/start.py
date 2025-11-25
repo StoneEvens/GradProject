@@ -47,6 +47,7 @@ def main():
     # Import and start MCP server
     try:
         from mcp_server.server import create_mcp_server
+        #from mcp_server.new_server import create_mcp_server
         
         logger.info("Starting MCP server...")
         mcp_server = create_mcp_server()

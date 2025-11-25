@@ -1,3 +1,5 @@
+from datetime import datetime
+from sqlite3 import Time
 from agents import HostedMCPTool, Agent, ModelSettings, TResponseInputItem, Runner, RunConfig, trace
 from agents.memory import OpenAIConversationsSession
 from pydantic import BaseModel, Field
@@ -241,7 +243,7 @@ async def run_workflow(workflow_input: WorkflowInput, user_id: int, username: st
     print(f"[PETer_Agent] Created base_session with _session_id: {getattr(base_session, '_session_id', None)}")
 
     # Prepare input with user context
-    agent_input = workflow_input.input_as_text + " user_id: " + str(user_id) + " username: " + username
+    agent_input = workflow_input.input_as_text + " Respond to the user in the same language the user asks questions. <<Authentic data attatched from backend>> user_id: " + str(user_id) + "; username: " + username + "; time_stamp: " + str(datetime.now())
 
     # Run the unified summary agent
     summary_agent_result_temp = await Runner.run(
