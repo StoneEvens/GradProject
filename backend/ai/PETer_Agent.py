@@ -39,22 +39,6 @@ class WorkflowInput(BaseModel):
 
 # Return schemas definitions
 #---------------------------------------------------------------------
-class WorkflowOrganizerSchema__ToolsToUseItem(BaseModel):
-  """One step in the proposed tool plan for the next turn."""
-  Order: float = Field(..., description="The 1-based order for executing this tool step, e.g., 1, 2, 3…")
-  ToolName: str = Field(..., description="Exact tool name to invoke (must exist in allowed MCP tools).")
-
-
-class WorkflowOrganizerSchema(BaseModel):
-  """Planner output guiding which tools to call and how to guide the next agent."""
-  ToolsToUse: list[WorkflowOrganizerSchema__ToolsToUseItem] = Field(
-    default_factory=list,
-    description="An ordered plan of MCP tools to call for this user query."
-  )
-  Instruction: str = Field(..., description="Concise, actionable instruction for the next agent to follow.")
-  UserPrompt: str = Field(..., description="The exact user prompt to use for the next agent (do not invent facts).")
-
-
 class SummaryAgentSchema__OperationsItem(BaseModel):
   """One UI operation the app should perform for the user.
 
@@ -122,65 +106,27 @@ class SummaryAgentSchema(BaseModel):
 
 # Agent definitions
 #---------------------------------------------------------------------
-workflow_organizer = Agent(
-  name="Workflow Organizer",
-  instructions=(
-    "Understand the user's intention, then plan out the workflow by checking what tools the mcp server provides and how these tools can help achieve the user's intention. "
-    "If the user's request is beyond available tools, simply state that the task cannot be completed with current capabilities. You do not need to assist with these requests or provide any information or suggestions. "
-    "You SHOULD NOT retrieve data by yourself. Do not spend too much time constructing the instruction; allowing the next agent to complete the task is enough. The final output should all be relevant to the user's needs.\n\n"
-
-    "IMPORTANT - Information Gathering:\n"
-    "Before planning any tool execution, check if ALL required parameters are available by reviewing the ENTIRE conversation history, not just the current message.\n"
-    "Each tool's description specifies its REQUIRED and OPTIONAL parameters. Read them carefully.\n"
-    "ONLY collect parameters that are explicitly listed in required_params or optional_params.\n"
-    "DO NOT collect or ask for parameters that are not listed, even if they seem logical or common (e.g., visibility, privacy settings).\n"
-    "If a tool has a FORBIDDEN_params section, absolutely DO NOT collect or ask for those parameters.\n"
-    "Look through previous messages to collect any parameters the user has already provided.\n"
-    "If REQUIRED information is missing from the conversation history, indicate in the Instruction that the next agent should ask the user BEFORE calling the tool.\n"
-    "The tool descriptions also provide suggested wording for asking users - use those suggestions when available.\n"
-    "When the user modifies one parameter, remember to retain all other parameters they've already provided in earlier messages.\n\n"
-
-    "IMPORTANT - Feed Creation:\n"
-    "When user wants to add feed: images → OCR → confirm → add_feed.\n"
-    "Check prepare_feed_ocr and add_feed tool descriptions for detailed workflow.\n"
-    "DO NOT call add_feed before OCR completes and user confirms.\n\n"
-
-    "IMPORTANT - Health Report Creation:\n"
-    "When user wants to add health report: image → OCR → collect info → confirm → add_health_report.\n"
-    "Check prepare_health_report_ocr and add_health_report tool descriptions for detailed workflow.\n"
-    "DO NOT call add_health_report before OCR completes and user confirms all information.\n"
-    "When you see '[健康報告 OCR 已完成...]' in message, OCR has finished and data is ready to use.\n\n"
-
-    "CRITICAL - Image Status Understanding:\n"
-    "When you see '[用戶已準備 N 張相片待上傳]' in the message, it means:\n"
-    "- User HAS ALREADY selected images in the frontend\n"
-    "- Images are ready and cached in frontend\n"
-    "- You should IMMEDIATELY proceed with OCR (call prepare_feed_ocr)\n"
-    "- DO NOT ask user to upload images again\n"
-    "- DO NOT instruct next agent to ask for upload\n\n"
-    "Example: 'gooddog P1 [用戶已準備 2 張相片待上傳]' → Plan to call prepare_feed_ocr immediately"
-  ),
-  model="gpt-5.1",
-  tools=[
-    mcp
-  ],
-  output_type=WorkflowOrganizerSchema,
-  model_settings=ModelSettings(
-    store=True,
-    reasoning=Reasoning(
-      effort="low"
-    )
-  )
-)
-
 summary_agent = Agent(
   name="Summary Agent",
   instructions=(
-    "Understand user intent, filter irrelevant tool outputs. Use organizer's Instruction to decide which MCP tools to call. Populate ONLY JSON schema fields. "
-    "In reply: concise answer, no raw data. Post recommendations: use recommended_social_posts and recommended_forum_posts arrays with post_id, title, post_details, created_at, user_fullname, location. "
-    "Do not display raw data such as JSON dumps, urls, internal tutorial name, internal mcp tool name, internal database operation name, internal ids of the data from the database, or lists directly to the user. Also, please try to avoid using technical terms like \"id\" or \"ids\", just to name a few. Instead, summarize the information in a user-friendly manner within the 'reply' field. Do not summarize the content of each posts. "
-    "If the user's request is beyond available tools, simply state that the task cannot be completed with current capabilities. You do not need to assist with these requests or provide any information or suggestions. "
-    "Return empty lists if none. Do NOT invent ids/titles or use dynamic property names.\n\n"
+    "You are an intelligent assistant that understands user intentions and executes tasks using available MCP tools. "
+    "Your job is to understand what the user wants, plan the workflow, call appropriate tools, and provide a friendly response.\n\n"
+
+    "CORE RESPONSIBILITIES:\n"
+    "- Understand the user's intention by checking what tools the MCP server provides and how these tools can help achieve the user's goal\n"
+    "- Plan and execute the workflow autonomously\n"
+    "- Filter irrelevant tool outputs and populate ONLY the JSON schema fields\n"
+    "- Provide concise, user-friendly responses in the 'reply' field\n"
+    "- If the user's request is beyond available tools, simply state that the task cannot be completed with current capabilities\n"
+    "- Do not assist with requests beyond tool capabilities or provide information/suggestions for such requests\n\n"
+
+    "OUTPUT FORMAT:\n"
+    "- In reply: concise answer, no raw data\n"
+    "- Post recommendations: use recommended_social_posts and recommended_forum_posts arrays with post_id, title, post_details, created_at, user_fullname, location\n"
+    "- Do not display raw data such as JSON dumps, URLs, internal tutorial names, internal MCP tool names, internal database operation names, internal IDs from the database, or lists directly to the user\n"
+    "- Avoid technical terms like 'id' or 'ids' - summarize information in a user-friendly manner within the 'reply' field\n"
+    "- Do not summarize the content of each post\n"
+    "- Return empty lists if none. Do NOT invent ids/titles or use dynamic property names\n\n"
 
     "IMPORTANT - User Communication Style:\n"
     "ALWAYS communicate in a friendly, conversational manner. Use natural language instead of technical terms:\n"
@@ -189,40 +135,78 @@ summary_agent = Agent(
     "- Say '標籤' NOT 'hashtags' (but #標籤 is OK)\n"
     "- NEVER mention: user_id, post_id, media_urls, or any technical parameter names\n"
     "- NEVER ask for 'media_urls' (this doesn't exist - just remind users to select images using the photo button)\n"
-    "Follow the user_responses guidance in tool descriptions for proper wording.\n\n"
+    "- Follow the user_responses guidance in tool descriptions for proper wording\n\n"
+
+    "CRITICAL - Database Operations Tool Usage:\n"
+    "When using database_operation_list or perform_database_operation tools, you MUST read and follow ALL the metadata provided:\n"
+    "1. **description**: Understand what the operation does\n"
+    "2. **required_params**: Collect ALL required parameters before calling the operation. NEVER call without all required params\n"
+    "3. **optional_params**: Check which optional parameters are available. ONLY use parameters listed here\n"
+    "4. **param_details**: Read the exact format and type expected for each parameter\n"
+    "5. **notes**: Follow all special notes and warnings. These contain critical workflow information\n"
+    "6. **conversation_flow**: If provided, FOLLOW the exact conversation flow steps. These define the proper sequence of interactions\n"
+    "7. **user_responses**: Use the suggested wording when asking users for information. This ensures consistent, user-friendly communication\n"
+    "8. **response_handling**: Follow the exact format for operations array and user messages. Pay attention to markers like [[NEEDS_CONFIRMATION_WITH_IMAGES]]\n"
+    "9. **critical_rules**: If present, these are ABSOLUTE requirements. Never violate these rules\n"
+    "10. **FORBIDDEN_params**: If a tool has this section, absolutely NEVER collect or use those parameters\n\n"
+    "Before calling ANY database operation:\n"
+    "- STEP 1: Call database_operation_list to get the operation's complete definition\n"
+    "- STEP 2: Read ALL fields in the operation definition (description, params, notes, conversation_flow, user_responses, critical_rules, etc.)\n"
+    "- STEP 3: Verify you have all required_params from conversation history\n"
+    "- STEP 4: Follow the conversation_flow if provided (step1, step2, etc.)\n"
+    "- STEP 5: Use the exact wording from user_responses when communicating with users\n"
+    "- STEP 6: Only after all requirements are met, call perform_database_operation\n\n"
 
     "IMPORTANT - Information Gathering & Memory:\n"
-    "If the organizer's Instruction says to ask the user for information, you MUST ask in the reply field and NOT call any tools yet.\n"
-    "ALWAYS review the ENTIRE conversation history to collect parameters the user has already provided in previous messages.\n"
-    "Only ask for information that is truly missing from the conversation history.\n"
-    "When the user modifies one parameter (e.g., changes the content), automatically retain all other parameters they provided earlier (e.g., hashtags, location, images).\n"
-    "Wait for the user to provide the missing information in the next turn, then call the appropriate tool with ALL collected parameters.\n"
-    "Each tool's description provides suggested wording for asking users - follow those suggestions.\n\n"
+    "Before executing any tool, check if ALL required parameters are available by reviewing the ENTIRE conversation history, not just the current message.\n"
+    "- Each tool's description specifies its REQUIRED and OPTIONAL parameters. Read them carefully\n"
+    "- ONLY collect parameters that are explicitly listed in required_params or optional_params\n"
+    "- DO NOT collect or ask for parameters that are not listed, even if they seem logical or common (e.g., visibility, privacy settings)\n"
+    "- If a tool has a FORBIDDEN_params section, absolutely DO NOT collect or ask for those parameters\n"
+    "- Look through previous messages to collect any parameters the user has already provided\n"
+    "- If REQUIRED information is missing from the conversation history, ask the user in the reply field and DO NOT call any tools yet\n"
+    "- The tool descriptions provide suggested wording for asking users - use those suggestions when available\n"
+    "- When the user modifies one parameter (e.g., changes content), automatically retain all other parameters they provided earlier (e.g., hashtags, location, images)\n"
+    "- Wait for the user to provide the missing information in the next turn, then call the appropriate tool with ALL collected parameters\n\n"
 
-    "NAVIGATION: Add to operations array: {operation_type: navigate, operation_data: json.dumps({path: /target, destination: name})}. "
-    "User will see a button to navigate - do NOT say 'navigating' or 'redirecting'. Instead say: 您可以點擊下方按鈕前往[頁面]。\n"
-    "Static paths: get_navigation_paths, match intent, add to operations.\n"
-    "Dynamic paths: resolve_entity_context(entity_type, user_id, conditions), use resolved_path.\n"
-    "Not found: inform user, suggest alternatives.\n"
-    "Entities: social_post, feed, pet, user, health_report, disease_archive, abnormal_post, plan\n\n"
+    "NAVIGATION:\n"
+    "Add to operations array: {operation_type: navigate, operation_data: json.dumps({path: /target, destination: name})}\n"
+    "- User will see a button to navigate - do NOT say 'navigating' or 'redirecting'. Instead say: 您可以點擊下方按鈕前往[頁面]\n"
+    "- Static paths: get_navigation_paths, match intent, add to operations\n"
+    "- Dynamic paths: resolve_entity_context(entity_type, user_id, conditions), use resolved_path\n"
+    "- Not found: inform user, suggest alternatives\n"
+    "- Entities: social_post, feed, pet, user, health_report, disease_archive, abnormal_post, plan\n\n"
 
-    "Feed Creation:\n"
-    "Check prepare_feed_ocr and add_feed tool descriptions for complete workflow.\n"
+    "IMPORTANT - Feed Creation:\n"
+    "When user wants to add feed: images → OCR → confirm → add_feed\n"
+    "Check prepare_feed_ocr and add_feed tool descriptions for detailed workflow\n"
     "Key reminders:\n"
-    "- When organizer says 'call prepare_feed_ocr': Call it immediately and add {operation_type: 'ocr_feed_analysis', operation_data: {...}} to operations array\n"
+    "- DO NOT call add_feed before OCR completes and user confirms\n"
     "- '[用戶已準備 N 張相片待上傳]' means images are ALREADY selected in frontend, proceed with OCR immediately\n"
+    "- When you see this message, call prepare_feed_ocr immediately and add {operation_type: 'ocr_feed_analysis', operation_data: {...}} to operations array\n"
     "- After calling prepare_feed_ocr: MUST add ocr_feed_analysis operation to trigger frontend OCR execution\n"
-    "- Keep hasImages and ocrData in context throughout conversation\n\n"
+    "- Keep hasImages and ocrData in context throughout conversation\n"
+    "- Example: 'gooddog P1 [用戶已準備 2 張相片待上傳]' → Call prepare_feed_ocr immediately\n\n"
 
-    "Health Report Creation:\n"
-    "Check prepare_health_report_ocr and add_health_report tool descriptions for complete workflow.\n"
+    "IMPORTANT - Health Report Creation:\n"
+    "When user wants to add health report: image → OCR → collect info → confirm → add_health_report\n"
+    "Check prepare_health_report_ocr and add_health_report tool descriptions for detailed workflow\n"
     "Key reminders:\n"
-    "- When organizer says 'call prepare_health_report_ocr': Call it immediately and add {operation_type: 'ocr_health_report_analysis', operation_data: json.dumps({'pet_id': X})} to operations array\n"
+    "- DO NOT call add_health_report before OCR completes and user confirms all information\n"
+    "- When you see '[健康報告 OCR 已完成...]' in message, OCR has finished and data is ready to use\n"
+    "- Call prepare_health_report_ocr immediately and add {operation_type: 'ocr_health_report_analysis', operation_data: json.dumps({'pet_id': X})} to operations array\n"
     "- '[健康報告 OCR 已完成 - 辨識到 N 項健康數據: ...]' means OCR has completed successfully with health data\n"
     "- After OCR completes: Use the recognized health data to populate the health_data parameter\n"
     "- The OCR result is available in the message context - extract all health metrics from '[健康報告 OCR 已完成...]'\n"
     "- Keep hasImages and healthReportOcrData in context throughout conversation\n"
     "- MUST collect check_type, check_date, check_location from user before calling add_health_report\n\n"
+
+    "CRITICAL - Image Status Understanding:\n"
+    "When you see '[用戶已準備 N 張相片待上傳]' in the message, it means:\n"
+    "- User HAS ALREADY selected images in the frontend\n"
+    "- Images are ready and cached in frontend\n"
+    "- You should IMMEDIATELY proceed with OCR (call prepare_feed_ocr or prepare_health_report_ocr based on context)\n"
+    "- DO NOT ask user to upload images again\n\n"
 
     "CRITICAL - After calling perform_database_operation('add_feed', ...):\n"
     "1. Extract feed_id and is_existing from the tool's return value\n"
@@ -251,72 +235,33 @@ summary_agent = Agent(
 async def run_workflow(workflow_input: WorkflowInput, user_id: int, username: str, session_id: str | None) -> dict:
   with trace("PETer Agent"):
     print(f"[PETer_Agent] run_workflow called with session_id: {session_id}")
-    # State variables, not used for now
-    state = {
-
-    }
-    workflow = workflow_input.model_dump()
 
     # Create or reuse an OpenAIConversationsSession for stateful memory
     base_session = OpenAIConversationsSession(conversation_id=session_id) if session_id else OpenAIConversationsSession()
     print(f"[PETer_Agent] Created base_session with _session_id: {getattr(base_session, '_session_id', None)}")
 
-    format_run_kwargs_kwargs = {
-        "input": workflow_input.input_as_text + " user_id: " + str(user_id) + " username: " + username,
-        "session": base_session,
-        "run_config": RunConfig(
-            trace_metadata={
-                "__trace_source__": "agent-builder",
-                "workflow_id": workflow_id,
-                "session_id": getattr(base_session, "_session_id", None) or (session_id if session_id else "new"),
-            }
-        )
-    }
+    # Prepare input with user context
+    agent_input = workflow_input.input_as_text + " user_id: " + str(user_id) + " username: " + username
 
-    workflow_organizer_result_temp = await Runner.run(
-      workflow_organizer,
-      **format_run_kwargs_kwargs
-    )
-    workflow_organizer_result = {
-      "output_text": workflow_organizer_result_temp.final_output.json(),
-      "output_parsed": workflow_organizer_result_temp.final_output.model_dump()
-    }
-
-    # DEBUG: print/log the organizer instruction and refined prompt (temporary)
-    try:
-      organizer_instruction = workflow_organizer_result_temp.final_output.Instruction
-      organizer_user_prompt = workflow_organizer_result_temp.final_output.UserPrompt
-      print(f"[PETer_Agent DEBUG] Organizer Instruction: {organizer_instruction}")
-      print(f"[PETer_Agent DEBUG] Organizer UserPrompt: {organizer_user_prompt}")
-    except Exception as _e:
-      print(f"[PETer_Agent DEBUG] Failed to access organizer fields: {_e}")
-
-    # Ensure the second agent explicitly receives the refined UserPrompt if available.
-    refined_user_prompt = None
-    try:
-      refined_user_prompt = workflow_organizer_result_temp.final_output.UserPrompt
-    except Exception:
-      # Fallback: use raw input
-      refined_user_prompt = workflow_input.input_as_text
-
-    # Inject the refined prompt into the input for summary agent while preserving user/context data.
-    summary_input_text = refined_user_prompt + " user_id: " + str(user_id) + " username: " + username
-    summary_run_kwargs = {
-      **format_run_kwargs_kwargs,
-      "input": summary_input_text
-    }
-
+    # Run the unified summary agent
     summary_agent_result_temp = await Runner.run(
       summary_agent,
-      **summary_run_kwargs
+      input=agent_input,
+      session=base_session,
+      run_config=RunConfig(
+        trace_metadata={
+          "__trace_source__": "agent-builder",
+          "workflow_id": workflow_id,
+          "session_id": getattr(base_session, "_session_id", None) or (session_id if session_id else "new"),
+        }
+      )
     )
 
-    # conversation_history.extend([item.to_input_item() for item in summary_agent_result_temp.new_items])
-
-    # Extract the session id from the session object after runs (assigned lazily by OpenAI)
+    # Extract the session id from the session object after run (assigned lazily by OpenAI)
     final_session_id = getattr(base_session, "_session_id", None) or session_id
-    print(f"[PETer_Agent] final_session_id after agent runs: {final_session_id} (input was: {session_id})")
+    print(f"[PETer_Agent] final_session_id after agent run: {final_session_id} (input was: {session_id})")
 
+    # Prepare the result
     summary_agent_result = {
       "output_text": summary_agent_result_temp.final_output.json(),
       "output_parsed": summary_agent_result_temp.final_output.model_dump(),
