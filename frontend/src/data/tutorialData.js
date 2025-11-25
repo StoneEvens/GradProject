@@ -726,13 +726,13 @@ const tutorialData = {
       instruction: '',
       targetElement: {
         component: 'CreateFeedModal',
-        selector: '[data-step="upload-front"] button[class*="uploadButton"]:not([disabled])',
-        className: 'uploadButton',
-        fallbackSelector: '[data-step="upload-front"] button:not([disabled])'
+        selector: '[data-step="upload-front"]',
+        className: 'uploadSection',
+        fallbackSelector: '[data-step="upload-front"]'
       },
       highlight: {
         type: 'rectangle',
-        position: 'button'
+        position: 'form'
       },
       nextCondition: 'manualNext',
       showPointer: true
@@ -743,13 +743,13 @@ const tutorialData = {
       instruction: '',
       targetElement: {
         component: 'CreateFeedModal',
-        selector: '[data-step="upload-nutrition"] button[class*="uploadButton"]:not([disabled])',
-        className: 'uploadButton',
-        fallbackSelector: '[data-step="upload-nutrition"] button:not([disabled])'
+        selector: '[data-step="upload-nutrition"]',
+        className: 'uploadSection',
+        fallbackSelector: '[data-step="upload-nutrition"]'
       },
       highlight: {
         type: 'rectangle',
-        position: 'button'
+        position: 'form'
       },
       nextCondition: 'manualNext',
       showPointer: true
