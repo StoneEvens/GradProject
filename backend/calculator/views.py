@@ -572,23 +572,31 @@ class FeedUsageTracker(APIView):
             }, status=status.HTTP_404_NOT_FOUND)
         
         try:
-            user_feed = UserFeed.objects.get(
-                user=user, 
-                feed_id=feed_id, 
-                pet=pet
+            # 驗證飼料是否存在
+            from feeds.models import Feed
+            try:
+                feed = Feed.objects.get(id=feed_id)
+            except Feed.DoesNotExist:
+                return Response({
+                    "error": "找不到該飼料"
+                }, status=status.HTTP_404_NOT_FOUND)
+
+            # 使用 get_or_create 確保 UserFeed 記錄存在
+            user_feed, created = UserFeed.objects.get_or_create(
+                user=user,
+                feed=feed,
+                pet=pet,
+                defaults={'usage_count': 0}
             )
             user_feed.increment_usage()
-            
+
             return Response({
-                "message": "使用次數已更新",
+                "message": "使用次數已更新" if not created else "飼料記錄已建立並更新使用次數",
                 "usage_count": user_feed.usage_count,
-                "last_used_at": user_feed.last_used_at
+                "last_used_at": user_feed.last_used_at,
+                "created": created
             }, status=status.HTTP_200_OK)
-            
-        except UserFeed.DoesNotExist:
-            return Response({
-                "error": "找不到該飼料記錄或寵物不匹配"
-            }, status=status.HTTP_404_NOT_FOUND)
+
         except Exception as e:
             return Response({
                 "error": f"更新使用次數失敗：{str(e)}"
