@@ -2,7 +2,7 @@
   "title": "栄養計算機",
   "functions": {
     "reset": "リセット",
-    "quickCalculate": "クイック計算",
+    "feedConsultation": "フード相談",
     "history": "履歴"
   },
   "sections": {

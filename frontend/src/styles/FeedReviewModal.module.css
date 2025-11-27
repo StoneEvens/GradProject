@@ -18,7 +18,7 @@
   background: #FFF2D9;
   border-radius: 16px;
   width: 100%;
-  max-width: 380px;
+  max-width: 400px;
   max-height: calc(100vh - 80px);
   overflow: hidden;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
@@ -63,115 +63,49 @@
   -webkit-overflow-scrolling: touch;
 }
 
-/* 頭像區塊 */
-.avatarSection {
+/* 飼料圖片區塊 */
+.imageSection {
   display: flex;
   justify-content: center;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
-.avatarContainer {
-  width: 110px;
-  height: 110px;
-  cursor: pointer;
-  border-radius: 50%;
+.feedImageContainer {
+  width: 120px;
+  height: 120px;
+  border-radius: 12px;
   overflow: hidden;
   border: 3px solid rgba(255, 179, 112, 0.3);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   background: linear-gradient(135deg, #fff6ea 0%, #FFE4B5 100%);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  position: relative;
 }
 
-.avatarContainer::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 100%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  border-radius: 50%;
-}
-
-.avatarContainer:hover {
-  transform: scale(1.05);
-  border-color: #FFB370;
-  box-shadow: 0 6px 20px rgba(255, 179, 112, 0.3);
-}
-
-.avatarContainer:hover::before {
-  opacity: 1;
-}
-
-.avatarPreview {
+.feedImage {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.hiddenInput {
-  display: none;
-}
-
-/* 只讀欄位 */
-.readOnlyField {
-  background: #fff6ea;
-  border: 1px solid rgba(255, 179, 112, 0.2);
-  border-radius: 10px;
-  padding: 12px 14px;
-  color: #89350c;
-  font-size: 0.95rem;
-  min-height: 20px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-}
-
-/* 營養成分資訊 */
-.nutritionInfo {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.2) 100%);
-  border: 1px solid rgba(255, 179, 112, 0.2);
-  border-radius: 12px;
-  padding: 14px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-}
-
-.nutritionRow {
+.feedImagePlaceholder {
+  width: 100%;
+  height: 100%;
   display: flex;
-  justify-content: space-between;
-  margin-bottom: 10px;
-  font-size: 0.9rem;
-  color: #8B4513;
-  padding: 6px 8px;
-  background: rgba(255, 246, 234, 0.5);
-  border-radius: 6px;
-}
-
-.nutritionRow:last-child {
-  margin-bottom: 0;
-}
-
-.nutritionRow span {
-  flex: 1;
-}
-
-.nutritionRow span:first-child {
-  font-weight: 500;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #fff6ea 0%, #FFE4B5 100%);
   color: #89350c;
-}
-
-.nutritionRow span:last-child {
-  text-align: right;
-  font-weight: 600;
-  color: #F08651;
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-align: center;
+  padding: 10px;
 }
 
 /* 表單區塊 */
 .formSection {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 16px;
 }
 
 .inputGroup {
@@ -187,55 +121,51 @@
   margin-left: 4px;
 }
 
-.formInput {
-  width: 100%;
-  padding: 12px 14px;
+/* 只讀欄位 */
+.readOnlyField {
+  background: #fff6ea;
   border: 1px solid rgba(255, 179, 112, 0.2);
   border-radius: 10px;
-  background: #fff6ea;
-  font-size: 0.95rem;
+  padding: 12px 14px;
   color: #89350c;
-  box-sizing: border-box;
-  outline: none;
-  transition: all 0.3s ease;
+  font-size: 0.95rem;
+  min-height: 20px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 }
 
-.formInput:focus {
-  border-color: #FFB370;
-  box-shadow: 0 2px 8px rgba(255, 179, 112, 0.2);
-}
-
-.formInput::placeholder {
-  color: #b8814a;
-  opacity: 0.7;
-}
-
-.formTextarea {
-  width: 100%;
-  padding: 12px 14px;
+/* 營養成分區塊 */
+.nutritionContainer {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.2) 100%);
   border: 1px solid rgba(255, 179, 112, 0.2);
-  border-radius: 10px;
-  background: #fff6ea;
-  font-size: 0.95rem;
-  color: #89350c;
-  resize: none;
-  box-sizing: border-box;
-  outline: none;
-  font-family: inherit;
-  min-height: 100px;
-  transition: all 0.3s ease;
+  border-radius: 12px;
+  padding: 14px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 }
 
-.formTextarea:focus {
-  border-color: #FFB370;
-  box-shadow: 0 2px 8px rgba(255, 179, 112, 0.2);
+.nutritionRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 10px;
+  background: #fff6ea;
+  border-radius: 8px;
+  margin-bottom: 8px;
 }
 
-.formTextarea::placeholder {
-  color: #b8814a;
-  opacity: 0.7;
+.nutritionRow:last-child {
+  margin-bottom: 0;
+}
+
+.nutritionLabel {
+  color: #8B4513;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.nutritionValue {
+  color: #F08651;
+  font-size: 0.9rem;
+  font-weight: 700;
 }
 
 /* Modal 底部 */
@@ -248,7 +178,7 @@
   border-top: 2px solid rgba(255, 179, 112, 0.3);
 }
 
-.cancelButton {
+.reportButton {
   flex: 1;
   padding: 12px 20px;
   border: 2px solid rgba(255, 179, 112, 0.2);
@@ -264,7 +194,7 @@
   overflow: hidden;
 }
 
-.cancelButton::before {
+.reportButton::before {
   content: '';
   position: absolute;
   top: 0;
@@ -276,28 +206,28 @@
   transition: opacity 0.3s ease;
 }
 
-.cancelButton:hover:not(:disabled) {
+.reportButton:hover:not(:disabled) {
   background: #f5eed8;
   transform: translateY(-1px);
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
   border-color: #FFB370;
 }
 
-.cancelButton:hover:not(:disabled)::before {
+.reportButton:hover:not(:disabled)::before {
   opacity: 1;
 }
 
-.cancelButton:active:not(:disabled) {
+.reportButton:active:not(:disabled) {
   transform: translateY(1px);
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.cancelButton:disabled {
+.reportButton:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.saveButton {
+.confirmButton {
   flex: 1;
   padding: 12px 20px;
   border: 2px solid transparent;
@@ -313,7 +243,7 @@
   overflow: hidden;
 }
 
-.saveButton::before {
+.confirmButton::before {
   content: '';
   position: absolute;
   top: 0;
@@ -325,22 +255,22 @@
   transition: opacity 0.3s ease;
 }
 
-.saveButton:hover:not(:disabled) {
+.confirmButton:hover:not(:disabled) {
   background: #F08651;
   transform: translateY(-1px);
   box-shadow: 0 6px 20px rgba(255, 140, 26, 0.4);
 }
 
-.saveButton:hover:not(:disabled)::before {
+.confirmButton:hover:not(:disabled)::before {
   opacity: 1;
 }
 
-.saveButton:active:not(:disabled) {
+.confirmButton:active:not(:disabled) {
   transform: translateY(1px);
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1), 0 4px 12px rgba(255, 140, 26, 0.25);
 }
 
-.saveButton:disabled {
+.confirmButton:disabled {
   opacity: 0.5;
   cursor: not-allowed;
   background: #ccc;
@@ -396,17 +326,17 @@
     padding: 16px;
   }
 
-  .avatarSection {
-    margin-bottom: 20px;
+  .imageSection {
+    margin-bottom: 16px;
   }
 
-  .avatarContainer {
+  .feedImageContainer {
     width: 100px;
     height: 100px;
   }
 
   .formSection {
-    gap: 14px;
+    gap: 12px;
   }
 
   .inputGroup {
@@ -417,29 +347,23 @@
     font-size: 0.9rem;
   }
 
-  .formInput,
-  .formTextarea {
-    padding: 10px 12px;
-    font-size: 0.9rem;
-  }
-
-  .formTextarea {
-    min-height: 80px;
-  }
-
   .readOnlyField {
     padding: 10px 12px;
     font-size: 0.9rem;
   }
 
-  .nutritionInfo {
+  .nutritionContainer {
     padding: 12px;
   }
 
   .nutritionRow {
+    padding: 6px 8px;
+    margin-bottom: 6px;
+  }
+
+  .nutritionLabel,
+  .nutritionValue {
     font-size: 0.85rem;
-    padding: 5px 6px;
-    margin-bottom: 8px;
   }
 
   .modalFooter {
@@ -447,9 +371,16 @@
     gap: 10px;
   }
 
-  .cancelButton,
-  .saveButton {
+  .reportButton,
+  .confirmButton {
     padding: 10px 16px;
     font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 320px) {
+  .nutritionLabel,
+  .nutritionValue {
+    font-size: 0.8rem;
   }
 }

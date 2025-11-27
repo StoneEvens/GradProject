@@ -15,17 +15,17 @@
 
 /* Modal 主體 */
 .modal {
-  background: #ffca9c;
-  border-radius: 5px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  background: #FFF2D9;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
   width: 100%;
-  max-width: 300px;
-  animation: modalSlideIn 0.3s ease-out;
+  max-width: 320px;
+  animation: modalSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Modal 內容 */
 .content {
-  padding: 24px 20px 20px;
+  padding: 28px 24px 24px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -34,21 +34,21 @@
 
 /* 標題 */
 .title {
-  font-size: 16px;
-  font-weight: 500;
-  color: #333;
+  font-size: 1.15rem;
+  font-weight: bold;
+  color: #89350c;
   text-align: center;
   margin: 0;
-  line-height: 1.4;
+  line-height: 1.5;
 }
 
 /* 描述文字 */
 .description {
   margin: 0;
-  font-size: 14px;
-  color: #666;
+  font-size: 0.9rem;
+  color: #8B4513;
   text-align: center;
-  line-height: 1.4;
+  line-height: 1.5;
 }
 
 /* 按鈕容器 */
@@ -61,60 +61,97 @@
 /* 取消按鈕 */
 .cancelButton {
   flex: 1;
-  padding: 10px 14px;
-  border: none;
-  border-radius: 8px;
-  background-color: #ffeed6;
-  color: #CC7A00;
-  font-size: 15px;
-  font-weight: 500;
+  padding: 12px 16px;
+  border: 2px solid rgba(255, 179, 112, 0.2);
+  border-radius: 10px;
+  background: #fff6ea;
+  color: #8B4513;
+  font-size: 0.95rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.cancelButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .cancelButton:hover {
-  background-color: #FFEBCC;
+  background: #f5eed8;
   transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-color: #FFB370;
+}
+
+.cancelButton:hover::before {
+  opacity: 1;
 }
 
 .cancelButton:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transform: translateY(1px);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* 確認按鈕 */
 .confirmButton {
   flex: 1;
-  padding: 10px 14px;
-  border: none;
-  border-radius: 8px;
-  background-color: #F08651;
+  padding: 12px 16px;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  background: #FFB370;
   color: white;
-  font-size: 15px;
-  font-weight: 500;
+  font-size: 0.95rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 16px rgba(255, 140, 26, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.confirmButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .confirmButton:hover {
-  background-color: #E07045;
+  background: #F08651;
   transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 6px 20px rgba(255, 140, 26, 0.4);
+}
+
+.confirmButton:hover::before {
+  opacity: 1;
 }
 
 .confirmButton:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transform: translateY(1px);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1), 0 4px 12px rgba(255, 140, 26, 0.25);
 }
 
 /* Modal 進入動畫 */
 @keyframes modalSlideIn {
   from {
     opacity: 0;
-    transform: scale(0.9) translateY(-20px);
+    transform: scale(0.95) translateY(10px);
   }
   to {
     opacity: 1;
@@ -123,22 +160,41 @@
 }
 
 /* 響應式設計 */
-@media (max-width: 320px) {
+@media (max-width: 430px) {
   .modal {
-    max-width: 280px;
+    max-width: calc(100vw - 40px);
   }
-  
+}
+
+@media (max-width: 380px) {
+  .overlay {
+    padding: 16px;
+  }
+
+  .modal {
+    max-width: calc(100vw - 32px);
+  }
+
   .content {
-    padding: 20px 16px 16px;
+    padding: 24px 20px 20px;
+    gap: 16px;
   }
-  
+
   .title {
-    font-size: 15px;
+    font-size: 1.05rem;
   }
-  
+
+  .description {
+    font-size: 0.85rem;
+  }
+
+  .buttons {
+    gap: 10px;
+  }
+
   .cancelButton,
   .confirmButton {
-    font-size: 14px;
+    font-size: 0.9rem;
     padding: 10px 14px;
   }
-} 
+}

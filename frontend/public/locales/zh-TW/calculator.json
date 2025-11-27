@@ -2,7 +2,7 @@
   "title": "營養計算機",
   "functions": {
     "reset": "重置計算機",
-    "quickCalculate": "快速計算",
+    "feedConsultation": "飼料諮詢",
     "history": "歷史紀錄"
   },
   "sections": {

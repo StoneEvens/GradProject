@@ -5,7 +5,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.8);
+  background-color: rgba(0, 0, 0, 0.7);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -15,53 +15,55 @@
 
 /* Modal 容器 */
 .modalContainer {
-  background-color: #FFca9c;
-  border-radius: 15px;
+  background: #FFF2D9;
+  border-radius: 16px;
   width: 100%;
-  max-width: 350px;
-  max-height: 90vh;
+  max-width: 380px;
+  max-height: calc(100vh - 80px);
   overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  animation: slideIn 0.3s ease-out;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-direction: column;
 }
 
 @keyframes slideIn {
   from {
-    transform: scale(0.9);
+    transform: scale(0.95) translateY(10px);
     opacity: 0;
   }
   to {
-    transform: scale(1);
+    transform: scale(1) translateY(0);
     opacity: 1;
   }
 }
 
 /* Modal 標題 */
 .modalHeader {
-  background-color: #FFca9c;
-  color: #333;
-  padding: 15px 20px;
-  border-bottom: 1px solid #ffeed6;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.2) 100%);
+  padding: 16px 20px;
+  border-bottom: 2px solid rgba(255, 179, 112, 0.3);
   text-align: center;
+  flex-shrink: 0;
 }
 
 .modalHeader h2 {
   margin: 0;
-  font-size: 18px;
-  font-weight: 600;
+  font-size: 1.15rem;
+  font-weight: bold;
+  color: #89350c;
 }
 
 /* Modal 內容 */
 .modalBody {
-  background-color: #FFca9c;
-  padding: 15px 20px 0;
+  background: #FFF2D9;
+  padding: 16px 20px;
   flex: 1;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 16px;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* 按鈕列 - 固定在底部 */
@@ -69,11 +71,12 @@
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  padding: 15px 20px;
-  border-top: 1px solid #ffeed6;
-  background-color: #FFca9c;
+  padding: 16px 20px;
+  border-top: 2px solid rgba(255, 179, 112, 0.3);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.2) 100%);
   margin-top: auto;
   flex-shrink: 0;
+  gap: 12px;
 }
 
 .leftButtons {
@@ -88,47 +91,82 @@
 
 .toolButton {
   padding: 8px 16px;
-  border: none;
+  border: 1px solid rgba(255, 179, 112, 0.2);
   border-radius: 8px;
-  background-color: #ffeed6;
-  color: #333;
-  font-size: 14px;
-  font-weight: 500;
+  background: #fff6ea;
+  color: #8B4513;
+  font-size: 0.85rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   min-width: 60px;
   height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  position: relative;
+  overflow: hidden;
+}
+
+.toolButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .toolButton:hover {
-  background-color: #ffdbaa;
+  background: #f5eed8;
+  border-color: #FFB370;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+}
+
+.toolButton:hover::before {
+  opacity: 1;
+}
+
+.toolButton:active {
+  transform: translateY(1px);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .toolButton.active {
-  background-color: #ffb370;
+  background: #FFB370;
   color: #fff;
+  border-color: transparent;
+  box-shadow: 0 4px 12px rgba(255, 140, 26, 0.3);
+}
+
+.toolButton.active:hover {
+  background: #F08651;
 }
 
 /* 圖片容器 */
 .imageContainer {
   position: relative;
   width: 100%;
-  max-height: 300px;
-  border-radius: 10px;
+  max-height: 280px;
+  border-radius: 12px;
   overflow: hidden;
-  background-color: #ffeed6;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.2) 100%);
+  border: 1px solid rgba(255, 179, 112, 0.2);
   display: flex;
   justify-content: center;
   align-items: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .editImage {
   width: 100%;
   height: auto;
-  max-height: 300px;
+  max-height: 280px;
   object-fit: contain;
   cursor: pointer;
   user-select: none;
@@ -137,28 +175,31 @@
 /* 標註圖示 */
 .annotationIcon {
   position: absolute;
-  bottom: 10px;
-  left: 10px;
+  bottom: 12px;
+  left: 12px;
   z-index: 15;
   cursor: pointer;
-  width: 32px;
-  height: 32px;
-  background-color: rgba(255, 255, 255, 0.9);
-  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(255, 179, 112, 0.3);
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  transition: transform 0.2s;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .annotationIcon:hover {
   transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  border-color: #FFB370;
 }
 
 .annotationIconImage {
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   object-fit: contain;
 }
 
@@ -168,27 +209,28 @@
   transform: translate(-50%, -50%);
   z-index: 10;
   cursor: pointer;
-  padding: 5px;
-  margin: -5px;
+  padding: 6px;
+  margin: -6px;
 }
 
 .annotationDot {
-  width: 12px;
-  height: 12px;
-  background-color: #F08651;
+  width: 14px;
+  height: 14px;
+  background: #F08651;
   border: 2px solid white;
   border-radius: 50%;
   cursor: pointer;
-  transition: transform 0.2s;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
 }
 
 .annotationDot:hover {
-  transform: scale(1.2);
+  transform: scale(1.25);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
 .newDot {
-  background-color: #ff6b6b;
+  background: #EF5350;
   animation: pulse 1s infinite;
 }
 
@@ -200,18 +242,20 @@
 
 .annotationLabel {
   position: absolute;
-  top: -35px;
+  top: -38px;
   left: 50%;
   transform: translateX(-50%);
-  background-color: rgba(0, 0, 0, 0.8);
+  background: rgba(137, 53, 12, 0.9);
   color: white;
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-size: 12px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 500;
   white-space: nowrap;
   opacity: 0;
-  transition: opacity 0.2s;
+  transition: opacity 0.3s ease;
   pointer-events: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .annotationPoint:hover .annotationLabel {
@@ -220,18 +264,20 @@
 
 /* 編輯面板 */
 .editPanel {
-  background-color: #ffeed6;
-  border-radius: 10px;
-  padding: 15px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.2) 100%);
+  border: 1px solid rgba(255, 179, 112, 0.2);
+  border-radius: 12px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 16px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 }
 
 .inputRow {
   display: flex;
-  gap: 15px;
-  margin-bottom: 15px;
+  gap: 14px;
+  margin-bottom: 14px;
 }
 
 .inputGroup {
@@ -242,9 +288,9 @@
 }
 
 .inputGroup label {
-  font-size: 14px;
-  font-weight: 500;
-  color: #333;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #89350c;
   margin-left: 4px;
 }
 
@@ -256,254 +302,424 @@
 }
 
 .typeSelector label {
-  font-size: 14px;
-  font-weight: 500;
-  color: #333;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #89350c;
   margin-left: 4px;
 }
 
 .typeSelect {
   width: 100%;
   padding: 10px 12px;
-  border: none;
+  border: 1px solid rgba(255, 179, 112, 0.2);
   border-radius: 8px;
-  background-color: white;
-  font-size: 14px;
-  color: #333;
+  background: #fff6ea;
+  font-size: 0.85rem;
+  color: #89350c;
   box-sizing: border-box;
   outline: none;
-  transition: box-shadow 0.2s ease;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23F08651' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 16px;
+  padding-right: 36px;
 }
 
 .typeSelect:focus {
-  box-shadow: 0 0 0 2px #F08651;
+  border-color: #FFB370;
+  box-shadow: 0 2px 8px rgba(255, 179, 112, 0.2);
 }
 
 .searchInput {
   width: 100%;
   padding: 10px 12px;
-  border: none;
+  border: 1px solid rgba(255, 179, 112, 0.2);
   border-radius: 8px;
-  background-color: white;
-  font-size: 14px;
-  color: #333;
+  background: #fff6ea;
+  font-size: 0.85rem;
+  color: #89350c;
   box-sizing: border-box;
   outline: none;
-  transition: box-shadow 0.2s ease;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 }
 
 .searchInput:focus {
-  box-shadow: 0 0 0 2px #F08651;
+  border-color: #FFB370;
+  box-shadow: 0 2px 8px rgba(255, 179, 112, 0.2);
+}
+
+.searchInput::placeholder {
+  color: #b8814a;
+  opacity: 0.7;
 }
 
 .editActions {
   display: flex;
-  gap: 8px;
+  gap: 10px;
 }
 
 .editCancelButton {
   flex: 1;
-  padding: 8px 12px;
-  border: none;
-  border-radius: 6px;
-  background-color: #ccc;
-  color: #666;
-  font-size: 14px;
-  font-weight: 500;
+  padding: 10px 14px;
+  border: 1px solid rgba(255, 179, 112, 0.2);
+  border-radius: 8px;
+  background: #fff6ea;
+  color: #8B4513;
+  font-size: 0.85rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 }
 
 .editCancelButton:hover {
-  background-color: #bbb;
+  background: #f5eed8;
+  border-color: #FFB370;
+  transform: translateY(-1px);
+}
+
+.editCancelButton:active {
+  transform: translateY(1px);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .deleteButton {
   flex: 1;
-  padding: 8px 12px;
-  border: none;
-  border-radius: 6px;
-  background-color: #ff6b6b;
+  padding: 10px 14px;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  background: #EF5350;
   color: white;
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 0.85rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: opacity 0.2s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(239, 83, 80, 0.3);
 }
 
 .deleteButton:hover {
-  opacity: 0.9;
+  background: #E53935;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(239, 83, 80, 0.4);
+}
+
+.deleteButton:active {
+  transform: translateY(1px);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .confirmButton {
   flex: 1;
-  padding: 8px 12px;
-  border: none;
-  border-radius: 6px;
-  background-color: #F08651;
+  padding: 10px 14px;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  background: #FFB370;
   color: white;
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 0.85rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: opacity 0.2s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(255, 140, 26, 0.3);
 }
 
 .confirmButton:hover {
-  opacity: 0.9;
+  background: #F08651;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(255, 140, 26, 0.4);
+}
+
+.confirmButton:active {
+  transform: translateY(1px);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1), 0 4px 12px rgba(255, 140, 26, 0.25);
 }
 
 /* 提示文字 */
 .hintText {
   text-align: center;
-  color: #666;
-  font-size: 12px;
+  color: #8B4513;
+  font-size: 0.8rem;
   font-style: italic;
-  padding: 10px;
-  background-color: #ffeed6;
-  border-radius: 8px;
+  padding: 12px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.2) 100%);
+  border: 1px solid rgba(255, 179, 112, 0.2);
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 }
 
 .annotationInstructions {
   text-align: center;
-  padding: 15px;
-  background-color: #fff6ea;
-  border-radius: 8px;
-  margin: 10px 0;
+  padding: 16px;
+  background: #fff6ea;
   border: 1px solid #FFB370;
+  border-radius: 10px;
+  margin: 10px 0;
+  box-shadow: 0 2px 8px rgba(255, 179, 112, 0.15);
 }
 
 .annotationInstructions h3 {
-  color: #8B4513;
-  font-size: 16px;
-  margin: 0 0 8px 0;
-  font-weight: 600;
+  color: #89350c;
+  font-size: 1rem;
+  margin: 0 0 10px 0;
+  font-weight: bold;
 }
 
 .annotationInstructions p {
-  color: #6B3410;
-  font-size: 14px;
+  color: #8B4513;
+  font-size: 0.85rem;
   margin: 0;
-  line-height: 1.4;
+  line-height: 1.5;
 }
 
 /* 按鈕樣式 */
 .cancelButton {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 8px;
-  background-color: #ffb370;
-  font-size: 14px;
-  font-weight: 500;
-  color: #fff;
+  padding: 10px 18px;
+  border: 2px solid rgba(255, 179, 112, 0.2);
+  border-radius: 10px;
+  background: #fff6ea;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #8B4513;
   cursor: pointer;
-  transition: background-color 0.2s;
-  min-width: 60px;
-  height: 36px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  min-width: 70px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.cancelButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .cancelButton:hover {
-  background-color: #faab66;
+  background: #f5eed8;
+  border-color: #FFB370;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+}
+
+.cancelButton:hover::before {
+  opacity: 1;
+}
+
+.cancelButton:active {
+  transform: translateY(1px);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .saveButton {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 8px;
-  background-color: #F08651;
-  font-size: 14px;
-  font-weight: 500;
+  padding: 10px 18px;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  background: #FFB370;
+  font-size: 0.9rem;
+  font-weight: 600;
   color: #fff;
   cursor: pointer;
-  transition: opacity 0.2s;
-  min-width: 60px;
-  height: 36px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  min-width: 70px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 4px 16px rgba(255, 140, 26, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.saveButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .saveButton:hover {
-  opacity: 0.9;
+  background: #F08651;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(255, 140, 26, 0.4);
+}
+
+.saveButton:hover::before {
+  opacity: 1;
+}
+
+.saveButton:active {
+  transform: translateY(1px);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1), 0 4px 12px rgba(255, 140, 26, 0.25);
+}
+
+/* 滾動條樣式 */
+.modalBody::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modalBody::-webkit-scrollbar-track {
+  background: rgba(255, 179, 112, 0.1);
+  border-radius: 3px;
+}
+
+.modalBody::-webkit-scrollbar-thumb {
+  background: #FFB370;
+  border-radius: 3px;
+  transition: background 0.3s ease;
+}
+
+.modalBody::-webkit-scrollbar-thumb:hover {
+  background: #F08651;
 }
 
 /* 響應式設計 */
-@media (max-width: 480px) {
+@media (max-width: 430px) {
   .modalContainer {
-    max-width: 320px;
-    margin: 0 15px;
+    max-width: calc(100vw - 40px);
+    max-height: calc(100vh - 80px);
   }
-  
+}
+
+@media (max-width: 380px) {
+  .modalOverlay {
+    padding: 16px;
+  }
+
+  .modalContainer {
+    max-width: calc(100vw - 32px);
+  }
+
   .modalHeader {
-    padding: 12px 15px;
+    padding: 14px 16px;
   }
-  
+
   .modalHeader h2 {
-    font-size: 16px;
+    font-size: 1.05rem;
   }
-  
+
   .modalBody {
-    padding: 12px 15px;
+    padding: 12px 16px;
     gap: 12px;
   }
-  
+
   .imageContainer {
-    max-height: 250px;
+    max-height: 240px;
   }
-  
+
+  .editImage {
+    max-height: 240px;
+  }
+
   .editPanel {
-    padding: 12px;
-    gap: 12px;
+    padding: 14px;
+    gap: 14px;
   }
-  
+
   .inputRow {
     flex-direction: row;
-    gap: 12px;
+    gap: 10px;
+    margin-bottom: 12px;
   }
-  
+
   .typeSelector {
     min-width: auto;
   }
-  
+
   .searchInput,
   .typeSelect {
     padding: 8px 10px;
-    font-size: 13px;
+    font-size: 0.8rem;
   }
-  
+
+  .editActions {
+    gap: 8px;
+  }
+
   .editActions button {
-    padding: 6px 10px;
-    font-size: 13px;
+    padding: 8px 12px;
+    font-size: 0.8rem;
   }
-  
+
   .buttonBar {
-    padding: 8px 0;
+    padding: 12px 16px;
+    gap: 10px;
   }
-  
+
   .leftButtons,
   .rightButtons {
     gap: 8px;
   }
-  
+
   .toolButton {
     padding: 6px 12px;
-    font-size: 13px;
+    font-size: 0.8rem;
     min-width: 50px;
     height: 32px;
   }
-  
+
   .cancelButton,
   .saveButton {
-    padding: 6px 12px;
-    font-size: 13px;
-    min-width: 50px;
-    height: 32px;
+    padding: 8px 14px;
+    font-size: 0.85rem;
+    min-width: 60px;
+    height: 36px;
   }
-  
+
   .hintText {
-    font-size: 12px;
-    padding: 8px;
+    font-size: 0.75rem;
+    padding: 10px;
   }
-} 
+
+  .annotationInstructions {
+    padding: 14px;
+  }
+
+  .annotationInstructions h3 {
+    font-size: 0.95rem;
+  }
+
+  .annotationInstructions p {
+    font-size: 0.8rem;
+  }
+
+  .annotationIcon {
+    width: 32px;
+    height: 32px;
+    bottom: 10px;
+    left: 10px;
+  }
+
+  .annotationIconImage {
+    width: 20px;
+    height: 20px;
+  }
+
+  .annotationDot {
+    width: 12px;
+    height: 12px;
+  }
+
+  .annotationLabel {
+    font-size: 0.7rem;
+    padding: 5px 10px;
+    top: -34px;
+  }
+}

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import styles from '../styles/EditProfileModal.module.css';
+import styles from '../styles/FeedReviewModal.module.css';
 import Notification from './Notification';
 import FeedErrorReportModal from './FeedErrorReportModal';
 import LongNotification from './LongNotification';
@@ -47,12 +47,12 @@ const FeedReviewModal = ({ feed, isOpen, onClose, onConfirm, onReportError, onEr
       await onReportError(errorData);
       setShowErrorReportModal(false);
       setShowLongNotification(true);
-      
+
       // 如果有成功回調，執行它（例如允許使用飼料）
       if (onErrorReportSuccess) {
         onErrorReportSuccess(feed);
       }
-      
+
       // 不自動關閉主 modal，讓用戶看到長通知並手動關閉
     } catch (error) {
       console.error('回報錯誤失敗:', error);
@@ -88,26 +88,19 @@ const FeedReviewModal = ({ feed, isOpen, onClose, onConfirm, onReportError, onEr
           <div className={styles.modalHeader}>
             <h2>{feed.name || feed.feedName || '飼料名稱'}</h2>
           </div>
-          
+
           <div className={styles.modalBody}>
             {/* 飼料圖片區塊 */}
-            <div className={styles.avatarSection}>
-              <div className={styles.avatarContainer}>
+            <div className={styles.imageSection}>
+              <div className={styles.feedImageContainer}>
                 {feed.frontImage || feed.front_image_url ? (
                   <img
                     src={feed.frontImage || feed.front_image_url}
                     alt={t('reviewModal.alt.feedImage')}
-                    className={styles.avatarPreview}
+                    className={styles.feedImage}
                   />
                 ) : (
-                  <div className={styles.avatarPreview} style={{
-                    backgroundColor: '#FFE4B5',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: '#89350c',
-                    fontSize: '14px'
-                  }}>
+                  <div className={styles.feedImagePlaceholder}>
                     {t('page.feedCard.noImage')}
                   </div>
                 )}
@@ -146,21 +139,34 @@ const FeedReviewModal = ({ feed, isOpen, onClose, onConfirm, onReportError, onEr
 
               <div className={styles.inputGroup}>
                 <label>{t('detailPage.labels.nutrition')}</label>
-                <div className={styles.nutritionInfo}>
+                <div className={styles.nutritionContainer}>
                   <div className={styles.nutritionRow}>
-                    <span>{t('detailPage.labels.protein')}: {feed.protein || 0}{t('detailPage.info.unit')}</span>
-                    <span>{t('detailPage.labels.fat')}: {feed.fat || 0}{t('detailPage.info.unit')}</span>
+                    <span className={styles.nutritionLabel}>{t('detailPage.labels.protein')}</span>
+                    <span className={styles.nutritionValue}>{feed.protein || 0}{t('detailPage.info.unit')}</span>
                   </div>
                   <div className={styles.nutritionRow}>
-                    <span>{t('detailPage.labels.carbohydrate')}: {feed.carbohydrate || 0}{t('detailPage.info.unit')}</span>
-                    <span>{t('detailPage.labels.calcium')}: {feed.calcium || 0}{t('detailPage.info.unit')}</span>
+                    <span className={styles.nutritionLabel}>{t('detailPage.labels.fat')}</span>
+                    <span className={styles.nutritionValue}>{feed.fat || 0}{t('detailPage.info.unit')}</span>
                   </div>
                   <div className={styles.nutritionRow}>
-                    <span>{t('detailPage.labels.phosphorus')}: {feed.phosphorus || 0}{t('detailPage.info.unit')}</span>
-                    <span>{t('detailPage.labels.magnesium')}: {feed.magnesium || 0}{t('detailPage.info.unit')}</span>
+                    <span className={styles.nutritionLabel}>{t('detailPage.labels.carbohydrate')}</span>
+                    <span className={styles.nutritionValue}>{feed.carbohydrate || 0}{t('detailPage.info.unit')}</span>
                   </div>
                   <div className={styles.nutritionRow}>
-                    <span>{t('detailPage.labels.sodium')}: {feed.sodium || 0}{t('detailPage.info.unit')}</span>
+                    <span className={styles.nutritionLabel}>{t('detailPage.labels.calcium')}</span>
+                    <span className={styles.nutritionValue}>{feed.calcium || 0}{t('detailPage.info.unit')}</span>
+                  </div>
+                  <div className={styles.nutritionRow}>
+                    <span className={styles.nutritionLabel}>{t('detailPage.labels.phosphorus')}</span>
+                    <span className={styles.nutritionValue}>{feed.phosphorus || 0}{t('detailPage.info.unit')}</span>
+                  </div>
+                  <div className={styles.nutritionRow}>
+                    <span className={styles.nutritionLabel}>{t('detailPage.labels.magnesium')}</span>
+                    <span className={styles.nutritionValue}>{feed.magnesium || 0}{t('detailPage.info.unit')}</span>
+                  </div>
+                  <div className={styles.nutritionRow}>
+                    <span className={styles.nutritionLabel}>{t('detailPage.labels.sodium')}</span>
+                    <span className={styles.nutritionValue}>{feed.sodium || 0}{t('detailPage.info.unit')}</span>
                   </div>
                 </div>
               </div>
@@ -169,14 +175,14 @@ const FeedReviewModal = ({ feed, isOpen, onClose, onConfirm, onReportError, onEr
 
           <div className={styles.modalFooter}>
             <button
-              className={styles.cancelButton}
+              className={styles.reportButton}
               onClick={handleReportError}
               disabled={loading}
             >
               {t('reviewModal.buttons.reportError')}
             </button>
             <button
-              className={styles.saveButton}
+              className={styles.confirmButton}
               onClick={handleConfirm}
               disabled={loading}
             >
@@ -193,7 +199,7 @@ const FeedReviewModal = ({ feed, isOpen, onClose, onConfirm, onReportError, onEr
         onClose={() => setShowErrorReportModal(false)}
         onSubmit={handleErrorReportSubmit}
       />
-      
+
       {/* 長通知 */}
       {showLongNotification && (
         <LongNotification

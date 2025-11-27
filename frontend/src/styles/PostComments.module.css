@@ -15,13 +15,13 @@
 
 /* Modal Container */
 .modalContainer {
-  background-color: #FFca9c;
-  border-radius: 15px;
+  background: #FFF2D9;
+  border-radius: 16px;
   width: 100%;
-  max-width: 450px;
-  height: 80vh;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  animation: slideIn 0.3s ease-out;
+  max-width: 420px;
+  max-height: calc(100vh - 80px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -29,24 +29,25 @@
 
 @keyframes slideIn {
   from {
-    transform: scale(0.9);
+    transform: scale(0.95) translateY(10px);
     opacity: 0;
   }
   to {
-    transform: scale(1);
+    transform: scale(1) translateY(0);
     opacity: 1;
   }
 }
 
 /* Modal Header */
 .modalHeader {
-  padding: 20px 24px;
-  background-color: #FFca9c;
+  padding: 20px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.2) 100%);
   position: relative;
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  border-bottom: 2px solid rgba(255, 179, 112, 0.3);
+  flex-shrink: 0;
 }
 
 .modalTitle {
@@ -56,26 +57,29 @@
 
 .modalTitle h2 {
   margin: 0;
-  font-size: 18px;
-  font-weight: 600;
-  color: #333;
+  font-size: 1.15rem;
+  font-weight: bold;
+  color: #89350c;
 }
 
 /* Modal Body */
 .modalBody {
   padding: 16px 16px 8px 16px;
-  background-color: #FFca9c;
+  background: #FFF2D9;
   flex: 1;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
+  -webkit-overflow-scrolling: touch;
 }
 /* Modal Footer */
 .modalFooter {
-  padding: 10px;
-  background-color: #FFca9c;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.2) 100%);
   display: flex;
   justify-content: flex-end;
+  border-top: 2px solid rgba(255, 179, 112, 0.3);
+  flex-shrink: 0;
 }
 
 /* Comments Container */
@@ -508,25 +512,25 @@
 /* 移除舊的樣式，已在上方重新定義 */
 
 /* Responsive Design */
-@media (max-width: 480px) {
+@media (max-width: 430px) {
   .modalOverlay {
-    padding: 12px;
+    padding: 16px;
   }
-  
+
   .modalContainer {
-    max-width: 95vw; /* 使用視窗寬度的95% */
-    min-width: 320px; /* 確保最小寬度 */
-    height: 85vh; /* 稍微增加高度 */
+    max-width: calc(100vw - 32px);
+    min-width: 300px;
+    max-height: calc(100vh - 80px);
   }
-  
+
   .modalHeader {
-    padding: 16px 20px;
+    padding: 16px;
   }
-  
-  .modalHeader h2 {
-    font-size: 16px;
+
+  .modalTitle h2 {
+    font-size: 1.05rem;
   }
-  
+
   .modalBody {
     padding: 12px;
   }

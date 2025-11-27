@@ -140,6 +140,7 @@
       "feedPrice": "フード価格を入力してください"
     },
     "buttons": {
+      "upload": "アップロード",
       "uploadFront": "正面画像をアップロード",
       "uploadNutrition": "栄養成分表をアップロード",
       "removeFront": "正面画像を削除",

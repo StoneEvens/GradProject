@@ -521,11 +521,13 @@ const FeedPage = () => {
         
         <div className={styles.content}>
           
-          {/* 標題區域 */}
-          <div className={styles.titleSection}>
-            <h2 className={styles.title}>{t('page.title')}</h2>
-            <button 
-              className={styles.addFeedButton} 
+          {/* 標題列 */}
+          <div className={styles.header}>
+            <div className={styles.titleSection}>
+              <h2 className={styles.title}>{t('page.title')}</h2>
+            </div>
+            <button
+              className={styles.addFeedButton}
               onClick={handleCreateFeedClick}
             >
               {t('page.buttons.addFeed')}

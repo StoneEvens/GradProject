@@ -140,6 +140,7 @@
       "feedPrice": "Ingresa el precio del alimento"
     },
     "buttons": {
+      "upload": "Subir",
       "uploadFront": "Subir Imagen Frontal",
       "uploadNutrition": "Subir Etiqueta Nutricional",
       "removeFront": "Eliminar Imagen Frontal",

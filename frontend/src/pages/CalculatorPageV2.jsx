@@ -9,6 +9,7 @@ import CreateFeedModal from '../components/CreateFeedModal';
 import FeedSelectModal from '../components/FeedSelectModal';
 import NotificationComponent from '../components/Notification';
 import HistoryRecordModal from '../components/HistoryRecordModal';
+import ChatWindow from '../components/ChatWindow';
 import defaultAvatar from '../MockPicture/mockCat1.jpg';
 import mockFeed1 from '../MockPicture/mockFeed1.png';
 import mockFeed2 from '../MockPicture/mockFeed2.png';
@@ -41,6 +42,7 @@ function CalculatorPageV2() {
   
   // Modals
   const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const [showChatWindow, setShowChatWindow] = useState(false);
   
   // 選擇寵物相關
   const [selectedPet, setSelectedPet] = useState(null);
@@ -629,11 +631,11 @@ function CalculatorPageV2() {
             {t('functions.reset')}
           </button>
           
-          <button 
+          <button
             className={styles.functionButton}
-            onClick={() => setNotification(t('messages.quickCalculateInDevelopment'))}
+            onClick={() => setShowChatWindow(true)}
           >
-            {t('functions.quickCalculate')}
+            {t('functions.feedConsultation')}
           </button>
           
           <button 
@@ -1009,7 +1011,13 @@ function CalculatorPageV2() {
         isOpen={showHistoryModal}
         onClose={() => setShowHistoryModal(false)}
       />
-      
+
+      <ChatWindow
+        isOpen={showChatWindow}
+        onClose={() => setShowChatWindow(false)}
+        user={userData}
+      />
+
       {notification && (
         <NotificationComponent 
           message={notification} 

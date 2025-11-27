@@ -333,78 +333,89 @@ const CreateFeedModal = ({ isOpen, onClose, onConfirm, defaultPetType = 'cat' })
                 />
               </div>
 
-              {/* 正面圖片上傳區域 */}
-              <div className={styles.uploadSection} data-step="upload-front">
-                <label className={styles.uploadLabel}>{t('createModal.labels.frontImage')}</label>
-                <div className={styles.imageSection}>
-                  {!frontPreview ? (
-                    <div className={styles.noImageState}>
-                      <button
-                        className={styles.uploadButton}
-                        onClick={() => frontInputRef.current?.click()}
-                        disabled={loading}
-                      >
-                        {t('createModal.buttons.uploadFront')}
-                      </button>
-                      <p className={styles.uploadHint}>{t('createModal.messages.uploadFrontImage')}</p>
-                    </div>
-                  ) : (
-                    <div className={styles.imagePreview}>
-                      <img src={frontPreview} alt={t('createModal.alt.frontImage')} />
-                      <button
-                        className={styles.removeImageBtn}
-                        onClick={handleRemoveFrontImage}
-                        disabled={loading}
-                      >
-                        ×
-                      </button>
-                    </div>
-                  )}
+              {/* 圖片上傳區域 - 並排佈局 */}
+              <div className={styles.uploadRow}>
+                {/* 正面圖片上傳 */}
+                <div className={styles.uploadColumn}>
+                  <div className={styles.uploadHeader}>
+                    <span className={styles.uploadLabel}>{t('createModal.labels.frontImage')}</span>
+                    <button
+                      className={styles.uploadBtn}
+                      onClick={() => frontInputRef.current?.click()}
+                      disabled={loading}
+                    >
+                      {t('createModal.buttons.upload')}
+                    </button>
+                  </div>
+                  <div className={`${styles.imageBox} ${frontPreview ? styles.hasImage : ''}`}>
+                    {!frontPreview ? (
+                      <img
+                        src="/assets/icon/PetpageFeedButton.png"
+                        alt="placeholder"
+                        className={styles.placeholderIcon}
+                      />
+                    ) : (
+                      <>
+                        <img src={frontPreview} alt={t('createModal.alt.frontImage')} className={styles.previewImage} />
+                        <button
+                          className={styles.removeImageBtn}
+                          onClick={handleRemoveFrontImage}
+                          disabled={loading}
+                        >
+                          ×
+                        </button>
+                      </>
+                    )}
+                  </div>
+                  <input
+                    ref={frontInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFrontImageSelect}
+                    className={styles.hiddenInput}
+                  />
                 </div>
-                <input
-                  ref={frontInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFrontImageSelect}
-                  className={styles.hiddenInput}
-                />
-              </div>
 
-              {/* 營養標示圖片上傳區域 */}
-              <div className={styles.uploadSection} data-step="upload-nutrition">
-                <label className={styles.uploadLabel}>{t('createModal.labels.nutritionImage')}</label>
-                <div className={styles.imageSection}>
-                  {!nutritionPreview ? (
-                    <div className={styles.noImageState}>
-                      <button
-                        className={styles.uploadButton}
-                        onClick={() => nutritionInputRef.current?.click()}
-                        disabled={loading}
-                      >
-                        {t('createModal.buttons.uploadNutrition')}
-                      </button>
-                      <p className={styles.uploadHint}>{t('createModal.messages.uploadNutritionImage')}</p>
-                    </div>
-                  ) : (
-                    <div className={styles.imagePreview}>
-                      <img src={nutritionPreview} alt={t('createModal.alt.nutritionImage')} />
-                      <button
-                        className={styles.removeImageBtn}
-                        onClick={handleRemoveNutritionImage}
-                        disabled={loading}
-                      >
-                        ×
-                      </button>
-                    </div>
-                  )}
+                {/* 營養標示圖片上傳 */}
+                <div className={styles.uploadColumn}>
+                  <div className={styles.uploadHeader}>
+                    <span className={styles.uploadLabel}>{t('createModal.labels.nutritionImage')}</span>
+                    <button
+                      className={styles.uploadBtn}
+                      onClick={() => nutritionInputRef.current?.click()}
+                      disabled={loading}
+                    >
+                      {t('createModal.buttons.upload')}
+                    </button>
+                  </div>
+                  <div className={`${styles.imageBox} ${nutritionPreview ? styles.hasImage : ''}`}>
+                    {!nutritionPreview ? (
+                      <img
+                        src="/assets/icon/PetpageFeedButton.png"
+                        alt="placeholder"
+                        className={styles.placeholderIcon}
+                      />
+                    ) : (
+                      <>
+                        <img src={nutritionPreview} alt={t('createModal.alt.nutritionImage')} className={styles.previewImage} />
+                        <button
+                          className={styles.removeImageBtn}
+                          onClick={handleRemoveNutritionImage}
+                          disabled={loading}
+                        >
+                          ×
+                        </button>
+                      </>
+                    )}
+                  </div>
+                  <input
+                    ref={nutritionInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleNutritionImageSelect}
+                    className={styles.hiddenInput}
+                  />
                 </div>
-                <input
-                  ref={nutritionInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleNutritionImageSelect}
-                  className={styles.hiddenInput}
-                />
               </div>
             </>
           ) : (

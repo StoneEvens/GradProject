@@ -15,54 +15,55 @@
 
 /* Modal 容器 */
 .modalContainer {
-  background-color: #FFca9c;
-  border-radius: 15px;
-  width: 380px;
-  height: 600px;
+  background: #FFF2D9;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 400px;
+  max-height: calc(100vh - 80px);
   overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  animation: slideIn 0.3s ease-out;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-direction: column;
 }
 
 @keyframes slideIn {
   from {
-    transform: scale(0.9);
+    transform: scale(0.95) translateY(10px);
     opacity: 0;
   }
   to {
-    transform: scale(1);
+    transform: scale(1) translateY(0);
     opacity: 1;
   }
 }
 
 /* Modal 標題 */
 .modalHeader {
-  background-color: #FFca9c;
-  color: #333;
-  padding: 16px 20px;
-  text-align: center;
-  border-bottom: 1px solid #ffeed6;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.2) 100%);
+  padding: 20px;
+  border-bottom: 2px solid rgba(255, 179, 112, 0.3);
   flex-shrink: 0;
 }
 
 .modalHeader h2 {
   margin: 0;
-  font-size: 18px;
-  font-weight: 600;
+  font-size: 1.15rem;
+  font-weight: bold;
   color: #89350c;
+  text-align: center;
 }
 
 /* Modal 內容 */
 .modalBody {
-  background-color: #FFca9c;
+  background: #FFF2D9;
   padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
   flex: 1;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* 載入狀態 */
@@ -70,9 +71,9 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100%;
+  min-height: 200px;
   color: #89350c;
-  font-size: 16px;
+  font-size: 1rem;
 }
 
 /* 空狀態 */
@@ -81,22 +82,26 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100%;
+  min-height: 200px;
   text-align: center;
   padding: 40px 20px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.2) 100%);
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .emptyIcon {
   width: 80px;
   height: 80px;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
   opacity: 0.6;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
 }
 
 .emptyState p {
-  color: #89350c;
-  opacity: 0.7;
-  font-size: 15px;
+  color: #8B4513;
+  font-size: 0.95rem;
+  font-weight: 500;
   margin: 0;
 }
 
@@ -104,25 +109,60 @@
 .recordList {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
 }
 
 /* 返回按鈕 */
 .backButton {
-  background: none;
-  border: none;
-  color: #89350c;
-  font-size: 16px;
-  font-weight: 500;
-  cursor: pointer;
-  padding: 0;
   display: flex;
   align-items: center;
-  transition: color 0.2s ease;
+  justify-content: center;
+  padding: 8px 16px;
+  background: #fff6ea;
+  border: 1px solid rgba(255, 179, 112, 0.2);
+  border-radius: 8px;
+  color: #8B4513;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 8px;
+  align-self: flex-start;
+}
+
+.backButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .backButton:hover {
-  color: #F08651;
+  background: #f5eed8;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+  border-color: #FFB370;
+  color: #6B3410;
+}
+
+.backButton:hover::before {
+  opacity: 1;
+}
+
+.backButton:active {
+  background: #FFB370;
+  border: 1px solid transparent;
+  color: white;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1), 0 4px 12px rgba(255, 140, 26, 0.25);
+  transform: translateY(1px);
 }
 
 /* 詳細內容 */
@@ -130,63 +170,82 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .detailSection {
-  background: #FFF6EA;
-  border-radius: 8px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.2) 100%);
+  border-radius: 12px;
   padding: 16px;
-  border: 1px solid #FFE5C4;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .detailSectionTitle {
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 1.1rem;
+  font-weight: bold;
   color: #89350c;
-  margin: 0 0 12px 0;
-  border-bottom: 1px solid #FFE5C4;
-  padding-bottom: 8px;
+  margin: 0 0 16px 0;
+  padding-bottom: 12px;
+  border-bottom: 2px solid rgba(255, 179, 112, 0.3);
 }
 
 .detailInfoGrid {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
 }
 
 .detailInfoItem {
   display: flex;
   align-items: flex-start;
-  font-size: 14px;
+  padding: 10px 12px;
+  background: #fff6ea;
+  border: 1px solid rgba(255, 179, 112, 0.2);
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 }
 
 .detailLabel {
-  color: #89350c;
-  opacity: 0.8;
-  min-width: 100px;
+  color: #8B4513;
+  min-width: 90px;
+  font-size: 0.85rem;
   font-weight: 500;
 }
 
 .detailValue {
   color: #89350c;
+  font-size: 0.9rem;
   font-weight: 600;
   word-break: break-word;
+  flex: 1;
 }
 
 /* 結果區塊 */
 .resultBox {
-  background: #FFEED6;
-  border-radius: 6px;
+  background: #fff6ea;
+  border-radius: 8px;
   padding: 12px;
-  margin-top: 8px;
-  border: 1px solid #FFB370;
+  margin-top: 12px;
+  border: 1px solid rgba(255, 179, 112, 0.2);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 }
 
 .resultBoxTitle {
-  font-size: 14px;
+  font-size: 0.9rem;
   font-weight: 600;
-  color: #89350c;
-  margin: 0 0 8px 0;
+  color: #F08651;
+  margin: 0 0 10px 0;
 }
 
 /* 營養素網格 */
@@ -199,79 +258,148 @@
 .nutrientItem {
   display: flex;
   align-items: center;
-  font-size: 13px;
+  padding: 6px 8px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 6px;
+  font-size: 0.8rem;
 }
 
 .nutrientName {
-  color: #89350c;
-  opacity: 0.8;
+  color: #8B4513;
   margin-right: 6px;
   min-width: 50px;
+  font-weight: 500;
 }
 
 .nutrientValue {
-  color: #89350c;
-  font-weight: 600;
+  color: #F08651;
+  font-weight: 700;
 }
 
 /* 描述文字 */
 .description {
-  color: #89350c;
+  color: #8B4513;
   line-height: 1.6;
-  font-size: 13px;
+  font-size: 0.85rem;
   white-space: pre-wrap;
   max-height: 150px;
   overflow-y: auto;
+  padding: 12px;
+  background: #fff6ea;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 179, 112, 0.2);
 }
 
 /* Modal 底部 */
 .modalFooter {
-  background-color: #FFca9c;
-  padding: 20px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.2) 100%);
+  padding: 16px 20px;
   display: flex;
-  gap: 10px;
-  border-top: 1px solid #ffeed6;
+  gap: 12px;
+  border-top: 2px solid rgba(255, 179, 112, 0.3);
   flex-shrink: 0;
 }
 
 .clearButton {
   flex: 1;
   padding: 10px 20px;
-  border: none;
-  border-radius: 8px;
-  background-color: #FFCDD2;
-  font-size: 16px;
-  font-weight: 500;
+  background: #fff6ea;
+  border: 2px solid rgba(255, 179, 112, 0.2);
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
   color: #D32F2F;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.clearButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .clearButton:hover {
-  background-color: #FFBBC4;
+  background: #FFEBEE;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(211, 47, 47, 0.2);
+  border-color: #EF9A9A;
+}
+
+.clearButton:hover::before {
+  opacity: 1;
+}
+
+.clearButton:active {
+  background: #FFCDD2;
+  transform: translateY(1px);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .clearButton:disabled {
-  background-color: #F5F5F5;
-  color: #BDBDBD;
+  opacity: 0.5;
   cursor: not-allowed;
+  background: #f0f0f0;
+  color: #999;
+  border-color: #ddd;
+}
+
+.clearButton:disabled:hover {
+  transform: none;
+  background: #f0f0f0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
 .closeButton {
   flex: 1;
   padding: 10px 20px;
-  border: none;
-  border-radius: 8px;
-  background-color: #F08651;
-  font-size: 16px;
-  font-weight: 500;
-  color: #fff;
+  background: #FFB370;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: white;
   cursor: pointer;
-  transition: opacity 0.2s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 16px rgba(255, 140, 26, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.closeButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .closeButton:hover:not(:disabled) {
-  opacity: 0.9;
+  background: #F08651;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(255, 140, 26, 0.4);
+}
+
+.closeButton:hover:not(:disabled)::before {
+  opacity: 1;
+}
+
+.closeButton:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1), 0 4px 12px rgba(255, 140, 26, 0.25);
 }
 
 /* 滾動條樣式 */
@@ -280,63 +408,124 @@
 }
 
 .modalBody::-webkit-scrollbar-track {
-  background: rgba(255, 179, 112, 0.2);
+  background: rgba(255, 179, 112, 0.1);
   border-radius: 3px;
 }
 
 .modalBody::-webkit-scrollbar-thumb {
   background: #FFB370;
   border-radius: 3px;
+  transition: background 0.3s ease;
 }
 
 .modalBody::-webkit-scrollbar-thumb:hover {
-  background: #FF9C4A;
+  background: #F08651;
 }
 
-/* 手機版優化 */
-@media (max-width: 480px) {
+.description::-webkit-scrollbar {
+  width: 4px;
+}
+
+.description::-webkit-scrollbar-track {
+  background: rgba(255, 179, 112, 0.1);
+  border-radius: 2px;
+}
+
+.description::-webkit-scrollbar-thumb {
+  background: #FFB370;
+  border-radius: 2px;
+}
+
+/* 響應式設計 - 小螢幕調整 */
+@media (max-width: 430px) {
   .modalContainer {
-    width: calc(100vw - 40px);
-    height: calc(100vh - 100px);
-    max-height: 600px;
+    max-width: calc(100vw - 40px);
+    max-height: calc(100vh - 80px);
   }
-  
+}
+
+@media (max-width: 380px) {
+  .modalOverlay {
+    padding: 16px;
+  }
+
+  .modalContainer {
+    max-width: calc(100vw - 32px);
+  }
+
+  .modalHeader {
+    padding: 16px;
+  }
+
   .modalHeader h2 {
-    font-size: 16px;
+    font-size: 1.05rem;
   }
-  
+
+  .modalBody {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .modalFooter {
+    padding: 12px 16px;
+    gap: 10px;
+  }
+
   .clearButton,
   .closeButton {
     padding: 8px 16px;
-    font-size: 14px;
+    font-size: 0.85rem;
   }
-  
+
   .backButton {
-    font-size: 14px;
+    font-size: 0.85rem;
+    padding: 6px 12px;
   }
-  
+
   .detailSection {
     padding: 12px;
   }
-  
+
   .detailSectionTitle {
-    font-size: 15px;
+    font-size: 1rem;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
   }
-  
+
   .detailInfoItem {
-    font-size: 13px;
+    padding: 8px 10px;
   }
-  
+
   .detailLabel {
     min-width: 80px;
+    font-size: 0.8rem;
   }
-  
+
+  .detailValue {
+    font-size: 0.85rem;
+  }
+
   .nutrientGrid {
     grid-template-columns: 1fr;
+    gap: 6px;
   }
-  
+
+  .nutrientItem {
+    font-size: 0.75rem;
+  }
+
   .description {
-    font-size: 12px;
+    font-size: 0.8rem;
     max-height: 120px;
+    padding: 10px;
+  }
+
+  .emptyIcon {
+    width: 60px;
+    height: 60px;
+  }
+
+  .emptyState p {
+    font-size: 0.85rem;
   }
 }

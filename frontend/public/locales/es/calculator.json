@@ -2,7 +2,7 @@
   "title": "Calculadora Nutricional",
   "functions": {
     "reset": "Restablecer",
-    "quickCalculate": "Cálculo Rápido",
+    "feedConsultation": "Consulta de Alimento",
     "history": "Historial"
   },
   "sections": {

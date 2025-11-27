@@ -1,3 +1,4 @@
+/* Modal 遮罩 */
 .overlay {
   position: fixed;
   top: 0;
@@ -9,40 +10,55 @@
   justify-content: center;
   align-items: center;
   z-index: 1000;
-}
-
-.modal {
-  background-color: #FFca9c;
-  border-radius: 15px;
   padding: 20px;
-  width: 85%;
-  max-width: 350px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
+/* Modal 容器 */
+.modal {
+  background: #FFF2D9;
+  border-radius: 16px;
+  padding: 20px;
+  width: 100%;
+  max-width: 380px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideIn {
+  from {
+    transform: scale(0.95) translateY(10px);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+
+/* 標題區域 */
 .headerSection {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid #ffeed6;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid rgba(255, 179, 112, 0.3);
 }
 
 .headerTitle {
-  font-size: 18px;
-  font-weight: 600;
-  color: #333;
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #89350c;
   display: flex;
   align-items: center;
   flex-wrap: wrap;
 }
 
 .dateLabel {
-  font-size: 14px;
-  font-weight: 400;
-  color: #666;
-  margin-left: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #8B4513;
+  margin-left: 8px;
 }
 
 .headerButtons {
@@ -51,66 +67,115 @@
 }
 
 /* 按鈕基本樣式 */
-.deleteButton, .completeButton, .statusButton {
-  padding: 4px 8px;
+.deleteButton,
+.completeButton,
+.statusButton {
+  padding: 6px 12px;
   border: none;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 500;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
-  min-width: 40px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  min-width: 50px;
   text-align: center;
   white-space: nowrap;
+  position: relative;
+  overflow: hidden;
+}
+
+.deleteButton::before,
+.completeButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .deleteButton {
-  background-color: #F44336;
+  background-color: #EF5350;
   color: white;
+  box-shadow: 0 2px 6px rgba(239, 83, 80, 0.3);
 }
 
 .deleteButton:hover {
-  background-color: #d32f2f;
+  background-color: #E53935;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(239, 83, 80, 0.4);
+}
+
+.deleteButton:hover::before {
+  opacity: 1;
+}
+
+.deleteButton:active {
+  transform: translateY(1px);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .completeButton {
-  background-color: #4CAF50;
+  background-color: #66BB6A;
   color: white;
+  box-shadow: 0 2px 6px rgba(102, 187, 106, 0.3);
 }
 
 .completeButton:hover {
-  background-color: #388e3c;
+  background-color: #4CAF50;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 187, 106, 0.4);
+}
+
+.completeButton:hover::before {
+  opacity: 1;
+}
+
+.completeButton:active {
+  transform: translateY(1px);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .statusButton {
-  background-color: #6c757d;
+  background-color: #9E9E9E;
   color: white;
   cursor: default;
+  box-shadow: 0 2px 6px rgba(158, 158, 158, 0.3);
 }
 
-
+/* 時間區域 */
 .timeSection {
   display: flex;
   margin-bottom: 16px;
-  gap: 10px;
+  gap: 12px;
   align-items: center;
 }
 
 .timeLabel {
-  flex: 0 0 40px;
-  font-size: 16px;
-  font-weight: 500;
+  flex: 0 0 50px;
+  font-size: 0.95rem;
   font-weight: bold;
-  color: #333;
+  color: #89350c;
 }
 
 .timeInputContainer {
   flex: 1;
   display: flex;
   align-items: center;
-  background-color: #ffeed6;
-  border-radius: 10px;
-  padding: 8px 12px;
+  background: #fff6ea;
+  border: 1px solid rgba(255, 179, 112, 0.2);
+  border-radius: 12px;
+  padding: 10px 14px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.timeInputContainer:focus-within {
+  border-color: #FFB370;
+  box-shadow: 0 2px 8px rgba(255, 179, 112, 0.2);
 }
 
 .timeInput {
@@ -120,23 +185,25 @@
 
 .timeValue {
   text-align: center;
-  font-size: 18px;
-  font-weight: 500;
-  color: #333;
-  padding: 6px;
-  border-radius: 6px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #89350c;
+  padding: 8px;
+  border-radius: 8px;
   cursor: pointer;
   user-select: none;
+  transition: all 0.3s ease;
 }
 
 .timeValue:hover {
-  background-color: rgba(240, 134, 81, 0.1);
+  background-color: rgba(255, 179, 112, 0.15);
 }
 
 .timeSeparator {
-  font-size: 20px;
-  color: #666;
-  margin: 0 5px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #F08651;
+  margin: 0 6px;
   user-select: none;
 }
 
@@ -148,143 +215,287 @@
   max-height: 200px;
   overflow-y: auto;
   background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
   z-index: 10;
-  margin-top: 4px;
-  /* 隱藏滾動條但保持功能 */
-  scrollbar-width: none;  /* Firefox */
-  -ms-overflow-style: none;  /* IE and Edge */
+  margin-top: 6px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 .timeDropdown::-webkit-scrollbar {
-  display: none;  /* Chrome, Safari, Opera */
+  display: none;
 }
 
 .timeOption {
-  padding: 8px 0;
+  padding: 10px 0;
   text-align: center;
-  font-size: 16px;
+  font-size: 0.95rem;
   cursor: pointer;
   transition: all 0.2s ease;
+  color: #8B4513;
 }
 
 .timeOption:hover {
-  background-color: #ffeed6;
+  background-color: rgba(255, 179, 112, 0.15);
 }
 
 .timeOption.selected {
-  background-color: #F08651;
+  background: #FFB370;
   color: #fff;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .dateInput {
   width: 100%;
   background: transparent;
   border: none;
-  font-size: 18px;
-  font-weight: 500;
-  color: #333;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #89350c;
   outline: none;
   text-align: center;
 }
 
 .timeDivider {
   text-align: center;
-  margin: 10px 0;
-  font-size: 16px;
-  font-weight: 500;
-  color: #333;
+  margin: 12px 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #8B4513;
 }
 
+/* 錯誤訊息 */
 .errorMessage {
-  color: #d9534f;
-  font-size: 14px;
+  color: #D32F2F;
+  font-size: 0.85rem;
   text-align: center;
   margin-bottom: 16px;
-  padding: 6px 10px;
-  background-color: rgba(217, 83, 79, 0.1);
-  border-radius: 6px;
-  
+  padding: 10px 14px;
+  background-color: rgba(211, 47, 47, 0.1);
+  border: 1px solid rgba(211, 47, 47, 0.2);
+  border-radius: 10px;
 }
 
+/* 標題輸入 */
 .titleInput {
   width: 100%;
-  padding: 12px;
-  border: none;
-  border-radius: 10px;
-  background-color: #ffeed6;
-  font-size: 16px;
-  color: #333;
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 179, 112, 0.2);
+  border-radius: 12px;
+  background-color: #fff6ea;
+  font-size: 0.95rem;
+  color: #89350c;
   margin-bottom: 16px;
   box-sizing: border-box;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 }
 
 .titleInput:focus {
   outline: none;
-  box-shadow: 0 0 0 2px #F08651;
+  border-color: #FFB370;
+  box-shadow: 0 2px 8px rgba(255, 179, 112, 0.2);
 }
 
+.titleInput::placeholder {
+  color: #b8814a;
+  opacity: 0.7;
+}
+
+/* 描述輸入 */
 .descriptionInput {
   width: 100%;
-  padding: 12px;
-  border: none;
-  border-radius: 10px;
-  background-color: #ffeed6;
-  font-size: 16px;
-  color: #333;
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 179, 112, 0.2);
+  border-radius: 12px;
+  background-color: #fff6ea;
+  font-size: 0.95rem;
+  color: #89350c;
   margin-bottom: 16px;
   resize: none;
   box-sizing: border-box;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 }
 
 .descriptionInput:focus {
   outline: none;
-  box-shadow: 0 0 0 2px #F08651;
+  border-color: #FFB370;
+  box-shadow: 0 2px 8px rgba(255, 179, 112, 0.2);
 }
 
+.descriptionInput::placeholder {
+  color: #b8814a;
+  opacity: 0.7;
+}
+
+/* 按鈕區域 */
 .buttonSection {
   display: flex;
   justify-content: space-between;
-  gap: 10px;
+  gap: 12px;
 }
 
 .cancelButton {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 8px;
-  background-color: #ffeed6;
-  font-size: 16px;
-  font-weight: 500;
-  color: #666;
-  cursor: pointer;
-  transition: background-color 0.2s;
   flex: 1;
+  padding: 12px 20px;
+  border: 2px solid rgba(255, 179, 112, 0.2);
+  border-radius: 10px;
+  background: #fff6ea;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #8B4513;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.cancelButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .cancelButton:hover {
-  background-color: #ffdbaa;
+  background: #f5eed8;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+  border-color: #FFB370;
+}
+
+.cancelButton:hover::before {
+  opacity: 1;
+}
+
+.cancelButton:active {
+  transform: translateY(1px);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .saveButton {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 8px;
-  background-color: #F08651;
-  font-size: 16px;
-  font-weight: 500;
+  flex: 1;
+  padding: 12px 20px;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  background: #FFB370;
+  font-size: 0.95rem;
+  font-weight: 600;
   color: #fff;
   cursor: pointer;
-  transition: opacity 0.2s;
-  flex: 1;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 16px rgba(255, 140, 26, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.saveButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .saveButton:hover:not(:disabled) {
-  opacity: 0.9;
+  background: #F08651;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(255, 140, 26, 0.4);
+}
+
+.saveButton:hover:not(:disabled)::before {
+  opacity: 1;
+}
+
+.saveButton:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1), 0 4px 12px rgba(255, 140, 26, 0.25);
 }
 
 .saveButton:disabled {
-  background-color: #ccc;
+  opacity: 0.5;
   cursor: not-allowed;
-} 
+  background: #ccc;
+  box-shadow: none;
+}
+
+/* 響應式設計 */
+@media (max-width: 430px) {
+  .modal {
+    max-width: calc(100vw - 40px);
+  }
+}
+
+@media (max-width: 380px) {
+  .overlay {
+    padding: 16px;
+  }
+
+  .modal {
+    padding: 16px;
+    max-width: calc(100vw - 32px);
+  }
+
+  .headerSection {
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+  }
+
+  .headerTitle {
+    font-size: 1rem;
+  }
+
+  .dateLabel {
+    font-size: 0.8rem;
+  }
+
+  .deleteButton,
+  .completeButton,
+  .statusButton {
+    padding: 5px 10px;
+    font-size: 0.75rem;
+    min-width: 45px;
+  }
+
+  .timeSection {
+    gap: 10px;
+  }
+
+  .timeLabel {
+    flex: 0 0 45px;
+    font-size: 0.9rem;
+  }
+
+  .timeInputContainer {
+    padding: 8px 12px;
+  }
+
+  .timeValue {
+    font-size: 1rem;
+    padding: 6px;
+  }
+
+  .titleInput,
+  .descriptionInput {
+    padding: 10px 12px;
+    font-size: 0.9rem;
+  }
+
+  .cancelButton,
+  .saveButton {
+    padding: 10px 16px;
+    font-size: 0.9rem;
+  }
+}

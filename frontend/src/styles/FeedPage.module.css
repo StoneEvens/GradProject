@@ -1,65 +1,101 @@
+/* 主容器 */
 .container {
-  display: flex;
-  flex-direction: column;
   min-height: 100vh;
-  background-color: #FFF2D9;
+  background: #FFF2D9;
+  padding-top: calc(60px + max(env(safe-area-inset-top), 10px) + 30px);
+  padding-bottom: calc(70px + max(env(safe-area-inset-bottom), 8px) + 30px);
+  box-sizing: border-box;
 }
 
 .content {
-  flex: 1;
-  padding: 30px;
-  padding-top: calc(60px + max(env(safe-area-inset-top), 10px) + 30px);
-  padding-bottom: calc(70px + max(env(safe-area-inset-bottom), 8px) + 30px);
-  max-width: 430px;
+  max-width: 420px;
   margin: 0 auto;
-  width: 100%;
-  box-sizing: border-box;
-  overflow-y: auto;
+  padding: 0 16px;
 }
 
+/* 載入狀態 */
 .loadingContainer {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 200px;
-  font-size: 16px;
+  min-height: 300px;
+  font-size: 1.1rem;
   color: #89350c;
 }
 
-/* 標題區域 */
-.titleSection {
+/* 標題列 */
+.header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-top: 30px;
-  margin-bottom: 5px;
-  position: relative;
+  align-items: flex-end;
+  padding: 20px 0 8px 0;
+  gap: 15px;
+}
+
+.titleSection {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  flex: 1;
 }
 
 .title {
-  font-size: 24px;
+  font-size: 1.3rem;
+  font-weight: 700;
   color: #89350c;
-  text-align: left;
   margin: 0;
-  font-weight: bold;
+  white-space: nowrap;
 }
 
+/* 分隔線 */
+.divider {
+  width: 100%;
+  height: 2px;
+  background-color: #FFB370;
+  margin-bottom: 20px;
+}
+
+/* 按鈕群組 */
+.buttonGroup {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+/* 查看精選按鈕 */
 .viewMarkedButton {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 50%;
-  transition: background-color 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 8px;
+  background: #fff6ea;
+  border: 1px solid rgba(255, 179, 112, 0.2);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
   color: #89350c;
   font-size: 14px;
 }
 
+.viewMarkedButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  border-radius: 8px;
+}
+
 .viewMarkedButton:hover {
-  background-color: rgba(255, 179, 112, 0.2);
+  background: #f5eed8;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+  border-color: #FFB370;
 }
 
 /* 新增飼料按鈕 */
@@ -81,94 +117,123 @@
   transform: translateY(-1px);
 }
 
-/* 分隔線 */
-.divider {
-  width: 100%;
-  height: 1.5px;
-  background: #FFB370;
-  margin: 10px 0 25px 0;
-}
-
-.viewMoreLink {
-  background: none;
-  border: none;
-  color: #FFB370;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  text-decoration: none;
-  padding: 4px 8px;
-  border-radius: 4px;
-}
-
-.viewMoreLink:hover {
-  color: #FFB370;
-}
-
-/* 區塊 */
+/* 區塊樣式 */
 .section {
   margin-bottom: 20px;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .sectionHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 
 .sectionLabel {
   display: block;
-  font-size: 16px;
-  color: #89350c;
+  font-size: 1rem;
   font-weight: bold;
-  margin-bottom: 0;
+  color: #89350c;
+  margin: 0 0 12px 0;
 }
 
+/* 查看更多連結 */
+.viewMoreLink {
+  background: none;
+  border: none;
+  color: #FFB370;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.viewMoreLink:hover {
+  color: #F08651;
+  background: rgba(255, 179, 112, 0.1);
+  text-decoration: underline;
+}
+
+/* 區塊內容容器 */
 .sectionContent {
-  background-color: #fff6ea;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.2) 100%);
   border-radius: 16px;
-  padding: 20px;
+  padding: 16px;
   min-height: 120px;
-}
-
-.sectionTitle {
-  font-size: 16px;
-  font-weight: bold;
-  color: #89350c;
-  margin: 0 0 15px 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 /* 飼料網格 */
 .feedGrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 15px;
-  margin-bottom: 10px;
+  gap: 12px;
 }
 
 /* 飼料卡片 */
 .feedCard {
   display: flex;
   flex-direction: column;
-  background: white;
+  background: #fff6ea;
+  border: 1px solid rgba(255, 179, 112, 0.2);
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
+  position: relative;
+}
+
+.feedCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 1;
+  pointer-events: none;
 }
 
 .feedCard:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  border-color: #FFB370;
 }
 
+.feedCard:hover::before {
+  opacity: 1;
+}
+
+.feedCard:active {
+  transform: translateY(0);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* 飼料圖片容器 */
 .feedImageContainer {
   position: relative;
   width: 100%;
   aspect-ratio: 1;
-  background-color: #FFE4B5;
+  background: linear-gradient(135deg, #fff6ea 0%, #FFE4B5 100%);
   overflow: hidden;
 }
 
@@ -184,17 +249,18 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #FFE4B5;
+  background: linear-gradient(135deg, #fff6ea 0%, #FFE4B5 100%);
   color: #89350c;
-  font-size: 12px;
+  font-size: 0.7rem;
+  font-weight: 500;
 }
 
 /* 標記按鈕 */
 .markButton {
   position: absolute;
-  top: 8px;
-  right: 8px;
-  background: white;
+  top: 6px;
+  right: 6px;
+  background: rgba(255, 255, 255, 0.95);
   border: none;
   border-radius: 50%;
   width: 28px;
@@ -203,47 +269,53 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  transition: transform 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 2;
 }
 
 .markButton:hover {
-  transform: scale(1.1);
+  transform: scale(1.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.markButton:active {
+  transform: scale(0.95);
 }
 
 .markButton img {
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
 }
 
 /* 審核中標示 */
 .verifyingBadge {
   position: absolute;
-  bottom: 8px;
-  left: 8px;
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 8px;
-  padding: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  bottom: 6px;
+  left: 6px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 6px;
+  padding: 3px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  z-index: 2;
 }
 
 .verifyingBadge img {
-  width: 24px;
-  height: 24px;
+  width: 18px;
+  height: 18px;
   display: block;
 }
-
 
 /* 飼料資訊 */
 .feedInfo {
   padding: 10px;
-  background: white;
+  background: #fff6ea;
 }
 
 .feedName {
-  font-size: 14px;
+  font-size: 0.8rem;
   font-weight: 600;
-  color: #333;
+  color: #89350c;
   margin: 0 0 4px 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -251,26 +323,27 @@
 }
 
 .feedBrand {
-  font-size: 12px;
-  color: #666;
+  font-size: 0.7rem;
+  color: #8B4513;
   margin: 0 0 4px 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  opacity: 0.8;
 }
 
 .feedPrice {
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 0.8rem;
+  font-weight: 700;
   color: #F08651;
   margin: 0;
 }
 
 .verifiedBadge {
   display: inline-block;
-  font-size: 11px;
-  color: #28a745;
-  font-weight: 500;
+  font-size: 0.65rem;
+  color: #4CAF50;
+  font-weight: 600;
   margin-top: 4px;
 }
 
@@ -278,7 +351,7 @@
 .viewMoreContainer {
   display: flex;
   justify-content: flex-end;
-  margin-top: 10px;
+  margin-top: 12px;
 }
 
 /* 空狀態 */
@@ -287,97 +360,222 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  min-height: 100px;
-  color: #89350c;
-  font-size: 14px;
+  min-height: 120px;
+  color: #8B4513;
+  font-size: 0.9rem;
   text-align: center;
+  padding: 20px;
 }
 
 .noResultImage {
   width: 60px;
   height: 60px;
-  margin-bottom: 4px;
-  opacity: 0.6;
+  margin-bottom: 12px;
+  opacity: 0.5;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
 }
 
-/* 手機版優化 */
+/* ========== 響應式設計 ========== */
 @media (max-width: 480px) {
   .content {
-    padding: 15px 15px 15px 15px;
-    padding-top: calc(60px + max(env(safe-area-inset-top), 10px) + 15px); /* TopNavbar 高度 + 額外間距 */
-    padding-bottom: calc(70px + max(env(safe-area-inset-bottom), 8px) + 15px); /* BottomNavbar 高度 + 額外間距 */
+    padding: 0 15px;
   }
-  
-  .titleSection {
-    margin-top: 25px;
-    margin-bottom: 15px;
+
+  .header {
+    padding: 15px 0 12px 0;
+    gap: 10px;
   }
-  
+
   .title {
-    font-size: 20px;
+    font-size: 1.3rem;
   }
-  
-  .section {
-    margin-bottom: 15px;
+
+  .addFeedButton {
+    padding: 10px 16px;
+    font-size: 13px;
   }
-  
+
   .sectionContent {
-    padding: 15px;
-  }
-
-  .sectionTitle {
-    font-size: 14px;
-    margin-bottom: 12px;
+    padding: 14px;
   }
 
   .feedGrid {
-    gap: 12px;
-  }
-
-  .feedName {
-    font-size: 12px;
-  }
-
-  .feedBrand {
-    font-size: 11px;
-  }
-
-  .feedPrice {
-    font-size: 12px;
-  }
-
-  .markButton {
-    width: 26px;
-    height: 26px;
-  }
-
-  .markButton img {
-    width: 22px;
-    height: 22px;
-  }
-
-  .viewMarkedButton {
-    padding: 6px;
-  }
-}
-
-@media (max-width: 360px) {
-  .content {
-    padding: 12px 12px 12px 12px;
-    padding-top: calc(60px + max(env(safe-area-inset-top), 10px) + 12px); /* TopNavbar 高度 + 額外間距 */
-    padding-bottom: calc(70px + max(env(safe-area-inset-bottom), 8px) + 12px); /* BottomNavbar 高度 + 額外間距 */
-  }
-
-  .feedGrid {
-    grid-template-columns: repeat(2, 1fr);
     gap: 10px;
   }
 
   .feedInfo {
     padding: 8px;
   }
-  
+
+  .feedName {
+    font-size: 0.75rem;
+  }
+
+  .feedBrand {
+    font-size: 0.65rem;
+  }
+
+  .feedPrice {
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .content {
+    padding: 0 12px;
+  }
+
+  .header {
+    padding: 12px 0 10px 0;
+    gap: 8px;
+  }
+
+  .titleSection {
+    gap: 8px;
+  }
+
+  .title {
+    font-size: 1.2rem;
+  }
+
+  .buttonGroup {
+    gap: 6px;
+  }
+
+  .viewMarkedButton {
+    padding: 6px;
+  }
+
+  .addFeedButton {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+
+  .section {
+    margin-bottom: 16px;
+  }
+
+  .sectionHeader {
+    margin-bottom: 10px;
+  }
+
+  .sectionLabel {
+    font-size: 0.9rem;
+  }
+
+  .viewMoreLink {
+    font-size: 0.8rem;
+  }
+
   .sectionContent {
     padding: 12px;
+    min-height: 100px;
   }
+
+  .feedGrid {
+    gap: 8px;
+  }
+
+  .feedCard {
+    border-radius: 10px;
+  }
+
+  .markButton {
+    width: 24px;
+    height: 24px;
+    top: 4px;
+    right: 4px;
+  }
+
+  .markButton img {
+    width: 16px;
+    height: 16px;
+  }
+
+  .verifyingBadge {
+    bottom: 4px;
+    left: 4px;
+    padding: 2px;
+  }
+
+  .verifyingBadge img {
+    width: 14px;
+    height: 14px;
+  }
+
+  .feedInfo {
+    padding: 6px;
+  }
+
+  .feedName {
+    font-size: 0.7rem;
+    margin-bottom: 2px;
+  }
+
+  .feedBrand {
+    font-size: 0.6rem;
+    margin-bottom: 2px;
+  }
+
+  .feedPrice {
+    font-size: 0.7rem;
+  }
+
+  .emptyState {
+    min-height: 100px;
+    font-size: 0.85rem;
+    padding: 16px;
+  }
+
+  .noResultImage {
+    width: 50px;
+    height: 50px;
+    margin-bottom: 10px;
+  }
+}
+
+@media (max-width: 320px) {
+  .content {
+    padding: 0 10px;
+  }
+
+  .feedGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .buttonGroup {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .feedInfo {
+    padding: 8px;
+  }
+
+  .feedName {
+    font-size: 0.75rem;
+  }
+
+  .feedBrand {
+    font-size: 0.65rem;
+  }
+
+  .feedPrice {
+    font-size: 0.75rem;
+  }
+}
+
+/* 區塊標題（用於內部標題） */
+.sectionTitle {
+  font-size: 0.95rem;
+  font-weight: bold;
+  color: #89350c;
+  margin: 0 0 12px 0;
 }

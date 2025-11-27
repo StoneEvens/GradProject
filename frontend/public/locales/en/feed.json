@@ -140,6 +140,7 @@
       "feedPrice": "Enter feed price"
     },
     "buttons": {
+      "upload": "Upload",
       "uploadFront": "Upload Front Image",
       "uploadNutrition": "Upload Nutrition Label",
       "removeFront": "Remove Front Image",

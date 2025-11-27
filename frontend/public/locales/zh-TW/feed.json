@@ -140,6 +140,7 @@
       "feedPrice": "請輸入飼料價格"
     },
     "buttons": {
+      "upload": "上傳",
       "uploadFront": "上傳正面圖片",
       "uploadNutrition": "上傳營養成分表",
       "removeFront": "移除正面圖片",

@@ -273,38 +273,67 @@
     padding-top: calc(60px + max(env(safe-area-inset-top), 10px) + 15px); /* TopNavbar 高度 + 額外間距 */
     padding-bottom: calc(70px + max(env(safe-area-inset-bottom), 8px) + 15px); /* BottomNavbar 高度 + 額外間距 */
   }
-  
-  /* 手機版本：階段二頂部區域改為垂直布局 */
-  .phaseTwoTopSection {
-    flex-direction: column;
-    align-items: center;
-    gap: 15px;
+
+  .phaseTwo {
+    margin-left: 10px;
+    margin-right: 10px;
   }
-  
-  .titleContainer {
+
+  /* 手機版本：階段二頂部區域改為垂直布局，標題在上，大頭貼在下 */
+  .phaseTwoTopSection {
+    flex-direction: column-reverse;
+    align-items: center;
+    gap: 20px;
+    margin-top: 10px;
+  }
+
+  .avatarContainer {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .avatarSection {
+    display: flex;
     justify-content: center;
   }
-  
+
+  .avatarUpload {
+    width: 100px;
+    height: 100px;
+  }
+
+  .titleContainer {
+    justify-content: center;
+    width: 100%;
+  }
+
   .phaseTwo .title {
     text-align: center;
+    font-size: 22px;
   }
-  
+
   .formGroup {
     flex-direction: column;
     align-items: flex-start;
     gap: 8px;
   }
-  
+
   .formGroup label {
     min-width: auto;
   }
-  
+
+  .formGroup input,
+  .formGroup select {
+    width: 100%;
+  }
+
   .actionButtons {
     flex-direction: row;
     gap: 15px;
     justify-content: space-between;
   }
-  
+
   .backButton,
   .submitButton {
     flex: 1;
@@ -320,5 +349,47 @@
     padding: 12px 12px 12px 12px;
     padding-top: calc(60px + max(env(safe-area-inset-top), 10px) + 12px); /* TopNavbar 高度 + 額外間距 */
     padding-bottom: calc(70px + max(env(safe-area-inset-bottom), 8px) + 12px); /* BottomNavbar 高度 + 額外間距 */
+  }
+
+  .phaseTwo {
+    margin-left: 5px;
+    margin-right: 5px;
+    gap: 15px;
+  }
+
+  .phaseTwoTopSection {
+    gap: 15px;
+  }
+
+  .avatarUpload {
+    width: 90px;
+    height: 90px;
+  }
+
+  .phaseTwo .title {
+    font-size: 20px;
+  }
+
+  .formGroup label {
+    font-size: 15px;
+  }
+
+  .formGroup input,
+  .formGroup select {
+    padding: 10px;
+    font-size: 15px;
+  }
+
+  .descriptionSection textarea {
+    padding: 10px;
+    font-size: 15px;
+    min-height: 80px;
+  }
+
+  .backButton,
+  .submitButton {
+    max-width: 110px;
+    height: 45px;
+    font-size: 15px;
   }
 } 

@@ -2,7 +2,7 @@
   "title": "Nutrition Calculator",
   "functions": {
     "reset": "Reset",
-    "quickCalculate": "Quick Calculate",
+    "feedConsultation": "Feed Consultation",
     "history": "History"
   },
   "sections": {
