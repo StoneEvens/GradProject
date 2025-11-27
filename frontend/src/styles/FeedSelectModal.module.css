@@ -138,21 +138,47 @@
   display: flex;
   align-items: flex-start;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: #FFB370 rgba(255, 179, 112, 0.1);
 }
 
-/* 飼料網格 */
+/* 橫向滾動條樣式 */
+.sectionContent::-webkit-scrollbar {
+  height: 6px;
+}
+
+.sectionContent::-webkit-scrollbar-track {
+  background: rgba(255, 179, 112, 0.1);
+  border-radius: 3px;
+}
+
+.sectionContent::-webkit-scrollbar-thumb {
+  background: #FFB370;
+  border-radius: 3px;
+}
+
+.sectionContent::-webkit-scrollbar-thumb:hover {
+  background: #F08651;
+}
+
+/* 飼料網格 - 改為橫向可滑動 */
 .feedGrid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  display: flex;
+  flex-direction: row;
   gap: 10px;
-  width: 100%;
+  width: max-content;
+  min-width: 100%;
 }
 
 /* 飼料卡片 */
 .feedCard {
   position: relative;
-  width: 100%;
-  aspect-ratio: 1;
+  width: 80px;
+  height: 80px;
+  min-width: 80px;
+  flex-shrink: 0;
   background: #fff6ea;
   border: 1px solid rgba(255, 179, 112, 0.2);
   border-radius: 10px;
@@ -346,6 +372,9 @@
   }
 
   .feedCard {
+    width: 70px;
+    height: 70px;
+    min-width: 70px;
     border-radius: 8px;
   }
 
@@ -378,9 +407,10 @@
 }
 
 @media (max-width: 320px) {
-  .feedGrid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
+  .feedCard {
+    width: 65px;
+    height: 65px;
+    min-width: 65px;
   }
 
   .modalContainer {
