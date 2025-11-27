@@ -1,18 +1,18 @@
 /**
  * ImageEditor 組件 - 圖片標註編輯器
- * 
+ *
  * 標註資料格式 (符合後端 ImageAnnotation API):
  * {
  *   id: number,                    // 前端臨時ID
  *   x_position: number,            // X 座標（百分比 0-100）
- *   y_position: number,            // Y 座標（百分比 0-100）  
- *   display_name: string,          // 標註顯示名稱
- *   target_type: 'user' | 'pet',   // 標註目標類型
- *   target_id: number,             // 標註目標ID（用戶ID或寵物ID）
+ *   y_position: number,            // Y 座標（百分比 0-100）
+ *   display_name: string,          // 標註顯示名稱（寵物名稱）
+ *   target_type: 'pet',            // 標註目標類型（僅支援寵物）
+ *   target_id: number,             // 標註目標ID（寵物ID）
  *   created_by: number | null,     // 創建者ID（將在同步到後端時設置）
  *   // firebase_url: string,       // 圖片Firebase URL（暫時跳過）
  * }
- * 
+ *
  * 後端同步格式:
  * POST /api/v1/social/annotations/
  * {
@@ -20,7 +20,7 @@
  *   "x_position": 座標,
  *   "y_position": 座標,
  *   "display_name": "顯示名稱",
- *   "target_type": "user/pet",
+ *   "target_type": "pet",
  *   "target_id": 目標ID
  * }
  */
@@ -29,7 +29,6 @@ import { useTranslation } from 'react-i18next';
 import styles from '../styles/ImageEditor.module.css';
 import Annotation from './Annotation';
 import { getUserPets } from '../services/petService';
-import { checkAnnotationPermission } from '../services/socialService';
 
 const ImageEditor = ({ image, isOpen, onClose, onSave, mode = 'create' }) => {
   const { t } = useTranslation('posts');
@@ -38,8 +37,6 @@ const ImageEditor = ({ image, isOpen, onClose, onSave, mode = 'create' }) => {
   const [showAnnotationDots, setShowAnnotationDots] = useState(true);
   const [editingAnnotation, setEditingAnnotation] = useState(null);
   const [newAnnotation, setNewAnnotation] = useState(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [annotationType, setAnnotationType] = useState('user'); // 'user' or 'pet'
   const [selectedPet, setSelectedPet] = useState('');
   const [userPets, setUserPets] = useState([]);
   const [isLoadingPets, setIsLoadingPets] = useState(false);
@@ -236,14 +233,7 @@ const ImageEditor = ({ image, isOpen, onClose, onSave, mode = 'create' }) => {
     if (clickedAnnotation) {
       // 編輯現有標註
       setEditingAnnotation(clickedAnnotation);
-      setAnnotationType(clickedAnnotation.target_type || 'user');
-      if (clickedAnnotation.target_type === 'pet') {
-        setSelectedPet(String(clickedAnnotation.target_id));
-        setSearchQuery('');
-      } else {
-        setSearchQuery(clickedAnnotation.display_name || '');
-        setSelectedPet('');
-      }
+      setSelectedPet(String(clickedAnnotation.target_id));
     } else {
       // 新增標註
       const tempAnnotation = {
@@ -253,119 +243,69 @@ const ImageEditor = ({ image, isOpen, onClose, onSave, mode = 'create' }) => {
         imageId: image.id,
         display_name: '',
         target_id: null,
-        target_type: 'user', // 'user' 或 'pet'
+        target_type: 'pet',
         // firebase_url: '', // 暫時跳過，後續添加
         created_by: null // 將在保存時設置為當前用戶
       };
       setNewAnnotation(tempAnnotation);
-      setSearchQuery('');
+      setSelectedPet('');
     }
   };
 
   // 確認新增標註
-  const handleAddAnnotation = async () => {
-    let displayName = '';
-    let targetId = '';
-    
-    if (annotationType === 'user') {
-      if (!searchQuery.trim()) {
-        return;
-      }
-      
-      // 驗證使用者標註權限
-      try {
-        const result = await checkAnnotationPermission(searchQuery.trim());
-        if (!result.success || !result.data.can_annotate) {
-          return;
-        }
-        displayName = result.data.user_info.user_fullname || result.data.user_info.user_account;
-        targetId = result.data.user_info.user_account;
-      } catch (error) {
-        return;
-      }
-    } else {
-      if (!selectedPet) {
-        return;
-      }
-      if (isLoadingPets) {
-        return;
-      }
-      const pet = userPets.find(p => String(p.pet_id) === String(selectedPet));
-      if (!pet) {
-        console.error(t('imageEditor.messages.petNotFoundAdd'), selectedPet, 'userPets:', userPets.map(p => ({ pet_id: p.pet_id, name: p.pet_name, type: typeof p.pet_id })));
-        return;
-      }
-      displayName = pet.pet_name;
-      targetId = pet.pet_id;
+  const handleAddAnnotation = () => {
+    if (!selectedPet) {
+      return;
+    }
+    if (isLoadingPets) {
+      return;
+    }
+    const pet = userPets.find(p => String(p.pet_id) === String(selectedPet));
+    if (!pet) {
+      console.error(t('imageEditor.messages.petNotFoundAdd'), selectedPet, 'userPets:', userPets.map(p => ({ pet_id: p.pet_id, name: p.pet_name, type: typeof p.pet_id })));
+      return;
     }
 
     const annotation = {
       ...newAnnotation,
-      display_name: displayName,
-      target_id: targetId,
-      target_type: annotationType,
+      display_name: pet.pet_name,
+      target_id: pet.pet_id,
+      target_type: 'pet',
       created_by: null // 將在實際保存到後端時設置
     };
 
     const updatedAnnotations = [...annotations, annotation];
     setAnnotations(updatedAnnotations);
     saveAnnotations(updatedAnnotations);
-    
+
     setNewAnnotation(null);
-    setSearchQuery('');
-    setAnnotationType('user');
     setSelectedPet('');
   };
 
   // 更新標註
-  const handleUpdateAnnotation = async () => {
-    let displayName = '';
-    let targetId = '';
-    
-    if (annotationType === 'user') {
-      if (!searchQuery.trim()) {
-        return;
-      }
-      
-      // 驗證使用者標註權限
-      try {
-        const result = await checkAnnotationPermission(searchQuery.trim());
-        if (!result.success || !result.data.can_annotate) {
-          return;
-        }
-        displayName = result.data.user_info.user_fullname || result.data.user_info.user_account;
-        targetId = result.data.user_info.user_account;
-      } catch (error) {
-        return;
-      }
-    } else {
-      if (!selectedPet) {
-        return;
-      }
-      if (isLoadingPets) {
-        return;
-      }
-      const pet = userPets.find(p => String(p.pet_id) === String(selectedPet));
-      if (!pet) {
-        console.error(t('imageEditor.messages.petNotFoundUpdate'), selectedPet, 'userPets:', userPets.map(p => ({ pet_id: p.pet_id, name: p.pet_name, type: typeof p.pet_id })));
-        return;
-      }
-      displayName = pet.pet_name;
-      targetId = pet.pet_id;
+  const handleUpdateAnnotation = () => {
+    if (!selectedPet) {
+      return;
+    }
+    if (isLoadingPets) {
+      return;
+    }
+    const pet = userPets.find(p => String(p.pet_id) === String(selectedPet));
+    if (!pet) {
+      console.error(t('imageEditor.messages.petNotFoundUpdate'), selectedPet, 'userPets:', userPets.map(p => ({ pet_id: p.pet_id, name: p.pet_name, type: typeof p.pet_id })));
+      return;
     }
 
     const updatedAnnotations = annotations.map(annotation =>
       annotation.id === editingAnnotation.id
-        ? { ...annotation, display_name: displayName, target_id: targetId, target_type: annotationType }
+        ? { ...annotation, display_name: pet.pet_name, target_id: pet.pet_id, target_type: 'pet' }
         : annotation
     );
 
     setAnnotations(updatedAnnotations);
     saveAnnotations(updatedAnnotations);
-    
+
     setEditingAnnotation(null);
-    setSearchQuery('');
-    setAnnotationType('user');
     setSelectedPet('');
   };
 
@@ -374,20 +314,17 @@ const ImageEditor = ({ image, isOpen, onClose, onSave, mode = 'create' }) => {
     const updatedAnnotations = annotations.filter(
       annotation => annotation.id !== editingAnnotation.id
     );
-    
+
     setAnnotations(updatedAnnotations);
     saveAnnotations(updatedAnnotations);
-    
+
     setEditingAnnotation(null);
-    setSearchQuery('');
   };
 
   // 取消編輯
   const handleCancelEdit = () => {
     setNewAnnotation(null);
     setEditingAnnotation(null);
-    setSearchQuery('');
-    setAnnotationType('user');
     setSelectedPet('');
   };
 
@@ -490,15 +427,7 @@ const ImageEditor = ({ image, isOpen, onClose, onSave, mode = 'create' }) => {
                   e.stopPropagation();
                   if (showAnnotations) {
                     setEditingAnnotation(annotation);
-                    setAnnotationType(annotation.target_type || 'user');
-                    if (annotation.target_type === 'pet') {
-                      // 確保 target_id 是字串格式
-                      setSelectedPet(String(annotation.target_id));
-                      setSearchQuery('');
-                    } else {
-                      setSearchQuery(annotation.display_name || '');
-                      setSelectedPet('');
-                    }
+                    setSelectedPet(String(annotation.target_id));
                   }
                 }}
               />
@@ -530,47 +459,21 @@ const ImageEditor = ({ image, isOpen, onClose, onSave, mode = 'create' }) => {
           {(newAnnotation || editingAnnotation) && (
             <div className={styles.editPanel}>
               <div className={styles.inputRow}>
-                <div className={styles.typeSelector}>
-                  <label>{t('imageEditor.form.annotationType')}</label>
-                  <select
-                    value={annotationType}
-                    onChange={(e) => {
-                      setAnnotationType(e.target.value);
-                      setSearchQuery('');
-                      setSelectedPet('');
-                    }}
-                    className={styles.typeSelect}
-                  >
-                    <option value="user">{t('imageEditor.form.otherUser')}</option>
-                    <option value="pet">{t('imageEditor.form.pet')}</option>
-                  </select>
-                </div>
-
                 <div className={styles.inputGroup}>
-                  <label>{t('imageEditor.form.annotationContent')}</label>
-                  {annotationType === 'user' ? (
-                    <input
-                      type="text"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder={t('imageEditor.form.enterUsername')}
-                      className={styles.searchInput}
-                    />
-                  ) : (
-                    <select
-                      value={selectedPet}
-                      onChange={(e) => setSelectedPet(e.target.value)}
-                      className={styles.searchInput}
-                      disabled={isLoadingPets}
-                    >
-                      <option value="">{isLoadingPets ? t('imageEditor.form.loading') : t('imageEditor.form.selectPet')}</option>
-                      {userPets.map((pet, index) => (
-                        <option key={`pet-${pet.pet_id || index}`} value={pet.pet_id}>
-                          {pet.pet_name} ({pet.pet_type === 'dog' ? t('imageEditor.petTypes.dog') : t('imageEditor.petTypes.cat')})
-                        </option>
-                      ))}
-                    </select>
-                  )}
+                  <label>{t('imageEditor.form.selectPet')}</label>
+                  <select
+                    value={selectedPet}
+                    onChange={(e) => setSelectedPet(e.target.value)}
+                    className={styles.searchInput}
+                    disabled={isLoadingPets}
+                  >
+                    <option value="">{isLoadingPets ? t('imageEditor.form.loading') : t('imageEditor.form.selectPet')}</option>
+                    {userPets.map((pet, index) => (
+                      <option key={`pet-${pet.pet_id || index}`} value={pet.pet_id}>
+                        {pet.pet_name} ({pet.pet_type === 'dog' ? t('imageEditor.petTypes.dog') : t('imageEditor.petTypes.cat')})
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
 
