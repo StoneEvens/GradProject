@@ -110,6 +110,8 @@
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
+  height: fit-content;
+  align-self: center;
 }
 
 .addFeedButton:hover {
@@ -391,7 +393,7 @@
   }
 
   .addFeedButton {
-    padding: 10px 16px;
+    padding: 6px 12px;
     font-size: 13px;
   }
 
@@ -545,14 +547,29 @@
   }
 
   .header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
+    flex-direction: row;
+    align-items: flex-end;
+    gap: 8px;
+  }
+
+  .titleSection {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .title {
+    font-size: 1.1rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .buttonGroup {
-    width: 100%;
-    justify-content: flex-end;
+    flex-shrink: 0;
+  }
+
+  .addFeedButton {
+    padding: 6px 10px;
+    font-size: 11px;
   }
 
   .feedInfo {
