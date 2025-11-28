@@ -591,10 +591,23 @@ function CalculatorPageV2() {
 
       setCalculationResult(res.data);
       setHasCalculated(true);
-      
+
       // 儲存為上次使用的資料
       saveAsLastUsed();
-      
+
+      // 記錄飼料使用（建立 UserFeed 關聯）
+      if (selectedFeed?.id && selectedPet?.id && !selectedPet.isTemporary) {
+        try {
+          await axios.post('/calculator/feeds/usage/', {
+            feed_id: selectedFeed.id,
+            pet_id: selectedPet.id
+          });
+        } catch (usageError) {
+          console.error('記錄飼料使用失敗:', usageError);
+          // 不影響主要計算流程，只記錄錯誤
+        }
+      }
+
       // 不在這裡儲存歷史記錄，而是在重置時才儲存
 
     } catch (error) {
