@@ -796,6 +796,23 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
             }
         }, 100); // 等 highlight 定位完，100ms 是最穩的延遲
     }
+        // Step 15 等待 modal Step 2 render
+    if (stepData?.id === 15) {
+      const modalContainer = document.querySelector('[class*="modalContainer"]');
+      if (!modalContainer) {
+        console.log("Step 15: modalContainer 尚未渲染，稍後再試");
+        setTimeout(findAndHighlightElement, 120);
+        return;
+      }
+
+      // Step 15 confirmSection 若還沒出現
+      if (!document.querySelector('[class^="_confirmSection"]')) {
+        console.log("Step 15: confirmSection 尚未渲染，稍後再試");
+        setTimeout(findAndHighlightElement, 120);
+        return;
+      }
+    }
+
     // 供快取與一般流程共用：設定目標元素互動（事件/條件監聽）
     const setupTargetInteraction = (targetElement) => {
       // 監聽元素點擊 - 加強事件綁定和防止重複觸發
@@ -920,7 +937,6 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
                                    stepData?.action === 'select' ||
                                    targetElement.className?.includes('clickableImage') ||
                                    targetElement.className?.includes('editImage') ||
-                                   targetElement.className?.includes('confirmButton') ||
                                    targetElement.className?.includes('saveButton') ||
                                    targetElement.tagName === 'SELECT';
 

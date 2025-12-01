@@ -726,9 +726,9 @@ const tutorialData = {
       instruction: '',
       targetElement: {
         component: 'CreateFeedModal',
-        selector: '[data-step="upload-front"]',
-        className: 'uploadSection',
-        fallbackSelector: '[data-step="upload-front"]'
+        selector: 'div[class*="uploadRow"] > div:nth-of-type(1) button[class*="uploadBtn"]',
+        className: 'uploadBtn',
+        fallbackSelector: 'button[class*="uploadBtn"]'
       },
       highlight: {
         type: 'rectangle',
@@ -743,9 +743,9 @@ const tutorialData = {
       instruction: '',
       targetElement: {
         component: 'CreateFeedModal',
-        selector: '[data-step="upload-nutrition"]',
-        className: 'uploadSection',
-        fallbackSelector: '[data-step="upload-nutrition"]'
+        selector: 'div[class*="uploadRow"] > div:nth-of-type(2) button[class*="uploadBtn"]',
+        className: 'uploadBtn',
+        fallbackSelector: 'div[class*="uploadColumn"]:nth-of-type(2) button[class*="uploadBtn"]'
       },
       highlight: {
         type: 'rectangle',
@@ -756,7 +756,40 @@ const tutorialData = {
     },
     {
       id: 14,
-      title: '步驟 14：完成「新增飼料」',
+      title: '步驟 14：完成新增飼料',
+      instruction: '按下「下一步」按鈕',
+      targetElement: {
+        component: 'CreateFeedModal',
+        selector: '[class*="modalFooter"] .confirmButton:not([disabled])',
+        className: 'confirmButton',
+        fallbackSelector: '[class*="modalFooter"] .button:not([disabled])'
+      },
+      highlight: {
+        type: 'rectangle',
+        position: 'button'
+      },
+      action: 'click'
+    },
+    {
+      id: 15,
+      title: '步驟 15：確認及修改飼料資訊',
+      instruction: '',
+      targetElement: {
+        component: 'CreateFeedModal',
+        selector: '[class*="_confirmSection"]',
+        fallbackSelector: '[class*="_confirmSection"]',
+        className: '_confirmSection',
+      },
+      highlight: {
+        type: 'rectangle',
+        position: 'center'
+      },
+      nextCondition: 'manualNext',
+      showPointer: true
+    },
+    {
+      id: 16,
+      title: '步驟 16：完成確認及修改飼料資訊',
       instruction: '按下「確認新增」按鈕',
       targetElement: {
         component: 'CreateFeedModal',
@@ -772,8 +805,8 @@ const tutorialData = {
       showPointer: true
     },
     {
-      id: 15,
-      title: '步驟 15：點選「開始計算」按鈕',
+      id: 17,
+      title: '步驟 17：點選「開始計算」按鈕',
       instruction: '開始依數據計算結果',
       targetElement: {
         component: 'Calculate',
@@ -789,7 +822,7 @@ const tutorialData = {
       showPointer: true
     },
     {
-      id: 16,
+      id: 18,
       title: '完成！',
       instruction: '恭喜！您已成功獲得計算結果！',
       targetElement: null,

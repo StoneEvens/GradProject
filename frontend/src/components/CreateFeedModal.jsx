@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import axios from '../utils/axios';
 import styles from '../styles/CreateFeedModal.module.css';
 import NotificationComponent from './Notification';
+import tutorialData from '../data/tutorialData';
 
 const CreateFeedModal = ({ isOpen, onClose, onConfirm, defaultPetType = 'cat' }) => {
   const { t } = useTranslation('feed');
@@ -26,6 +27,8 @@ const CreateFeedModal = ({ isOpen, onClose, onConfirm, defaultPetType = 'cat' })
   }); // OCR 提取的營養成分
   const [loading, setLoading] = useState(false);
   const [notification, setNotification] = useState('');
+  const [stepData, setStepData] = useState(null);
+  const [currentStep, setCurrentStep] = useState(1);
 
   const frontInputRef = useRef(null);
   const nutritionInputRef = useRef(null);
@@ -158,7 +161,14 @@ const CreateFeedModal = ({ isOpen, onClose, onConfirm, defaultPetType = 'cat' })
     if (!validateForm()) {
       return;
     }
+    console.log('tutorialData',tutorialData);
+    console.log('tutorialData.calculate', tutorialData.calculate);
+    console.log('tutorialData.calculate.steps', tutorialData.calculate.steps);
+    const target = tutorialData.calculate.steps[14];
+    console.log('target', target);
 
+    setStepData(target);
+    setCurrentStep(target.id);
     setLoading(true);
     try {
       // 調用 OCR API 提取營養成分
