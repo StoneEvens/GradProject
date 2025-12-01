@@ -133,7 +133,7 @@ class PetNutritionCalculator(APIView):
     def calculate_recommended_nutrients(self, pet_type, daily_ME):
         if pet_type == 'dog':
             return {
-                'protein': round((50 / 1000) * daily_ME, 2),
+                'protein': round((25 / 1000) * daily_ME, 2),
                 'fat': round((13.8 / 1000) * daily_ME, 2),
                 'calcium': round((1 / 1000) * daily_ME, 2),
                 'phosphorus': round((0.75 / 1000) * daily_ME, 2),
@@ -142,12 +142,12 @@ class PetNutritionCalculator(APIView):
             }
         elif pet_type == 'cat':
             return {
-                'protein': round((65 / 1000) * daily_ME, 2),
+                'protein': round((50 / 1000) * daily_ME, 2),
                 'fat': round((22.5 / 1000) * daily_ME, 2),
-                'calcium': round((1 / 1000) * daily_ME, 2),
-                'phosphorus': round((0.75 / 1000) * daily_ME, 2),
-                'magnesium': round((140 / 1000 / 1000) * daily_ME, 4),
-                'sodium': round((300 / 1000 / 1000) * daily_ME, 4),
+                'calcium': round((0.72 / 1000) * daily_ME, 2),
+                'phosphorus': round((0.64 / 1000) * daily_ME, 2),
+                'magnesium': round((100 / 1000 / 1000) * daily_ME, 4),
+                'sodium': round((170 / 1000 / 1000) * daily_ME, 4),
             }
         return {}
 
