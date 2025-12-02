@@ -714,9 +714,53 @@ def get_operation_list() -> Dict:
             ]
         }
     }
+    return operations
+
+
+def get_operation_list_summary() -> Dict:
+    """
+    返回所有可用資料庫操作的簡要列表（只有名稱和簡短描述）
+    使用 get_operation_usage(operation) 獲取特定操作的完整詳細資訊
+    
+    Returns:
+        Dict: 包含操作名稱和簡短描述
+    """
+    operations = get_operation_list()
+    summary = {}
+    for op_name, op_details in operations.items():
+        summary[op_name] = {
+            "description": op_details.get("description", ""),
+            "required_params": op_details.get("required_params", []),
+            "optional_params": op_details.get("optional_params", [])
+        }
     return {
-        "operations": operations,
-        "total_count": len(operations)
+        "operations": summary,
+        "total_count": len(summary),
+        "hint": "Use get_operation_usage(operation_name) to get full details including param_details, notes, workflow, and response_handling before calling perform_database_operation."
+    }
+
+
+def get_operation_usage(operation: str) -> Dict:
+    """
+    返回特定資料庫操作的完整詳細資訊
+    
+    Args:
+        operation: 操作名稱
+        
+    Returns:
+        Dict: 包含該操作的完整詳細資訊（params, notes, workflow, response_handling等）
+    """
+    operations = get_operation_list()
+    if operation not in operations:
+        available = list(operations.keys())
+        return {
+            "error": f"Unknown operation: {operation}",
+            "available_operations": available
+        }
+    
+    return {
+        "operation": operation,
+        "details": operations[operation]
     }
 
 
@@ -2079,10 +2123,13 @@ def _create_social_post(data: Dict) -> Dict:
     # 3. 解析並建立標籤
     created_hashtags = []
 
-    # 從參數解析標籤
+    # 從參數解析標籤 (支援 list 或 comma-separated string)
     tag_list = []
     if hashtags_param:
-        tag_list = [tag.strip().lstrip('#') for tag in hashtags_param.split(',')]
+        if isinstance(hashtags_param, list):
+            tag_list = [str(tag).strip().lstrip('#') for tag in hashtags_param]
+        else:
+            tag_list = [tag.strip().lstrip('#') for tag in hashtags_param.split(',')]
 
     # 從內容中提取 #標籤
     implicit_tags = re.findall(r'#([\w\u4e00-\u9fff]+)', content)

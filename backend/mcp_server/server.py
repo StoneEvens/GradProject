@@ -16,7 +16,7 @@ from social.serializers import PostFrameSerializer
 from pets.serializers import DiseaseArchiveContentSerializer, AbnormalPostSerializer
 from feeds.models import Feed
 from django.forms.models import model_to_dict
-from mcp_server.database_operations import get_operation_list, perform_operation
+from mcp_server.database_operations import get_operation_list, get_operation_list_summary, get_operation_usage, perform_operation
 from mcp_server.entity_resolver import EntityResolver
 
 # Setup logger
@@ -32,8 +32,12 @@ def create_mcp_server() -> FastMCP:
 
     @mcp.tool(
         name="get_user_pet_info_detailed",
-        description="Fetch a user's basic profile and their pets, including the abnormal posts. You are encouraged to use this tool to get abnormal posts data of the user's pets."
-        "Note that this operation requires verification that the user is performing the operation for themself. The easiest way to ensure this is to check the target of the prompt matches the user ID of the requester. The user id was added to the prompt automatically by the backend."
+        description=(
+            "Fetch a user's profile and their pets with abnormal posts.\n"
+            "USE WHEN: User asks about their pets, pet health history, or abnormal records.\n"
+            "NOTE: Verify requester_user_id matches the requested user_id.\n"
+            "RETURNS: User info + list of pets with their abnormal_posts arrays."
+        )
     )
     async def get_user_pet_info_detailed(user_id: int) -> str:
         """Returns a JSON string with user and pet information, or error message."""
@@ -103,7 +107,11 @@ def create_mcp_server() -> FastMCP:
     
     @mcp.tool(
         name="get_user_pet_list",
-        description="Fetch a user's list of pets."
+        description=(
+            "Fetch a user's list of pets (basic info only, no health records).\n"
+            "USE WHEN: Need pet names/types/breeds without health data.\n"
+            "RETURNS: List of {id, name, type, breed, age, weight}."
+        )
     )
     async def get_user_pet_list(user_id: int) -> str:
         @sync_to_async
@@ -146,8 +154,12 @@ def create_mcp_server() -> FastMCP:
     
     @mcp.tool(
         name="get_post_recommendations",
-        description="Get recommended posts based on a natural-language content description. Please use keywords; vague descriptions may yield poor results. Fetch both social and forum posts if no specific instruction was given."
-        "You can also use this tool to get the posts related to specific pet type, then use the result to filter such pet type owned by users for complex search requirements. Use entity resolver for simple cases."
+        description=(
+            "Get recommended social/forum posts based on content keywords.\n"
+            "USE WHEN: User wants post recommendations or searches for specific topics to find users relevant to the topic.\n"
+            "PARAMS: Use clear description of content and relevant hashtags; set isSocial/isForum flags, get both on default if not specified.\n"
+            "RETURNS: List of posts → populate recommended_social_posts or recommended_forum_posts."
+        )
     )
     async def get_post_recommendations(content_description: str, hashtags: list[str], isSocial: bool, isForum: bool) -> str:
         @sync_to_async
@@ -189,7 +201,11 @@ def create_mcp_server() -> FastMCP:
     
     @mcp.tool(
         name="get_user_information",
-        description="Fetch basic information of a user by their user ID."
+        description=(
+            "Fetch public profile info for specified user IDs.\n"
+            "USE WHEN: Need info about OTHER users (not the requester).\n"
+            "RETURNS: {users: {id: {username, user_fullname, user_intro, headshot_url}}}."
+        )
     )
     async def get_user_information(user_ids: list[int]) -> str:
         @sync_to_async
@@ -234,7 +250,11 @@ def create_mcp_server() -> FastMCP:
     
     @mcp.tool(
         name="get_user_pet_types",
-        description="Fetch the types of pets owned by a user."
+        description=(
+            "Fetch pet types (dog/cat/etc.) owned by specified users.\n"
+            "USE WHEN: Need to filter or match users by pet type.\n"
+            "RETURNS: {pet_types: {user_id: ['dog', 'cat', ...]}}."
+        )
     )
     async def get_user_pet_types(user_ids: list[int]) -> str:
         @sync_to_async
@@ -258,7 +278,11 @@ def create_mcp_server() -> FastMCP:
     
     @mcp.tool(
         name="get_pet_foods_details",
-        description="Fetch detailed information about pet foods"
+        description=(
+            "Fetch all pet foods from database with nutrition info.\n"
+            "USE WHEN: User asks about feed/food comparison or nutrition.\n"
+            "RETURNS: List of feeds with protein, fat, carbs, minerals, etc."
+        )
     )
     async def get_pet_foods_details() -> str:
         @sync_to_async
@@ -279,7 +303,11 @@ def create_mcp_server() -> FastMCP:
 
     @mcp.tool(
         name="list_tutorial_topics",
-        description="List available tutorial topics for users as an id->description mapping."
+        description=(
+            "List available interactive tutorial topics.\n"
+            "USE WHEN: User asks how to do something or wants to learn a feature.\n"
+            "RETURNS: {id: description} mapping → set matching id in 'tutorial' field."
+        )
     )
     async def list_tutorial_topics() -> str:
         @sync_to_async
@@ -302,7 +330,11 @@ def create_mcp_server() -> FastMCP:
 
     @mcp.tool(
         name="get_navigation_paths",
-        description="Get all available page paths and their mappings. Use this to find the correct path for user navigation requests."
+        description=(
+            "Get all valid page paths and their friendly names.\n"
+            "USE WHEN: Need to find correct path before calling prepare_navigate.\n"
+            "RETURNS: {available_paths: [...], dynamic_paths: [...]}."
+        )
     )
     async def get_navigation_paths() -> str:
         try:
@@ -324,7 +356,12 @@ def create_mcp_server() -> FastMCP:
 
     @mcp.tool(
         name="prepare_navigate",
-        description="Prepare a page navigation operation that requires user confirmation. Call get_navigation_paths first to find the correct path."
+        description=(
+            "Prepare navigation to a page (returns operation for frontend).\n"
+            "USE WHEN: User wants to go to a specific page.\n"
+            "PREREQ: Call get_navigation_paths first to get valid path.\n"
+            "RETURNS: Operation object → add to 'operations' array."
+        )
     )
     async def prepare_navigate(
         path: str,
@@ -399,12 +436,34 @@ def create_mcp_server() -> FastMCP:
     
     @mcp.tool(
         name="database_operation_list",
-        description="List available database operations as well as the parameters required."
+        description=(
+            "List all database operations with brief summary (names + params).\n"
+            "USE WHEN: Need to know what operations are available.\n"
+            "RETURNS: {operations: {name: {description, required_params, optional_params}}}.\n"
+            "NEXT: Call get_operation_usage(operation_name) to get full details before perform_database_operation."
+        )
     )
     async def database_operation_list() -> str:
         @sync_to_async
         def fetch() -> Dict:
-            return get_operation_list()
+            return get_operation_list_summary()
+
+        result_dict = await fetch()
+        return json.dumps(result_dict, ensure_ascii=False, indent=2)
+
+    @mcp.tool(
+        name="get_operation_usage",
+        description=(
+            "Get full details for a specific database operation.\n"
+            "USE WHEN: About to call perform_database_operation - MUST call this first.\n"
+            "RETURNS: Complete param_details, notes, workflow, response_handling, user_responses.\n"
+            "This tells you exactly what to ask the user and how to handle the response."
+        )
+    )
+    async def get_operation_usage_tool(operation: str) -> str:
+        @sync_to_async
+        def fetch() -> Dict:
+            return get_operation_usage(operation)
 
         result_dict = await fetch()
         return json.dumps(result_dict, ensure_ascii=False, indent=2)
@@ -412,42 +471,11 @@ def create_mcp_server() -> FastMCP:
     @mcp.tool(
         name="prepare_feed_ocr",
         description=(
-            "Trigger OCR analysis for feed nutrition label images.\n\n"
-            "CRITICAL - After calling this tool, you MUST add an operation to the operations array with EXACT format:\n"
-            "{\n"
-            "  'operation_type': 'ocr_feed_analysis',\n"
-            "  'operation_data': json.dumps({'purpose': 'feed_nutrition'})\n"
-            "}\n"
-            "Note: operation_data MUST be a JSON string created with json.dumps().\n"
-            "Do NOT use {operation_id, type, params} format - frontend will convert automatically.\n"
-            "Without this operation, frontend will NOT execute OCR!\n\n"
-            "Complete Workflow??\n"
-            "1. Check Context: User must have hasImages=true and imageCount=2 (package + nutrition label)\n"
-            "2. Call this tool + ADD operation to operations array (see above)\n"
-            "3. Tell user: '收到圖片！正在辨識飼料資訊，請稍候...'\n"
-            "4. Wait for Results: Frontend sends back ocrCompleted=true with ocrData containing: protein, fat, carbohydrate, calcium, phosphorus, magnesium, sodium (all values will be 0 if not detected)\n"
-            "5. Display to User: Show formatted OCR results with template:\n"
-            "   **飼料資訊辨識完成**\n"
-            "   **辨識結果**：\n"
-            "   蛋白質：{protein}%\n"
-            "   脂肪：{fat}%\n"
-            "   碳水化合物：{carbohydrate}%\n"
-            "   鈣：{calcium}%\n"
-            "   磷：{phosphorus}%\n"
-            "   鎂：{magnesium}%\n"
-            "   鈉：{sodium}%\n"
-            "   Then ask: 請問這是狗飼料還是貓飼料？另外請告訴我飼料名稱（如果您知道的話）。\n"
-            "6. Collect Info: After user provides pet_type, name, brand, show COMPLETE summary and ask for confirmation:\n"
-            "   **請確認飼料資訊**：\n"
-            "   用對象：{pet_type}\n"
-            "   品牌：{brand}\n"
-            "   名稱：{name}\n"
-            "   [all nutrition data]\n"
-            "   資料如有誤，請點選「返回修改」或「取消」，確認無誤就點選「確認」幫您建立飼料。\n"
-            "7. 請 WAIT for User Confirmation: Do NOT call add_feed until user explicitly confirms (e.g., '確定', '是', '好', '沒問題')\n"
-            "8. After Confirmation: Call perform_database_operation('add_feed', {...complete data...})\n"
-            "9. Handle Result: Check is_existing flag from add_feed response (see add_feed operation for details)\n\n"
-            "IMPORTANT: Do NOT call this tool if imageCount ??2. Frontend will validate this."
+            "Trigger OCR for feed nutrition label images.\n"
+            "USE WHEN: User uploads 2 images (package + nutrition label) for feed analysis.\n"
+            "PREREQ: hasImages=true AND imageCount>=2.\n"
+            "RETURNS: Operation object → add {operation_type: 'ocr_feed_analysis', operation_data: json.dumps({purpose: 'feed_nutrition'})} to 'operations'.\n"
+            "NEXT: Tell user '收到圖片！正在辨識飼料資訊，請稍候...' and wait for OCR results."
         )
     )
     async def prepare_feed_ocr(
@@ -476,36 +504,12 @@ def create_mcp_server() -> FastMCP:
     @mcp.tool(
         name="perform_database_operation",
         description=(
-            "Perform a database operation such as: add_pet, update_pet (modify pet info), add_abnormal_post (health records), "
-            "update_abnormal_post, delete_abnormal_post, create_disease_archive, add_plan (create schedule/calendar event), "
-            "update_plan (modify schedule), delete_plan (remove schedule), list_plans (view all schedules), create_social_post, "
-            "add_feed (add feed after OCR confirmation), add_health_report (create health report with OCR data), "
-            "update_health_report (modify health report), delete_health_report (remove health report).\n\n"
-            "IMPORTANT: Use 'add_plan' for creating schedules/calendar events, NOT 'create_schedule'.\n"
-            "Always call database_operation_list first to see exact parameter requirements.\n\n"
-            "CRITICAL - Parameter Structure:\n"
-            "This tool requires TWO parameters:\n"
-            "1. operation: The operation type (e.g., 'add_feed', 'add_pet')\n"
-            "2. data: A dictionary containing ALL the operation-specific parameters\n\n"
-            "Example for add_feed:\n"
-            "  operation: 'add_feed'\n"
-            "  data: {\n"
-            "    'user_id': 123,\n"
-            "    'pet_type': 'dog',\n"
-            "    'has_images': True,\n"
-            "    'name': 'Feed Name',\n"
-            "    'brand': 'Brand Name',\n"
-            "    'price': 500.0,\n"
-            "    'protein': 25.0,\n"
-            "    'fat': 15.0,\n"
-            "    'carbohydrate': 40.0,\n"
-            "    'calcium': 1.2,\n"
-            "    'phosphorus': 1.0,\n"
-            "    'magnesium': 0.1,\n"
-            "    'sodium': 0.3\n"
-            "  }\n\n"
-            "DO NOT flatten the parameters - ALL operation parameters must be inside the 'data' dictionary.\n\n"
-            "Note that database operations affects personal data; please verify that the user is doing the operation for themself."
+            "Execute a database mutation (add/update/delete).\n"
+            "USE WHEN: User confirms they want to create, modify, or delete data.\n"
+            "PREREQ: Call get_operation_usage(operation_name) first to get full details.\n"
+            "WORKFLOW: database_operation_list → get_operation_usage → ask user for params → perform_database_operation.\n"
+            "PARAMS: operation (str) + data (dict with ALL operation-specific params).\n"
+            "NOTE: Verify user is modifying their own data. Use 'add_plan' for schedules (not 'create_schedule')."
         )
     )
     async def perform_database_operation(
@@ -527,23 +531,12 @@ def create_mcp_server() -> FastMCP:
 
     @mcp.tool(
         name="search_glossary",
-        description="""
-        Search the system glossary to find definitions and explanations of PETer terminology.
-
-        Use this tool when users ask "什麼是...", "...是什麼意思", or need clarification on system terms.
-
-        Example queries:
-        - "什麼是疾病檔案"
-        - "OCR 是什麼"
-        - "異常記錄是什麼意思"
-
-        The tool searches through term names, aliases, and definitions to find matching entries.
-        Returns detailed explanations including usage examples, related terms, and navigation paths.
-
-        This is different from search_system_faq:
-        - search_glossary: For term definitions and concepts ("什麼是...")
-        - search_system_faq: For how-to questions and operations ("如何...", "怎麼...")
-        """
+        description=(
+            "Search glossary for term definitions and concepts.\n"
+            "USE WHEN: User asks '什麼是...', '...是什麼意思' (what is X?).\n"
+            "NOT FOR: How-to questions (use search_system_faq instead).\n"
+            "RETURNS: Term definitions with examples and related terms."
+        )
     )
     async def search_glossary(
         query: str,
@@ -685,19 +678,12 @@ def create_mcp_server() -> FastMCP:
 
     @mcp.tool(
         name="search_system_faq",
-        description="""
-        Search the system FAQ database to answer user questions about app features and operations.
-
-        Use this tool when users ask questions about:
-        - How to use specific features (e.g., "如何發布貼文", "怎麼新增寵物")
-        - Where to find certain functions (e.g., "設定在哪裡", "如何更改隱私")
-        - System operations and navigation (e.g., "如何標註寵物", "如何計算飼料")
-
-        The tool will search through keywords, use_cases, and descriptions to find relevant FAQ entries.
-        Always use this tool BEFORE providing answers about system features to avoid hallucinations.
-
-        Returns matching FAQ entries with detailed answers and tutorial information if available.
-        """
+        description=(
+            "Search FAQ for how-to questions about app features.\n"
+            "USE WHEN: User asks '如何...', '怎麼...' (how to do X?).\n"
+            "NOT FOR: Term definitions (use search_glossary instead).\n"
+            "RETURNS: FAQ entries with answers and tutorial info if available."
+        )
     )
     async def search_system_faq(
         query: str,
@@ -819,57 +805,13 @@ def create_mcp_server() -> FastMCP:
 
     @mcp.tool(
         name="resolve_entity_context",
-        description="""
-        Resolve dynamic path parameters by finding entities based on natural language descriptions. Use this tool for simple entity lookups.
-
-        This is a UNIVERSAL tool for handling dynamic paths that require IDs or query parameters.
-
-        Supported entity types:
-        - social_post: User's social posts (for /post/{id}/edit, etc.)
-        - feed: Pet food products (for /feeds/{id})
-        - pet: User's pets (for /pet/{id}/edit, /pet/{id}/health-reports, etc.)
-        - user: Other users (for /user/{username})
-        - health_report: Health reports (for /pet/{petId}/health-report/{id})
-        - disease_archive: Disease archives (for /pet/{petId}/disease-archive/{id})
-        - abnormal_post: Abnormal records (for /pet/{petId}/abnormal-post/{id})
-        - search_query: Generate search paths (for /social?q={query} or /feeds/search?q={query})
-
-        Common conditions patterns:
-        - time_range: "today", "yesterday", "last_week", "last_month", "last_sunday"
-        - specific_date: "2025-11-03"
-        - keywords: ["keyword1", "keyword2"]
-        - pet_name: "pet name" (string, will be resolved to pet first)
-        - pet_id: integer ID of specific pet
-        - newest: true (get most recent)
-        - oldest: true (get earliest)
-
-        Entity-specific conditions:
-        
-        For disease_archive:
-        - pet_id: integer - specific pet ID
-        - pet_name: string - pet name (will be resolved to pet_id)
-        - time_range: "last_week", "last_month", "today", "yesterday"
-        - keywords: array of strings - searches in archive_title and content
-        - newest: true (default) - most recent first
-        - oldest: true - earliest first
-        
-        For health_report:
-        - pet_id: integer - specific pet ID
-        - time_range: "last_week", "last_month"
-        - newest: true (default) - most recent first
-        
-        For abnormal_post:
-        - pet_id: integer - specific pet ID
-        - time_range: supported
-        - keywords: supported
-
-        For search_query entity type:
-        - search_type: "social" or "feed" (required)
-        - keywords: ["keyword1", "keyword2"] (required)
-        - description: "optional description for user-friendly message"
-
-        Returns matching entities with their IDs and resolved paths.
-        """
+        description=(
+            "Resolve entity IDs from natural language descriptions.\n"
+            "USE WHEN: Need to find specific pet/post/report IDs for navigation or operations.\n"
+            "ENTITY TYPES: pet, social_post, feed, user, health_report, disease_archive, abnormal_post, search_query.\n"
+            "CONDITIONS: time_range ('today','last_week'), pet_name, keywords, newest/oldest.\n"
+            "RETURNS: Matched entities with IDs and resolved paths."
+        )
     )
     async def resolve_entity_context(
         entity_type: Literal["social_post", "feed", "pet", "user", "health_report", "disease_archive", "abnormal_post", "search_query"],
