@@ -54,6 +54,7 @@ urlpatterns = [
     path(f'{api_v1_prefix}auctions/', include('auctions.urls')),
     path(f'{api_v1_prefix}ai-agent/', include('aiAgent.urls')),  # Changed prefix to avoid conflict
     path(f'{api_v1_prefix}ai/', include('ai.urls')),  # ChatKit and AI services
+    path(f'{api_v1_prefix}ai-v2/', include('aiAgentv2.urls')),  # AI Agent V2 - Multi-Agent Architecture
 
     # Swagger 文檔
     re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),

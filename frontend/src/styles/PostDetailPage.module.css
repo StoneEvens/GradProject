@@ -1,0 +1,190 @@
+/* 貼文詳情頁面樣式 - 參考 DiseaseArchiveDetailPage 風格 */
+.container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #FFF2D9;
+}
+
+.content {
+  flex: 1;
+  padding: 30px;
+  padding-top: calc(60px + max(env(safe-area-inset-top), 10px) + 30px);
+  padding-bottom: calc(70px + max(env(safe-area-inset-bottom), 8px) + 30px);
+  max-width: 430px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+.loadingContainer,
+.errorContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+  color: #89350c;
+  font-size: 16px;
+  text-align: center;
+}
+
+.errorMessage {
+  background: white;
+  padding: 32px 24px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  max-width: 400px;
+  width: 100%;
+}
+
+.errorMessage h3 {
+  color: #89350c;
+  margin: 0 0 12px 0;
+  font-size: 18px;
+}
+
+.errorMessage p {
+  color: #666;
+  margin: 0 0 24px 0;
+  line-height: 1.5;
+}
+
+.errorButtons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.retryButton,
+.errorButtons .backButton {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.retryButton {
+  background-color: #F08651;
+  color: white;
+}
+
+.retryButton:hover {
+  background-color: #d97444;
+}
+
+.errorButtons .backButton {
+  background-color: #f5f5f5;
+  color: #666;
+}
+
+.errorButtons .backButton:hover {
+  background-color: #e8e8e8;
+}
+
+/* 標題列 */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 20px 0 8px 0;
+  gap: 15px;
+}
+
+.titleSection {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex: 1;
+}
+
+.backButton {
+  background: none;
+  border: none;
+  padding: 8px 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  font-size: 20px;
+  color: #89350c;
+  font-weight: bold;
+}
+
+.title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #89350c;
+  margin: 0;
+  white-space: nowrap;
+}
+
+/* 分隔線 */
+.divider {
+  width: 100%;
+  height: 2px;
+  background-color: #FFB370;
+  margin-bottom: 20px;
+}
+
+/* 貼文容器 */
+.postWrapper {
+  margin-top: 0;
+}
+
+/* 響應式設計 */
+@media (max-width: 480px) {
+  .content {
+    padding: 20px;
+    padding-top: calc(60px + max(env(safe-area-inset-top), 10px) + 15px);
+    padding-bottom: calc(70px + max(env(safe-area-inset-bottom), 8px) + 15px);
+  }
+
+  .header {
+    padding: 15px 0 5px 0;
+    gap: 10px;
+  }
+
+  .title {
+    font-size: 1.1rem;
+  }
+
+  .titleSection {
+    gap: 10px;
+  }
+
+  .backButton {
+    padding: 6px 8px;
+    font-size: 18px;
+  }
+}
+
+/* 小屏手機優化 */
+@media (max-width: 360px) {
+  .content {
+    padding: 15px;
+    padding-top: calc(60px + max(env(safe-area-inset-top), 10px) + 12px);
+    padding-bottom: calc(70px + max(env(safe-area-inset-bottom), 8px) + 12px);
+  }
+
+  .header {
+    padding: 12px 0 8px 0;
+    gap: 8px;
+  }
+
+  .title {
+    font-size: 1rem;
+  }
+
+  .titleSection {
+    gap: 8px;
+  }
+
+  .backButton {
+    padding: 5px 7px;
+    font-size: 16px;
+  }
+}

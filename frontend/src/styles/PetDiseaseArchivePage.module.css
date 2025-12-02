@@ -70,7 +70,7 @@
   transition: all 0.2s ease;
   white-space: nowrap;
   height: fit-content;
-  align-self: center;
+  align-self: flex-end;
 }
 
 .newButton:hover {

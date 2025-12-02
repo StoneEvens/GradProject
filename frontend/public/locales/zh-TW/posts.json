@@ -292,6 +292,12 @@
     "weekDays": ["日", "一", "二", "三", "四", "五", "六"]
   },
   "post": {
+    "detailTitle": "貼文詳情",
+    "errorTitle": "無法載入貼文",
+    "errorDescription": "貼文可能已被刪除或不存在",
+    "retry": "重試",
+    "goBack": "返回",
+    "deleteSuccess": "貼文已刪除",
     "justNow": "剛剛",
     "minutesAgo": "{{minutes}}分鐘前",
     "hoursAgo": "{{hours}}小時前",

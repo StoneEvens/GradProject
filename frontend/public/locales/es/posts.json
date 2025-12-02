@@ -293,6 +293,12 @@
     "monthNames": ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]
   },
   "post": {
+    "detailTitle": "Detalles de la Publicación",
+    "errorTitle": "No se puede cargar la publicación",
+    "errorDescription": "La publicación puede haber sido eliminada o no existe",
+    "retry": "Reintentar",
+    "goBack": "Volver",
+    "deleteSuccess": "Publicación eliminada",
     "justNow": "Justo ahora",
     "minutesAgo": "hace {{minutes}} min",
     "hoursAgo": "hace {{hours}} hrs",

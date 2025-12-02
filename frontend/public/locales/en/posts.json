@@ -293,6 +293,12 @@
     "monthNames": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
   },
   "post": {
+    "detailTitle": "Post Details",
+    "errorTitle": "Unable to Load Post",
+    "errorDescription": "The post may have been deleted or does not exist",
+    "retry": "Retry",
+    "goBack": "Go Back",
+    "deleteSuccess": "Post deleted",
     "justNow": "Just now",
     "minutesAgo": "{{minutes}} mins ago",
     "hoursAgo": "{{hours}} hrs ago",

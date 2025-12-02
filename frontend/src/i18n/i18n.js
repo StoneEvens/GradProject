@@ -24,7 +24,7 @@ i18n
       loadPath: '/locales/{{lng}}/{{ns}}.json',
     },
 
-    ns: ['common', 'auth', 'pet', 'social', 'feed', 'settings', 'main', 'health'],
+    ns: ['common', 'auth', 'pet', 'social', 'feed', 'settings', 'main', 'health', 'posts'],
     defaultNS: 'common',
   });
 

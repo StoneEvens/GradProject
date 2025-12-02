@@ -292,6 +292,12 @@
     "weekDays": ["日", "月", "火", "水", "木", "金", "土"]
   },
   "post": {
+    "detailTitle": "投稿の詳細",
+    "errorTitle": "投稿を読み込めません",
+    "errorDescription": "投稿は削除されたか存在しない可能性があります",
+    "retry": "再試行",
+    "goBack": "戻る",
+    "deleteSuccess": "投稿が削除されました",
     "justNow": "たった今",
     "minutesAgo": "{{minutes}}分前",
     "hoursAgo": "{{hours}}時間前",

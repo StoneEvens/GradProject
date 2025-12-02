@@ -21,6 +21,7 @@ import CreateAbnormalPostPage from './pages/CreateAbnormalPostPage';
 import EditAbnormalPostPage from './pages/EditAbnormalPostPage';
 import PostPreviewPage from './pages/PostPreviewPage';
 import EditPostPage from './pages/EditPostPage';
+import PostDetailPage from './pages/PostDetailPage';
 import SearchPostsPage from './pages/SearchPostsPage';
 import LikedPostsPage from './pages/LikedPostsPage';
 import LikedPostsListPage from './pages/LikedPostsListPage';
@@ -507,9 +508,14 @@ const App = () => {
           element={isUserAuthenticated ? <PostPreviewPage /> : <Navigate to="/" />} 
         />
         {/* 編輯貼文頁面：未登入導向HomePage */}
-        <Route 
-          path="/post/:postId/edit" 
-          element={isUserAuthenticated ? <EditPostPage /> : <Navigate to="/" />} 
+        <Route
+          path="/post/:postId/edit"
+          element={isUserAuthenticated ? <EditPostPage /> : <Navigate to="/" />}
+        />
+        {/* 貼文詳情頁面：未登入導向HomePage */}
+        <Route
+          path="/post/:postId"
+          element={isUserAuthenticated ? <PostDetailPage /> : <Navigate to="/" />}
         />
         {/* 未定義路徑：根據登入狀態重定向 */}
         <Route 
