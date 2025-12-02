@@ -15,11 +15,13 @@ import mockFeed1 from '../MockPicture/mockFeed1.png';
 import mockFeed2 from '../MockPicture/mockFeed2.png';
 import mockFeed3 from '../MockPicture/mockFeed3.png';
 import { useUser } from '../context/UserContext';
+import { useTutorial } from '../context/TutorialContext';
 import { saveHistoryRecord } from '../utils/historyRecordStorage';
 
 function CalculatorPageV2() {
   const { t, i18n } = useTranslation('calculator');
   const { userData } = useUser();
+  const { isTutorialMode } = useTutorial();
 
   const CONDITION_OPTIONS = [
     'chronicKidneyDisease', 'liverDisease', 'arthritisObesity', 'heartDisease', 'diabetes',
@@ -449,6 +451,36 @@ function CalculatorPageV2() {
 
   // 新增飼料
   const handleCreateFeed = async ({ frontImage, nutritionImage, petType, feedName, feedBrand, feedPrice, nutrients }) => {
+    // 教學模式：模擬新增飼料成功，不呼叫 API
+    if (isTutorialMode) {
+      console.log('[CalculatorPageV2] 教學模式 - 模擬新增飼料成功');
+
+      const parseNumber = (val) => {
+        const num = parseFloat(val);
+        return isNaN(num) ? 0 : num;
+      };
+
+      // 建立模擬的飼料資料
+      const mockNewFeed = {
+        id: `tutorial-feed-${Date.now()}`,
+        name: feedName || t('feedSection.customFeed', { defaultValue: '自訂飼料' }),
+        brand: feedBrand || t('feedSection.unknownBrand', { defaultValue: '未知品牌' }),
+        img: mockFeed1,
+        carbohydrate: parseNumber(nutrients?.carbohydrate),
+        protein: parseNumber(nutrients?.protein),
+        fat: parseNumber(nutrients?.fat),
+        calcium: parseNumber(nutrients?.calcium),
+        phosphorus: parseNumber(nutrients?.phosphorus),
+        magnesium: parseNumber(nutrients?.magnesium),
+        sodium: parseNumber(nutrients?.sodium),
+        price: feedPrice
+      };
+
+      handleSelectFeed(mockNewFeed);
+      setNotification(t('messages.feedCreated'));
+      return;
+    }
+
     try {
       // CreateFeedModal 已經處理了 OCR，直接使用傳遞過來的 nutrients
       console.log("使用者確認的營養成分：", nutrients || {});
@@ -491,7 +523,7 @@ function CalculatorPageV2() {
 
       const createFeedRes = await axios.post('/feeds/create/', createFeedPayload);
       const responseData = createFeedRes.data;
-      
+
       // 處理回應
       const newFeed = {
         id: responseData.feed_id || responseData.data?.id,
@@ -507,10 +539,10 @@ function CalculatorPageV2() {
         sodium: parseNumber(nutrients.sodium),
         price: feedPrice
       };
-      
+
       handleSelectFeed(newFeed);
       setNotification(responseData.message || t('messages.feedCreated'));
-      
+
     } catch (error) {
       console.error(t('messages.createFeedFailed'), error);
       setNotification(t('messages.feedCreateFailed'));
@@ -531,6 +563,31 @@ function CalculatorPageV2() {
 
     setCalculating(true);
     setCalculationResult(null);
+
+    // 教學模式：模擬計算成功，不呼叫 API
+    if (isTutorialMode) {
+      console.log('[CalculatorPageV2] 教學模式 - 模擬計算成功');
+
+      // 模擬計算結果
+      const mockResult = {
+        recommended_daily_calories: 350,
+        recommended_daily_amount: 85,
+        analysis: '這是教學模式的模擬計算結果。實際使用時會根據您的寵物資訊和飼料營養成分進行精確計算。',
+        warnings: [],
+        nutrients_analysis: {
+          protein: { status: 'adequate', message: '蛋白質攝取量適中' },
+          fat: { status: 'adequate', message: '脂肪攝取量適中' },
+        }
+      };
+
+      setTimeout(() => {
+        setCalculationResult(mockResult);
+        setHasCalculated(true);
+        setCalculating(false);
+      }, 1000); // 模擬計算延遲
+
+      return;
+    }
 
     try {
       // 更新寵物資訊

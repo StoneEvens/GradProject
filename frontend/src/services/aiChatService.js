@@ -7,7 +7,10 @@ class AIChatService {
   constructor() {
     // Use shared axios instance with standard interceptors
     this.apiClient = axiosInstance;
-    this.basePath = '/ai';
+    // ====== 切換到 AI Agent V2 ======
+    // V1: this.basePath = '/ai';
+    // V2: 使用多 Agent 架構，更快速穩定
+    this.basePath = '/ai-v2';
     this.agentBasePath = '/ai-agent'; // for legacy endpoints still provided by aiAgent app
 
     // 會話上下文管理
@@ -46,23 +49,42 @@ class AIChatService {
       console.log('[AIChatService] Request data:', { conversationId: requestData.conversationId, session_id: requestData.session_id });
 
       // 調用後端 API
-  const response = await this.apiClient.post(`${this.basePath}/chat/`, requestData);
+      const response = await this.apiClient.post(`${this.basePath}/chat/`, requestData);
+
+      // ====== V2 回應格式轉換 ======
+      // V2 使用 'reply'，V1 使用 'response'，這裡做兼容處理
+      const data = response.data;
+      const normalizedData = {
+        ...data,
+        // 將 V2 的 'reply' 映射到前端期望的 'response'
+        response: data.reply || data.response,
+        // 將 V2 的 'workId' 保留（前端可用於調試）
+        workId: data.workId,
+        // 將 V2 的 'currentTasks' 保留（前端可用於顯示進度）
+        currentTasks: data.currentTasks || [],
+      };
+
+      console.log('[AIChatService] V2 Response:', {
+        workId: normalizedData.workId,
+        reply: normalizedData.response?.substring(0, 50),
+        currentTasks: normalizedData.currentTasks?.length || 0
+      });
 
       // 更新當前對話 ID（如果是新對話，後端會返回）
-      if (response.data.conversationId) {
-        this.currentConversationId = response.data.conversationId;
+      if (normalizedData.conversationId) {
+        this.currentConversationId = normalizedData.conversationId;
       }
 
-      // 更新當前 Session ID（OpenAI 對話延續 ID）
-      if (response.data.session_id) {
-        this.currentSessionId = response.data.session_id;
+      // V2 不使用 OpenAI Session ID，但保留邏輯以向後兼容
+      if (normalizedData.session_id) {
+        this.currentSessionId = normalizedData.session_id;
         console.log('[AIChatService] Updated session_id to:', this.currentSessionId);
       }
 
       // 更新會話上下文
-      this.updateSessionContext(userMessage, response.data);
+      this.updateSessionContext(userMessage, normalizedData);
 
-      return response.data;
+      return normalizedData;
 
     } catch (error) {
       console.error('AI Chat Service Error:', error);
@@ -143,7 +165,8 @@ class AIChatService {
    */
   async checkHealth() {
     try {
-  const response = await this.apiClient.get(`${this.agentBasePath}/health/`);
+      // 使用 V2 的健康檢查端點
+      const response = await this.apiClient.get(`${this.basePath}/health/`);
       return response.data;
     } catch (error) {
       console.error('AI Health Check Error:', error);
@@ -359,8 +382,9 @@ class AIChatService {
    */
   async pinConversation(conversationId, isPinned = true) {
     try {
+      // 使用 V2 端點
       const response = await this.apiClient.post(
-        `${this.agentBasePath}/conversations/${conversationId}/pin/`,
+        `${this.basePath}/conversations/${conversationId}/pin/`,
         { is_pinned: isPinned }
       );
       return response.data;
@@ -378,7 +402,8 @@ class AIChatService {
    */
   async submitFeedback(messageId, feedback) {
     try {
-      const response = await this.apiClient.post(`${this.agentBasePath}/feedback/`, {
+      // 使用 V2 端點
+      const response = await this.apiClient.post(`${this.basePath}/feedback/`, {
         message: messageId,
         ...feedback,
       });

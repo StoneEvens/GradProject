@@ -20,6 +20,19 @@
     "systemLanguage": "系統語言",
     "changeLanguageInfo": "選擇您偏好的顯示語言，變更會立即生效。"
   },
+  "tutorial": {
+    "title": "教學導覽",
+    "selectTutorial": "選擇教學",
+    "placeholder": "-- 請選擇教學 --",
+    "startButton": "開始",
+    "options": {
+      "tagPet": "如何在貼文中標註寵物",
+      "createPost": "如何發布貼文",
+      "calculate": "如何使用營養計算機",
+      "addAbnormalPost": "如何新增異常記錄",
+      "addPet": "如何新增一隻寵物"
+    }
+  },
   "logout": "登出",
   "loggingOut": "登出中..."
 }

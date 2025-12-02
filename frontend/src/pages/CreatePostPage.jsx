@@ -7,11 +7,13 @@ import Notification from '../components/Notification';
 import ConfirmNotification from '../components/ConfirmNotification';
 import ImageEditor from '../components/ImageEditor';
 import { NotificationProvider } from '../context/NotificationContext';
+import { useTutorial } from '../context/TutorialContext';
 import styles from '../styles/CreatePostPage.module.css';
 
 const CreatePostPage = () => {
   const { t } = useTranslation('posts');
   const navigate = useNavigate();
+  const { isTutorialMode } = useTutorial();
   const fileInputRef = useRef(null);
   const imageContainerRef = useRef(null);
   const hashtagContainerRef = useRef(null);
@@ -162,6 +164,11 @@ const CreatePostPage = () => {
 
   // 保存草稿
   const saveDraft = async () => {
+    // 教學模式時不儲存草稿
+    if (isTutorialMode) {
+      console.log('[CreatePostPage] 教學模式 - 跳過儲存草稿');
+      return;
+    }
     try {
       // 使用 FileReader 轉換圖片為 base64（如果檔案太大則壓縮）
       const imageDataPromises = selectedImages.map(async (image) => {

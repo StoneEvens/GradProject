@@ -6,6 +6,7 @@ import BottomNavbar from '../components/BottomNavigationbar';
 import Notification from '../components/Notification';
 import ConfirmNotification from '../components/ConfirmNotification';
 import { NotificationProvider } from '../context/NotificationContext';
+import { useTutorial } from '../context/TutorialContext';
 import { getUserPets, getSymptoms, createAbnormalPost, checkAbnormalPostExists } from '../services/petService';
 import { useSymptomTranslation } from '../hooks/useSymptomTranslation';
 import styles from '../styles/CreateAbnormalPostPage.module.css';
@@ -15,6 +16,7 @@ const CreateAbnormalPostPage = () => {
   const { translateSymptomList, translateSingleSymptom, reverseTranslateSymptoms } = useSymptomTranslation();
   const navigate = useNavigate();
   const location = useLocation();
+  const { isTutorialMode } = useTutorial();
   const fileInputRef = useRef(null);
   
   // 從路由狀態獲取寵物資訊
@@ -259,6 +261,11 @@ const CreateAbnormalPostPage = () => {
 
   // 保存草稿
   const saveDraft = async () => {
+    // 教學模式時不儲存草稿
+    if (isTutorialMode) {
+      console.log('[CreateAbnormalPostPage] 教學模式 - 跳過儲存草稿');
+      return;
+    }
     try {
       // 轉換圖片為 base64
       const imageDataPromises = selectedImages.map(async (image) => {
@@ -728,16 +735,46 @@ const CreateAbnormalPostPage = () => {
 
   // 創建貼文
   const handleCreatePost = async () => {
+    // 教學模式：模擬創建成功，不呼叫 API
+    if (isTutorialMode) {
+      console.log('[CreateAbnormalPostPage] 教學模式 - 模擬創建異常記錄成功');
+      setLoading(true);
+
+      // 清除草稿
+      clearDraft();
+
+      // 重置所有表單狀態
+      setSelectedPet(null);
+      setSelectedDate(null);
+      setIsEmergency(false);
+      setSelectedSymptoms([]);
+      setSelectedSymptomOption('');
+      setBodyStats({
+        weight: '',
+        waterIntake: '',
+        temperature: ''
+      });
+      setSelectedImages([]);
+      setDescription('');
+
+      showNotification(t('createAbnormalPost.messages.recordCreated'));
+      setTimeout(() => {
+        setLoading(false);
+        navigate('/pet');
+      }, 1500);
+      return;
+    }
+
     try {
       setLoading(true);
-      
+
       // 準備貼文資料
       const postData = {
         pet: {
           id: selectedPet.id
         },
-        date: selectedDate ? 
-          `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}T12:00:00Z` 
+        date: selectedDate ?
+          `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}T12:00:00Z`
           : null,
         isEmergency,
         symptoms: reverseTranslateSymptoms(selectedSymptoms).map(symptom => ({
@@ -750,7 +787,7 @@ const CreateAbnormalPostPage = () => {
         })),
         description
       };
-      
+
       // 呼叫API創建異常記錄
       const result = await createAbnormalPost(postData);
       console.log('異常記錄創建成功:', result);

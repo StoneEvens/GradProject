@@ -7,6 +7,7 @@ import Notification from '../components/Notification';
 import AccountSettings from '../components/AccountSettings';
 import MyInteractionSettings from '../components/MyInteractionSettings';
 import LanguageSettings from '../components/LanguageSettings';
+import TutorialSettings from '../components/TutorialSettings';
 import { logout } from '../services/authService';
 import { getUserProfile, updateAccountPrivacy } from '../services/userService';
 import styles from '../styles/SettingsPage.module.css';
@@ -103,6 +104,9 @@ const SettingsPage = () => {
 
           {/* 語言設定組件 */}
           <LanguageSettings />
+
+          {/* 教學導覽組件 */}
+          <TutorialSettings />
         </div>
 
         {/* 登出按鈕 */}

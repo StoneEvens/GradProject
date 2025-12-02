@@ -20,6 +20,19 @@
     "systemLanguage": "System Language",
     "changeLanguageInfo": "Choose your preferred display language. Changes will take effect immediately."
   },
+  "tutorial": {
+    "title": "Tutorial Guide",
+    "selectTutorial": "Select Tutorial",
+    "placeholder": "-- Select a tutorial --",
+    "startButton": "Start",
+    "options": {
+      "tagPet": "How to tag pets in posts",
+      "createPost": "How to create a post",
+      "calculate": "How to use the nutrition calculator",
+      "addAbnormalPost": "How to add an abnormal record",
+      "addPet": "How to add a new pet"
+    }
+  },
   "logout": "Logout",
   "loggingOut": "Logging out..."
 }

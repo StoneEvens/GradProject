@@ -6,12 +6,14 @@ import TopNavbar from '../components/TopNavbar';
 import BottomNavbar from '../components/BottomNavigationbar';
 import Notification from '../components/Notification';
 import { NotificationProvider } from '../context/NotificationContext';
+import { useTutorial } from '../context/TutorialContext';
 import petService from '../services/petService';
 import { handleImageSelection, revokeImagePreview, createProgressCallback } from '../utils/imageUtils';
 
 const AddPetPage = () => {
   const { t } = useTranslation('pet');
   const navigate = useNavigate();
+  const { isTutorialMode } = useTutorial();
   const fileInputRef = useRef(null);
   const [phase, setPhase] = useState(1);
   const [petType, setPetType] = useState('');
@@ -120,6 +122,18 @@ const AddPetPage = () => {
   const handleSubmit = async () => {
     if (!petData.name || !petData.breed || !petData.age || !petData.weight || !petData.height) {
       showNotification(t('addPage.messages.requiredFields'));
+      return;
+    }
+
+    // 教學模式：模擬新增成功，不呼叫 API
+    if (isTutorialMode) {
+      console.log('[AddPetPage] 教學模式 - 模擬新增寵物成功');
+      setLoading(true);
+      showNotification(t('addPage.messages.addSuccess'));
+      setTimeout(() => {
+        setLoading(false);
+        navigate('/pet');
+      }, 1500);
       return;
     }
 

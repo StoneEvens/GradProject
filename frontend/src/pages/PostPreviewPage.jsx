@@ -6,6 +6,7 @@ import BottomNavbar from '../components/BottomNavigationbar';
 import Notification from '../components/Notification';
 import Annotation from '../components/Annotation';
 import { NotificationProvider } from '../context/NotificationContext';
+import { useTutorial } from '../context/TutorialContext';
 import { getUserProfile } from '../services/userService';
 import styles from '../styles/PostPreviewPage.module.css';
 
@@ -13,6 +14,7 @@ const PostPreviewPage = () => {
   const { t } = useTranslation('posts');
   const navigate = useNavigate();
   const location = useLocation();
+  const { isTutorialMode } = useTutorial();
   const [user, setUser] = useState(null);
   const [selectedLocation, setSelectedLocation] = useState('');
   const [showLocationModal, setShowLocationModal] = useState(false);
@@ -181,11 +183,38 @@ const PostPreviewPage = () => {
       showNotification(t('editPost.messages.selectLocation'));
       return;
     }
-    
+
     if (isPublishing) {
       return; // 防止重複發布
     }
-    
+
+    // 教學模式：模擬發布成功，不呼叫 API
+    if (isTutorialMode) {
+      console.log('[PostPreviewPage] 教學模式 - 模擬發布成功');
+      setIsPublishing(true);
+      showNotification(t('postPreview.messages.publishSuccess'));
+
+      // 清除草稿（教學模式下也要清除，因為教學結束後不需要保留）
+      clearAllCachedData();
+
+      // 重置組件狀態
+      setPostData({
+        images: [],
+        description: '',
+        hashtags: []
+      });
+      setSelectedLocation('');
+      setCurrentImageIndex(0);
+      setShowAnnotationDots(false);
+
+      // 延遲導航
+      setTimeout(() => {
+        setIsPublishing(false);
+        navigate('/social');
+      }, 1500);
+      return;
+    }
+
     try {
       setIsPublishing(true);
       showNotification(t('postPreview.messages.processingImages'));

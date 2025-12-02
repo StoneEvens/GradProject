@@ -20,6 +20,19 @@
     "systemLanguage": "Idioma del Sistema",
     "changeLanguageInfo": "Elige tu idioma de visualización preferido. Los cambios tendrán efecto inmediatamente."
   },
+  "tutorial": {
+    "title": "Guía de Tutorial",
+    "selectTutorial": "Seleccionar Tutorial",
+    "placeholder": "-- Selecciona un tutorial --",
+    "startButton": "Iniciar",
+    "options": {
+      "tagPet": "Cómo etiquetar mascotas en publicaciones",
+      "createPost": "Cómo crear una publicación",
+      "calculate": "Cómo usar la calculadora nutricional",
+      "addAbnormalPost": "Cómo agregar un registro anormal",
+      "addPet": "Cómo agregar una nueva mascota"
+    }
+  },
   "logout": "Cerrar Sesión",
   "loggingOut": "Cerrando sesión..."
 }

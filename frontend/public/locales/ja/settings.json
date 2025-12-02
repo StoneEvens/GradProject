@@ -20,6 +20,19 @@
     "systemLanguage": "システム言語",
     "changeLanguageInfo": "お好みの表示言語を選択してください。変更はすぐに反映されます。"
   },
+  "tutorial": {
+    "title": "チュートリアルガイド",
+    "selectTutorial": "チュートリアルを選択",
+    "placeholder": "-- チュートリアルを選択 --",
+    "startButton": "開始",
+    "options": {
+      "tagPet": "投稿でペットをタグ付けする方法",
+      "createPost": "投稿を作成する方法",
+      "calculate": "栄養計算機の使い方",
+      "addAbnormalPost": "異常記録を追加する方法",
+      "addPet": "新しいペットを追加する方法"
+    }
+  },
   "logout": "ログアウト",
   "loggingOut": "ログアウト中..."
 }

@@ -12,11 +12,13 @@ import mockFeed1 from '../MockPicture/mockFeed1.png';
 import mockFeed2 from '../MockPicture/mockFeed2.png';
 import mockFeed3 from '../MockPicture/mockFeed3.png';
 import { useUser } from '../context/UserContext';
+import { useTutorial } from '../context/TutorialContext';
 
 function CalculatorStep2({ onNext, onPrev, selectedPet }) {
   const { user_id } = useParams();
   const navigate = useNavigate();
   const { userData } = useUser();
+  const { isTutorialMode } = useTutorial();
   const [selectedFeed, setSelectedFeed] = useState(0);
   const [feeds, setFeeds] = useState([]);
   const [showCreateFeedModal, setShowCreateFeedModal] = useState(false);
@@ -490,6 +492,29 @@ function CalculatorStep2({ onNext, onPrev, selectedPet }) {
   };
 
   const performCalculation = async (feed) => {
+    // 教學模式：模擬計算成功，不呼叫 API
+    if (isTutorialMode) {
+      console.log('[CalculatorStep2] 教學模式 - 模擬計算成功');
+
+      // 模擬計算結果
+      const mockResult = {
+        recommended_daily_calories: 350,
+        recommended_daily_amount: 85,
+        analysis: '這是教學模式的模擬計算結果。實際使用時會根據您的寵物資訊和飼料營養成分進行精確計算。',
+        warnings: [],
+        nutrients_analysis: {
+          protein: { status: 'adequate', message: '蛋白質攝取量適中' },
+          fat: { status: 'adequate', message: '脂肪攝取量適中' },
+        }
+      };
+
+      setTimeout(() => {
+        onNext(feed, { isCalculating: false, result: mockResult });
+      }, 1000); // 模擬計算延遲
+
+      return;
+    }
+
     try {
       // Step 1: 確保 UserFeed 關係存在（用於使用次數統計）
       try {

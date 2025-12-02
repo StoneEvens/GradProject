@@ -52,6 +52,7 @@ import DiseaseArchiveDetailPage from './pages/DiseaseArchiveDetailPage';
 import InteractiveCityPage from './pages/InteractiveCityPage';
 import CheckpointDetailPage from './pages/CheckpointDetailPage';
 import { UserProvider } from './context/UserContext';
+import { TutorialProvider, useTutorial } from './context/TutorialContext';
 import TutorialOverlay from './components/TutorialOverlay';
 import FloatingAIAvatar from './components/FloatingAIAvatar';
 import ChatWindow from './components/ChatWindow';
@@ -196,15 +197,51 @@ const GlobalFloatingAI = ({ user }) => {
   );
 };
 
+// 教學模式管理組件 - 必須在 TutorialProvider 內部使用
+const TutorialManager = () => {
+  const { tutorialMode, startTutorial, endTutorial } = useTutorial();
+
+  useEffect(() => {
+    // 監聽教學啟動事件
+    const handleStartTutorial = (event) => {
+      const { tutorialType } = event.detail;
+      console.log('TutorialManager 收到教學啟動事件:', tutorialType);
+      startTutorial(tutorialType);
+    };
+    window.addEventListener('startTutorial', handleStartTutorial);
+
+    return () => {
+      window.removeEventListener('startTutorial', handleStartTutorial);
+    };
+  }, [startTutorial]);
+
+  // 處理教學完成
+  const handleTutorialComplete = () => {
+    console.log('教學完成');
+    endTutorial();
+  };
+
+  // 處理教學跳過
+  const handleTutorialSkip = () => {
+    console.log('教學跳過');
+    endTutorial();
+  };
+
+  if (!tutorialMode.isActive) return null;
+
+  return (
+    <TutorialOverlay
+      tutorialType={tutorialMode.tutorialType}
+      onComplete={handleTutorialComplete}
+      onSkip={handleTutorialSkip}
+    />
+  );
+};
+
 const App = () => {
   const [isUserAuthenticated, setIsUserAuthenticated] = useState(false);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [currentUser, setCurrentUser] = useState(null);
-  // 教學模式狀態
-  const [tutorialMode, setTutorialMode] = useState({
-    isActive: false,
-    tutorialType: null
-  });
 
   useEffect(() => {
     // 檢查認證狀態並嘗試刷新 Token
@@ -257,45 +294,15 @@ const App = () => {
     };
     window.addEventListener('auth-logout', handleLogout);
 
-    // 監聽教學啟動事件
-    const handleStartTutorial = (event) => {
-      const { tutorialType } = event.detail;
-      console.log('App 收到教學啟動事件:', tutorialType);
-      setTutorialMode({
-        isActive: true,
-        tutorialType: tutorialType
-      });
-    };
-    window.addEventListener('startTutorial', handleStartTutorial);
-
     // 定期檢查 token 是否有效（每分鐘）
     const intervalId = setInterval(checkAuth, 60000);
 
     return () => {
       window.removeEventListener('auth-change', checkAuth);
       window.removeEventListener('auth-logout', handleLogout);
-      window.removeEventListener('startTutorial', handleStartTutorial);
       clearInterval(intervalId);
     };
   }, []);
-
-  // 處理教學完成
-  const handleTutorialComplete = () => {
-    console.log('教學完成');
-    setTutorialMode({
-      isActive: false,
-      tutorialType: null
-    });
-  };
-
-  // 處理教學跳過
-  const handleTutorialSkip = () => {
-    console.log('教學跳過');
-    setTutorialMode({
-      isActive: false,
-      tutorialType: null
-    });
-  };
 
   // 認證檢查中顯示載入畫面
   if (isAuthLoading) {
@@ -316,6 +323,7 @@ const App = () => {
 
   return (
     <UserProvider>
+      <TutorialProvider>
       <BrowserRouter>
           <Routes>
         {/* 根路徑：已登入導向MainPage，未登入導向HomePage */}
@@ -584,18 +592,13 @@ const App = () => {
         />
       </Routes>
 
-      {/* 教學模式覆蓋層 - 移到 Router 內部 */}
-      {tutorialMode.isActive && (
-        <TutorialOverlay
-          tutorialType={tutorialMode.tutorialType}
-          onComplete={handleTutorialComplete}
-          onSkip={handleTutorialSkip}
-        />
-      )}
+      {/* 教學模式管理組件 - 使用 TutorialContext */}
+      <TutorialManager />
 
       {/* 全局浮動 AI 頭像 - 最高層級 */}
       {isUserAuthenticated && <GlobalFloatingAI user={currentUser} />}
     </BrowserRouter>
+      </TutorialProvider>
     </UserProvider>
   );
 };

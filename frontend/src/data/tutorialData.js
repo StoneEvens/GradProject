@@ -26,6 +26,10 @@ const tutorialData = {
           type: 'circle',
           position: 'bottom-center'
         },
+        chatBubble: {
+          position: 'above',
+          offsetY: 20
+        },
         action: 'click',
         nextCondition: 'menuOpen'
       },
@@ -211,6 +215,10 @@ const tutorialData = {
           type: 'circle',
           position: 'bottom-center'
         },
+        chatBubble: {
+          position: 'above',
+          offsetY: 20
+        },
         action: 'click',
         nextCondition: 'menuOpen'
       },
@@ -395,7 +403,7 @@ const tutorialData = {
           position: 'button'
         },
         action: 'click',
-        nextCondition: 'manualNext'
+        nextCondition: 'hashtagAdded'
       },
       {
         id: 12,
@@ -524,6 +532,10 @@ const tutorialData = {
         type: 'circle',
         position: 'bottom-center'
       },
+      chatBubble: {
+        position: 'above',
+        offsetY: 20
+      },
       action: 'click',
       nextCondition: 'pageNavigateToCalculator',
       transition: {
@@ -544,7 +556,13 @@ const tutorialData = {
       },
       highlight: {
         type: 'rectangle',
-        position: 'center'
+        position: 'center',
+        paddingTop: 20,
+        paddingBottom: 20
+      },
+      chatBubble: {
+        position: 'below',
+        offsetY: 30
       },
       nextCondition: 'manualNext',
       action: 'click'
@@ -597,6 +615,7 @@ const tutorialData = {
         type: 'rectangle',
         position: 'form'
       },
+      action: 'click',
       nextCondition: 'manualNext'
     },
     {
@@ -649,6 +668,7 @@ const tutorialData = {
         type: 'rectangle',
         position: 'form'
       },
+      action: 'click',
       nextCondition: 'manualNext'
     },
     {
@@ -665,6 +685,7 @@ const tutorialData = {
         type: 'rectangle',
         position: 'form'
       },
+      action: 'click',
       nextCondition: 'manualNext',
       showPointer: true
     },
@@ -682,6 +703,7 @@ const tutorialData = {
         type: 'rectangle',
         position: 'form'
       },
+      action: 'click',
       nextCondition: 'manualNext',
       showPointer: true
     },
@@ -699,6 +721,7 @@ const tutorialData = {
         type: 'rectangle',
         position: 'form'
       },
+      action: 'click',
       nextCondition: 'manualNext',
       showPointer: true
     },
@@ -716,6 +739,7 @@ const tutorialData = {
         type: 'rectangle',
         position: 'form'
       },
+      action: 'click',
       nextCondition: 'manualNext',
       showPointer: true
     },
@@ -733,6 +757,7 @@ const tutorialData = {
         type: 'rectangle',
         position: 'form'
       },
+      action: 'click',
       nextCondition: 'manualNext',
       showPointer: true
     },
@@ -767,6 +792,7 @@ const tutorialData = {
         type: 'rectangle',
         position: 'center'
       },
+      action: 'click',
       nextCondition: 'manualNext',
       showPointer: true
     },
@@ -836,6 +862,10 @@ const tutorialData = {
       highlight: {
         type: 'circle',
         position: 'bottom-center'
+      },
+      chatBubble: {
+        position: 'above',
+        offsetY: 20
       },
       action: 'click',
       nextCondition: 'menuOpen'
@@ -943,8 +973,7 @@ const tutorialData = {
         fallbackSelector: '[class*="symptomInputSection"] button:not([disabled])'
       },
       highlight: { type: 'rectangle', position: 'button' },
-      action: 'click',
-      nextCondition: 'manualNext'
+      action: 'click'
     },
     {
       id: 8,
@@ -1013,6 +1042,10 @@ const tutorialData = {
         fallbackSelector: '[class*="descriptionSection"] textarea:not([disabled])'
       },
       highlight: { type: 'rectangle', position: 'form' },
+      chatBubble: {
+        position: 'above',
+        offsetY: 20
+      },
       action: 'click',
       nextCondition: 'manualNext'
     },
@@ -1061,6 +1094,10 @@ const tutorialData = {
           type: 'circle',
           position: 'bottom-center'
         },
+        chatBubble: {
+          position: 'above',
+          offsetY: 20
+        },
         action: 'click',
         nextCondition: 'pageNavigate',
         expectedPath: '/pet',
@@ -1075,9 +1112,9 @@ const tutorialData = {
         instruction: '',
         targetElement: {
           component: 'PetPage',
-          selector: 'button[class*="addFirstPetButton"]:not([disabled]), button[class*="addPetButton"]:not([disabled])',
+          selector: 'button[class*="addFirstPetButton"]:not([disabled]), button[class*="addPetButton"]:not([disabled]), button[class*="addButton"]',
           className: 'addFirstPetButton',
-          fallbackSelector: 'button[class*="addFirstPetButton"], button[class*="addPetButton"]:not([disabled])'
+          fallbackSelector: 'button[class*="addFirstPetButton"], button[class*="addPetButton"]:not([disabled]), button[class*="addButton"]'
         },
         highlight: {
           type: 'rectangle',
@@ -1098,13 +1135,15 @@ const tutorialData = {
         instruction: '請在下方選擇「貓」或「狗」',
         targetElement: {
           component: 'AddPetPage',
-          selector: '[class*="phaseOne"] [class*="petTypeButtons"]',
-          className: 'petTypeButtons',
-          fallbackSelector: '[class*="petTypeSection"] [class*="petTypeButtons"]'
+          selector: '[class*="petTypeSection"]',
+          className: 'petTypeSection',
+          fallbackSelector: '[class*="phaseOne"] [class*="petTypeSection"]'
         },
         highlight: {
           type: 'rectangle',
-          position: 'center'
+          position: 'center',
+          padding: 10,
+          paddingBottom: 100
         },
         action: 'click',
         nextCondition: 'petTypeSelected',
