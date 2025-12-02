@@ -98,9 +98,9 @@ const tutorialData = {
         instruction: '在照片中您想要標註寵物的位置點擊一下',
         targetElement: {
           component: 'ImageEditor',
-          selector: '[class*="imageEditorModal"] [class*="editImage"], [class*="imageEditorModal"] img[class*="editableImage"], [class*="modalContent"] img:not([class*="addImage"])',
+          selector: '[class*="modalContainer"] [class*="editImage"], [class*="modalBody"] img[class*="editImage"], [class*="imageContainer"] img[class*="editImage"]',
           className: 'editImage',
-          fallbackSelector: '[class*="imageEditorModal"] img'
+          fallbackSelector: '[class*="modalContainer"] img[class*="editImage"]'
         },
         highlight: {
           type: 'fullImage',
@@ -283,9 +283,9 @@ const tutorialData = {
         instruction: '在照片中您想要標註寵物的位置點擊一下',
         targetElement: {
           component: 'ImageEditor',
-          selector: '[class*="imageEditorModal"] [class*="editImage"], [class*="imageEditorModal"] img[class*="editableImage"], [class*="modalContent"] img:not([class*="addImage"])',
+          selector: '[class*="modalContainer"] [class*="editImage"], [class*="modalBody"] img[class*="editImage"], [class*="imageContainer"] img[class*="editImage"]',
           className: 'editImage',
-          fallbackSelector: '[class*="imageEditorModal"] img'
+          fallbackSelector: '[class*="modalContainer"] img[class*="editImage"]'
         },
         highlight: {
           type: 'fullImage',
@@ -394,7 +394,8 @@ const tutorialData = {
           type: 'rectangle',
           position: 'button'
         },
-        action: 'click'
+        action: 'click',
+        nextCondition: 'manualNext'
       },
       {
         id: 12,
@@ -403,21 +404,27 @@ const tutorialData = {
         targetElement: {
           component: 'CreatePostPage',
           selector: '[class*="nextButton"], button:contains("下一步")',
-          className: 'confirmButton',
+          className: 'nextButton',
           fallbackSelector: 'button:last-of-type'
         },
         highlight: {
           type: 'rectangle',
           position: 'button'
         },
-        action: 'click'
+        action: 'click',
+        nextCondition: 'pageNavigate',
+        expectedPath: '/create-post-preview',
+        transition: {
+          fadeOut: true,
+          delay: 320
+        }
       },
       {
         id: 13,
         title: '步驟 13：打開位置清單',
         instruction: '點選按鈕以選擇貼文位置',
         targetElement: {
-          component: 'CreatePostPage',
+          component: 'PostPreviewPage',
           selector: 'button[class*="locationButton"], div[class*="userDetails"] > button, div[class*="userInfo"] button',
           className: 'locationButton',
           fallbackSelector: 'button[aria-haspopup="listbox"], button[aria-label*="位置"]'
@@ -426,14 +433,20 @@ const tutorialData = {
           type: 'rectangle',
           position: 'form'
         },
-        action: 'click'
+        action: 'click',
+        nextCondition: 'locationModalOpen',
+        transition: {
+          fadeIn: true,
+          delay: 480,
+          waitForPageLoad: true
+        }
       },
       {
         id: 14,
         title: '步驟 14：選擇您的位置',
         instruction: '在位置清單中，選擇您發文的地點',
         targetElement: {
-          component: 'CreatePostPage',
+          component: 'PostPreviewPage',
           selector: 'div[class*="locationModal"]',
           className: 'locationModal',
           fallbackSelector: 'div[class*="locationList"]'
@@ -443,6 +456,7 @@ const tutorialData = {
           position: 'form'
         },
         action: 'click',
+        nextCondition: 'locationSelected',
         delay: 800
       },
       {
@@ -459,7 +473,8 @@ const tutorialData = {
           type: 'rectangle',
           position: 'button'
         },
-        action: 'click'
+        action: 'click',
+        nextCondition: 'postPublished'
       },
       {
         id: 16,
@@ -599,6 +614,7 @@ const tutorialData = {
         position: 'center'
       },
       action: 'click',
+      nextCondition: 'tabSwitchedToFeed',
       showPointer: true
     },
     {
@@ -616,6 +632,7 @@ const tutorialData = {
         position: 'button'
       },
       action: 'click',
+      nextCondition: 'feedModalOpen',
       showPointer: true
     },
     {
@@ -725,15 +742,16 @@ const tutorialData = {
       instruction: '按下「下一步」按鈕',
       targetElement: {
         component: 'CreateFeedModal',
-        selector: '[class*="modalFooter"] .confirmButton:not([disabled])',
+        selector: '[class*="modalFooter"] [class*="confirmButton"]:not([disabled])',
         className: 'confirmButton',
-        fallbackSelector: '[class*="modalFooter"] .button:not([disabled])'
+        fallbackSelector: '[class*="modalFooter"] button:not([disabled])'
       },
       highlight: {
         type: 'rectangle',
         position: 'button'
       },
-      action: 'click'
+      action: 'click',
+      nextCondition: 'feedModalStep2'
     },
     {
       id: 15,
@@ -767,6 +785,7 @@ const tutorialData = {
         position: 'button'
       },
       action: 'click',
+      nextCondition: 'feedModalClosed',
       showPointer: true
     },
     {
@@ -784,6 +803,7 @@ const tutorialData = {
         position: 'center'
       },
       action: 'click',
+      nextCondition: 'calculationComplete',
       showPointer: true
     },
     {
@@ -826,9 +846,9 @@ const tutorialData = {
       instruction: '在彈出的選單中，選擇「異常記錄」',
       targetElement: {
         component: 'PostMenu',
-        selector: '[class*="menuItem"]:second-child, [class*="buttonElement"]:second-child, [class*="menu"] button:second-child, [class*="popup"] button:second-child',
+        selector: '[class*="menuItem"]:nth-child(2), [class*="buttonElement"]:nth-child(2), [class*="menu"] button:nth-child(2), [class*="popup"] button:nth-child(2)',
         className: 'menuItem',
-        fallbackSelector: 'button:second-child, div:second-child'
+        fallbackSelector: 'button:nth-child(2), div:nth-child(2)'
       },
       highlight: {
         type: 'rectangle',
@@ -837,7 +857,6 @@ const tutorialData = {
       action: 'click',
       nextCondition: 'pageNavigate',
       expectedPath: '/create-abnormal-post',
-      // 添加過渡配置來減少閃爍
       transition: {
         fadeOut: true,
         delay: 320
@@ -858,7 +877,12 @@ const tutorialData = {
         position: 'center'
       },
       action: 'click',
-      nextCondition: 'petChosen'
+      nextCondition: 'manualNext',
+      transition: {
+        fadeIn: true,
+        delay: 480,
+        waitForPageLoad: true
+      }
     },
     {
       id: 4,
@@ -875,7 +899,7 @@ const tutorialData = {
         position: 'form'
       },
       action: 'click',
-      nextCondition: 'menuOpen'
+      nextCondition: 'manualNext'
     },
     {
       id: 5,
@@ -892,27 +916,26 @@ const tutorialData = {
         position: 'button'
       },
       action: 'click',
-      nextCondition: 'menuOpen'
+      nextCondition: 'manualNext'
     },
     {
-      id: 7,
-      title: '步驟 7：選擇症狀',
+      id: 6,
+      title: '步驟 6：選擇症狀',
       instruction: '從下拉選單選擇一個症狀',
       targetElement: {
         component: 'CreateAbnormalPostPage',
-        // 鎖定症狀區塊內的 select
         selector: '[class*="symptomSection"] [class*="symptomSelectContainer"] select[class*="symptomSelect"]:not([disabled])',
         className: 'symptomSelect',
         fallbackSelector: '[class*="symptomInputSection"] select:not([disabled])'
       },
       highlight: { type: 'rectangle', position: 'form' },
       action: 'select',
-      nextCondition: 'menuOpen'
+      nextCondition: 'manualNext'
     },
     {
-      id: 8,
-      title: '步驟 8：新增症狀',
-      instruction: '按「新增」把剛才選的症狀加入，若需要新增多個症狀請重複步驟7和8',
+      id: 7,
+      title: '步驟 7：新增症狀',
+      instruction: '按「新增」把剛才選的症狀加入，若需要新增多個症狀請重複步驟6和7',
       targetElement: {
         component: 'CreateAbnormalPostPage',
         selector: '[class*="symptomSection"] [class*="symptomInputSection"] button[class*="addSymptomBtn"]:not([disabled])',
@@ -921,11 +944,11 @@ const tutorialData = {
       },
       highlight: { type: 'rectangle', position: 'button' },
       action: 'click',
-      nextCondition: 'menuOpen'
+      nextCondition: 'manualNext'
     },
     {
-      id: 9,
-      title: '步驟 9：填寫體重',
+      id: 8,
+      title: '步驟 8：填寫體重',
       instruction: '',
       targetElement: {
         component: 'CreateAbnormalPostPage',
@@ -935,11 +958,11 @@ const tutorialData = {
       },
       highlight: { type: 'rectangle', position: 'form' },
       action: 'click',
-      nextCondition: 'menuOpen'
+      nextCondition: 'manualNext'
     },
     {
-      id: 10,
-      title: '步驟 10：填寫喝水量',
+      id: 9,
+      title: '步驟 9：填寫喝水量',
       instruction: '',
       targetElement: {
         component: 'CreateAbnormalPostPage',
@@ -949,11 +972,11 @@ const tutorialData = {
       },
       highlight: { type: 'rectangle', position: 'form' },
       action: 'click',
-      nextCondition: 'menuOpen'
+      nextCondition: 'manualNext'
     },
     {
-      id: 11,
-      title: '步驟 11：填寫體溫',
+      id: 10,
+      title: '步驟 10：填寫體溫',
       instruction: '',
       targetElement: {
         component: 'CreateAbnormalPostPage',
@@ -963,11 +986,11 @@ const tutorialData = {
       },
       highlight: { type: 'rectangle', position: 'form' },
       action: 'click',
-      nextCondition: 'menuOpen'
+      nextCondition: 'manualNext'
     },
     {
-      id: 12,
-      title: '步驟 12：新增圖片',
+      id: 11,
+      title: '步驟 11：新增圖片',
       instruction: '點選方框新增寵物需記錄之圖片',
       targetElement: {
         component: 'CreateAbnormalPostPage',
@@ -977,11 +1000,11 @@ const tutorialData = {
       },
       highlight: { type: 'rectangle', position: 'button' },
       action: 'click',
-      nextCondition: 'menuOpen'
+      nextCondition: 'manualNext'
     },
     {
-      id: 13,
-      title: '步驟 13：新增補充描述',
+      id: 12,
+      title: '步驟 12：新增補充描述',
       instruction: '將剛才沒記錄到的部分，如寵物精神狀況、醫生提醒、異常行為等填入空格',
        targetElement: {
         component: 'CreateAbnormalPostPage',
@@ -991,11 +1014,11 @@ const tutorialData = {
       },
       highlight: { type: 'rectangle', position: 'form' },
       action: 'click',
-      nextCondition: 'menuOpen'
+      nextCondition: 'manualNext'
     },
     {
-      id: 14,
-      title: '步驟 14：建立異常記錄',
+      id: 13,
+      title: '步驟 13：建立異常記錄',
       instruction: '點擊「建立」按鈕完成建立動作',
       targetElement: {
         component: 'CreateAbnormalPostPage',
@@ -1005,10 +1028,10 @@ const tutorialData = {
       },
       highlight: { type: 'rectangle', position: 'button' },
       action: 'click',
-      nextCondition: 'menuOpen'
+      nextCondition: 'abnormalPostCreated'
     },
     {
-        id: 15,
+        id: 14,
         title: '完成！',
         instruction: '恭喜！您已成功新增一篇異常記錄！',
         targetElement: null,
@@ -1030,8 +1053,8 @@ const tutorialData = {
         instruction: '點擊底部導覽列的「寵物」按鈕',
         targetElement: {
           component: 'BottomNavbar',
-          selector: 'img[alt*="pets"], img[src*="CreatePost"], [class*="createPost"]',
-          className: 'calculate',
+          selector: 'img[alt*="pets"], img[src*="PetPage"], [class*="navItem"]:nth-child(2) img',
+          className: 'icon',
           fallbackSelector: '.icon'
         },
         highlight: {
@@ -1039,15 +1062,20 @@ const tutorialData = {
           position: 'bottom-center'
         },
         action: 'click',
-        nextCondition: 'menuOpen'
+        nextCondition: 'pageNavigate',
+        expectedPath: '/pet',
+        transition: {
+          fadeOut: true,
+          delay: 320
+        }
       },
       {
         id: 2,
         title: '步驟 2：按下「新增寵物」按鈕',
         instruction: '',
         targetElement: {
-          component: 'addPet',
-          selector: 'button[class*="addFirstPetButton"]:not([disabled])',
+          component: 'PetPage',
+          selector: 'button[class*="addFirstPetButton"]:not([disabled]), button[class*="addPetButton"]:not([disabled])',
           className: 'addFirstPetButton',
           fallbackSelector: 'button[class*="addFirstPetButton"], button[class*="addPetButton"]:not([disabled])'
         },
@@ -1056,7 +1084,13 @@ const tutorialData = {
           position: 'button'
         },
         action: 'click',
-        nextCondition: 'menuOpen'
+        nextCondition: 'pageNavigate',
+        expectedPath: '/pet/add',
+        transition: {
+          fadeIn: true,
+          delay: 480,
+          waitForPageLoad: true
+        }
       },
       {
         id: 3,
@@ -1073,7 +1107,12 @@ const tutorialData = {
           position: 'center'
         },
         action: 'click',
-        nextCondition: 'menuOpen'
+        nextCondition: 'petTypeSelected',
+        transition: {
+          fadeIn: true,
+          delay: 480,
+          waitForPageLoad: true
+        }
       },
       {
         id: 4,
@@ -1090,7 +1129,7 @@ const tutorialData = {
           position: 'image'
         },
         action: 'click',
-        nextCondition: 'menuOpen'
+        nextCondition: 'manualNext'
       },
       {
         id: 5,
@@ -1107,7 +1146,7 @@ const tutorialData = {
           position: 'form'
         },
         action: 'click',
-        nextCondition: 'menuOpen'
+        nextCondition: 'manualNext'
       },
       {
         id: 6,
@@ -1122,10 +1161,9 @@ const tutorialData = {
         highlight: {
           type: 'rectangle',
           position: 'form'
-
         },
         action: 'click',
-        nextCondition: 'menuOpen'
+        nextCondition: 'manualNext'
       },
       {
         id: 7,
@@ -1142,7 +1180,7 @@ const tutorialData = {
           position: 'form'
         },
         action: 'click',
-        nextCondition: 'menuOpen'
+        nextCondition: 'manualNext'
       },
       {
         id: 8,
@@ -1159,7 +1197,7 @@ const tutorialData = {
           position: 'form'
         },
         action: 'click',
-        nextCondition: 'menuOpen'
+        nextCondition: 'manualNext'
       },
       {
         id: 9,
@@ -1176,7 +1214,7 @@ const tutorialData = {
           position: 'form'
         },
         action: 'click',
-        nextCondition: 'menuOpen'
+        nextCondition: 'manualNext'
       },
       {
         id: 10,
@@ -1193,7 +1231,7 @@ const tutorialData = {
           position: 'form'
         },
         action: 'click',
-        nextCondition: 'menuOpen'
+        nextCondition: 'manualNext'
       },
       {
         id: 11,
@@ -1210,7 +1248,7 @@ const tutorialData = {
           position: 'button'
         },
         action: 'click',
-        nextCondition: 'menuOpen'
+        nextCondition: 'petCreated'
       },
       {
         id: 12,

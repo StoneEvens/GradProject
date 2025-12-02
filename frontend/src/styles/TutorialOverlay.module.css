@@ -520,7 +520,12 @@
   }
 }
 
-/* 確保目標元素可點擊 - z-index 必須高於暗背景 (10000045) */
+/* 高亮窗口 - 使用 box-shadow 創建周圍的暗區域 */
+.highlightWindow {
+  /* 樣式主要通過 inline style 設定 */
+}
+
+/* 確保目標元素可點擊 - z-index 必須高於暗背景 (10000045) 和 highlightBlocker (10000044) */
 :global(.tutorial-target) {
   position: relative !important;
   z-index: 10000050 !important;

@@ -305,7 +305,7 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
       }
     };
   }, []);
-  // 讓聊天泡泡「盡量不與 highlight 區域重疊」的通用函式
+  // 讓聊天泡泡「盡量不與 highlight 區域重疊」且「不超出瀏覽器可視範圍」的通用函式
   const calculateBubblePosition = ({
     basePos,
     highlightRect,
@@ -313,7 +313,19 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
     bubbleHeight,
     margin = 20,
   }) => {
-    if (!highlightRect || !basePos) return basePos;
+    if (!basePos) return basePos;
+
+    // 取得瀏覽器可視範圍（viewport）
+    const viewportTop = 0;
+    const viewportBottom = window.innerHeight;
+    const viewportHeight = viewportBottom - viewportTop;
+
+    // 使用 viewport 作為最終邊界（確保泡泡不會超出螢幕）
+    const cTop = Math.max(containerRect?.top ?? 0, viewportTop);
+    const cBottom = Math.min(
+      (containerRect?.top ?? 0) + (containerRect?.height ?? viewportHeight),
+      viewportBottom
+    );
 
     const chatRect = {
       top: basePos.top,
@@ -322,15 +334,42 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
       right: basePos.left + basePos.width
     };
 
+    const gap = 16;
+
+    const makeResult = (top, placement) => {
+      // 最終檢查：確保泡泡完全在可視範圍內
+      const clampedTop = Math.max(
+        viewportTop + margin,
+        Math.min(top, viewportBottom - bubbleHeight - margin)
+      );
+      return {
+        ...basePos,
+        top: clampedTop,
+        placement: placement || basePos.placement,
+        description: (basePos.description || '') + ' (已避開高亮)'
+      };
+    };
+
+    // 如果沒有高亮區域，只需確保在可視範圍內
+    if (!highlightRect) {
+      // 檢查原始位置是否超出可視範圍
+      if (chatRect.bottom > viewportBottom - margin || chatRect.top < viewportTop + margin) {
+        // 優先放在可視範圍內的中央偏上位置
+        const safeTop = Math.max(
+          viewportTop + margin,
+          Math.min(basePos.top, viewportBottom - bubbleHeight - margin)
+        );
+        return { ...basePos, top: safeTop };
+      }
+      return basePos;
+    }
+
     const hRect = {
       top: highlightRect.top,
       bottom: highlightRect.top + highlightRect.height,
       left: highlightRect.left,
       right: highlightRect.left + highlightRect.width
     };
-
-    const cTop = containerRect.top ?? 0;
-    const cBottom = cTop + (containerRect.height ?? window.innerHeight);
 
     const isOverlap = !(
       chatRect.right <= hRect.left ||
@@ -339,32 +378,26 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
       chatRect.top >= hRect.bottom
     );
 
-    // 沒有重疊就直接用
-    if (!isOverlap) return basePos;
+    // 檢查原始位置是否超出可視範圍
+    const isOutOfViewport = chatRect.bottom > viewportBottom - margin || chatRect.top < viewportTop + margin;
 
-    const gap = 16;
+    // 沒有重疊且在可視範圍內就直接用
+    if (!isOverlap && !isOutOfViewport) return basePos;
 
-    const makeResult = (top, placement) => ({
-      ...basePos,
-      top,
-      placement: placement || basePos.placement,
-      description: (basePos.description || '') + ' (已避開高亮)'
-    });
-
-    // 1️⃣ 試著放在 highlight 下方
-    const belowTop = hRect.bottom + gap;
-    if (belowTop + bubbleHeight + margin <= cBottom) {
-      return makeResult(belowTop, 'avoid-overlap-below');
-    }
-
-    // 2️⃣ 再試著放在 highlight 上方
+    // 1️⃣ 試著放在 highlight 上方（優先，因為下方可能會超出螢幕）
     const aboveTop = hRect.top - gap - bubbleHeight;
-    if (aboveTop >= cTop + margin) {
+    if (aboveTop >= viewportTop + margin) {
       return makeResult(aboveTop, 'avoid-overlap-above');
     }
 
+    // 2️⃣ 試著放在 highlight 下方
+    const belowTop = hRect.bottom + gap;
+    if (belowTop + bubbleHeight + margin <= viewportBottom) {
+      return makeResult(belowTop, 'avoid-overlap-below');
+    }
+
     // 3️⃣ 嘗試貼最上面，只要不碰到 highlight 就好
-    const topTop = cTop + margin;
+    const topTop = viewportTop + margin;
     const topBottom = topTop + bubbleHeight;
     const topOverlaps = !(
       topBottom <= hRect.top || topTop >= hRect.bottom
@@ -373,18 +406,18 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
       return makeResult(topTop, 'avoid-overlap-top');
     }
 
-    // 4️⃣ 嘗試貼最下面，只要不碰到 highlight 就好
-    const bottomTop = cBottom - bubbleHeight - margin;
+    // 4️⃣ 嘗試貼最下面（在可視範圍內），只要不碰到 highlight 就好
+    const bottomTop = viewportBottom - bubbleHeight - margin;
     const bottomBottom = bottomTop + bubbleHeight;
     const bottomOverlaps = !(
       bottomBottom <= hRect.top || bottomTop >= hRect.bottom
     );
-    if (!bottomOverlaps) {
+    if (!bottomOverlaps && bottomTop >= viewportTop + margin) {
       return makeResult(bottomTop, 'avoid-overlap-bottom');
     }
 
-    // 5️⃣ 如果 highlight 幾乎佔滿全螢幕，至少把泡泡盡量往上擠
-    return makeResult(cTop + margin, 'force-top-overlap-maybe');
+    // 5️⃣ 如果 highlight 幾乎佔滿全螢幕，優先放在上方（確保可見）
+    return makeResult(viewportTop + margin, 'force-top-overlap-maybe');
   };
 
   // 計算聊天泡泡位置，根據目標元素位置智能選擇高度
@@ -715,23 +748,41 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
     const relativeTargetBottom = targetBottom - containerTop;
     const relativeTargetCenterY = targetCenterY - containerTop;
 
-    // 🔹 不同的預設位置策略
+    // 取得瀏覽器可視範圍
+    const viewportHeight = window.innerHeight;
+    const viewportBottom = viewportHeight;
+
+    // 輔助函數：確保位置在可視範圍內
+    const clampToViewport = (top) => {
+      return Math.max(
+        margin,
+        Math.min(top, viewportBottom - chatBubbleHeight - margin)
+      );
+    };
+
+    // 輔助函數：檢查位置是否會超出可視範圍底部
+    const wouldExceedViewport = (top) => {
+      return (top + chatBubbleHeight + margin) > viewportBottom;
+    };
+
+    // 🔹 不同的預設位置策略（考慮可視範圍）
     const positions = [
-      // 1. 在目標元素下方（如果目標在容器上半部且有足夠空間）
+      // 1. 在目標元素上方（優先，因為目標通常在畫面下半部）
       {
-        condition: relativeTargetBottom < containerHeight * 0.5 &&
-          (containerHeight - relativeTargetBottom) > (chatBubbleHeight + 60),
-        top: relativeTargetBottom + 30,
-        placement: 'below-target',
-        description: '目標元素下方'
-      },
-      // 2. 在目標元素上方（如果目標在容器下半部且有足夠空間）
-      {
-        condition: relativeTargetTop > containerHeight * 0.5 &&
-          relativeTargetTop > (chatBubbleHeight + 60),
+        condition: relativeTargetTop > (chatBubbleHeight + 60) &&
+          (relativeTargetTop - chatBubbleHeight - 30) >= margin,
         top: relativeTargetTop - chatBubbleHeight - 30,
         placement: 'above-target',
         description: '目標元素上方'
+      },
+      // 2. 在目標元素下方（如果目標在容器上半部且有足夠空間，且不會超出可視範圍）
+      {
+        condition: relativeTargetBottom < containerHeight * 0.5 &&
+          (containerHeight - relativeTargetBottom) > (chatBubbleHeight + 60) &&
+          !wouldExceedViewport(relativeTargetBottom + 30),
+        top: relativeTargetBottom + 30,
+        placement: 'below-target',
+        description: '目標元素下方'
       },
       // 3. 容器上方（如果目標在容器下方）
       {
@@ -740,30 +791,28 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
         placement: 'top-fixed',
         description: '容器上方'
       },
-      // 4. 容器中央（如果目標在容器中央區域）
+      // 4. 容器中央（如果目標在容器中央區域，且不會超出可視範圍）
       {
         condition: relativeTargetCenterY > containerHeight * 0.25 &&
-          relativeTargetCenterY < containerHeight * 0.75,
+          relativeTargetCenterY < containerHeight * 0.75 &&
+          !wouldExceedViewport((containerHeight - chatBubbleHeight) / 2),
         top: (containerHeight - chatBubbleHeight) / 2,
         placement: 'center',
         description: '容器中央'
       },
-      // 5. 容器下方（預設位置）
+      // 5. 可視範圍頂部（安全的備用位置）
       {
         condition: true,
-        top: containerHeight - 250,
-        placement: 'bottom-fixed',
-        description: '容器下方'
+        top: margin,
+        placement: 'top-safe',
+        description: '可視範圍頂部（安全位置）'
       }
     ];
 
     // 找到第一個符合條件的位置
     for (const pos of positions) {
       if (pos.condition) {
-        const finalTop = Math.max(
-          margin,
-          Math.min(pos.top, containerHeight - chatBubbleHeight - margin)
-        );
+        const finalTop = clampToViewport(pos.top);
 
         return applyAvoidOverlap({
           top: finalTop,
@@ -775,14 +824,14 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
       }
     }
 
-    // 最後的備用方案
+    // 最後的備用方案：放在可視範圍頂部
     return applyAvoidOverlap({
-      top: containerHeight - 250,
+      top: margin,
       left: baseLeft,
       width: containerWidth - (margin * 2),
-      placement: 'bottom-fixed',
-      description: '容器下方（備用）'
-    }, '容器下方（備用）');
+      placement: 'top-fallback',
+      description: '可視範圍頂部（備用）'
+    }, '可視範圍頂部（備用）');
   }, [stepData, highlightPosition, isFullImageHighlight]);
 
 
@@ -911,17 +960,28 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
           startConditionMonitoring(stepData.nextCondition);
 
           // 對於 menuOpen、pageNavigate 和 imageAdded 條件，需要讓點擊事件正常執行
-          if (stepData.nextCondition === 'menuOpen' || 
+          if (stepData.nextCondition === 'menuOpen' ||
               stepData.nextCondition === 'manualNext' ||
-              stepData.nextCondition === 'nutritionImageUploaded' || 
+              stepData.nextCondition === 'nutritionImageUploaded' ||
               stepData.nextCondition === 'frontImageUploaded' ||
-              stepData.nextCondition === 'selectedPet' || 
+              stepData.nextCondition === 'selectedPet' ||
               stepData.nextCondition === 'pageNavigateToCalculator' ||
-              stepData.nextCondition === 'pageNavigate' || 
+              stepData.nextCondition === 'pageNavigate' ||
               stepData.nextCondition === 'noCondition' ||
-              stepData.nextCondition === 'descriptionClicked' || 
-              stepData.nextCondition === 'elementClicked'  || 
-              stepData.nextCondition === 'tabSwitchedToCondition'  || 
+              stepData.nextCondition === 'descriptionClicked' ||
+              stepData.nextCondition === 'elementClicked'  ||
+              stepData.nextCondition === 'tabSwitchedToCondition'  ||
+              stepData.nextCondition === 'tabSwitchedToFeed' ||
+              stepData.nextCondition === 'locationModalOpen' ||
+              stepData.nextCondition === 'locationSelected' ||
+              stepData.nextCondition === 'postPublished' ||
+              stepData.nextCondition === 'feedModalOpen' ||
+              stepData.nextCondition === 'feedModalStep2' ||
+              stepData.nextCondition === 'feedModalClosed' ||
+              stepData.nextCondition === 'calculationComplete' ||
+              stepData.nextCondition === 'abnormalPostCreated' ||
+              stepData.nextCondition === 'petTypeSelected' ||
+              stepData.nextCondition === 'petCreated' ||
               stepData.nextCondition === 'imageAdded') {
             // 移除事件阻止，讓原始點擊功能執行
             console.log('允許原始點擊事件執行以觸發:', stepData.nextCondition);
@@ -2190,6 +2250,143 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
             }
           }
           break;
+        case 'locationModalOpen': {
+          // 檢查位置選擇 Modal 是否已打開
+          const locationModal = document.querySelector('[class*="locationModal"]');
+          const locationList = document.querySelector('[class*="locationList"]');
+          console.log('locationModalOpen 條件檢查:', {
+            locationModalFound: !!locationModal,
+            locationListFound: !!locationList
+          });
+          conditionMet = !!locationModal || !!locationList;
+          break;
+        }
+        case 'locationSelected': {
+          // 檢查位置是否已選擇（Modal 關閉且位置按鈕顯示選擇的位置）
+          const locationModalClosed = !document.querySelector('[class*="locationModal"]');
+          const locationButton = document.querySelector('button[class*="locationButton"]');
+          // 檢查按鈕是否顯示了選擇的位置（不再是預設文字）
+          const hasLocationText = locationButton &&
+                                  locationButton.textContent &&
+                                  locationButton.textContent.trim().length > 0;
+          console.log('locationSelected 條件檢查:', {
+            locationModalClosed,
+            hasLocationText,
+            buttonText: locationButton?.textContent
+          });
+          // 當 Modal 關閉時視為選擇完成
+          conditionMet = locationModalClosed;
+          break;
+        }
+        case 'postPublished': {
+          // 檢查貼文是否已發布（通過頁面跳轉或成功通知）
+          const currentPath = window.location.pathname;
+          const isOnHomePage = currentPath === '/' || currentPath === '/home' || currentPath === '/social';
+          const successNotice = document.querySelector(
+            '[class*="success"], [class*="notification"][class*="success"], [class*="toast"][class*="success"]'
+          );
+          console.log('postPublished 條件檢查:', {
+            currentPath,
+            isOnHomePage,
+            hasSuccessNotice: !!successNotice
+          });
+          conditionMet = isOnHomePage || !!successNotice;
+          break;
+        }
+        case 'tabSwitchedToFeed': {
+          // 檢查計算機是否切換到飼料頁籤
+          const feedSection = document.querySelector('[class*="feedActions"]');
+          const activeFeedTab = document.querySelector('button[class*="navButton"][class*="active"]:has(img[src*="PetpageFeedButton"])');
+          console.log('tabSwitchedToFeed 條件檢查:', {
+            feedSectionFound: !!feedSection,
+            activeFeedTab: !!activeFeedTab
+          });
+          conditionMet = !!feedSection || !!activeFeedTab;
+          break;
+        }
+        case 'feedModalOpen': {
+          // 檢查新增飼料 Modal 是否打開
+          const feedModal = document.querySelector('[class*="CreateFeedModal"], [class*="modalContainer"][class*="feed"], [class*="modalOverlay"]');
+          const petTypeSelect = document.querySelector('[class*="petTypeSelect"]');
+          console.log('feedModalOpen 條件檢查:', {
+            feedModalFound: !!feedModal,
+            petTypeSelectFound: !!petTypeSelect
+          });
+          conditionMet = !!feedModal || !!petTypeSelect;
+          break;
+        }
+        case 'feedModalStep2': {
+          // 檢查飼料 Modal 是否進入步驟 2（確認頁面）
+          const confirmSection = document.querySelector('[class*="confirmSection"]');
+          console.log('feedModalStep2 條件檢查:', {
+            confirmSectionFound: !!confirmSection
+          });
+          conditionMet = !!confirmSection;
+          break;
+        }
+        case 'feedModalClosed': {
+          // 檢查飼料 Modal 是否已關閉
+          const feedModalOverlay = document.querySelector('[class*="modalOverlay"]');
+          const feedModalContainer = document.querySelector('[class*="modalContainer"]');
+          console.log('feedModalClosed 條件檢查:', {
+            feedModalOverlayFound: !!feedModalOverlay,
+            feedModalContainerFound: !!feedModalContainer
+          });
+          conditionMet = !feedModalOverlay && !feedModalContainer;
+          break;
+        }
+        case 'calculationComplete': {
+          // 檢查計算是否完成（顯示結果區域）
+          const resultSection = document.querySelector('[class*="resultSection"], [class*="calculationResult"], [class*="result"]');
+          const activeCalculateTab = document.querySelector('button[class*="navButton"][class*="active"]:has(img[src*="CalculatorCalculateIcon"])');
+          console.log('calculationComplete 條件檢查:', {
+            resultSectionFound: !!resultSection,
+            activeCalculateTab: !!activeCalculateTab
+          });
+          conditionMet = !!resultSection || !!activeCalculateTab;
+          break;
+        }
+        case 'abnormalPostCreated': {
+          // 檢查異常記錄是否已創建
+          const abnormalCurrentPath = window.location.pathname;
+          const isOnPetPage = abnormalCurrentPath.includes('/pet') && !abnormalCurrentPath.includes('/create-abnormal');
+          const abnormalSuccessNotice = document.querySelector(
+            '[class*="success"], [class*="notification"][class*="success"]'
+          );
+          console.log('abnormalPostCreated 條件檢查:', {
+            currentPath: abnormalCurrentPath,
+            isOnPetPage,
+            hasSuccessNotice: !!abnormalSuccessNotice
+          });
+          conditionMet = isOnPetPage || !!abnormalSuccessNotice;
+          break;
+        }
+        case 'petTypeSelected': {
+          // 檢查是否已選擇寵物類型（進入 phaseTwo）
+          const phaseTwo = document.querySelector('[class*="phaseTwo"]');
+          const avatarUpload = document.querySelector('[class*="avatarUpload"]');
+          console.log('petTypeSelected 條件檢查:', {
+            phaseTwoFound: !!phaseTwo,
+            avatarUploadFound: !!avatarUpload
+          });
+          conditionMet = !!phaseTwo || !!avatarUpload;
+          break;
+        }
+        case 'petCreated': {
+          // 檢查寵物是否已創建
+          const petCreatedPath = window.location.pathname;
+          const isBackToPetPage = petCreatedPath === '/pet' || (petCreatedPath.includes('/pet/') && !petCreatedPath.includes('/add'));
+          const petSuccessNotice = document.querySelector(
+            '[class*="success"], [class*="notification"][class*="success"]'
+          );
+          console.log('petCreated 條件檢查:', {
+            currentPath: petCreatedPath,
+            isBackToPetPage,
+            hasSuccessNotice: !!petSuccessNotice
+          });
+          conditionMet = isBackToPetPage || !!petSuccessNotice;
+          break;
+        }
         // case 'descriptionEnterTwice': {
         //   const scopeRoot = (typeof getDescriptionFlowRoot === 'function')
         //     ? getDescriptionFlowRoot()
@@ -2609,27 +2806,21 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
       onScrollCapture={handleBackgroundScroll}
       onWheelCapture={handleBackgroundScroll}
     >
-      {/* 暗背景 - 使用單一覆蓋層配合 clip-path 挖空高亮區域，避免間隙問題 */}
+      {/* 高亮窗口 - 使用超大 box-shadow 創建周圍的暗區域，避免間隙和穿模問題 */}
       {highlightPosition && (
         <div
-          className={styles.darkBackground}
+          className={styles.highlightWindow}
           style={{
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            clipPath: `polygon(
-              0% 0%,
-              0% 100%,
-              ${highlightPosition.left}px 100%,
-              ${highlightPosition.left}px ${highlightPosition.top}px,
-              ${highlightPosition.left + highlightPosition.width}px ${highlightPosition.top}px,
-              ${highlightPosition.left + highlightPosition.width}px ${highlightPosition.top + highlightPosition.height}px,
-              ${highlightPosition.left}px ${highlightPosition.top + highlightPosition.height}px,
-              ${highlightPosition.left}px 100%,
-              100% 100%,
-              100% 0%
-            )`,
+            position: 'absolute',
+            top: `${highlightPosition.top}px`,
+            left: `${highlightPosition.left}px`,
+            width: `${highlightPosition.width}px`,
+            height: `${highlightPosition.height}px`,
+            zIndex: 10000046,
+            pointerEvents: 'none',
+            background: 'transparent',
+            borderRadius: '8px',
+            boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.75)',
           }}
         />
       )}
