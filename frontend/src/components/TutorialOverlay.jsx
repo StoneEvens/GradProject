@@ -2706,24 +2706,13 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
                 >
                   {stepData.action === 'complete' ? '✓ 完成教學' : '✕ 關閉教學'}
                 </button>
-                {/* 第10步：新增一個「下一步」按鈕 */}
+                {/* 手動下一步按鈕 */}
                 {stepData?.nextCondition === 'manualNext' && (
                   <button
                     className={styles.nextButton}
                     onClick={() => {
                       console.log('🟢 Tutorial: 手動進入下一步');
                       handleNextStep();
-                    }}
-                    style={{
-                      marginLeft: '10px',
-                      backgroundColor: '#4CAF50',
-                      color: 'white',
-                      padding: '6px 12px',
-                      borderRadius: '6px',
-                      border: 'none',
-                      cursor: 'pointer',
-                      fontSize: '14px',
-                      boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
                     }}
                   >
                     下一步 →
