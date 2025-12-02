@@ -1,4 +1,4 @@
-from typing import Dict, Optional, Literal
+from typing import Dict, Optional, Literal, Any
 import json
 import inspect
 from typing import get_type_hints, get_origin, get_args
@@ -508,13 +508,14 @@ def create_mcp_server() -> FastMCP:
             "USE WHEN: User confirms they want to create, modify, or delete data.\n"
             "PREREQ: Call get_operation_usage(operation_name) first to get full details.\n"
             "WORKFLOW: database_operation_list → get_operation_usage → ask user for params → perform_database_operation.\n"
-            "PARAMS: operation (str) + data (dict with ALL operation-specific params).\n"
-            "NOTE: Verify user is modifying their own data. Use 'add_plan' for schedules (not 'create_schedule')."
+            "PARAMS: operation (str) + data (dict with ALL operation-specific params like user_id, pet_id, etc.).\n"
+            "EXAMPLE: perform_database_operation(operation='create_disease_archive', data={'user_id': 1, 'pet_id': 2, 'archive_title': '...', 'abnormal_post_ids': [1,2], ...})\n"
+            "NOTE: Both 'operation' AND 'data' parameters are REQUIRED. Verify user is modifying their own data. Use 'add_plan' for schedules (not 'create_schedule')."
         )
     )
     async def perform_database_operation(
         operation: Literal["add_pet", "update_pet", "update_user", "update_user_headshot", "add_abnormal_post", "update_abnormal_post", "delete_abnormal_post", "create_disease_archive", "add_plan", "update_plan", "delete_plan", "list_plans", "create_social_post", "add_feed", "prepare_health_report_ocr", "add_health_report", "update_health_report", "delete_health_report"],
-        data: Dict
+        data: Dict[str, Any]
     ) -> str:
         print(f"[MCP Tool] ===== perform_database_operation CALLED =====")
         print(f"[MCP Tool] operation: {operation}")

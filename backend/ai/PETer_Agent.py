@@ -238,7 +238,10 @@ User wants to add/update/delete data:
   2. use_local_tool("get_db_operation_details", '{"operation": "..."}') → get FULL workflow
   3. Follow the workflow, ASK user for required params - NEVER invent values
   4. Show preview and wait for confirmation
-  5. perform_database_operation(...) (MCP) → execute
+  5. Call perform_database_operation with BOTH parameters:
+     - operation: the operation name (e.g., "create_disease_archive")
+     - data: a dict with ALL required params (e.g., {"user_id": 1, "pet_id": 2, "archive_title": "...", "abnormal_post_ids": [1,2,3], ...})
+     Example: perform_database_operation(operation="create_disease_archive", data={"user_id": 1, "pet_id": 5, "archive_title": "Joe的感冒記錄", "abnormal_post_ids": [10, 11], "main_cause": "感冒"})
   6. Follow response_handling to format reply and add operations
 
 -- SCHEDULE/PLAN OPERATIONS --
@@ -275,7 +278,7 @@ def create_peter_agent(mcp_server):
     return Agent(
         name="PETer Agent",
         instructions=AGENT_INSTRUCTIONS,
-        model="gpt-4o",
+        model="gpt-5.1",
         mcp_servers=[mcp_server],  # MCP tools (database operations) - with caching
         tools=[
             # Meta-tools for local operations (2 tools instead of 8)

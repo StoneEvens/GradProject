@@ -1326,9 +1326,17 @@ def _create_disease_archive(data: Dict) -> Dict:
                 'symptom_name': symptom_relation.symptom.symptom_name
             })
         
+        # Handle None record_date - use created_at as fallback
+        if post.record_date:
+            record_date_str = post.record_date.isoformat()
+        elif post.created_at:
+            record_date_str = post.created_at.isoformat()
+        else:
+            record_date_str = None
+        
         abnormal_posts_data.append({
             'id': post.id,
-            'record_date': post.record_date.isoformat(),
+            'record_date': record_date_str,
             'is_emergency': post.is_emergency,
             'symptoms': symptoms_data,
             'content': post.content
@@ -1425,8 +1433,15 @@ def _generate_disease_archive_content_with_ai(pet, abnormal_posts, symptoms, mai
         posts_data = []
         for post in abnormal_posts:
             post_symptoms = [rel.symptom.symptom_name for rel in post.symptoms.all()]
+            # Handle None record_date - use created_at as fallback
+            if post.record_date:
+                date_str = post.record_date.strftime('%Y年%m月%d日')
+            elif post.created_at:
+                date_str = post.created_at.strftime('%Y年%m月%d日')
+            else:
+                date_str = '日期未記錄'
             post_data = {
-                'date': post.record_date.strftime('%Y年%m月%d日'),
+                'date': date_str,
                 'symptoms': '、'.join(post_symptoms) if post_symptoms else '無症狀記錄',
                 'content': post.content or '無補充描述',
                 'weight': f"{post.weight}公斤" if post.weight else '未記錄',
