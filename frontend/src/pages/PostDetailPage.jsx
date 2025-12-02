@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import TopNavbar from '../components/TopNavbar';
 import BottomNavbar from '../components/BottomNavigationBar';
 import Post from '../components/Post';
-import PageTransition from '../components/PageTransition';
 import PostComments from '../components/PostComments';
 import Notification from '../components/Notification';
 import { NotificationProvider } from '../context/NotificationContext';
@@ -116,37 +115,31 @@ const PostDetailPage = () => {
       <NotificationProvider>
         <div className={styles.container}>
           <TopNavbar />
-          <PageTransition
-            isLoading={false}
-            overlayColor="#FFF2D9"
-            fadeDuration={400}
-          >
-            <div className={styles.content}>
-              <div className={styles.errorContainer}>
-                <div className={styles.errorMessage}>
-                  <h3>{t('post.errorTitle') || '無法載入貼文'}</h3>
-                  <p>{t('post.errorDescription') || '貼文可能已被刪除或不存在'}</p>
-                  <div className={styles.errorButtons}>
-                    <button
-                      className={styles.retryButton}
-                      onClick={() => {
-                        setLoadError(false);
-                        loadData();
-                      }}
-                    >
-                      {t('post.retry') || '重試'}
-                    </button>
-                    <button
-                      className={styles.backButton}
-                      onClick={() => navigate(-1)}
-                    >
-                      {t('post.goBack') || '返回'}
-                    </button>
-                  </div>
+          <div className={styles.content}>
+            <div className={styles.errorContainer}>
+              <div className={styles.errorMessage}>
+                <h3>{t('post.errorTitle') || '無法載入貼文'}</h3>
+                <p>{t('post.errorDescription') || '貼文可能已被刪除或不存在'}</p>
+                <div className={styles.errorButtons}>
+                  <button
+                    className={styles.retryButton}
+                    onClick={() => {
+                      setLoadError(false);
+                      loadData();
+                    }}
+                  >
+                    {t('post.retry') || '重試'}
+                  </button>
+                  <button
+                    className={styles.backButton}
+                    onClick={() => navigate(-1)}
+                  >
+                    {t('post.goBack') || '返回'}
+                  </button>
                 </div>
               </div>
             </div>
-          </PageTransition>
+          </div>
           <BottomNavbar />
         </div>
       </NotificationProvider>
@@ -158,28 +151,32 @@ const PostDetailPage = () => {
       <div className={styles.container}>
         <TopNavbar />
 
-        <PageTransition
-          isLoading={loading}
-          overlayColor="#FFF2D9"
-          fadeDuration={400}
-        >
-          <div className={styles.content}>
-            {/* 標題區域 */}
-            <div className={styles.header}>
-              <div className={styles.titleSection}>
-                <button className={styles.backButton} onClick={handleBack}>
-                  ❮
-                </button>
-                <span className={styles.title}>
-                  {t('post.detailTitle') || '貼文詳情'}
-                </span>
-              </div>
+        <div className={styles.content}>
+          {/* 載入中 */}
+          {loading && (
+            <div className={styles.loadingContainer}>
+              {t('common.loading') || '載入中...'}
             </div>
+          )}
 
-            <div className={styles.divider}></div>
+          {/* 主要內容 */}
+          {!loading && post && (
+            <>
+              {/* 標題區域 */}
+              <div className={styles.header}>
+                <div className={styles.titleSection}>
+                  <button className={styles.backButton} onClick={handleBack}>
+                    ❮
+                  </button>
+                  <span className={styles.title}>
+                    {t('post.detailTitle') || '貼文詳情'}
+                  </span>
+                </div>
+              </div>
 
-            {/* 貼文內容 */}
-            {post && (
+              <div className={styles.divider}></div>
+
+              {/* 貼文內容 */}
               <div className={styles.postWrapper}>
                 <Post
                   postData={post}
@@ -191,9 +188,9 @@ const PostDetailPage = () => {
                   showFullDescription={true}
                 />
               </div>
-            )}
-          </div>
-        </PageTransition>
+            </>
+          )}
+        </div>
 
         <BottomNavbar />
 
