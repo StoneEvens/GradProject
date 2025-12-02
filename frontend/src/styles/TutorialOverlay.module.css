@@ -19,19 +19,15 @@
 }
 
 
-/* 暗背景 - 保留用於其他情況 */
+/* 暗背景 - 使用純色避免間隙問題 */
 .darkBackground {
   position: absolute;
   will-change: top, left, right, bottom, height, width, opacity;
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(2px);
-  -webkit-backdrop-filter: blur(2px);
-  z-index: 10000040;
-  pointer-events: none;  /* 改為 none，允許點擊穿透 */
-  /* 阻止用戶與背景內容交互 */
+  background: rgba(0, 0, 0, 0.75);
+  z-index: 10000045;
+  pointer-events: none;
   touch-action: none;
   user-select: none;
-  transition: opacity 0.18s ease;
   backface-visibility: hidden;
   transform: translateZ(0);
 }
@@ -264,30 +260,31 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
-/* 下一步按鈕 */
+/* 下一步按鈕 - 與關閉教學按鈕使用相同風格 */
 .nextButton {
-  background: linear-gradient(145deg, #FFB370, #F08651);
-  color: white;
+  background: linear-gradient(145deg, #ffffff, #fff6ea);
+  color: #8B4513;
   padding: 10px 16px;
   border-radius: 20px;
   font-size: 14px;
   font-weight: 600;
-  border: none;
+  border: 1px solid rgba(255, 179, 112, 0.2);
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow:
-    0 4px 16px rgba(240, 134, 81, 0.3),
-    0 2px 4px rgba(240, 134, 81, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    0 4px 16px rgba(0, 0, 0, 0.15),
+    0 2px 4px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
 .nextButton:hover {
-  background: linear-gradient(145deg, #F08651, #E67E30);
+  background: linear-gradient(145deg, #fff6ea, #ffffff);
   transform: translateY(-2px);
   box-shadow:
-    0 6px 20px rgba(240, 134, 81, 0.4),
-    0 3px 6px rgba(240, 134, 81, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    0 6px 20px rgba(0, 0, 0, 0.2),
+    0 3px 6px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(255, 179, 112, 0.3);
 }
 
 .nextButton:active {
@@ -523,10 +520,10 @@
   }
 }
 
-/* 確保目標元素可點擊 */
+/* 確保目標元素可點擊 - z-index 必須高於暗背景 (10000045) */
 :global(.tutorial-target) {
   position: relative !important;
-  z-index: 10000020 !important;
+  z-index: 10000050 !important;
   pointer-events: auto !important;
   user-select: auto !important;
   touch-action: auto !important;

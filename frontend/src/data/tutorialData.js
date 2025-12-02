@@ -98,9 +98,9 @@ const tutorialData = {
         instruction: '在照片中您想要標註寵物的位置點擊一下',
         targetElement: {
           component: 'ImageEditor',
-          selector: '[class*="editImage"], img[alt*="編輯"], img[alt*="圖片"]',
+          selector: '[class*="imageEditorModal"] [class*="editImage"], [class*="imageEditorModal"] img[class*="editableImage"], [class*="modalContent"] img:not([class*="addImage"])',
           className: 'editImage',
-          fallbackSelector: 'img'
+          fallbackSelector: '[class*="imageEditorModal"] img'
         },
         highlight: {
           type: 'fullImage',
@@ -283,9 +283,9 @@ const tutorialData = {
         instruction: '在照片中您想要標註寵物的位置點擊一下',
         targetElement: {
           component: 'ImageEditor',
-          selector: '[class*="editImage"], img[alt*="編輯"], img[alt*="圖片"]',
+          selector: '[class*="imageEditorModal"] [class*="editImage"], [class*="imageEditorModal"] img[class*="editableImage"], [class*="modalContent"] img:not([class*="addImage"])',
           className: 'editImage',
-          fallbackSelector: 'img'
+          fallbackSelector: '[class*="imageEditorModal"] img'
         },
         highlight: {
           type: 'fullImage',

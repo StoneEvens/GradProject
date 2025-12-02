@@ -814,12 +814,22 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
       currentStep
     });
 
-    // 先清理之前的事件監聽器
+    // 先清理之前的事件監聯器
     if (cleanupRef.current) {
       console.log('清理之前的事件監聽器');
       cleanupRef.current();
       cleanupRef.current = null;
     }
+
+    // 全局清理：移除所有殘留的 tutorial-target 類別和樣式
+    document.querySelectorAll('.tutorial-target').forEach(el => {
+      el.classList.remove('tutorial-target');
+      el.style.position = '';
+      el.style.zIndex = '';
+      el.style.pointerEvents = '';
+      el.style.userSelect = '';
+      el.style.touchAction = '';
+    });
 
     if (!stepData || !stepData.targetElement) {
       console.log('沒有目標元素，使用預設位置');
@@ -2599,50 +2609,29 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
       onScrollCapture={handleBackgroundScroll}
       onWheelCapture={handleBackgroundScroll}
     >
-      {/* 暗背景區塊 - 分為四個區域來突出目標元素，使用 1px 重疊避免間隙黑線 */}
+      {/* 暗背景 - 使用單一覆蓋層配合 clip-path 挖空高亮區域，避免間隙問題 */}
       {highlightPosition && (
-        <>
-          {/* 上方暗背景 */}
-          <div
-            className={styles.darkBackground}
-            style={{
-              top: 0,
-              left: 0,
-              right: 0,
-              height: `${highlightPosition.top + 1}px`,
-            }}
-          />
-          {/* 左方暗背景 */}
-          <div
-            className={styles.darkBackground}
-            style={{
-              top: `${highlightPosition.top}px`,
-              left: 0,
-              width: `${highlightPosition.left + 1}px`,
-              height: `${highlightPosition.height}px`,
-            }}
-          />
-          {/* 右方暗背景 */}
-          <div
-            className={styles.darkBackground}
-            style={{
-              top: `${highlightPosition.top}px`,
-              left: `${highlightPosition.left + highlightPosition.width - 1}px`,
-              right: 0,
-              height: `${highlightPosition.height}px`,
-            }}
-          />
-          {/* 下方暗背景 */}
-          <div
-            className={styles.darkBackground}
-            style={{
-              top: `${highlightPosition.top + highlightPosition.height - 1}px`,
-              left: 0,
-              right: 0,
-              bottom: 0,
-            }}
-          />
-        </>
+        <div
+          className={styles.darkBackground}
+          style={{
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            clipPath: `polygon(
+              0% 0%,
+              0% 100%,
+              ${highlightPosition.left}px 100%,
+              ${highlightPosition.left}px ${highlightPosition.top}px,
+              ${highlightPosition.left + highlightPosition.width}px ${highlightPosition.top}px,
+              ${highlightPosition.left + highlightPosition.width}px ${highlightPosition.top + highlightPosition.height}px,
+              ${highlightPosition.left}px ${highlightPosition.top + highlightPosition.height}px,
+              ${highlightPosition.left}px 100%,
+              100% 100%,
+              100% 0%
+            )`,
+          }}
+        />
       )}
 
 
