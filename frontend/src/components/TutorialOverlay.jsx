@@ -66,6 +66,69 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
   const chatBubbleHeightRef = useRef(200);
   const imageFlowScopeRef = useRef(null);
 
+  // ============ 輔助判斷函數：基於 stepData 屬性而非寫死 ID ============
+
+  // 判斷是否為圖片流程相關步驟（需要限定查找範圍）
+  const isImageFlowStep = useCallback((step) => {
+    if (!step?.targetElement) return false;
+    const { component, className, selector } = step.targetElement;
+    return (
+      component === 'CreatePostPage' &&
+      (className?.includes('Image') ||
+       className?.includes('image') ||
+       selector?.includes('image') ||
+       selector?.includes('Image') ||
+       className === 'addImageBtn' ||
+       className === 'clickableImage')
+    );
+  }, []);
+
+  // 判斷是否需要排除 Navbar 中的元素
+  const shouldExcludeNavbar = useCallback((step) => {
+    if (!step?.targetElement) return false;
+    const { className } = step.targetElement;
+    return className === 'clickableImage' || className?.includes('Image');
+  }, []);
+
+  // 判斷是否為 fullImage 高亮類型
+  const isFullImageHighlight = useCallback((step) => {
+    return step?.highlight?.type === 'fullImage';
+  }, []);
+
+  // 判斷是否需要等待元素穩定
+  const needsStableRect = useCallback((step) => {
+    if (!step) return false;
+    const { component, className } = step.targetElement || {};
+    return (
+      className === 'addImageBtn' ||
+      className === 'searchInput' ||
+      step.transition?.waitForPageLoad
+    );
+  }, []);
+
+  // 判斷是否為選單步驟
+  const isMenuStep = useCallback((step) => {
+    return step?.targetElement?.component === 'PostMenu';
+  }, []);
+
+  // 判斷是否需要等待 modal 渲染
+  const needsModalWait = useCallback((step) => {
+    if (!step?.targetElement) return false;
+    const { selector, className } = step.targetElement;
+    return (
+      className === 'publishButton' ||
+      selector?.includes('modalContainer') ||
+      selector?.includes('publishButton')
+    );
+  }, []);
+
+  // 判斷是否需要自動滾動到目標
+  const needsAutoScroll = useCallback((step) => {
+    if (!step?.targetElement) return false;
+    const { selector } = step.targetElement;
+    return selector?.includes('upload-nutrition') || selector?.includes('data-step');
+  }, []);
+
   // 取得影像相關步驟的查找根節點，優先使用已建立的範圍
   const getImageFlowRoot = useCallback(() => {
     return imageFlowScopeRef.current && imageFlowScopeRef.current.isConnected
@@ -244,11 +307,11 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
   }, []);
   // 讓聊天泡泡「盡量不與 highlight 區域重疊」的通用函式
   const calculateBubblePosition = ({
-    basePos,          // { top, left, width, placement, description }
-    highlightRect,    // { top, left, width, height }  (viewport 座標)
-    containerRect,    // root 容器的 rect (viewport 座標)
-    bubbleHeight,     // 泡泡高度
-    margin = 20,      // 與容器邊緣保留距離
+    basePos,
+    highlightRect,
+    containerRect,
+    bubbleHeight,
+    margin = 20,
   }) => {
     if (!highlightRect || !basePos) return basePos;
 
@@ -256,14 +319,14 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
       top: basePos.top,
       bottom: basePos.top + bubbleHeight,
       left: basePos.left,
-      right: basePos.left + basePos.width,
+      right: basePos.left + basePos.width
     };
 
     const hRect = {
       top: highlightRect.top,
       bottom: highlightRect.top + highlightRect.height,
       left: highlightRect.left,
-      right: highlightRect.left + highlightRect.width,
+      right: highlightRect.left + highlightRect.width
     };
 
     const cTop = containerRect.top ?? 0;
@@ -285,7 +348,7 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
       ...basePos,
       top,
       placement: placement || basePos.placement,
-      description: (basePos.description || '') + ' (已避開高亮)',
+      description: (basePos.description || '') + ' (已避開高亮)'
     });
 
     // 1️⃣ 試著放在 highlight 下方
@@ -552,40 +615,32 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
       });
     };
 
-    // 🔹 特例：步驟 5 固定在畫面下方 35% 位置（但之後仍會避免與 highlight 重疊）
-    if (stepData?.id === 5) {
-      const topCandidate = containerHeight * 0.55; // 下方 35%
+    // 🔹 fullImage 類型的特殊處理：固定在畫面下方區域
+    const isFullImage = isFullImageHighlight(stepData);
+    if (isFullImage) {
+      // fullImage 步驟固定在畫面下方 35% 位置
+      const topCandidate = containerHeight * 0.55;
       const finalTop = Math.max(
         margin,
         Math.min(topCandidate, containerHeight - chatBubbleHeight - margin)
       );
 
-      return applyAvoidOverlap({
-        top: finalTop,
-        left: baseLeft,
-        width: containerWidth - (margin * 2),
-        placement: 'bottom-35-fixed',
-        description: '步驟5：固定在下方35%',
-      }, '步驟5：固定在下方35%');
-    }
-
-    // 🔹 fullImage 類型：優先跟著高亮區域走
-    if (stepData?.highlight?.type === 'fullImage') {
+      // 如果有高亮位置，進一步調整避免重疊
       if (highlightPosition) {
-        const gap = stepData?.id === 5 ? 56 : 20;
+        const gap = 56; // fullImage 使用較大間距
         const highlightTop = highlightPosition.top;
         const highlightBottom = highlightPosition.top + highlightPosition.height;
         const highlightRatio = highlightPosition.height / containerHeight;
 
-        // 第 5 步：若高光占比過大或靠近容器下半部，直接固定在底部，避免遮擋
-        if (stepData?.id === 5 && (highlightRatio > 0.5 || highlightBottom > containerHeight * 0.55)) {
+        // 若高光占比過大或靠近容器下半部，直接固定在底部
+        if (highlightRatio > 0.5 || highlightBottom > containerHeight * 0.55) {
           const bottomGap = Math.max(24, margin);
           return applyAvoidOverlap({
             top: Math.max(margin, containerHeight - chatBubbleHeight - bottomGap),
             left: baseLeft,
             width: containerWidth - (margin * 2),
             placement: 'bottom-fixed-avoid-highlight',
-            description: '步驟5：高光占比大，固定底部',
+            description: '全圖高亮：高光占比大，固定底部'
           }, '全圖高亮 - 固定底部');
         }
 
@@ -598,7 +653,7 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
             left: baseLeft,
             width: containerWidth - (margin * 2),
             placement: 'below-highlight',
-            description: '全圖高亮 - 高光區塊下方',
+            description: '全圖高亮 - 高光區塊下方'
           }, '全圖高亮 - 高光區塊下方');
         }
 
@@ -611,7 +666,7 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
             left: baseLeft,
             width: containerWidth - (margin * 2),
             placement: 'above-highlight',
-            description: '全圖高亮 - 高光區塊上方',
+            description: '全圖高亮 - 高光區塊上方'
           }, '全圖高亮 - 高光區塊上方');
         }
 
@@ -625,7 +680,7 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
           left: baseLeft,
           width: containerWidth - (margin * 2),
           placement: 'center',
-          description: '全圖高亮 - 空間不足（置中）',
+          description: '全圖高亮 - 空間不足（置中）'
         }, '全圖高亮 - 空間不足（置中）');
       }
 
@@ -636,7 +691,7 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
         left: baseLeft,
         width: containerWidth - (margin * 2),
         placement: 'bottom-fixed',
-        description: '全圖高亮 - 尚無高光位置（備用）',
+        description: '全圖高亮 - 尚無高光位置（備用）'
       }, '全圖高亮 - 尚無高光位置（備用）');
     }
 
@@ -647,7 +702,7 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
         left: baseLeft,
         width: containerWidth - (margin * 2),
         placement: 'center-default',
-        description: '沒有目標元素 - 中央位置',
+        description: '沒有目標元素 - 中央位置'
       }, '沒有目標元素 - 中央位置');
     }
 
@@ -664,45 +719,42 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
     const positions = [
       // 1. 在目標元素下方（如果目標在容器上半部且有足夠空間）
       {
-        condition:
-          relativeTargetBottom < containerHeight * 0.5 &&
+        condition: relativeTargetBottom < containerHeight * 0.5 &&
           (containerHeight - relativeTargetBottom) > (chatBubbleHeight + 60),
         top: relativeTargetBottom + 30,
         placement: 'below-target',
-        description: '目標元素下方',
+        description: '目標元素下方'
       },
       // 2. 在目標元素上方（如果目標在容器下半部且有足夠空間）
       {
-        condition:
-          relativeTargetTop > containerHeight * 0.5 &&
+        condition: relativeTargetTop > containerHeight * 0.5 &&
           relativeTargetTop > (chatBubbleHeight + 60),
         top: relativeTargetTop - chatBubbleHeight - 30,
         placement: 'above-target',
-        description: '目標元素上方',
+        description: '目標元素上方'
       },
       // 3. 容器上方（如果目標在容器下方）
       {
         condition: relativeTargetTop > containerHeight * 0.75,
         top: 50,
         placement: 'top-fixed',
-        description: '容器上方',
+        description: '容器上方'
       },
       // 4. 容器中央（如果目標在容器中央區域）
       {
-        condition:
-          relativeTargetCenterY > containerHeight * 0.25 &&
+        condition: relativeTargetCenterY > containerHeight * 0.25 &&
           relativeTargetCenterY < containerHeight * 0.75,
         top: (containerHeight - chatBubbleHeight) / 2,
         placement: 'center',
-        description: '容器中央',
+        description: '容器中央'
       },
       // 5. 容器下方（預設位置）
       {
         condition: true,
         top: containerHeight - 250,
         placement: 'bottom-fixed',
-        description: '容器下方',
-      },
+        description: '容器下方'
+      }
     ];
 
     // 找到第一個符合條件的位置
@@ -718,7 +770,7 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
           left: baseLeft,
           width: containerWidth - (margin * 2),
           placement: pos.placement,
-          description: pos.description,
+          description: pos.description
         }, pos.description);
       }
     }
@@ -729,9 +781,9 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
       left: baseLeft,
       width: containerWidth - (margin * 2),
       placement: 'bottom-fixed',
-      description: '容器下方（備用）',
+      description: '容器下方（備用）'
     }, '容器下方（備用）');
-  }, [stepData, highlightPosition]);
+  }, [stepData, highlightPosition, isFullImageHighlight]);
 
 
   // 量測聊天泡泡實際高度並在高度變更時重新計算定位
@@ -780,28 +832,32 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
 
     const { className, selector } = stepData.targetElement;
     console.log('尋找目標元素:', { className, selector });
-    
-    if (stepData?.id === 13) {
-        setTimeout(() => {
-            const block = document.querySelector('[data-step="upload-nutrition"]');
 
-            if (block) {
-                block.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'center'
-                });
-                setTimeout(() => {
-                  findAndHighlightElement();
-                }, 200);
-            }
-        }, 100); // 等 highlight 定位完，100ms 是最穩的延遲
+    // 自動滾動到需要滾動的目標元素（基於 selector 屬性判斷）
+    if (needsAutoScroll(stepData)) {
+      setTimeout(() => {
+        const scrollTarget = selector?.includes('upload-nutrition')
+          ? document.querySelector('[data-step="upload-nutrition"]')
+          : document.querySelector(selector);
+
+        if (scrollTarget) {
+          scrollTarget.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center'
+          });
+          setTimeout(() => {
+            findAndHighlightElement();
+          }, 200);
+        }
+      }, 100);
     }
-        // Step 15 等待 modal Step 2 render
-    if (stepData?.id === 15) {
+
+    // 等待 modal 渲染完成（基於 component/className 判斷）
+    if (needsModalWait(stepData)) {
       const modalContainer = document.querySelector('[class*="modalContainer"]');
       const publishButton = document.querySelector('[class*="publishButton"]');
       if (!publishButton && !modalContainer && !document.querySelector('[class^="_confirmSection"]')) {
-        console.log("Step 15: modalContainer、publishButton、confirmSection 尚未渲染，稍後再試");
+        console.log('Modal 尚未渲染，稍後再試');
         setTimeout(findAndHighlightElement, 120);
         return;
       }
@@ -990,25 +1046,18 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
       if (rect.width > 0 && rect.height > 0) {
         targetElementRef.current = cachedEl;
 
-        // 影像流程：在步驟 3 或 4 建立查找範圍（使用貼文建立頁面的主要容器）
-        if (stepData?.id === 3 || stepData?.id === 4 || stepData?.id === 13 || stepData?.id === 16) {
+        // 影像流程：建立查找範圍（使用貼文建立頁面的主要容器）
+        if (isImageFlowStep(stepData)) {
           const scopeCandidate = cachedEl.closest(
             '[class*="CreatePost"], [class*="createPost"], [class*="createFeed"], [class*="postContainer"], main, form'
           );
           imageFlowScopeRef.current = scopeCandidate || document.getElementById('root') || document.body;
         }
 
-        // if (stepData?.id === 3 || stepData?.id === 4) {
-        //   const scopeCandidate = cachedEl.closest('[class*="CreatePost"], [class*="createPost"], [class*="postContainer"], main, form');
-        //   imageFlowScopeRef.current = scopeCandidate || document.getElementById('root') || document.body;
-        // }
-        
-
-
-        // 在渲染 spotlight 前等待（僅在關鍵步驟）
+        // 在渲染 spotlight 前等待（僅在需要穩定的步驟）
         (async () => {
-          if (stepData?.id === 3 || stepData?.id === 6) {
-            const stableMs = stepData?.id === 6 ? 220 : 240;
+          if (needsStableRect(stepData)) {
+            const stableMs = stepData.targetElement?.className === 'searchInput' ? 220 : 240;
             await waitForStableRect(cachedEl, { stableMs, maxWaitMs: 1200, thresholdPx: 1 });
           }
           if (targetElementRef.current !== cachedEl) return;
@@ -1061,20 +1110,23 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
       // 使用多種方式查找元素
       let targetElement = null;
 
+      // 判斷是否需要在限定範圍內查找
+      const useImageFlowScope = isImageFlowStep(stepData);
+      const excludeNavbar = shouldExcludeNavbar(stepData);
+
       // 優先使用 selector（使用自定義函數處理 :contains() 語法）
       if (selector) {
         console.log('嘗試 selector:', selector);
-        // 優先在影像流程範圍內查找
-        const queryRoot = (stepData?.id === 3 || stepData?.id === 4) ? getImageFlowRoot() : document;
+        const queryRoot = useImageFlowScope ? getImageFlowRoot() : document;
         try {
           if (selector.includes(':contains(')) {
             targetElement = findElementWithSelector(selector);
-            if (targetElement && (stepData?.id === 4) && isInNavbar(targetElement)) {
+            if (targetElement && excludeNavbar && isInNavbar(targetElement)) {
               targetElement = null;
             }
           } else {
             targetElement = queryRoot.querySelector(selector);
-            if (targetElement && (stepData?.id === 4) && isInNavbar(targetElement)) {
+            if (targetElement && excludeNavbar && isInNavbar(targetElement)) {
               targetElement = null;
             }
           }
@@ -1085,44 +1137,43 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
       // 如果還是找不到，嘗試通過 className 查找（CSS Modules 會產生唯一的類名）
       if (!targetElement && className) {
         console.log('嘗試 className:', className);
-        // 查找包含該類名的元素（適用於 CSS Modules）
-        const queryRoot = (stepData?.id === 3 || stepData?.id === 4) ? getImageFlowRoot() : document;
+        const queryRoot = useImageFlowScope ? getImageFlowRoot() : document;
         const elements = queryRoot.querySelectorAll(`[class*="${className}"]`);
         console.log('className 查找結果:', elements);
-        targetElement = Array.from(elements).find(el => !(stepData?.id === 4 && isInNavbar(el)));
+        targetElement = Array.from(elements).find(el => !(excludeNavbar && isInNavbar(el)));
       }
 
       // 最後嘗試直接使用 className
       if (!targetElement && className) {
         console.log('嘗試直接 className:', className);
-        const queryRoot = (stepData?.id === 3 || stepData?.id === 4) ? getImageFlowRoot() : document;
+        const queryRoot = useImageFlowScope ? getImageFlowRoot() : document;
         const list = queryRoot.getElementsByClassName(className);
-        targetElement = Array.from(list).find(el => !(stepData?.id === 4 && isInNavbar(el)));
+        targetElement = Array.from(list).find(el => !(excludeNavbar && isInNavbar(el)));
         console.log('直接 className 結果:', targetElement);
       }
 
       // 如果還是找不到，嘗試其他選擇器
       if (!targetElement && stepData.targetElement.fallbackSelector) {
         console.log('嘗試 fallbackSelector:', stepData.targetElement.fallbackSelector);
-        const queryRoot = (stepData?.id === 3 || stepData?.id === 4) ? getImageFlowRoot() : document;
+        const queryRoot = useImageFlowScope ? getImageFlowRoot() : document;
         try {
           if (stepData.targetElement.fallbackSelector.includes(':contains(')) {
             targetElement = findElementWithSelector(stepData.targetElement.fallbackSelector);
           } else {
             targetElement = queryRoot.querySelector(stepData.targetElement.fallbackSelector);
           }
-          if (targetElement && (stepData?.id === 4) && isInNavbar(targetElement)) {
+          if (targetElement && excludeNavbar && isInNavbar(targetElement)) {
             targetElement = null;
           }
         } catch (_) {}
         console.log('fallbackSelector 結果:', targetElement);
       }
 
-      // 最後嘗試：根據步驟ID進行智能查找
-      if (!targetElement && stepData.id === 2) {
-        console.log('步驟 2 最後嘗試：查找任何可見的選單項目');
+      // 智能備用查找：基於步驟特性而非寫死 ID
+      // 選單步驟：查找包含特定文字的按鈕
+      if (!targetElement && isMenuStep(stepData)) {
+        console.log('選單步驟備用查找：查找可見的選單項目');
         const allButtons = document.querySelectorAll('button, div[role="button"], [onclick]');
-        // 查找包含「日常」或「記錄」的元素
         for (const btn of allButtons) {
           if (btn.textContent && (btn.textContent.includes('日常') || btn.textContent.includes('記錄'))) {
             targetElement = btn;
@@ -1131,7 +1182,6 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
           }
         }
 
-        // 如果還是找不到，取第一個可見的按鈕
         if (!targetElement) {
           const visibleButtons = Array.from(allButtons).filter(btn => {
             const rect = btn.getBoundingClientRect();
@@ -1142,13 +1192,12 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
         }
       }
 
-      // 步驟 3：查找新增圖片相關元素（限定在影像流程範圍）
-      if (!targetElement && stepData.id === 3) {
-        console.log('步驟 3 最後嘗試：查找新增圖片相關元素');
+      // 圖片上傳步驟：查找新增圖片相關元素
+      if (!targetElement && stepData.targetElement?.className === 'addImageBtn') {
+        console.log('圖片上傳步驟備用查找：查找新增圖片相關元素');
         const queryRoot = getImageFlowRoot();
         const allElements = queryRoot.querySelectorAll('button, input, div[role="button"], [onclick]');
 
-        // 查找包含「新增」、「上傳」、「圖片」、「照片」的元素
         for (const elem of allElements) {
           const text = elem.textContent || elem.alt || elem.title || '';
           if (text && (text.includes('新增') || text.includes('上傳') || text.includes('圖片') || text.includes('照片') || text.includes('添加'))) {
@@ -1158,13 +1207,11 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
           }
         }
 
-        // 查找文件輸入元素
         if (!targetElement) {
           targetElement = queryRoot.querySelector('input[type="file"]');
           console.log('找到文件輸入元素:', targetElement);
         }
 
-        // 如果還是找不到，取第一個可見的按鈕
         if (!targetElement) {
           const visibleButtons = Array.from(allElements).filter(elem => {
             const rect = elem.getBoundingClientRect();
@@ -1175,9 +1222,9 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
         }
       }
 
-      // 步驟 4：更嚴格地限定可點擊圖片（限定在影像流程範圍，排除 Navbar）
-      if (!targetElement && stepData.id === 4) {
-        console.log('步驟 4 加強：在範圍內查找可點擊圖片並排除 Navbar');
+      // 可點擊圖片步驟：限定在影像流程範圍，排除 Navbar
+      if (!targetElement && stepData.targetElement?.className === 'clickableImage') {
+        console.log('可點擊圖片步驟備用查找：在範圍內查找可點擊圖片');
         const queryRoot = getImageFlowRoot();
         // 先找預期的預覽/可點擊圖片
         let candidates = Array.from(queryRoot.querySelectorAll('[class*="imagePreview"] img, [class*="clickableImage"]'))
@@ -1194,17 +1241,17 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
             });
         }
         targetElement = candidates[0] || null;
-        console.log('步驟 4 加強結果:', targetElement);
+        console.log('可點擊圖片備用查找結果:', targetElement);
       }
 
       if (targetElement) {
         targetElementRef.current = targetElement;
         elementCacheRef.current[stepData.id] = targetElement;
 
-        // 在渲染 spotlight 前等待（僅在關鍵步驟）
+        // 在渲染 spotlight 前等待（僅在需要穩定的步驟）
         (async () => {
-          if (stepData?.id === 3 || stepData?.id === 6) {
-            const stableMs = stepData?.id === 6 ? 220 : 240;
+          if (needsStableRect(stepData)) {
+            const stableMs = stepData.targetElement?.className === 'searchInput' ? 220 : 240;
             await waitForStableRect(targetElement, { stableMs, maxWaitMs: 1200, thresholdPx: 1 });
           }
           if (targetElementRef.current !== targetElement) return;
@@ -1298,7 +1345,7 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
         setChatPositionStable(chatPos);
       }
     }, delay);
-  }, [stepData, calculateChatPosition, currentStep]);
+  }, [stepData, calculateChatPosition, currentStep, isImageFlowStep, shouldExcludeNavbar, needsStableRect, isMenuStep, needsModalWait, needsAutoScroll]);
 
   // 預先快取下一步的目標元素，降低下一步切換的搜尋時間
   useEffect(() => {
@@ -1335,9 +1382,9 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
     });
 
     if (stepData) {
-      // 對於步驟 2，目標元素在當前頁面的選單中，不需要等待導航
-      if (stepData.id === 2 && stepData.targetElement?.component === 'PostMenu') {
-        console.log('步驟 2：在當前頁面查找選單元素');
+      // 選單步驟：目標元素在當前頁面的選單中，不需要等待導航
+      if (isMenuStep(stepData)) {
+        console.log('選單步驟：在當前頁面查找選單元素');
         const cleanup = findAndHighlightElement();
         return cleanup;
       }
@@ -1378,13 +1425,12 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
       isTransitioning
     });
 
-    // 只有步驟2需要處理 pageNavigate 到 /create-post
+    // 處理所有 pageNavigate 條件（不再限定特定步驟 ID）
     if (stepData &&
         stepData.nextCondition === 'pageNavigate' &&
         stepData.expectedPath &&
         location.pathname === stepData.expectedPath &&
-        stepData.id === currentStep &&
-        stepData.id === 2) {  // 明確只處理步驟2的 pageNavigate
+        stepData.id === currentStep) {
 
       // 檢查是否已經處理過這個導航
       const processKey = `${stepData.id}-${location.pathname}`;
@@ -1402,10 +1448,9 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
         if (stepData?.nextCondition === 'pageNavigate' &&
             location.pathname === stepData?.expectedPath &&
             stepData?.id === currentStep &&
-            stepData?.id === 2 &&  // 確保仍是步驟2
-            !isTransitioning) {  // 確保不在轉換中
+            !isTransitioning) {
           const nextStep = tutorialUtils.getNextStep(tutorialType, currentStep);
-          if (nextStep && nextStep.id > currentStep) {  // 確保是前進，不是回退
+          if (nextStep && nextStep.id > currentStep) {
             console.log('PageNavigate: 切換到下一步:', nextStep.id);
             setStepData(nextStep);
             setCurrentStep(nextStep.id);
@@ -2410,11 +2455,13 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
         return true;
       }
 
-      // 第 3 步：允許影像流程範圍內的互動（避免擋住媒體選擇器按鈕/label）
-      if (stepData?.id === 3) {
+      // 圖片上傳步驟：允許影像流程範圍內的互動（避免擋住媒體選擇器按鈕/label）
+      if (stepData?.targetElement?.className === 'addImageBtn' ||
+          stepData?.nextCondition === 'imageAdded' ||
+          stepData?.nextCondition === 'frontImageUploaded' ||
+          stepData?.nextCondition === 'nutritionImageUploaded') {
         if (isUploadRelated(node)) return true;
         if (imageFlowScopeRef.current && imageFlowScopeRef.current.contains(node)) return true;
-        // 特別允許新增圖片按鈕的互動
         if (node.className && node.className.includes('addImageBtn')) return true;
       }
       return false;
@@ -2552,7 +2599,7 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
       onScrollCapture={handleBackgroundScroll}
       onWheelCapture={handleBackgroundScroll}
     >
-      {/* 暗背景區塊 - 分為四個區域來突出目標元素 */}
+      {/* 暗背景區塊 - 分為四個區域來突出目標元素，使用 1px 重疊避免間隙黑線 */}
       {highlightPosition && (
         <>
           {/* 上方暗背景 */}
@@ -2562,7 +2609,7 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
               top: 0,
               left: 0,
               right: 0,
-              height: `${highlightPosition.top}px`
+              height: `${highlightPosition.top + 1}px`,
             }}
           />
           {/* 左方暗背景 */}
@@ -2571,8 +2618,8 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
             style={{
               top: `${highlightPosition.top}px`,
               left: 0,
-              width: `${highlightPosition.left}px`,
-              height: `${highlightPosition.height}px`
+              width: `${highlightPosition.left + 1}px`,
+              height: `${highlightPosition.height}px`,
             }}
           />
           {/* 右方暗背景 */}
@@ -2580,19 +2627,19 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
             className={styles.darkBackground}
             style={{
               top: `${highlightPosition.top}px`,
-              left: `${highlightPosition.left + highlightPosition.width}px`,
+              left: `${highlightPosition.left + highlightPosition.width - 1}px`,
               right: 0,
-              height: `${highlightPosition.height}px`
+              height: `${highlightPosition.height}px`,
             }}
           />
           {/* 下方暗背景 */}
           <div
             className={styles.darkBackground}
             style={{
-              top: `${highlightPosition.top + highlightPosition.height}px`,
+              top: `${highlightPosition.top + highlightPosition.height - 1}px`,
               left: 0,
               right: 0,
-              bottom: 0
+              bottom: 0,
             }}
           />
         </>
@@ -2609,7 +2656,7 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
           style={{
             top: `${chatPosition.top}px`,
             left: `${chatPosition.left}px`,
-            width: `${chatPosition.width}px`
+            width: `${chatPosition.width}px`,
           }}
         >
           {/* AI 頭像和訊息泡泡 */}
@@ -2676,7 +2723,7 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
                       border: 'none',
                       cursor: 'pointer',
                       fontSize: '14px',
-                      boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
                     }}
                   >
                     下一步 →
