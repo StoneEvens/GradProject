@@ -168,7 +168,7 @@ ALWAYS return ALL fields. Use empty string/list if not applicable.
    - Friendly, SHORT conversational text for the user
    - Same language as user's question
    - NO raw JSON, NO technical IDs, NO data dumps, NO internal references, NO urls
-   - DO NOT repeat/list data that's already in operations, recommended_users, recommended_posts
+   - DO NOT repeat/list data that's already in operations, recommended_users, recommended_posts, confirmation messages
    - If data is in structured fields, just say "這是我找到的結果" or similar brief response
    - Only elaborate in reply when there's NO structured data to show
 
