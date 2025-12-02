@@ -112,25 +112,7 @@ const tutorialData = {
       },
       {
         id: 6,
-        title: '步驟 6：選擇標註類型',
-        instruction: '在「標註類型」下拉選單中，選擇「寵物」',
-        targetElement: {
-          component: 'ImageEditor',
-          selector: '[class*="typeSelect"], select',
-          className: 'typeSelect',
-          fallbackSelector: 'select'
-        },
-        highlight: {
-          type: 'rectangle',
-          position: 'form'
-        },
-        action: 'select',
-        selectValue: 'pet',
-        nextCondition: 'typeSelected'
-      },
-      {
-        id: 7,
-        title: '步驟 7：選擇寵物名稱',
+        title: '步驟 6：選擇寵物名稱',
         instruction: '在「標註內容」下拉選單中，選擇您的寵物',
         targetElement: {
           component: 'ImageEditor',
@@ -143,11 +125,11 @@ const tutorialData = {
           position: 'form'
         },
         action: 'select',
-        nextCondition: 'petSelected'
+        nextCondition: 'manualNext'
       },
       {
-        id: 8,
-        title: '步驟 8：新增標註',
+        id: 7,
+        title: '步驟 7：新增標註',
         instruction: '點擊「新增」按鈕，完成標註',
         targetElement: {
           component: 'ImageEditor',
@@ -163,8 +145,8 @@ const tutorialData = {
         nextCondition: 'annotationAdded'
       },
       {
-        id: 9,
-        title: '步驟 9：儲存並關閉',
+        id: 8,
+        title: '步驟 8：儲存並關閉',
         instruction: '點擊「完成」按鈕，儲存您的標註',
         targetElement: {
           component: 'ImageEditor',
@@ -180,7 +162,7 @@ const tutorialData = {
         nextCondition: 'editorClosed'
       },
       {
-        id: 10,
+        id: 9,
         title: '完成！',
         instruction: '恭喜！您已成功在照片中標註寵物。標註會在發布貼文後顯示。',
         targetElement: null,
@@ -315,25 +297,7 @@ const tutorialData = {
       },
       {
         id: 6,
-        title: '步驟 6：選擇標註類型',
-        instruction: '在「標註類型」下拉選單中，選擇「寵物」',
-        targetElement: {
-          component: 'ImageEditor',
-          selector: '[class*="typeSelect"], select',
-          className: 'typeSelect',
-          fallbackSelector: 'select'
-        },
-        highlight: {
-          type: 'rectangle',
-          position: 'form'
-        },
-        action: 'select',
-        selectValue: 'pet',
-        nextCondition: 'typeSelected'
-      },
-      {
-        id: 7,
-        title: '步驟 7：選擇寵物名稱',
+        title: '步驟 6：選擇寵物名稱',
         instruction: '在「標註內容」下拉選單中，選擇您的寵物',
         targetElement: {
           component: 'ImageEditor',
@@ -346,11 +310,11 @@ const tutorialData = {
           position: 'form'
         },
         action: 'select',
-        nextCondition: 'petSelected'
+        nextCondition: 'manualNext'
       },
       {
-        id: 8,
-        title: '步驟 8：新增標註',
+        id: 7,
+        title: '步驟 7：新增標註',
         instruction: '點擊「新增」按鈕，完成標註',
         targetElement: {
           component: 'ImageEditor',
@@ -366,8 +330,8 @@ const tutorialData = {
         nextCondition: 'annotationAdded'
       },
       {
-        id: 9,
-        title: '步驟 9：儲存並關閉',
+        id: 8,
+        title: '步驟 8：儲存並關閉',
         instruction: '點擊「完成」按鈕，儲存您的標註',
         targetElement: {
           component: 'ImageEditor',
@@ -383,8 +347,8 @@ const tutorialData = {
         nextCondition: 'editorClosed'
       },
       {
-        id: 10,
-        title: '步驟 10：新增描述',
+        id: 9,
+        title: '步驟 9：新增描述',
         instruction: '在輸入框裡，新增您的貼文描述',
         targetElement: {
           component: 'DescriptionSection',
@@ -400,8 +364,8 @@ const tutorialData = {
         nextCondition: 'manualNext'
       },
       {
-        id: 11,
-        title: '步驟 11：新增標籤',
+        id: 10,
+        title: '步驟 10：新增標籤',
         instruction: '在「輸入標籤」裡，新增您想使用的 hashtag',
         targetElement: {
           component: 'CreatePostPage',
@@ -417,8 +381,8 @@ const tutorialData = {
         nextCondition: 'manualNext'
       },
       {
-        id: 12,
-        title: '步驟 12：新增hashtag到貼文中',
+        id: 11,
+        title: '步驟 11：新增hashtag到貼文中',
         instruction: '點擊「新增」按鈕',
         targetElement: {
           component: 'CreatePostPage',
@@ -433,8 +397,8 @@ const tutorialData = {
         action: 'click'
       },
       {
-        id: 13,
-        title: '步驟 13：點擊「下一步」按鈕',
+        id: 12,
+        title: '步驟 12：點擊「下一步」按鈕',
         instruction: '確認無誤後點擊按鈕進入預覽頁面',
         targetElement: {
           component: 'CreatePostPage',
@@ -449,8 +413,8 @@ const tutorialData = {
         action: 'click'
       },
       {
-        id: 14,
-        title: '步驟 14：打開位置清單',
+        id: 13,
+        title: '步驟 13：打開位置清單',
         instruction: '點選按鈕以選擇貼文位置',
         targetElement: {
           component: 'CreatePostPage',
@@ -465,8 +429,8 @@ const tutorialData = {
         action: 'click'
       },
       {
-        id: 15,
-        title: '步驟 15：選擇您的位置',
+        id: 14,
+        title: '步驟 14：選擇您的位置',
         instruction: '在位置清單中，選擇您發文的地點',
         targetElement: {
           component: 'CreatePostPage',
@@ -478,11 +442,12 @@ const tutorialData = {
           type: 'rectangle',
           position: 'form'
         },
-        action: 'click'
+        action: 'click',
+        delay: 800
       },
       {
-        id: 16,
-        title: '步驟 16：發布貼文',
+        id: 15,
+        title: '步驟 15：發布貼文',
         instruction: '點擊「發布」按鈕，發布您的貼文',
         targetElement: {
           component: 'PostPreviewPage',
@@ -497,7 +462,7 @@ const tutorialData = {
         action: 'click'
       },
       {
-        id: 17,
+        id: 16,
         title: '完成！',
         instruction: '恭喜！您已成功發布一則貼文。貼文將會顯示在您的主頁。',
         targetElement: null,

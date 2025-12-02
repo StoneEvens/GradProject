@@ -799,15 +799,9 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
         // Step 15 等待 modal Step 2 render
     if (stepData?.id === 15) {
       const modalContainer = document.querySelector('[class*="modalContainer"]');
-      if (!modalContainer) {
-        console.log("Step 15: modalContainer 尚未渲染，稍後再試");
-        setTimeout(findAndHighlightElement, 120);
-        return;
-      }
-
-      // Step 15 confirmSection 若還沒出現
-      if (!document.querySelector('[class^="_confirmSection"]')) {
-        console.log("Step 15: confirmSection 尚未渲染，稍後再試");
+      const publishButton = document.querySelector('[class*="publishButton"]');
+      if (!publishButton && !modalContainer && !document.querySelector('[class^="_confirmSection"]')) {
+        console.log("Step 15: modalContainer、publishButton、confirmSection 尚未渲染，稍後再試");
         setTimeout(findAndHighlightElement, 120);
         return;
       }
