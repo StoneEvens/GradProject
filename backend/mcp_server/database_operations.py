@@ -277,7 +277,6 @@ def get_operation_list() -> Dict:
                 "step4_display_confirmation": {
                     "description": "顯示生成的內容給用戶確認",
                     "agent_response_format": "我已經為{寵物名}整理好疾病檔案了，內容如下：\n\n【檔案標題】\n{archive_title}\n\n【主要病因】\n{main_cause}\n\n【病程記錄】\n{generated_content}\n\n請確認以上內容是否正確？如果正確，請回覆「確認」或「是」，我就會為您建立這份疾病檔案。",
-                    "confirmation_marker": "CRITICAL: 在確認訊息末尾必須添加特殊標記 '[[NEEDS_CONFIRMATION_DISEASE_ARCHIVE]]'，這會告訴前端顯示確認用的格式化內容。範例：'您的確認訊息\n\n[[NEEDS_CONFIRMATION_DISEASE_ARCHIVE]]'",
                     "user_responses": {
                         "confirm": "用戶回覆「確認」、「是」、「好」、「沒問題」等肯定詞 → 執行 step5",
                         "modify": "用戶要求修改 → 重新生成內容或詢問修改細節",

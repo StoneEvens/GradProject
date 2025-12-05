@@ -7,10 +7,8 @@ class AIChatService {
   constructor() {
     // Use shared axios instance with standard interceptors
     this.apiClient = axiosInstance;
-    // ====== 切換到 AI Agent V2 ======
-    // V1: this.basePath = '/ai';
-    // V2: 使用多 Agent 架構，更快速穩定
-    this.basePath = '/ai-v2';
+    // Base path for AI endpoints - uses the 'ai' app in Django backend
+    this.basePath = '/ai';
     this.agentBasePath = '/ai-agent'; // for legacy endpoints still provided by aiAgent app
 
     // 會話上下文管理

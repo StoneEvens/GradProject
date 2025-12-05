@@ -3,6 +3,9 @@
  * 
  * Provides voice interaction with automatic MCP tool execution
  * Uses WebRTC for automatic audio handling (microphone + speaker)
+ * 
+ * Supports structured operations (navigate, OCR, etc.) that are emitted
+ * as events for the frontend to handle.
  */
 
 import { realtime } from '@openai/agents';
@@ -10,6 +13,12 @@ import { z } from 'zod';
 import axiosInstance from '../utils/axios';
 
 const { RealtimeAgent, RealtimeSession, tool } = realtime;
+
+// Operation schema for UI actions that require physical changes
+export interface RealtimeOperation {
+  operation_type: string;
+  operation_data: string | Record<string, any>;
+}
 
 // Simple EventEmitter implementation for browser
 class EventEmitter {
@@ -239,6 +248,60 @@ class RealtimeVoiceService extends EventEmitter {
           }),
           execute: async (args) => executeViaMCP('resolve_entity_context', args),
         }),
+        
+        // ====================================================================
+        // EMIT OPERATIONS TOOL - Triggers frontend UI actions
+        // Only for actions that CANNOT be conveyed through voice alone
+        // ====================================================================
+        tool({
+          name: 'emit_operations',
+          description: `Call this tool ONLY to trigger frontend UI actions that require physical UI changes.
+Do NOT use this for information that can be spoken (recommendations, tutorials info, etc.)
+
+Available operation_type values:
+- "navigate": Navigate to a page. operation_data: {"path": "/route", "destination": "頁面名稱"}
+- "ocr_feed_analysis": Open camera for feed nutrition OCR. operation_data: {}
+- "ocr_health_report": Open camera for health report OCR. operation_data: {}
+- "post_created": Trigger image upload after creating post. operation_data: {"post_id": 123}
+- "abnormal_post_created": Trigger image upload. operation_data: {"abnormal_post_id": 123, "pet_id": 456}
+- "feed_created": Trigger image upload. operation_data: {"feed_id": 123}
+- "remove_image": Remove selected image by index. operation_data: {"index": 1}
+- "replace_image": Replace selected image by index. operation_data: {"index": 1}
+
+When to use:
+1. User confirms navigation → emit navigate operation
+2. User wants OCR → emit ocr operation to open camera
+3. Database creates something needing images → emit to trigger upload UI
+4. User asks to remove/replace a selected image`,
+          parameters: z.object({
+            operations: z.array(z.object({
+              operation_type: z.string().describe('Type of operation'),
+              operation_data: z.union([z.string(), z.record(z.any())]).describe('Operation parameters'),
+            })).describe('Array of UI operations to trigger'),
+          }),
+          execute: async ({ operations }) => {
+            console.log('[RealtimeVoice] 📤 Emitting operations:', operations);
+            
+            // Normalize operation_data to be consistent
+            const normalizedOps = operations.map(op => ({
+              operation_type: op.operation_type,
+              operation_data: typeof op.operation_data === 'string' 
+                ? op.operation_data 
+                : JSON.stringify(op.operation_data),
+            }));
+            
+            // Emit the operations event for frontend to handle
+            this.emit('agent_operations', { operations: normalizedOps });
+            
+            // Return confirmation to the agent
+            const opSummary = normalizedOps.map(op => op.operation_type).join(', ');
+            return JSON.stringify({
+              success: true,
+              message: `已執行: ${opSummary}`,
+              operations_count: normalizedOps.length,
+            });
+          },
+        }),
       ];
       
       // Create RealtimeAgent with instructions and ALL tools
@@ -250,7 +313,7 @@ class RealtimeVoiceService extends EventEmitter {
         tools: tools,
       });
 
-      console.log('[RealtimeVoice] ✅ Created agent with 3 tools');
+      console.log(`[RealtimeVoice] ✅ Created agent with ${tools.length} tools (including emit_operations)`);
 
       console.log('[RealtimeVoice] Creating RealtimeSession...');
       

@@ -169,6 +169,7 @@ ALWAYS return ALL fields. Use empty string/list if not applicable.
    - Same language as user's question
    - NO raw JSON, NO technical IDs, NO data dumps, NO internal references, NO urls
    - DO NOT repeat/list data that's already in operations, recommended_users, recommended_posts, confirmation messages
+   - DO NOT say [[NEEDS_CONFIRMATION_DISEASE_ARCHIVE]]
    - If data is in structured fields, just say "這是我找到的結果" or similar brief response
    - Only elaborate in reply when there's NO structured data to show
 
@@ -302,27 +303,66 @@ def create_peter_agent(mcp_server):
 
 # Global MCP server instance for connection reuse
 _mcp_server = None
+_mcp_server_connected = False
 
 
 async def get_mcp_server():
-    """Get or create the global MCP server instance."""
-    global _mcp_server
+    """Get or create the global MCP server instance with automatic reconnection."""
+    global _mcp_server, _mcp_server_connected
+    
+    # Create server instance if not exists
     if _mcp_server is None:
+        print("[PETer_Agent] Creating new MCP server instance...")
         _mcp_server = create_mcp_server()
-        await _mcp_server.__aenter__()  # Initialize connection
+    
+    # Connect if not connected
+    if not _mcp_server_connected:
+        print("[PETer_Agent] Connecting to MCP server...")
+        try:
+            await _mcp_server.__aenter__()
+            _mcp_server_connected = True
+            print("[PETer_Agent] MCP server connected successfully")
+        except Exception as e:
+            print(f"[PETer_Agent] MCP connection failed: {e}")
+            # Reset and retry with fresh instance
+            _mcp_server = create_mcp_server()
+            await _mcp_server.__aenter__()
+            _mcp_server_connected = True
+            print("[PETer_Agent] MCP server reconnected with fresh instance")
+    
     return _mcp_server
+
+
+async def reset_mcp_connection():
+    """Reset the MCP connection (call when connection errors occur)."""
+    global _mcp_server, _mcp_server_connected
+    print("[PETer_Agent] Resetting MCP connection...")
+    
+    if _mcp_server is not None:
+        try:
+            await _mcp_server.__aexit__(None, None, None)
+        except Exception:
+            pass  # Ignore cleanup errors
+    
+    _mcp_server = None
+    _mcp_server_connected = False
 
 
 async def run_workflow(workflow_input: WorkflowInput, user_id: int, username: str, session_id: str | None) -> dict:
     """
     Single-agent workflow with session memory for conversation continuity.
-    Uses cached MCP server connection for better performance.
+    Uses cached MCP server connection with automatic reconnection on failure.
     """
     with trace("PETer Agent"):
         print(f"[PETer_Agent] run_workflow called with session_id: {session_id}")
 
-        # Get cached MCP server
-        mcp_server = await get_mcp_server()
+        # Get cached MCP server (will connect if needed)
+        try:
+            mcp_server = await get_mcp_server()
+        except Exception as e:
+            print(f"[PETer_Agent] Initial MCP connection failed: {e}, retrying...")
+            await reset_mcp_connection()
+            mcp_server = await get_mcp_server()
         
         # Create agent with MCP server
         peter_agent = create_peter_agent(mcp_server)
@@ -338,20 +378,45 @@ async def run_workflow(workflow_input: WorkflowInput, user_id: int, username: st
             f"<<Authentic data attached from backend>> requester_user_id: {user_id}; requester_username: {username}; time_stamp: {datetime.now()}"
         )
 
-        # Run the agent
+        # Run the agent with retry on MCP connection errors
         print("[PETer_Agent] Running PETer Agent...")
-        result_temp = await Runner.run(
-            peter_agent,
-            input=agent_input_text,
-            session=base_session,
-            run_config=RunConfig(
-                trace_metadata={
-                    "__trace_source__": "agent-builder",
-                    "workflow_id": workflow_id,
-                    "agent": "peter_agent",
-                }
+        try:
+            result_temp = await Runner.run(
+                peter_agent,
+                input=agent_input_text,
+                session=base_session,
+                run_config=RunConfig(
+                    trace_metadata={
+                        "__trace_source__": "agent-builder",
+                        "workflow_id": workflow_id,
+                        "agent": "peter_agent",
+                    }
+                )
             )
-        )
+        except Exception as e:
+            error_str = str(e)
+            # Check if it's an MCP connection error
+            if "ClosedResourceError" in error_str or "MCP tool" in error_str or "ConnectionResetError" in error_str:
+                print(f"[PETer_Agent] MCP connection error, reconnecting and retrying: {e}")
+                await reset_mcp_connection()
+                mcp_server = await get_mcp_server()
+                peter_agent = create_peter_agent(mcp_server)
+                
+                # Retry the agent run
+                result_temp = await Runner.run(
+                    peter_agent,
+                    input=agent_input_text,
+                    session=base_session,
+                    run_config=RunConfig(
+                        trace_metadata={
+                            "__trace_source__": "agent-builder",
+                            "workflow_id": workflow_id,
+                            "agent": "peter_agent",
+                        }
+                    )
+                )
+            else:
+                raise  # Re-raise non-MCP errors
 
         # Extract session id
         final_session_id = getattr(base_session, "_session_id", None) or session_id

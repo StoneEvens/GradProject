@@ -315,6 +315,111 @@ const ChatWindow = ({
       // Note: conversation items are handled automatically by the SDK
       // We don't need to manually process them here
       
+      // 🔥 NEW: Listen for structured operations from the realtime agent
+      // This mirrors the operations handling from the text-based agent
+      realtimeVoiceService.on('agent_operations', (data) => {
+        console.log('[ChatWindow] 📤 Received agent_operations:', data);
+        
+        const { operations, tutorial } = data;
+        
+        // Handle tutorial if present
+        if (tutorial) {
+          console.log('[ChatWindow] Starting tutorial:', tutorial);
+          // Trigger tutorial (same as text-based agent)
+        }
+        
+        // Process each operation (same logic as text-based agent response)
+        if (operations && Array.isArray(operations)) {
+          operations.forEach((op) => {
+            try {
+              const opData = typeof op.operation_data === 'string' 
+                ? JSON.parse(op.operation_data) 
+                : op.operation_data;
+              
+              console.log(`[ChatWindow] Processing voice operation: ${op.operation_type}`, opData);
+              
+              switch (op.operation_type) {
+                case 'navigate':
+                  // Navigate to the specified path
+                  if (opData.path) {
+                    console.log(`[ChatWindow] 🚀 Voice navigation to: ${opData.path}`);
+                    navigate(opData.path);
+                  }
+                  break;
+                  
+                case 'ocr_feed_analysis':
+                  // Trigger OCR for feed analysis
+                  console.log('[ChatWindow] 🔍 Starting OCR feed analysis');
+                  setShowOCRCamera(true);
+                  setOcrPurpose('feed_nutrition');
+                  break;
+                  
+                case 'ocr_health_report':
+                  // Trigger OCR for health report
+                  console.log('[ChatWindow] 🔍 Starting OCR health report');
+                  setShowOCRCamera(true);
+                  setOcrPurpose('health_report');
+                  break;
+                  
+                case 'start_tutorial':
+                  // Start a specific tutorial
+                  if (opData.tutorial_id) {
+                    console.log(`[ChatWindow] 📚 Starting tutorial: ${opData.tutorial_id}`);
+                  }
+                  break;
+                  
+                case 'show_calculator':
+                  // Show the nutrition calculator
+                  console.log('[ChatWindow] 🧮 Showing calculator');
+                  navigate('/calculator');
+                  break;
+                  
+                case 'remove_image':
+                  // Remove an image from selection
+                  const removeIndex = (opData.index || 1) - 1;
+                  console.log(`[ChatWindow] 🗑️ Removing image at index ${removeIndex}`);
+                  setSelectedImages(prev => {
+                    const newImages = [...prev];
+                    if (removeIndex >= 0 && removeIndex < newImages.length) {
+                      newImages.splice(removeIndex, 1);
+                      window.__selectedFeedImages = newImages;
+                    }
+                    return newImages;
+                  });
+                  break;
+                  
+                case 'replace_image':
+                  // Replace an image
+                  const replaceIndex = (opData.index || 1) - 1;
+                  console.log(`[ChatWindow] 🔄 Replacing image at index ${replaceIndex}`);
+                  setSelectedImages(prev => {
+                    const newImages = [...prev];
+                    if (replaceIndex >= 0 && replaceIndex < newImages.length) {
+                      newImages.splice(replaceIndex, 1);
+                      window.__selectedFeedImages = newImages;
+                    }
+                    return newImages;
+                  });
+                  setIsWaitingForFeedImageReplacement(true);
+                  break;
+                  
+                case 'post_created':
+                case 'abnormal_post_created':
+                case 'feed_created':
+                  // Handle post creation that needs image upload
+                  console.log(`[ChatWindow] 📝 ${op.operation_type}:`, opData);
+                  break;
+                  
+                default:
+                  console.log(`[ChatWindow] Unknown operation type: ${op.operation_type}`);
+              }
+            } catch (error) {
+              console.error('[ChatWindow] Error processing voice operation:', error);
+            }
+          });
+        }
+      });
+      
       realtimeVoiceService.on('error', (event) => {
         console.error('Realtime error:', event);
         setVoiceError('語音通話發生錯誤');
