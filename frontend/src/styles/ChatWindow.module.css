@@ -288,6 +288,24 @@
   border-bottom-left-radius: 8px;
 }
 
+/* 語音模式通知樣式 */
+.voiceModeNotice {
+  justify-content: center;
+}
+
+.voiceModeBubble {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  color: white !important;
+  text-align: center;
+  font-weight: 500;
+  border: none !important;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.voiceModeNotice .messageAvatar {
+  display: none;
+}
+
 /* 訊息時間 */
 .messageTime {
   font-size: 11px;
@@ -602,6 +620,25 @@
 
 .sendBtn:disabled img {
   filter: brightness(0) invert(0.5);
+}
+
+/* 語音模式下的禁用樣式 */
+.inputTextarea.disabled {
+  background: #f0f0f0;
+  cursor: not-allowed;
+  color: #999;
+}
+
+.photoBtn.disabled,
+.voiceBtn.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.photoBtn.disabled img,
+.voiceBtn.disabled img {
+  filter: grayscale(100%);
 }
 
 /* 滾動條樣式 */

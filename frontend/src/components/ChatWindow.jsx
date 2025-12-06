@@ -44,6 +44,9 @@ const ChatWindow = ({
   const [isUploadingImages, setIsUploadingImages] = useState(false);
   const [isWaitingForFeedImageReplacement, setIsWaitingForFeedImageReplacement] = useState(false);
 
+  // 語音模式下的文字輸入控制
+  const [voiceModeWaitingForImages, setVoiceModeWaitingForImages] = useState(false); // AI 請求圖片時為 true
+
   // 確認對話框相關 state
   const [showImageConfirm, setShowImageConfirm] = useState(false);
   const [pendingAction, setPendingAction] = useState(null); // 'close' 或 { type: 'switch', conversation: {...} }
@@ -494,20 +497,29 @@ const ChatWindow = ({
                   break;
                 
                 case 'request_images':
-                  // Open image picker for user to select images before creating a post
-                  console.log(`[ChatWindow] 📷 Opening image picker for: ${opData.purpose || 'general'}`);
+                  // Enable photo button and show message asking user to select images
+                  console.log(`[ChatWindow] 📷 Requesting images for: ${opData.purpose || 'general'}`);
                   {
                     // Store the purpose for later use
                     window.__pendingImagePurpose = opData.purpose || 'social_post';
-                    
-                    // Trigger the file input
-                    if (fileInputRef.current) {
-                      fileInputRef.current.click();
-                    }
-                    
+
+                    // 啟用圖片選擇功能
+                    setVoiceModeWaitingForImages(true);
+
+                    // 顯示請求圖片的對話泡泡
+                    const requestImageMessage = {
+                      id: Date.now(),
+                      text: t('chatWindow.voiceMode.requestImages', '請選擇要上傳的圖片'),
+                      isUser: false,
+                      timestamp: new Date(),
+                      isSystemMessage: true,
+                      isVoiceModeNotice: true
+                    };
+                    setMessages(prev => [...prev, requestImageMessage]);
+
                     // Notify the agent that we're waiting for image selection
                     if (realtimeVoiceService.isConnected()) {
-                      realtimeVoiceService.sendMessage('[系統] 已開啟圖片選擇器，請等待用戶選擇圖片後再建立貼文。');
+                      realtimeVoiceService.sendMessage('[系統] 已請求用戶選擇圖片，請等待用戶選擇並發送圖片後再建立貼文。');
                     }
                   }
                   break;
@@ -653,6 +665,17 @@ const ChatWindow = ({
       setIsVoiceConnecting(false);
       console.log('[ChatWindow] ✅ Voice call active!');
 
+      // 顯示語音模式啟動的對話泡泡
+      const voiceModeMessage = {
+        id: Date.now(),
+        text: t('chatWindow.voiceMode.activated', '語音模式啟動中，文字對話暫時關閉'),
+        isUser: false,
+        timestamp: new Date(),
+        isSystemMessage: true,
+        isVoiceModeNotice: true
+      };
+      setMessages(prev => [...prev, voiceModeMessage]);
+
     } catch (error) {
       console.error('[ChatWindow] ❌ Failed to start voice call:', error);
       console.error('[ChatWindow] Error details:', {
@@ -688,6 +711,18 @@ const ChatWindow = ({
     setIsVoiceCallActive(false);
     setIsVoiceConnecting(false);
     setVoiceError(null);
+    setVoiceModeWaitingForImages(false); // 重置圖片等待狀態
+
+    // 顯示語音模式結束的對話泡泡
+    const voiceEndMessage = {
+      id: Date.now(),
+      text: t('chatWindow.voiceMode.deactivated', '語音模式已結束，文字對話已恢復'),
+      isUser: false,
+      timestamp: new Date(),
+      isSystemMessage: true,
+      isVoiceModeNotice: true
+    };
+    setMessages(prev => [...prev, voiceEndMessage]);
   };
 
   // 注意：我們不再在組件卸載時自動結束通話
@@ -790,6 +825,50 @@ const ChatWindow = ({
 
     // 清空 input 的值
     event.target.value = '';
+  };
+
+  // 語音模式下用戶發送圖片
+  const handleVoiceModeImageSubmit = () => {
+    if (!isVoiceCallActive || !voiceModeWaitingForImages || selectedImages.length === 0) {
+      return;
+    }
+
+    console.log('[ChatWindow] 語音模式：用戶發送圖片', selectedImages.length, '張');
+
+    // 將圖片存到 window 物件供後續上傳使用
+    window.__selectedFeedImages = [...selectedImages];
+
+    // 顯示用戶發送圖片的對話泡泡
+    const userImageMessage = {
+      id: Date.now(),
+      text: `[${selectedImages.length} 張圖片]`,
+      isUser: true,
+      timestamp: new Date(),
+      images: [...selectedImages]
+    };
+    setMessages(prev => [...prev, userImageMessage]);
+
+    // 通知語音 AI 圖片已準備好
+    const pendingPurpose = window.__pendingImagePurpose || 'general';
+    if (realtimeVoiceService.isConnected()) {
+      let purposeText = '貼文';
+      if (pendingPurpose === 'abnormal_post') {
+        purposeText = '異常紀錄';
+      } else if (pendingPurpose === 'feed') {
+        purposeText = '飼料資料';
+      }
+      realtimeVoiceService.sendMessage(
+        `[系統] 用戶已選擇並確認 ${selectedImages.length} 張圖片，可以繼續建立${purposeText}了。`
+      );
+    }
+
+    // 重置狀態：停用 photoBtn 和 sendBtn，但保留圖片預覽
+    setVoiceModeWaitingForImages(false);
+
+    // 清空預覽區（圖片已保存在 window.__selectedFeedImages）
+    setSelectedImages([]);
+
+    console.log('[ChatWindow] 語音模式：圖片已發送，等待 AI 建立貼文');
   };
 
   const removeImage = (imageId) => {
@@ -2197,7 +2276,7 @@ const ChatWindow = ({
         {messages.map((message) => (
           <div
             key={message.id}
-            className={`${styles.messageWrapper} ${message.isUser ? styles.userMessage : styles.aiMessage}`}
+            className={`${styles.messageWrapper} ${message.isUser ? styles.userMessage : styles.aiMessage} ${message.isVoiceModeNotice ? styles.voiceModeNotice : ''}`}
           >
             {/* AI 訊息：頭像在左，訊息在右 */}
             {!message.isUser && (
@@ -2208,7 +2287,7 @@ const ChatWindow = ({
                   className={styles.messageAvatar}
                 />
                 <div className={styles.messageContent}>
-                  <div className={styles.messageBubble}>
+                  <div className={`${styles.messageBubble} ${message.isVoiceModeNotice ? styles.voiceModeBubble : ''}`}>
                     {String(cleanMessageText(message.text) || '').split('\n').map((line, index) => (
                       <React.Fragment key={index}>
                         {line}
@@ -2452,39 +2531,55 @@ const ChatWindow = ({
           <div className={styles.textareaWrapper}>
             <textarea
               ref={textareaRef}
-              placeholder={interimTranscript || t('chatWindow.inputPlaceholder')}
-              className={`${styles.inputTextarea} ${isListening ? styles.listening : ''}`}
+              placeholder={
+                isVoiceCallActive && !voiceModeWaitingForImages
+                  ? t('chatWindow.voiceMode.textDisabled', '語音模式中...')
+                  : (interimTranscript || t('chatWindow.inputPlaceholder'))
+              }
+              className={`${styles.inputTextarea} ${isListening ? styles.listening : ''} ${isVoiceCallActive && !voiceModeWaitingForImages ? styles.disabled : ''}`}
               value={inputText + (interimTranscript ? ' ' + interimTranscript : '')}
               onChange={handleInputChange}
               onKeyPress={handleKeyPress}
               rows={1}
+              disabled={isVoiceCallActive && !voiceModeWaitingForImages}
             />
           </div>
           <div className={styles.inputActions}>
             <button
-              className={styles.photoBtn}
+              className={`${styles.photoBtn} ${isVoiceCallActive && !voiceModeWaitingForImages ? styles.disabled : ''}`}
               onClick={handleImageSelect}
               title="新增圖片"
+              disabled={isVoiceCallActive && !voiceModeWaitingForImages}
             >
               <img src="/assets/icon/CommentPhotoIcon.png" alt="新增圖片" />
             </button>
             {speechSupported && (
               <button
-                className={`${styles.voiceBtn} ${isListening ? styles.active : ''}`}
+                className={`${styles.voiceBtn} ${isListening ? styles.active : ''} ${isVoiceCallActive ? styles.disabled : ''}`}
                 onClick={toggleVoiceInput}
                 title={isListening ? t('chatWindow.voiceInput.stopTooltip') : t('chatWindow.voiceInput.startTooltip')}
+                disabled={isVoiceCallActive}
               >
                 <img src="/assets/icon/microphone.png" alt={isListening ? t('chatWindow.voiceInput.stopTooltip') : t('chatWindow.voiceInput.startTooltip')} />
               </button>
             )}
             <button
-              className={styles.sendBtn}
+              className={`${styles.sendBtn} ${isVoiceCallActive && !(voiceModeWaitingForImages && selectedImages.length > 0) ? styles.disabled : ''}`}
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                handleSendMessage();
+                // 語音模式下發送圖片
+                if (isVoiceCallActive && voiceModeWaitingForImages && selectedImages.length > 0) {
+                  handleVoiceModeImageSubmit();
+                } else {
+                  handleSendMessage();
+                }
               }}
-              disabled={!inputText.trim() && selectedImages.length === 0}
+              disabled={
+                isVoiceCallActive
+                  ? !(voiceModeWaitingForImages && selectedImages.length > 0)
+                  : (!inputText.trim() && selectedImages.length === 0)
+              }
               title={t('chatWindow.sendButton')}
             >
               <img src="/assets/icon/CommentSendIcon.png" alt={t('chatWindow.sendButton')} />
