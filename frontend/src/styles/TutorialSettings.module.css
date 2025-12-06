@@ -181,20 +181,23 @@
   }
 
   .tutorialSelectContainer {
-    flex-direction: column;
-    gap: 10px;
+    flex-direction: row;
+    gap: 8px;
   }
 
   .tutorialSelect {
-    width: 100%;
-    padding: 12px 12px;
-    font-size: 0.95rem;
+    flex: 1;
+    min-width: 0;
+    padding: 10px 10px;
+    padding-right: 30px;
+    font-size: 0.9rem;
+    background-position: right 8px center;
   }
 
   .startButton {
-    width: 100%;
-    padding: 12px 20px;
-    font-size: 0.95rem;
+    flex-shrink: 0;
+    padding: 10px 16px;
+    font-size: 0.9rem;
   }
 }
 
@@ -212,13 +215,19 @@
     font-size: 0.9rem;
   }
 
+  .tutorialSelectContainer {
+    gap: 6px;
+  }
+
   .tutorialSelect {
-    padding: 10px 10px;
-    font-size: 0.9rem;
+    padding: 8px 8px;
+    padding-right: 26px;
+    font-size: 0.85rem;
+    background-position: right 6px center;
   }
 
   .startButton {
-    padding: 10px 16px;
-    font-size: 0.9rem;
+    padding: 8px 12px;
+    font-size: 0.85rem;
   }
 }
