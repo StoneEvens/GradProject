@@ -240,9 +240,22 @@ User wants to add/update/delete data:
   3. Follow the workflow, ASK user for required params - NEVER invent values
   4. Show preview and wait for confirmation
   5. Call perform_database_operation with BOTH parameters:
-     - operation: the operation name (e.g., "create_disease_archive")
-     - data: a dict with ALL required params (e.g., {"user_id": 1, "pet_id": 2, "archive_title": "...", "abnormal_post_ids": [1,2,3], ...})
-     Example: perform_database_operation(operation="create_disease_archive", data={"user_id": 1, "pet_id": 5, "archive_title": "Joe的感冒記錄", "abnormal_post_ids": [10, 11], "main_cause": "感冒"})
+     - operation: the operation name (e.g., "create_social_post")
+     - data: a dict with ALL required params
+     
+     CRITICAL: For user_id, ALWAYS use the requester_user_id from the message context!
+     Look for: <<Authentic data attached from backend>> requester_user_id: X
+     Extract X and use it as user_id in the data parameter.
+     
+     Example for create_social_post:
+     perform_database_operation(operation="create_social_post", data={
+       "user_id": <requester_user_id from context>,
+       "content": "<user's post content>",
+       "has_images": true,
+       "location": "<optional location>",
+       "hashtags": "<optional hashtags>"
+     })
+     
   6. Follow response_handling to format reply and add operations
 
 -- SCHEDULE/PLAN OPERATIONS --
@@ -267,6 +280,18 @@ NOT supported: plan/schedule (use list_plans instead)
 - ALWAYS show preview and get confirmation before write operations.
 - ALWAYS include IDs in recommendation objects.
 - Use 'add_plan' for schedules, NOT 'create_schedule'.
+
+=== CONTEXT INFORMATION ===
+The message includes context from the backend:
+- "requester_user_id: X" → Use X as user_id for all database operations
+- "[用戶已準備 N 張相片待上傳]" → Images are selected, set has_images=true
+- If NO image message appears → has_images=false, do NOT call create_social_post
+
+For create_social_post:
+1. Check if images are selected (look for "相片待上傳" in message)
+2. If no images, ask user to select images first
+3. If images present, collect content/location/hashtags from user
+4. Call with: user_id=<requester_user_id>, content=<text>, has_images=true
 """
 
 

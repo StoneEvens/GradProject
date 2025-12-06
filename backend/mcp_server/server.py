@@ -509,8 +509,8 @@ def create_mcp_server() -> FastMCP:
             "PREREQ: Call get_operation_usage(operation_name) first to get full details.\n"
             "WORKFLOW: database_operation_list → get_operation_usage → ask user for params → perform_database_operation.\n"
             "PARAMS: operation (str) + data (dict with ALL operation-specific params like user_id, pet_id, etc.).\n"
-            "EXAMPLE: perform_database_operation(operation='create_disease_archive', data={'user_id': 1, 'pet_id': 2, 'archive_title': '...', 'abnormal_post_ids': [1,2], ...})\n"
-            "NOTE: Both 'operation' AND 'data' parameters are REQUIRED. Verify user is modifying their own data. Use 'add_plan' for schedules (not 'create_schedule')."
+            "EXAMPLE for create_social_post: perform_database_operation(operation='create_social_post', data={'user_id': <from context>, 'content': '<user text>', 'has_images': true, 'location': '...', 'hashtags': '...'})\n"
+            "NOTE: Both 'operation' AND 'data' parameters are REQUIRED. Use requester_user_id from context as user_id. Verify user is modifying their own data. Use 'add_plan' for schedules (not 'create_schedule')."
         )
     )
     async def perform_database_operation(

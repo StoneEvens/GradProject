@@ -4,7 +4,8 @@ import styles from '../styles/FloatingAIAvatar.module.css';
 const FloatingAIAvatar = ({
   isVisible,
   onAvatarClick,
-  onDismiss
+  onDismiss,
+  isVoiceActive = false
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [isLongPress, setIsLongPress] = useState(false);
@@ -332,7 +333,7 @@ const FloatingAIAvatar = ({
       {/* 浮動 AI 頭像 */}
       <div
         ref={avatarRef}
-        className={`${styles.floatingAvatar} ${isDragging ? styles.dragging : ''} ${isLongPress ? styles.longPress : ''}`}
+        className={`${styles.floatingAvatar} ${isDragging ? styles.dragging : ''} ${isLongPress ? styles.longPress : ''} ${isVoiceActive ? styles.voiceActive : ''}`}
         style={{
           transform: `translate(${position.x}px, ${position.y}px)`,
           zIndex: showDismissZone ? 9999999 : 999999
@@ -352,6 +353,12 @@ const FloatingAIAvatar = ({
             onContextMenu={handleContextMenu}
           />
 
+          {/* 語音通話進行中指示器 */}
+          {isVoiceActive && (
+            <div className={styles.voiceIndicator}>
+              <span className={styles.voicePulse}></span>
+            </div>
+          )}
 
           {/* 新訊息提示點（可選） */}
           {/* <div className={styles.notificationDot}></div> */}

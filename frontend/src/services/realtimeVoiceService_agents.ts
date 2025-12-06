@@ -235,7 +235,55 @@ class RealtimeVoiceService extends EventEmitter {
             operation: z.string().describe('Exact operation name: add_pet, update_pet, add_abnormal_post, update_abnormal_post, delete_abnormal_post, create_disease_archive, add_plan, update_plan, delete_plan, list_plans, create_social_post'),
             data: z.any().describe('The data for the operation'),
           }),
-          execute: async ({ operation, data }) => executeViaMCP('perform_database_operation', { operation, data }),
+          execute: async ({ operation, data }) => {
+            const result = await executeViaMCP('perform_database_operation', { operation, data });
+            
+            // Auto-emit operations for post/record creation to trigger image upload
+            try {
+              const resultObj = typeof result === 'string' ? JSON.parse(result) : result;
+              
+              if (resultObj.success) {
+                // Social post created - emit post_created operation
+                if (operation === 'create_social_post' && resultObj.post_id) {
+                  console.log('[RealtimeVoice] 📤 Auto-emitting post_created operation for post:', resultObj.post_id);
+                  this.emit('agent_operations', {
+                    operations: [{
+                      operation_type: 'post_created',
+                      operation_data: JSON.stringify({ post_id: resultObj.post_id, status: 'pending_images' })
+                    }]
+                  });
+                }
+                // Abnormal post created - emit abnormal_post_created operation
+                else if (operation === 'add_abnormal_post' && resultObj.abnormal_post_id) {
+                  console.log('[RealtimeVoice] 📤 Auto-emitting abnormal_post_created operation for:', resultObj.abnormal_post_id);
+                  this.emit('agent_operations', {
+                    operations: [{
+                      operation_type: 'abnormal_post_created',
+                      operation_data: JSON.stringify({ 
+                        abnormal_post_id: resultObj.abnormal_post_id, 
+                        pet_id: data.pet_id,
+                        status: 'pending_images' 
+                      })
+                    }]
+                  });
+                }
+                // Feed created - emit feed_created operation
+                else if (operation === 'add_feed' && resultObj.feed_id && !resultObj.is_existing) {
+                  console.log('[RealtimeVoice] 📤 Auto-emitting feed_created operation for feed:', resultObj.feed_id);
+                  this.emit('agent_operations', {
+                    operations: [{
+                      operation_type: 'feed_created',
+                      operation_data: JSON.stringify({ feed_id: resultObj.feed_id, status: 'pending_images' })
+                    }]
+                  });
+                }
+              }
+            } catch (e) {
+              console.warn('[RealtimeVoice] Could not parse result for auto-emit:', e);
+            }
+            
+            return result;
+          },
         }),
         
         tool({
@@ -262,17 +310,30 @@ Available operation_type values:
 - "navigate": Navigate to a page. operation_data: {"path": "/route", "destination": "頁面名稱"}
 - "ocr_feed_analysis": Open camera for feed nutrition OCR. operation_data: {}
 - "ocr_health_report": Open camera for health report OCR. operation_data: {}
+- "analyze_selected_images": Analyze images user has already selected for feed nutrition. operation_data: {}
+- "start_tutorial": Start an interactive tutorial. operation_data: {"tutorial_id": "tutorial_name"}
+  Available tutorial_id values: "addPet", "createPost", "addAbnormalPost", "calculate", "tagPet"
+- "request_images": Open image picker for user to select images BEFORE creating a post. operation_data: {"purpose": "social_post" | "abnormal_post" | "feed"}
+  IMPORTANT: Always request images FIRST before creating posts. Wait for user to select images, then create the post.
 - "post_created": Trigger image upload after creating post. operation_data: {"post_id": 123}
 - "abnormal_post_created": Trigger image upload. operation_data: {"abnormal_post_id": 123, "pet_id": 456}
 - "feed_created": Trigger image upload. operation_data: {"feed_id": 123}
 - "remove_image": Remove selected image by index. operation_data: {"index": 1}
 - "replace_image": Replace selected image by index. operation_data: {"index": 1}
 
+CRITICAL WORKFLOW FOR CREATING POSTS:
+1. User wants to create a post → FIRST emit "request_images" to let user select images
+2. Wait for user to confirm they've selected images (they will say "done" or "selected")
+3. ONLY THEN call perform_database_operation to create the post
+4. The post_created event will automatically upload the selected images
+
 When to use:
 1. User confirms navigation → emit navigate operation
-2. User wants OCR → emit ocr operation to open camera
-3. Database creates something needing images → emit to trigger upload UI
-4. User asks to remove/replace a selected image`,
+2. User wants OCR but no images selected → emit ocr operation to open camera
+3. User has already selected images and wants analysis → emit analyze_selected_images
+4. User wants to learn how to do something step-by-step → emit start_tutorial
+5. User wants to create a post/record → FIRST emit request_images, THEN create after selection
+6. User asks to remove/replace a selected image`,
           parameters: z.object({
             operations: z.array(z.object({
               operation_type: z.string().describe('Type of operation'),
@@ -389,49 +450,21 @@ When to use:
 
     // Access the transport layer to intercept function call events
     this.session.transport.on('*', async (event: any) => {
-      // Log all events for debugging
+      // Log function-related events for debugging
       if (event.type && event.type.includes('function')) {
-        console.log('[RealtimeVoice] Function-related event:', event.type, event);
+        console.log('[RealtimeVoice] Function-related event:', event.type);
+        console.log('[RealtimeVoice] Event details:', JSON.stringify(event, null, 2));
       }
       
-      // Intercept function call requests
-      if (event.type === 'response.function_call_arguments.done') {
-        const { call_id, name, arguments: args } = event;
-        console.log('[RealtimeVoice] Function call detected:', { call_id, name, args });
-        
-        try {
-          // Execute tool via backend
-          const result = await this.executeToolViaBackend(name, args);
-          console.log('[RealtimeVoice] Tool result:', result);
-          
-          // Send the result back to the session
-          this.session!.transport.sendEvent({
-            type: 'conversation.item.create',
-            item: {
-              type: 'function_call_output',
-              call_id: call_id,
-              output: JSON.stringify(result),
-            },
-          });
-          
-          // Trigger a new response with the tool output
-          this.session!.transport.sendEvent({
-            type: 'response.create',
-          });
-        } catch (error) {
-          console.error('[RealtimeVoice] Tool execution failed:', error);
-          
-          // Send error back to session
-          this.session!.transport.sendEvent({
-            type: 'conversation.item.create',
-            item: {
-              type: 'function_call_output',
-              call_id: call_id,
-              output: JSON.stringify({ error: String(error) }),
-            },
-          });
-        }
-      }
+      // NOTE: Tool execution is handled automatically by the SDK via the `execute` functions
+      // defined in the tool definitions. We only need to intercept events that the SDK
+      // doesn't handle, or for logging/debugging purposes.
+      
+      // The SDK automatically:
+      // 1. Receives function_call_arguments.done events
+      // 2. Calls the execute() function we defined
+      // 3. Sends the result back to OpenAI
+      // So we DON'T need to manually intercept and execute tools here.
       
       // Forward other important events
       if (event.type === 'response.audio.delta') {
@@ -439,8 +472,38 @@ When to use:
       } else if (event.type === 'conversation.updated') {
         this.emit('conversation.updated', event);
       } else if (event.type === 'error') {
-        console.error('[RealtimeVoice] Transport error:', event);
-        this.emit('error', event);
+        // Log the error but check if it's fatal
+        console.warn('[RealtimeVoice] Transport error event:', event);
+        
+        // Check if this is a fatal error that should end the session
+        const errorCode = event.error?.code;
+        const errorType = event.error?.type;
+        const errorMessage = event.error?.message || '';
+        
+        // Fatal errors that should disconnect
+        const fatalErrors = [
+          'session_expired',
+          'invalid_session',
+          'authentication_error',
+          'rate_limit_exceeded',
+          'server_error',
+          'connection_error'
+        ];
+        
+        const isFatal = fatalErrors.some(fe => 
+          errorCode === fe || 
+          errorType === fe || 
+          errorMessage.toLowerCase().includes(fe.replace('_', ' '))
+        );
+        
+        if (isFatal) {
+          console.error('[RealtimeVoice] Fatal error, emitting to end session:', errorCode || errorType);
+          this.emit('error', event);
+        } else {
+          // Non-fatal error - log but don't end session
+          // These could be tool execution errors, temporary issues, etc.
+          console.warn('[RealtimeVoice] Non-fatal error (session continues):', errorMessage || event);
+        }
       }
     });
 
@@ -537,6 +600,29 @@ When to use:
   }
 
   /**
+   * Send image context update to the agent
+   * This notifies the agent about currently selected images
+   */
+  async sendImageContext(imageCount: number, imageDescriptions?: string[]): Promise<void> {
+    if (!this.session) {
+      console.log('[RealtimeVoice] Not connected, skipping image context update');
+      return;
+    }
+
+    let contextMessage = '';
+    if (imageCount === 0) {
+      contextMessage = '[系統訊息] 用戶已清除所有已選擇的圖片。';
+    } else if (imageCount === 1) {
+      contextMessage = `[系統訊息] 用戶已選擇 1 張圖片。你可以詢問用戶關於這張圖片的用途，例如：是否要進行飼料營養分析、新增貼文、或其他用途。`;
+    } else {
+      contextMessage = `[系統訊息] 用戶已選擇 ${imageCount} 張圖片。你可以詢問用戶關於這些圖片的用途，例如：是否要進行飼料營養分析、新增貼文、或其他用途。`;
+    }
+
+    console.log('[RealtimeVoice] Sending image context:', contextMessage);
+    await this.session.sendMessage(contextMessage);
+  }
+
+  /**
    * Mute/unmute microphone
    */
   mute(muted: boolean): void {
@@ -582,6 +668,13 @@ When to use:
    */
   getSession(): typeof RealtimeSession.prototype | null {
     return this.session;
+  }
+
+  /**
+   * Check if the voice service is currently connected
+   */
+  isConnected(): boolean {
+    return this.session !== null;
   }
 }
 

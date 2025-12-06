@@ -16,7 +16,8 @@ const ChatWindow = ({
   user,
   floatingMode = false,
   onToggleFloating,
-  onDismissFloating
+  onDismissFloating,
+  onVoiceStateChange
 }) => {
   const { t, ready, i18n } = useTranslation('main');
   const navigate = useNavigate();
@@ -33,7 +34,8 @@ const ChatWindow = ({
   const [interimTranscript, setInterimTranscript] = useState('');
 
   // 即時語音通話相關 state (Realtime API)
-  const [isVoiceCallActive, setIsVoiceCallActive] = useState(false);
+  // 初始化時檢查語音服務是否已連接（跨頁面導航後恢復狀態）
+  const [isVoiceCallActive, setIsVoiceCallActive] = useState(() => realtimeVoiceService.isConnected());
   const [isVoiceConnecting, setIsVoiceConnecting] = useState(false);
   const [voiceError, setVoiceError] = useState(null);
 
@@ -151,6 +153,62 @@ const ChatWindow = ({
       stopVoiceRecording();
     };
   }, [isListening]);
+
+  // 通知父組件語音通話狀態變化
+  useEffect(() => {
+    if (onVoiceStateChange) {
+      onVoiceStateChange(isVoiceCallActive);
+    }
+  }, [isVoiceCallActive, onVoiceStateChange]);
+
+  // 如果組件掛載時語音已連接（導航後恢復），重新附加事件監聽器
+  useEffect(() => {
+    if (isVoiceCallActive && realtimeVoiceService.isConnected()) {
+      console.log('[ChatWindow] 📡 Re-attaching voice event listeners after navigation');
+      
+      // 重新設置事件監聽器
+      realtimeVoiceService.on('conversation.updated', (event) => {
+        console.log('[ChatWindow] Conversation updated:', event);
+      });
+
+      realtimeVoiceService.on('response.audio.delta', (event) => {
+        // 音頻會自動播放
+        console.log('[ChatWindow] Audio delta received');
+      });
+
+      realtimeVoiceService.on('agent_operations', (data) => {
+        console.log('[ChatWindow] 🎯 Agent operations received (re-attached listener):', data);
+        if (data.operations && Array.isArray(data.operations)) {
+          data.operations.forEach(op => {
+            const opData = typeof op.operation_data === 'string' 
+              ? JSON.parse(op.operation_data) 
+              : op.operation_data;
+            
+            console.log(`[ChatWindow] Processing voice operation: ${op.operation_type}`, opData);
+            
+            if (op.operation_type === 'navigate' && opData.path) {
+              console.log(`[ChatWindow] 🚀 Voice navigation to: ${opData.path}`);
+              // Use voiceNavigate event to ensure floating avatar shows
+              window.dispatchEvent(new CustomEvent('voiceNavigate', { detail: { isVoiceActive: true } }));
+              navigate(opData.path);
+            } else if (op.operation_type === 'show_calculator') {
+              console.log('[ChatWindow] 🧮 Showing calculator');
+              // Use voiceNavigate event to ensure floating avatar shows
+              window.dispatchEvent(new CustomEvent('voiceNavigate', { detail: { isVoiceActive: true } }));
+              navigate('/calculator');
+            }
+            // 其他操作類型可以在這裡處理
+          });
+        }
+      });
+
+      realtimeVoiceService.on('error', (event) => {
+        console.error('[ChatWindow] Voice error:', event);
+        setVoiceError(event.error?.message || 'Voice call error');
+        setIsVoiceCallActive(false);
+      });
+    }
+  }, []); // 只在掛載時運行一次
 
   // 自動滾動到最新訊息
   const scrollToBottom = () => {
@@ -322,29 +380,36 @@ const ChatWindow = ({
         
         const { operations, tutorial } = data;
         
-        // Handle tutorial if present
+        // Handle tutorial if present (direct tutorial field)
         if (tutorial) {
-          console.log('[ChatWindow] Starting tutorial:', tutorial);
-          // Trigger tutorial (same as text-based agent)
+          console.log('[ChatWindow] Starting tutorial from direct field:', tutorial);
+          handleStartTutorial(tutorial);
         }
         
         // Process each operation (same logic as text-based agent response)
         if (operations && Array.isArray(operations)) {
-          operations.forEach((op) => {
-            try {
-              const opData = typeof op.operation_data === 'string' 
-                ? JSON.parse(op.operation_data) 
-                : op.operation_data;
-              
-              console.log(`[ChatWindow] Processing voice operation: ${op.operation_type}`, opData);
-              
-              switch (op.operation_type) {
-                case 'navigate':
-                  // Navigate to the specified path
-                  if (opData.path) {
-                    console.log(`[ChatWindow] 🚀 Voice navigation to: ${opData.path}`);
-                    navigate(opData.path);
-                  }
+          // Use for...of loop to allow async/await
+          (async () => {
+            for (const op of operations) {
+              try {
+                const opData = typeof op.operation_data === 'string' 
+                  ? JSON.parse(op.operation_data) 
+                  : op.operation_data;
+                
+                console.log(`[ChatWindow] Processing voice operation: ${op.operation_type}`, opData);
+                
+                switch (op.operation_type) {
+                  case 'navigate':
+                    // Navigate to the specified path
+                    if (opData.path) {
+                      console.log(`[ChatWindow] 🚀 Voice navigation to: ${opData.path}`);
+                      
+                      // Use same pattern as text-based agent: minimize chat, show floating avatar
+                      // But for voice, we dispatch a special event that keeps voice state
+                      window.dispatchEvent(new CustomEvent('voiceNavigate', { detail: { isVoiceActive: true } }));
+                      
+                      navigate(opData.path);
+                    }
                   break;
                   
                 case 'ocr_feed_analysis':
@@ -360,17 +425,34 @@ const ChatWindow = ({
                   setShowOCRCamera(true);
                   setOcrPurpose('health_report');
                   break;
+                
+                case 'analyze_selected_images':
+                  // Analyze images that are already selected (for feed nutrition)
+                  console.log('[ChatWindow] 📸 Analyzing selected images for feed nutrition');
+                  if (selectedImages.length > 0 || window.__selectedFeedImages?.length > 0) {
+                    // Send a message to the text-based agent to analyze the images
+                    const analyzeMessage = '請幫我分析這些飼料圖片的營養成分';
+                    handleSendMessage(analyzeMessage);
+                  } else {
+                    console.log('[ChatWindow] No images selected to analyze');
+                  }
+                  break;
                   
                 case 'start_tutorial':
                   // Start a specific tutorial
                   if (opData.tutorial_id) {
                     console.log(`[ChatWindow] 📚 Starting tutorial: ${opData.tutorial_id}`);
+                    handleStartTutorial(opData.tutorial_id);
                   }
                   break;
                   
                 case 'show_calculator':
                   // Show the nutrition calculator
                   console.log('[ChatWindow] 🧮 Showing calculator');
+                  
+                  // Use same pattern as navigate
+                  window.dispatchEvent(new CustomEvent('voiceNavigate', { detail: { isVoiceActive: true } }));
+                  
                   navigate('/calculator');
                   break;
                   
@@ -402,12 +484,137 @@ const ChatWindow = ({
                   });
                   setIsWaitingForFeedImageReplacement(true);
                   break;
+                
+                case 'request_images':
+                  // Open image picker for user to select images before creating a post
+                  console.log(`[ChatWindow] 📷 Opening image picker for: ${opData.purpose || 'general'}`);
+                  {
+                    // Store the purpose for later use
+                    window.__pendingImagePurpose = opData.purpose || 'social_post';
+                    
+                    // Trigger the file input
+                    if (fileInputRef.current) {
+                      fileInputRef.current.click();
+                    }
+                    
+                    // Notify the agent that we're waiting for image selection
+                    if (realtimeVoiceService.isConnected()) {
+                      realtimeVoiceService.sendMessage('[系統] 已開啟圖片選擇器，請等待用戶選擇圖片後再建立貼文。');
+                    }
+                  }
+                  break;
                   
                 case 'post_created':
+                  // Handle post creation - upload images if available
+                  console.log(`[ChatWindow] 📝 post_created:`, opData);
+                  {
+                    const postId = opData.post_id;
+                    if (postId) {
+                      // Get images from state or window object
+                      const imagesToUpload = selectedImages.length > 0 
+                        ? selectedImages 
+                        : (window.__selectedFeedImages || []);
+                      
+                      if (imagesToUpload.length > 0) {
+                        const validImages = imagesToUpload.filter(img => img && img.file);
+                        if (validImages.length > 0) {
+                          console.log(`[ChatWindow] 🖼️ Uploading ${validImages.length} images to post ${postId}`);
+                          setIsUploadingImages(true);
+                          try {
+                            const uploadResult = await aiChatService.uploadPostImages(postId, validImages);
+                            console.log('[ChatWindow] ✅ Images uploaded:', uploadResult);
+                            clearAllImages();
+                            // Notify user via voice
+                            if (realtimeVoiceService.isConnected()) {
+                              realtimeVoiceService.sendMessage(`[系統] 已成功上傳 ${uploadResult.data?.uploaded_count || validImages.length} 張圖片到貼文`);
+                            }
+                          } catch (uploadError) {
+                            console.error('[ChatWindow] ❌ Image upload failed:', uploadError);
+                            if (realtimeVoiceService.isConnected()) {
+                              realtimeVoiceService.sendMessage(`[系統] 圖片上傳失敗：${uploadError.message || '未知錯誤'}`);
+                            }
+                          } finally {
+                            setIsUploadingImages(false);
+                          }
+                        }
+                      } else {
+                        console.log('[ChatWindow] No images to upload for post');
+                      }
+                    }
+                  }
+                  break;
+                  
                 case 'abnormal_post_created':
+                  // Handle abnormal post creation - upload images if available
+                  console.log(`[ChatWindow] 📝 abnormal_post_created:`, opData);
+                  {
+                    const abnormalPostId = opData.abnormal_post_id;
+                    const petId = opData.pet_id;
+                    if (abnormalPostId && petId) {
+                      const imagesToUpload = selectedImages.length > 0 
+                        ? selectedImages 
+                        : (window.__selectedFeedImages || []);
+                      
+                      if (imagesToUpload.length > 0) {
+                        const validImages = imagesToUpload.filter(img => img && img.file);
+                        if (validImages.length > 0) {
+                          console.log(`[ChatWindow] 🖼️ Uploading ${validImages.length} images to abnormal post ${abnormalPostId}`);
+                          setIsUploadingImages(true);
+                          try {
+                            const uploadResult = await aiChatService.uploadAbnormalPostImages(abnormalPostId, petId, validImages);
+                            console.log('[ChatWindow] ✅ Images uploaded:', uploadResult);
+                            clearAllImages();
+                            if (realtimeVoiceService.isConnected()) {
+                              realtimeVoiceService.sendMessage(`[系統] 已成功上傳 ${uploadResult.data?.uploaded_count || validImages.length} 張圖片到異常紀錄`);
+                            }
+                          } catch (uploadError) {
+                            console.error('[ChatWindow] ❌ Image upload failed:', uploadError);
+                            if (realtimeVoiceService.isConnected()) {
+                              realtimeVoiceService.sendMessage(`[系統] 圖片上傳失敗：${uploadError.message || '未知錯誤'}`);
+                            }
+                          } finally {
+                            setIsUploadingImages(false);
+                          }
+                        }
+                      }
+                    }
+                  }
+                  break;
+                  
                 case 'feed_created':
-                  // Handle post creation that needs image upload
-                  console.log(`[ChatWindow] 📝 ${op.operation_type}:`, opData);
+                  // Handle feed creation - upload images if available
+                  console.log(`[ChatWindow] 📝 feed_created:`, opData);
+                  {
+                    const feedId = opData.feed_id;
+                    if (feedId) {
+                      const imagesToUpload = selectedImages.length > 0 
+                        ? selectedImages 
+                        : (window.__selectedFeedImages || []);
+                      
+                      if (imagesToUpload.length > 0) {
+                        const validImages = imagesToUpload.filter(img => img && img.file);
+                        if (validImages.length > 0) {
+                          console.log(`[ChatWindow] 🖼️ Uploading ${validImages.length} images to feed ${feedId}`);
+                          setIsUploadingImages(true);
+                          try {
+                            const uploadResult = await aiChatService.uploadFeedImages(feedId, validImages);
+                            console.log('[ChatWindow] ✅ Images uploaded:', uploadResult);
+                            clearAllImages();
+                            if (realtimeVoiceService.isConnected()) {
+                              realtimeVoiceService.sendMessage(`[系統] 已成功上傳 ${uploadResult.data?.uploaded_count || validImages.length} 張飼料圖片`);
+                            }
+                          } catch (uploadError) {
+                            console.error('[ChatWindow] ❌ Image upload failed:', uploadError);
+                            if (realtimeVoiceService.isConnected()) {
+                              realtimeVoiceService.sendMessage(`[系統] 圖片上傳失敗：${uploadError.message || '未知錯誤'}`);
+                            }
+                          } finally {
+                            setIsUploadingImages(false);
+                          }
+                        }
+                      }
+                    }
+                  }
                   break;
                   
                 default:
@@ -416,13 +623,16 @@ const ChatWindow = ({
             } catch (error) {
               console.error('[ChatWindow] Error processing voice operation:', error);
             }
-          });
+          }
+          })();
         }
       });
       
       realtimeVoiceService.on('error', (event) => {
-        console.error('Realtime error:', event);
-        setVoiceError('語音通話發生錯誤');
+        // Only fatal errors reach here now (non-fatal are filtered in the service)
+        console.error('[ChatWindow] Fatal realtime error:', event);
+        const errorMessage = event.error?.message || '語音通話發生嚴重錯誤';
+        setVoiceError(errorMessage);
         endVoiceCall();
       });
 
@@ -472,14 +682,9 @@ const ChatWindow = ({
     setVoiceError(null);
   };
 
-  // 清理函數：當組件卸載時結束通話
-  useEffect(() => {
-    return () => {
-      if (isVoiceCallActive) {
-        endVoiceCall();
-      }
-    };
-  }, [isVoiceCallActive]);
+  // 注意：我們不再在組件卸載時自動結束通話
+  // 因為語音服務是單例模式，需要跨頁面導航保持連接
+  // 用戶必須手動點擊結束通話按鈕來結束語音
 
   // ============= 即時語音通話功能結束 =============
 
@@ -537,6 +742,27 @@ const ChatWindow = ({
           // 使用 window 物件儲存（避免 localStorage 容量限制）
           window.__selectedFeedImages = newImages;
           console.log('[ChatWindow] 圖片已選擇並保存到 window.__selectedFeedImages:', newImages.length, '張');
+          
+          // 如果語音通話進行中，通知語音代理有新圖片
+          if (isVoiceCallActive && realtimeVoiceService.isConnected()) {
+            console.log('[ChatWindow] 語音通話中，通知語音代理有新圖片');
+            
+            // Check if this was a request_images operation
+            const pendingPurpose = window.__pendingImagePurpose;
+            if (pendingPurpose) {
+              // Clear the pending purpose
+              delete window.__pendingImagePurpose;
+              
+              // Send a more specific message telling agent images are ready
+              realtimeVoiceService.sendMessage(`[系統] 用戶已選擇 ${newImages.length} 張圖片，可以繼續建立${pendingPurpose === 'abnormal_post' ? '異常紀錄' : '貼文'}了。`);
+            } else {
+              // General image context update
+              realtimeVoiceService.sendImageContext(newImages.length).catch(err => {
+                console.warn('[ChatWindow] 無法通知語音代理圖片更新:', err);
+              });
+            }
+          }
+          
           return newImages;
         });
 
@@ -563,6 +789,14 @@ const ChatWindow = ({
       const newImages = prev.filter(img => img.id !== imageId);
       // 更新 window 物件
       window.__selectedFeedImages = newImages;
+      
+      // 如果語音通話進行中，通知語音代理圖片已移除
+      if (isVoiceCallActive && realtimeVoiceService.isConnected()) {
+        realtimeVoiceService.sendImageContext(newImages.length).catch(err => {
+          console.warn('[ChatWindow] 無法通知語音代理圖片更新:', err);
+        });
+      }
+      
       return newImages;
     });
   };
@@ -573,6 +807,13 @@ const ChatWindow = ({
     delete window.__selectedFeedImages;
     localStorage.removeItem('feedOcrData');
     localStorage.removeItem('feedImageTypeMap');
+    
+    // 如果語音通話進行中，通知語音代理圖片已清除
+    if (isVoiceCallActive && realtimeVoiceService.isConnected()) {
+      realtimeVoiceService.sendImageContext(0).catch(err => {
+        console.warn('[ChatWindow] 無法通知語音代理圖片更新:', err);
+      });
+    }
   };
 
   // 發送訊息
@@ -1527,23 +1768,38 @@ const ChatWindow = ({
   const handleStartTutorial = (tutorialId) => {
     console.log('開始教學模式:', tutorialId);
 
-    // 延遲一下讓用戶看到訊息，然後關閉聊天室並啟動教學
+    // 延遲一下讓用戶看到訊息，然後啟動教學
     setTimeout(() => {
       try {
-        // 停止語音錄音並關閉聊天室
-        stopVoiceRecording();
-        onClose();
-
-        // 自動關閉漂浮頭像（如果存在）
-        window.dispatchEvent(new CustomEvent('dismissFloatingAvatar'));
+        // Check if realtime voice call is active
+        const isRealtimeVoiceActive = realtimeVoiceService.isConnected();
+        
+        if (isRealtimeVoiceActive) {
+          // For realtime voice: keep voice call active, but close chat box for cleaner tutorial view
+          console.log('[ChatWindow] 🎤 Realtime voice active, closing chat but keeping voice call during tutorial');
+          
+          // Close the chat window but keep voice session running
+          onClose();
+          
+          // Dispatch voiceNavigate to keep floating avatar visible (voice indicator)
+          window.dispatchEvent(new CustomEvent('voiceNavigate', { detail: { isVoiceActive: true } }));
+        } else {
+          // For text chat: stop voice recording and close chat
+          stopVoiceRecording();
+          onClose();
+          
+          // 自動關閉漂浮頭像（如果存在）- only for non-voice mode
+          window.dispatchEvent(new CustomEvent('dismissFloatingAvatar'));
+        }
 
         // 觸發教學模式事件，由 App.jsx 或相應組件處理
         window.dispatchEvent(new CustomEvent('startTutorial', {
           detail: {
             // 保持事件欄位名稱為 tutorialType 以相容其他組件
             tutorialType: tutorialId,
-            source: 'ai_chat',
-            user: user
+            source: isRealtimeVoiceActive ? 'realtime_voice' : 'ai_chat',
+            user: user,
+            keepVoiceActive: isRealtimeVoiceActive
           }
         }));
       } catch (error) {

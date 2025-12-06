@@ -935,14 +935,25 @@ def create_realtime_session(request):
 
 1. 導航：使用者確認後 → emit_operations([{{operation_type: "navigate", operation_data: {{"path": "/路徑"}}}}])
 2. OCR：開啟相機 → "ocr_feed_analysis" 或 "ocr_health_report"
-3. 圖片上傳：建立貼文/異常紀錄後 → "post_created", "abnormal_post_created", "feed_created"
-4. 圖片管理：移除/替換圖片 → "remove_image", "replace_image"
+3. 圖片管理：移除/替換圖片 → "remove_image", "replace_image"
+4. 互動教學：使用者想學習某功能 → "start_tutorial" 配合 tutorial_id ("addPet", "createPost", "addAbnormalPost", "calculate", "tagPet")
+5. 請求選擇圖片：建立貼文前 → "request_images" 配合 purpose ("social_post", "abnormal_post", "feed")
+
+=== 建立貼文的正確流程 ===
+重要！建立貼文（社群貼文、異常紀錄等）必須遵循以下步驟：
+1. 先收集貼文內容（標題、描述等）
+2. 呼叫 emit_operations 發送 "request_images" 請使用者選擇圖片
+3. 等待系統通知「用戶已選擇 X 張圖片」
+4. 收到通知後，才呼叫 perform_database_operation 建立貼文
+5. 貼文建立後會自動上傳圖片
 
 不需要 emit_operations 的情況：
 - 回答問題（直接說）
 - 推薦貼文或用戶（直接說明）
-- 教學說明（口頭解釋步驟）
+- 簡單解釋步驟（口頭說明即可）
 - 任何可以用語音傳達的資訊
+
+當使用者想要「互動式教學」或「手把手教我」時，使用 start_tutorial；當使用者只是問「怎麼做」時，可以口頭解釋。
 
 請用自然對話的方式回應，適合語音互動。請始終使用繁體中文回應。"""
         elif language.startswith('ja'):  # Japanese
@@ -964,13 +975,24 @@ def create_realtime_session(request):
 
 1. ナビゲーション：ユーザー確認後 → emit_operations([{{operation_type: "navigate", operation_data: {{"path": "/パス"}}}}])
 2. OCR：カメラを開く → "ocr_feed_analysis" または "ocr_health_report"
-3. 画像アップロード：投稿作成後 → "post_created", "abnormal_post_created", "feed_created"
-4. 画像管理：削除/置換 → "remove_image", "replace_image"
+3. 画像管理：削除/置換 → "remove_image", "replace_image"
+4. インタラクティブチュートリアル：ユーザーが機能を学びたい時 → "start_tutorial" と tutorial_id ("addPet", "createPost", "addAbnormalPost", "calculate", "tagPet")
+5. 画像選択リクエスト：投稿作成前 → "request_images" と purpose ("social_post", "abnormal_post", "feed")
+
+=== 投稿作成の正しいフロー ===
+重要！投稿（ソーシャル投稿、異常記録など）を作成する際は以下の手順に従う：
+1. まず投稿内容（タイトル、説明など）を収集
+2. emit_operations で "request_images" を送信してユーザーに画像選択を依頼
+3. システムから「ユーザーが X 枚の画像を選択しました」という通知を待つ
+4. 通知を受け取ってから、perform_database_operation で投稿を作成
+5. 投稿作成後、画像は自動的にアップロードされる
 
 emit_operations 不要な場合：
 - 質問への回答（直接話す）
 - 推薦の説明（口頭で説明）
-- チュートリアル説明（ステップを口頭で説明）
+- 簡単な手順の説明（口頭で説明可能）
+
+ユーザーが「インタラクティブチュートリアル」や「ステップバイステップで教えて」と言った場合は start_tutorial を使用。単に「どうやって」と聞かれた場合は口頭で説明できます。
 
 音声インタラクションに適した自然な会話で応答してください。常に日本語で応答してください。"""
         else:  # English or other languages
@@ -992,14 +1014,25 @@ Only call emit_operations when actual UI changes are needed:
 
 1. Navigation: After user confirms → emit_operations([{{operation_type: "navigate", operation_data: {{"path": "/route"}}}}])
 2. OCR: Open camera → "ocr_feed_analysis" or "ocr_health_report"
-3. Image upload: After creating post → "post_created", "abnormal_post_created", "feed_created"
-4. Image management: Remove/replace → "remove_image", "replace_image"
+3. Image management: Remove/replace → "remove_image", "replace_image"
+4. Interactive tutorial: When user wants to learn a feature → "start_tutorial" with tutorial_id ("addPet", "createPost", "addAbnormalPost", "calculate", "tagPet")
+5. Request image selection: Before creating a post → "request_images" with purpose ("social_post", "abnormal_post", "feed")
+
+=== CORRECT WORKFLOW FOR CREATING POSTS ===
+IMPORTANT! When creating posts (social posts, abnormal records, etc.), follow these steps:
+1. First collect post content (title, description, etc.)
+2. Call emit_operations with "request_images" to ask user to select images
+3. Wait for system notification "User has selected X images"
+4. Only AFTER receiving the notification, call perform_database_operation to create the post
+5. Images will be automatically uploaded after post creation
 
 Do NOT use emit_operations for:
 - Answering questions (just speak)
 - Explaining recommendations (describe verbally)
-- Tutorial explanations (explain steps verbally)
+- Simple step explanations (can be spoken)
 - Any information that can be conveyed through voice
+
+Use start_tutorial when user wants "interactive tutorial" or "show me step by step". For simple "how to" questions, you can explain verbally.
 
 Keep responses natural and conversational for voice interaction. Always respond in English."""
 

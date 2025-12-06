@@ -56,13 +56,17 @@ import { TutorialProvider, useTutorial } from './context/TutorialContext';
 import TutorialOverlay from './components/TutorialOverlay';
 import FloatingAIAvatar from './components/FloatingAIAvatar';
 import ChatWindow from './components/ChatWindow';
+import { realtimeVoiceService } from './services/realtimeVoiceService_agents';
 
 // 全局浮動AI頭像管理器
 const GlobalFloatingAI = ({ user }) => {
   const [floatingMode, setFloatingMode] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isForceMode, setIsForceMode] = useState(false); // 強制模式標記
+  // 初始化時檢查語音服務是否已連接
+  const [isVoiceCallActive, setIsVoiceCallActive] = useState(() => realtimeVoiceService.isConnected());
   const location = useLocation();
+  const navigate = useNavigate();
 
   // 監聽全局AI聊天啟動事件
   useEffect(() => {
@@ -89,6 +93,24 @@ const GlobalFloatingAI = ({ user }) => {
       }, 2000); // 2秒後清除強制模式
     };
 
+    // 語音導航專用事件：保持浮動模式並標記語音狀態
+    const handleVoiceNavigate = (event) => {
+      console.log('語音導航觸發，啟動浮動模式並保持語音狀態');
+      const { isVoiceActive } = event.detail || {};
+      setFloatingMode(true);
+      setIsForceMode(true);
+      if (isVoiceActive) {
+        setIsVoiceCallActive(true);
+      }
+      // 關閉聊天視窗但保持浮動頭像可見（與文字代理相同邏輯）
+      setIsChatOpen(false);
+      // 設置一個定時器，在導航完成後清除強制模式標記
+      setTimeout(() => {
+        console.log('清除強制模式標記');
+        setIsForceMode(false);
+      }, 2000);
+    };
+
     const handleDismissFloatingAvatar = (event) => {
       console.log('自動關閉漂浮頭像（教學模式觸發）');
       setFloatingMode(false);
@@ -99,12 +121,14 @@ const GlobalFloatingAI = ({ user }) => {
     window.addEventListener('startFloatingChat', handleStartFloatingChat);
     window.addEventListener('closeFloatingChat', handleCloseFloatingChat);
     window.addEventListener('forceFloatingMode', handleForceFloatingMode);
+    window.addEventListener('voiceNavigate', handleVoiceNavigate);
     window.addEventListener('dismissFloatingAvatar', handleDismissFloatingAvatar);
 
     return () => {
       window.removeEventListener('startFloatingChat', handleStartFloatingChat);
       window.removeEventListener('closeFloatingChat', handleCloseFloatingChat);
       window.removeEventListener('forceFloatingMode', handleForceFloatingMode);
+      window.removeEventListener('voiceNavigate', handleVoiceNavigate);
       window.removeEventListener('dismissFloatingAvatar', handleDismissFloatingAvatar);
     };
   }, []);
@@ -118,16 +142,22 @@ const GlobalFloatingAI = ({ user }) => {
         location.pathname === '/' ||
         location.pathname === '/main';
 
+      // 直接從服務檢查語音連接狀態，避免狀態同步延遲問題
+      const isVoiceActive = isVoiceCallActive || realtimeVoiceService.isConnected();
+
       console.log('全局AI頭像 - 當前路徑:', location.pathname);
       console.log('全局AI頭像 - 是否在主頁面:', isOnMainPages);
-      console.log('全局AI頭像 - 當前狀態:', { floatingMode, isChatOpen, isForceMode });
+      console.log('全局AI頭像 - 當前狀態:', { floatingMode, isChatOpen, isForceMode, isVoiceCallActive, isVoiceActive });
 
       if (!isOnMainPages) {
         console.log('在非主頁面，確保顯示浮動頭像');
         // 在非主頁面，如果聊天是開啟的，關閉它顯示浮動頭像
-        if (isChatOpen) {
+        // 但如果語音通話進行中，保持聊天開啟
+        if (isChatOpen && !isVoiceActive) {
           console.log('關閉展開的聊天，顯示浮動頭像');
           setIsChatOpen(false);
+        } else if (isChatOpen && isVoiceActive) {
+          console.log('語音通話進行中，保持聊天視窗開啟');
         }
       } else if (!isForceMode) {
         // 只有在非強制模式下才關閉浮動模式
@@ -138,7 +168,7 @@ const GlobalFloatingAI = ({ user }) => {
         console.log('回到主頁面但處於強制模式，保持浮動模式');
       }
     }
-  }, [location.pathname, floatingMode, isForceMode]);
+  }, [location.pathname, floatingMode, isForceMode, isVoiceCallActive]);
 
   // 單獨處理聊天開啟狀態變化，避免衝突
   useEffect(() => {
@@ -170,16 +200,24 @@ const GlobalFloatingAI = ({ user }) => {
     // 浮動模式狀態由路徑變化自動管理，這裡不做變更
   };
 
+  // 處理語音通話狀態變化 (從 ChatWindow 回傳)
+  const handleVoiceStateChange = (isActive) => {
+    console.log('GlobalFloatingAI - 語音通話狀態變化:', isActive);
+    setIsVoiceCallActive(isActive);
+  };
+
   // 只在浮動模式下渲染
   if (!floatingMode) return null;
 
   return (
     <>
       {/* 浮動 AI 頭像 - 最高 z-index */}
+      {/* 當語音通話進行中，即使聊天視窗開啟也顯示浮動頭像作為指示器 */}
       <FloatingAIAvatar
-        isVisible={!isChatOpen}
+        isVisible={!isChatOpen || isVoiceCallActive}
         onAvatarClick={handleToggleFloating}
         onDismiss={handleDismissFloating}
+        isVoiceActive={isVoiceCallActive}
       />
 
       {/* 展開的聊天視窗 */}
@@ -191,6 +229,7 @@ const GlobalFloatingAI = ({ user }) => {
           floatingMode={true}
           onToggleFloating={handleToggleFloating}
           onDismissFloating={handleDismissFloating}
+          onVoiceStateChange={handleVoiceStateChange}
         />
       )}
     </>
