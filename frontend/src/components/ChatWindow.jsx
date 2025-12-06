@@ -186,12 +186,12 @@ const ChatWindow = ({
         console.log('[ChatWindow] 🎯 Agent operations received (re-attached listener):', data);
         if (data.operations && Array.isArray(data.operations)) {
           data.operations.forEach(op => {
-            const opData = typeof op.operation_data === 'string' 
-              ? JSON.parse(op.operation_data) 
+            const opData = typeof op.operation_data === 'string'
+              ? JSON.parse(op.operation_data)
               : op.operation_data;
-            
+
             console.log(`[ChatWindow] Processing voice operation: ${op.operation_type}`, opData);
-            
+
             if (op.operation_type === 'navigate' && opData.path) {
               console.log(`[ChatWindow] 🚀 Voice navigation to: ${opData.path}`);
               // Use voiceNavigate event to ensure floating avatar shows
@@ -202,6 +202,19 @@ const ChatWindow = ({
               // Use voiceNavigate event to ensure floating avatar shows
               window.dispatchEvent(new CustomEvent('voiceNavigate', { detail: { isVoiceActive: true } }));
               navigate('/calculator');
+            } else if (op.operation_type === 'request_images') {
+              console.log('[ChatWindow] 📷 Request images (re-attached listener)');
+              window.__pendingImagePurpose = opData.purpose || 'social_post';
+              setVoiceModeWaitingForImages(true);
+              setMessages(prev => [...prev, {
+                id: Date.now(),
+                text: '請選擇要上傳的圖片',
+                isUser: false,
+                timestamp: new Date()
+              }]);
+              if (realtimeVoiceService.isConnected()) {
+                realtimeVoiceService.sendMessage('[系統] 已請求用戶選擇圖片，請等待用戶選擇並發送圖片後再建立貼文。');
+              }
             }
             // 其他操作類型可以在這裡處理
           });
@@ -504,18 +517,16 @@ const ChatWindow = ({
                     window.__pendingImagePurpose = opData.purpose || 'social_post';
 
                     // 啟用圖片選擇功能
+                    console.log('[ChatWindow] 📷 Setting voiceModeWaitingForImages to true');
                     setVoiceModeWaitingForImages(true);
 
-                    // 顯示請求圖片的對話泡泡
-                    const requestImageMessage = {
+                    // 顯示請求圖片的對話泡泡 - 使用函數式更新確保獲取最新狀態
+                    setMessages(prev => [...prev, {
                       id: Date.now(),
-                      text: t('chatWindow.voiceMode.requestImages', '請選擇要上傳的圖片'),
+                      text: '請選擇要上傳的圖片',
                       isUser: false,
-                      timestamp: new Date(),
-                      isSystemMessage: true,
-                      isVoiceModeNotice: true
-                    };
-                    setMessages(prev => [...prev, requestImageMessage]);
+                      timestamp: new Date()
+                    }]);
 
                     // Notify the agent that we're waiting for image selection
                     if (realtimeVoiceService.isConnected()) {
@@ -670,9 +681,7 @@ const ChatWindow = ({
         id: Date.now(),
         text: t('chatWindow.voiceMode.activated', '語音模式啟動中，文字對話暫時關閉'),
         isUser: false,
-        timestamp: new Date(),
-        isSystemMessage: true,
-        isVoiceModeNotice: true
+        timestamp: new Date()
       };
       setMessages(prev => [...prev, voiceModeMessage]);
 
@@ -718,9 +727,7 @@ const ChatWindow = ({
       id: Date.now(),
       text: t('chatWindow.voiceMode.deactivated', '語音模式已結束，文字對話已恢復'),
       isUser: false,
-      timestamp: new Date(),
-      isSystemMessage: true,
-      isVoiceModeNotice: true
+      timestamp: new Date()
     };
     setMessages(prev => [...prev, voiceEndMessage]);
   };
@@ -2276,7 +2283,7 @@ const ChatWindow = ({
         {messages.map((message) => (
           <div
             key={message.id}
-            className={`${styles.messageWrapper} ${message.isUser ? styles.userMessage : styles.aiMessage} ${message.isVoiceModeNotice ? styles.voiceModeNotice : ''}`}
+            className={`${styles.messageWrapper} ${message.isUser ? styles.userMessage : styles.aiMessage}`}
           >
             {/* AI 訊息：頭像在左，訊息在右 */}
             {!message.isUser && (
@@ -2287,7 +2294,7 @@ const ChatWindow = ({
                   className={styles.messageAvatar}
                 />
                 <div className={styles.messageContent}>
-                  <div className={`${styles.messageBubble} ${message.isVoiceModeNotice ? styles.voiceModeBubble : ''}`}>
+                  <div className={styles.messageBubble}>
                     {String(cleanMessageText(message.text) || '').split('\n').map((line, index) => (
                       <React.Fragment key={index}>
                         {line}
