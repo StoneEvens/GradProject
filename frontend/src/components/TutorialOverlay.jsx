@@ -964,6 +964,24 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
       el.style.touchAction = '';
     });
 
+    // 額外清理：重置可能被 manualNext 設定過高 z-index 的元素
+    // 清理有 tutorial-manual-target 標記的元素
+    document.querySelectorAll('.tutorial-manual-target').forEach(el => {
+      el.classList.remove('tutorial-manual-target');
+      el.style.zIndex = '';
+      el.style.pointerEvents = '';
+      console.log('🧹 清理 tutorial-manual-target 元素:', el);
+    });
+
+    // 備用清理：針對 addImageBtn 等可能遺漏的元素
+    document.querySelectorAll('[class*="addImageBtn"], [class*="addImage"]').forEach(el => {
+      if (el.style.zIndex === '999999') {
+        el.style.zIndex = '';
+        el.style.pointerEvents = '';
+        console.log('🧹 清理殘留的高 z-index 元素:', el);
+      }
+    });
+
     if (!stepData || !stepData.targetElement) {
       console.log('沒有目標元素，使用預設位置');
       setHighlightPosition(null);
@@ -1890,6 +1908,7 @@ const TutorialOverlay = ({ tutorialType, onComplete, onSkip }) => {
             if (target) {
               target.style.pointerEvents = 'auto';
               target.style.zIndex = '999999';
+              target.classList.add('tutorial-manual-target'); // 加上標記以便清理
               console.log('🟢 開放互動目標元素:', target);
             }
           }, 150);
