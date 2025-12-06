@@ -53,6 +53,9 @@ const ChatWindow = ({
   const recognitionRef = useRef(null);
   const fileInputRef = useRef(null);
 
+  // 用於在事件監聽器中獲取最新的 messages 狀態
+  const messagesRef = useRef(messages);
+
   // 簡易本地快取鍵
   const LAST_CONV_ID_KEY = 'aiChat.lastConversationId';
   const LAST_MESSAGES_KEY = 'aiChat.lastMessages';
@@ -217,6 +220,11 @@ const ChatWindow = ({
 
   useEffect(() => {
     scrollToBottom();
+  }, [messages]);
+
+  // 同步 messagesRef 以便事件監聽器能獲取最新的 messages
+  useEffect(() => {
+    messagesRef.current = messages;
   }, [messages]);
 
   // 注意：歡迎訊息現在由 isOpen 的 useEffect 處理
@@ -850,7 +858,9 @@ const ChatWindow = ({
     const userInput = String(messageText || '').trim();
 
     // 添加用戶訊息
-    const newMessages = [...messages, userMessage];
+    // 使用 messagesRef.current 來確保事件監聽器能獲取最新的 messages 狀態
+    const currentMessages = messagesRef.current || messages;
+    const newMessages = [...currentMessages, userMessage];
     setMessages(newMessages);
 
     // 清空輸入框和圖片預覽
