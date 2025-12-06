@@ -328,7 +328,7 @@ CRITICAL WORKFLOW FOR CREATING POSTS:
 4. The post_created event will automatically upload the selected images
 
 When to use:
-1. User confirms navigation → emit navigate operation
+1. User wants to navigate → emit navigate operation directly (no need to ask for confirmation)
 2. User wants OCR but no images selected → emit ocr operation to open camera
 3. User has already selected images and wants analysis → emit analyze_selected_images
 4. User wants to learn how to do something step-by-step → emit start_tutorial
