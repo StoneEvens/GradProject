@@ -2058,12 +2058,10 @@ const ChatWindow = ({
                       socialPosts={message.recommendedSocialPosts}
                       forumPosts={message.recommendedForumPosts}
                       onArticleClick={(article) => {
+                        const targetId = article.post_id || article.id;
                         if (article?.type === 'social') {
-                          minimizeHudThen(() => navigate('/social', {
-                            state: { injectedPost: article, source: 'agent', focus: true }
-                          }));
+                          minimizeHudThen(() => navigate(`/post/${targetId}`));
                         } else {
-                          const targetId = article.post_id || article.id;
                           minimizeHudThen(() => navigate(`/disease-archive/${targetId}/public`));
                         }
                       }}

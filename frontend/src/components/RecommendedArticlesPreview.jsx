@@ -92,82 +92,15 @@ const RecommendedArticlesPreview = ({
       window.dispatchEvent(new CustomEvent('forceFloatingMode'));
 
       if (article.type === 'social') {
-        // 直接導向社群頁面，並注入代理返回的貼文資料（仿後端取回的結構）
-        const normalized = normalizeAgentSocialPost(article);
-        navigate('/social', {
-          state: {
-            injectedPost: normalized,
-            source: 'agent',
-            focus: true
-          }
-        });
+        // 導向社群貼文詳情頁面
+        const targetId = article.id ?? article.post_id ?? article.postId;
+        navigate(`/post/${targetId}`);
       } else {
         // 跳轉到疾病檔案詳情頁面（公開瀏覽模式）
         const targetId = article.id ?? article.post_id ?? article.postId;
         navigate(`/disease-archive/${targetId}/public`);
       }
     }
-  };
-
-  // 將代理返回的社群貼文規格化為前端 Post 組件可直接渲染的結構
-  const normalizeAgentSocialPost = (post) => {
-    // 圖片處理：兼容 images、image_urls、imageUrls
-    const rawImages = post.images || post.image_urls || post.imageUrls || [];
-    const images = Array.isArray(rawImages)
-      ? rawImages.map((img) => {
-          if (typeof img === 'string') return { url: img };
-          if (img && typeof img === 'object') {
-            return {
-              url: img.url || img.firebase_url || img.dataUrl,
-              firebase_url: img.firebase_url,
-              dataUrl: img.dataUrl
-            };
-          }
-          return null;
-        }).filter(Boolean)
-      : [];
-
-    // 使用者資訊
-    const user = post.user_info || {
-      user_account: post.user_account || post.username || '',
-      username: post.username || post.user_account || '',
-      user_fullname: post.user_fullname || post.author?.fullname || '',
-      headshot_url: post.headshot_url || post.avatar_url || ''
-    };
-
-    // Hashtags 標準化為物件陣列或字串陣列皆可被 Post 支援
-    const hashtags = Array.isArray(post.hashtags) ? post.hashtags : [];
-
-    // 標註
-    const annotations = Array.isArray(post.annotations) ? post.annotations : [];
-
-    // 互動統計
-    const interaction_stats = {
-      likes: post.interaction_stats?.likes ?? post.like_count ?? 0,
-      comments: post.interaction_stats?.comments ?? post.comment_count ?? 0
-    };
-
-    const user_interaction = {
-      is_liked: post.user_interaction?.is_liked ?? post.is_liked ?? false,
-      is_saved: post.user_interaction?.is_saved ?? post.is_saved ?? false
-    };
-
-    return {
-      id: post.id ?? post.post_id ?? post.postId,
-      created_at: post.created_at || post.post_date || new Date().toISOString(),
-      images,
-      content: {
-        content_text: post.content_text || post.content?.content_text || post.content || '',
-        location: post.content?.location || post.location || ''
-      },
-      hashtags,
-      annotations,
-      user_info: user,
-      interaction_stats,
-      user_interaction,
-      // 標記為由代理注入，便於頁面做特殊處理（例如滾動或高亮）
-      __injected: true
-    };
   };
 
   // 格式化日期
