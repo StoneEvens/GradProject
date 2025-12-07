@@ -17,6 +17,13 @@
   animation: slideDown 0.3s ease-out;
 }
 
+/* Standalone webapp 模式 - 加上狀態列安全區域 */
+@media all and (display-mode: standalone) {
+  .notification {
+    top: calc(20px + env(safe-area-inset-top, 0px));
+  }
+}
+
 .notification.fadeOut {
   animation: fadeOut 0.3s ease-out forwards;
 }
