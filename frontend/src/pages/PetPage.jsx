@@ -9,6 +9,9 @@ import PetSwitcher from '../components/PetSwitcher';
 import { NotificationProvider } from '../context/NotificationContext';
 import { getUserPets } from '../services/petService';
 
+// localStorage key 用於記住最後選擇的寵物
+const LAST_SELECTED_PET_KEY = 'lastSelectedPetId';
+
 const PetPage = () => {
   const { t } = useTranslation('pet');
   const navigate = useNavigate();
@@ -33,7 +36,7 @@ const PetPage = () => {
     setLoading(true);
     try {
       const pets = await getUserPets();
-      
+
       if (!pets || pets.length === 0) {
         setNoPets(true);
         setAllPets([]);
@@ -55,9 +58,20 @@ const PetPage = () => {
           basicInfo: `${pet.age ? pet.age + t('page.ageUnit') : ''}${pet.breed ? '，' + pet.breed : ''}${pet.pet_stage ? '，' + pet.pet_stage : ''}`,
           avatarUrl: pet.headshot_url
         }));
-        
+
         setAllPets(formattedPets);
-        setCurrentPet(formattedPets[0]);
+
+        // 嘗試恢復上次選擇的寵物
+        const lastSelectedPetId = localStorage.getItem(LAST_SELECTED_PET_KEY);
+        let selectedPet = null;
+
+        if (lastSelectedPetId) {
+          // 嘗試找到上次選擇的寵物
+          selectedPet = formattedPets.find(pet => pet.id === parseInt(lastSelectedPetId, 10));
+        }
+
+        // 如果找不到上次選擇的寵物（可能已被刪除），則選擇第一隻
+        setCurrentPet(selectedPet || formattedPets[0]);
         setNoPets(false);
       }
     } catch (error) {
@@ -79,6 +93,10 @@ const PetPage = () => {
   // 切換寵物
   const handlePetSwitch = (pet) => {
     setCurrentPet(pet);
+    // 保存選擇的寵物 ID 到 localStorage
+    if (pet && pet.id) {
+      localStorage.setItem(LAST_SELECTED_PET_KEY, pet.id.toString());
+    }
   };
 
   // 功能按鈕點擊處理

@@ -59,6 +59,51 @@ const clearAiChatCache = () => {
   }
 };
 
+// 清除所有應用程式相關的 localStorage 資料
+const clearAllAppData = () => {
+  try {
+    // 定義需要清除的 key 前綴和完整 key
+    const keysToRemove = [];
+
+    // 遍歷所有 localStorage keys
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key) {
+        // 清除所有應用相關的資料
+        // 包含：寵物選擇、草稿、標註、聊天、用戶設定等
+        if (
+          key.startsWith('aiChat.') ||
+          key.startsWith('createPostDraft') ||
+          key.startsWith('imageAnnotations') ||
+          key.startsWith('annotationTemp') ||
+          key.startsWith('postDraft') ||
+          key.startsWith('historyRecords') ||
+          key === 'lastSelectedPetId' ||
+          key === 'userData' ||
+          key === 'userProfile' ||
+          key === 'accessToken' ||
+          key === 'refreshToken' ||
+          key === 'token' ||
+          key === 'refresh_token' ||
+          key === 'i18nextLng' // 語言設定可選擇是否保留
+        ) {
+          keysToRemove.push(key);
+        }
+      }
+    }
+
+    // 移除所有標記的 keys
+    keysToRemove.forEach(key => {
+      localStorage.removeItem(key);
+      console.log(`[Logout] 已清除: ${key}`);
+    });
+
+    console.log(`[Logout] 共清除 ${keysToRemove.length} 個 localStorage 項目`);
+  } catch (e) {
+    console.error('[Logout] 清除 localStorage 失敗:', e);
+  }
+};
+
 // 防止同時多次刷新token的Promise快取
 let refreshPromise = null;
 
@@ -242,8 +287,8 @@ export const logout = async () => {
   } catch (error) {
     console.error('登出請求失敗:', error);
   } finally {
-    clearTokens();
-    clearAiChatCache();
+    // 清除所有應用程式相關的 localStorage 資料
+    clearAllAppData();
     window.location.href = '/';
   }
 };
@@ -276,9 +321,9 @@ export const setupAuthEventListeners = () => {
     if (window.showNotification) {
       window.showNotification(message);
     }
-    
-    // 清除 AI 聊天相關本地快取
-    clearAiChatCache();
+
+    // 清除所有應用程式相關的 localStorage 資料
+    clearAllAppData();
 
     // 延遲跳轉到登入頁面，讓用戶看到通知
     setTimeout(() => {
