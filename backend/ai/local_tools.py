@@ -189,21 +189,22 @@ def prepare_navigate(path: str, reason: Optional[str] = None) -> Dict:
     operation_id = f"nav_{uuid.uuid4().hex[:12]}"
     expires_at = (datetime.now(timezone.utc) + timedelta(minutes=5)).isoformat()
     
-    confirmation_msg = f"確定要前往{friendly_name}嗎？"
+    # No verbal confirmation needed - user clicks a button to navigate
+    action_msg = f"前往{friendly_name}"
     if reason:
-        confirmation_msg += f"\n\n{reason}"
+        action_msg += f" - {reason}"
     
     return {
         "operation_id": operation_id,
         "type": "navigate",
         "params": {"path": path},
-        "confirmation_message": confirmation_msg,
+        "action_message": action_msg,
         "preview": {
             "destination": friendly_name,
             "path": path,
             "reason": reason or "用戶要導航到此頁面"
         },
-        "requires_confirmation": True,
+        "requires_confirmation": False,
         "expires_at": expires_at
     }
 

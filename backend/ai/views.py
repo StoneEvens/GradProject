@@ -933,7 +933,8 @@ def create_realtime_session(request):
 === 前端 UI 操作 (emit_operations) ===
 只有需要觸發實際 UI 變化時才呼叫 emit_operations：
 
-1. 導航：使用者確認後 → emit_operations([{{operation_type: "navigate", operation_data: {{"path": "/路徑"}}}}])
+1. 導航：直接導航，不需要詢問確認 → emit_operations([{{operation_type: "navigate", operation_data: {{"path": "/路徑"}}}}])
+   直接說「好的，帶你去XXX」然後導航，不用問「確定嗎？」
 2. OCR：開啟相機 → "ocr_feed_analysis" 或 "ocr_health_report"
 3. 圖片管理：移除/替換圖片 → "remove_image", "replace_image"
 4. 互動教學：使用者想學習某功能 → "start_tutorial" 配合 tutorial_id ("addPet", "createPost", "addAbnormalPost", "calculate", "tagPet")
@@ -973,7 +974,8 @@ def create_realtime_session(request):
 === フロントエンドUI操作 (emit_operations) ===
 実際のUI変更が必要な場合のみ emit_operations を呼び出す：
 
-1. ナビゲーション：ユーザー確認後 → emit_operations([{{operation_type: "navigate", operation_data: {{"path": "/パス"}}}}])
+1. ナビゲーション：確認なしで直接ナビゲート → emit_operations([{{operation_type: "navigate", operation_data: {{"path": "/パス"}}}}])
+   「はい、XXXに移動します」と言ってナビゲート。「よろしいですか？」は不要。
 2. OCR：カメラを開く → "ocr_feed_analysis" または "ocr_health_report"
 3. 画像管理：削除/置換 → "remove_image", "replace_image"
 4. インタラクティブチュートリアル：ユーザーが機能を学びたい時 → "start_tutorial" と tutorial_id ("addPet", "createPost", "addAbnormalPost", "calculate", "tagPet")
@@ -1012,7 +1014,8 @@ Your role:
 === FRONTEND UI OPERATIONS (emit_operations) ===
 Only call emit_operations when actual UI changes are needed:
 
-1. Navigation: After user confirms → emit_operations([{{operation_type: "navigate", operation_data: {{"path": "/route"}}}}])
+1. Navigation: Navigate directly without asking for confirmation → emit_operations([{{operation_type: "navigate", operation_data: {{"path": "/route"}}}}])
+   Just say "好的，帶你去XXX" and navigate. No need to ask "確定嗎？"
 2. OCR: Open camera → "ocr_feed_analysis" or "ocr_health_report"
 3. Image management: Remove/replace → "remove_image", "replace_image"
 4. Interactive tutorial: When user wants to learn a feature → "start_tutorial" with tutorial_id ("addPet", "createPost", "addAbnormalPost", "calculate", "tagPet")

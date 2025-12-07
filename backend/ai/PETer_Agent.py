@@ -232,6 +232,9 @@ TIPS for get_post_recommendations:
 -- NAVIGATION --
 User wants to go somewhere → use_local_tool("get_navigation_paths"), then use_local_tool("prepare_navigate", ...)
 User mentions specific pet/post/report → resolve_entity_context to get ID first
+IMPORTANT: Do NOT ask for confirmation before navigating. Just navigate directly.
+The user will click a button to confirm navigation, so no verbal confirmation needed.
+Simply say "好的，帶你前往XXX" and add the navigate operation.
 
 -- DATA OPERATIONS --
 User wants to add/update/delete data:
