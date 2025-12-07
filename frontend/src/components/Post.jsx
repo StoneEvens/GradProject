@@ -404,13 +404,6 @@ const Post = ({
     });
   };
 
-  // 處理檢舉貼文
-  const handleReportPost = () => {
-    setShowMoreMenu(false);
-    console.log('檢舉貼文功能開發中');
-    // 未來可以開啟檢舉表單
-  };
-
   // 截取描述文字
   const getDisplayDescription = () => {
     // 支援不同的內容格式
@@ -463,7 +456,7 @@ const Post = ({
           </h3>
           <div className={styles.postMeta}>
             {location && (
-              <span className={styles.location} onClick={handleLocationClick}>
+              <span className={styles.location}>
                 {location}
               </span>
             )}
@@ -493,14 +486,9 @@ const Post = ({
                   </button>
                 </>
               ) : (
-                <>
-                  <button className={styles.menuItem} onClick={handleCopyLink}>
-                    {t('post.copyLink')}
-                  </button>
-                  <button className={styles.menuItem} onClick={handleReportPost}>
-                    {t('post.reportPost')}
-                  </button>
-                </>
+                <button className={styles.menuItem} onClick={handleCopyLink}>
+                  {t('post.copyLink')}
+                </button>
               )}
             </div>
           )}

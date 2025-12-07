@@ -433,9 +433,11 @@ const tutorialData = {
         instruction: '點選按鈕以選擇貼文位置',
         targetElement: {
           component: 'PostPreviewPage',
-          selector: 'button[class*="locationButton"], div[class*="userDetails"] > button, div[class*="userInfo"] button',
+          // 主選擇器：優先使用 data 屬性（最可靠），其次是 class 匹配
+          selector: '[data-tutorial-target="locationButton"], [class*="locationButton"], [class*="userDetails"] button',
           className: 'locationButton',
-          fallbackSelector: 'button[aria-haspopup="listbox"], button[aria-label*="位置"]'
+          // 後備選擇器：透過 DOM 結構定位
+          fallbackSelector: '[class*="userDetails"] > button, [class*="postCard"] [class*="userInfo"] button'
         },
         highlight: {
           type: 'rectangle',

@@ -374,9 +374,10 @@ const PostPreviewPage = () => {
               />
               <div className={styles.userDetails}>
                 <h3 className={styles.userName}>{user.user_account}</h3>
-                <button 
+                <button
                   className={styles.locationButton}
                   onClick={() => setShowLocationModal(true)}
+                  data-tutorial-target="locationButton"
                 >
                   {selectedLocation || t('editPost.ui.selectLocation')}
                 </button>
