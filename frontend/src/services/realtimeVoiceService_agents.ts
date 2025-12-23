@@ -50,7 +50,7 @@ class EventEmitter {
 export interface CreateSessionOptions {
   conversationId?: number;
   model?: string;
-  voice?: 'alloy' | 'echo' | 'fable' | 'onyx' | 'nova' | 'shimmer';
+  voice?: 'alloy' | 'ash' | 'ballad' | 'coral' | 'echo' | 'sage' | 'shimmer' | 'verse' | 'marin' | 'cedar';
   language?: string;
 }
 
@@ -87,9 +87,6 @@ class RealtimeVoiceService extends EventEmitter {
    */
   async createSession(options: CreateSessionOptions = {}): Promise<RealtimeSessionConfig> {
     try {
-      console.log('[RealtimeVoice] Creating session with backend...');
-      console.log('[RealtimeVoice] Options:', options);
-      
       const response = await axiosInstance.post('/ai/realtime/session/create/', options);
 
       this.sessionConfig = response.data;
@@ -97,13 +94,9 @@ class RealtimeVoiceService extends EventEmitter {
         throw new Error('Invalid session config received');
       }
 
-      console.log('[RealtimeVoice] ✅ Session configuration received:', {
-        model: this.sessionConfig.model,
+      console.log('[RealtimeVoice] Session created:', {
         voice: this.sessionConfig.voice,
-        tools_count: this.sessionConfig.tools_count,
-        greeting: this.sessionConfig.greeting,
         language: this.sessionConfig.language,
-        expires_at: new Date(this.sessionConfig.client_secret.expires_at * 1000).toISOString()
       });
 
       return this.sessionConfig;
@@ -123,20 +116,15 @@ class RealtimeVoiceService extends EventEmitter {
     }
 
     try {
-      console.log('[RealtimeVoice] Creating RealtimeAgent...');
-      
       // Define ALL MCP tools that execute via backend
       // The SDK will handle calling these automatically when the agent needs them
       
       // Helper function to execute any tool via backend
       const executeViaMCP = async (toolName: string, args: any) => {
-        console.log(`[RealtimeVoice] 🔧 Executing ${toolName} via backend`);
-        console.log(`[RealtimeVoice] Arguments:`, args);
         const response = await axiosInstance.post('/ai/realtime/execute-tool/', {
           tool_name: toolName,
           arguments: args,
         });
-        console.log('[RealtimeVoice] ✅ Tool result received:', response.data);
         // Backend returns {result: "..."}, we want just the result string
         return response.data.result || JSON.stringify(response.data);
       };
@@ -230,12 +218,78 @@ class RealtimeVoiceService extends EventEmitter {
         
         tool({
           name: 'perform_database_operation',
-          description: 'Perform database operations: add_pet (create new pet), update_pet (modify pet), add_abnormal_post (health record), update_abnormal_post, delete_abnormal_post, create_disease_archive, add_plan (CREATE schedule/calendar event), update_plan (modify schedule), delete_plan (remove schedule), list_plans (view schedules), create_social_post. CRITICAL: For schedules use "add_plan" NOT "create_schedule". Call database_operation_list first to see required parameters.',
+          description: `CRITICAL: Both "operation" AND "data" parameters are REQUIRED - never omit data!
+
+Perform database operations. ALWAYS provide both parameters:
+- operation: The operation name (string)
+- data: The operation data (object) - REQUIRED, NEVER OMIT!
+
+ALL Operations with REQUIRED data fields:
+• add_plan: {user_id, title, date, start_time, end_time, pet_id?, description?}
+• update_plan: {user_id, plan_id, title?, date?, start_time?, end_time?, is_completed?}
+• delete_plan: {user_id, plan_id}
+• list_plans: {user_id, pet_id?, start_date?, end_date?}
+• add_pet: {user_id, pet_name, pet_type, weight, pet_stage, breed?, age?}
+• update_pet: {pet_id, weight?, pet_stage?, age?, pet_name?, breed?}
+• update_user: {user_id, username?, user_fullname?, bio?, account_privacy?}
+• update_user_headshot: {user_id, has_image}
+• add_abnormal_post: {user_id, pet_id, symptoms, content, record_date?, is_emergency?}
+• update_abnormal_post: {user_id, post_id, content?, symptoms?}
+• delete_abnormal_post: {user_id, post_id}
+• create_disease_archive: {user_id, pet_id, archive_title, abnormal_post_ids, main_cause}
+• create_social_post: {user_id, content, has_images, hashtags?}
+• add_feed: {user_id, feed_name, brand?}
+• add_health_report: {user_id, pet_id, report_date, report_type}
+• update_health_report: {user_id, report_id, ...}
+• delete_health_report: {user_id, report_id}
+
+Call database_operation_list first if unsure about required fields.`,
           parameters: z.object({
-            operation: z.string().describe('Exact operation name: add_pet, update_pet, add_abnormal_post, update_abnormal_post, delete_abnormal_post, create_disease_archive, add_plan, update_plan, delete_plan, list_plans, create_social_post'),
-            data: z.any().describe('The data for the operation'),
+            operation: z.string().describe('REQUIRED: Operation name - add_plan, update_plan, delete_plan, list_plans, add_pet, update_pet, add_abnormal_post, create_social_post, etc.'),
+            data: z.object({}).passthrough().describe('REQUIRED: Operation data object. NEVER OMIT THIS! Must contain all required fields for the operation.'),
           }),
           execute: async ({ operation, data }) => {
+            // Comprehensive hints for ALL operations
+            const errorHints: Record<string, string> = {
+              // Plan operations
+              add_plan: '{user_id, title, date, start_time, end_time}',
+              update_plan: '{user_id, plan_id, title?, date?, start_time?, end_time?, is_completed?}',
+              delete_plan: '{user_id, plan_id}',
+              list_plans: '{user_id, pet_id?, start_date?, end_date?}',
+              // Pet operations
+              add_pet: '{user_id, pet_name, pet_type, weight, pet_stage}',
+              update_pet: '{pet_id, weight?, pet_stage?, age?, pet_name?}',
+              // User operations
+              update_user: '{user_id, username?, user_fullname?, bio?, account_privacy?}',
+              update_user_headshot: '{user_id, has_image}',
+              // Abnormal post operations
+              add_abnormal_post: '{user_id, pet_id, symptoms, content}',
+              update_abnormal_post: '{user_id, post_id, content?, symptoms?}',
+              delete_abnormal_post: '{user_id, post_id}',
+              // Disease archive
+              create_disease_archive: '{user_id, pet_id, archive_title, abnormal_post_ids, main_cause}',
+              // Social post
+              create_social_post: '{user_id, content, has_images}',
+              // Feed
+              add_feed: '{user_id, feed_name, brand?}',
+              // Health report
+              add_health_report: '{user_id, pet_id, report_date, report_type}',
+              update_health_report: '{user_id, report_id, ...}',
+              delete_health_report: '{user_id, report_id}',
+            };
+
+            // Validate that data is provided and not empty
+            if (!data || (typeof data === 'object' && Object.keys(data).length === 0)) {
+              const hint = errorHints[operation] || 'Call database_operation_list to see required fields';
+              return JSON.stringify({
+                success: false,
+                error: `ERROR: "data" parameter is REQUIRED but was empty or missing!`,
+                operation: operation,
+                required_format: `data=${hint}`,
+                fix: `Retry with: perform_database_operation(operation='${operation}', data=${hint})`
+              });
+            }
+            
             const result = await executeViaMCP('perform_database_operation', { operation, data });
             
             // Auto-emit operations for post/record creation to trigger image upload
@@ -245,7 +299,6 @@ class RealtimeVoiceService extends EventEmitter {
               if (resultObj.success) {
                 // Social post created - emit post_created operation
                 if (operation === 'create_social_post' && resultObj.post_id) {
-                  console.log('[RealtimeVoice] 📤 Auto-emitting post_created operation for post:', resultObj.post_id);
                   this.emit('agent_operations', {
                     operations: [{
                       operation_type: 'post_created',
@@ -255,7 +308,6 @@ class RealtimeVoiceService extends EventEmitter {
                 }
                 // Abnormal post created - emit abnormal_post_created operation
                 else if (operation === 'add_abnormal_post' && resultObj.abnormal_post_id) {
-                  console.log('[RealtimeVoice] 📤 Auto-emitting abnormal_post_created operation for:', resultObj.abnormal_post_id);
                   this.emit('agent_operations', {
                     operations: [{
                       operation_type: 'abnormal_post_created',
@@ -269,7 +321,6 @@ class RealtimeVoiceService extends EventEmitter {
                 }
                 // Feed created - emit feed_created operation
                 else if (operation === 'add_feed' && resultObj.feed_id && !resultObj.is_existing) {
-                  console.log('[RealtimeVoice] 📤 Auto-emitting feed_created operation for feed:', resultObj.feed_id);
                   this.emit('agent_operations', {
                     operations: [{
                       operation_type: 'feed_created',
@@ -279,7 +330,7 @@ class RealtimeVoiceService extends EventEmitter {
                 }
               }
             } catch (e) {
-              console.warn('[RealtimeVoice] Could not parse result for auto-emit:', e);
+              // Silently ignore parse errors for auto-emit
             }
             
             return result;
@@ -341,8 +392,6 @@ When to use:
             })).describe('Array of UI operations to trigger'),
           }),
           execute: async ({ operations }) => {
-            console.log('[RealtimeVoice] 📤 Emitting operations:', operations);
-            
             // Normalize operation_data to be consistent
             const normalizedOps = operations.map(op => ({
               operation_type: op.operation_type,
@@ -366,7 +415,6 @@ When to use:
       ];
       
       // Create RealtimeAgent with instructions and ALL tools
-      // The SDK will automatically handle tool execution
       this.agent = new RealtimeAgent({
         name: 'peter',
         instructions: this.sessionConfig.instructions,
@@ -374,27 +422,26 @@ When to use:
         tools: tools,
       });
 
-      console.log(`[RealtimeVoice] ✅ Created agent with ${tools.length} tools (including emit_operations)`);
-
-      console.log('[RealtimeVoice] Creating RealtimeSession...');
+      // Get the voice from session config, defaulting to 'marin'
+      const voiceToUse = this.sessionConfig.voice || 'marin';
       
-      // Create session with the agent (defaults to WebRTC = automatic audio)
+      // Create session with the agent AND explicit voice config
+      // The SDK uses agent.voice but we also pass it in config to ensure it's set
       this.session = new RealtimeSession(this.agent, {
         model: this.sessionConfig.model,
+        config: {
+          voice: voiceToUse,
+        },
       });
 
-      console.log('[RealtimeVoice] Setting up event listeners...');
       this.setupEventListeners();
-
-      console.log('[RealtimeVoice] Connecting with ephemeral token...');
       
       // Connect using the ephemeral token from backend
       await this.session.connect({
         apiKey: this.sessionConfig.client_secret.value,
       });
       
-      console.log('[RealtimeVoice] ✅ Connected successfully (WebRTC auto-handling audio)');
-      console.log('[RealtimeVoice] 🛠️  Tools registered and ready for automatic execution');
+      console.log('[RealtimeVoice] ✅ Connected');
 
       // Send greeting if available
       if (this.sessionConfig.greeting) {
@@ -419,24 +466,12 @@ When to use:
     // Listen for when items are added to history (better than history_updated)
     // This fires once per item when it's completed
     this.session.on('history_added', (item: any) => {
-      console.log('[RealtimeVoice] History item added:', {
-        id: item.id,
-        type: item.type,
-        role: item.role,
-        status: item.status,
-      });
-      
       // Only emit message items that are completed
       if (item.type === 'message' && item.role && item.status === 'completed') {
         const itemId = item.id;
         
         // Double-check we haven't emitted this already
         if (!this.emittedItemIds.has(itemId)) {
-          console.log('[RealtimeVoice] Emitting conversation.item.completed for:', {
-            id: itemId,
-            role: item.role,
-          });
-          
           this.emittedItemIds.add(itemId);
           this.emit('conversation.item.completed', { item });
         }
@@ -445,16 +480,11 @@ When to use:
 
     // Listen for audio interruptions
     this.session.on('audio_interrupted', () => {
-      console.log('[RealtimeVoice] Audio interrupted');
+      // Audio was interrupted (user started speaking)
     });
 
-    // Access the transport layer to intercept function call events
+    // Access the transport layer to intercept events
     this.session.transport.on('*', async (event: any) => {
-      // Log function-related events for debugging
-      if (event.type && event.type.includes('function')) {
-        console.log('[RealtimeVoice] Function-related event:', event.type);
-        console.log('[RealtimeVoice] Event details:', JSON.stringify(event, null, 2));
-      }
       
       // NOTE: Tool execution is handled automatically by the SDK via the `execute` functions
       // defined in the tool definitions. We only need to intercept events that the SDK
@@ -497,47 +527,29 @@ When to use:
         );
         
         if (isFatal) {
-          console.error('[RealtimeVoice] Fatal error, emitting to end session:', errorCode || errorType);
+          console.error('[RealtimeVoice] Fatal error:', errorCode || errorType);
           this.emit('error', event);
-        } else {
-          // Non-fatal error - log but don't end session
-          // These could be tool execution errors, temporary issues, etc.
-          console.warn('[RealtimeVoice] Non-fatal error (session continues):', errorMessage || event);
         }
+        // Non-fatal errors are silently ignored
       }
     });
-
-    console.log('[RealtimeVoice] ✅ Event listeners configured');
   }
 
   /**
    * Execute a tool call via the backend
    */
   private async executeToolViaBackend(toolName: string, args: string): Promise<any> {
-    console.log('[RealtimeVoice] Executing tool via backend:', toolName);
-    console.log('[RealtimeVoice] Raw args type:', typeof args);
-    console.log('[RealtimeVoice] Raw args value:', args);
-    
     try {
       const parsedArgs = typeof args === 'string' ? JSON.parse(args) : args;
-      console.log('[RealtimeVoice] Parsed args:', parsedArgs);
-      
       const payload = {
         tool_name: toolName,
         arguments: parsedArgs,
       };
-      console.log('[RealtimeVoice] Sending payload:', payload);
       
       const response = await axiosInstance.post('/ai/realtime/execute-tool/', payload);
-      
-      console.log('[RealtimeVoice] Backend response:', response.data);
       return response.data;
     } catch (error: any) {
-      console.error('[RealtimeVoice] Backend tool execution error:', error);
-      if (error.response) {
-        console.error('[RealtimeVoice] Error response data:', error.response.data);
-        console.error('[RealtimeVoice] Error response status:', error.response.status);
-      }
+      console.error('[RealtimeVoice] Tool execution error:', toolName);
       throw error;
     }
   }
@@ -550,8 +562,7 @@ When to use:
     if (!this.session) {
       throw new Error('Not connected. Call connect() first.');
     }
-    
-    console.log('[RealtimeVoice] ✅ WebRTC is auto-recording (no manual start needed)');
+    // WebRTC handles recording automatically
   }
 
   /**
@@ -559,7 +570,7 @@ When to use:
    * WebRTC handles this automatically, so this is a no-op
    */
   stopRecording(): void {
-    console.log('[RealtimeVoice] ✅ WebRTC auto-recording will stop on disconnect');
+    // WebRTC handles this automatically
   }
 
   /**
@@ -568,10 +579,9 @@ When to use:
   private async sendGreeting(): Promise<void> {
     if (this.session && this.sessionConfig?.greeting) {
       try {
-        console.log('[RealtimeVoice] 👋 Sending greeting:', this.sessionConfig.greeting);
         await this.session.sendMessage(this.sessionConfig.greeting);
       } catch (error) {
-        console.error('[RealtimeVoice] ❌ Failed to send greeting:', error);
+        console.error('[RealtimeVoice] Failed to send greeting');
       }
     }
   }
@@ -584,7 +594,6 @@ When to use:
       throw new Error('Not connected. Call connect() first.');
     }
 
-    console.log('[RealtimeVoice] Sending message:', text);
     await this.session.sendMessage(text);
   }
 
@@ -605,7 +614,6 @@ When to use:
    */
   async sendImageContext(imageCount: number, imageDescriptions?: string[]): Promise<void> {
     if (!this.session) {
-      console.log('[RealtimeVoice] Not connected, skipping image context update');
       return;
     }
 
@@ -618,7 +626,6 @@ When to use:
       contextMessage = `[系統訊息] 用戶已選擇 ${imageCount} 張圖片。你可以詢問用戶關於這些圖片的用途，例如：是否要進行飼料營養分析、新增貼文、或其他用途。`;
     }
 
-    console.log('[RealtimeVoice] Sending image context:', contextMessage);
     await this.session.sendMessage(contextMessage);
   }
 
@@ -636,7 +643,6 @@ When to use:
    */
   interrupt(): void {
     if (this.session) {
-      console.log('[RealtimeVoice] Interrupting agent response...');
       this.session.interrupt();
     }
   }
@@ -645,8 +651,6 @@ When to use:
    * Disconnect from the session
    */
   async disconnect(): Promise<void> {
-    console.log('[RealtimeVoice] Disconnecting...');
-    
     // Close session (WebRTC cleanup is automatic)
     if (this.session) {
       await this.session.close();
@@ -659,8 +663,6 @@ When to use:
     
     // Remove all event listeners
     this.removeAllListeners();
-    
-    console.log('[RealtimeVoice] ✅ Disconnected');
   }
 
   /**

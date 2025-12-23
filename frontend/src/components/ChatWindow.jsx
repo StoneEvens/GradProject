@@ -372,7 +372,7 @@ const ChatWindow = ({
       console.log('[ChatWindow] Step 1: Creating session...');
       const sessionConfig = await realtimeVoiceService.createSession({
         conversationId: currentConversationId,
-        voice: 'alloy', // 可以改為其他聲音: echo, fable, onyx, nova, shimmer
+        voice: 'marin', // 使用 marin 聲音 (可選: alloy, ash, ballad, coral, echo, sage, shimmer, verse, marin, cedar)
         language: i18n.language || 'zh-TW', // Use i18n.language directly
       });
       console.log('[ChatWindow] Using language:', i18n.language);

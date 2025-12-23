@@ -860,7 +860,7 @@ def create_realtime_session(request):
         {
             "conversation_id": <int>,  # Optional: link to existing conversation
             "model": "gpt-4o-realtime-preview-2024-12-17",  # Optional: specify model
-            "voice": "alloy"  # Optional: voice selection (alloy, echo, fable, onyx, nova, shimmer)
+            "voice": "coral"  # Optional: voice selection (alloy, ash, ballad, coral, echo, sage, shimmer, verse)
         }
     
     Response:
@@ -892,7 +892,7 @@ def create_realtime_session(request):
         # Get optional parameters
         conversation_id = request.data.get('conversation_id')
         model = request.data.get('model', 'gpt-4o-realtime-preview-2024-12-17')
-        voice = request.data.get('voice', 'alloy')
+        voice = request.data.get('voice', 'coral')  # Valid voices: alloy, ash, ballad, coral, echo, sage, shimmer, verse
         language = request.data.get('language', 'zh-TW')  # Default to Traditional Chinese
         
         # Validate conversation if provided

@@ -26,6 +26,11 @@ def get_operation_list() -> Dict:
             "description": "新增寵物",
             "required_params": ["user_id", "pet_name", "pet_type", "weight", "pet_stage"],
             "optional_params": ["age", "breed", "predicted_adult_weight", "description", "height", "weeks_of_lactation"],
+            "tool_call_example": {
+                "description": "CRITICAL: Both 'operation' AND 'data' parameters are REQUIRED!",
+                "format": "perform_database_operation(operation='add_pet', data={...})",
+                "example": "perform_database_operation(operation='add_pet', data={'user_id': 1, 'pet_name': 'Lucky', 'pet_type': 'dog', 'weight': 5.5, 'pet_stage': 'adult', 'breed': '柴犬', 'age': 3})"
+            },
             "param_details": {
                 "user_id": "用戶ID (整數)",
                 "pet_name": "寵物名稱 (字串)",
@@ -44,6 +49,11 @@ def get_operation_list() -> Dict:
             "description": "更新寵物資訊",
             "required_params": ["pet_id"],
             "optional_params": ["owner", "weight", "pet_stage", "age", "pet_name", "breed", "pet_type", "predicted_adult_weight", "description"],
+            "tool_call_example": {
+                "description": "CRITICAL: Both 'operation' AND 'data' parameters are REQUIRED!",
+                "format": "perform_database_operation(operation='update_pet', data={...})",
+                "example": "perform_database_operation(operation='update_pet', data={'pet_id': 5, 'weight': 6.2, 'age': 4})"
+            },
             "param_details": {
                 "pet_id": "寵物ID (整數)",
                 "owner": "新的主人用戶ID (整數)",
@@ -61,6 +71,11 @@ def get_operation_list() -> Dict:
             "description": "更新用戶資訊（包含帳號隱私設定）",
             "required_params": ["user_id"],
             "optional_params": ["username", "user_fullname", "bio", "account_privacy"],
+            "tool_call_example": {
+                "description": "CRITICAL: Both 'operation' AND 'data' parameters are REQUIRED!",
+                "format": "perform_database_operation(operation='update_user', data={...})",
+                "example": "perform_database_operation(operation='update_user', data={'user_id': 1, 'bio': '愛貓人士', 'account_privacy': 'public'})"
+            },
             "param_details": {
                 "username": "用戶名稱 (字串，唯一)",
                 "user_fullname": "用戶真實全名 (字串)",
@@ -104,6 +119,11 @@ def get_operation_list() -> Dict:
             "description": "更新用戶頭像（大頭照）。此操作只建立更新請求，實際圖片需透過前端上傳。",
             "required_params": ["user_id", "has_image"],
             "optional_params": [],
+            "tool_call_example": {
+                "description": "CRITICAL: Both 'operation' AND 'data' parameters are REQUIRED!",
+                "format": "perform_database_operation(operation='update_user_headshot', data={...})",
+                "example": "perform_database_operation(operation='update_user_headshot', data={'user_id': 1, 'has_image': true})"
+            },
             "param_details": {
                 "user_id": "用戶ID (整數)",
                 "has_image": "用戶是否已選擇圖片 (布林值)"
@@ -168,6 +188,11 @@ def get_operation_list() -> Dict:
             "description": "新增異常記錄（寵物健康異常情況的記錄，不含圖片）。圖片需透過前端另外上傳。",
             "required_params": ["user_id", "pet_id", "symptoms","record_date"],
             "optional_params": ["content", "weight", "body_temperature", "water_amount", "is_emergency", "is_private"],
+            "tool_call_example": {
+                "description": "CRITICAL: Both 'operation' AND 'data' parameters are REQUIRED!",
+                "format": "perform_database_operation(operation='add_abnormal_post', data={...})",
+                "example": "perform_database_operation(operation='add_abnormal_post', data={'user_id': 1, 'pet_id': 5, 'symptoms': ['打噴嚏', '流鼻水'], 'record_date': '2025-01-15T10:30:00Z', 'content': '今天早上發現有點感冒症狀', 'is_emergency': false})"
+            },
             "param_details": {
                 "user_id": "用戶ID (整數)",
                 "pet_id": "寵物ID (整數)",
@@ -203,6 +228,11 @@ def get_operation_list() -> Dict:
             "description": "建立疾病檔案（將多個異常記錄整合成一個疾病檔案）。如果未提供content，系統會使用AI自動生成統整內容。- 必須先生成格式化內容並經用戶確認後才能建立",
             "required_params": ["user_id", "pet_id", "archive_title", "abnormal_post_ids"],
             "optional_params": ["content", "symptoms", "main_cause", "go_to_doctor", "health_status", "is_private", "diagnosis_status", "treatment_status"],
+            "tool_call_example": {
+                "description": "CRITICAL: Both 'operation' AND 'data' parameters are REQUIRED!",
+                "format": "perform_database_operation(operation='create_disease_archive', data={...})",
+                "example": "perform_database_operation(operation='create_disease_archive', data={'user_id': 1, 'pet_id': 5, 'archive_title': '11月感冒記錄', 'abnormal_post_ids': [10, 11, 12], 'main_cause': '感冒', 'content': '11月15日，我發現毛毛開始咳嗽...'})"
+            },
             "param_details": {
                 "user_id": "用戶ID (整數)",
                 "pet_id": "寵物ID (整數)",
@@ -328,6 +358,11 @@ def get_operation_list() -> Dict:
             "description": "更新異常記錄",
             "required_params": ["user_id", "post_id"],
             "optional_params": ["pet_id", "content", "symptoms", "weight", "body_temperature", "water_amount", "is_emergency", "record_date", "is_private"],
+            "tool_call_example": {
+                "description": "CRITICAL: Both 'operation' AND 'data' parameters are REQUIRED!",
+                "format": "perform_database_operation(operation='update_abnormal_post', data={...})",
+                "example": "perform_database_operation(operation='update_abnormal_post', data={'user_id': 1, 'post_id': 10, 'content': '更新：症狀有好轉', 'symptoms': ['輕微咳嗽']})"
+            },
             "param_details": {
                 "user_id": "用戶ID (整數)",
                 "post_id": "異常記錄ID (整數)",
@@ -346,6 +381,11 @@ def get_operation_list() -> Dict:
             "description": "刪除異常記錄",
             "required_params": ["user_id", "post_id"],
             "optional_params": [],
+            "tool_call_example": {
+                "description": "CRITICAL: Both 'operation' AND 'data' parameters are REQUIRED!",
+                "format": "perform_database_operation(operation='delete_abnormal_post', data={...})",
+                "example": "perform_database_operation(operation='delete_abnormal_post', data={'user_id': 1, 'post_id': 10})"
+            },
             "param_details": {
                 "user_id": "用戶ID (整數)",
                 "post_id": "異常記錄ID (整數)"
@@ -355,6 +395,11 @@ def get_operation_list() -> Dict:
             "description": "新增當日行程/計劃",
             "required_params": ["user_id", "title", "date"],
             "optional_params": ["description", "start_time", "end_time", "is_completed"],
+            "tool_call_example": {
+                "description": "CRITICAL: Both 'operation' AND 'data' parameters are REQUIRED!",
+                "format": "perform_database_operation(operation='add_plan', data={...})",
+                "example": "perform_database_operation(operation='add_plan', data={'user_id': 1, 'title': '帶狗狗打疫苗', 'date': '2025-01-20', 'start_time': '14:00', 'end_time': '15:00'})"
+            },
             "param_details": {
                 "user_id": "用戶ID (整數)",
                 "title": "行程標題 (字串)",
@@ -369,6 +414,11 @@ def get_operation_list() -> Dict:
             "description": "更新行程資訊",
             "required_params": ["user_id", "plan_id"],
             "optional_params": ["title", "description", "date", "start_time", "end_time", "is_completed"],
+            "tool_call_example": {
+                "description": "CRITICAL: Both 'operation' AND 'data' parameters are REQUIRED!",
+                "format": "perform_database_operation(operation='update_plan', data={...})",
+                "example": "perform_database_operation(operation='update_plan', data={'user_id': 1, 'plan_id': 5, 'is_completed': true})"
+            },
             "param_details": {
                 "user_id": "用戶ID (整數)",
                 "plan_id": "行程ID (整數)",
@@ -384,6 +434,11 @@ def get_operation_list() -> Dict:
             "description": "刪除行程",
             "required_params": ["user_id", "plan_id"],
             "optional_params": [],
+            "tool_call_example": {
+                "description": "CRITICAL: Both 'operation' AND 'data' parameters are REQUIRED!",
+                "format": "perform_database_operation(operation='delete_plan', data={...})",
+                "example": "perform_database_operation(operation='delete_plan', data={'user_id': 1, 'plan_id': 5})"
+            },
             "param_details": {
                 "user_id": "用戶ID (整數)",
                 "plan_id": "行程ID (整數)"
@@ -393,6 +448,11 @@ def get_operation_list() -> Dict:
             "description": "列出用戶的行程列表",
             "required_params": ["user_id"],
             "optional_params": ["start_date", "end_date", "is_completed"],
+            "tool_call_example": {
+                "description": "CRITICAL: Both 'operation' AND 'data' parameters are REQUIRED!",
+                "format": "perform_database_operation(operation='list_plans', data={...})",
+                "example": "perform_database_operation(operation='list_plans', data={'user_id': 1, 'start_date': '2025-01-01', 'end_date': '2025-01-31'})"
+            },
             "param_details": {
                 "user_id": "用戶ID (整數)",
                 "start_date": "開始日期 (字串，格式: 'YYYY-MM-DD'，用於篩選日期範圍)",
@@ -404,6 +464,11 @@ def get_operation_list() -> Dict:
             "description": "建立社群貼文（不含圖片）。【強制規則】1) 社群貼文必須包含至少一張圖片！檢查 context.hasImages 和 context.imageCount，如果為 false/0 則不呼叫此工具。2) 在呼叫此工具前，必須先向用戶顯示完整的貼文預覽（內容、地點、標籤、圖片數量）並明確詢問「確認發布嗎？」等待用戶明確回覆（如「確認」、「是」、「好」、「發布」）後才呼叫此工具。3)不准自作主張詢問用戶 required_params 和 optional_params 以外的要素。4)非所有貼文是否公開是由使用者帳號隱私設定決定，你不用管。",
             "required_params": ["user_id", "content", "has_images"],
             "optional_params": ["location", "hashtags"],
+            "tool_call_example": {
+                "description": "CRITICAL: Both 'operation' AND 'data' parameters are REQUIRED!",
+                "format": "perform_database_operation(operation='create_social_post', data={...})",
+                "example": "perform_database_operation(operation='create_social_post', data={'user_id': 1, 'content': '今天帶毛毛去公園玩！', 'has_images': true, 'location': '台北大安森林公園', 'hashtags': '寵物,日常,可愛'})"
+            },
             "param_details": {
                 "user_id": "用戶ID (整數)",
                 "content": "貼文內容 (字串，必填)",
@@ -464,6 +529,11 @@ def get_operation_list() -> Dict:
                 "protein", "fat", "carbohydrate",
                 "calcium", "phosphorus", "magnesium", "sodium"
             ],
+            "tool_call_example": {
+                "description": "CRITICAL: Both 'operation' AND 'data' parameters are REQUIRED!",
+                "format": "perform_database_operation(operation='add_feed', data={...})",
+                "example": "perform_database_operation(operation='add_feed', data={'user_id': 1, 'pet_type': 'dog', 'has_images': true, 'name': '優質成犬糧', 'brand': '皇家', 'price': 850, 'protein': 25.0, 'fat': 14.0})"
+            },
             "param_details": {
                 "user_id": "用戶ID (整數)",
                 "pet_type": "適用寵物類型 (字串: 'dog' 或 'cat')",

@@ -504,13 +504,29 @@ def create_mcp_server() -> FastMCP:
     @mcp.tool(
         name="perform_database_operation",
         description=(
-            "Execute a database mutation (add/update/delete).\n"
-            "USE WHEN: User confirms they want to create, modify, or delete data.\n"
-            "PREREQ: Call get_operation_usage(operation_name) first to get full details.\n"
-            "WORKFLOW: database_operation_list → get_operation_usage → ask user for params → perform_database_operation.\n"
-            "PARAMS: operation (str) + data (dict with ALL operation-specific params like user_id, pet_id, etc.).\n"
-            "EXAMPLE for create_social_post: perform_database_operation(operation='create_social_post', data={'user_id': <from context>, 'content': '<user text>', 'has_images': true, 'location': '...', 'hashtags': '...'})\n"
-            "NOTE: Both 'operation' AND 'data' parameters are REQUIRED. Use requester_user_id from context as user_id. Verify user is modifying their own data. Use 'add_plan' for schedules (not 'create_schedule')."
+            "Execute a database mutation (add/update/delete).\n\n"
+            "⚠️ CRITICAL: Both 'operation' AND 'data' parameters are REQUIRED! NEVER omit data!\n\n"
+            "WORKFLOW: get_operation_usage(op_name) → ask user for params → perform_database_operation(operation, data)\n\n"
+            "COMMON OPERATIONS WITH REQUIRED DATA FIELDS:\n"
+            "• add_plan: data={user_id, title, date, start_time, end_time, pet_id?, description?}\n"
+            "  Example: perform_database_operation(operation='add_plan', data={'user_id': 1, 'title': '帶狗散步', 'date': '2025-12-08', 'start_time': '09:00', 'end_time': '10:00'})\n"
+            "• update_plan: data={user_id, plan_id, title?, date?, start_time?, end_time?, is_completed?}\n"
+            "• delete_plan: data={user_id, plan_id}\n"
+            "• list_plans: data={user_id, pet_id?, start_date?, end_date?}\n"
+            "• add_pet: data={user_id, pet_name, pet_type, weight, pet_stage, breed?, age?}\n"
+            "• update_pet: data={pet_id, weight?, pet_stage?, age?, pet_name?}\n"
+            "• add_abnormal_post: data={user_id, pet_id, symptoms, content, record_date?, is_emergency?}\n"
+            "• update_abnormal_post: data={user_id, post_id, content?, symptoms?}\n"
+            "• delete_abnormal_post: data={user_id, post_id}\n"
+            "• create_social_post: data={user_id, content, has_images, hashtags?}\n"
+            "• create_disease_archive: data={user_id, pet_id, archive_title, abnormal_post_ids, main_cause}\n"
+            "• update_user: data={user_id, username?, user_fullname?, bio?, account_privacy?}\n"
+            "• update_user_headshot: data={user_id, has_image}\n"
+            "• add_feed: data={user_id, feed_name, brand?}\n"
+            "• add_health_report: data={user_id, pet_id, report_date, ...}\n"
+            "• update_health_report: data={user_id, report_id, ...}\n"
+            "• delete_health_report: data={user_id, report_id}\n\n"
+            "NOTE: Use requester_user_id from context as user_id."
         )
     )
     async def perform_database_operation(
@@ -520,6 +536,50 @@ def create_mcp_server() -> FastMCP:
         print(f"[MCP Tool] ===== perform_database_operation CALLED =====")
         print(f"[MCP Tool] operation: {operation}")
         print(f"[MCP Tool] data: {data}")
+
+        # Comprehensive hints for ALL operations
+        error_hints = {
+            # Plan operations
+            "add_plan": "data={user_id, title, date, start_time, end_time, pet_id?, description?}",
+            "update_plan": "data={user_id, plan_id, title?, date?, start_time?, end_time?, is_completed?}",
+            "delete_plan": "data={user_id, plan_id}",
+            "list_plans": "data={user_id, pet_id?, start_date?, end_date?}",
+            # Pet operations
+            "add_pet": "data={user_id, pet_name, pet_type, weight, pet_stage, breed?, age?}",
+            "update_pet": "data={pet_id, weight?, pet_stage?, age?, pet_name?, breed?}",
+            # User operations
+            "update_user": "data={user_id, username?, user_fullname?, bio?, account_privacy?}",
+            "update_user_headshot": "data={user_id, has_image}",
+            # Abnormal post operations
+            "add_abnormal_post": "data={user_id, pet_id, symptoms, content, record_date?, is_emergency?}",
+            "update_abnormal_post": "data={user_id, post_id, content?, symptoms?}",
+            "delete_abnormal_post": "data={user_id, post_id}",
+            # Disease archive
+            "create_disease_archive": "data={user_id, pet_id, archive_title, abnormal_post_ids, main_cause, content?}",
+            # Social post
+            "create_social_post": "data={user_id, content, has_images, hashtags?, location?}",
+            # Feed
+            "add_feed": "data={user_id, feed_name, brand?, pet_type?}",
+            # Health report operations
+            "prepare_health_report_ocr": "data={user_id, pet_id}",
+            "add_health_report": "data={user_id, pet_id, report_date, report_type, ...}",
+            "update_health_report": "data={user_id, report_id, ...fields to update}",
+            "delete_health_report": "data={user_id, report_id}",
+        }
+
+        # Validate that data is provided and not empty
+        if not data or (isinstance(data, dict) and len(data) == 0):
+            hint = error_hints.get(operation, f"Call get_operation_usage('{operation}') to see required fields")
+            error_result = {
+                "success": False,
+                "error": f"ERROR: 'data' parameter is REQUIRED but was empty or missing!",
+                "operation": operation,
+                "required_format": hint,
+                "fix": f"Retry with: perform_database_operation(operation='{operation}', data={{...}})",
+                "example": f"perform_database_operation(operation='{operation}', data={{{hint.replace('data=', '').replace('?', '')}}})"
+            }
+            print(f"[MCP Tool] ERROR: Empty data parameter")
+            return json.dumps(error_result, ensure_ascii=False, indent=2)
 
         @sync_to_async
         def execute() -> Dict:
