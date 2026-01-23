@@ -6,6 +6,9 @@ import Home from './Home/Home'
 import LoginPage from './LoginPage/LoginPage'
 import RegisterPage from './RegisterPage/RegisterPage'
 import PetHomePage from './PetPage/PetHomePage'
+import DiseaseRecord from './PetPage/DiseaseRecord'
+import HealthReport from './PetPage/HealthReport'
+import PetHistory from './PetPage/PetHistory'
 
 function App() {
   return (
@@ -15,6 +18,9 @@ function App() {
         <Route path="/home" element={<Home />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/pet" element={<PetHomePage />} />
+        <Route path="/dr" element={<DiseaseRecord />} />
+        <Route path="/hr" element={<HealthReport />} />
+        <Route path="/his" element={<PetHistory />} />
       </Routes>
     </Router>
   )
