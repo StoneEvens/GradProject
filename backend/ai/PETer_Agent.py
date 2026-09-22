@@ -8,6 +8,7 @@ This agent uses a mix of:
 
 from datetime import datetime
 from agents import Agent, ModelSettings, Runner, RunConfig, trace, function_tool
+from openai.types.shared import Reasoning
 from agents.mcp import MCPServerSse
 from agents.memory import OpenAIConversationsSession
 from pydantic import BaseModel, Field
@@ -65,7 +66,11 @@ def use_local_tool(tool_name: str, params: str = "{}") -> str:
 # MCP Server Configuration (with tool caching for performance)
 # =============================================================================
 
-MCP_SERVER_URL = "https://peter.geniusbee.net/mcp/sse"
+# Read from settings.MCP_SERVER_URL (env var MCP_SERVER_URL), same as ai/views.py
+from django.conf import settings as _django_settings
+MCP_SERVER_URL = _django_settings.MCP_SERVER_URL.rstrip("/")
+if not MCP_SERVER_URL.endswith("/sse"):
+    MCP_SERVER_URL = f"{MCP_SERVER_URL}/sse"
 MCP_ALLOWED_TOOLS = [
     "get_user_pet_info_detailed",
     "get_user_pet_list",
@@ -301,7 +306,7 @@ def create_peter_agent(mcp_server):
     return Agent(
         name="PETer Agent",
         instructions=AGENT_INSTRUCTIONS,
-        model="gpt-5.1",
+        model=_django_settings.PETER_AGENT_MODEL,  # gpt-5.6-terra by default
         mcp_servers=[mcp_server],  # MCP tools (database operations) - with caching
         tools=[
             # Meta-tools for local operations (2 tools instead of 8)
@@ -312,9 +317,12 @@ def create_peter_agent(mcp_server):
         model_settings=ModelSettings(
             store=True,
             truncation="auto",
-            temperature=0.2,
             parallel_tool_calls=True,
-            max_output_tokens=512,
+            # GPT-5.6 is a reasoning model: control it with reasoning effort instead of
+            # temperature (GPT-5.x reasoning models reject temperature when reasoning is on).
+            # The old max_output_tokens=512 was never applied (the SDK field is max_tokens),
+            # so no cap is set; a cap would also have to cover reasoning tokens.
+            reasoning=Reasoning(effort=_django_settings.PETER_AGENT_REASONING_EFFORT),
         )
     )
 

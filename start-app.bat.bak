@@ -33,26 +33,8 @@ echo Cleaning up existing services...
 call :stop_quiet
 
 REM Set paths
-REM Paths are relative to this script, so it works on any machine
-set BACKEND_PATH=%~dp0backend
-set FRONTEND_PATH=%~dp0frontend
-
-REM Always use the project's Python venv (one folder above this script)
-set VENV_PATH=%~dp0..\.venv
-if not exist "%VENV_PATH%\Scripts\activate.bat" (
-    echo     Error: Python venv not found at %VENV_PATH%
-    echo     Create it with: python -m venv "%VENV_PATH%"
-    pause
-    exit /b 1
-)
-call "%VENV_PATH%\Scripts\activate.bat"
-echo Using Python venv: %VENV_PATH%
-
-REM Local testing: backend AI agent talks to the local MCP server, not the domain
-set MCP_SERVER_URL=http://127.0.0.1:5000
-REM Frontend API address (overrides VITE_API_URL in frontend\.env files).
-REM Relative path: Vite forwards /api to Django, so it works locally and via the domain.
-set VITE_API_URL=/api/v1
+set BACKEND_PATH=c:\Users\GeniusBee\GradProject\backend
+set FRONTEND_PATH=c:\Users\GeniusBee\GradProject\frontend
 
 echo Starting services...
 echo.
@@ -66,40 +48,32 @@ echo     Status: Starting...
 REM Start MCP server
 echo [2/4] MCP Server (port 5000)...
 cd /d "%BACKEND_PATH%"
-REM Output goes to backend\logs\mcp_server.log so startup errors are not lost
-start "MCP Server" /min cmd /c "python -m mcp_server.start > logs\mcp_server.log 2>&1"
+start /min "" python -m mcp_server.start
 echo     Status: Starting...
 
 REM Wait and start Vite frontend
 timeout /t 3 /nobreak >nul
 echo [3/4] Vite Frontend (port 4173)...
 cd /d "%FRONTEND_PATH%"  
-REM dev server reads frontend\.env (VITE_API_URL); preview would serve the old prebuilt dist
-start /min "" npm run dev
+start /min "" npm run preview
 echo     Status: Starting...
 
 REM Wait and start Nginx
 timeout /t 3 /nobreak >nul
-echo [4/4] Nginx Reverse Proxy (port 8080)...
+echo [4/4] Nginx Reverse Proxy (port 443)...
 
-if not exist "C:\nginx\nginx.exe" (
-    echo     Skipped: C:\nginx\nginx.exe not found
-    goto :nginx_done
-)
-REM Ensure nginx directories exist and copy config (nginx.conf is gitignored,
-REM so it may not exist on this machine - fall back to the existing config)
+REM Ensure nginx directories exist and copy config
 if not exist "C:\nginx\logs" mkdir "C:\nginx\logs"
-if exist "%~dp0nginx.conf" (
-    copy /Y "%~dp0nginx.conf" "C:\nginx\conf\nginx.conf" >nul 2>&1
-    if errorlevel 1 echo     Warning: Failed to copy nginx.conf, using existing config
-) else (
-    echo     Note: no nginx.conf in project, using C:\nginx\conf\nginx.conf
+copy /Y "%~dp0nginx.conf" "C:\nginx\conf\nginx.conf" >nul 2>&1
+if errorlevel 1 (
+    echo     Error: Failed to copy nginx configuration
+    pause
+    exit /b 1
 )
 
 cd /d "C:\nginx"
 start /min "" "C:\nginx\nginx.exe"
 echo     Status: Starting...
-:nginx_done
 
 REM Final wait for all services to initialize
 timeout /t 4 /nobreak >nul
@@ -109,14 +83,14 @@ echo ========================================
 echo            Services Ready!
 echo ========================================
 echo.
-echo Website:  https://peter.hodgepodge-studio.com   (via Cloudflare Tunnel)
-echo API:      https://peter.hodgepodge-studio.com/api/v1
-echo Admin:    https://peter.hodgepodge-studio.com/admin
+echo Website:  https://petapp.geniusbee.net
+echo API:      https://petapp.geniusbee.net/api/v1
+echo Admin:    https://petapp.geniusbee.net/admin
+echo MCP Server: https://petapp.geniusbee.net/mcp
 echo.
 echo  Local Development URLs:
 echo Django:   http://127.0.0.1:8000
-echo MCP:      http://127.0.0.1:5000   (local only, not exposed)
-echo Nginx:    http://127.0.0.1:8080   (unified entry point)
+echo MCP:      http://127.0.0.1:5000
 echo Vite:     http://127.0.0.1:4173
 echo.
 echo ========================================
@@ -175,10 +149,10 @@ echo Django (8000):
 netstat -an 2>nul | findstr ":8000 " && echo ✓ Port active || echo ✗ Port inactive
 echo MCP (5000):
 netstat -an 2>nul | findstr ":5000 " && echo ✓ Port active || echo ✗ Port inactive
-echo Vite (4173):
-netstat -an 2>nul | findstr ":4173 " && echo ✓ Port active || echo ✗ Port inactive  
-echo Nginx (8080):
-netstat -an 2>nul | findstr ":8080 " && echo ✓ Port active || echo ✗ Port inactive
+echo Vite (5173):
+netstat -an 2>nul | findstr ":5173 " && echo ✓ Port active || echo ✗ Port inactive  
+echo Nginx (443):
+netstat -an 2>nul | findstr ":443 " && echo ✓ Port active || echo ✗ Port inactive
 echo.
 echo ========================================
 pause

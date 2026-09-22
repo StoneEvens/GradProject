@@ -167,6 +167,8 @@ CSRF_TRUSTED_ORIGINS = [
     "http://10.0.2.2:8000",
     "https://peter.geniusbee.net",
     "https://geniusbee.net",
+    "https://hodgepodge-studio.com",
+    "https://*.hodgepodge-studio.com",  # Cloudflare Tunnel
 ]
 CORS_ALLOW_METHODS = [
     'DELETE',
@@ -387,7 +389,9 @@ os.makedirs(os.path.join(BASE_DIR, 'logs'), exist_ok=True)
 # Avoid redirecting HTTP->HTTPS in local development to prevent CORS preflight redirects.
 if DEBUG:
     SECURE_SSL_REDIRECT = False
-    SECURE_PROXY_SSL_HEADER = None
+    # Trust X-Forwarded-Proto from the HTTPS proxy (Cloudflare Tunnel / nginx) so
+    # links Django builds use https:// when accessed through the domain.
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     SECURE_HSTS_SECONDS = 0
     SECURE_HSTS_INCLUDE_SUBDOMAINS = False
     SECURE_HSTS_PRELOAD = False
@@ -421,6 +425,13 @@ OPENAI_WORKFLOW_ID = os.environ.get('OPENAI_WORKFLOW_ID', '')
 # MCP Server Configuration
 # The MCP server runs on port 5000 by default (see backend/mcp_server/start.py)
 MCP_SERVER_URL = os.environ.get('MCP_SERVER_URL', 'https://peter.geniusbee.net/mcp')
+
+# PETer AI agent model (ai/PETer_Agent.py)
+# Model ID from https://developers.openai.com/api/docs/models/gpt-5.6-terra
+PETER_AGENT_MODEL = os.environ.get('PETER_AGENT_MODEL', 'gpt-5.6-terra')
+# Reasoning effort: 'low' suits a latency-sensitive tool-calling chat agent.
+# The installed openai SDK accepts: minimal, low, medium, high.
+PETER_AGENT_REASONING_EFFORT = os.environ.get('PETER_AGENT_REASONING_EFFORT', 'low')
 
 # Optional: ChatKit API base URL (defaults to https://api.openai.com)
 CHATKIT_API_BASE = os.environ.get('CHATKIT_API_BASE', 'https://api.openai.com')
