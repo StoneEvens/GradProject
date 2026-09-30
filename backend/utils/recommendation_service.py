@@ -20,6 +20,24 @@ warnings.filterwarnings("ignore", category=UserWarning, module="torch._utils")
 logging.set_verbosity_error()  # This will suppress transformers warnings
 script_dir = os.path.dirname(os.path.abspath(__file__))
 
+# The .npy index files live in the backend/ folder, one level above utils/.
+# Always address them by absolute path: the process's working directory is not
+# guaranteed to be the backend folder (it is not, under Passenger), and bare
+# relative filenames would read and write them somewhere else.
+base_dir = os.path.dirname(script_dir)
+
+
+def index_paths(content_type: str) -> Tuple[str, str]:
+    """Absolute (ids_path, embs_path) for 'social' or 'forum'."""
+    return (
+        os.path.join(base_dir, f'{content_type}_post_ids.npy'),
+        os.path.join(base_dir, f'{content_type}_post_embs.npy'),
+    )
+
+
+def index_exists(content_type: str) -> bool:
+    return all(os.path.exists(p) for p in index_paths(content_type))
+
 class RecommendationService:
     _instance = None
     _initialized = False
@@ -54,11 +72,8 @@ class RecommendationService:
 
         #----------Load embeddings and post IDs----------#
         # Get the project root directory (where post_embs.npy is located)
-        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        social_emb_path = os.path.join(base_dir, 'social_post_embs.npy')
-        social_ids_path = os.path.join(base_dir, 'social_post_ids.npy')
-        forum_emb_path = os.path.join(base_dir, 'forum_post_embs.npy')
-        forum_ids_path = os.path.join(base_dir, 'forum_post_ids.npy')
+        social_ids_path, social_emb_path = index_paths("social")
+        forum_ids_path, forum_emb_path = index_paths("forum")
 
         #print(f"Looking for files in: {base_dir}")
         #print(f"Embeddings path: {emb_path}")
@@ -195,8 +210,9 @@ class RecommendationService:
 
         post_ids        = np.array(all_ids)                          # shape: (N_posts,)
         post_embeddings = np.vstack(all_embeddings)                  # shape: (N_posts, hidden_dim)
-        np.save(f'{content_type}_post_ids.npy', post_ids)
-        np.save(f'{content_type}_post_embs.npy', post_embeddings)
+        ids_path, embs_path = index_paths(content_type)
+        np.save(ids_path, post_ids)
+        np.save(embs_path, post_embeddings)
 
     #----------Content Embedding----------#
     def embed_content(self, content: str, hashtags: List[str] | None = None) -> np.ndarray:
@@ -227,18 +243,24 @@ class RecommendationService:
             print(f"Warning: Unsupported content type '{content_type}'.")
             return
 
-        post_embeddings = np.load(f'{content_type}_post_embs.npy')
-        post_ids = np.load(f'{content_type}_post_ids.npy')
-
+        ids_path, embs_path = index_paths(content_type)
         emb = self.embed_content(content, hashtags=hashtags)
 
-        # Add new embedding and ID to the arrays
-        post_embeddings = np.vstack([post_embeddings, emb])
-        post_ids = np.append(post_ids, post_id)
+        if index_exists(content_type):
+            post_embeddings = np.load(embs_path)
+            post_ids = np.load(ids_path)
+            # Add new embedding and ID to the arrays
+            post_embeddings = np.vstack([post_embeddings, emb])
+            post_ids = np.append(post_ids, post_id)
+        else:
+            # No index yet (fresh install, first post): start one.
+            print(f"No {content_type} index yet; creating it from this post.")
+            post_embeddings = emb.reshape(1, -1)
+            post_ids = np.array([post_id])
 
         # Save updated arrays
-        np.save(f'{content_type}_post_ids.npy', post_ids)
-        np.save(f'{content_type}_post_embs.npy', post_embeddings)
+        np.save(ids_path, post_ids)
+        np.save(embs_path, post_embeddings)
 
         print(post_embeddings.shape)
 
@@ -248,15 +270,20 @@ class RecommendationService:
             print(f"Warning: Unsupported content type '{content_type}'.")
             return
 
-        post_ids = np.load(f'{content_type}_post_ids.npy')
-        post_embeddings = np.load(f'{content_type}_post_embs.npy')
+        if not index_exists(content_type):
+            print(f"No {content_type} index yet; nothing to delete.")
+            return
+
+        ids_path, embs_path = index_paths(content_type)
+        post_ids = np.load(ids_path)
+        post_embeddings = np.load(embs_path)
 
         if post_id in post_ids:
             idx = np.where(post_ids == post_id)[0][0]
             post_ids = np.delete(post_ids, idx)
             post_embeddings = np.delete(post_embeddings, idx, axis=0)
-            np.save(f'{content_type}_post_ids.npy', post_ids)
-            np.save(f'{content_type}_post_embs.npy', post_embeddings)
+            np.save(ids_path, post_ids)
+            np.save(embs_path, post_embeddings)
 
             print(post_embeddings.shape)
         else:
@@ -273,8 +300,13 @@ class RecommendationService:
             print(f"Warning: Unsupported content type '{content_type}'.")
             return
 
-        post_ids = np.load(f'{content_type}_post_ids.npy')
-        post_embeddings = np.load(f'{content_type}_post_embs.npy')
+        if not index_exists(content_type):
+            print(f"No {content_type} index yet; cannot build a user vector.")
+            return None
+
+        ids_path, embs_path = index_paths(content_type)
+        post_ids = np.load(ids_path)
+        post_embeddings = np.load(embs_path)
 
         now = max(ts for _, _, ts in posts)
         emb_map = dict(zip(post_ids, post_embeddings))
@@ -306,8 +338,16 @@ class RecommendationService:
             print(f"Warning: Unsupported content type '{content_type}'.")
             return []
 
-        post_ids = np.load(f'{content_type}_post_ids.npy')
-        post_embeddings = np.load(f'{content_type}_post_embs.npy')
+        if user_vec is None or not index_exists(content_type):
+            print(f"No {content_type} recommendations available yet.")
+            return []
+
+        ids_path, embs_path = index_paths(content_type)
+        post_ids = np.load(ids_path)
+        post_embeddings = np.load(embs_path)
+
+        if post_ids.size == 0:
+            return []
 
         dimension = post_embeddings.shape[1]  # Should be 768
         index = faiss.IndexFlatIP(dimension)  # Using inner product for similarity
