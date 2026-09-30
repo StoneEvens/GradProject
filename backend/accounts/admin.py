@@ -1,20 +1,34 @@
 from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin as DjangoUserAdmin
 from .models import (
     CustomUser, UserFollow, UserBlock, Achievement, UserAchievement, 
     FollowNotification, Plan
 )
 
 # 自定義用戶管理
+# Extends Django's UserAdmin so passwords are hashed: the add form asks for the
+# password twice and stores a hash, and the edit form shows a 'change password' link
+# instead of the raw field. A plain ModelAdmin would save the password as clear text
+# and the account could not log in.
 @admin.register(CustomUser)
-class CustomUserAdmin(admin.ModelAdmin):
+class CustomUserAdmin(DjangoUserAdmin):
     list_display = ('id','username', 'email', 'user_fullname', 'user_account', 'points', 'is_active', 'account_privacy')
     search_fields = ('username', 'email', 'user_fullname', 'user_account')
     list_filter = ('is_active', 'is_staff')
     readonly_fields = ('date_joined', 'last_login')
+    ordering = ('id',)
     fieldsets = (
         ('基本信息', {'fields': ('username', 'email', 'password')}),
-        ('個人資料', {'fields': ('user_fullname', 'user_account', 'user_intro')}),
-        ('系統狀態', {'fields': ('points', 'is_active', 'is_staff', 'is_superuser', 'date_joined', 'last_login')}),
+        ('個人資料', {'fields': ('user_fullname', 'user_account', 'user_intro', 'account_privacy')}),
+        ('系統狀態', {'fields': ('points', 'is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions', 'date_joined', 'last_login')}),
+    )
+    # Fields shown when creating a user in the admin. username and user_account should
+    # match what the signup API does (it sets both to the account name).
+    add_fieldsets = (
+        (None, {
+            'classes': ('wide',),
+            'fields': ('username', 'user_account', 'email', 'user_fullname', 'password1', 'password2'),
+        }),
     )
 
 # 用戶追蹤管理

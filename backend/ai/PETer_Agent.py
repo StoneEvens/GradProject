@@ -84,7 +84,12 @@ MCP_ALLOWED_TOOLS = [
 
 
 def create_mcp_server():
-    """Create MCP server with tool caching enabled."""
+    """Create the MCP server connection (see settings.MCP_TRANSPORT)."""
+    if getattr(_django_settings, 'MCP_TRANSPORT', 'sse') == 'inprocess':
+        # Tools run inside this process - no separate MCP server, no port
+        from mcp_server.inprocess import InProcessMCPServer
+        return InProcessMCPServer(allowed_tool_names=MCP_ALLOWED_TOOLS)
+
     from agents.mcp import create_static_tool_filter
     return MCPServerSse(
         name="PETer MCP Server",

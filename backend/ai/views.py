@@ -1227,8 +1227,13 @@ def execute_realtime_tool(request):
                 arguments['user_id'] = request.user.id
             logger.info(f"   Added user_id: {arguments['user_id']}")
         
-        # Connect to the remote MCP server via SSE
+        # Reach the MCP tools: in-process, or over SSE (see settings.MCP_TRANSPORT)
         async def call_mcp_tool():
+            if getattr(settings, 'MCP_TRANSPORT', 'sse') == 'inprocess':
+                from mcp_server.inprocess import call_tool as call_tool_inprocess
+                logger.info(f"   Calling tool in-process: {tool_name}")
+                return await call_tool_inprocess(tool_name, arguments)
+
             # Get MCP server URL from settings
             mcp_url = settings.MCP_SERVER_URL
             if not mcp_url.endswith('/sse'):

@@ -89,6 +89,8 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',  # Handle CORS as early as possible
     'django.middleware.security.SecurityMiddleware',
+    # WhiteNoise serves collected static files when Django runs behind Passenger/gunicorn.
+    # Added conditionally below so local development without it keeps working.
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -278,6 +280,13 @@ DATABASES = {
 }
 
 AUTH_USER_MODEL = 'accounts.CustomUser'
+
+# Public sign-up. Set REGISTRATION_OPEN=False on deployments where only you should
+# be able to create accounts (e.g. the demo server, to keep AI usage under control).
+# With an invite code set, /api/v1/accounts/register/ still accepts requests that
+# include the matching "invite_code" field.
+REGISTRATION_OPEN = os.environ.get('REGISTRATION_OPEN', 'True').lower() not in ('false', '0', 'no')
+REGISTRATION_INVITE_CODE = os.environ.get('REGISTRATION_INVITE_CODE', '')
 RECOMMENDATIONS_ENABLED = False
 
 
@@ -316,6 +325,19 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # target of `manage.py collectstatic`
+
+# Serve those collected files ourselves when WhiteNoise is available (VPS deployment).
+try:
+    import whitenoise  # noqa: F401
+except ImportError:
+    pass
+else:
+    if 'whitenoise.middleware.WhiteNoiseMiddleware' not in MIDDLEWARE:
+        MIDDLEWARE.insert(
+            MIDDLEWARE.index('django.middleware.security.SecurityMiddleware') + 1,
+            'whitenoise.middleware.WhiteNoiseMiddleware',
+        )
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -438,6 +460,11 @@ OPENAI_WORKFLOW_ID = os.environ.get('OPENAI_WORKFLOW_ID', '')
 # MCP Server Configuration
 # The MCP server runs on port 5000 by default (see backend/mcp_server/start.py)
 MCP_SERVER_URL = os.environ.get('MCP_SERVER_URL', 'https://peter.geniusbee.net/mcp')
+
+# How Django reaches the MCP tools:
+#   'sse'       - separate MCP server process at MCP_SERVER_URL (local development)
+#   'inprocess' - same process, no port, nothing exposed (shared hosting: one app only)
+MCP_TRANSPORT = os.environ.get('MCP_TRANSPORT', 'sse')
 
 # PETer AI agent model (ai/PETer_Agent.py)
 # Model ID from https://developers.openai.com/api/docs/models/gpt-5.6-terra

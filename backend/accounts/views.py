@@ -4,6 +4,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status as drf_status
 from django.contrib.auth import authenticate
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from accounts.models import *
@@ -28,6 +29,18 @@ class RegisterAPIView(APIView):
     permission_classes = [AllowAny]  # 註冊不需要認證
     
     def post(self, request):
+        # Registration can be closed on public deployments (settings.REGISTRATION_OPEN).
+        # An invite code, when configured, still lets you create accounts yourself.
+        if not getattr(settings, 'REGISTRATION_OPEN', True):
+            invite_required = getattr(settings, 'REGISTRATION_INVITE_CODE', '')
+            invite_given = (request.data.get('invite_code') or '').strip()
+            if not invite_required or invite_given != invite_required:
+                return APIResponse(
+                    message='目前暫停開放註冊。',
+                    code=drf_status.HTTP_403_FORBIDDEN,
+                    status=drf_status.HTTP_403_FORBIDDEN
+                )
+
         user_account = request.data.get('user_account')
         password = request.data.get('password')
         email = request.data.get('email')
