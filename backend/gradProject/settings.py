@@ -23,10 +23,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-9$@4-v*$7-=1r-l@3(fytpr_*f1b!@z^j00f%31hcp6(udqh6s'
+SECRET_KEY = os.environ.get(
+    'DJANGO_SECRET_KEY',
+    'django-insecure-9$@4-v*$7-=1r-l@3(fytpr_*f1b!@z^j00f%31hcp6(udqh6s',
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True  # Set to True for development
+# Defaults to True so local development is unchanged. Deployments MUST set
+# DJANGO_DEBUG=False in .env - with DEBUG on, any error page shows a full
+# traceback including settings values to whoever triggered it.
+DEBUG = os.environ.get('DJANGO_DEBUG', 'True').lower() not in ('false', '0', 'no')
 
 # Allow common hosts; when DEBUG is True, allow all to simplify mobile/emulator testing
 ALLOWED_HOSTS = [
@@ -37,6 +43,8 @@ ALLOWED_HOSTS = [
     'geniusbee.net',
     '.geniusbee.net',  # Allows all subdomains
     '140.119.19.25',
+    'hodgepodge-studio.com',
+    '.hodgepodge-studio.com',  # api. and peter. on the VPS
 ]
 if DEBUG:
     # For local development, accept any Host header to support LAN IPs and emulator access
@@ -433,11 +441,18 @@ if DEBUG:
     SESSION_COOKIE_SECURE = False
     CSRF_COOKIE_SECURE = False
 else:
-    SECURE_SSL_REDIRECT = True
+    # Django's own HTTP->HTTPS redirect is only safe when the proxy in front
+    # reliably sets X-Forwarded-Proto. Under DirectAdmin/Passenger it may not,
+    # and Django would then redirect every request forever. Let the web server
+    # handle the redirect unless this is explicitly turned on.
+    SECURE_SSL_REDIRECT = os.environ.get(
+        'SECURE_SSL_REDIRECT', 'False').lower() in ('true', '1', 'yes')
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-    SECURE_HSTS_SECONDS = 31536000  # 1 year
-    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-    SECURE_HSTS_PRELOAD = True
+    # HSTS is cached by browsers for its full duration and cannot be called back.
+    # Off by default; raise it deliberately once the deployment is known good.
+    SECURE_HSTS_SECONDS = int(os.environ.get('SECURE_HSTS_SECONDS', '0'))
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = SECURE_HSTS_SECONDS > 0
+    SECURE_HSTS_PRELOAD = False
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
 
