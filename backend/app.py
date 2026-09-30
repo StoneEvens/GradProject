@@ -35,6 +35,7 @@ for _key, _value in {
     "OPENBLAS_NUM_THREADS": "1",
     "NUMEXPR_NUM_THREADS": "1",
     "TOKENIZERS_PARALLELISM": "false",
+    "PYTHONIOENCODING": "utf-8",
     # The Rust tokenizer builds its own rayon thread pool and ignores the
     # OpenMP variables above; without this it tries one thread per CPU core
     # and panics with "The global thread pool has not been initialized".
@@ -45,6 +46,18 @@ for _key, _value in {
     "TRANSFORMERS_OFFLINE": "1",
 }.items():
     os.environ.setdefault(_key, _value)
+
+# Passenger hands the worker an ASCII stdout (no locale, unlike an interactive
+# shell). This project logs in Chinese, so any print() during startup then raises
+# UnicodeEncodeError - and when that happens inside an AppConfig.ready(), Django's
+# populate() aborts with its "loading" flag still set, permanently breaking the app
+# registry in that process. Every later import then reports "populate() isn't
+# reentrant", which hides the real cause.
+for _stream in (sys.stdout, sys.stderr):
+    try:
+        _stream.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:  # pragma: no cover - very old Python, or a stream without it
+        pass
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "gradProject.settings")
 
