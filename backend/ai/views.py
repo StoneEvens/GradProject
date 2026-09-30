@@ -859,7 +859,7 @@ def create_realtime_session(request):
     Request body (optional):
         {
             "conversation_id": <int>,  # Optional: link to existing conversation
-            "model": "gpt-4o-realtime-preview-2024-12-17",  # Optional: specify model
+            "model": "gpt-realtime-2.1",  # Optional: defaults to settings.REALTIME_MODEL
             "voice": "coral"  # Optional: voice selection (alloy, ash, ballad, coral, echo, sage, shimmer, verse)
         }
     
@@ -891,7 +891,7 @@ def create_realtime_session(request):
         
         # Get optional parameters
         conversation_id = request.data.get('conversation_id')
-        model = request.data.get('model', 'gpt-4o-realtime-preview-2024-12-17')
+        model = request.data.get('model', settings.REALTIME_MODEL)  # gpt-realtime-2.1 by default
         voice = request.data.get('voice', 'coral')  # Valid voices: alloy, ash, ballad, coral, echo, sage, shimmer, verse
         language = request.data.get('language', 'zh-TW')  # Default to Traditional Chinese
         
@@ -1045,6 +1045,30 @@ Keep responses natural and conversational for voice interaction. Always respond 
         # The TypeScript agents SDK handles tool registration client-side
         # Tools will be executed via the /ai/realtime/execute-tool/ endpoint
         
+        # Voice activity detection / noise handling (see REALTIME_* in settings.py).
+        # These are also returned to the frontend, because the Agents SDK re-sends its
+        # own audio defaults on connect and would otherwise override them.
+        if settings.REALTIME_TURN_DETECTION == 'semantic_vad':
+            turn_detection = {
+                'type': 'semantic_vad',
+                'eagerness': settings.REALTIME_SEMANTIC_EAGERNESS,
+                'create_response': True,
+                'interrupt_response': True,
+            }
+        else:
+            turn_detection = {
+                'type': 'server_vad',
+                'threshold': settings.REALTIME_VAD_THRESHOLD,  # higher = ignores more background noise
+                'prefix_padding_ms': 300,
+                'silence_duration_ms': settings.REALTIME_VAD_SILENCE_MS,
+                'create_response': True,
+                'interrupt_response': True,
+            }
+        noise_reduction = (
+            None if settings.REALTIME_NOISE_REDUCTION == 'off'
+            else {'type': settings.REALTIME_NOISE_REDUCTION}
+        )
+
         # Create realtime client secret using the /v1/realtime/client_secrets endpoint (GA API)
         # This endpoint creates an ephemeral key that can be used client-side to create sessions
         # with the specified configuration (including tools)
@@ -1066,13 +1090,8 @@ Keep responses natural and conversational for voice interaction. Always respond 
                                     'type': 'audio/pcm',
                                     'rate': 24000
                                 },
-                                'turn_detection': {
-                                    'type': 'server_vad',
-                                    'threshold': 0.5,  # Very sensitive (0.0-1.0, lower = more sensitive)
-                                    'prefix_padding_ms': 300,
-                                    'silence_duration_ms': 1000,  # Wait 1 second of silence before considering speech ended
-                                    'create_response': True
-                                }
+                                'turn_detection': turn_detection,
+                                'noise_reduction': noise_reduction,
                             },
                             'output': {
                                 'format': {
@@ -1140,6 +1159,10 @@ Keep responses natural and conversational for voice interaction. Always respond 
             'tools_count': len(session_config.get('tools', [])),  # Don't send full tools to frontend
             'user_id': request.user.id,
             'audio': session_config.get('audio', {}),  # Include audio config with turn_detection
+            'input_audio': {  # applied by the frontend SDK on connect
+                'turn_detection': turn_detection,
+                'noise_reduction': noise_reduction,
+            },
             'greeting': greeting,  # Initial greeting message for the agent to speak
             'language': language,  # User's language preference
         }

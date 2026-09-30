@@ -106,6 +106,9 @@ CORS_ALLOWED_ORIGINS = [
     "https://geniusbee.net",
     "https://peter.geniusbee.net:4173",  # Vite preview server with domain
     "https://peter.geniusbee.net:5173",  # Vite dev server with domain
+    "https://hodgepodge-studio.com",       # frontend hosted on the VPS
+    "https://www.hodgepodge-studio.com",
+    "https://peter.hodgepodge-studio.com",
     "https://localhost",  # WebView/live-reload over HTTPS default port
     "http://localhost:3000",  # Local development
     "http://localhost:5173",  # Vite default port
@@ -324,6 +327,16 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 FIREBASE_CREDENTIALS_PATH = os.path.join(BASE_DIR, 'config', 'petapp-c2e46-firebase-adminsdk-fbsvc-0ec3a87ef4.json')
 FIREBASE_STORAGE_BUCKET = 'petapp-c2e46.firebasestorage.app'
 
+# Where uploaded images go: 'firebase' (bucket above) or 'local' (this machine).
+IMAGE_STORAGE_BACKEND = os.environ.get('IMAGE_STORAGE_BACKEND', 'firebase')
+# Local image storage (IMAGE_STORAGE_BACKEND=local), served by Django at LOCAL_IMAGE_URL
+LOCAL_IMAGE_ROOT = os.environ.get('LOCAL_IMAGE_ROOT', os.path.join(BASE_DIR, 'uploaded_images'))
+LOCAL_IMAGE_URL = '/media/images/'
+# When the frontend is served from a different address than this backend (e.g. the
+# frontend on the VPS calling this API), image links must be absolute. Set this to
+# the backend's public address, e.g. https://peter.hodgepodge-studio.com
+PUBLIC_MEDIA_BASE_URL = os.environ.get('PUBLIC_MEDIA_BASE_URL', '').rstrip('/')
+
 # 日誌配置
 LOGGING = {
     'version': 1,
@@ -432,6 +445,23 @@ PETER_AGENT_MODEL = os.environ.get('PETER_AGENT_MODEL', 'gpt-5.6-terra')
 # Reasoning effort: 'low' suits a latency-sensitive tool-calling chat agent.
 # The installed openai SDK accepts: minimal, low, medium, high.
 PETER_AGENT_REASONING_EFFORT = os.environ.get('PETER_AGENT_REASONING_EFFORT', 'low')
+
+# Voice chat (Realtime API) model, used by ai/views.py create_realtime_session.
+# gpt-4o-realtime-preview models are no longer available; gpt-realtime-2.1 is the
+# current realtime model with tool calling (https://developers.openai.com/api/docs/models/gpt-realtime-2.1)
+REALTIME_MODEL = os.environ.get('REALTIME_MODEL', 'gpt-realtime-2.1')
+
+# Voice chat: how easily background noise counts as the user speaking.
+# Turn detection: 'server_vad' (volume based, uses THRESHOLD) or 'semantic_vad' (meaning based, uses EAGERNESS)
+REALTIME_TURN_DETECTION = os.environ.get('REALTIME_TURN_DETECTION', 'server_vad')
+# server_vad: 0.0-1.0, higher = needs louder speech, ignores more background noise (was 0.5)
+REALTIME_VAD_THRESHOLD = float(os.environ.get('REALTIME_VAD_THRESHOLD', '0.7'))
+# server_vad: silence (ms) before the user's turn is considered finished
+REALTIME_VAD_SILENCE_MS = int(os.environ.get('REALTIME_VAD_SILENCE_MS', '1000'))
+# semantic_vad: 'low' waits longest before replying / interrupting; 'medium', 'high', 'auto'
+REALTIME_SEMANTIC_EAGERNESS = os.environ.get('REALTIME_SEMANTIC_EAGERNESS', 'low')
+# Input noise reduction: 'far_field' (laptop/phone mic), 'near_field' (headset), or 'off'
+REALTIME_NOISE_REDUCTION = os.environ.get('REALTIME_NOISE_REDUCTION', 'far_field')
 
 # Optional: ChatKit API base URL (defaults to https://api.openai.com)
 CHATKIT_API_BASE = os.environ.get('CHATKIT_API_BASE', 'https://api.openai.com')

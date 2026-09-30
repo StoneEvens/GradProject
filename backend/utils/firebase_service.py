@@ -26,6 +26,17 @@ class FirebaseStorageService:
     def __init__(self):
         """初始化 Firebase Storage 服務"""
         
+        # IMAGE_STORAGE_BACKEND=local: save images on this machine instead of Firebase
+        if getattr(settings, 'IMAGE_STORAGE_BACKEND', 'firebase') == 'local':
+            from utils.local_storage import LocalBucket
+            self.bucket = LocalBucket(
+                settings.LOCAL_IMAGE_ROOT,
+                settings.LOCAL_IMAGE_URL,
+                getattr(settings, 'PUBLIC_MEDIA_BASE_URL', ''),
+            )
+            logger.info(f'Image storage: local ({settings.LOCAL_IMAGE_ROOT})')
+            return
+        
         import firebase_admin
         from firebase_admin import credentials, storage
         

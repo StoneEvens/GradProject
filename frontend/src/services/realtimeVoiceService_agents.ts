@@ -69,6 +69,11 @@ export interface RealtimeSessionConfig {
   greeting?: string;
   language?: string;
   audio?: any;
+  // Turn detection / noise reduction chosen by the backend (settings.REALTIME_*)
+  input_audio?: {
+    turn_detection?: Record<string, any>;
+    noise_reduction?: { type: 'near_field' | 'far_field' } | null;
+  };
 }
 
 class RealtimeVoiceService extends EventEmitter {
@@ -427,12 +432,25 @@ When to use:
       
       // Create session with the agent AND explicit voice config
       // The SDK uses agent.voice but we also pass it in config to ensure it's set
+      // Pass the backend's turn detection + noise reduction explicitly: on connect the
+      // SDK sends a session.update with its own defaults (semantic_vad, no noise
+      // reduction), which would otherwise replace the backend's settings.
+      const inputAudio = this.sessionConfig.input_audio;
       this.session = new RealtimeSession(this.agent, {
         model: this.sessionConfig.model,
         config: {
-          voice: voiceToUse,
+          audio: {
+            input: {
+              ...(inputAudio?.turn_detection ? { turnDetection: inputAudio.turn_detection as any } : {}),
+              ...(inputAudio && 'noise_reduction' in inputAudio ? { noiseReduction: inputAudio.noise_reduction ?? null } : {}),
+            },
+            output: {
+              voice: voiceToUse,
+            },
+          },
         },
       });
+      console.log('[RealtimeVoice] Input audio config:', inputAudio);
 
       this.setupEventListeners();
       

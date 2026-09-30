@@ -60,3 +60,16 @@ urlpatterns = [
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 ]
+
+# Serve locally stored images (IMAGE_STORAGE_BACKEND=local). nginx forwards /media to Django.
+from django.conf import settings as _settings
+from django.views.static import serve as _serve
+
+if getattr(_settings, 'IMAGE_STORAGE_BACKEND', 'firebase') == 'local':
+    urlpatterns += [
+        re_path(
+            r'^' + _settings.LOCAL_IMAGE_URL.lstrip('/') + r'(?P<path>.*)$',
+            _serve,
+            {'document_root': _settings.LOCAL_IMAGE_ROOT},
+        ),
+    ]

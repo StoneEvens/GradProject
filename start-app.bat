@@ -53,6 +53,10 @@ set MCP_SERVER_URL=http://127.0.0.1:5000
 REM Frontend API address (overrides VITE_API_URL in frontend\.env files).
 REM Relative path: Vite forwards /api to Django, so it works locally and via the domain.
 set VITE_API_URL=/api/v1
+REM Store uploaded images on this machine (backend\uploaded_images) instead of Firebase
+set IMAGE_STORAGE_BACKEND=local
+REM Absolute image links, so the frontend hosted on the VPS can load them
+set PUBLIC_MEDIA_BASE_URL=https://peter.hodgepodge-studio.com
 
 echo Starting services...
 echo.
