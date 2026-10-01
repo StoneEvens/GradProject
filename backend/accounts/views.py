@@ -25,6 +25,32 @@ class TokenObtainPairView(BaseTokenObtainPairView):
     permission_classes = [AllowAny]  # 確保這個視圖可以被未認證的用戶訪問
 
 # 註冊
+class RegistrationStatusAPIView(APIView):
+    """Public: tells the sign-up page whether registration is open.
+
+    The register form uses this to decide whether to ask for an invite code,
+    so the field only appears when it is actually needed. It deliberately
+    reveals only whether a code is required - never the code itself.
+    """
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        registration_open = bool(getattr(settings, 'REGISTRATION_OPEN', True))
+        invite_required = (
+            not registration_open
+            and bool(getattr(settings, 'REGISTRATION_INVITE_CODE', ''))
+        )
+        return APIResponse(
+            data={
+                'registration_open': registration_open,
+                'invite_required': invite_required,
+                # closed with no invite code configured: nobody can sign up
+                'closed': not registration_open and not invite_required,
+            },
+            message='操作成功',
+        )
+
+
 class RegisterAPIView(APIView):
     permission_classes = [AllowAny]  # 註冊不需要認證
     

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from '../styles/RegisterPage.module.css';
 import Notification from '../components/Notification';
 import { NotificationProvider } from '../context/NotificationContext';
@@ -12,13 +12,33 @@ const RegisterPage = () => {
     userName: '',
     email: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    inviteCode: ''
   });
+  // null = not yet known; the field stays hidden until the server says it is needed
+  const [inviteRequired, setInviteRequired] = useState(null);
+  const [registrationClosed, setRegistrationClosed] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [notification, setNotification] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    let cancelled = false;
+    api.get('/accounts/registration-status/')
+      .then((response) => {
+        if (cancelled) return;
+        const data = response.data?.data || {};
+        setInviteRequired(Boolean(data.invite_required));
+        setRegistrationClosed(Boolean(data.closed));
+      })
+      .catch(() => {
+        // Status unavailable: assume open and let the server have the final say.
+        if (!cancelled) setInviteRequired(false);
+      });
+    return () => { cancelled = true; };
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -36,6 +56,10 @@ const RegisterPage = () => {
   const validateStep = async () => {
     switch (step) {
       case 1:
+        if (inviteRequired && formData.inviteCode.trim() === '') {
+          showNotification('請輸入邀請碼');
+          return false;
+        }
         if (formData.accountName.trim() === '') {
           showNotification('請輸入帳號名稱');
           return false;
@@ -171,12 +195,16 @@ const RegisterPage = () => {
 
     try {
       setIsLoading(true);
-      const response = await api.post('/accounts/register/', {
+      const payload = {
         user_account: formData.accountName,
         user_fullname: formData.userName,
         email: formData.email,
         password: formData.password
-      });
+      };
+      if (inviteRequired && formData.inviteCode.trim() !== '') {
+        payload.invite_code = formData.inviteCode.trim();
+      }
+      const response = await api.post('/accounts/register/', payload);
 
       // 儲存 token 到 localStorage
       localStorage.setItem('accessToken', response.data.tokens.access);
@@ -206,6 +234,10 @@ const RegisterPage = () => {
           case 400:
             errorMessage = error.response.data.message || '請檢查輸入資料是否正確';
             break;
+          case 403:
+            // Registration closed, or the invite code did not match
+            errorMessage = error.response.data.message || '目前暫停開放註冊。';
+            break;
           default:
             errorMessage = '註冊失敗，請稍後再試';
         }
@@ -232,6 +264,27 @@ const RegisterPage = () => {
       case 1:
         return (
           <div className={styles.formStep}>
+            {registrationClosed && (
+              <div className={styles.hint}>目前暫停開放註冊。</div>
+            )}
+            {inviteRequired && (
+              <>
+                <div className={styles.accountInput}>
+                  <input
+                    type="text"
+                    name="inviteCode"
+                    value={formData.inviteCode}
+                    onChange={handleInputChange}
+                    placeholder="請輸入邀請碼"
+                    className={styles.input}
+                    maxLength="128"
+                    autoComplete="off"
+                    disabled={isLoading}
+                  />
+                </div>
+                <div className={styles.hint}>此網站目前僅開放邀請註冊</div>
+              </>
+            )}
             <div className={styles.accountInput}>
               <input
                 type="text"
