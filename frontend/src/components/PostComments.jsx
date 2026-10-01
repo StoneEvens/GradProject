@@ -149,7 +149,7 @@ const PostComments = ({user, postID, handleClose, onCommentCountChange}) => {
 
     const fetchComments = async (postID) => {
         try {
-            const response = await axios.get(`/comments/post/${postID}/comments`, {
+            const response = await axios.get(`/comments/post/${postID}/comments/`, {
                 headers: {
                     'Accept': 'application/json',
                 },
