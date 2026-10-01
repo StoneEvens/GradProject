@@ -10,6 +10,7 @@ import { getUserProfile } from '../services/userService';
 import { getPosts, getPost } from '../services/socialService';
 import { getPublicDiseaseArchivesPreview } from '../services/petService';
 import styles from '../styles/SocialPage.module.css';
+import { isSocialPost } from '../utils/postType';
 
 const SocialPage = () => {
   const { t } = useTranslation('posts');
@@ -68,19 +69,13 @@ const SocialPage = () => {
 
         console.log('🔍 API 返回貼文數據:', allPosts.length, '筆');
 
-        // 過濾掉疾病檔案，只保留一般貼文
-        // 簡單方法：一般貼文一定會有照片
+        // 過濾掉疾病檔案，只保留一般貼文（依後端回傳的 post_type 判斷）
         const newPosts = allPosts.filter(post => {
-          // 檢查是否有圖片
-          const hasImages = post.images && Array.isArray(post.images) && post.images.length > 0;
-
-          // 簡化調試輸出
-          if (!hasImages) {
-            console.log(`🚫 過濾掉沒有圖片的項目 (ID: ${post.id || post.post_id})`);
+          const keep = isSocialPost(post);
+          if (!keep) {
+            console.log(`🚫 過濾掉非社群貼文的項目 (ID: ${post.id || post.post_id}, type: ${post.post_type})`);
           }
-
-          // 只保留有圖片的貼文
-          return hasImages;
+          return keep;
         });
 
         console.log('📊 載入貼文過濾結果:', {
@@ -183,11 +178,11 @@ const SocialPage = () => {
             if (result.success) {
               const allPosts = result.data.posts || [];
               const newPosts = allPosts.filter(post => {
-                const hasImages = post.images && Array.isArray(post.images) && post.images.length > 0;
-                if (!hasImages) {
-                  console.log(`🚫 過濾掉沒有圖片的項目 (ID: ${post.id || post.post_id})`);
+                const keep = isSocialPost(post);
+                if (!keep) {
+                  console.log(`🚫 過濾掉非社群貼文的項目 (ID: ${post.id || post.post_id}, type: ${post.post_type})`);
                 }
-                return hasImages;
+                return keep;
               });
 
               const deduped = newPosts.filter(p => (p.id || p.post_id) !== primaryPost.id);

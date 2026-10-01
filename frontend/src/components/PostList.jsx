@@ -8,6 +8,7 @@ import { getUserPosts } from '../services/socialService';
 import { getUserProfile } from '../services/userService';
 import styles from '../styles/PostList.module.css';
 import PostComments from './PostComments';
+import { isSocialPost } from '../utils/postType';
 
 const PostList = ({ 
   posts = [],
@@ -433,15 +434,14 @@ const PostList = ({
       <div className={styles.postList} ref={containerRef}>
         {currentPosts
           .filter(post => {
-            // 簡單方法：只顯示有圖片的貼文
-            const hasImages = post.images && Array.isArray(post.images) && post.images.length > 0;
+            // 只顯示一般社群貼文（依後端回傳的 post_type 判斷，而非有無圖片）
+            const keep = isSocialPost(post);
 
-            // 簡化調試輸出
-            if (!hasImages) {
+            if (!keep) {
               console.log(t('postList.messages.filterOutNoImagePost', { postId: post.id || post.post_id }));
             }
 
-            return hasImages;
+            return keep;
           })
           .map((post, index) => (
             <div

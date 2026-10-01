@@ -14,6 +14,30 @@ from comments.serializers import CommentSerializer
 User = get_user_model()
 
 # === PostFrame 序列化器 ===
+def resolve_post_type(postFrame) -> str:
+    """What kind of content hangs off this PostFrame.
+
+    A PostFrame is a generic wrapper: a social post has SoLContent
+    (related_name='contents'), a disease archive has DiseaseArchiveContent
+    (related_name='illness_archives_postFrame'). Clients need to tell these
+    apart; before this field existed the frontend guessed from "does it have a
+    photo", which silently hid any social post whose image failed to upload.
+
+    Returns 'social', 'archive', or 'unknown'.
+    """
+    try:
+        if postFrame.contents.exists():
+            return 'social'
+    except Exception:
+        pass
+    try:
+        if postFrame.illness_archives_postFrame.exists():
+            return 'archive'
+    except Exception:
+        pass
+    return 'unknown'
+
+
 class PostFrameSerializer(serializers.ModelSerializer):
     """
     PostFrame 完整序列化器，包含所有相關資訊
@@ -27,6 +51,7 @@ class PostFrameSerializer(serializers.ModelSerializer):
     user_interaction = serializers.SerializerMethodField()
     annotations = serializers.SerializerMethodField()
     top_comments = serializers.SerializerMethodField()
+    post_type = serializers.SerializerMethodField()
 
     class Meta:
         model = PostFrame
@@ -43,8 +68,12 @@ class PostFrameSerializer(serializers.ModelSerializer):
             'user_interaction',
             'annotations',
             'top_comments',
+            'post_type',
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
+
+    def get_post_type(self, postFrame: PostFrame):
+        return resolve_post_type(postFrame)
     
     def get_user_info(self, postFrame: PostFrame):
         user = postFrame.getUser()
@@ -220,6 +249,7 @@ class SolPostSerializer(serializers.ModelSerializer):
     post_id = serializers.SerializerMethodField()
     created_at = serializers.SerializerMethodField()
     annotations = serializers.SerializerMethodField()
+    post_type = serializers.SerializerMethodField()
 
     class Meta:
         model = SoLContent
@@ -234,8 +264,13 @@ class SolPostSerializer(serializers.ModelSerializer):
             'images',
             'interaction_stats',
             'user_interaction',
-            'annotations'
+            'annotations',
+            'post_type',
         ]
+
+    def get_post_type(self, solContent: SoLContent):
+        # This serializer only ever wraps SoLContent, so it is a social post.
+        return 'social'
     
     def get_post_id(self, solContent: SoLContent):
         return solContent.get_postFrame().id
@@ -402,6 +437,7 @@ class UserDetailSearchSerializer(serializers.ModelSerializer):
         
 # === 預覽用 PostFrame 序列化器 ===
 class PostPreviewSerializer(serializers.ModelSerializer):
+    post_type = serializers.SerializerMethodField()
     first_image_url = serializers.SerializerMethodField()
     content_preview = serializers.SerializerMethodField()
     user_info = serializers.SerializerMethodField()
@@ -410,7 +446,10 @@ class PostPreviewSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PostFrame
-        fields = ['id', 'created_at', 'first_image_url', 'content_preview', 'user_info', 'interaction_stats', 'user_interaction']
+        fields = ['id', 'created_at', 'first_image_url', 'content_preview', 'user_info', 'interaction_stats', 'user_interaction', 'post_type']
+
+    def get_post_type(self, postFrame: PostFrame):
+        return resolve_post_type(postFrame)
 
     def get_first_image_url(self, postFrame: PostFrame):
         """獲取第一張圖片URL"""
