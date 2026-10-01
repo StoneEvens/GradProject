@@ -73,6 +73,21 @@ class InProcessMCPServer(MCPServer):
     async def cleanup(self):  # nothing to tear down
         return None
 
+    # The Agents SDK opens servers with "async with mcp_server:". Only the
+    # networked subclasses implement that; the abstract MCPServer base does
+    # not, so without these the SDK fails with
+    #   'InProcessMCPServer' object has no attribute '__aenter__'
+    # Note this is the agent path only - call_tool() alone (used by the
+    # realtime/voice path) never goes through the context manager, which is
+    # why voice worked while chat did not.
+    async def __aenter__(self):
+        await self.connect()
+        return self
+
+    async def __aexit__(self, exc_type, exc_value, traceback):
+        await self.cleanup()
+        return False
+
     async def list_tools(self, run_context=None, agent=None):
         async with Client(get_server()) as client:
             tools = await client.list_tools()
