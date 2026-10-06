@@ -4,11 +4,13 @@ from rest_framework import status
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-import re
-
-from google.cloud import vision
-from google.oauth2 import service_account
 from rest_framework.permissions import AllowAny, IsAuthenticated
+
+from ocrapp.openai_vision import (
+    OCRConfigurationError,
+    OCRExtractionError,
+    extract as run_vision_extraction,
+)
 from utils.firebase_service import FirebaseStorageService
 import os
 from django.conf import settings
@@ -18,18 +20,66 @@ from django.utils import timezone
 from feeds.models import Feed, FeedReview, FeedErrorReport, UserFeedMark, UserFeed
 from feeds.serializers import FeedReviewSerializer, FeedErrorReportSerializer, UserFeedMarkSerializer
 
-NUTRIENT_KEYWORDS = {
-    'protein': ['protein', '蛋白', '粗蛋白', '粗蛋白質'],
-    'fat': ['fat', '脂肪', '粗脂肪'],
-    'carbohydrate': ['carbohydrate', 'carb', '碳水', '碳水化合物', '纖維', '粗纖維'],
-    'calcium': ['calcium', '鈣'],
-    'phosphorus': ['phosphorus', '磷'],
-    'magnesium': ['magnesium', '鎂'],
-    'sodium': ['sodium', '鈉']
+# Nutrient keys returned to the frontend. The order is the display order and
+# the frontend counts how many are non-null to pick the better of two photos,
+# so keys must not be renamed or dropped without changing aiChatService.js.
+NUTRIENT_FIELDS = ('protein', 'fat', 'carbohydrate', 'calcium', 'phosphorus', 'magnesium', 'sodium')
+
+FEED_OCR_INSTRUCTIONS = (
+    "You read the guaranteed-analysis panel (保證成分 / Guaranteed Analysis) on pet food packaging.\n"
+    "Return each nutrient as a percentage by weight, as a number without the % sign.\n"
+    "If a value is printed in mg/kg or ppm, divide it by 10000 to get a percentage. "
+    "If it is printed in g per 100 g, use the number as it stands.\n"
+    "Where a minimum and a maximum are both given (最低量 / 最高量), report the minimum.\n"
+    "Use null for any nutrient the panel does not state. Never estimate a value from "
+    "the ingredient list, from a feeding guide, or from what is typical for this kind of food.\n\n"
+    "Field notes:\n"
+    "- protein: 粗蛋白質 / crude protein\n"
+    "- fat: 粗脂肪 / crude fat\n"
+    "- carbohydrate: 碳水化合物; if the panel gives only 粗纖維 (crude fibre), use that\n"
+    "- calcium 鈣, phosphorus 磷, magnesium 鎂, sodium 鈉\n\n"
+    "Also return raw_text: the nutrition panel transcribed as printed, line by line."
+)
+
+FEED_OCR_SCHEMA = {
+    "type": "object",
+    "additionalProperties": False,
+    "required": ["raw_text", "nutrients"],
+    "properties": {
+        "raw_text": {
+            "type": "string",
+            "description": "The nutrition panel transcribed as printed.",
+        },
+        "nutrients": {
+            "type": "object",
+            "additionalProperties": False,
+            "required": list(NUTRIENT_FIELDS),
+            "properties": {
+                field: {
+                    "type": ["number", "null"],
+                    "description": "Percentage by weight, or null if the panel does not state it.",
+                }
+                for field in NUTRIENT_FIELDS
+            },
+        },
+    },
 }
 
+
 class FeedOCRView(APIView):
-    permission_classes = [AllowAny]  
+    """
+    Read the nutrition panel on a feed package.
+
+    Was Google Cloud Vision plus keyword/regex scanning of the raw text, which
+    needed a service-account JSON file that is not in the repo or on the
+    server, so every request returned 500. Now one call to the OpenAI Responses
+    API (see ocrapp/openai_vision.py).
+
+    The response shape is unchanged - {'raw_text', 'extracted_nutrients'} with
+    percentages or null - so aiChatService.js needs no edit.
+    """
+
+    permission_classes = [AllowAny]
     parser_classes = (MultiPartParser, FormParser)
 
     @swagger_auto_schema(
@@ -46,161 +96,54 @@ class FeedOCRView(APIView):
         responses={200: openapi.Response('成功', schema=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
+                'raw_text': openapi.Schema(type=openapi.TYPE_STRING),
                 'extracted_nutrients': openapi.Schema(type=openapi.TYPE_OBJECT)
             }
         ))}
     )
     def post(self, request, *args, **kwargs):
-        credentials_path = os.path.join(settings.BASE_DIR, 'feeds', 'ai-project-454107-a1e8b881803e.json')
-
-        uploaded_image = request.FILES.get('image')
+        uploaded_image = request.FILES.get('image') or request.FILES.get('file')
         if not uploaded_image:
             return Response({'error': 'No image uploaded.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        credentials = service_account.Credentials.from_service_account_file(credentials_path)
-        client = vision.ImageAnnotatorClient(credentials=credentials)
+        try:
+            parsed = run_vision_extraction(
+                uploaded_image,
+                schema_name='feed_nutrition',
+                schema=FEED_OCR_SCHEMA,
+                instructions=FEED_OCR_INSTRUCTIONS,
+                prompt='請讀出這張飼料包裝上的營養標示（保證成分）。',
+            )
+        except OCRConfigurationError as exc:
+            return Response({'error': str(exc)}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+        except OCRExtractionError as exc:
+            return Response({'error': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
 
-        content = uploaded_image.read()
-        image = vision.Image(content=content)
-
-        response = client.text_detection(image=image)
-        texts = response.text_annotations
-
-        if response.error.message:
-            return Response({'error': response.error.message}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        elif not texts:
-            return Response({'extracted_nutrients': {}}, status=status.HTTP_200_OK)
-
-        raw_text = texts[0].description
-        # extracted = self.extract_nutrients(raw_text)
-        extracted = self.extract_nutrients(raw_text, debug=True)
         return Response({
-            'raw_text': raw_text,
-            'extracted_nutrients': extracted
+            'raw_text': parsed.get('raw_text') or '',
+            'extracted_nutrients': self.clean_nutrients(parsed.get('nutrients') or {}),
         }, status=status.HTTP_200_OK)
 
-    # 正確的
-    # def extract_nutrients(self, text, debug=False):
-    #     lines = [l.strip() for l in text.split("\n") if l.strip()]
-
-    #     if debug:
-    #         print("=== OCR Lines ===")
-    #         for l in lines:
-    #             print(l)
-
-    #     result = {}
-
-    #     for field, keywords in NUTRIENT_KEYWORDS.items():
-    #         result[field] = None
-
-    #         for i, line in enumerate(lines):
-    #             if any(k.lower() in line.lower() for k in keywords):
-    #                 if debug:
-    #                     print(f"\n[DEBUG] 找到關鍵字: {keywords} 在 -> {line}")
-
-    #                 # 往下最多 3 行找數字
-    #                 for j in range(i, min(i+3, len(lines))):
-    #                     match = re.search(r"([\d]+(?:\.\d+)?)\s*%?", lines[j])
-    #                     if match:
-    #                         try:
-    #                             value = float(match.group(1))
-    #                             if 0 <= value <= 100:  # 合理範圍
-    #                                 result[field] = value
-    #                                 if debug:
-    #                                     print(f"[DEBUG] {field} -> {value} (來自行: {lines[j]})")
-    #                                 break
-    #                         except ValueError:
-    #                             continue
-    #                 break  # 找到就跳出
-
-    #     return result
     @staticmethod
-    def merge_ocr_lines(lines):
-        merged = []
-        buffer = ""
-        for line in lines:
-            if re.search(r"\d", line):  # 這行有數字
-                if buffer:
-                    merged.append(buffer + " " + line)
-                    buffer = ""
-                else:
-                    merged.append(line)
+    def clean_nutrients(nutrients):
+        """
+        Keep only plausible percentages, as the old keyword scanner did.
+
+        A panel in an unexpected unit, or a misread decimal point, shows up as a
+        number outside 0-100; null is a better answer than a wrong one, because
+        the frontend's nutrient score treats any number as a confident reading.
+        """
+        cleaned = {}
+        for field in NUTRIENT_FIELDS:
+            value = nutrients.get(field)
+            if isinstance(value, bool) or not isinstance(value, (int, float)):
+                cleaned[field] = None
+            elif 0 <= value <= 100:
+                cleaned[field] = float(value)
             else:
-                # 沒數字，先存著
-                if buffer:
-                    merged.append(buffer)
-                buffer = line
-        if buffer:
-            merged.append(buffer)
-        return merged
+                cleaned[field] = None
+        return cleaned
 
-
-    # def extract_nutrients(self, text, debug=False):
-    #     # Step 1: 切行 + 清理
-    #     lines = [l.strip() for l in text.split("\n") if l.strip()]
-
-    #     # Step 2: 合併被 OCR 拆掉的行
-    #     lines = self.merge_ocr_lines(lines)
-
-    #     if debug:
-    #         print("=== Merged OCR Lines ===")
-    #         for l in lines:
-    #             print(l)
-
-    #     # Step 3: 關鍵字比對
-    #     result = {}
-    #     for field, keywords in NUTRIENT_KEYWORDS.items():
-    #         result[field] = None
-    #         for line in lines:
-    #             if any(k.lower() in line.lower() for k in keywords):
-    #                 match = re.search(r"([\d]+(?:\.\d+)?)\s*%?", line)
-    #                 if match:
-    #                     try:
-    #                         value = float(match.group(1))
-    #                         if 0 <= value <= 100:  # 過濾掉不合理數字
-    #                             result[field] = value
-    #                             if debug:
-    #                                 print(f"[DEBUG] {field} -> {value} (來自行: {line})")
-    #                             break
-    #                     except ValueError:
-    #                         continue
-    #     return result
-    def extract_nutrients(self, text, debug=False):
-        lines = [l.strip() for l in text.split("\n") if l.strip()]
-
-        if debug:
-            print("=== OCR Lines ===")
-            for l in lines:
-                print(l)
-
-        result = {field: None for field in NUTRIENT_KEYWORDS.keys()}
-
-        for field, keywords in NUTRIENT_KEYWORDS.items():
-            for i, line in enumerate(lines):
-                if any(k in line for k in keywords):
-                    if debug:
-                        print(f"\n[DEBUG] 找到關鍵字: {keywords} 在 -> {line}")
-
-                    # 往下最多 3 行內找數字
-                    for j in range(i, min(i + 3, len(lines))):
-                        if debug:
-                            print(f"[DEBUG] 嘗試從這行找數字: {lines[j]}")
-
-                        # 🚨 只接受含有「%」或「最低量/最高量」的數字
-                        match = re.search(r"([\d]+(?:\.\d+)?)\s*%?", lines[j])
-                        if match and ("%" in lines[j] or "量" in lines[j]):
-                            try:
-                                value = float(match.group(1))
-                                if 0 <= value <= 100:  # 合理範圍
-                                    result[field] = value
-                                    if debug:
-                                        print(f"[DEBUG] {field} -> {value} (來自行: {lines[j]})")
-                                    break
-                            except ValueError:
-                                continue
-                    break  # 找到就不要再繼續找同一個 field
-
-        return result
 
 
 

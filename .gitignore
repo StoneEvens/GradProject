@@ -40,3 +40,13 @@ backend/utils/bert-base-chinese/
 
 # Locally stored uploaded images (IMAGE_STORAGE_BACKEND=local)
 backend/uploaded_images/
+
+# Secrets and per-server settings: OPENAI_API_KEY, DJANGO_SECRET_KEY, the invite
+# code. Anything that reaches the repo stays in its history, so keep these out.
+.env
+.env.*
+!frontend/.env.android
+
+# The live database
+db.sqlite3
+*.sqlite3

@@ -4,17 +4,15 @@ from rest_framework import status
 from rest_framework.parsers import MultiPartParser, FormParser
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-import re
 from .models import HealthReport
 from pets.models import Pet
-import io
-from pdf2image import convert_from_bytes
-import os
-from pathlib import Path
-
-from google.cloud import vision
-from google.oauth2 import service_account
 from rest_framework.permissions import AllowAny, IsAuthenticated
+
+from .openai_vision import (
+    OCRConfigurationError,
+    OCRExtractionError,
+    extract as run_vision_extraction,
+)
 
 FIELD_ALIASES = {
     "白血球計數": ["白血球", "WBC", "白血球計數"],
@@ -142,182 +140,129 @@ class HealthReportUploadView(APIView):
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-# class OCRUploadView(APIView):
-#     permission_classes = [AllowAny]
-#     parser_classes = (MultiPartParser, FormParser)
+# ---------------------------------------------------------------------------
+# Health report OCR
+#
+# Was Google Cloud Vision + regexes over the flattened page text. Vision needed
+# a service-account JSON file that is not in the repo and not on the server, so
+# this endpoint returned 500 for every upload.
+#
+# Now: one call to the OpenAI Responses API (see openai_vision.py). The model
+# reads the report and returns the values already attached to their field
+# names, which also fixes the old failure mode where `白血球.*?([\d\.]+)` picked
+# up a number from a neighbouring row.
+#
+# The response shape is unchanged - {'extracted_results': {欄位: {result, unit}
+# or null}} - so the frontend needs no edit.
+# ---------------------------------------------------------------------------
 
-#     def post(self, request, *args, **kwargs):
-#         pet_id = request.data.get('pet_id')
-#         if not pet_id:
-#             return Response({'error': '缺少 pet_id'}, status=status.HTTP_400_BAD_REQUEST)
+# One line per field: the canonical name, then the names a lab might actually
+# print. Built from FIELD_ALIASES so the two never drift apart.
+_FIELD_HINTS = "\n".join(
+    f"- {field}: {', '.join(aliases)}" for field, aliases in FIELD_ALIASES.items()
+)
 
-#         try:
-#             Pet.objects.get(id=pet_id)  # 只驗證，不建檔
-#         except Pet.DoesNotExist:
-#             return Response({'error': '找不到寵物'}, status=status.HTTP_404_NOT_FOUND)
+HEALTH_REPORT_INSTRUCTIONS = (
+    "You read veterinary laboratory reports for pets and return the measured values.\n"
+    "Report the number exactly as printed, including decimal points; never estimate, "
+    "convert or infer a value, and never carry a value across from a different row.\n"
+    "Reference ranges (for example '5.0 - 16.8') are not results: ignore them and "
+    "report only the patient's own value.\n"
+    "Omit a field entirely if it is absent, unreadable, or marked as pending.\n\n"
+    "Each field below is followed by the labels a report might use for it:\n"
+    f"{_FIELD_HINTS}"
+)
 
-#         uploaded_image = request.FILES.get('image')
-#         if not uploaded_image:
-#             return Response({'error': '沒有上傳圖片'}, status=status.HTTP_400_BAD_REQUEST)
+HEALTH_REPORT_SCHEMA = {
+    "type": "object",
+    "additionalProperties": False,
+    "required": ["items"],
+    "properties": {
+        "items": {
+            "type": "array",
+            "description": "One entry per measurement found in the report.",
+            "items": {
+                "type": "object",
+                "additionalProperties": False,
+                "required": ["field", "result", "unit"],
+                "properties": {
+                    # An enum means the model cannot invent a field name, so the
+                    # mapping back to our keys needs no fuzzy matching.
+                    "field": {"type": "string", "enum": list(FIELD_ALIASES.keys())},
+                    "result": {"type": "string", "description": "The value as printed."},
+                    "unit": {"type": "string", "description": "The unit as printed, or '' if none."},
+                },
+            },
+        }
+    },
+}
 
-#         # OCR 流程
-#         credentials_path = r"C:\Users\lxzhe\GradProject\backend\ocrapp\ai-project-454107-a1e8b881803e.json"
-#         credentials = service_account.Credentials.from_service_account_file(credentials_path)
-#         client = vision.ImageAnnotatorClient(credentials=credentials)
-
-#         content = uploaded_image.read()
-#         image = vision.Image(content=content)
-#         response = client.text_detection(image=image)
-#         texts = response.text_annotations
-
-#         if response.error.message:
-#             return Response({'error': response.error.message}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-#         raw_text = texts[0].description if texts else ""
-#         extracted_data = self.extract_test_results(raw_text)
-
-#         return Response({'extracted_results': extracted_data}, status=status.HTTP_200_OK)
-
-#     def extract_test_results(self, text):
-#         text = text.replace('\n', ' ')
-#         text = re.sub(r'\s+', ' ', text)
-#         result = {}
-
-#         for field, aliases in FIELD_ALIASES.items():
-#             matched = False
-#             for alias in aliases:
-#                 # 允許任意空白與符號，匹配數值和單位
-#                 pattern = rf"{alias}.*?([\d\.]+)\s*([^\s]+)"
-#                 match = re.search(pattern, text)
-#                 if match:
-#                     value = match.group(1)
-#                     unit = match.group(2)
-#                     result[field] = {
-#                         "result": value,
-#                         "unit": unit
-#                     }
-#                     matched = True
-#                     break
-#             if not matched:
-#                 result[field] = None
-
-#         return result
-    
-
-from pdf2image import convert_from_bytes
-import io
 
 class OCRUploadView(APIView):
     permission_classes = [AllowAny]
     parser_classes = (MultiPartParser, FormParser)
 
+    @swagger_auto_schema(
+        operation_description="上傳健康檢查報告（圖片或 PDF），辨識各項檢驗數值",
+        manual_parameters=[
+            openapi.Parameter('pet_id', openapi.IN_FORM, type=openapi.TYPE_INTEGER,
+                              required=True, description='寵物 ID'),
+            openapi.Parameter('image', openapi.IN_FORM, type=openapi.TYPE_FILE,
+                              required=True, description='報告圖片或 PDF（欄位名 image 或 file 皆可）'),
+        ],
+        responses={200: '辨識成功', 400: '參數錯誤', 404: '找不到寵物', 503: '辨識服務未設定'}
+    )
     def post(self, request, *args, **kwargs):
         pet_id = request.data.get('pet_id')
         if not pet_id:
             return Response({'error': '缺少 pet_id'}, status=status.HTTP_400_BAD_REQUEST)
 
-        try:
-            Pet.objects.get(id=pet_id)  # 只驗證，不建檔
-        except Pet.DoesNotExist:
+        if not Pet.objects.filter(id=pet_id).exists():  # 只驗證，不建檔
             return Response({'error': '找不到寵物'}, status=status.HTTP_404_NOT_FOUND)
 
         # 兼容：優先 image，沒有就拿 file
         uploaded_file = request.FILES.get('image') or request.FILES.get('file')
         if not uploaded_file:
-            return Response({'error': '沒有上傳檔案（image 或 file）'}, status=status.HTTP_400_BAD_REQUEST)
-
-        # 使用相對路徑或環境變數來設定憑證檔案
-        # 方法1: 使用相對路徑（基於當前檔案位置）
-        current_dir = Path(__file__).parent
-        credentials_path = current_dir / "ai-project-454107-a1e8b881803e.json"
-
-        # 方法2: 也可以從環境變數讀取（如果有設定的話）
-        # credentials_path = os.getenv('GOOGLE_CLOUD_CREDENTIALS', credentials_path)
-
-        if not credentials_path.exists():
-            return Response({'error': f'找不到憑證檔案，請確認檔案存在於: {credentials_path}'},
-                          status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-        credentials = service_account.Credentials.from_service_account_file(str(credentials_path))
-        client = vision.ImageAnnotatorClient(credentials=credentials)
-
-        content_type = (uploaded_file.content_type or "").lower()
-        filename = (uploaded_file.name or "").lower()
-        is_pdf = (content_type == "application/pdf") or filename.endswith(".pdf")
+            return Response({'error': '沒有上傳檔案（image 或 file）'},
+                            status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            if is_pdf:
-                # ---------------- PDF → 逐頁轉圖片再 OCR（保留 text_detection 寫法） ----------------
-                pdf_bytes = uploaded_file.read()
-                # 300 dpi 較清楚；更高更清晰但較慢與較吃記憶體
-                images = convert_from_bytes(pdf_bytes, dpi=300, fmt="jpeg")
+            parsed = run_vision_extraction(
+                uploaded_file,
+                schema_name='health_report',
+                schema=HEALTH_REPORT_SCHEMA,
+                instructions=HEALTH_REPORT_INSTRUCTIONS,
+                prompt='請讀出這份寵物檢驗報告中的檢驗項目與數值。',
+            )
+        except OCRConfigurationError as exc:
+            return Response({'error': str(exc)}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+        except OCRExtractionError as exc:
+            return Response({'error': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
 
-                all_text = []
-                for img in images:
-                    buf = io.BytesIO()
-                    img.save(buf, format="JPEG")
-                    image = vision.Image(content=buf.getvalue())
+        return Response({'extracted_results': self.to_extracted_results(parsed)},
+                        status=status.HTTP_200_OK)
 
-                    # 照你舊寫法：text_detection + 取 texts[0].description
-                    response = client.text_detection(
-                        image=image,
-                        image_context={"language_hints": ["zh", "en"]}  # 可有可無，但對中文常有幫助
-                    )
-                    if response.error.message:
-                        return Response({'error': response.error.message}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    @staticmethod
+    def to_extracted_results(parsed):
+        """
+        Turn the model's list of measurements into the dict the frontend expects:
+        every canonical field present, each either {'result', 'unit'} or None.
+        """
+        results = {field: None for field in FIELD_ALIASES}
 
-                    texts = response.text_annotations
-                    page_text = texts[0].description if texts else ""
-                    if page_text:
-                        all_text.append(page_text)
+        for item in parsed.get('items') or []:
+            field = item.get('field')
+            value = (item.get('result') or '').strip()
+            # Unknown field names cannot occur (the schema uses an enum), but a
+            # blank value can: skip those rather than storing an empty string.
+            if field not in results or not value:
+                continue
+            # First mention wins, so a summary table at the end of a multi-page
+            # report does not overwrite the detailed page.
+            if results[field] is None:
+                results[field] = {'result': value, 'unit': (item.get('unit') or '').strip()}
 
-                raw_text = "\n".join(all_text)
-            else:
-                # ---------------- 單張圖片（完全保留你原本流程） ----------------
-                content = uploaded_file.read()
-                image = vision.Image(content=content)
-                response = client.text_detection(
-                    image=image,
-                    image_context={"language_hints": ["zh", "en"]}
-                )
-                if response.error.message:
-                    return Response({'error': response.error.message}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-                texts = response.text_annotations
-                raw_text = texts[0].description if texts else ""
-
-            extracted_data = self.extract_test_results(raw_text)
-            return Response({'extracted_results': extracted_data}, status=status.HTTP_200_OK)
-
-        except Exception as e:
-            # 維持簡潔的錯誤（避免曝露環境細節）；若想保留原樣也可回傳 str(e)
-            traceback.print_exc()
-            return Response({'error': 'OCR 處理失敗'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-    def extract_test_results(self, text):
-        text = text.replace('\n', ' ')
-        text = re.sub(r'\s+', ' ', text)
-        result = {}
-
-        for field, aliases in FIELD_ALIASES.items():
-            matched = False
-            for alias in aliases:
-                # 允許任意空白與符號，匹配數值和單位（保留你原本 pattern）
-                pattern = rf"{alias}.*?([\d\.]+)\s*([^\s]+)"
-                match = re.search(pattern, text)
-                if match:
-                    value = match.group(1)
-                    unit = match.group(2)
-                    result[field] = {
-                        "result": value,
-                        "unit": unit
-                    }
-                    matched = True
-                    break
-            if not matched:
-                result[field] = None
-
-        return result
+        return results
 
 
 def convert_ocr_to_health_data(ocr_result):

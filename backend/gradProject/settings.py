@@ -488,6 +488,15 @@ PETER_AGENT_MODEL = os.environ.get('PETER_AGENT_MODEL', 'gpt-5.6-terra')
 # The installed openai SDK accepts: minimal, low, medium, high.
 PETER_AGENT_REASONING_EFFORT = os.environ.get('PETER_AGENT_REASONING_EFFORT', 'low')
 
+# OCR model for feed labels and health reports (ocrapp/openai_vision.py).
+# gpt-6-luna is the cheapest model that accepts images and supports structured
+# outputs, which is all this job needs - about US$0.0002 per page.
+# https://developers.openai.com/api/docs/pricing
+OCR_MODEL = os.environ.get('OCR_MODEL', 'gpt-6-luna')
+# A phone photo of a lab report can take a while; the Cloudflare proxy cuts
+# requests off at 100s, so stay under that.
+OCR_TIMEOUT_SECONDS = float(os.environ.get('OCR_TIMEOUT_SECONDS', '75'))
+
 # Voice chat (Realtime API) model, used by ai/views.py create_realtime_session.
 # gpt-4o-realtime-preview models are no longer available; gpt-realtime-2.1 is the
 # current realtime model with tool calling (https://developers.openai.com/api/docs/models/gpt-realtime-2.1)
