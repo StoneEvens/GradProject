@@ -33,11 +33,21 @@ def update_owner_vector_on_pet_delete(sender, instance, **kwargs):
     寵物刪除時，更新飼主的向量資料庫
 
     因為飼主的向量包含寵物資訊，所以寵物刪除時需要更新飼主向量
+
+    注意：刪除使用者時，寵物會在同一個 cascade 中被刪除，此時 owner 那一列
+    可能已經不存在，讀取 instance.owner 會丟出 CustomUser.DoesNotExist。
+    以前這行在 try 之外，所以「刪除擁有寵物的帳號」一定會失敗。
     """
-    if instance.owner:
+    try:
+        owner = instance.owner
+    except Exception:
+        # 飼主已在同一次刪除中移除，沒有向量需要更新。
+        return
+
+    if owner:
         try:
             from aiAgent.services.user_vector_updater import update_user_vector
-            update_user_vector(instance.owner)
+            update_user_vector(owner)
         except Exception as e:
             print(f"⚠️ 更新飼主向量失敗（不影響寵物操作）: {str(e)}")
 
