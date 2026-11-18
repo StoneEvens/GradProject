@@ -15,9 +15,10 @@ Two things about symptoms are worth knowing before you read the output.
 Symptom lookup everywhere in this project is
 ``Symptom.objects.filter(symptom_name=...).first()`` - an unmatched name is
 dropped without an error - so each CSV label is mapped onto a name that
-seed_symptoms creates. The mapping is printed on every run. Where a label has
-no equivalent (挑食), the record is still created and simply carries no tag;
-the command says so rather than letting it vanish quietly.
+seed_symptoms creates. The mapping is printed on every run. Where a label has no
+equivalent, the record is still created and simply carries no tag, and the
+command says so rather than letting it vanish quietly. Nothing is unmapped at
+the moment: 挑食 is tagged 食慾不振, so four of the ten posts share that tag.
 
 The record's own text keeps the CSV's original wording even where the tag is
 mapped, so a post about 食量減少 still reads 食量減少 to a participant even
@@ -58,7 +59,7 @@ SYMPTOM_MAP = {
     '皮膚紅疹': '皮膚紅腫',
     '走路跛腳': '跛行',
     '眼睛分泌物': '眼睛分泌物增多',
-    '挑食': None,
+    '挑食': '食慾不振',        # asked for as 食慾不佳; 食慾不振 is the name that exists
 }
 
 # The study CSV, embedded so the command is self-contained on the server.
