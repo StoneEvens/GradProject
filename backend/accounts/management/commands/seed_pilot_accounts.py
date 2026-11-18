@@ -8,8 +8,17 @@ Each account gets:
   - one abnormal record, 「軟便，一天兩次」, dated 2026-11-18 21:00 Taipei time,
     tagged with the 軟便 symptom and left private.
 
-Credentials are derived from the index, zero-padded to two digits:
-    PILOT-P01 / Password01  ...  PILOT-P25 / Password25
+Credentials are derived from the index, zero-padded to two digits. Note that
+the login form takes the EMAIL, not the account name - CustomTokenObtainPairSerializer
+sets username_field = 'email' and looks the account up by it:
+
+    account name  PILOT-P01
+    login         pilot-p01@pilot.invalid
+    password      Password01
+
+The generated addresses are unique per account, which matters: the serializer
+uses CustomUser.objects.get(email=...), so two accounts sharing an address
+would make both of them unable to log in.
 
 Safe to run more than once. Accounts, pets and records are matched on their
 natural key and reused, so a second run reports "already there" and changes
@@ -66,6 +75,14 @@ def account_name(n):
 
 def password_for(n):
     return f'Password{n:02d}'
+
+
+def email_for(n, domain):
+    # This is the login identifier, not just a contact field: the login form
+    # posts `email` and CustomTokenObtainPairSerializer looks the account up by
+    # it (username_field = 'email'). Typing PILOT-P01 into that form fails
+    # with "Enter a valid email address".
+    return f'{account_name(n).lower()}@{domain}'
 
 
 class Command(BaseCommand):
@@ -135,9 +152,14 @@ class Command(BaseCommand):
             + (f", reset {made['passwords']} passwords" if made['passwords'] else '')
             + '.'
         ))
+        last = start + count - 1
+        domain = options['email_domain']
         self.stdout.write(
-            f'Sign in as {account_name(start)} / {password_for(start)} '
-            f'through {account_name(start + count - 1)} / {password_for(start + count - 1)}.'
+            'Testers sign in with the EMAIL address, not the account name:'
+        )
+        self.stdout.write(
+            f'  {email_for(start, domain)} / {password_for(start)}'
+            f'   ...   {email_for(last, domain)} / {password_for(last)}'
         )
 
     # ------------------------------------------------------------- one account
@@ -148,7 +170,7 @@ class Command(BaseCommand):
             username=name,
             defaults={
                 'user_account': name,
-                'email': f'{name.lower()}@{options["email_domain"]}',
+                'email': email_for(n, options['email_domain']),
                 'user_fullname': f'測試者 {n:02d}',
                 'account_privacy': 'private',
             },
@@ -226,7 +248,7 @@ class Command(BaseCommand):
         name = account_name(n)
         state = 'exists' if User.objects.filter(username=name).exists() else 'new'
         self.stdout.write(
-            f'  {name}  ({state})  password {password_for(n)}  {name.lower()}@{domain}')
+            f'  {name}  ({state})  login {email_for(n, domain)}  password {password_for(n)}')
 
     def disconnect_vector_signals(self, announce=True):
         disconnected = []
